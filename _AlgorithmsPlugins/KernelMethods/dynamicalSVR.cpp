@@ -50,7 +50,7 @@ char *DynamicalSVR::GetInfoString()
 }
 
 DynamicalSVR::DynamicalSVR()
-: svm1(0), svm2(0)
+: svm1(0), svm2(0), node(0)
 {
 	type = DYN_SVR;
 	// default values
@@ -79,11 +79,7 @@ DynamicalSVR::DynamicalSVR()
 
 DynamicalSVR::~DynamicalSVR()
 {
-
-}
-
-void DynamicalSVR::Draw(IplImage *display)
-{
+	DEL(node);
 }
 
 void DynamicalSVR::Train(std::vector< std::vector<fvec> > trajectories, ivec labels)
@@ -104,6 +100,7 @@ void DynamicalSVR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	if(!samples.size()) return;
 	DEL(svm1);
 	DEL(svm2);
+	DEL(node);
 
 	svm_problem problem;
 	svm_node *x_space;
@@ -150,24 +147,23 @@ std::vector<fvec> DynamicalSVR::Test( const fvec &sample, const int count)
 	if(!svm1 || !svm2) return res;
 	fvec velocity; velocity.resize(dim,0);
 
-	svm_node *x = new svm_node[dim+1];
+	if(!node) node = new svm_node[dim+1];
 	FOR(i, dim)
 	{
-		x[i].index = i+1;
-		x[i].value = start[i];
+		node[i].index = i+1;
+		node[i].value = start[i];
 	}
-	x[dim].index = -1;
+	node[dim].index = -1;
 
 	FOR(i, count)
 	{
 		res[i] = start;
 		start += velocity*dT;
 
-		FOR(d, dim) x[d].value = start[d];
-		velocity[0] = (float)svm_predict(svm1, x);
-		velocity[1] = (float)svm_predict(svm2, x);
+		FOR(d, dim) node[d].value = start[d];
+		velocity[0] = (float)svm_predict(svm1, node);
+		velocity[1] = (float)svm_predict(svm2, node);
 	}
-	delete [] x;
 	return res;
 }
 
@@ -175,18 +171,34 @@ fvec DynamicalSVR::Test( const fvec &sample )
 {
 	int dim = sample.size();
 	float estimate;
-	svm_node *x = new svm_node[dim+1];
+	if(!node) node = new svm_node[dim+1];
 	FOR(i, dim)
 	{
-		x[i].index = i+1;
-		x[i].value = sample[i];
+		node[i].index = i+1;
+		node[i].value = sample[i];
 	}
-	x[dim].index = -1;
+	node[dim].index = -1;
 	fvec res;
 	res.resize(dim);
-	res[0] = (float)svm_predict(svm1, x);
-	res[1] = (float)svm_predict(svm2, x);
-	delete [] x;
+	res[0] = (float)svm_predict(svm1, node);
+	res[1] = (float)svm_predict(svm2, node);
+	return res;
+}
+
+fVec DynamicalSVR::Test( const fVec &sample )
+{
+	int dim = 2;
+	float estimate;
+	if(!node) node = new svm_node[dim+1];
+	FOR(i, dim)
+	{
+		node[i].index = i+1;
+		node[i].value = sample._[i];
+	}
+	node[dim].index = -1;
+	fVec res;
+	res[0] = (float)svm_predict(svm1, node);
+	res[1] = (float)svm_predict(svm2, node);
 	return res;
 }
 

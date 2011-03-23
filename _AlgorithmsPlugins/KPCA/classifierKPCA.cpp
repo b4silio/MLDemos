@@ -69,8 +69,6 @@ std::vector<fvec> ClassifierKPCA::Project(std::vector<fvec> samples)
 	return projected;
 }
 
-void ClassifierKPCA::Draw(IplImage *display){}
-
 void ClassifierKPCA::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
@@ -137,11 +135,23 @@ float ClassifierKPCA::Test( const fvec &sample )
 	if(!pca) return estimate;
 
 	VectorXd point(sample.size());
+	FOR(i, sample.size()) point(i) = sample[i];
 	estimate = pca->test(point);
 
 	return estimate;
 }
 
+float ClassifierKPCA::Test( const fVec &sample )
+{
+	float estimate = 0;
+	if(!pca) return estimate;
+
+	VectorXd point(2);
+	FOR(i, sample.size()) point(i) = sample._[i];
+	estimate = pca->test(point);
+
+	return estimate;
+}
 void ClassifierKPCA::SetParams(int kernelType, int kernelDegree, float kernelGamma)
 {
 	this->kernelType = kernelType;

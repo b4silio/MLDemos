@@ -104,6 +104,7 @@ private:
 	QList<DynamicalInterface *> dynamicals;
 	QList<AvoidanceInterface *> avoiders;
 	QList<InputOutputInterface *> inputoutputs;
+	QList<bool> bInputRunning;
 	void AddPlugin(ClassifierInterface *iClassifier, const char *method);
 	void AddPlugin(ClustererInterface *iCluster, const char *method);
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
@@ -198,6 +199,7 @@ private slots:
 	void DrawingStopped();
 
 	void FitToData();
+	void ZoomChanged(float d);
 	void Navigation(fvec sample);
 	void ResetPositiveClass();
 	void ChangeActiveOptions();

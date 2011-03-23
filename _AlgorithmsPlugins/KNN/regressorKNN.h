@@ -39,7 +39,7 @@ public:
 	~RegressorKNN();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
-	void Draw(IplImage *display);
+	fVec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 k, int metricType, u32 metricP);

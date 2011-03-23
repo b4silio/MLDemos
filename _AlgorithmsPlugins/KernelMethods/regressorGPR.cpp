@@ -75,43 +75,29 @@ fvec RegressorGPR::Test( const fvec &sample )
 	return res;
 }
 
+fVec RegressorGPR::Test( const fVec &sample )
+{
+	fVec res;
+	if(!sogp) return res;
+	double confidence;
+	Matrix _testout;
+	ColumnVector _testin(2);
+	FOR(i,2)
+	{
+		_testin(1+i) = sample._[i];
+	}
+	_testout = sogp->predict(_testin,confidence);
+	res[0] = _testout(1,1);
+	res[1] = confidence*confidence;
+	return res;
+}
+
 float RegressorGPR::GetLikelihood(float mean, float sigma, float point)
 {
 	const float sqrpi = 1.f/sqrtf(2.f*PIf);
 	const float divider = sqrpi/sigma;
 	const float exponent = -powf((point-mean)/sigma,2.f)*0.5;
 	return expf(exponent)*divider;
-}
-
-void RegressorGPR::Draw( IplImage *display )
-{
-	if(!sogp) return;
-	Matrix _testout;
-	ColumnVector _testin(1);
-	CvPoint avgPoint=cvPoint(0,0), sigmaPoint1=cvPoint(0,0), sigmaPoint2=cvPoint(0,0);
-
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
-	// we draw a density map for the probability
-	for (int i=0; i < density->width; i++)
-	{
-		float testin = i/(float)density->width;
-		double sigma;
-		_testin(1) = testin;
-		_testout = sogp->predict(_testin, sigma);
-		sigma = sigma*sigma;
-		float testout = _testout(1,1);
-		for (int j=0; j< density->height; j++)
-		{
-			float val = GetLikelihood(testout, sigma, j/(float)density->height);
-			cvSet2D(density, j, i, cvScalarAll(val*100));
-		}
-	}
-	IplImage *densBig = cvCloneImage(display);
-	cvResize(density, densBig, CV_INTER_CUBIC);
-	cvAddWeighted(display, 0.5, densBig, 0.5,0,display);
-	IMKILL(density);
-	IMKILL(densBig);
 }
 
 void RegressorGPR::Clear()

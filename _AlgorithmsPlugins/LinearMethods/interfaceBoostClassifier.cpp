@@ -60,7 +60,6 @@ void ClassBoost::DrawInfo(Canvas *canvas, Classifier *classifier)
 void ClassBoost::Draw(Canvas *canvas, Classifier *classifier)
 {
 	if(!classifier || !canvas) return;
-	canvas->liveTrajectory.clear();
 	int w = canvas->width();
 	int h = canvas->height();
 
@@ -116,6 +115,7 @@ void ClassBoost::Draw(Canvas *canvas, Classifier *classifier)
 		}
 	}
 
+	canvas->liveTrajectory.clear();
 	canvas->repaint();
 	canvas->confidencePixmap = QPixmap();
 }

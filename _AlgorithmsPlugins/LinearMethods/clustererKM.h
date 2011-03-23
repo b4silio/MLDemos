@@ -38,7 +38,7 @@ public:
 	ClustererKM();
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
-	void Draw(IplImage *display);
+	fvec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 clusters, int method, float beta, int power);

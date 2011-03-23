@@ -54,6 +54,21 @@ fvec ClustererGMM::Test( const fvec &sample)
 	return res;
 }
 
+fvec ClustererGMM::Test( const fVec &sample)
+{
+	fvec res;
+	res.resize(nbClusters,0);
+	if(!gmm) return res;
+	float estimate;
+	float sigma;
+	FOR(i, nbClusters) res[i] = gmm->pdf(sample._, i);
+	float sum = 0;
+	FOR(i, nbClusters) sum += res[i];
+	if(sum > FLT_MIN*3) FOR(i, nbClusters) res[i] /= sum;
+	return res;
+}
+
+
 void ClustererGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 {
 	this->nbClusters = nbClusters;
@@ -93,26 +108,4 @@ char *ClustererGMM::GetInfoString()
 		break;
 	}
 	return text;
-}
-
-
-void ClustererGMM::Draw(IplImage *display)
-{
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
-	// we draw a density map for the probability
-	float sample[2];
-	float sigma[4];
-	for (int i=0; i < density->width; i++)
-	{
-		sample[0] = i/(float)density->width;
-		for (int j=0; j< density->height; j++)
-		{
-			sample[1] = j/(float)density->height;
-			float val = gmm->pdf(sample);
-			cvSet2D(density, j, i, cvScalarAll(128 + val*10));
-		}
-	}
-	cvResize(density, display, CV_INTER_CUBIC);
-	IMKILL(density);
 }

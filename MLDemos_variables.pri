@@ -5,11 +5,16 @@
 ##############################
 
 MLDEMOS = $${MLPATH}/MLDemos
-MLBUILD = /tmp/$$NAME
+MLBUILD = /tmp/MLDemos/$$NAME
 
-TARGET = $$qtLibraryTarget($$NAME)
-CONFIG(debug, debug|release):DESTDIR = $$MLPATH/pluginsDebug
-CONFIG(release, debug|release):DESTDIR = $$MLPATH/plugins
+mainApp{
+}else{
+	TARGET = $$qtLibraryTarget($$NAME)
+	CONFIG(debug, debug|release):DESTDIR = $$MLPATH/pluginsDebug
+	CONFIG(release, debug|release):DESTDIR = $$MLPATH/plugins
+}
+CONFIG(debug, debug|release):DEFINES += DEBUG
+
 macx:DEFINES += MACX
 win32:DEFINES += WIN32
 win32{

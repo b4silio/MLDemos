@@ -58,15 +58,15 @@ void RandomEmitter::timerEvent(QTimerEvent *event)
 	sample.resize(2);
 	FOR(i, count)
 	{
-		sample[0] = (rand() / (float)RAND_MAX) * 0.7;
-		sample[1] = (rand() / (float)RAND_MAX) * 0.7;
+		sample[0] = (rand() / (float)RAND_MAX -0.5) * 0.7;
+		sample[1] = (rand() / (float)RAND_MAX -0.5) * 0.7;
 		samples[i] = sample;
 		labels[i] = 0;
 	}
 	FOR(i, count)
 	{
-		sample[0] = (rand() / (float)RAND_MAX) * 0.7 + 0.3;
-		sample[1] = (rand() / (float)RAND_MAX) * 0.7 + 0.3;
+		sample[0] = (rand() / (float)RAND_MAX-0.5) * 0.7 + 0.3;
+		sample[1] = (rand() / (float)RAND_MAX-0.5) * 0.7 + 0.3;
 		samples[count + i] = sample;
 		labels[count + i] = 1;
 	}

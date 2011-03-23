@@ -36,7 +36,7 @@ public:
 	ClassifierGMM();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
-	void Draw(IplImage *display);
+	float Test(const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);

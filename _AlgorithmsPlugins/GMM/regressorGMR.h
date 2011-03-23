@@ -36,7 +36,7 @@ public:
 	RegressorGMR() : gmm(0), data(0), nbClusters(2), covarianceType(2), initType(1){type = REGR_GMR;};
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
-	void Draw(IplImage *display);
+	fVec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);

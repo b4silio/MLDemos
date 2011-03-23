@@ -24,12 +24,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QWidget>
 #include <map>
 #include <QMouseEvent>
+#include <QWheelEvent>
 #include <QPainter>
 #include <QPainterPath>
 
 class Canvas : public QWidget
 {
 	Q_OBJECT
+
 public:
 	Canvas(QWidget *parent);
 	~Canvas();
@@ -52,6 +54,7 @@ protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent *event);
+	void wheelEvent(QWheelEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void enterEvent(QEvent *event);
@@ -72,7 +75,7 @@ public:
 	bool bDisplayMap, bDisplayInfo, bDisplaySingle, bDisplaySamples, bDisplayTrajectories, bDisplayLearned, bDisplayGrid;
 	bool bShowCrosshair, bNewCrosshair;
 	int trajectoryCenterType, trajectoryResampleType, trajectoryResampleCount;
-	QPoint mouse;
+	QPoint mouse, mouseAnchor;
 	fVec fromCanvas(QPointF point);
 	fVec fromCanvas(float x, float y);
 	QPointF toCanvasCoords(float x, float y);
@@ -103,6 +106,7 @@ public slots:
 signals:
 	void DrawCrosshair();
 	void Drawing(fvec sample, int label);
+//	void ZoomChanged();
 	void Released();
 	void Navigation(fvec sample);
 

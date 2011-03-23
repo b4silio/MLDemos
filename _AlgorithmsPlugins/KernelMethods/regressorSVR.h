@@ -27,14 +27,15 @@ class RegressorSVR : public Regressor
 {
 private:
 	svm_model *svm;
-
+	svm_node *node;
 public:
 	svm_parameter param;
 
 	RegressorSVR();
-	void Draw(IplImage *display);
+	~RegressorSVR();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
+	fVec Test(const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);

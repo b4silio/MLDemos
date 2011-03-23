@@ -106,23 +106,63 @@ fvec RegressorKNN::Test( const fvec &sample )
 	return res;
 }
 
-void RegressorKNN::Draw(IplImage *display)
-{
 
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvSet(density, CV_RGB(255,255,255));
-	// we draw a density map for the probability
-	fvec sample;
-	sample.resize(2,0);
-	for (int i=0; i < density->width; i++)
+fVec RegressorKNN::Test( const fVec &sample )
+{
+	fVec res;
+	if(!samples.size()) return res;
+	int dim = 1;
+	double eps = 0; // error bound
+	ANNpoint queryPt; // query point
+	queryPt = annAllocPt(dim); // allocate query point
+	ANNidxArray nnIdx = new ANNidx[k]; // allocate near neigh indices
+	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
+	FOR(i, dim) queryPt[i] = sample._[i];
+	if(k > samples.size()) k = samples.size();
+	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
+
+	float dsum = 0;
+	fvec scores;
+		scores.resize(k,0);
+		FOR(i, k)
 	{
-		sample[0] = i/(float)density->width;
+				if(nnIdx[i] >= samples.size()) continue;
+				if(dists[i] == 0) dsum += 0;
+				else dsum += 1./dists[i];
+				scores[i] = samples[nnIdx[i]][dim];
 	}
-	IplImage *densBig = cvCloneImage(display);
-	cvResize(density, densBig, CV_INTER_CUBIC);
-	cvAddWeighted(display, 0.5, densBig, 0.5,0,display);
-	IMKILL(density);
-	IMKILL(densBig);
+		FOR(i, k)
+		{
+			   if(nnIdx[i] >= samples.size()) continue;
+			   if(dists[i] == 0) continue;
+			   dists[i] = 1./(dists[i])/dsum;
+		}
+
+	float mean = 0, stdev = 0;
+		int cnt = 0;
+		FOR(i, k)
+	{
+				if(nnIdx[i] >= samples.size()) continue;
+				//mean += scores[i] / (scores.size());
+		mean += scores[i] * dists[i];
+				cnt++;
+	}
+		FOR(i, k)
+	{
+				if(nnIdx[i] >= samples.size()) continue;
+				stdev += (scores[i] - mean)*(scores[i] - mean);
+	}
+		if(cnt) stdev /= cnt;
+		else stdev = 0;
+	stdev = sqrtf(stdev);
+
+	delete [] nnIdx; // clean things up
+	delete [] dists;
+
+	res[0] = mean;
+	res[1] = stdev;
+
+	return res;
 }
 
 void RegressorKNN::SetParams( u32 k, int metricType, u32 metricP )

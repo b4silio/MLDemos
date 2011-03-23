@@ -419,7 +419,7 @@ class LWPR_Object {
       \return    Predicted output vector
       \exception LWPR_Exception::BAD_INPUT_DIM  
          if the parameter x does not match the model dimensions
-   */      
+   */
    doubleVec predict(const doubleVec& x, doubleVec& confidence, doubleVec& maxW, double cutoff = 0.001) {
       doubleVec yp(model.nOut);   
       

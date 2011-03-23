@@ -37,7 +37,7 @@ public:
 	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
-	void Draw(IplImage *display);
+	fVec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);

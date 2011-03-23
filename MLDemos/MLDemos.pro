@@ -5,63 +5,18 @@ TEMPLATE = app
 TARGET = mldemos
 NAME = mldemos
 MLPATH =..
-MLDEMOS = $${MLPATH}/MLDemos
-MLBUILD = /tmp/$$NAME
 DESTDIR = $$MLPATH
-CONFIG(debug, debug|release) {
+#CONFIG(debug, debug|release) {
 #	unix: TARGET = $${TARGET}_debug
 #	else: TARGET = $${TARGET}d)
-}
-
-CONFIG(debug, debug|release):DEFINES += DEBUG
-macx:DEFINES += MACX
-win32:DEFINES += WIN32
-win32{
-	CONFIG(Debug, Debug|Release){
-		MOC_DIR = $${MLBUILD}/Debug
-		UI_DIR = $${MLBUILD}/Debug
-		RCC_DIR = $${MLBUILD}/Debug
-		OBJECTS_DIR = $${MLBUILD}/Debug
-	}else{
-		MOC_DIR = $${MLBUILD}/Release
-		UI_DIR = $${MLBUILD}/Release
-		RCC_DIR = $${MLBUILD}/Release
-		OBJECTS_DIR = $${MLBUILD}/Release
-	}
-}else{
-	MOC_DIR = $${MLBUILD}/build
-	UI_DIR = $${MLBUILD}/build
-	RCC_DIR = $${MLBUILD}/build
-	OBJECTS_DIR = $${MLBUILD}/build
-}
+#}
 macx:ICON = logo.icns
 win32:RC_FILE = MachineLearning.rc
 RESOURCES += mldemos.qrc
-DEPENDPATH += .
-win32{
-INCLUDEPATH += . \
-    "C:/Program Files/OpenCV2.0/include/"
-LIBS += -L"C:/Progra~1/OpenCV2.0/lib/"
-LIBS += -lcv200 \
-    -lcxcore200 \
-    -lcvaux200 \
-    -lhighgui200 \
-    -lml200
-}else{
-INCLUDEPATH += . \
-    /usr/include/qt4/ \
-    /usr/include/qt4/QtCore/ \
-    /usr/include/qt4/QtGui/ \
-    /usr/include/qt4/QtOpenGL \
-    /usr/include/opencv/ \
-    /usr/local/include/opencv/
-LIBS += -L/usr/local/lib
-LIBS += -lcv \
-    -lcxcore \
-    -lcvaux \
-    -lhighgui \
-    -lml
-}
+
+CONFIG += mainApp
+include($$MLPATH/MLDemos_variables.pri)
+
 macx:INCLUDEPATH += uiMac
 
 ###########################

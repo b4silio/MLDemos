@@ -50,7 +50,7 @@ char *RegressorSVR::GetInfoString()
 }
 
 RegressorSVR::RegressorSVR()
-: svm(0)
+: svm(0), node(0)
 {
 	type = REGR_SVR;
 	// default values
@@ -77,24 +77,9 @@ RegressorSVR::RegressorSVR()
 	param.normalizeKernel = false;
 }
 
-void RegressorSVR::Draw(IplImage *display)
+RegressorSVR::~RegressorSVR()
 {
-	if(!svm) return;
-	u32 edges = 20;
-	// we draw the support vectors
-	FOR(i, svm->l)
-	{
-		f32 *sv = new f32[dim]; 
-		FOR(j, dim)
-		{
-			sv[j] = (f32)svm->SV[i][j].value;
-		}
-		CvPoint point = cvPoint((u32)(sv[0]*(display->width-edges*2))+edges,(u32)(sv[1]*(display->height-edges*2))+edges);
-		KILL(sv);
-
-		//cvCircle(display, point, 5, CV_RGB(255,255,255), 1, CV_AA);
-		draw_cross(display, point, CV_RGB(255,255,255), 5);
-	}
+	DEL(node);
 }
 
 void RegressorSVR::Train(std::vector< fvec > samples, ivec labels)
@@ -120,7 +105,8 @@ void RegressorSVR::Train(std::vector< fvec > samples, ivec labels)
 		problem.y[i] = samples[i][data_dimension];
 	}
 
-	if(svm) delete [] svm;
+	DEL(svm);
+	DEL(node);
 	svm = svm_train(&problem, &param);
 
 	delete [] problem.x;
@@ -134,19 +120,36 @@ fvec RegressorSVR::Test( const fvec &sample )
 {
 	int data_dimension = sample.size()-1;
 	float estimate;
-	svm_node *x = new svm_node[data_dimension+1];
+	if(!node)
+	{
+		node = new svm_node[data_dimension+1];
+		node[data_dimension].index = -1;
+	}
 	FOR(i, data_dimension)
 	{
-		x[i].index = i+1;
-		x[i].value = sample[i];
+		node[i].index = i+1;
+		node[i].value = sample[i];
 	}
-	x[data_dimension].index = -1;
-	estimate = (float)svm_predict(svm, x);
-	delete [] x;
+	estimate = (float)svm_predict(svm, node);
 	fvec res;
 	res.push_back(estimate);
 	res.push_back(1);
 	return res;
+}
+
+fVec RegressorSVR::Test( const fVec &sample )
+{
+	int data_dimension = 1;
+	float estimate;
+	if(!node) node = new svm_node[data_dimension+1];
+	FOR(i, data_dimension)
+	{
+		node[i].index = i+1;
+		node[i].value = sample._[i];
+	}
+	node[data_dimension].index = -1;
+	estimate = (float)svm_predict(svm, node);
+	return fVec(estimate,1);
 }
 
 void RegressorSVR::SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam)

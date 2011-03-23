@@ -1,5 +1,8 @@
 # MLDemos noise
 last-data.txt
+*.psd
+*.sln
+*.zip
 
 # build output
 plugins/*
@@ -12,10 +15,8 @@ profile
 # qt noise
 Makefile*
 *.pro.user*
-*.sln
 *.app
 *.dylib
-*.zip
 
 
 # xcode noise

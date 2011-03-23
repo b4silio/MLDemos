@@ -45,11 +45,6 @@ char *ClassifierPegasos::GetInfoString()
 	return text;
 }
 
-
-void ClassifierPegasos::Draw(IplImage *display)
-{
-}
-
 void ClassifierPegasos::Train(std::vector< fvec > _samples, ivec _labels)
 {
 	vector<sample_type> samples;
@@ -96,6 +91,27 @@ float ClassifierPegasos::Test( const fvec &_sample )
 	sample_type sample;
 	sample(0) = _sample[0];
 	sample(1) = _sample[1];
+	float estimate;
+	switch(kernelType)
+	{
+	case 0:
+		estimate = linFunc(sample);
+		break;
+	case 1:
+		estimate = polFunc(sample);
+		break;
+	case 2:
+		estimate = rbfFunc(sample);
+		break;
+	}
+	return estimate;
+}
+
+float ClassifierPegasos::Test( const fVec &_sample )
+{
+	sample_type sample;
+	sample(0) = _sample._[0];
+	sample(1) = _sample._[1];
 	float estimate;
 	switch(kernelType)
 	{

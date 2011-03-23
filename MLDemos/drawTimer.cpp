@@ -135,12 +135,12 @@ void DrawTimer::Refine()
 		int start = count * (refineLevel-1) + (refineLevel == 1 ? 100 : 0);
 		int stop = count * refineLevel;
 		if(refineLevel == refineMax) stop = w*h; // we want to be sure we paint everything in the end
-		Test(start,stop); // we finish the current batch
+		TestFast(start,stop); // we finish the current batch
 		if(dynamical && (*dynamical))
 		{
 			int cnt = 10000 / refineMax;
 			int steps = 8;
-			Vectors(cnt, steps);
+			VectorsFast(cnt, steps);
 		}
 	}
 	refineLevel++;
@@ -304,7 +304,9 @@ void DrawTimer::TestFast(int start, int stop)
 {
 	if(stop < 0 || stop > w*h) stop = w*h;
 	fVec sample;
+	mutex->lock();
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
+	mutex->unlock();
 	for (int i=start; i<stop; i++)
 	{
 		int x = perm[i]%w;

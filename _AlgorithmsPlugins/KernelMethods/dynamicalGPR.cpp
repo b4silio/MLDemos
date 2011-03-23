@@ -114,16 +114,28 @@ fvec DynamicalGPR::Test( const fvec &sample )
 	return res;
 }
 
+fVec DynamicalGPR::Test( const fVec &sample )
+{
+	fVec res;
+	if(!sogp) return res;
+	Matrix _testout;
+	ColumnVector _testin(dim);
+	FOR(i,dim)
+	{
+		_testin(1+i) = sample._[i];
+	}
+	_testout = sogp->predict(_testin);
+	res[0] = _testout(1,1);
+	res[1] = _testout(2,1);
+	return res;
+}
+
 float DynamicalGPR::GetLikelihood(float mean, float sigma, float point)
 {
 	const float sqrpi = 1.f/sqrtf(2.f*PIf);
 	const float divider = sqrpi/sigma;
 	const float exponent = -powf((point-mean)/sigma,2.f)*0.5;
 	return expf(exponent)*divider;
-}
-
-void DynamicalGPR::Draw( IplImage *display )
-{
 }
 
 void DynamicalGPR::Clear()

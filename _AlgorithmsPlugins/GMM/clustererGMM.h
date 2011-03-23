@@ -20,7 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLUSTERER_GMM_H_
 
 #include <vector>
-#include "clusterer.h"
+#include <clusterer.h>
 #include "fgmm/fgmm++.hpp"
 
 class ClustererGMM : public Clusterer
@@ -36,7 +36,7 @@ public:
 	ClustererGMM() : gmm(0), data(0), nbClusters(2), covarianceType(2), initType(1){type = CLUS_GMM;};
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
-	void Draw(IplImage *display);
+	fvec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);

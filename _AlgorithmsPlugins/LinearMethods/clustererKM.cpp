@@ -68,8 +68,18 @@ fvec ClustererKM::Test( const fvec &sample)
 	fvec res;
 	res.resize(clusters,0);
 	if(!kmeans) return res;
-	float estimate;
-	float sigma;
+	kmeans->Test(sample, res);
+	float sum = 0;
+	FOR(i, res.size()) sum += res[i];
+	FOR(i, res.size()) res[i] /= sum;
+	return res;
+}
+
+fvec ClustererKM::Test( const fVec &sample)
+{
+	fvec res;
+	res.resize(clusters,0);
+	if(!kmeans) return res;
 	kmeans->Test(sample, res);
 	float sum = 0;
 	FOR(i, res.size()) sum += res[i];
@@ -127,29 +137,4 @@ char *ClustererKM::GetInfoString()
 		break;
 	}
 	return text;
-}
-
-
-void ClustererKM::Draw(IplImage *display)
-{
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
-	// we draw a density map for the probability
-	fvec sample;
-	sample.resize(2);
-	fvec sigma;
-	sigma.resize(4);
-	for (int i=0; i < density->width; i++)
-	{
-		sample[0] = i/(float)density->width;
-		for (int j=0; j< density->height; j++)
-		{
-			sample[1] = j/(float)density->height;
-			fvec val;
-			kmeans->Test(sample, val);
-			cvSet2D(density, j, i, cvScalarAll(128 + val[0]*10));
-		}
-	}
-	cvResize(density, display, CV_INTER_CUBIC);
-	IMKILL(density);
 }
