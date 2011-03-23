@@ -70,6 +70,7 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	//gmm->initRegression(dim/2);
 	//return;
 
+	/*
 	// we write down the data (for debugging purposes)
 	ofstream file;
 	file.open("last-data.txt");
@@ -85,7 +86,7 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 		}
 		file.close();
 	}
-
+	*/
 	// then optimize with seds
 	DEL(seds);
 	seds = new SEDS();
