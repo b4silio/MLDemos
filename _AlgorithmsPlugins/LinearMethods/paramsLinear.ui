@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ParametersLinear</class>
+ <widget class="QWidget" name="ParametersLinear">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>310</width>
+    <height>158</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QComboBox" name="linearTypeCombo">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>80</y>
+     <width>101</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Linear projection methods:
+Naive Bayes: computed separately over the two axes
+PCA: Principal Component Analysis
+LDA: Linear Discriminant Analysis
+Fisher: Fisher Linear Discriminant</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>PCA</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ICA</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>LDA</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Fisher LDA</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Naive Bayes</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_19">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>50</y>
+     <width>101</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Projection Method</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

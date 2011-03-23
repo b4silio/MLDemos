@@ -1,0 +1,39 @@
+MLDemos: A User-Friendly visualization toolkit for machine learning
+Copyright (C) 2010  Basilio Noris
+Contact: mldemos@b4silio.com
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License,
+version 3 as published by the Free Software Foundation.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+A copy of the terms and conditions of the license can be found in
+License.txt or online at
+
+    http://www.gnu.org/copyleft/lesser.html
+
+To obtain a copy, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+Disclaimer
+----------
+The authors make no representations about the suitability or fitness
+of this software for any purpose.  It is provided "as is" without
+express or implied warranty.
+---------------------------------------------------------------------
+
+Authors
+-------
+Basilio Noris
+Learning Algorithms and Systems Laboratory
+Ecole Polytechnique Fédérale de Lausanne
+mldemos@b4silio.com
+http://mldemos.b4silio.com
+
+A number of people have contributed directly or indirectly to this
+software, which makes use of several open-source libraries.
+Please refer to http://mldemos.b4silio.com for a complete list

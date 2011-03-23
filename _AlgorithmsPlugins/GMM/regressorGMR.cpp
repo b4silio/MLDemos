@@ -1,0 +1,118 @@
+/*********************************************************************
+MLDemos: A User-Friendly visualization toolkit for machine learning
+Copyright (C) 2010  Basilio Noris
+Contact: mldemos@b4silio.com
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free
+Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*********************************************************************/
+#include "public.h"
+#include "basicOpenCV.h"
+#include "regressorGMR.h"
+
+using namespace std;
+
+void RegressorGMR::Train(std::vector< fvec > samples, ivec labels)
+{
+	if(!samples.size()) return;
+	int dim = samples[0].size();
+	DEL(gmm);
+        nbClusters = min((int)nbClusters, (int)samples.size());
+	gmm = new Gmm(nbClusters, dim);
+	KILL(data);
+	data = new float[samples.size()*dim];
+	FOR(i, samples.size())
+	{
+		FOR(j, dim) data[i*dim + j] = samples[i][j];
+	}
+	gmm->init(data, samples.size(), initType);
+	gmm->em(data, samples.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
+	bFixedThreshold = false;
+	gmm->initRegression(dim-1);
+}
+
+fvec RegressorGMR::Test( const fvec &sample)
+{
+	fvec res;
+	res.resize(2,0);
+	if(!gmm) return res;
+	float estimate;
+	float sigma;
+	gmm->doRegression(&sample[0], &estimate, &sigma);
+	res[0] = estimate;
+	res[1] = sqrt(sigma);
+	return res;
+}
+
+void RegressorGMR::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
+{
+	this->nbClusters = nbClusters;
+	this->covarianceType = covarianceType;
+	this->initType = initType;
+}
+
+char *RegressorGMR::GetInfoString()
+{
+	char *text = new char[255];
+	sprintf(text, "GMR\n");
+	sprintf(text, "%sMixture Components: %d\n", text, nbClusters);
+	sprintf(text, "%sCovariance Type: ", text);
+	switch(covarianceType)
+	{
+	case 0:
+		sprintf(text, "%sSpherical\n", text);
+		break;
+	case 1:
+		sprintf(text, "%sDiagonal\n", text);
+		break;
+	case 2:
+		sprintf(text, "%sFull\n", text);
+		break;
+	}
+	sprintf(text, "%sInitialization Type: ", text);
+	switch(initType)
+	{
+	case 0:
+		sprintf(text, "%sRandom\n", text);
+		break;
+	case 1:
+		sprintf(text, "%sUniform\n", text);
+		break;
+	case 2:
+		sprintf(text, "%sK-Means\n", text);
+		break;
+	}
+	return text;
+}
+
+void RegressorGMR::Draw(IplImage *display)
+{
+	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
+	cvZero(density);
+	// we draw a density map for the probability
+	float sample[2];
+	float sigma[4];
+	for (int i=0; i < density->width; i++)
+	{
+		sample[0] = i/(float)density->width;
+		for (int j=0; j< density->height; j++)
+		{
+			sample[1] = j/(float)density->height;
+			float val = gmm->pdf(sample);
+			cvSet2D(density, j, i, cvScalarAll(128 + val*10));
+		}
+	}
+	cvResize(density, display, CV_INTER_CUBIC);
+	IMKILL(density);
+}
