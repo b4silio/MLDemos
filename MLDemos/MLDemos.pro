@@ -2,7 +2,7 @@
 # Configuration      #
 # ##########################
 TEMPLATE = app
-TARGET = MLDemos
+TARGET = mldemos
 NAME = mldemos
 MLPATH =..
 MLDEMOS = $${MLPATH}/MLDemos

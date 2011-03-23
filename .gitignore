@@ -2,6 +2,15 @@
 .DS_Store
 profile
 
+# qt noise
+Makefile*
+*.pro.user*
+*.sln
+*.app
+*.dylib
+*.zip
+
+
 # xcode noise
 build/*
 *.mode1
