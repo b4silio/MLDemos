@@ -44,7 +44,7 @@ void SpatialVector::Print(string name) const {
   PRINT_BEGIN(cout);
 
 
-  cout << "SpatialVector " <<name<<endl;;
+  //cout << "SpatialVector " << name << std::endl;
   for (unsigned int i = 0; i < 3; i++){
     cout <<"| ";
     cout.width(PRINT_WIDTH);

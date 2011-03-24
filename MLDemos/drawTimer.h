@@ -51,7 +51,7 @@ public:
 	void TestFast(int start, int stop);
 	void Vectors(int count, int steps);
 	void VectorsFast(int count, int steps);
-	void stop();
+        void Stop();
 
 	Classifier **classifier;
 	Regressor **regressor;

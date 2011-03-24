@@ -42,7 +42,8 @@ protected:
 	s32 class2labels[255];
 	ivec labels2class;
 	bool bFixedThreshold;
-	bool bSingleClass;
+        bool bSingleClass;
+        bool bUsesDrawTimer;
 
 public:
 	std::vector<fvec> crossval;
@@ -51,7 +52,7 @@ public:
 	std::vector< std::vector<f32pair> > rocdata;
         std::vector<const char *> roclabels;
 
-	Classifier(): posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), bSingleClass(true), type(CLASS_NONE)
+        Classifier(): posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), bSingleClass(true), bUsesDrawTimer(true),type(CLASS_NONE)
 	{
 		rocdata.push_back(std::vector<f32pair>());
 		rocdata.push_back(std::vector<f32pair>());
@@ -67,6 +68,7 @@ public:
 	virtual float Test(const fVec &sample){ return Test((fvec)sample); };
 	virtual char *GetInfoString(){return NULL;};
 	bool SingleClass(){return bSingleClass;};
+        bool UsesDrawTimer(){return bUsesDrawTimer;};
 };
 
 #endif // _CLASSIFIER_H_

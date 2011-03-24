@@ -6,24 +6,24 @@ CONFIG += plugin
 NAME = mld_DSAvoid
 MLPATH =../..
 
-include($$MLPATH/MLDemos_variables.pri)
+include("$$MLPATH/MLDemos_variables.pri")
 
 ###########################
 # Source Files            #
 ###########################
 HEADERS +=	\
-			$$MLDEMOS/canvas.h \
-			$$MLDEMOS/datasetManager.h \
-			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/interfaces.h \
-			$$MLDEMOS/obstacles.h \
-			DSAvoid.h \
+                        "$$MLDEMOS/canvas.h" \
+                        "$$MLDEMOS/datasetManager.h" \
+                        "$$MLDEMOS/mymaths.h" \
+                        "$$MLDEMOS/interfaces.h" \
+                        "$$MLDEMOS/obstacles.h" \
+                        DSAvoid.h \
 			interfaceAvoidance.h
 
 SOURCES += 	\
-			$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/datasetManager.cpp \
-			$$MLDEMOS/mymaths.cpp \
+                        "$$MLDEMOS/canvas.cpp" \
+                        "$$MLDEMOS/datasetManager.cpp" \
+                        "$$MLDEMOS/mymaths.cpp" \
 			DSAvoid.cpp \
 			interfaceAvoidance.cpp
 

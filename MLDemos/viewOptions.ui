@@ -51,7 +51,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -72,7 +73,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -93,7 +95,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -114,7 +117,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -135,8 +139,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
-     <pointsize>9</pointsize>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -154,17 +158,18 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="decimals">
     <number>1</number>
    </property>
    <property name="minimum">
-    <double>-999.000000000000000</double>
+    <double>-20.000000000000000</double>
    </property>
    <property name="maximum">
-    <double>999.000000000000000</double>
+    <double>20.000000000000000</double>
    </property>
    <property name="singleStep">
     <double>0.500000000000000</double>
@@ -184,8 +189,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
-     <pointsize>9</pointsize>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -206,8 +211,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
-     <pointsize>9</pointsize>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -225,7 +230,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">

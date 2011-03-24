@@ -19,6 +19,8 @@
 
 #ifdef WIN32
 #include "windows.h"
+#define snprintf sprintf_s
+#define isnan(a) (a != a)
 #endif
 
 #include <stdio.h>

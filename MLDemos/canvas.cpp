@@ -240,18 +240,20 @@ void Canvas::SetZoom(float zoom)
 	confidencePixmap = QPixmap();
 	infoPixmap = QPixmap();
 	ResetSamples();
+	bNewCrosshair = true;
 	repaint();
 }
 
-void Canvas::SetCenter(fvec center)
+void Canvas::SetCenter(fVec center)
 {
-	if(this->zoom == zoom) return;
+	if(this->center == center) return;
 	this->center = center;
 	gridPixmap = QPixmap();
 	modelPixmap = QPixmap();
 	confidencePixmap = QPixmap();
 	infoPixmap = QPixmap();
 	ResetSamples();
+	bNewCrosshair = true;
 	repaint();
 }
 
@@ -402,7 +404,7 @@ QPainterPath Canvas::DrawObstacle(Obstacle o)
 		float RX = + X * cosf(angle) - Y * sinf(angle);
 		float RY = + X * sinf(angle) + Y * cosf(angle);
 
-		point = toCanvasCoords(RX,RY) - toCanvasCoords(center);
+		point = QPointF(RX*(zoom*height()),RY*(zoom*height()));
 		if(theta==-PIf)
 		{
 			firstPoint = point;
@@ -435,15 +437,15 @@ void Canvas::DrawObstacles()
 	FOR(i, data->GetObstacles().size())
 	{
 		QPainterPath obstaclePath = DrawObstacle(data->GetObstacle(i));
-		obstaclePath.translate(toCanvasCoords(data->GetObstacle(i).center - center));
+		obstaclePath.translate(toCanvasCoords(data->GetObstacle(i).center));
 		paths.push_back(obstaclePath);
 		obstaclePath = DrawObstacle(data->GetObstacle(i));
 
 		QMatrix scalingMatrix;
-		QPointF t = toCanvasCoords(data->GetObstacle(i).center - center);
+		QPointF t = toCanvasCoords(data->GetObstacle(i).center);
 		scalingMatrix.scale(data->GetObstacle(i).repulsion[0], data->GetObstacle(i).repulsion[1]);
 		obstaclePath = scalingMatrix.map(obstaclePath);
-		obstaclePath.translate(toCanvasCoords(data->GetObstacle(i).center - center));
+		obstaclePath.translate(toCanvasCoords(data->GetObstacle(i).center));
 		safeties.push_back(obstaclePath);
 	}
 	FOR(i, paths.size())
@@ -680,6 +682,7 @@ void Canvas::mouseReleaseEvent( QMouseEvent *event )
 	if(event->button()==Qt::RightButton) label = 0;
 
 	mouseAnchor = QPoint(-1,-1);
+	if(x > 0 && x < width() && y>0 && y<height()) bShowCrosshair = true;
 
 	//emit Drawing(sample, label);
 	emit Released();
@@ -709,9 +712,9 @@ void Canvas::leaveEvent(QEvent *event)
 void Canvas::wheelEvent(QWheelEvent *event)
 {
 	float d = 0;
-	if (event->delta() > 50) d = 1;
-	if (event->delta() < 50) d = -1;
-	emit Navigation(fVec(-1,d));
+        if (event->delta() > 100) d = 1;
+        if (event->delta() < 100) d = -1;
+        if(d!=0) emit Navigation(fVec(-1,d));
 }
 
 void Canvas::mouseMoveEvent( QMouseEvent *event )
@@ -722,12 +725,14 @@ void Canvas::mouseMoveEvent( QMouseEvent *event )
 	fvec sample = toSampleCoords(x,y);
 
 	// we navigate in our environment
-	if(event->modifiers() == Qt::AltModifier)
+	if(event->modifiers() == Qt::AltModifier && event->buttons() == Qt::LeftButton)
 	{
-		QPoint diff = event->pos() - mouseAnchor;
-		center = toSampleCoords(diff);
+		fVec d = (fromCanvas(mouseAnchor) - fromCanvas(event->pos()));
+                if(d.x == 0 && d.y == 0) return;
+		SetCenter(center + d);
 		mouseAnchor = event->pos();
-		repaint();
+		bShowCrosshair = false;
+                emit CanvasMoveEvent();
 		return;
 	}
 

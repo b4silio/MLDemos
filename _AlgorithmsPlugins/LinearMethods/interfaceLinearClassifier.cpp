@@ -104,7 +104,7 @@ void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
 		FOR(i, 4) painter.drawLine(p1[i],p2[i]);
 
 		painter.setPen(QPen(Qt::red, 2));
-		painter.drawLine(p2[0],p2[1]);
+                painter.drawLine(p2[0],p2[1]);
 		painter.drawLine(p2[1],p2[2]);
 		painter.drawLine(p2[2],p2[3]);
 		painter.drawLine(p2[3],p2[0]);

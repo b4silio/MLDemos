@@ -25,7 +25,9 @@ using namespace std;
 
 ClassifierKPCA::ClassifierKPCA()
 : pca(0)
-{}
+{
+    bUsesDrawTimer = false;
+}
 
 
 std::vector<fvec> ClassifierKPCA::Project(std::vector<fvec> samples)
@@ -52,7 +54,7 @@ std::vector<fvec> ClassifierKPCA::Project(std::vector<fvec> samples)
 	{
 		FOR(d, projections.cols())
 		{
-			sample[d] = projections(i,d) + 0.5; // we recenter the data
+                        sample[d] = projections(i,d); // we recenter the data
 		}
 		projected[i] = sample;
 	}

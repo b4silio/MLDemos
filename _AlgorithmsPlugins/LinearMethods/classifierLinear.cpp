@@ -32,19 +32,23 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 	if(linearType == 0) // PCA
 	{
 		TrainPCA(samples, labels);
+                bUsesDrawTimer = false;
 	}
 	else if(linearType == 1) // ICA
 	{
 		TrainICA(samples, labels);
-	}
+                bUsesDrawTimer = false;
+        }
 	else if(linearType == 2) // LDA
 	{
 		TrainLDA(samples, labels, false);
-	}
+                bUsesDrawTimer = false;
+        }
 	else if(linearType == 3) // Fisher LDA
 	{
 		TrainLDA(samples, labels);
-	}
+                bUsesDrawTimer = false;
+        }
 	else // Naive Bayes
 	{
 		int dim = samples[0].size();
@@ -69,7 +73,8 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 			if(cntPos) meanPos[d] /= cntPos;
 			if(cntNeg) meanNeg[d] /= cntNeg;
 		}
-	}
+                bUsesDrawTimer = true;
+        }
 }
 
 float ClassifierLinear::Test(const fvec &sample )
@@ -155,8 +160,8 @@ fvec ClassifierLinear::InvProject(const fvec &sample)
 		double iTransf[4];
 		Invert(Transf, iTransf);
 		double *Data = new double[2];
-		Data[0] = sample[0]-0.5;
-		Data[1] = sample[1]-0.5;
+                Data[0] = sample[0];
+                Data[1] = sample[1];
 		//                Data[0] = sample[0]-meanPos[0];
 		//                Data[1] = sample[1]-meanPos[1];
 		Transform (Data, iTransf, 2, 1);
@@ -176,8 +181,8 @@ fvec ClassifierLinear::Project(const fvec &sample)
 		Data[0] = sample[0]-meanPos[0];
 		Data[1] = sample[1]-meanPos[1];
 		Transform (Data, Transf, 2, 1);
-		newSample[0] = Data[0]+0.5;
-		newSample[1] = Data[1]+0.5;
+                newSample[0] = Data[0];
+                newSample[1] = Data[1];
 		//		newSample[0] = Data[0]+meanPos[0];
 		//		newSample[1] = Data[1]+meanPos[1];
 	}

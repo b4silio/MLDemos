@@ -131,6 +131,7 @@ public:
 	MLDemos(QString filename="", QWidget *parent = 0, Qt::WFlags flags = 0);
 	~MLDemos();
 
+        int tabUsedForTraining;
 	Classifier *classifier;
 	Regressor *regressor;
 	Dynamical *dynamical;
@@ -200,6 +201,7 @@ private slots:
 
 	void FitToData();
 	void ZoomChanged(float d);
+        void CanvasMoveEvent();
 	void Navigation(fvec sample);
 	void ResetPositiveClass();
 	void ChangeActiveOptions();

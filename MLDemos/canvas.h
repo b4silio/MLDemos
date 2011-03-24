@@ -88,7 +88,7 @@ public:
 	QRectF canvasRect();
 	void SetZoom(float zoom);
 	float GetZoom(){return zoom;};
-	void SetCenter(fvec center);
+	void SetCenter(fVec center);
 	fvec GetCenter(){return center;};
 
 	std::map<int,fvec> centers;
@@ -106,7 +106,7 @@ public slots:
 signals:
 	void DrawCrosshair();
 	void Drawing(fvec sample, int label);
-//	void ZoomChanged();
+        void CanvasMoveEvent();
 	void Released();
 	void Navigation(fvec sample);
 
