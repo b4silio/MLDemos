@@ -194,8 +194,8 @@ namespace BasicML
 		u32 pointsCount = 0;
 
 		FOR(i,height){
-			FOR(j,width){
-				if (RGB(image,i*width+j)){
+                        FOR(j,width){
+                                if ((uchar)image->imageData[i*width+j]){
 					points[pointsCount++] = cvPoint3D32f(j,i,0);
 				}
 			}
@@ -303,8 +303,8 @@ namespace BasicML
 		if(length != (u32)(y->widthStep*y->height)) return eig;
 		CvPoint2D32f *points = new CvPoint2D32f[length];
 		FOR(i, length){
-			points[i].x = RGB(x, i)/255.f;
-			points[i].y = RGB(y, i)/255.f;
+                        points[i].x = x->imageData[i]/255.f;
+                        points[i].y = y->imageData[i]/255.f;
 		}
 		eig = PCA(points, length);
 		delete[] points;
@@ -358,7 +358,7 @@ namespace BasicML
 		u32 height = x->height;
 		FOR(i,height){
 			FOR(j, width){
-				RGB(dst,i*width + j) = isInsideEllipse(cvPoint2D32f(RGB(x,i*width+j)/255.f, RGB(y,i*width+j)/255.f), eig, ratio) ? 255 : 0;
+                                dst->imageData[i*width + j] = isInsideEllipse(cvPoint2D32f((unsigned char)(x->imageData[i*width+j])/255.f, ((unsigned char)y->imageData[i*width+j])/255.f), eig, ratio) ? 255 : 0;
 			}
 		}
 	}

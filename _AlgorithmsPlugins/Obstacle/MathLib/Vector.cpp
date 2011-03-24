@@ -44,7 +44,7 @@ void Vector::Print() const{
 void Vector::Print(string name) const{
   PRINT_BEGIN(cout);
 
-  cout << "Vector " <<row<<" "<<name<<endl;;
+  //cout << "Vector " <<row<<" "<<name<<endl;;
   for (unsigned int i = 0; i < row; i++){
 
     cout <<"| ";

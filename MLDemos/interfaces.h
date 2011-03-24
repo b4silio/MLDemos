@@ -47,7 +47,6 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(std::ofstream &stream) = 0;
 	virtual bool LoadParams(char *line, float value) = 0;
-	virtual bool UsesDrawTimer() = 0;
 };
 
 class ClustererInterface

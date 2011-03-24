@@ -50,7 +50,7 @@ DrawTimer::~DrawTimer()
 
 }
 
-void DrawTimer::stop()
+void DrawTimer::Stop()
 {
 	if(!bRunning)
 	{

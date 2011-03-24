@@ -33,7 +33,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="currentIndex">
@@ -56,7 +56,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <widget class="QLabel" name="label">
@@ -70,7 +70,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>9</pointsize>
+      <pointsize>7</pointsize>
      </font>
     </property>
     <property name="text">
@@ -91,7 +91,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>9</pointsize>
+      <pointsize>7</pointsize>
      </font>
     </property>
     <property name="toolTip">
@@ -157,7 +157,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>9</pointsize>
+      <pointsize>7</pointsize>
      </font>
     </property>
     <property name="text">
@@ -178,7 +178,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>9</pointsize>
+      <pointsize>7</pointsize>
      </font>
     </property>
     <property name="toolTip">
@@ -213,7 +213,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <property name="text">
@@ -231,7 +231,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>7</pointsize>
     </font>
    </property>
    <layout class="QVBoxLayout">
@@ -239,7 +239,7 @@ p, li { white-space: pre-wrap; }
      <spacer name="spacer_2">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -257,7 +257,7 @@ p, li { white-space: pre-wrap; }
      <widget class="QPushButton" name="regressionButton">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -272,7 +272,7 @@ p, li { white-space: pre-wrap; }
      <widget class="QPushButton" name="clearButton">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -292,7 +292,7 @@ p, li { white-space: pre-wrap; }
      <spacer name="spacer">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -313,7 +313,7 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="toolTip">

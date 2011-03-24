@@ -16,9 +16,10 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _TYPES_H_
-#define _TYPES_H_
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
+#include <vector>
 // type definitions, u <- unsigned, s <- signed, f <- floating point, X: number of bits
 typedef unsigned char u8;
 typedef unsigned short int u16;
@@ -89,4 +90,4 @@ static bool endsWith(const char *a,const char *b)
 }
 
 
-#endif // _TYPES_H_
+#endif // __TYPES_H__

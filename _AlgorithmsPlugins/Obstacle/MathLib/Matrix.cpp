@@ -102,7 +102,7 @@ bool Matrix::Save(const char* filename, unsigned int precision, int max_row){
     ofstream file;
     file.open(filename);
 
-    if(max_row == -1 or ((unsigned int)max_row) > RowSize())
+    if(max_row == -1 || ((unsigned int)max_row) > RowSize())
       max_row = RowSize();
 
     if(file.is_open()){

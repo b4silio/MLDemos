@@ -6,6 +6,7 @@ TARGET = mldemos
 NAME = mldemos
 MLPATH =..
 DESTDIR = $$MLPATH
+
 #CONFIG(debug, debug|release) {
 #	unix: TARGET = $${TARGET}_debug
 #	else: TARGET = $${TARGET}d)
