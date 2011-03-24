@@ -17,6 +17,9 @@ Makefile*
 *.dylib
 *.zip
 
+#codeblocks noise
+*.layout
+*.depends
 
 # xcode noise
 build/*

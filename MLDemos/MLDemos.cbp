@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="MLDemos" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="$make -f $makefile all" />
+			<CompileFile command="$make -f $makefile $file" />
+			<Clean command="$make -f $makefile clean" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile all" />
+			<SilentBuild command="$make -s -f $makefile all" />
+		</MakeCommands>
+		<Build>
+			<Target title="debug">
+				<Option output="../mldemos" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="$make -f $makefile all" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile all" />
+					<SilentBuild command="$make -s -f $makefile all" />
+				</MakeCommands>
+			</Target>
+			<Target title="release">
+				<Option output="../mldemos" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<MakeCommands>
+					<Build command="$make -f $makefile all" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile all" />
+					<SilentBuild command="$make -s -f $makefile all" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<ExtraCommands>
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG=$(TARGET)" />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="MachineLearning.rc" />
+		<Unit filename="aboutDialog.ui" />
+		<Unit filename="algorithmOptions.ui" />
+		<Unit filename="basicMath.h" />
+		<Unit filename="basicOpenCV.cpp" />
+		<Unit filename="basicOpenCV.h" />
+		<Unit filename="canvas.cpp" />
+		<Unit filename="canvas.h" />
+		<Unit filename="classifier.h" />
+		<Unit filename="clusterer.h" />
+		<Unit filename="datasetManager.cpp" />
+		<Unit filename="datasetManager.h" />
+		<Unit filename="drawTimer.cpp" />
+		<Unit filename="drawTimer.h" />
+		<Unit filename="drawUtils.cpp" />
+		<Unit filename="drawUtils.h" />
+		<Unit filename="drawingTools.ui" />
+		<Unit filename="drawingToolsContext1.ui" />
+		<Unit filename="drawingToolsContext2.ui" />
+		<Unit filename="drawingToolsContext3.ui" />
+		<Unit filename="dynamical.h" />
+		<Unit filename="fgmm/em.cpp" />
+		<Unit filename="fgmm/em.h" />
+		<Unit filename="fgmm/fgmm++.hpp" />
+		<Unit filename="fgmm/fgmm.h" />
+		<Unit filename="fgmm/gaussian.cpp" />
+		<Unit filename="fgmm/gaussian.h" />
+		<Unit filename="fgmm/gmm.cpp" />
+		<Unit filename="fgmm/gmmregression.cpp" />
+		<Unit filename="fgmm/regression.h" />
+		<Unit filename="fgmm/smat.cpp" />
+		<Unit filename="fgmm/smat.h" />
+		<Unit filename="fgmm/update.cpp" />
+		<Unit filename="gettimeofday.cc" />
+		<Unit filename="gettimeofday.h" />
+		<Unit filename="interfaces.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="mldemos.cpp" />
+		<Unit filename="mldemos.h" />
+		<Unit filename="mldemos.ui" />
+		<Unit filename="mlprocessing.cpp" />
+		<Unit filename="mlsaving.cpp" />
+		<Unit filename="mlstats.cpp" />
+		<Unit filename="mymaths.cpp" />
+		<Unit filename="mymaths.h" />
+		<Unit filename="obstacles.h" />
+		<Unit filename="optsClassify.ui" />
+		<Unit filename="optsCluster.ui" />
+		<Unit filename="optsDynamic.ui" />
+		<Unit filename="optsRegress.ui" />
+		<Unit filename="public.h" />
+		<Unit filename="regressor.h" />
+		<Unit filename="roc.cpp" />
+		<Unit filename="roc.h" />
+		<Unit filename="sampleManager.cpp" />
+		<Unit filename="sampleManager.h" />
+		<Unit filename="statisticsDialog.ui" />
+		<Unit filename="types.h" />
+		<Unit filename="uiMac/aboutDialog.ui" />
+		<Unit filename="uiMac/algorithmOptions.ui" />
+		<Unit filename="uiMac/drawingTools.ui" />
+		<Unit filename="uiMac/drawingToolsContext1.ui" />
+		<Unit filename="uiMac/drawingToolsContext2.ui" />
+		<Unit filename="uiMac/drawingToolsContext3.ui" />
+		<Unit filename="uiMac/mldemos.ui" />
+		<Unit filename="uiMac/optsClassify.ui" />
+		<Unit filename="uiMac/optsCluster.ui" />
+		<Unit filename="uiMac/optsDynamic.ui" />
+		<Unit filename="uiMac/optsRegress.ui" />
+		<Unit filename="uiMac/statisticsDialog.ui" />
+		<Unit filename="uiMac/viewOptions.ui" />
+		<Unit filename="viewOptions.ui" />
+		<Unit filename="widget.cpp" />
+		<Unit filename="widget.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
