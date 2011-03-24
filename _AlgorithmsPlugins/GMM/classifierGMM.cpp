@@ -73,6 +73,15 @@ float ClassifierGMM::Test( const fvec &sample)
 	return log(pos) - log(neg);
 }
 
+float ClassifierGMM::Test( const fVec &_sample)
+{
+	if(!gmmPos || !gmmNeg) return 0.f;
+	fVec sample = _sample;
+	float pos = gmmPos->pdf(sample._);
+	float neg = gmmNeg->pdf(sample._);
+	return log(pos) - log(neg);
+}
+
 void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 {
 	this->nbClusters = nbClusters;
@@ -112,11 +121,6 @@ char *ClassifierGMM::GetInfoString()
 		break;
 	}
 	return text;
-}
-
-
-void ClassifierGMM::Draw(IplImage *display)
-{
 }
 
 void ClassifierGMM::Update()

@@ -42,9 +42,9 @@ public:
 	ivec GetLabels(){return labels;};
 
 	ClassifierKPCA();
-	void Draw(IplImage *display);
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
+	float Test(const fVec &sample);
 	char *GetInfoString();
 	void SetParams(int kernelType, int kernelDegree, float kernelGamma);
 };

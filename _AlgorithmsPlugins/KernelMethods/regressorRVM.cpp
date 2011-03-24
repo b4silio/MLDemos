@@ -45,10 +45,6 @@ char *RegressorRVM::GetInfoString()
 	return text;
 }
 
-void RegressorRVM::Draw(IplImage *display)
-{
-}
-
 void RegressorRVM::Train(std::vector< fvec > _samples, ivec _labels)
 {
 	samples.clear();
@@ -92,6 +88,26 @@ fvec  RegressorRVM::Test( const fvec &_sample )
 	res.resize(2,0);
 	reg_sample_type sample;
 	sample(0) = _sample[0];
+	switch(kernelType)
+	{
+	case 0:
+		res[0] = linFunc(sample);
+		break;
+	case 1:
+		res[0] = polFunc(sample);
+		break;
+	case 2:
+		res[0] = rbfFunc(sample);
+		break;
+	}
+	return res;
+}
+
+fVec  RegressorRVM::Test( const fVec &_sample )
+{
+	fVec res;
+	reg_sample_type sample;
+	sample(0) = _sample._[0];
 	switch(kernelType)
 	{
 	case 0:

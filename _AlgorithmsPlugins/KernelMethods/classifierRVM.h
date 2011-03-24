@@ -42,9 +42,9 @@ private:
 public:
 
 	ClassifierRVM():epsilon(0.001), kernelType(2){type = CLASS_RVM;};
-	void Draw(IplImage *display);
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
+	float Test(const fVec &sample);
 	char *GetInfoString();
 	void SetParams(float epsilon, int kernelType, float kernelParam, int kernelDegree)
 		{this->epsilon=epsilon;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;};

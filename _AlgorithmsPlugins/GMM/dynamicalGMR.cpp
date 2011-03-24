@@ -89,6 +89,18 @@ fvec DynamicalGMR::Test( const fvec &sample)
 }
 
 
+fVec DynamicalGMR::Test( const fVec &sample)
+{
+	fVec res;
+	if(!gmm) return res;
+	fVec velocity;
+	float *sigma = new float[dim*(dim+1)/2];
+	gmm->doRegression(sample._, velocity._, sigma);
+	res = velocity;
+	delete [] sigma;
+	return res;
+}
+
 void DynamicalGMR::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 {
 	this->nbClusters = nbClusters;
@@ -128,27 +140,4 @@ char *DynamicalGMR::GetInfoString()
 		break;
 	}
 	return text;
-}
-
-void DynamicalGMR::Draw(IplImage *display)
-{
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
-	// we draw a density map for the probability
-	fvec sample;
-	sample.resize(dim);
-	for (int i=0; i < density->width; i++)
-	{
-		sample[0] = i/(float)density->width;
-		for (int j=0; j< density->height; j++)
-		{
-			sample[1] = j/(float)density->height;
-			fvec res = Test(sample)*10;
-			//float val = gmm->pdf(sample);
-			int hue = (int)(atan2(res[1], res[0]) / (2*M_PI) * 359);
-			cvSet2D(density, j, i, CV_RGB(128+res[0]*128,128+res[1]*128,0));
-		}
-	}
-	cvResize(density, display, CV_INTER_CUBIC);
-	IMKILL(density);
 }

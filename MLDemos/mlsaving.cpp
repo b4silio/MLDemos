@@ -131,21 +131,18 @@ void MLDemos::SaveLayoutOptions()
 	}
 	FOR(i,regressors.size())
 	{
-		if(!classifiers[i]) continue;
+		if(!regressors[i]) continue;
 		settings.beginGroup(QString("plugins::regressors::") + regressors[i]->GetName());
 		regressors[i]->SaveOptions(settings);
 		settings.endGroup();
 	}
 	FOR(i,dynamicals.size())
 	{
-		if(!classifiers[i]) continue;
+		if(!dynamicals[i]) continue;
 		settings.beginGroup(QString("plugins::dynamicals::") + dynamicals[i]->GetName());
 		dynamicals[i]->SaveOptions(settings);
 		settings.endGroup();
 	}
-
-
-
 }
 
 void MLDemos::LoadLayoutOptions()

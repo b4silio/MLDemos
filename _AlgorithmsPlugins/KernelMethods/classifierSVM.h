@@ -27,14 +27,15 @@ class ClassifierSVM : public Classifier
 {
 private:
 	svm_model *svm;
-
+	svm_node *node;
 public:
 	svm_parameter param;
 
 	ClassifierSVM();
-	void Draw(IplImage *display);
+	~ClassifierSVM();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
+	float Test(const fVec &sample);
 	char *GetInfoString();
 	void SetParams(int svmType, float svmC, u32 kernelType, float kernelParam);
 	svm_model *GetModel(){return svm;};

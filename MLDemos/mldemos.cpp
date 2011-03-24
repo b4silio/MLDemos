@@ -179,14 +179,6 @@ void MLDemos::initToolBars()
 
 void MLDemos::initDialogs()
 {
-
-    /*
- classifierOptions = new Ui::ClassifierOptions();
- QFrame *classWidget = new QFrame();
- classifierOptions->setupUi(classWidget);
- classWidget->show();
- /**/
-
     drawToolbar = new Ui::DrawingToolbar();
     drawToolbarContext1 = new Ui::DrawingToolbarContext1();
 	drawToolbarContext2 = new Ui::DrawingToolbarContext2();
@@ -255,8 +247,8 @@ void MLDemos::initDialogs()
 	algorithmWidget = new QWidget();
 	algorithmOptions->setupUi(algorithmWidget);
 
-	//algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
-	algorithmWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
+	algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
+	//algorithmWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
 	displayDialog->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
 	//drawToolbarWidget->setWindowFlags(Qt::Tool);
 	drawToolbarWidget->setWindowFlags(Qt::CustomizeWindowHint | Qt::Tool | Qt::WindowTitleHint);
@@ -312,8 +304,9 @@ void MLDemos::initDialogs()
     connect(canvas, SIGNAL(Drawing(fvec,int)), this, SLOT(Drawing(fvec,int)));
     connect(canvas, SIGNAL(DrawCrosshair()), this, SLOT(DrawCrosshair()));
     connect(canvas, SIGNAL(Navigation(fvec)), this, SLOT(Navigation(fvec)));
-    connect(canvas, SIGNAL(Released()), this, SLOT(DrawingStopped()));
-    drawTimer = new DrawTimer(canvas, &mutex);
+	connect(canvas, SIGNAL(Released()), this, SLOT(DrawingStopped()));
+	//connect(canvas, SIGNAL(ZoomChanged()), this, SLOT(ZoomChanged()));
+	drawTimer = new DrawTimer(canvas, &mutex);
     drawTimer->classifier = &classifier;
     drawTimer->regressor = &regressor;
     drawTimer->dynamical = &dynamical;
@@ -357,12 +350,12 @@ void MLDemos::initPlugins()
 	}
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files))
     {
-		//qDebug() << fileName;
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = loader.instance();
         if (plugin)
         {
-            // check type of plugin
+			qDebug() << fileName;
+			// check type of plugin
             CollectionInterface *iCollection = qobject_cast<CollectionInterface *>(plugin);
             if(iCollection)
             {
@@ -485,6 +478,7 @@ void MLDemos::HideContextMenus()
 void MLDemos::AddPlugin(InputOutputInterface *iIO)
 {
     inputoutputs.push_back(iIO);
+	bInputRunning.push_back(false);
     connect(this, SIGNAL(SendResults(std::vector<fvec>)), iIO->object(), iIO->FetchResultsSlot());
     connect(iIO->object(), iIO->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>)));
     connect(iIO->object(), iIO->QueryClassifierSignal(), this, SLOT(QueryClassifier(std::vector<fvec>)));
@@ -538,6 +532,11 @@ void MLDemos::AddPlugin(AvoidanceInterface *iAvoid, const char *method)
 
 MLDemos::~MLDemos()
 {
+	Clear();
+	FOR(i, inputoutputs.size())
+	{
+		if(inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
+	}
     SaveLayoutOptions();
     delete optionsClassify;
     delete optionsRegress;
@@ -547,13 +546,7 @@ MLDemos::~MLDemos()
     delete drawToolbarContext1;
     delete drawToolbarContext2;
     delete displayOptions;
-    /*
- FOR(i, classifiers.size()) DEL(classifiers[i]);
- FOR(i, regressors.size()) DEL(regressors[i]);
- FOR(i, dynamicals.size()) DEL(dynamicals[i]);
- FOR(i, clusterers.size()) DEL(clusterers[i]);
- FOR(i, inputoutputs.size()) DEL(inputoutputs[i]);
- */
+
     canvas->hide();
     delete canvas;
 }
@@ -718,12 +711,13 @@ void MLDemos::HideStatsDialog()
 
 void MLDemos::Clear()
 {
-    QMutexLocker lock(&mutex);
-    DEL(classifier);
-    DEL(regressor);
+	drawTimer->stop();
+	drawTimer->Clear();
+	QMutexLocker lock(&mutex);
+	DEL(classifier);
+	DEL(regressor);
     DEL(dynamical);
     DEL(clusterer);
-    drawTimer->Clear();
     canvas->confidencePixmap = QPixmap();
     canvas->modelPixmap = QPixmap();
     canvas->infoPixmap = QPixmap();
@@ -1212,8 +1206,18 @@ void MLDemos::FitToData()
 	drawTimer->start(QThread::NormalPriority);
 }
 
+void MLDemos::ZoomChanged(float d)
+{
+	displayOptions->spinZoom->setValue(displayOptions->spinZoom->value()+d/4);
+}
+
 void MLDemos::Navigation( fvec sample )
 {
+	if(sample[0]==-1)
+	{
+		ZoomChanged(sample[1]);
+		return;
+	}
     QString information;
     char string[255];
     int count = canvas->data->GetCount();
@@ -1396,8 +1400,16 @@ void MLDemos::ActivateIO()
     {
         if(i<pluginActions.size() && inputoutputs[i] && pluginActions[i])
         {
-            if(pluginActions[i]->isChecked()) inputoutputs[i]->Start();
-            else inputoutputs[i]->Stop();
+			if(pluginActions[i]->isChecked())
+			{
+				bInputRunning[i] = true;
+				inputoutputs[i]->Start();
+			}
+			else if(bInputRunning[i])
+			{
+				bInputRunning[i] = false;
+				inputoutputs[i]->Stop();
+			}
         }
     }
 }
@@ -1424,8 +1436,9 @@ void MLDemos::DisactivateIO(QObject *io)
     if(pluginIndex < pluginActions.size() && pluginActions[pluginIndex])
     {
         pluginActions[pluginIndex]->setChecked(false);
-        inputoutputs[pluginIndex]->Stop();
-    }
+		if(bInputRunning[pluginIndex]) inputoutputs[pluginIndex]->Stop();
+		bInputRunning[pluginIndex] = false;
+	}
 }
 
 void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories)

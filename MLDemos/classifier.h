@@ -65,7 +65,6 @@ public:
 	virtual void Train(std::vector< fvec > samples, ivec labels){};
 	virtual float Test(const fvec &sample){ return 0; };
 	virtual float Test(const fVec &sample){ return Test((fvec)sample); };
-	virtual void Draw(IplImage *display){};
 	virtual char *GetInfoString(){return NULL;};
 	bool SingleClass(){return bSingleClass;};
 };

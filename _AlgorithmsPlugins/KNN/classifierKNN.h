@@ -39,6 +39,7 @@ public:
 	~ClassifierKNN();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test( const fvec &sample);
+	float Test( const fVec &sample);
 	void SetParams(u32 k, int metricType, u32 metricP);
 	char *GetInfoString();
 };

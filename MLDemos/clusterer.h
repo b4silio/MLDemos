@@ -39,8 +39,7 @@ public:
 
 	virtual void Train(std::vector< fvec > samples){};
 	virtual fvec Test( const fvec &sample){ return fvec(); };
-	virtual fVec Test(const fVec &sample){ return fVec(Test((fvec)sample)); };
-	virtual void Draw(IplImage *display){};
+	virtual fvec Test(const fVec &sample){ return Test((fvec)sample); };
 	virtual char *GetInfoString(){return NULL;};
 };
 

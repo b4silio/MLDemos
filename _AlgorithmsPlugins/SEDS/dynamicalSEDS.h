@@ -45,7 +45,6 @@ public:
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
 	fVec Test( const fVec &sample);
-	void Draw(IplImage *display);
 	char *GetInfoString();
 
 	void SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType);

@@ -55,6 +55,18 @@ fvec RegressorGMR::Test( const fvec &sample)
 	return res;
 }
 
+fVec RegressorGMR::Test( const fVec &sample)
+{
+	fVec res;
+	if(!gmm) return res;
+	float estimate;
+	float sigma;
+	gmm->doRegression(sample._, &estimate, &sigma);
+	res[0] = estimate;
+	res[1] = sqrt(sigma);
+	return res;
+}
+
 void RegressorGMR::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 {
 	this->nbClusters = nbClusters;
@@ -94,25 +106,4 @@ char *RegressorGMR::GetInfoString()
 		break;
 	}
 	return text;
-}
-
-void RegressorGMR::Draw(IplImage *display)
-{
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
-	// we draw a density map for the probability
-	float sample[2];
-	float sigma[4];
-	for (int i=0; i < density->width; i++)
-	{
-		sample[0] = i/(float)density->width;
-		for (int j=0; j< density->height; j++)
-		{
-			sample[1] = j/(float)density->height;
-			float val = gmm->pdf(sample);
-			cvSet2D(density, j, i, cvScalarAll(128 + val*10));
-		}
-	}
-	cvResize(density, display, CV_INTER_CUBIC);
-	IMKILL(density);
 }

@@ -27,15 +27,16 @@ class DynamicalSVR : public Dynamical
 {
 private:
 	svm_model *svm1, *svm2;
+	svm_node *node;
 public:
 	svm_parameter param;
 
 	DynamicalSVR();
 	~DynamicalSVR();
-	void Draw(IplImage *display);
 	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
+	fVec Test(const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);

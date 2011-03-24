@@ -30,7 +30,7 @@ PCAFaces::PCAFaces()
 
 PCAFaces::~PCAFaces()
 {
-	guiDialog->hide();
+	if(gui && guiDialog) guiDialog->hide();
 	DEL(projector);
 }
 
@@ -51,7 +51,10 @@ void PCAFaces::Start()
 
 void PCAFaces::Stop()
 {
-	guiDialog->hide();
+	if(projector)
+	{
+		guiDialog->hide();
+	}
 }
 
 void PCAFaces::Closing()

@@ -51,26 +51,6 @@ ClustererSVR::ClustererSVR()
 	param.normalizeKernel = false;
 }
 
-void ClustererSVR::Draw(IplImage *display)
-{
-	if(!svm) return;
-	u32 edges = 20;
-	// we draw the support vectors
-	FOR(i, svm->l)
-	{
-		f32 *sv = new f32[dim]; 
-		FOR(j, dim)
-		{
-			sv[j] = (f32)svm->SV[i][j].value;
-		}
-		CvPoint point = cvPoint((u32)(sv[0]*(display->width-edges*2))+edges,(u32)(sv[1]*(display->height-edges*2))+edges);
-		KILL(sv);
-
-		//cvCircle(display, point, 5, CV_RGB(255,255,255), 1, CV_AA);
-		draw_cross(display, point, CV_RGB(255,255,255), 5);
-	}
-}
-
 void ClustererSVR::Train(std::vector< fvec > samples)
 {
 	svm_problem problem;
@@ -110,6 +90,25 @@ fvec ClustererSVR::Test( const fvec &sample )
 	{
 		x[i].index = i+1;
 		x[i].value = sample[i];
+	}
+	x[data_dimension].index = -1;
+	estimate = (float)svm_predict(svm, x);
+	delete [] x;
+	fvec res;
+	estimate = std::max(-1.f,min(1.f,estimate))/2 + 0.5f;
+	res.push_back(estimate);
+	return res;
+}
+
+fvec ClustererSVR::Test( const fVec &sample )
+{
+	int data_dimension = 2;
+	float estimate;
+	svm_node *x = new svm_node[data_dimension+1];
+	FOR(i, data_dimension)
+	{
+		x[i].index = i+1;
+		x[i].value = sample._[i];
 	}
 	x[data_dimension].index = -1;
 	estimate = (float)svm_predict(svm, x);

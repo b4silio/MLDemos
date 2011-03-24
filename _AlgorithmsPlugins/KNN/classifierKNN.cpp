@@ -74,6 +74,33 @@ float ClassifierKNN::Test( const fvec &sample )
 	return score*2;
 }
 
+float ClassifierKNN::Test( const fVec &sample )
+{
+	if(!samples.size()) return 0;
+	float score = 0;
+
+	double eps = 0; // error bound
+	ANNpoint queryPt; // query point
+	queryPt = annAllocPt(sample.size()); // allocate query point
+	ANNidxArray nnIdx = new ANNidx[k]; // allocate near neigh indices
+	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
+	FOR(i, sample.size()) queryPt[i] = sample._[i];
+	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
+	int cnt = 0;
+	FOR(i, k)
+	{
+		if(nnIdx[i] >= labels.size()) continue;
+		score += labels[nnIdx[i]];
+		cnt++;
+	}
+	score /= cnt;
+
+	delete [] nnIdx; // clean things up
+	delete [] dists;
+
+	return score*2;
+}
+
 void ClassifierKNN::SetParams( u32 k, int metricType, u32 metricP )
 {
 	this->k = k;

@@ -50,7 +50,6 @@ public:
 	virtual std::vector<fvec> Test( const fvec &sample, const int count){ return std::vector<fvec>(); };
 	virtual fvec Test( const fvec &sample){ return fvec(); };
 	virtual fVec Test(const fVec &sample){ return fVec(Test((fvec)sample)); };
-	virtual void Draw(IplImage *display){};
 	virtual char *GetInfoString(){return NULL;};
 };
 

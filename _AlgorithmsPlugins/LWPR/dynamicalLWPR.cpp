@@ -100,17 +100,25 @@ fvec DynamicalLWPR::Test( const fvec &sample)
 	return res;
 }
 
+fVec DynamicalLWPR::Test( const fVec &sample)
+{
+	int dim = 2;
+	fVec res;
+	if(!model) return res;
+	dvec x;
+	x.resize(dim,0);
+	FOR(d, dim) x[d] = sample._[d];
+	dvec y = model->predict(x);
+	FOR(d, dim) res[d] = y[d];
+	return res;
+}
+
 void DynamicalLWPR::SetParams(double initD, double initAlpha, double wGen)
 {
 	this->initD = initD;
 	this->initAlpha = initAlpha;
 	this->wGen = wGen;
 }
-
-void DynamicalLWPR::Draw(IplImage *display)
-{
-}
-
 
 char *DynamicalLWPR::GetInfoString()
 {

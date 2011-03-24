@@ -44,11 +44,6 @@ char *ClustererKKM::GetInfoString()
 	return text;
 }
 
-
-void ClustererKKM::Draw(IplImage *display)
-{
-}
-
 void ClustererKKM::Train(std::vector< fvec > _samples)
 {
 	vector<sample_type> samples;
@@ -102,6 +97,30 @@ fvec ClustererKKM::Test( const fvec &_sample )
 	sample_type sample;
 	sample(0) = _sample[0];
 	sample(1) = _sample[1];
+	fvec res;
+	res.resize(clusters, 0);
+	int index;
+	switch(kernelType)
+	{
+	case 0:
+		index = (*linKmeans)(sample);
+		break;
+	case 1:
+		index = (*polKmeans)(sample);
+		break;
+	case 2:
+		index = (*rbfKmeans)(sample);
+		break;
+	}
+	res[index] = 1;
+	return res;
+}
+
+fvec ClustererKKM::Test( const fVec &_sample )
+{
+	sample_type sample;
+	sample(0) = _sample._[0];
+	sample(1) = _sample._[1];
 	fvec res;
 	res.resize(clusters, 0);
 	int index;

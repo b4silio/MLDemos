@@ -44,9 +44,9 @@ private:
 public:
 
 	RegressorRVM():epsilon(0.001), kernelType(2){type = REGR_RVM;};
-	void Draw(IplImage *display);
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
+	fVec Test(const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(float epsilon, int kernelType, float kernelParam, int kernelDegree)

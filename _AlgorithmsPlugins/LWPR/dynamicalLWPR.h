@@ -34,10 +34,10 @@ public:
 	double wGen;
 
 	DynamicalLWPR();
-	void Draw(IplImage *display);
 	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
+	fVec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(double initD, double initAlpha, double wGen);

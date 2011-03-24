@@ -73,27 +73,6 @@ void RegressorLWPR::SetParams(double initD, double initAlpha, double wGen)
 	this->wGen = wGen;
 }
 
-void RegressorLWPR::Draw(IplImage *display)
-{
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
-	// we draw a density map for the probability
-	float sample[2];
-	float sigma[4];
-	for (int i=0; i < density->width; i++)
-	{
-		sample[0] = i/(float)density->width;
-		for (int j=0; j< density->height; j++)
-		{
-			sample[1] = j/(float)density->height;
-			//float val = gmm->Pdf(sample);
-			//cvSet2D(density, j, i, cvScalarAll(128 + val*10));
-		}
-	}
-	cvResize(density, display, CV_INTER_CUBIC);
-	IMKILL(density);
-}
-
 char *RegressorLWPR::GetInfoString()
 {
 	char *text = new char[255];

@@ -53,10 +53,6 @@ RegressorKRLS::~RegressorKRLS()
 	DEL(rbfTrainer);
 }
 
-void RegressorKRLS::Draw(IplImage *display)
-{
-}
-
 void RegressorKRLS::Train(std::vector< fvec > _samples, ivec _labels)
 {
 	if(capacity == 1) capacity = 2;
@@ -116,6 +112,26 @@ fvec  RegressorKRLS::Test( const fvec &_sample )
 	res.resize(2,0);
 	reg_sample_type sample;
 	sample(0) = _sample[0];
+	switch(kernelType)
+	{
+	case 0:
+		res[0] = (*linTrainer)(sample);
+		break;
+	case 1:
+		res[0] = (*polTrainer)(sample);
+		break;
+	case 2:
+		res[0] = (*rbfTrainer)(sample);
+		break;
+	}
+	return res;
+}
+
+fVec  RegressorKRLS::Test( const fVec &_sample )
+{
+	fVec res;
+	reg_sample_type sample;
+	sample(0) = _sample._[0];
 	switch(kernelType)
 	{
 	case 0:

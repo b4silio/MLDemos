@@ -54,6 +54,7 @@ liveTrajectory(vector<fvec>()),
 centers(map<int,fvec>()),
 drawnSamples(0),
 drawnTrajectories(0),
+mouseAnchor(QPoint(-1,-1)),
 bDrawing(false),
 zoom(1.f),
 data(new DatasetManager())
@@ -658,6 +659,12 @@ void Canvas::mousePressEvent( QMouseEvent *event )
 	if(event->button()==Qt::LeftButton) label = 1;
 	if(event->button()==Qt::RightButton) label = 0;
 
+	if(event->modifiers()==Qt::AltModifier)
+	{
+		mouseAnchor = event->pos();
+		return;
+	}
+
 	emit Drawing(sample, label);
 }
 
@@ -671,6 +678,8 @@ void Canvas::mouseReleaseEvent( QMouseEvent *event )
 	int label = 0;
 	if(event->button()==Qt::LeftButton) label = 1;
 	if(event->button()==Qt::RightButton) label = 0;
+
+	mouseAnchor = QPoint(-1,-1);
 
 	//emit Drawing(sample, label);
 	emit Released();
@@ -693,7 +702,16 @@ void Canvas::leaveEvent(QEvent *event)
 {
 	bShowCrosshair = false;
 	bNewCrosshair = true;
+	//mouseAnchor = QPoint(-1,-1);
 	repaint();
+}
+
+void Canvas::wheelEvent(QWheelEvent *event)
+{
+	float d = 0;
+	if (event->delta() > 50) d = 1;
+	if (event->delta() < 50) d = -1;
+	emit Navigation(fVec(-1,d));
 }
 
 void Canvas::mouseMoveEvent( QMouseEvent *event )
@@ -702,6 +720,16 @@ void Canvas::mouseMoveEvent( QMouseEvent *event )
 	int y = event->y();
 	mouse = QPoint(x,y);
 	fvec sample = toSampleCoords(x,y);
+
+	// we navigate in our environment
+	if(event->modifiers() == Qt::AltModifier)
+	{
+		QPoint diff = event->pos() - mouseAnchor;
+		center = toSampleCoords(diff);
+		mouseAnchor = event->pos();
+		repaint();
+		return;
+	}
 
 	if(event->buttons() != Qt::LeftButton && event->buttons() != Qt::RightButton )
 	{

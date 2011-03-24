@@ -34,7 +34,6 @@ public:
 	double wGen;
 
 	RegressorLWPR();
-	void Draw(IplImage *display);
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
 	char *GetInfoString();

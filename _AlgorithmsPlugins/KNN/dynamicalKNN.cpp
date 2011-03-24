@@ -152,8 +152,66 @@ fvec DynamicalKNN::Test( const fvec &sample )
 	return res;
 }
 
-void DynamicalKNN::Draw(IplImage *display)
+
+fVec DynamicalKNN::Test( const fVec &sample )
 {
+	fVec res;
+	int dim = 2;
+	if(!points.size()) return res;
+	double eps = 0; // error bound
+	ANNpoint queryPt; // query point
+	queryPt = annAllocPt(dim); // allocate query point
+	ANNidxArray nnIdx = new ANNidx[k]; // allocate near neigh indices
+	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
+	FOR(i, dim) queryPt[i] = sample._[i];
+	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
+
+	float dsum = 0;
+	vector<fvec> scores;
+	scores.resize(k);
+	FOR(i, k)
+	{
+		if(nnIdx[i] >= points.size()) continue;
+		if(dists[i] == 0) dsum += 0;
+		else dsum += 1./dists[i];
+		scores[i].resize(dim);
+		FOR(d,dim) scores[i][d] = velocities[nnIdx[i]][d];
+	}
+	FOR(i, k)
+	{
+		if(nnIdx[i] >= points.size()) continue;
+		if(dists[i] == 0) continue;
+		dists[i] = 1./(dists[i])/dsum;
+	}
+
+	fVec mean, stdev;
+	int cnt = 0;
+	FOR(i, k)
+	{
+		if(nnIdx[i] >= points.size()) continue;
+		//mean += scores[i] / (scores.size());
+		mean += scores[i] * dists[i];
+		cnt++;
+	}
+	FOR(i, k)
+	{
+		if(nnIdx[i] >= points.size()) continue;
+		FOR(d,dim) stdev[d] += (scores[i] - mean)[d]*(scores[i] - mean)[d];
+	}
+	FOR(d,dim)
+	{
+		if(cnt) stdev[d] /= cnt;
+		else stdev[d] = 0;
+		stdev[d] = sqrtf(stdev[d]);
+	}
+
+	delete [] nnIdx; // clean things up
+	delete [] dists;
+
+	res = mean;
+	//res[1] = stdev;
+
+	return res;
 }
 
 void DynamicalKNN::SetParams( u32 k, int metricType, u32 metricP )

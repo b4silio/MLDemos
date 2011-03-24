@@ -11,7 +11,7 @@ MLDemos.file = MLDemos/MLDemos.pro
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-#SUBDIRS += GMM SEDS Obstacle
+#SUBDIRS += GMM KernelMethods
 SUBDIRS += GMM KernelMethods KNN KPCA LinearMethods LWPR Obstacle SEDS
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
 KernelMethods.file = $$ALGOPATH/KernelMethods/pluginKernel.pro
