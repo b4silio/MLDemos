@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="MLDemos/MLDemos.cbp" />
+		<Project filename="_AlgorithmsPlugins/SEDS/SEDS.cbp" />
+		<Project filename="_AlgorithmsPlugins/Obstacle/Obstacle.cbp" />
+		<Project filename="_AlgorithmsPlugins/LWPR/LWPR.cbp" />
+		<Project filename="_AlgorithmsPlugins/LinearMethods/LinearMethods.cbp" />
+		<Project filename="_AlgorithmsPlugins/KPCA/kPCA.cbp" />
+		<Project filename="_AlgorithmsPlugins/KNN/KNN.cbp" />
+		<Project filename="_AlgorithmsPlugins/KernelMethods/KernelMethods.cbp" />
+		<Project filename="_AlgorithmsPlugins/GMM/GMM.cbp" />
+		<Project filename="_IOPlugins/RandomEmitter/RandomEmitter.cbp" />
+		<Project filename="_IOPlugins/PCAFaces/PCAFaces.cbp" active="1" />
+	</Workspace>
+</CodeBlocks_workspace_file>
