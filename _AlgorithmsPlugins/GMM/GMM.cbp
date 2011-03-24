@@ -16,7 +16,7 @@
 		</MakeCommands>
 		<Build>
 			<Target title="debug">
-				<Option output="../../GMM" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_GMM" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -33,7 +33,7 @@
 				</MakeCommands>
 			</Target>
 			<Target title="release">
-				<Option output="../../GMM" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_GMM" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -57,9 +57,44 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro" />
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="classifierGMM.cpp" />
+		<Unit filename="classifierGMM.h" />
+		<Unit filename="clustererGMM.cpp" />
+		<Unit filename="clustererGMM.h" />
+		<Unit filename="dynamicalGMR.cpp" />
+		<Unit filename="dynamicalGMR.h" />
+		<Unit filename="fgmm/em.cpp" />
+		<Unit filename="fgmm/em.h" />
+		<Unit filename="fgmm/fgmm++.hpp" />
+		<Unit filename="fgmm/fgmm.h" />
+		<Unit filename="fgmm/gaussian.cpp" />
+		<Unit filename="fgmm/gaussian.h" />
+		<Unit filename="fgmm/gmm.cpp" />
+		<Unit filename="fgmm/gmmregression.cpp" />
+		<Unit filename="fgmm/regression.h" />
+		<Unit filename="fgmm/smat.cpp" />
+		<Unit filename="fgmm/smat.h" />
+		<Unit filename="fgmm/update.cpp" />
+		<Unit filename="interfaceGMMClassifier.cpp" />
+		<Unit filename="interfaceGMMClassifier.h" />
+		<Unit filename="interfaceGMMCluster.cpp" />
+		<Unit filename="interfaceGMMCluster.h" />
+		<Unit filename="interfaceGMMDynamic.cpp" />
+		<Unit filename="interfaceGMMDynamic.h" />
+		<Unit filename="interfaceGMMRegress.cpp" />
+		<Unit filename="interfaceGMMRegress.h" />
+		<Unit filename="paramsGMM.ui" />
+		<Unit filename="paramsGMMcluster.ui" />
+		<Unit filename="paramsGMMdynamic.ui" />
+		<Unit filename="paramsGMMregr.ui" />
+		<Unit filename="pluginGMM.cpp" />
+		<Unit filename="pluginGMM.h" />
+		<Unit filename="pluginGMM.pro" />
+		<Unit filename="regressorGMR.cpp" />
+		<Unit filename="regressorGMR.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

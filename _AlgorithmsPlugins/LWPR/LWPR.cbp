@@ -16,7 +16,7 @@
 		</MakeCommands>
 		<Build>
 			<Target title="debug">
-				<Option output="../../LWPR" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_LWPR" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -33,7 +33,7 @@
 				</MakeCommands>
 			</Target>
 			<Target title="release">
-				<Option output="../../LWPR" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_LWPR" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -57,9 +57,51 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro" />
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="dynamicalLWPR.cpp" />
+		<Unit filename="dynamicalLWPR.h" />
+		<Unit filename="interfaceLWPRDynamic.cpp" />
+		<Unit filename="interfaceLWPRDynamic.h" />
+		<Unit filename="interfaceLWPRRegress.cpp" />
+		<Unit filename="interfaceLWPRRegress.h" />
+		<Unit filename="lwpr/lwpr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lwpr/lwpr.h" />
+		<Unit filename="lwpr/lwpr.hh" />
+		<Unit filename="lwpr/lwpr_aux.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lwpr/lwpr_aux.h" />
+		<Unit filename="lwpr/lwpr_binio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lwpr/lwpr_binio.h" />
+		<Unit filename="lwpr/lwpr_config.h" />
+		<Unit filename="lwpr/lwpr_config_def.h" />
+		<Unit filename="lwpr/lwpr_math.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lwpr/lwpr_math.h" />
+		<Unit filename="lwpr/lwpr_mem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lwpr/lwpr_mem.h" />
+		<Unit filename="lwpr/lwpr_xml.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lwpr/lwpr_xml.h" />
+		<Unit filename="mymaths.cpp" />
+		<Unit filename="mymaths.h" />
+		<Unit filename="paramsLWPRDynamic.ui" />
+		<Unit filename="paramsLWPRRegress.ui" />
+		<Unit filename="pluginLWPR.cpp" />
+		<Unit filename="pluginLWPR.h" />
+		<Unit filename="pluginLWPR.pro" />
+		<Unit filename="regressorLWPR.cpp" />
+		<Unit filename="regressorLWPR.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
