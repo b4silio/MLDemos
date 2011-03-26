@@ -52,7 +52,6 @@ public:
 
 protected:
 	void paintEvent(QPaintEvent *event);
-	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
@@ -100,6 +99,7 @@ public:
 	QPixmap GetScreenshot();
 
 public slots:
+	void ResizeEvent();
 	void SetConfidenceMap(QImage image);
 	void SetModelImage(QImage image);
 

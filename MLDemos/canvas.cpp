@@ -59,14 +59,11 @@ bDrawing(false),
 zoom(1.f),
 data(new DatasetManager())
 {
-
 	resize(640,480);
 
 	setMouseTracking(true);
 	setCursor(Qt::CrossCursor);
 	setBackgroundRole(QPalette::Base);
-//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//	setFixedSize(640,480);
 	setMouseTracking(true);
 
 	QPalette p(palette());
@@ -645,9 +642,10 @@ void Canvas::DrawLiveTrajectory(QPainter &painter)
 	painter.drawEllipse(toCanvasCoords(liveTrajectory[count-1]), 5, 5);
 }
 
-void Canvas::resizeEvent( QResizeEvent *event )
+void Canvas::ResizeEvent()
 {
 	bNewCrosshair = true;
+	RedrawAxes();
 }
 
 void Canvas::mousePressEvent( QMouseEvent *event )

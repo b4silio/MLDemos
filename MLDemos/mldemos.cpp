@@ -60,11 +60,16 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     initDialogs();
     initToolBars();
     initPlugins();
-
-    LoadLayoutOptions();
+	LoadLayoutOptions();
     DisplayOptionChanged();
     UpdateInfo();
     FitToData();
+
+	ui.canvasWidget->resize(width(), height());
+	canvas->resize(ui.canvasWidget->width(), ui.canvasWidget->height());
+	canvas->ResizeEvent();
+	canvas->repaint();
+
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -154,8 +159,8 @@ void MLDemos::initToolBars()
 
     QToolBar *toolBar = addToolBar("Tools");
     toolBar->setObjectName("MainToolBar");
-    toolBar->setMovable(false);
-    toolBar->setFloatable(false);
+	//toolBar->setMovable(false);
+	//toolBar->setFloatable(false);
     toolBar->setIconSize(QSize(64,64));
     toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
@@ -289,7 +294,8 @@ void MLDemos::initDialogs()
     connect(optionsDynamic->centerCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->resampleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->resampleSpin, SIGNAL(valueChanged(int)), this, SLOT(ChangeActiveOptions()));
-    connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
+	connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
+	connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
 
     optionsClassify->tabWidget->clear();
     optionsCluster->tabWidget->clear();
@@ -300,8 +306,8 @@ void MLDemos::initDialogs()
     optionsRegress->tabWidget->setUsesScrollButtons(true);
     optionsDynamic->tabWidget->setUsesScrollButtons(true);
 
-    canvas = new Canvas(ui.centralWidget);
-    canvas->setMouseTracking(true);
+	//canvas = new Canvas(ui.centralWidget);
+	canvas = new Canvas(ui.canvasWidget);
     connect(canvas, SIGNAL(Drawing(fvec,int)), this, SLOT(Drawing(fvec,int)));
     connect(canvas, SIGNAL(DrawCrosshair()), this, SLOT(DrawCrosshair()));
     connect(canvas, SIGNAL(Navigation(fvec)), this, SLOT(Navigation(fvec)));
@@ -328,16 +334,15 @@ void MLDemos::initPlugins()
     if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") pluginsDir.cdUp();
 #elif defined(Q_OS_MAC)
     if (pluginsDir.dirName() == "MacOS") {
-        pluginsDir.cdUp();
-        if(pluginsDir.cd("Resources/plugins"))
+		if(pluginsDir.cd("plugins"))
         {
             alternativeDir = pluginsDir;
-            pluginsDir.cdUp();
-            pluginsDir.cdUp();
-        }
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
-    }
+			pluginsDir.cdUp();
+		}
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+	}
 #endif
     bool bFoundPlugins = false;
 #if defined(DEBUG)
@@ -345,9 +350,10 @@ void MLDemos::initPlugins()
 #else
     bFoundPlugins = pluginsDir.cd("plugins");
 #endif
-    if(!bFoundPlugins)
+	if(!bFoundPlugins)
     {
-        qDebug() << "using alternative directory: " << alternativeDir.absolutePath();
+		qDebug() << "plugins not found on: " << pluginsDir.absolutePath();
+		qDebug() << "using alternative directory: " << alternativeDir.absolutePath();
         pluginsDir = alternativeDir;
     }
     foreach (QString fileName, pluginsDir.entryList(QDir::Files))
@@ -578,20 +584,14 @@ void MLDemos::resizeEvent( QResizeEvent *event )
 {
 #ifdef MACX // ugly hack to avoid resizing problems on the mac
     //	qDebug() << "resizing: " << ui.centralWidget->geometry() << endl;
-    if(height() < 600) resize(width(),600);
+	// if(height() < 600) resize(width(),600);
 #endif // MACX
     if(canvas)
     {
-        //		qDebug() << canvas->geometry() << endl;
-        //        qDebug() << ui.centralWidget->geometry();
-        int w = ui.centralWidget->width();
-        int h = ui.centralWidget->height()-2;
-        canvas->setGeometry(0, 0, w, h);
-        canvas->ResetSamples();
-        char text[255];
-        sprintf(text, "resizing: %d x %d", w, h);
-        ui.statusBar->showMessage(text);
+		canvas->resize(ui.canvasWidget->width(), ui.canvasWidget->height());
+		canvas->ResizeEvent();
     }
+	CanvasMoveEvent();
 }
 
 void MLDemos::ShowOptionClass()
@@ -866,6 +866,21 @@ void MLDemos::DrawObstacle()
     }
 }
 
+void MLDemos::AvoidOptionChanged()
+{
+	if(dynamical)
+	{
+		int avoidIndex = optionsDynamic->obstacleCombo->currentIndex();
+		mutex.lock();
+		if(dynamical->avoid) delete dynamical->avoid;
+		if(!avoidIndex) dynamical->avoid = 0;
+		else dynamical->avoid = avoiders[avoidIndex-1]->GetObstacleAvoidance();
+		mutex.unlock();
+		drawTimer->Stop();
+		drawTimer->Clear();
+		drawTimer->start(QThread::NormalPriority);
+	}
+}
 
 void MLDemos::DisplayOptionChanged()
 {

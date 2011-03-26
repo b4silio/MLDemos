@@ -95,17 +95,31 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 		}
 		else // random rectangle
 		{
+			// we need to find the boundaries
+			float *xMin = new float[dim];
+			float *xMax = new float[dim];
+			FOR(i, samples.size())
+			{
+				FOR(d,dim)
+				{
+					if(xMin[d] > samples[i][d]) xMin[d] = samples[i][d];
+					if(xMax[d] < samples[i][d]) xMax[d] = samples[i][d];
+				}
+			}
+
 			FOR(i, learnerCount)
 			{
 				learners[i].resize(dim*2);
 				FOR(d, dim)
 				{
-					float x = rand() / (float)RAND_MAX * 0.8f; // starting point
-					float l = rand() / (float)RAND_MAX * (0.8f-x) + 0.2f; // width
+					float x = (rand() / (float)RAND_MAX)*(xMax[d] - xMin[d]) + xMin[d]; // starting point
+					float l = (rand() / (float)RAND_MAX)*(xMax[d] - xMin[d]); // width
 					learners[i][2*d] = x;
 					learners[i][2*d+1] = l;
 				}
 			}
+			delete [] xMin;
+			delete [] xMax;
 		}
 		currentLearnerType = weakType;
 	}

@@ -2,6 +2,7 @@
 # Configuration      #
 # ##########################
 TEMPLATE = app
+QT -= network
 TARGET = mldemos
 NAME = mldemos
 MLPATH =..
@@ -55,8 +56,7 @@ FORMS += uiMac/aboutDialog.ui \
 	uiMac/drawingToolsContext3.ui \
 	uiMac/statisticsDialog.ui \
 	uiMac/viewOptions.ui
-}
-else {
+} else {
 FORMS += aboutDialog.ui \
 	algorithmOptions.ui \
 	optsClassify.ui \

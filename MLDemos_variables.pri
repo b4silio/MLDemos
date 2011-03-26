@@ -6,7 +6,7 @@
 
 MLDEMOS = $${MLPATH}/MLDemos
 win32{
-    MLBUILD = C:/tmp/MLDemos/$$NAME
+	MLBUILD = C:/tmp/MLDemos/$$NAME
     CONFIG += WIN32
 }else{
     MLBUILD = /tmp/MLDemos/$$NAME

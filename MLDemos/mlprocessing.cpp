@@ -223,7 +223,7 @@ void MLDemos::Dynamize()
     if(avoidIndex >=0 && avoidIndex < avoiders.size() && avoiders[avoidIndex])
     {
         DEL(dynamical->avoid);
-        dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
+		dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
     }
 
     if(drawTimer)

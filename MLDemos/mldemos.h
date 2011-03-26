@@ -53,10 +53,10 @@ class MLDemos : public QMainWindow
 
 private:
 	QAction *actionClassifiers, *actionRegression, *actionDynamical,
-		*actionClustering, *actionDrawSamples,
-		*actionDisplayOptions, *actionShowStats,
-		*actionClearData, *actionClearModel, *actionScreenshot,
-		*actionNew, *actionSave, *actionLoad;
+	*actionClustering, *actionDrawSamples,
+	*actionDisplayOptions, *actionShowStats,
+	*actionClearData, *actionClearModel, *actionScreenshot,
+	*actionNew, *actionSave, *actionLoad;
 
 	QDialog *displayDialog, *about, *statsDialog;
 
@@ -131,7 +131,7 @@ public:
 	MLDemos(QString filename="", QWidget *parent = 0, Qt::WFlags flags = 0);
 	~MLDemos();
 
-        int tabUsedForTraining;
+	int tabUsedForTraining;
 	Classifier *classifier;
 	Regressor *regressor;
 	Dynamical *dynamical;
@@ -166,6 +166,7 @@ private slots:
 	void HideSampleDrawing();
 	void HideOptionDisplay();
 	void HideStatsDialog();
+	void AvoidOptionChanged();
 	void DisplayOptionChanged();
 	void ActivateIO();
 	void DisactivateIO(QObject *);
@@ -201,7 +202,7 @@ private slots:
 
 	void FitToData();
 	void ZoomChanged(float d);
-        void CanvasMoveEvent();
+	void CanvasMoveEvent();
 	void Navigation(fvec sample);
 	void ResetPositiveClass();
 	void ChangeActiveOptions();
