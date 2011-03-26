@@ -57,7 +57,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG=$(TARGET)" />
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro  CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
 		<Unit filename="MachineLearning.rc" />

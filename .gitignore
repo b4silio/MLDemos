@@ -4,7 +4,9 @@ last-data.txt
 *.sln
 *.zip
 
-# build output
+# build/debug output
+*/ValgrindOut.xml
+pluginsDebug/*
 plugins/*
 mldemos
 

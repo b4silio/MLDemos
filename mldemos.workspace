@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Workspace">
-		<Project filename="MLDemos/MLDemos.cbp" />
-		<Project filename="_AlgorithmsPlugins/SEDS/SEDS.cbp" />
-		<Project filename="_AlgorithmsPlugins/Obstacle/Obstacle.cbp" />
-		<Project filename="_AlgorithmsPlugins/LWPR/LWPR.cbp" />
-		<Project filename="_AlgorithmsPlugins/LinearMethods/LinearMethods.cbp" />
-		<Project filename="_AlgorithmsPlugins/KPCA/kPCA.cbp" />
-		<Project filename="_AlgorithmsPlugins/KNN/KNN.cbp" />
-		<Project filename="_AlgorithmsPlugins/KernelMethods/KernelMethods.cbp" />
-		<Project filename="_AlgorithmsPlugins/GMM/GMM.cbp" />
-		<Project filename="_IOPlugins/RandomEmitter/RandomEmitter.cbp" />
-		<Project filename="_IOPlugins/PCAFaces/PCAFaces.cbp" active="1" />
+		<Project filename="MLDemos/MLDemos.cbp" active="1" />
+		<Project filename="_AlgorithmsPlugins/SEDS/SEDS.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/Obstacle/Obstacle.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/LWPR/LWPR.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/LinearMethods/LinearMethods.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/KPCA/kPCA.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/KNN/KNN.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/KernelMethods/KernelMethods.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_AlgorithmsPlugins/GMM/GMM.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_IOPlugins/RandomEmitter/RandomEmitter.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
+		<Project filename="_IOPlugins/PCAFaces/PCAFaces.cbp">
+			<Depends filename="MLDemos/MLDemos.cbp" />
+		</Project>
 	</Workspace>
 </CodeBlocks_workspace_file>

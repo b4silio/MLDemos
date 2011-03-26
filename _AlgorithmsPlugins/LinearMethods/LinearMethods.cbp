@@ -16,7 +16,7 @@
 		</MakeCommands>
 		<Build>
 			<Target title="debug">
-				<Option output="../../LinearMethods" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_LinearMethods" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -33,7 +33,7 @@
 				</MakeCommands>
 			</Target>
 			<Target title="release">
-				<Option output="../../LinearMethods" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_LinearMethods" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -57,9 +57,52 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro" />
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="JnS/JnS.cpp" />
+		<Unit filename="JnS/JnS.h" />
+		<Unit filename="JnS/Matutil.cpp" />
+		<Unit filename="JnS/Matutil.h" />
+		<Unit filename="basicOpenCV.cpp" />
+		<Unit filename="basicOpenCV.h" />
+		<Unit filename="classifierBoost.cpp" />
+		<Unit filename="classifierBoost.h" />
+		<Unit filename="classifierLinear.cpp" />
+		<Unit filename="classifierLinear.h" />
+		<Unit filename="classifierMLP.cpp" />
+		<Unit filename="classifierMLP.h" />
+		<Unit filename="clustererKM.cpp" />
+		<Unit filename="clustererKM.h" />
+		<Unit filename="dynamicalMLP.cpp" />
+		<Unit filename="dynamicalMLP.h" />
+		<Unit filename="interfaceBoostClassifier.cpp" />
+		<Unit filename="interfaceBoostClassifier.h" />
+		<Unit filename="interfaceKMCluster.cpp" />
+		<Unit filename="interfaceKMCluster.h" />
+		<Unit filename="interfaceLinearClassifier.cpp" />
+		<Unit filename="interfaceLinearClassifier.h" />
+		<Unit filename="interfaceMLPClassifier.cpp" />
+		<Unit filename="interfaceMLPClassifier.h" />
+		<Unit filename="interfaceMLPDynamic.cpp" />
+		<Unit filename="interfaceMLPDynamic.h" />
+		<Unit filename="interfaceMLPRegress.cpp" />
+		<Unit filename="interfaceMLPRegress.h" />
+		<Unit filename="kmeans.cpp" />
+		<Unit filename="kmeans.h" />
+		<Unit filename="mymaths.cpp" />
+		<Unit filename="mymaths.h" />
+		<Unit filename="paramsBoost.ui" />
+		<Unit filename="paramsKM.ui" />
+		<Unit filename="paramsLinear.ui" />
+		<Unit filename="paramsMLP.ui" />
+		<Unit filename="paramsMLPDynamic.ui" />
+		<Unit filename="paramsMLPRegress.ui" />
+		<Unit filename="pluginLinear.cpp" />
+		<Unit filename="pluginLinear.h" />
+		<Unit filename="pluginLinear.pro" />
+		<Unit filename="regressorMLP.cpp" />
+		<Unit filename="regressorMLP.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
