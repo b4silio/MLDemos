@@ -155,7 +155,7 @@ void ClustererSVR::SetParams(int svmType, float svmC, float svmP, u32 kernelType
 char *ClustererSVR::GetInfoString()
 {
 	if(!svm) return NULL;
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "OneClas SVR\n");
 	sprintf(text, "%sKernel: ", text);
 	switch(param.kernel_type)
@@ -164,7 +164,7 @@ char *ClustererSVR::GetInfoString()
 		sprintf(text, "%s linear\n", text);
 		break;
 	case POLY:
-		sprintf(text, "%s polynomial (deg: %f bias: %f width: %f)\n", text, param.degree, param.coef0, param.gamma);
+		sprintf(text, "%s polynomial (deg: %d bias: %f width: %f)\n", text, param.degree, param.coef0, param.gamma);
 		break;
 	case RBF:
 		sprintf(text, "%s rbf (gamma: %f)\n", text, param.gamma);

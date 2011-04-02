@@ -75,7 +75,7 @@ void RegressorLWPR::SetParams(double initD, double initAlpha, double wGen)
 
 char *RegressorLWPR::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "Locally Weighted Projection Regression\n");
 	if(!model) return text;
 	sprintf(text, "%sGeneration Threshold: %f\n", text, model->wGen());

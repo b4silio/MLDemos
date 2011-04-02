@@ -228,7 +228,7 @@ void DynamicalSEDS::SetParams(int clusters, float penalty, bool bPrior, bool bMu
 
 char *DynamicalSEDS::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "GMR\n");
 	sprintf(text, "%sMixture Components: %d\n", text, nbClusters);
 	sprintf(text, "%sObjective Function: ", text);

@@ -25,7 +25,7 @@ using namespace std;
 
 char *ClassifierPegasos::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "pegasos SVM\n");
 	sprintf(text, "%sKernel: ", text);
 	switch(kernelType)

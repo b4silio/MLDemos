@@ -91,7 +91,7 @@ void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 
 char *ClassifierGMM::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "GMM\n");
 	sprintf(text, "%sMixture Components: %d\n", text, nbClusters);
 	sprintf(text, "%sCovariance Type: ", text);

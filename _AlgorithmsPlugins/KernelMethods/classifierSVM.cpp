@@ -26,7 +26,7 @@ using namespace std;
 char *ClassifierSVM::GetInfoString()
 {
 	if(!svm) return NULL;
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "%s\n", param.svm_type == NU_SVC ? "nu-SVM" : "C-SVM");
 	sprintf(text, "%sKernel: ", text);
 	switch(param.kernel_type)
@@ -35,7 +35,7 @@ char *ClassifierSVM::GetInfoString()
 		sprintf(text, "%s linear\n", text);
 		break;
 	case POLY:
-		sprintf(text, "%s polynomial (deg: %f bias: %f width: %f)\n", text, param.degree, param.coef0, param.gamma);
+		sprintf(text, "%s polynomial (deg: %d bias: %.3f width: %f)\n", text, param.degree, param.coef0, param.gamma);
 		break;
 	case RBF:
 		sprintf(text, "%s rbf (gamma: %f)\n", text, param.gamma);

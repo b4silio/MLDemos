@@ -110,7 +110,7 @@ float ClassifierLinear::Test(const fvec &sample )
 
 char *ClassifierLinear::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "");
 	switch(linearType)
 	{

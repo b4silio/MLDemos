@@ -122,7 +122,7 @@ void DynamicalLWPR::SetParams(double initD, double initAlpha, double wGen)
 
 char *DynamicalLWPR::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "Locally Weighted Projection Regression\n");
 	sprintf(text, "%sGeneration Threshold: %f\n", text, model->wGen());
 	sprintf(text, "%sLambda (start: %f end: %f)\n", text, model->initLambda(), model->finalLambda());

@@ -25,7 +25,7 @@ using namespace std;
 
 char *ClustererKKM::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "Kernel K-Means\n");
 	sprintf(text, "%sClusters: %d\n", text, clusters);
 	sprintf(text, "%sKernel: ", text);

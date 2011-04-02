@@ -25,7 +25,7 @@ using namespace std;
 
 char *ClassifierRVM::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "Relevance Vector Machine\n");
 	sprintf(text, "%sKernel: ", text);
 	switch(kernelType)

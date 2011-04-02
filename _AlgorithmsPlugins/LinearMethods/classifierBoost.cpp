@@ -325,7 +325,7 @@ void ClassifierBoost::SetParams( u32 weakCount, int weakType )
 
 char *ClassifierBoost::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "Boosting\n");
 	sprintf(text, "%sLearners Count: %d\n", text, weakCount);
 	sprintf(text, "%sLearners Type: ", text);

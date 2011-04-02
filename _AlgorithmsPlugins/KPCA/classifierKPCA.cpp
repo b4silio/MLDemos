@@ -163,7 +163,7 @@ void ClassifierKPCA::SetParams(int kernelType, int kernelDegree, float kernelGam
 
 char *ClassifierKPCA::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	/*
 	if(!svm) return NULL;
 	sprintf(text, "%s\n", param.svm_type == NU_SVC ? "nu-KPCA" : "C-KPCA");

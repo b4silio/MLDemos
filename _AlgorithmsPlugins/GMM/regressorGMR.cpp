@@ -76,7 +76,7 @@ void RegressorGMR::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 
 char *RegressorGMR::GetInfoString()
 {
-	char *text = new char[255];
+	char *text = new char[1024];
 	sprintf(text, "GMR\n");
 	sprintf(text, "%sMixture Components: %d\n", text, nbClusters);
 	sprintf(text, "%sCovariance Type: ", text);
