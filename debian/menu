@@ -1,0 +1,2 @@
+?package(mldemos):needs="X11" section="Applications/Science/Mathematics"\
+  title="MLDemos: Machine Learning Demos" command="/usr/bin/mldemos"
