@@ -1,0 +1,23 @@
+From: Barak A. Pearlmutter <barak+git@cs.nuim.ie>
+Date: Tue, 31 May 2011 09:07:33 +0100
+Subject: [PATCH] spelling errors
+
+well, just one for now
+---
+ _AlgorithmsPlugins/SEDS/SEDS.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/_AlgorithmsPlugins/SEDS/SEDS.cpp b/_AlgorithmsPlugins/SEDS/SEDS.cpp
+index 80b95e3..a7b3010 100644
+--- a/_AlgorithmsPlugins/SEDS/SEDS.cpp
++++ b/_AlgorithmsPlugins/SEDS/SEDS.cpp
+@@ -1139,7 +1139,7 @@ bool SEDS::CheckConstraints(Matrix * A){
+ 	}
+ 	
+ 	if(ver)
+-		cout<<"Optimization finished succesfully!"<<endl;
++		cout<<"Optimization finished successfully!"<<endl;
+ 	cout << endl;
+ 	
+ 	return true;
+-- 
