@@ -2,17 +2,16 @@ From: Barak A. Pearlmutter <barak+git@cs.nuim.ie>
 Date: Tue, 31 May 2011 09:07:33 +0100
 Subject: [PATCH] spelling errors
 
-just two for now
+just one for now
 ---
- MLDemos/mldemos.cpp              |    2 +-
- _AlgorithmsPlugins/SEDS/SEDS.cpp |    2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ MLDemos/mldemos.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/MLDemos/mldemos.cpp b/MLDemos/mldemos.cpp
-index dde26fa..faa3ffc 100644
+index 8c04505..6f7fff3 100644
 --- a/MLDemos/mldemos.cpp
 +++ b/MLDemos/mldemos.cpp
-@@ -147,7 +147,7 @@ void MLDemos::initToolBars()
+@@ -156,7 +156,7 @@ void MLDemos::initToolBars()
  
  	actionShowStats = new QAction(QIcon(":/MLDemos/icons/stats.png"), tr("Info/Statistics"), this);
      actionShowStats->setShortcut(QKeySequence(tr("I")));
@@ -21,17 +20,4 @@ index dde26fa..faa3ffc 100644
      actionShowStats->setCheckable(true);
  
      connect(actionClassifiers, SIGNAL(triggered()), this, SLOT(ShowOptionClass()));
-diff --git a/_AlgorithmsPlugins/SEDS/SEDS.cpp b/_AlgorithmsPlugins/SEDS/SEDS.cpp
-index 12ce7d1..4253243 100644
---- a/_AlgorithmsPlugins/SEDS/SEDS.cpp
-+++ b/_AlgorithmsPlugins/SEDS/SEDS.cpp
-@@ -1206,7 +1206,7 @@ bool SEDS::CheckConstraints(Matrix * A){
- 	}
- 	
- 	if(ver)
--		cout<<"Optimization finished succesfully!"<<endl;
-+		cout<<"Optimization finished successfully!"<<endl;
- 	cout << endl;
- 	
- 	return true;
 -- 
