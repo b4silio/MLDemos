@@ -1117,11 +1117,11 @@ void MLDemos::AlgoChanged()
 #endif
 	if(!helpDir.cd("help"))
 	{
-		qDebug() << "using alternative directory: " << alternativeDir.absolutePath();
+		//qDebug() << "using alternative directory: " << alternativeDir.absolutePath();
 		helpDir = alternativeDir;
 		if(!helpDir.cd("help")) return;
 	}
-	qDebug() << "using help directory: " << helpDir.absolutePath();
+	//qDebug() << "using help directory: " << helpDir.absolutePath();
 
 	QString filePath(helpDir.absolutePath() + "/" + infoFile);
 	//qDebug() << "loading info from: " << filePath;

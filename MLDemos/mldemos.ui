@@ -101,6 +101,8 @@
     <addaction name="separator"/>
     <addaction name="actionClearModel"/>
     <addaction name="actionClearData"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Toolbar"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="enabled">
@@ -258,6 +260,17 @@
   <action name="actionAsd">
    <property name="text">
     <string>none</string>
+   </property>
+  </action>
+  <action name="actionShow_Toolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Toolbar</string>
    </property>
   </action>
  </widget>

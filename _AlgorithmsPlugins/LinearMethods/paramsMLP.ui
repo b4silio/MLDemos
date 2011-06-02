@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>115</y>
+     <y>70</y>
      <width>101</width>
      <height>21</height>
     </rect>
@@ -35,7 +35,7 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>65</y>
+     <y>100</y>
      <width>62</width>
      <height>22</height>
     </rect>
@@ -58,7 +58,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>65</y>
+     <y>100</y>
      <width>31</width>
      <height>21</height>
     </rect>
@@ -76,7 +76,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>115</y>
+     <y>70</y>
      <width>101</width>
      <height>22</height>
     </rect>
@@ -99,7 +99,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>20</y>
+     <y>30</y>
      <width>41</width>
      <height>21</height>
     </rect>
@@ -121,7 +121,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>20</y>
+     <y>30</y>
      <width>61</width>
      <height>21</height>
     </rect>
@@ -139,7 +139,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>20</y>
+     <y>30</y>
      <width>51</width>
      <height>21</height>
     </rect>
@@ -157,7 +157,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>65</y>
+     <y>100</y>
      <width>62</width>
      <height>22</height>
     </rect>
@@ -180,7 +180,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>65</y>
+     <y>100</y>
      <width>31</width>
      <height>21</height>
     </rect>
@@ -198,7 +198,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>20</y>
+     <y>30</y>
      <width>51</width>
      <height>21</height>
     </rect>

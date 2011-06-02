@@ -77,6 +77,7 @@ using std::min;
 #define etoc ((u64)(cvGetTickCount()/cvGetTickFrequency()) - tic_time)
 
 //
+#include <string.h>
 static bool endsWith(const char *a,const char *b)
 {
 	bool yeah = true;

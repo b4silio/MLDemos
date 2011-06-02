@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>549</width>
+    <width>620</width>
     <height>193</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
   <widget class="QPushButton" name="targetButton">
    <property name="geometry">
     <rect>
-     <x>360</x>
+     <x>400</x>
      <y>80</y>
      <width>31</width>
      <height>31</height>
@@ -40,7 +40,7 @@
     <string>¤</string>
    </property>
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QTabWidget" name="tabWidget">
@@ -69,7 +69,7 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>430</x>
+     <x>500</x>
      <y>10</y>
      <width>110</width>
      <height>171</height>
@@ -133,7 +133,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Classify the data using the current algorithm&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Pause</string>
+       <string>Stop/Start</string>
       </property>
      </widget>
     </item>
@@ -176,9 +176,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>380</x>
      <y>120</y>
-     <width>71</width>
+     <width>80</width>
      <height>16</height>
     </rect>
    </property>

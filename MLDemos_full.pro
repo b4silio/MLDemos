@@ -25,7 +25,7 @@ Maximizers.file = $$ALGOPATH/Maximizers/pluginMaximizers.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-#SUBDIRS += PCAFaces RandomEmitter
+SUBDIRS += PCAFaces RandomEmitter
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro
 

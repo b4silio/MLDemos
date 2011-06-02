@@ -1,7 +1,31 @@
-<html>
-<body>
-This is basic information on the maximization process
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head><body>
+<h2>Basic Maximization of Reward<br>
+</h2>
 
-This is the text that Mohi wrote about SEDS
-</body>
-</html>
+
+<br>
+Here are presented some basic methods for exploring a policy space and maximizing an arbitrary reward function.<br>
+<br>
+Additional information on Policy learning by Weighting Exploration with the Returns (PoWER) can be found in <a href="http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/MACH_Kober_6802[0].pdf">this paper</a>. <br>
+<br>
+Methods:<br>
+<ul>
+  <li>Random Search: randomly sample new policies (points) and keep the maximum value found</li>
+  <li>Random Walk: explore the proximity of the starting point and follow the maximum value found</li>
+  <ul>
+    <li>Search Variance: variance of the normal distribution used for exploration</li>
+  </ul>
+  <li>PoWER: keep track of the best k policies, explore new samples
+following a distribution that can be adapted to the current best
+policies.</li>
+  <ul>
+    <li>Search Variance: initial variance for exploration</li>
+    <li>Adaptive: adapt search variance as a function of the current best policies</li>
+    <li>k: size of the set of policies kept for optimization<br>
+    </li>
+  </ul>
+</ul>
+</body></html>
