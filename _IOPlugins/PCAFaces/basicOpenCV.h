@@ -20,7 +20,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _BASICOPENCV_H_
 
 #include <vector>
-#include <types.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/video/tracking.hpp>
@@ -28,6 +27,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/legacy/legacy.hpp>
 #include <opencv2/legacy/compat.hpp>
+#include <types.h>
+#undef RGB
+#define RGB(image,i) (image->imageData[i])
 
 /* computes the point corresponding to a certain angle on an input image */
 #define calc_point(img, angle)                                      \
@@ -210,7 +212,7 @@ namespace BasicML
 		}
 		CvPoint *clusters = KmeansClustering(points, pointsCount, clusterCount, width, height);
 		//FOR(i,pointsCount)
-			//RGB(image, u32(points[i].y*width + points[i].x)) = ((u32)points[i].z + 1)*255/(clusterCount+1);
+                        //RGB(image, u32(points[i].y*width + points[i].x)) = ((u32)points[i].z + 1)*255/(clusterCount+1);
 		delete points;
 		return clusters;
 	}

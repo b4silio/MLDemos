@@ -101,8 +101,9 @@ void DrawTimer::run()
 			emit MapReady(bigMap);
 			if(dynamical && (*dynamical))  emit ModelReady(modelMap);
 		}
-		qApp->processEvents();
+                //qApp->processEvents();
 		drawMutex.unlock();
+                this->msleep(10);
 	}
 	bRunning = false;
 }
@@ -258,7 +259,8 @@ void DrawTimer::Test(int start, int stop)
 	{
 		int x = perm[i]%w;
 		int y = perm[i]/w;
-		sample = canvas->toSampleCoords(x,y);
+                if(x >= bigMap.width() || y >= bigMap.height()) continue;
+                sample = canvas->toSampleCoords(x,y);
 		fvec val;
 		float v;
 		QMutexLocker lock(mutex);
@@ -372,6 +374,7 @@ void DrawTimer::TestFast(int start, int stop)
 	{
 		int x = perm[i]%w;
 		int y = perm[i]/w;
+                if(x >= bigMap.width() || y >= bigMap.height()) continue;
 		sample = canvas->fromCanvas(x,y);
 		fVec val;
 		float v;

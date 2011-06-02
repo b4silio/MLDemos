@@ -54,7 +54,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <property name="currentIndex">
@@ -77,7 +77,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <layout class="QVBoxLayout">
@@ -85,7 +85,7 @@
      <spacer name="spacer_2">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -103,7 +103,7 @@
      <widget class="QPushButton" name="maximizeButton">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -122,7 +122,7 @@ p, li { white-space: pre-wrap; }
      <widget class="QPushButton" name="pauseButton">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -141,7 +141,7 @@ p, li { white-space: pre-wrap; }
      <widget class="QPushButton" name="clearButton">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -157,7 +157,7 @@ p, li { white-space: pre-wrap; }
      <spacer name="spacer">
       <property name="font">
        <font>
-        <pointsize>9</pointsize>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -184,7 +184,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
-     <pointsize>9</pointsize>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <property name="text">

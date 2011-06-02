@@ -90,6 +90,7 @@ HEADERS += basicMath.h \
 	maximize.h \
 	dynamical.h \
     clusterer.h
+
 SOURCES += canvas.cpp \
     datasetManager.cpp \
     drawUtils.cpp \
