@@ -41,6 +41,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Kernel");};
+	QString GetInfoFile(){return "kernelDynamic.html";};
 	bool UsesDrawTimer(){return true;};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Dynamical *dynamical);

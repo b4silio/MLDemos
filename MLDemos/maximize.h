@@ -1,0 +1,60 @@
+/*********************************************************************
+MLDemos: A User-Friendly visualization toolkit for machine learning
+Copyright (C) 2010  Basilio Noris
+Contact: mldemos@b4silio.com
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License,
+version 3 as published by the Free Software Foundation.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free
+Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*********************************************************************/
+#ifndef _MAXIMIZE_H_
+#define _MAXIMIZE_H_
+
+#include <vector>
+#include "public.h"
+#include "mymaths.h"
+#include <QPainter>
+
+class Maximizer
+{
+protected:
+	u32 dim;
+	int w, h;
+	bool bIterative;
+	bool bConverged;
+	fvec maximum;
+	std::vector< fvec > visited;
+	std::vector< fvec > history;
+	std::vector<double> historyValue;
+	double maximumValue;
+	float *data;
+
+public:
+
+	Maximizer() : dim(2), bIterative(false) , bConverged(true), data(NULL), w(1), h(1), maximumValue(-FLT_MAX){ maximum.resize(2);};
+	~Maximizer(){if(data) delete [] data;};
+	void Maximize(float *dataMap, int w, int h) {Train(dataMap,fVec(w,h));};
+	bool hasConverged(){return bConverged;};
+	void SetConverged(bool converged){bConverged = converged;};
+	std::vector<fvec> &History(){return history;};
+	std::vector<double> &HistoryValue(){return historyValue;};
+	fvec &Maximum(){return maximum;};
+	std::vector<fvec> &Visited(){return visited;};
+
+	virtual void Draw(QPainter &painter){};
+	virtual void Train(float *dataMap, fVec size, fvec startingPoint=fvec()){};
+	virtual fvec Test( const fvec &sample){ return fvec(); };
+	virtual fvec Test(const fVec &sample){ return Test((fvec)sample); };
+	virtual char *GetInfoString(){return NULL;};
+};
+
+#endif // _MAXIMIZE_H_

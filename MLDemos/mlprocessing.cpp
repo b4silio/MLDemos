@@ -19,11 +19,11 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "mldemos.h"
 #include "basicMath.h"
-#include "basicOpenCV.h"
 #include "classifier.h"
 #include "regressor.h"
 #include "dynamical.h"
 #include "clusterer.h"
+#include "maximize.h"
 #include "roc.h"
 #include <QDebug>
 #include <fstream>
@@ -43,7 +43,8 @@ void MLDemos::Classify()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-    int tab = optionsClassify->tabWidget->currentIndex();
+	DEL(maximizer);
+	int tab = optionsClassify->tabWidget->currentIndex();
     if(tab >= classifiers.size() || !classifiers[tab]) return;
     classifier = classifiers[tab]->GetClassifier();
     tabUsedForTraining = tab;
@@ -52,11 +53,9 @@ void MLDemos::Classify()
     float trainRatio = ratios[ratioIndex];
     int positive = optionsClassify->positiveSpin->value();
 
-    if(drawTimer)
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
+	drawTimer->Stop();
+	drawTimer->Clear();
+
     bool trained = Train(classifier, positive, trainRatio);
     if(trained)
     {
@@ -86,7 +85,8 @@ void MLDemos::ClassifyCross()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-    int tab = optionsClassify->tabWidget->currentIndex();
+	DEL(maximizer);
+	int tab = optionsClassify->tabWidget->currentIndex();
     if(tab >= classifiers.size() || !classifiers[tab]) return;
     tabUsedForTraining = tab;
 
@@ -129,7 +129,8 @@ void MLDemos::Regression()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-    int tab = optionsRegress->tabWidget->currentIndex();
+	DEL(maximizer);
+	int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
     regressor = regressors[tab]->GetRegressor();
     tabUsedForTraining = tab;
@@ -138,11 +139,9 @@ void MLDemos::Regression()
     int ratioIndex = optionsRegress->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
 
-    if(drawTimer)
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
+	drawTimer->Stop();
+	drawTimer->Clear();
+
     Train(regressor, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
     UpdateInfo();
@@ -157,7 +156,8 @@ void MLDemos::RegressionCross()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-    int tab = optionsRegress->tabWidget->currentIndex();
+	DEL(maximizer);
+	int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
     regressor = regressors[tab]->GetRegressor();
     tabUsedForTraining = tab;
@@ -186,11 +186,9 @@ void MLDemos::RegressionCross()
     }
     regressor->crossval = errors;
     ShowCross();
-    if(drawTimer)
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
+	drawTimer->Stop();
+	drawTimer->Clear();
+
     Train(regressor, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
     UpdateInfo();
@@ -205,16 +203,15 @@ void MLDemos::Dynamize()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-    int tab = optionsDynamic->tabWidget->currentIndex();
+	DEL(maximizer);
+	int tab = optionsDynamic->tabWidget->currentIndex();
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     dynamical = dynamicals[tab]->GetDynamical();
     tabUsedForTraining = tab;
 
-    if(drawTimer)
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
+	drawTimer->Stop();
+	drawTimer->Clear();
+
     Train(dynamical);
     dynamicals[tab]->Draw(canvas,dynamical);
 
@@ -226,11 +223,7 @@ void MLDemos::Dynamize()
 		dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
     }
 
-    if(drawTimer)
-    {
-        if(dynamicals[tab]->UsesDrawTimer())
-            drawTimer->start(QThread::NormalPriority);
-    }
+	if(dynamicals[tab]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
     UpdateInfo();
 }
 
@@ -256,16 +249,14 @@ void MLDemos::Cluster()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-    int tab = optionsCluster->tabWidget->currentIndex();
+	DEL(maximizer);
+	int tab = optionsCluster->tabWidget->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
     Train(clusterer);
-    if(drawTimer)
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
+	drawTimer->Stop();
+	drawTimer->Clear();
     clusterers[tab]->Draw(canvas,clusterer);
     UpdateInfo();
 }
@@ -287,6 +278,46 @@ void MLDemos::ClusterIterate()
     Train(clusterer);
     clusterers[tab]->Draw(canvas,clusterer);
     UpdateInfo();
+}
+
+void MLDemos::Maximize()
+{
+	if(!canvas) return;
+	if(canvas->rewardPixmap.isNull()) return;
+	QMutexLocker lock(&mutex);
+	drawTimer->Stop();
+	DEL(clusterer);
+	DEL(regressor);
+	DEL(dynamical);
+	DEL(classifier);
+	DEL(maximizer);
+	int tab = optionsMaximize->tabWidget->currentIndex();
+	if(tab >= maximizers.size() || !maximizers[tab]) return;
+	maximizer = maximizers[tab]->GetMaximizer();
+	tabUsedForTraining = tab;
+	Train(maximizer);
+
+	drawTimer->Stop();
+	drawTimer->Clear();
+	drawTimer->start(QThread::NormalPriority);
+	UpdateInfo();
+}
+
+void MLDemos::MaximizeContinue()
+{
+	if(!canvas || !maximizer) return;
+	QMutexLocker lock(&mutex);
+	if(drawTimer)
+	{
+		drawTimer->Stop();
+	}
+	maximizer->SetConverged(!maximizer->hasConverged());
+
+	if(drawTimer)
+	{
+		drawTimer->start(QThread::NormalPriority);
+	}
+	UpdateInfo();
 }
 
 bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
@@ -588,9 +619,35 @@ void MLDemos::Train(Clusterer *clusterer)
     clusterer->Train(canvas->data->GetSamples());
 }
 
+void MLDemos::Train(Maximizer *maximizer)
+{
+	if(!maximizer) return;
+	if(canvas->rewardPixmap.isNull()) return;
+	QImage rewardImage = canvas->rewardPixmap.toImage();
+	QRgb *pixels = (QRgb*) rewardImage.bits();
+	int w = rewardImage.width();
+	int h = rewardImage.height();
+	float *data = new float[w*h];
+
+	FOR(i, w*h)
+	{
+		data[i] = qRed(pixels[i]) / 255.f; // all data is in a 0-1 range
+	}
+	fvec startingPoint;
+	if(canvas->targets.size())
+	{
+		startingPoint = canvas->targets[canvas->targets.size()-1];
+		QPointF starting = canvas->toCanvasCoords(startingPoint);
+		startingPoint[0] = starting.x()/w;
+		startingPoint[1] = starting.y()/h;
+	}
+	maximizer->Train(data, fVec(w,h), startingPoint);
+	delete [] data;
+}
+
 void MLDemos::ExportOutput()
 {
-    if(!classifier && !regressor && !clusterer) return;
+	if(!classifier && !regressor && !clusterer && !dynamical && !maximizer) return;
     // get a file
 }
 

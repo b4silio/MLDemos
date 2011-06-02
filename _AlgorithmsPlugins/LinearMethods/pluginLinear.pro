@@ -8,6 +8,28 @@ MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
 
+# opencv includes
+win32{
+INCLUDEPATH += . \
+	"C:/Program Files/OpenCV2.0/include/"
+LIBS += -L"C:/Progra~1/OpenCV2.0/lib/"
+LIBS += -lcv200 \
+	-lcxcore200 \
+	-lcvaux200 \
+	-lhighgui200 \
+	-lml200
+}else{
+INCLUDEPATH += /usr/local/include/
+LIBS += -L/usr/local/lib
+LIBS += \
+	-lopencv_core \
+	-lopencv_features2d \
+	-lopencv_highgui \
+	-lopencv_imgproc \
+	-lopencv_legacy \
+	-lopencv_ml \
+}
+
 ###########################
 # Source Files            #
 ###########################
@@ -16,7 +38,7 @@ HEADERS +=	\
 			$$MLDEMOS/canvas.h \
 			$$MLDEMOS/datasetManager.h \
 			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/basicOpenCV.h \
+			basicOpenCV.h \
 			classifierBoost.h \
 			classifierLinear.h \
 			classifierMLP.h \
@@ -36,7 +58,7 @@ SOURCES += 	\
 			$$MLDEMOS/canvas.cpp \
 			$$MLDEMOS/datasetManager.cpp \
 			$$MLDEMOS/mymaths.cpp \
-			$$MLDEMOS/basicOpenCV.cpp \
+			basicOpenCV.cpp \
 			classifierBoost.cpp \
 			classifierLinear.cpp \
 			classifierMLP.cpp \

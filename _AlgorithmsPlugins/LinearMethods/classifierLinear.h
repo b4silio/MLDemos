@@ -20,15 +20,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLASSIFIER_LINEAR_H_
 
 #include <vector>
+#include <mymaths.h>
 #include "classifier.h"
 #include "basicMath.h"
+#include "basicOpenCV.h"
 
 class ClassifierLinear : public Classifier
 {
 private:
 	fvec meanPos, meanNeg;
 	int linearType;
-	cvVec2 W;
+	fVec W;
 	int threshold;
 	double* Transf;
 
@@ -46,7 +48,7 @@ public:
 	fvec InvProject(const fvec &sample);
 	void SetParams(u32 linearType);
 	fvec GetMean(bool positive=true){return positive ? meanPos : meanNeg;};
-	cvVec2 GetW(){return W;};
+	fVec GetW(){return W;};
 	int GetType(){return linearType;};
 };
 

@@ -22,15 +22,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef std::pair<float, float> f32pair;
 typedef std::vector<f32pair> rocData;
 
+/*
 IplImage *GetRocImage();
 void roc_on_mouse( int event, int x, int y, int flags, void* param );
-
+IplImage *RocImage(std::vector<std::vector<f32pair> > dataVector, std::vector<char *> legend = std::vector<char *>(), CvSize res = cvSize(512,512));
 void RocCurve(std::vector<f32pair> data);
 void RocCurves(std::vector<std::vector<f32pair> > dataVector, std::vector<char *> legend = std::vector<char *>());
-IplImage *RocImage(std::vector<std::vector<f32pair> > dataVector, std::vector<char *> legend = std::vector<char *>(), CvSize res = cvSize(512,512));
+void SaveRocImage(const char *filename);
+*/
+
 void SaveRoc(std::vector<f32pair> data, const char *filename);
 std::vector<f32pair> LoadRoc(const char *filename);
-void SaveRocImage(const char *filename);
 
 std::vector<float> GetBestFMeasures();
 float GetBestThreshold(std::vector<f32pair> data);

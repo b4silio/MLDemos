@@ -40,6 +40,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("KMeans");};
+	QString GetInfoFile(){return "kmeans.html";};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);

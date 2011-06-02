@@ -19,11 +19,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "mldemos.h"
 #include "basicMath.h"
-#include "basicOpenCV.h"
 #include "classifier.h"
 #include "regressor.h"
 #include "clusterer.h"
-#include "roc.h"
 #include <QDebug>
 #include <fstream>
 #include <QPixmap>
@@ -47,9 +45,9 @@ void MLDemos::MouseOnRoc(QMouseEvent *event)
 		e = CV_EVENT_RBUTTONUP;
 		break;
 	}
-	roc_on_mouse(e, event->x(), event->y(), 0, 0);
-	rocWidget->ShowImage(GetRocImage());
-	statsDialog->repaint();
+	//roc_on_mouse(e, event->x(), event->y(), 0, 0);
+	//rocWidget->ShowImage(GetRocImage());
+	//statsDialog->repaint();
 }
 
 QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const char *> roclabels, QSize size)
@@ -74,7 +72,7 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 		std::sort(data.begin(), data.end());
 
 		std::vector<fvec> allData;
-		cvVec2 oldVal(1,0);
+		fVec oldVal(1,0);
 		FOR(i, data.size())
 		{
 			float thresh = data[i].first;
@@ -94,11 +92,11 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 					else tn++;
 				}
 			}
-			cvVec2 val;
+			fVec val;
 			float fmeasure = 0;
 			if((fp+tn)>0 && (tp+fn)>0 && (tp+fp)>0)
 			{
-				val=cvVec2(fp/float(fp+tn), 1 - tp/float(tp+fn));
+				val=fVec(fp/float(fp+tn), 1 - tp/float(tp+fn));
 				float precision = tp / float(tp+fp);
 				float recall = tp /float(tp+fn);
 				fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
@@ -116,14 +114,14 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 
 		painter.setPen(QColor(color,color,color));
 		// we highlight the current roc curve
-		cvVec2 pt1, pt2;
+		fVec pt1, pt2;
 		FOR(i, allData.size()-1)
 		{
-			pt1 = cvVec2(allData[i][0]*size.width(), allData[i][1]*size.height());
-			pt2 = cvVec2(allData[i+1][0]*size.width(), allData[i+1][1]*size.height());
+			pt1 = fVec(allData[i][0]*size.width(), allData[i][1]*size.height());
+			pt2 = fVec(allData[i+1][0]*size.width(), allData[i+1][1]*size.height());
 			painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
 		}
-		pt1 = cvVec2(0,size.width());
+		pt1 = fVec(0,size.width());
 		painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
 
 		//cvDrawLine(roc, cvPoint(0 + PAD,resolution.height + PAD), cvPoint(oldVal.x*resolution.width+vpad.x,oldVal.y*resolution.height+vpad.y), color);

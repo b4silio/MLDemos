@@ -23,13 +23,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <regressor.h>
 #include "SOGP.h"
 #include "basicMath.h"
+#include <mymaths.h>
 
 class RegressorGPR : public Regressor
 {
 private:
 	int dim;
 	bool bTrained;
-	std::vector<cvVec2> bv;
+	std::vector<fVec> bv;
 	double param1, param2;
 	int kernelType;
 	int degree;

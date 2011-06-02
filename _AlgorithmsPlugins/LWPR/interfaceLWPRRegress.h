@@ -40,6 +40,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("LWPR");};
+	QString GetInfoFile(){return "lwpr.html";};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Regressor *regressor);
 	void SaveOptions(QSettings &settings);

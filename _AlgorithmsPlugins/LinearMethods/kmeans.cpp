@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "basicMath.h"
 #include "basicOpenCV.h"
+#include <mymaths.h>
 #include "kmeans.h"
 
 using namespace std;

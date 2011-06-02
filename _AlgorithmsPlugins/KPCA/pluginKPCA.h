@@ -39,6 +39,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("KPCA");};
+	QString GetInfoFile(){return "kpca.html";};
 	bool UsesDrawTimer(){return false;};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Classifier *classifier);

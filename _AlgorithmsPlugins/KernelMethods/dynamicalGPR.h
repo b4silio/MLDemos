@@ -22,7 +22,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include "dynamical.h"
 #include "SOGP.h"
-#include "basicMath.h"
+#include <basicMath.h>
+#include <mymaths.h>
 
 class DynamicalGPR : public Dynamical
 {
@@ -30,7 +31,7 @@ private:
 	int dim;
 	SOGP *sogp;
 	bool bTrained;
-	std::vector<cvVec2> bv;
+	std::vector<fVec> bv;
 	double param1, param2;
 	int kernelType;
 	int degree;

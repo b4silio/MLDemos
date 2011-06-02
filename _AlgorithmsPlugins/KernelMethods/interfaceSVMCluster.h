@@ -41,6 +41,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Kernel");};
+	QString GetInfoFile(){return "kernelClust.html";};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);

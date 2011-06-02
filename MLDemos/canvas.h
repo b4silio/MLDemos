@@ -41,14 +41,18 @@ public:
 	void DrawSamples();
 	void DrawObstacles();
 	void DrawTrajectories();
+	void DrawRewards();
+	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
 	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0;};
 	void FitToData();
 	void RedrawAxes();
+	void PaintReward(fvec sample, float radius, float shift);
 	bool bDrawing;
 	QPainterPath DrawObstacle(Obstacle o);
 	fVec center;
 	float zoom;
+	std::vector<fvec> targets;
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -59,10 +63,13 @@ protected:
 	void enterEvent(QEvent *event);
 	void focusOutEvent(QFocusEvent *event);
 	void leaveEvent(QEvent *event);
+	void dragEnterEvent(QDragEnterEvent *);
+	void dropEvent(QDropEvent *);
 
 public:
 	DatasetManager *data;
 	QPixmap confidencePixmap;
+	QPixmap rewardPixmap;
 	QPixmap modelPixmap;
 	QPixmap infoPixmap;
 	QPixmap gridPixmap;
@@ -111,6 +118,7 @@ signals:
 	void Navigation(fvec sample);
 
 public:
+	/*
 	static QPixmap toPixmap(IplImage *src)
 	{
 		QPixmap pixmap;
@@ -128,6 +136,7 @@ public:
 		}
 		return pixmap;
 	}
+	*/
 	static void drawCross(QPainter &painter, QPointF point, float radius, int label)
 	{
 		float x = point.x();

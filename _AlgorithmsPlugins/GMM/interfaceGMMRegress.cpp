@@ -104,25 +104,22 @@ void RegrGMM::Draw(Canvas *canvas, Regressor *regressor)
 
 	RegressorGMR *gmr = ((RegressorGMR *)regressor);
 
-	IplImage *image = cvCreateImage(cvSize(w,h), 8, 3);
-	cvSet(image, CV_RGB(255,255,255));
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
+	QImage density(QSize(256,256), QImage::Format_RGB32);
+	density.fill(0);
 	// we draw a density map for the probability
 	float sigma[4];
-	for (int i=0; i < density->width; i++)
+	for (int i=0; i < density.width(); i++)
 	{
-		for (int j=0; j< density->height; j++)
+		for (int j=0; j< density.height(); j++)
 		{
-			sample = canvas->toSampleCoords(i*w/density->width,j*h/density->height);
+			sample = canvas->toSampleCoords(i*w/density.width(),j*h/density.height());
 			float val = gmr->gmm->pdf(&sample[0]);
-			cvSet2D(density, j, i, cvScalarAll(128 + val*10));
+			int color = min(255,(int)(128 + val*10));
+			density.setPixel(i,j, qRgb(color,color,color));
 		}
 	}
-	cvResize(density, image, CV_INTER_CUBIC);
-	IMKILL(density);
-	canvas->confidencePixmap = Canvas::toPixmap(image);
-	IMKILL(image);
+	canvas->confidencePixmap = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);

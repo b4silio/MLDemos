@@ -80,10 +80,7 @@ void RegrKNN::Draw(Canvas *canvas, Regressor *regressor)
 
 	fvec sample;
 	sample.resize(2,0);
-	IplImage *image = cvCreateImage(cvSize(w,h), 8, 3);
-	cvSet(image, CV_RGB(255,255,255));
-	canvas->confidencePixmap = Canvas::toPixmap(image);
-	IMKILL(image);
+	canvas->confidencePixmap.fill();
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);

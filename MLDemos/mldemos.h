@@ -31,12 +31,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_optsClassify.h"
 #include "ui_optsCluster.h"
 #include "ui_optsRegress.h"
+#include "ui_optsMaximize.h"
 #include "ui_optsDynamic.h"
 #include "ui_statisticsDialog.h"
 #include "ui_drawingTools.h"
 #include "ui_drawingToolsContext1.h"
 #include "ui_drawingToolsContext2.h"
 #include "ui_drawingToolsContext3.h"
+#include "ui_drawingToolsContext4.h"
 
 #include "canvas.h"
 #include "classifier.h"
@@ -60,7 +62,7 @@ private:
 
 	QDialog *displayDialog, *about, *statsDialog;
 
-	QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget;
+	QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget;
 
 	QNamedWindow *rocWidget, *crossvalidWidget, *infoWidget;
 
@@ -72,13 +74,16 @@ private:
 	Ui::optionsClassifyWidget *optionsClassify;
 	Ui::optionsClusterWidget *optionsCluster;
 	Ui::optionsRegressWidget *optionsRegress;
+	Ui::optionsMaximizeWidget *optionsMaximize;
 	Ui::optionsDynamicWidget *optionsDynamic;
 	Ui::DrawingToolbar *drawToolbar;
 	Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
 	Ui::DrawingToolbarContext3 *drawToolbarContext3;
+	Ui::DrawingToolbarContext4 *drawToolbarContext4;
 	QWidget *drawToolbarWidget;
-	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget;
+	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget, *drawContext4Widget;
+	QToolBar *toolBar;
 
 	DrawTimer *drawTimer;
 	QTime drawTime;
@@ -97,12 +102,15 @@ private:
 	void Draw(Dynamical *dynamical);
 	void Train(Clusterer *clusterer);
 	void Draw(Clusterer *clusterer);
+	void Train(Maximizer *maximizer);
+	void Draw(Maximizer *maximizer);
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
 	QList<RegressorInterface *> regressors;
 	QList<DynamicalInterface *> dynamicals;
 	QList<AvoidanceInterface *> avoiders;
+	QList<MaximizeInterface*> maximizers;
 	QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
 	void AddPlugin(ClassifierInterface *iClassifier, const char *method);
@@ -110,6 +118,7 @@ private:
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
 	void AddPlugin(DynamicalInterface *iDynamical, const char *method);
 	void AddPlugin(AvoidanceInterface *iAvoid, const char *method);
+	void AddPlugin(MaximizeInterface *iMaximize, const char *method);
 	void AddPlugin(InputOutputInterface *iIO);
 
 	void initDialogs();
@@ -136,6 +145,7 @@ public:
 	Regressor *regressor;
 	Dynamical *dynamical;
 	Clusterer *clusterer;
+	Maximizer *maximizer;
 	QMutex mutex;
 	void resizeEvent( QResizeEvent *event );
 	void dragEnterEvent(QDragEnterEvent *event);
@@ -149,6 +159,7 @@ public slots:
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);
 	void QueryClusterer(std::vector<fvec> samples);
+	void QueryMaximizer(std::vector<fvec> samples);
 
 private slots:
 	void ShowAbout();
@@ -156,16 +167,20 @@ private slots:
 	void ShowOptionRegress();
 	void ShowOptionDynamical();
 	void ShowOptionCluster();
+	void ShowOptionMaximize();
 	void ShowSampleDrawing();
 	void ShowOptionDisplay();
 	void ShowStatsDialog();
+	void ShowToolbar();
 	void HideOptionClass();
 	void HideOptionRegress();
 	void HideOptionDynamical();
 	void HideOptionCluster();
+	void HideOptionMaximize();
 	void HideSampleDrawing();
 	void HideOptionDisplay();
 	void HideStatsDialog();
+	void HideToolbar();
 	void AvoidOptionChanged();
 	void DisplayOptionChanged();
 	void ActivateIO();
@@ -175,6 +190,8 @@ private slots:
 	void ClassifyCross();
 	void Regression();
 	void RegressionCross();
+	void Maximize();
+	void MaximizeContinue();
 	void Dynamize();
 	void Cluster();
 	void ClusterIterate();
@@ -197,6 +214,7 @@ private slots:
 	void DrawEllipse();
 	void DrawErase();
 	void DrawObstacle();
+	void DrawPaint();
 	void Drawing(fvec sample, int label);
 	void DrawingStopped();
 
@@ -210,12 +228,15 @@ private slots:
 	void ShowCross();
 	void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
+	void AlgoChanged();
+	void TargetButton();
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);
 	void ShowContextMenuEllipse(const QPoint &point);
 	void ShowContextMenuErase(const QPoint &point);
 	void ShowContextMenuObstacle(const QPoint &point);
+	void ShowContextMenuReward(const QPoint &point);
 	void FocusChanged(QWidget *old, QWidget *now);
 	void HideContextMenus();
 };

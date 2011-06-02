@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _KMEANS_H_
 
 #include <vector>
+#include "basicOpenCV.h"
 
 struct ClusterPoint{
 	fvec point;

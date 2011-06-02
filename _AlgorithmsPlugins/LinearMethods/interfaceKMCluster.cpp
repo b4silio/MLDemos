@@ -91,15 +91,14 @@ void ClustKM::Draw(Canvas *canvas, Clusterer *clusterer)
 
 	if(bDrawConfidence)
 	{
-		IplImage *image = NULL;
-		image = cvCreateImage(cvSize(w,h), 8, 3);
-		cvSet(image, CV_RGB(255,255,255));
+		QImage pixels(QSize(canvas->width(), canvas->height()), QImage::Format_RGB32);
+		pixels.fill(0xffffff);
 
 		fvec sample;
 		sample.resize(2,0);
-		FOR(y, image->height)
+		FOR(y, pixels.height())
 		{
-			FOR(x, image->width)
+			FOR(x, pixels.width())
 			{
 				sample = canvas->toSampleCoords(x,y);
 				fvec res = clusterer->Test(sample);
@@ -108,9 +107,9 @@ void ClustKM::Draw(Canvas *canvas, Clusterer *clusterer)
 				{
 					FOR(i, res.size())
 					{
-						r += CV::color[(i+1)%CV::colorCnt].val[0]*res[i];
-						g += CV::color[(i+1)%CV::colorCnt].val[1]*res[i];
-						b += CV::color[(i+1)%CV::colorCnt].val[2]*res[i];
+						r += CVColor[(i+1)%CVColorCnt].red()*res[i];
+						g += CVColor[(i+1)%CVColorCnt].green()*res[i];
+						b += CVColor[(i+1)%CVColorCnt].blue()*res[i];
 					}
 				}
 				else if(res.size())
@@ -119,17 +118,11 @@ void ClustKM::Draw(Canvas *canvas, Clusterer *clusterer)
 					g = (1-res[0])*255;
 					b = (1-res[0])*255;
 				}
-				image->imageData[y*image->widthStep + x*3 + 2] = (u8)r;
-				image->imageData[y*image->widthStep + x*3 + 1] = (u8)g;
-				image->imageData[y*image->widthStep + x*3 + 0] = (u8)b;
+				if( r < 10 && g < 10 && b < 10) r = b = g = 255;
+				pixels.setPixel(x,y,qRgb(r,g,b));
 			}
 		}
-
-		IplImage *big = cvCreateImage(cvSize(canvas->width(), canvas->height()),8,3);
-		cvResize(image, big, CV_INTER_CUBIC);
-		canvas->confidencePixmap = Canvas::toPixmap(big);
-		IMKILL(image);
-		IMKILL(big);
+		canvas->confidencePixmap = QPixmap::fromImage(pixels);
 	}
 	else
 	{
@@ -154,9 +147,9 @@ void ClustKM::Draw(Canvas *canvas, Clusterer *clusterer)
 		{
 			FOR(j, res.size())
 			{
-				r += CV::color[(j+1)%CV::colorCnt].val[0]*res[j];
-				g += CV::color[(j+1)%CV::colorCnt].val[1]*res[j];
-				b += CV::color[(j+1)%CV::colorCnt].val[2]*res[j];
+				r += CVColor[(j+1)%CVColorCnt].red()*res[j];
+				g += CVColor[(j+1)%CVColorCnt].green()*res[j];
+				b += CVColor[(j+1)%CVColorCnt].blue()*res[j];
 			}
 		}
 		else if(res.size())

@@ -18,7 +18,6 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
-#include "basicOpenCV.h"
 #include "regressorGMR.h"
 
 using namespace std;
@@ -28,7 +27,7 @@ void RegressorGMR::Train(std::vector< fvec > samples, ivec labels)
 	if(!samples.size()) return;
 	int dim = samples[0].size();
 	DEL(gmm);
-        nbClusters = min((int)nbClusters, (int)samples.size());
+	nbClusters = min((int)nbClusters, (int)samples.size());
 	gmm = new Gmm(nbClusters, dim);
 	KILL(data);
 	data = new float[samples.size()*dim];

@@ -32,8 +32,9 @@ using namespace std;
 
 void MLDemos::SaveLayoutOptions()
 {
-	QCoreApplication::setOrganizationName("LASA");
-	QCoreApplication::setApplicationName("MachineLearning");
+	QCoreApplication::setOrganizationDomain("b4silio");
+	QCoreApplication::setOrganizationName("b4silio");
+	QCoreApplication::setApplicationName("MLDemos");
 
 	QSettings settings;
 	settings.beginGroup("Gui");
@@ -74,6 +75,8 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("spinObsPowerY", drawToolbarContext3->spinPowerY->value());
 	settings.setValue("spinObsRepulsionX", drawToolbarContext3->spinRepulsionX->value());
 	settings.setValue("spinObsRepulsionY", drawToolbarContext3->spinRepulsionY->value());
+	settings.setValue("spinRadius", drawToolbarContext4->spinRadius->value());
+	settings.setValue("spinAlpha", drawToolbarContext4->spinAlpha->value());
 	settings.setValue("eraseCheck", drawToolbar->eraseButton->isChecked());
 	settings.setValue("sprayCheck", drawToolbar->sprayButton->isChecked());
 	settings.setValue("singleCheck", drawToolbar->singleButton->isChecked());
@@ -81,6 +84,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("lineCheck", drawToolbar->lineButton->isChecked());
 	settings.setValue("trajectoryCheck", drawToolbar->trajectoryButton->isChecked());
 	settings.setValue("obstacleCheck", drawToolbar->obstacleButton->isChecked());
+	settings.setValue("paintCheck", drawToolbar->paintButton->isChecked());
 	settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
 	settings.endGroup();
 
@@ -143,24 +147,33 @@ void MLDemos::SaveLayoutOptions()
 		dynamicals[i]->SaveOptions(settings);
 		settings.endGroup();
 	}
+	FOR(i,maximizers.size())
+	{
+		if(!maximizers[i]) continue;
+		settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
+		maximizers[i]->SaveOptions(settings);
+		settings.endGroup();
+	}
 }
 
 void MLDemos::LoadLayoutOptions()
 {
-	QCoreApplication::setOrganizationName("LASA");
-	QCoreApplication::setApplicationName("MachineLearning");
+	QCoreApplication::setOrganizationDomain("b4silio");
+	QCoreApplication::setOrganizationName("b4silio");
+	QCoreApplication::setApplicationName("MLDemos");
 
 	QSettings settings;
 	settings.beginGroup("Gui");
 	if(settings.contains("geometry")) restoreGeometry(settings.value("geometry").toByteArray());
-#ifdef MACX // ugly hack to avoid resizing problems on the mac
-	if(height() < 600) resize(width(),600);
-#endif // MACX
 	if(settings.contains("windowState")) restoreState(settings.value("windowState").toByteArray());
 	if(settings.contains("algoGeometry")) algorithmWidget->restoreGeometry(settings.value("algoGeometry").toByteArray());
 	if(settings.contains("drawGeometry")) drawToolbarWidget->restoreGeometry(settings.value("drawGeometry").toByteArray());
 	if(settings.contains("displayGeometry")) displayDialog->restoreGeometry(settings.value("displayGeometry").toByteArray());
 	if(settings.contains("statsGeometry")) statsDialog->restoreGeometry(settings.value("statsGeometry").toByteArray());
+#ifdef MACX // ugly hack to avoid resizing problems on the mac
+	if(height() < 400) resize(width(),400);
+	if(algorithmWidget->height() < 220) algorithmWidget->resize(636,220);
+#endif // MACX
 
 	if(settings.contains("algoTab")) algorithmOptions->tabWidget->setCurrentIndex(settings.value("algoTab").toInt());
 	if(settings.contains("ShowAlgoOptions")) algorithmWidget->setVisible(settings.value("ShowAlgoOptions").toBool());
@@ -175,6 +188,7 @@ void MLDemos::LoadLayoutOptions()
 	actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClust);
 	actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
 	actionDisplayOptions->setChecked(displayDialog->isVisible());
+	actionShowStats->setChecked(statsDialog->isVisible());
 
 	settings.beginGroup("displayOptions");
 	if(settings.contains("infoCheck")) displayOptions->infoCheck->setChecked(settings.value("infoCheck").toBool());
@@ -199,6 +213,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("spinObsPowerY")) drawToolbarContext3->spinPowerY->setValue(settings.value("spinObsPowerY").toInt());
 	if(settings.contains("spinObsRepulsionX")) drawToolbarContext3->spinRepulsionX->setValue(settings.value("spinObsRepulsionX").toFloat());
 	if(settings.contains("spinObsRepulsionY")) drawToolbarContext3->spinRepulsionY->setValue(settings.value("spinObsRepulsionY").toFloat());
+	if(settings.contains("spinRadius")) drawToolbarContext4->spinRadius->setValue(settings.value("spinRadius").toFloat());
+	if(settings.contains("spinAlpha")) drawToolbarContext4->spinAlpha->setValue(settings.value("spinAlpha").toFloat());
 	if(settings.contains("eraseCheck")) drawToolbar->eraseButton->setChecked(settings.value("eraseCheck").toBool());
 	if(settings.contains("sprayCheck")) drawToolbar->sprayButton->setChecked(settings.value("sprayCheck").toBool());
 	if(settings.contains("singleCheck")) drawToolbar->singleButton->setChecked(settings.value("singleCheck").toBool());
@@ -206,6 +222,7 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("lineCheck")) drawToolbar->lineButton->setChecked(settings.value("lineCheck").toBool());
 	if(settings.contains("trajectoryCheck")) drawToolbar->trajectoryButton->setChecked(settings.value("trajectoryCheck").toBool());
 	if(settings.contains("obstacleCheck")) drawToolbar->obstacleButton->setChecked(settings.value("obstacleCheck").toBool());
+	if(settings.contains("paintCheck")) drawToolbar->paintButton->setChecked(settings.value("paintCheck").toBool());
 	settings.endGroup();
 
 	settings.beginGroup("classificationOptions");
@@ -265,6 +282,13 @@ void MLDemos::LoadLayoutOptions()
 		if(!dynamicals[i]) continue;
 		settings.beginGroup(QString("plugins::dynamicals::") + dynamicals[i]->GetName());
 		dynamicals[i]->LoadOptions(settings);
+		settings.endGroup();
+	}
+	FOR(i,maximizers.size())
+	{
+		if(!maximizers[i]) continue;
+		settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
+		maximizers[i]->LoadOptions(settings);
 		settings.endGroup();
 	}
 	canvas->repaint();
@@ -327,6 +351,16 @@ void MLDemos::SaveParams( QString filename )
 			clusterers[tab]->SaveParams(file);
 		}
 	}
+	if(maximizer)
+	{
+		int tab = optionsMaximize->tabWidget->currentIndex();
+		sprintf(groupName,"maximizationOptions");
+		file << groupName << ":" << "tab" << " " << optionsMaximize->tabWidget->currentIndex() << std::endl;
+		if(tab < maximizers.size() && maximizers[tab])
+		{
+			maximizers[tab]->SaveParams(file);
+		}
+	}
 
 	file.close();
 }
@@ -356,15 +390,17 @@ void MLDemos::LoadParams( QString filename )
 	char regrGroup[255];
 	char dynGroup[255];
 	char clustGroup[255];
+	char maximGroup[255];
 	sprintf(classGroup,"classificationOptions");
 	sprintf(regrGroup,"regressionOptions");
 	sprintf(dynGroup,"dynamicalOptions");
 	sprintf(clustGroup,"clusteringOptions");
+	sprintf(maximGroup,"maximizationgOptions");
 
 	// we skip the samples themselves
 	qDebug() << "Skipping "<< sampleCnt <<" samples" << endl;
 	FOR(i, sampleCnt) file.getline(line,255);
-	bool bClass = false, bRegr = false, bDyn = false, bClust = false;
+	bool bClass = false, bRegr = false, bDyn = false, bClust = false, bMaxim = false;
 	qDebug() << "Loading parameter list" << endl;
 	int tab = 0;
 	while(!file.eof())
@@ -407,6 +443,13 @@ void MLDemos::LoadParams( QString filename )
 			if(endsWith(line,"tab")) optionsCluster->tabWidget->setCurrentIndex((int)value);
 			if(tab < clusterers.size() && clusterers[tab]) clusterers[tab]->LoadParams(line,value);
 		}
+		if(startsWith(line, maximGroup))
+		{
+			bMaxim = true;
+			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
+			if(endsWith(line,"tab")) optionsMaximize->tabWidget->setCurrentIndex((int)value);
+			if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
+		}
 	}
 	file.close();
 	ResetPositiveClass();
@@ -414,11 +457,13 @@ void MLDemos::LoadParams( QString filename )
 	if(bRegr) Regression();
 	if(bDyn) Dynamize();
 	if(bClust) Cluster();
+	if(bMaxim) Maximize();
 	if(algorithmWidget->isVisible())
 	{
 		actionClassifiers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClass);
 		actionRegression->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabRegr);
 		actionDynamical->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabDyn);
 		actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClust);
+		//actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabMax);
 	}
 }

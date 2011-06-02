@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _REGRESSOR_H_
 
 #include <vector>
+#include "mymaths.h"
 
 extern "C" enum {REGR_SVR, REGR_RVM, REGR_GMR, REGR_GPR, REGR_KNN, REGR_MLP, REGR_LINEAR, REGR_LWPR, REGR_KRLS, REGR_NONE} regressorType;
 
@@ -39,7 +40,6 @@ protected:
 	s32 class2labels[255];
 	ivec labels2class;
 	bool bFixedThreshold;
-	IplImage *screenshot;
 
 public:
 	std::vector<fvec> crossval;
@@ -47,7 +47,7 @@ public:
 	fvec trainErrors, testErrors;
 	int type;
 
-	Regressor() : posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), screenshot(0), type(REGR_NONE){}
+	Regressor() : posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), type(REGR_NONE){}
 	std::vector <fvec> GetSamples(){return samples;};
 
 	virtual void Train(std::vector< fvec > samples, ivec labels){};

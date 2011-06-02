@@ -1,95 +1,69 @@
-/*********************************************************************
-MLDemos: A User-Friendly visualization toolkit for machine learning
-Copyright (C) 2010  Basilio Noris
-Contact: mldemos@b4silio.com
+/*
+	Public inclusions for opencv
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public License,
-version 3 as published by the Free Software Foundation.
+	Copyright (C) 2007 basilio noris
 
-This library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free
-Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*********************************************************************/
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /*!
  *	\file public.h
  *	\author Basilio Noris
  *	\date 25-11-06
+ *      Public includes for opencv and types definitions
  */
 
 #ifndef _PUBLIC_H_
 #define _PUBLIC_H_
 
-#ifdef WIN32
+#ifdef MSVC
 #pragma warning(disable:4996) // avoids the sprintf_s and fopen_s warning which dont exist on linux ;)
+#pragma warning(disable:4244) // conversion from X to Y, possible loss of data
+#pragma warning(disable:4305) // 'initializing' : truncation from X to Y
 #endif
 
-// opencv includes
-#include "cv.h"
-#include "cvaux.h"
-#include "highgui.h"
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <float.h>
+#include <cmath>
 
 // types and macros
 #include "types.h"
-#include "mymaths.h"
 
-/*!
- * The Filter class, one of the main tools to process images
- */
-class Filter
-{
-public:
-	/*!
-		The main Processing function, takes an input image and if necessary can make modifications over it
-		\param image the input image
-	*/
-	virtual void Apply(IplImage *){};
+// opencv includes
+/*
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/video/tracking.hpp>
+#include <opencv2/ml/ml.hpp>
+#include <opencv2/legacy/legacy.hpp>
+#include <opencv2/legacy/compat.hpp>
+*/
 
-	/*!
-		The secondary Processing function, usually does the same as the Apply()
-		function but returns the modifications as an output image, leaving the source image intact
-		\param image the input image
-		\return returns the filtered image
-	*/
-	virtual IplImage *Process(IplImage *){return NULL;};
-
-	/*!
-		The Configuration function, can be useful for certain filters
-		\param image the input image
-		\param selection the region of the image the filter will be configured from
-	*/
-	virtual void Config(IplImage *, CvRect , IplImage * =0){};
+#include <QColor>
+static const QColor CVColor [22]= {
+	QColor(255,255,255), QColor(255,0,0), QColor(0,255,0), QColor(0,0,255),
+	QColor(255,255,0), QColor(255,0,255), QColor(0,255,255),
+	QColor(255,128,0), QColor(255,0,128), QColor(0,255,128),
+	QColor(128,255,0), QColor(128,0,255), QColor(0,128,255),
+	QColor(128,128,128), QColor(80,80,80), QColor(0,128,80),
+	QColor(255,80,0), QColor(255,0,80), QColor(0,255,80),
+	QColor(80,255,0), QColor(80,0,255), QColor(0,80,255)
 };
+static const int CVColorCnt = 22;
 
-/*!
- * The Frame Grabber virtual class
- */
-class FrameGrabber
-{
-public:
-	/*!
-		Grabs the current frame
-		\param frame the pointer to the frame that will be filled by the grabber
-		\param index can be the index to a particular frame or to one of many streams (in case of stereo grabbers)
-	*/
-	virtual void GrabFrame(IplImage **, u32 =0){};
-	
-	/*!
-		Get the resolution of the frame grabber (or of the current frame)
-		\return returns the size of the current frame
-	*/
-	virtual CvSize GetSize(){return cvSize(0,0);};
-
-	/*!
-		Kills the grabber, freeing and releasing up the memory allocated by the grabber
-	*/
-	virtual void Kill(){};
-};
 
 #endif //_PUBLIC_H_

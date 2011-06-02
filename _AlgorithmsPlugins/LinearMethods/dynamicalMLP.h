@@ -20,8 +20,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _DYNAMICAL_MLP_H_
 
 #include <vector>
-#include <ml.h>
 #include "dynamical.h"
+#include "basicOpenCV.h"
 
 class DynamicalMLP : public Dynamical
 {

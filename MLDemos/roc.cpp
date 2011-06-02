@@ -19,6 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "basicMath.h"
+#include "mymaths.h"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -28,18 +29,22 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define RES 512
 #define PAD 16
 
-CvFont *rocfont;
 std::vector<std::vector<std::vector<f32> > > rocCallBackAllData;
 std::vector<std::vector<f32> > rocCallBackData;
 u32 rocIndex = 0;
+
+/*
+CvFont *rocfont;
 IplImage *roc = cvCreateImage(cvSize(RES,RES),8,3);
 IplImage *rocBackup = cvCloneImage(roc);
+*/
 
 bool UDLesser(f32pair e1, f32pair e2)
 {
 	return e1.first < e2.first;
 }
 
+/*
 void RocCurve(std::vector<f32pair> data)
 {
 	if(!data.size()) return;
@@ -190,13 +195,6 @@ IplImage *RocImage(std::vector<std::vector<f32pair> > dataVector, std::vector<ch
 				float recall = tp /float(tp+fn);
 				fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
 			}
-/*
-			cvDrawLine(roc,
-				cvPoint(oldVal.x*(float)resolution.width + vpad.x,oldVal.y*(float)resolution.height + vpad.y),
-				cvPoint(val.x*(float)resolution.width + vpad.x,val.y*(float)resolution.height + vpad.y),
-				color);
-*/
-			//draw_cross(roc, (val*(float)res).to2d(),CV_RGB(255,255,255), 2);
 
 			std::vector<f32> dat;
 			dat.push_back(val.x);
@@ -232,6 +230,7 @@ IplImage *RocImage(std::vector<std::vector<f32pair> > dataVector, std::vector<ch
 	cvCopy(roc, rocBackup);
 	return roc;
 }
+*/
 
 std::vector<float> GetBestFMeasures()
 {
@@ -291,7 +290,7 @@ float GetBestThreshold( std::vector<f32pair> data )
 
 	std::sort(data.begin(), data.end(), UDLesser);
 
-	cvVec2 oldVal(1,0);
+	fVec oldVal(1,0);
 	FOR(i, data.size())
 	{
 		float thresh = data[i].first;
@@ -310,7 +309,7 @@ float GetBestThreshold( std::vector<f32pair> data )
 				else tn++;
 			}
 		}
-		cvVec2 val(fp/float(fp+tn), 1 - tp/float(tp+fn));
+		fVec val(fp/float(fp+tn), 1 - tp/float(tp+fn));
 		float precision = tp / float(tp+fp);
 		float recall = tp /float(tp+fn);
 		float fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
@@ -346,7 +345,7 @@ float GetBestFMeasure( std::vector<f32pair> data )
 
 	std::sort(data.begin(), data.end(), UDLesser);
 
-	cvVec2 oldVal(1,0);
+	fVec oldVal(1,0);
 	FOR(i, data.size())
 	{
 		float thresh = data[i].first;
@@ -365,7 +364,7 @@ float GetBestFMeasure( std::vector<f32pair> data )
 				else tn++;
 			}
 		}
-		cvVec2 val(fp/float(fp+tn), 1 - tp/float(tp+fn));
+		fVec val(fp/float(fp+tn), 1 - tp/float(tp+fn));
 		float precision = tp / float(tp+fp);
 		float recall = tp /float(tp+fn);
 		float fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
@@ -453,7 +452,7 @@ float GetRocValueAt(std::vector<f32pair> data, float threshold)
 			else tn++;
 		}
 	}
-	cvVec2 val(fp/float(fp+tn), 1 - tp/float(tp+fn));
+	fVec val(fp/float(fp+tn), 1 - tp/float(tp+fn));
 	float precision = tp / float(tp+fp);
 	float recall = tp /float(tp+fn);
 	float fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
@@ -461,14 +460,17 @@ float GetRocValueAt(std::vector<f32pair> data, float threshold)
 	return fmeasure;
 }
 
+/*
 void SaveRocImage(const char *filename)
 {
 	cvSaveImage(filename, roc);
 }
+*/
 
 /****************************************************/
 /*     mouse listener (for filter configuration)    */
 /****************************************************/
+/*
 void roc_on_mouse( int event, int x, int y, int flags, void* param )
 {
 	if(!roc || !rocCallBackAllData.size()) return;
@@ -550,3 +552,4 @@ IplImage *GetRocImage()
 {
 	return roc;
 }
+*/

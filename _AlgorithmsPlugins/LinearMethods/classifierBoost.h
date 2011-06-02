@@ -21,7 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include "classifier.h"
-#include <ml.h>
+#include "basicOpenCV.h"
 
 class ClassifierBoost : public Classifier
 {

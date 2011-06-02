@@ -64,11 +64,11 @@ void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
 	painter.setRenderHint(QPainter::Antialiasing);
 	ClassifierLinear *linear = (ClassifierLinear*)classifier;
 	fvec mean = linear->GetMean();
-	cvVec2 m(mean[0],mean[1]);
+	fVec m(mean[0],mean[1]);
 	if(linear->GetType()==1) // ICA
 	{
 		fvec pt[4];
-		cvVec2 v[4];
+		fVec v[4];
 		QPointF p1[4], p2[4];
 		FOR(i,4) pt[i].resize(2,0);
 		// we get the bounding box
@@ -91,7 +91,7 @@ void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
 		{
 			p1[i] = canvas->toCanvasCoords(pt[i]);
 			fvec proj = linear->InvProject(pt[i]);
-			v[i] = cvVec2(proj[0], proj[1]);
+			v[i] = fVec(proj[0], proj[1]);
 			p2[i] = canvas->toCanvasCoords(v[i].x,v[i].y);
 		}
 
@@ -104,7 +104,7 @@ void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
 		FOR(i, 4) painter.drawLine(p1[i],p2[i]);
 
 		painter.setPen(QPen(Qt::red, 2));
-                painter.drawLine(p2[0],p2[1]);
+		painter.drawLine(p2[0],p2[1]);
 		painter.drawLine(p2[1],p2[2]);
 		painter.drawLine(p2[2],p2[3]);
 		painter.drawLine(p2[3],p2[0]);
@@ -122,20 +122,20 @@ void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
 		{
 			pt[i] = linear->Project(pt[i]);
 		}
-//			pt[3][0] = pt[2][0]-pt[0][1];
-//			pt[3][1] = pt[2][0]+pt[0][0];
-//			pt[4][0] = pt[2][0]-pt[1][1];
-//			pt[4][1] = pt[2][0]+pt[1][0];
+		//			pt[3][0] = pt[2][0]-pt[0][1];
+		//			pt[3][1] = pt[2][0]+pt[0][0];
+		//			pt[4][0] = pt[2][0]-pt[1][1];
+		//			pt[4][1] = pt[2][0]+pt[1][0];
 
 		point[0] = canvas->toCanvasCoords(pt[0]);
 		point[1] = canvas->toCanvasCoords(pt[1]);
-//			point[2] = QPointF(pt[3][0]*w, pt[3][1]*h);
-//			point[3] = QPointF(pt[4][0]*w, pt[4][1]*h);
+		//			point[2] = QPointF(pt[3][0]*w, pt[3][1]*h);
+		//			point[3] = QPointF(pt[4][0]*w, pt[4][1]*h);
 
 		painter.setPen(QPen(Qt::black, 2));
 		painter.drawLine(point[0], point[1]);
-//			painter.setPen(QPen(Qt::black, 1));
-//			painter.drawLine(point[2], point[3]);
+		//			painter.setPen(QPen(Qt::black, 1));
+		//			painter.drawLine(point[2], point[3]);
 	}
 	canvas->infoPixmap = infoPixmap;
 }

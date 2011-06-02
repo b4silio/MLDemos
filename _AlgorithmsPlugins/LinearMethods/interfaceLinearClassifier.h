@@ -40,6 +40,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Linear");};
+	QString GetInfoFile(){return "linearClassifiers.html";};
 	bool UsesDrawTimer();
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Classifier *classifier);

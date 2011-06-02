@@ -42,6 +42,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Kernel");};
+	QString GetInfoFile(){return "kernelClass.html";};
 	bool UsesDrawTimer(){return true;};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Classifier *classifier);

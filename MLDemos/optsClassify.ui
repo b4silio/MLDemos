@@ -33,7 +33,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <layout class="QVBoxLayout">
@@ -41,7 +41,7 @@
      <spacer name="spacer_2">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -59,7 +59,7 @@
      <widget class="QPushButton" name="classifyButton">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -78,7 +78,7 @@ p, li { white-space: pre-wrap; }
      <widget class="QPushButton" name="clearButton">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -94,7 +94,7 @@ p, li { white-space: pre-wrap; }
      <spacer name="spacer">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -115,7 +115,7 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -134,7 +134,7 @@ for the last training or cross-validation</string>
       </property>
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -153,7 +153,7 @@ p, li { white-space: pre-wrap; }
      <spacer>
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -180,7 +180,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <widget class="QLabel" name="label">
@@ -197,7 +197,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="text">
@@ -218,7 +218,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="toolTip">
@@ -283,7 +283,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="text">
@@ -304,7 +304,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="toolTip">
@@ -331,7 +331,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="minimum">
@@ -355,7 +355,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="text">
@@ -374,7 +374,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="currentIndex">
@@ -400,7 +400,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">

@@ -19,7 +19,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "dynamicalSVR.h"
-#include "basicOpenCV.h"
 
 using namespace std;
 

@@ -20,8 +20,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _REGRESSOR_MLP_H_
 
 #include <vector>
-#include <ml.h>
 #include "regressor.h"
+#include "basicOpenCV.h"
 
 class RegressorMLP : public Regressor
 {

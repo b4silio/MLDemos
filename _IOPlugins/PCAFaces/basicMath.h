@@ -7,6 +7,7 @@
 #define _BASICMATH_H_
 
 #include <vector>
+#include "basicOpenCV.h"
 
 #define PIf	3.1415926535897932384626433832795f
 //#define cvVec2 CvPoint2D32f

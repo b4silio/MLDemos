@@ -332,44 +332,36 @@ void RegrSVM::Draw(Canvas *canvas, Regressor *regressor)
 	}
 	else if(regressor->type == REGR_GPR)
 	{
-		IplImage *image = cvCreateImage(cvSize(w,h), 8, 3);
-		cvSet(image, CV_RGB(255,255,255));
-
 		RegressorGPR *gpr = (RegressorGPR *)regressor;
 		if(gpr->sogp)
 		{
 			Matrix _testout;
 			ColumnVector _testin(1);
-			CvPoint avgPoint=cvPoint(0,0), sigmaPoint1=cvPoint(0,0), sigmaPoint2=cvPoint(0,0);
-
-			IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-			cvZero(density);
+			QImage density(QSize(256,256), QImage::Format_RGB32);
+			density.fill(0);
 			// we draw a density map for the probability
-			for (int i=0; i < density->width; i++)
+			for (int i=0; i < density.width(); i++)
 			{
-				fvec sampleIn = canvas->toSampleCoords(i*w/density->width,0);
+				fvec sampleIn = canvas->toSampleCoords(i*w/density.width(),0);
 				float testin = sampleIn[0];
 				double sigma;
 				_testin(1) = testin;
 				_testout = gpr->sogp->predict(_testin, sigma);
 				sigma = sigma*sigma;
 				float testout = _testout(1,1);
-				for (int j=0; j< density->height; j++)
+				for (int j=0; j< density.height(); j++)
 				{
-					fvec sampleOut = canvas->toSampleCoords(0,j*h/density->height);
+					fvec sampleOut = canvas->toSampleCoords(0,j*h/density.height());
 					float val = gpr->GetLikelihood(testout, sigma, sampleOut[1]);
-					cvSet2D(density, j, i, cvScalarAll(val*100));
+					int color = min(255,(int)(128 + val*20));
+					density.setPixel(i,j, qRgb(color,color,color));
 				}
 			}
-			IplImage *densBig = cvCloneImage(image);
-			cvResize(density, densBig, CV_INTER_CUBIC);
-			cvAddWeighted(image, 0.5, densBig, 0.5,0,image);
-			IMKILL(density);
-			IMKILL(densBig);
+			canvas->confidencePixmap = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 		}
+		else canvas->confidencePixmap.fill();
 
-		canvas->confidencePixmap = Canvas::toPixmap(image);
-		IMKILL(image);
+
 		int steps = w;
 		QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 		QPointF oldPointUp(-FLT_MAX,-FLT_MAX);

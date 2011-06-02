@@ -36,30 +36,31 @@ using namespace std;
 bool Canvas::bCrossesAsDots = true;
 
 Canvas::Canvas(QWidget *parent)
-: QWidget(parent),
-bDisplayMap(false),
-bDisplayInfo(false),
-bDisplaySingle(false),
-bDisplaySamples(true),
-bDisplayTrajectories(true),
-bDisplayLearned(true),
-bDisplayGrid(true),
-crosshair(QPainterPath()),
-bShowCrosshair(false),
-bNewCrosshair(true),
-trajectoryCenterType(0),
-trajectoryResampleType(1),
-trajectoryResampleCount(100),
-liveTrajectory(vector<fvec>()),
-centers(map<int,fvec>()),
-drawnSamples(0),
-drawnTrajectories(0),
-mouseAnchor(QPoint(-1,-1)),
-bDrawing(false),
-zoom(1.f),
-data(new DatasetManager())
+	: QWidget(parent),
+	  bDisplayMap(false),
+	  bDisplayInfo(false),
+	  bDisplaySingle(false),
+	  bDisplaySamples(true),
+	  bDisplayTrajectories(true),
+	  bDisplayLearned(true),
+	  bDisplayGrid(true),
+	  crosshair(QPainterPath()),
+	  bShowCrosshair(false),
+	  bNewCrosshair(true),
+	  trajectoryCenterType(0),
+	  trajectoryResampleType(1),
+	  trajectoryResampleCount(100),
+	  liveTrajectory(vector<fvec>()),
+	  centers(map<int,fvec>()),
+	  drawnSamples(0),
+	  drawnTrajectories(0),
+	  mouseAnchor(QPoint(-1,-1)),
+	  bDrawing(false),
+	  zoom(1.f),
+	  data(new DatasetManager())
 {
 	resize(640,480);
+	setAcceptDrops(true);
 
 	setMouseTracking(true);
 	setCursor(Qt::CrossCursor);
@@ -75,6 +76,22 @@ data(new DatasetManager())
 Canvas::~Canvas()
 {
 	if(data) DEL(data);
+}
+
+void Canvas::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (event->mimeData()->hasFormat("text/plain")) event->acceptProposedAction();
+}
+
+void Canvas::dropEvent(QDropEvent *event)
+{
+	if(event->mimeData()->text() == "Target")
+	{
+		QPointF position = event->pos();
+		//qDebug() << "Dropping Target at coordinates: " << position;
+		targets.push_back(toSampleCoords(position.x(), position.y()));
+	}
+	event->acceptProposedAction();
 }
 
 void Canvas::SetConfidenceMap(QImage image)
@@ -99,12 +116,21 @@ void Canvas::paintEvent(QPaintEvent *event)
 
 	painter.fillRect(geometry(),Qt::white);
 
-	if(bDisplayMap && !confidencePixmap.isNull()) painter.drawPixmap(geometry(), confidencePixmap);
+	if(bDisplayMap)
+	{
+		if(!confidencePixmap.isNull()) painter.drawPixmap(geometry(), confidencePixmap);
+	}
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
 	if(bDisplaySamples)
 	{
+		DrawRewards();
+		if(!rewardPixmap.isNull())
+		{
+			painter.setBackgroundMode(Qt::TransparentMode);
+			painter.drawPixmap(geometry(), rewardPixmap);
+		}
 		DrawSamples();
 		painter.setBackgroundMode(Qt::TransparentMode);
 		painter.drawPixmap(geometry(), samplesPixmap);
@@ -116,6 +142,7 @@ void Canvas::paintEvent(QPaintEvent *event)
 		DrawTrajectories();
 		painter.setBackgroundMode(Qt::TransparentMode);
 		painter.drawPixmap(geometry(), trajectoriesPixmap);
+		if(targets.size()) DrawTargets(painter);
 	}
 	if(bDisplayLearned && !modelPixmap.isNull())
 	{
@@ -235,6 +262,7 @@ void Canvas::SetZoom(float zoom)
 	gridPixmap = QPixmap();
 	modelPixmap = QPixmap();
 	confidencePixmap = QPixmap();
+	//rewardPixmap = QPixmap();
 	infoPixmap = QPixmap();
 	ResetSamples();
 	bNewCrosshair = true;
@@ -248,6 +276,7 @@ void Canvas::SetCenter(fVec center)
 	gridPixmap = QPixmap();
 	modelPixmap = QPixmap();
 	confidencePixmap = QPixmap();
+	//rewardPixmap = QPixmap();
 	infoPixmap = QPixmap();
 	ResetSamples();
 	bNewCrosshair = true;
@@ -380,6 +409,25 @@ void Canvas::DrawSamples()
 	drawnSamples = data->GetCount();
 }
 
+void Canvas::DrawTargets(QPainter &painter)
+{
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	FOR(i, targets.size())
+	{
+		QPointF point = toCanvasCoords(targets[i]);
+		QPointF delta1 = QPointF(1,1);
+		QPointF delta2 = QPointF(1,-1);
+		painter.setBrush(Qt::NoBrush);
+		painter.setPen(QPen(Qt::black, 1.5));
+		int r = 8, p = 2;
+		painter.drawEllipse(point,r,r);
+		painter.drawLine(point+delta1*r, point+delta1*r+delta1*p);
+		painter.drawLine(point-delta1*r, point-delta1*r-delta1*p);
+		painter.drawLine(point+delta2*r, point+delta2*r+delta2*p);
+		painter.drawLine(point-delta2*r, point-delta2*r-delta2*p);
+	}
+}
+
 QPainterPath Canvas::DrawObstacle(Obstacle o)
 {
 	QPointF point;
@@ -453,6 +501,46 @@ void Canvas::DrawObstacles()
 		painter.setBrush(Qt::NoBrush);
 		painter.setPen(QPen(Qt::black, 1,Qt::DotLine));
 		painter.drawPath(safeties[i]);
+	}
+}
+
+void Canvas::DrawRewards()
+{
+	return;
+	int w = width();
+	int h = height();
+	rewardPixmap= QPixmap(w,h);
+	QBitmap bitmap(w,h);
+	bitmap.clear();
+	rewardPixmap.setMask(bitmap);
+	rewardPixmap.fill(Qt::transparent);
+
+	if(!data->GetReward()->rewards) return;
+
+	QPainter painter(&rewardPixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+	int radius = 10;
+	int stepsW = w/radius;
+	int stepsH = h/radius;
+	//int radius = min(w,h) / steps;
+	// we draw the rewards
+	QColor color;
+	fvec sample; sample.resize(2);
+	FOR(i, stepsH)
+	{
+		float y = i/(float)stepsH*h;
+		FOR(j, stepsW)
+		{
+			float x = j/(float)stepsW*w;
+			float value = data->GetReward()->ValueAt(toSampleCoords(x,y));
+			if(value > 0) color = QColor(255, 255 - (int)(max(0.f,min(1.f, value)) * 255), 255 - (int)(max(0.f,min(1.f, value)) * 255));
+			else color = QColor(255 - (int)(max(0.f,min(1.f, -value)) * 255),255 - (int)(max(0.f,min(1.f, -value)) * 255),255);
+			painter.setBrush(color);
+			painter.setPen(Qt::black);
+			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
+		}
 	}
 }
 
@@ -562,20 +650,20 @@ void Canvas::DrawTrajectories()
 		case 0: // do nothing
 			break;
 		case 1: // uniform resampling
+		{
+			if(i < sequences.size()-1 || !bDrawing)
 			{
-				if(i < sequences.size()-1 || !bDrawing)
-				{
-					trajectory = interpolate(trajectory, trajectoryResampleCount);
-				}
+				trajectory = interpolate(trajectory, trajectoryResampleCount);
 			}
+		}
 			break;
 		case 2: // spline resampling
+		{
+			if(i < sequences.size()-1 || !bDrawing)
 			{
-				if(i < sequences.size()-1 || !bDrawing)
-				{
-					trajectory = interpolate(trajectory, trajectoryResampleCount);
-				}
+				trajectory = interpolate(trajectory, trajectoryResampleCount);
 			}
+		}
 			break;
 		}
 		trajectories.push_back(trajectory);
@@ -710,9 +798,9 @@ void Canvas::leaveEvent(QEvent *event)
 void Canvas::wheelEvent(QWheelEvent *event)
 {
 	float d = 0;
-        if (event->delta() > 100) d = 1;
-        if (event->delta() < 100) d = -1;
-        if(d!=0) emit Navigation(fVec(-1,d));
+	if (event->delta() > 100) d = 1;
+	if (event->delta() < 100) d = -1;
+	if(d!=0) emit Navigation(fVec(-1,d));
 }
 
 void Canvas::mouseMoveEvent( QMouseEvent *event )
@@ -726,11 +814,11 @@ void Canvas::mouseMoveEvent( QMouseEvent *event )
 	if(event->modifiers() == Qt::AltModifier && event->buttons() == Qt::LeftButton)
 	{
 		fVec d = (fromCanvas(mouseAnchor) - fromCanvas(event->pos()));
-                if(d.x == 0 && d.y == 0) return;
+		if(d.x == 0 && d.y == 0) return;
 		SetCenter(center + d);
 		mouseAnchor = event->pos();
 		bShowCrosshair = false;
-                emit CanvasMoveEvent();
+		emit CanvasMoveEvent();
 		return;
 	}
 
@@ -825,4 +913,32 @@ bool Canvas::DeleteData( QPointF center, float radius )
 		}
 	}
 	return anythingDeleted;
+}
+
+void Canvas::PaintReward(fvec sample, float radius, float shift)
+{
+	int w = width();
+	int h = height();
+	if(rewardPixmap.isNull())
+	{
+		rewardPixmap = QPixmap(w,h);
+		QBitmap bitmap(w,h);
+		bitmap.clear();
+		rewardPixmap.setMask(bitmap);
+		rewardPixmap.fill(Qt::transparent);
+	}
+	QPainter painter(&rewardPixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+	QPointF center = toCanvasCoords(sample);
+	QRadialGradient gradient( center, radius*.75);
+	if(shift > 0) gradient.setColorAt(0, QColor(255,0,0,shift*255));
+	else gradient.setColorAt(0, QColor(255,255,255,-shift*255));
+	gradient.setColorAt(1, QColor(255,255,255,0));
+	painter.setBrush(gradient);
+	//if(shift > 0) painter.setBrush(QColor(255,0,0,shift*255));
+	//else painter.setBrush(QColor(255,255,255,-shift*255));
+	painter.setPen(Qt::NoPen);
+	painter.drawEllipse(toCanvasCoords(sample), radius, radius);
 }

@@ -40,6 +40,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("KNN");};
+	QString GetInfoFile(){return "knn.html";};
 	bool UsesDrawTimer(){return true;};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Dynamical *dynamical);

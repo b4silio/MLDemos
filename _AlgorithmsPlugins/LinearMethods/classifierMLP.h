@@ -20,8 +20,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLASSIFIER_MLP_H_
 
 #include <vector>
-#include <ml.h>
 #include "classifier.h"
+#include "basicOpenCV.h"
 
 class ClassifierMLP : public Classifier
 {

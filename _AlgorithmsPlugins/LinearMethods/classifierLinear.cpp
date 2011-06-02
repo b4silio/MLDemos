@@ -90,8 +90,8 @@ float ClassifierLinear::Test(const fvec &sample )
 	}
 	else if(linearType < 4) // pca, lda, fisher
 	{
-		cvVec2 point(sample[0] - meanPos[0], sample[1] - meanPos[1]);
-		float estimate = W.dot(point);
+		fVec point(sample[0] - meanPos[0], sample[1] - meanPos[1]);
+		float estimate = W*point;
 		return -(estimate - threshold);
 		//return estimate > threshold ? 2 : -2;
 	}
@@ -188,10 +188,10 @@ fvec ClassifierLinear::Project(const fvec &sample)
 	}
 	else if(linearType < 4) // pca, lda, fisher
 	{
-		cvVec2 mean(meanPos[0], meanPos[1]);
-		cvVec2 point(sample[0], sample[1]);
-		float dot = W.dot(point-mean);
-		cvVec2 proj(dot*W.x, dot*W.y);
+		fVec mean(meanPos[0], meanPos[1]);
+		fVec point(sample[0], sample[1]);
+		float dot = W*(point-mean);
+		fVec proj(dot*W.x, dot*W.y);
 		//proj += cvVec2(.5f,.5f);
 		proj += mean;
 		newSample[0] = proj.x;
@@ -246,7 +246,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 		printf("determinant is not positive during calculation of eigenvalues !!");
 		return;
 	}
-	cvVec2 e1, e2, tmp;
+	fVec e1, e2, tmp;
 
 	if(invSigma1[0][0] - eigenvalue1 != 0)
 		e1.x = -invSigma1[0][1]/(invSigma1[0][0]-eigenvalue1);
@@ -261,7 +261,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 	// swap the eigens
 	if (eigenvalue1 < eigenvalue2)
 	{
-		cvVec2 tmp = e1;
+		fVec tmp = e1;
 		e1 = e2;
 		e2 = tmp;
 		float lambda = eigenvalue1;
@@ -291,8 +291,8 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 		float thresh = 1.f / steps * c;
 		FOR(i, samples.size())
 		{
-			cvVec2 point(samples[i][0], samples[i][1]);
-			float estimate = W.dot(point);
+			fVec point(samples[i][0], samples[i][1]);
+			float estimate = W*point;
 			if(labels[i])
 			{
 				if (estimate < thresh) error++;
@@ -389,7 +389,7 @@ void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels,
 	w[0] /= n; w[1] /= n;
 
 	float c = w[0]*(mean1[0]+mean2[0])/2 + w[0]*(mean1[1]+mean2[1])/2;
-	W = cvVec2(w[0], w[1]);
+	W = fVec(w[0], w[1]);
 	W = W.normalize();
 
 	if(sigma1 == sigma2)
@@ -505,5 +505,5 @@ void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels 
 	free(Mixing);
 	free(Global);
 
-	W = cvVec2(Transf[0], Transf[2]);
+	W = fVec(Transf[0], Transf[2]);
 }

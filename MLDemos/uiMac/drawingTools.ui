@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>32</width>
-    <height>256</height>
+    <height>282</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -113,7 +113,7 @@
    <property name="geometry">
     <rect>
      <x>1</x>
-     <y>230</y>
+     <y>260</y>
      <width>30</width>
      <height>20</height>
     </rect>
@@ -236,7 +236,7 @@
    <property name="geometry">
     <rect>
      <x>1</x>
-     <y>210</y>
+     <y>240</y>
      <width>30</width>
      <height>20</height>
     </rect>
@@ -269,6 +269,33 @@
    </property>
    <property name="text">
     <string>Obs</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="paintButton">
+   <property name="geometry">
+    <rect>
+     <x>1</x>
+     <y>210</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>+/-</string>
    </property>
    <property name="checkable">
     <bool>true</bool>

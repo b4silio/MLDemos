@@ -44,31 +44,18 @@ win32{
 	RCC_DIR = $${MLBUILD}/build
 	OBJECTS_DIR = $${MLBUILD}/build
 }
+
 DEPENDPATH += . \
-		..
-win32{
+		.. \
+		$${MLPATH}/_3rdParty
 INCLUDEPATH += . \
-	"C:/Program Files/OpenCV2.0/include/"
-LIBS += -L"C:/Progra~1/OpenCV2.0/lib/"
-LIBS += -lcv200 \
-	-lcxcore200 \
-	-lcvaux200 \
-	-lhighgui200 \
-	-lml200
-}else{
-INCLUDEPATH += . \
-	/usr/include/qt4/ \
-	/usr/include/qt4/QtCore/ \
-	/usr/include/qt4/QtGui/ \
-	/usr/include/qt4/QtOpenGL \
-	/usr/include/opencv/ \
-	/usr/local/include/opencv/
+		$${MLPATH}/_3rdParty
+unix{
+INCLUDEPATH += /usr/include/qt4 \
+	/usr/include/qt4/QtCore \
+	/usr/include/qt4/QtGui \
+	/usr/include/qt4/QtOpenGL
 LIBS += -L/usr/local/lib
-LIBS += -lcv \
-	-lcxcore \
-	-lcvaux \
-	-lhighgui \
-	-lml
 }
 INCLUDEPATH += $$MLDEMOS
 
