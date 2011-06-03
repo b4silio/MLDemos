@@ -1176,7 +1176,7 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-		break;
+	break;
 	case 2: // spray
 	case 3: // erase
     {
@@ -1185,7 +1185,7 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-		break;
+	break;
 	case 7: // obstacles
     {
         Obstacle o;
@@ -1202,7 +1202,7 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-		break;
+	break;
 	case 8: // paint
 	{
 		float radius = drawToolbarContext4->spinRadius->value();
@@ -1212,7 +1212,7 @@ void MLDemos::DrawCrosshair()
 		canvas->bNewCrosshair = false;
 		return;
 	}
-		break;
+	break;
 	}
 
     QPointF oldPoint, point;
@@ -1271,7 +1271,7 @@ void MLDemos::Drawing( fvec sample, int label)
 		if(drawTime.elapsed() < 50/speed) return; // msec elapsed since last drawing
 		canvas->data->AddSample(sample, label);
 	}
-		break;
+	break;
 	case 2: // spray samples
 	{
 		// we don't want to draw too often
@@ -1306,7 +1306,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			}
 		}
 	}
-		break;
+	break;
 	case 3: // erase
 	{
 		float s = drawToolbarContext1->spinSize->value();
@@ -1323,7 +1323,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			canvas->ResetSamples();
 		}
 	}
-		break;
+	break;
 	case 4: // ellipse
 	{
 		if(drawTime.elapsed() < 200/speed) return; // msec elapsed since last drawing
@@ -1358,7 +1358,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			oldPoint = point;
 		}
 	}
-		break;
+	break;
 	case 5: // line
 	{
 		if(drawTime.elapsed() < 200/speed) return; // msec elapsed since last drawing
@@ -1386,7 +1386,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			oldPoint = point;
 		}
 	}
-		break;
+	break;
 	case 6: // trajectory
 	{
 		if(trajectory.first == -1) // we're starting a trajectory
@@ -1398,7 +1398,7 @@ void MLDemos::Drawing( fvec sample, int label)
 		canvas->data->AddSample(sample, label, _TRAJ);
 		trajectory.second = canvas->data->GetCount()-1;
 	}
-		break;
+	break;
 	case 7: // obstacle
 	{
 		bNewObstacle = true;
@@ -1412,7 +1412,7 @@ void MLDemos::Drawing( fvec sample, int label)
 		obstacle.repulsion[0] = drawToolbarContext3->spinRepulsionX->value();
 		obstacle.repulsion[1] = drawToolbarContext3->spinRepulsionX->value();
 	}
-		break;
+	break;
 	case 8: // paint rewards
 	{
 		float radius = drawToolbarContext4->spinRadius->value();
@@ -1434,7 +1434,7 @@ void MLDemos::Drawing( fvec sample, int label)
   //qDebug() << canvas->data->GetReward()->ValueAt(sample);
   */
 	}
-		break;
+	break;
 	}
 	canvas->repaint();
 	drawTime.restart();

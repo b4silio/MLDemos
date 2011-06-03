@@ -17,7 +17,7 @@
 #ifndef MATHLIBCOMMON_H_
 #define MATHLIBCOMMON_H_
 
-#ifdef WIN32
+#ifdef MSVC
 #include "windows.h"
 #define snprintf sprintf_s
 #define isnan(a) (a != a)

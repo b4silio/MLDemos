@@ -31,17 +31,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
-: canvas(canvas),
-refineLevel(0),
-refineMax(10),
-classifier(0),
-regressor(0),
-dynamical(0),
-clusterer(0),
-bRunning(false),
-bPaused(false),
-mutex(mutex),
-perm(0), w(0), h(0)
+	: canvas(canvas),
+	  refineLevel(0),
+	  refineMax(10),
+	  classifier(0),
+	  regressor(0),
+	  dynamical(0),
+	  clusterer(0),
+	  bRunning(false),
+	  bPaused(false),
+	  mutex(mutex),
+	  perm(0), w(0), h(0)
 {
 
 }
@@ -66,9 +66,9 @@ void DrawTimer::Clear()
 	bigMap.fill(0xffffff);
 	modelMap = QImage(QSize(w,h), QImage::Format_ARGB32);
 	modelMap.fill(qRgba(255, 255, 255, 0));
-	drawMutex.unlock();
 	KILL(perm);
 	perm = randPerm(w*h);
+	drawMutex.unlock();
 }
 
 void DrawTimer::run()
@@ -101,9 +101,9 @@ void DrawTimer::run()
 			emit MapReady(bigMap);
 			if(dynamical && (*dynamical))  emit ModelReady(modelMap);
 		}
-                //qApp->processEvents();
 		drawMutex.unlock();
-                this->msleep(10);
+		//qApp->processEvents();
+		this->msleep(50);
 	}
 	bRunning = false;
 }
@@ -257,10 +257,12 @@ void DrawTimer::Test(int start, int stop)
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
 	for (int i=start; i<stop; i++)
 	{
+		drawMutex.lock();
 		int x = perm[i]%w;
 		int y = perm[i]/w;
-                if(x >= bigMap.width() || y >= bigMap.height()) continue;
-                sample = canvas->toSampleCoords(x,y);
+		drawMutex.unlock();
+		if(x >= bigMap.width() || y >= bigMap.height()) continue;
+		sample = canvas->toSampleCoords(x,y);
 		fvec val;
 		float v;
 		QMutexLocker lock(mutex);
@@ -372,9 +374,11 @@ void DrawTimer::TestFast(int start, int stop)
 	mutex->unlock();
 	for (int i=start; i<stop; i++)
 	{
+		drawMutex.lock();
 		int x = perm[i]%w;
 		int y = perm[i]/w;
-                if(x >= bigMap.width() || y >= bigMap.height()) continue;
+		if(x >= bigMap.width() || y >= bigMap.height()) continue;
+		drawMutex.unlock();
 		sample = canvas->fromCanvas(x,y);
 		fVec val;
 		float v;
