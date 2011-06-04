@@ -16,7 +16,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "interfaceMaximizers.h"
+#include "interfaceParticles.h"
+#include "maximizeParticles.h"
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
@@ -25,54 +26,30 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-MaximizeBasic::MaximizeBasic()
+MaximizeInterfaceParticles::MaximizeInterfaceParticles()
 {
-	params = new Ui::ParametersMaximizers();
+	params = new Ui::ParametersParticles();
 	params->setupUi(widget = new QWidget());
 }
 
-void MaximizeBasic::SetParams(Maximizer *maximizer)
+void MaximizeInterfaceParticles::SetParams(Maximizer *maximizer)
 {
 	if(!maximizer) return;
-	int type = params->maximizeType->currentIndex();
-	int iterations = params->iterationsSpin->value();
+	int particleCount = params->particleSpin->value();
 	double variance = params->varianceSpin->value();
-	int k = params->kSpin->value();
-	bool bAdaptive = params->adaptiveCheck->isChecked();
-	switch(type)
-	{
-	case 0: // random search
-		((MaximizeRandom *)maximizer)->SetParams();
-		break;
-	case 1: // random walk
-		((MaximizeRandom *)maximizer)->SetParams(variance*variance);
-		break;
-	case 2: // power
-		((MaximizePower *)maximizer)->SetParams(k, variance*variance, bAdaptive);
-		break;
-	}
+	bool adaptive = params->adaptiveCheck->isChecked();
+	int samplingType = params->samplingType->currentIndex();
+	((MaximizeParticles *)maximizer)->SetParams(particleCount, variance, adaptive, samplingType);
 }
 
-Maximizer *MaximizeBasic::GetMaximizer()
+Maximizer *MaximizeInterfaceParticles::GetMaximizer()
 {
-	Maximizer *maximizer = NULL;
-	switch(params->maximizeType->currentIndex())
-	{
-	case 0:
-		maximizer = new MaximizeRandom();
-		break;
-	case 1:
-		maximizer = new MaximizeRandom();
-		break;
-	case 2:
-		maximizer = new MaximizePower();
-		break;
-	}
+	Maximizer *maximizer = new MaximizeParticles();
 	SetParams(maximizer);
 	return maximizer;
 }
 
-void MaximizeBasic::DrawInfo(Canvas *canvas, Maximizer *maximizer)
+void MaximizeInterfaceParticles::DrawInfo(Canvas *canvas, Maximizer *maximizer)
 {
 	if(!canvas || !maximizer) return;
 	int w = canvas->width();
@@ -90,7 +67,7 @@ void MaximizeBasic::DrawInfo(Canvas *canvas, Maximizer *maximizer)
 	canvas->infoPixmap = infoPixmap;
 }
 
-void MaximizeBasic::Draw(Canvas *canvas, Maximizer *maximizer)
+void MaximizeInterfaceParticles::Draw(Canvas *canvas, Maximizer *maximizer)
 {
 	if(!maximizer || !canvas) return;
 	canvas->liveTrajectory.clear();
@@ -141,40 +118,36 @@ void MaximizeBasic::Draw(Canvas *canvas, Maximizer *maximizer)
 	canvas->repaint();
 }
 
-void MaximizeBasic::SaveOptions(QSettings &settings)
+void MaximizeInterfaceParticles::SaveOptions(QSettings &settings)
 {
-	settings.setValue("maximizeType", params->maximizeType->currentIndex());
-	settings.setValue("iterationsSpin", params->iterationsSpin->value());
+	settings.setValue("samplingType", params->samplingType->currentIndex());
 	settings.setValue("varianceSpin", params->varianceSpin->value());
 	settings.setValue("adaptiveCheck", params->adaptiveCheck->isChecked());
-	settings.setValue("kSpin", params->kSpin->value());
+	settings.setValue("particleSpin", params->particleSpin->value());
 }
 
-bool MaximizeBasic::LoadOptions(QSettings &settings)
+bool MaximizeInterfaceParticles::LoadOptions(QSettings &settings)
 {
-	if(settings.contains("maximizeType")) params->maximizeType->setCurrentIndex(settings.value("maximizeType").toInt());
-	if(settings.contains("iterationsSpin")) params->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
+	if(settings.contains("samplingType")) params->samplingType->setCurrentIndex(settings.value("samplingType").toInt());
 	if(settings.contains("varianceSpin")) params->varianceSpin->setValue(settings.value("varianceSpin").toFloat());
 	if(settings.contains("adaptiveCheck")) params->adaptiveCheck->setChecked(settings.value("adaptiveCheck").toBool());
-	if(settings.contains("kSpin")) params->kSpin->setValue(settings.value("kSpin").toInt());
+	if(settings.contains("particleSpin")) params->particleSpin->setValue(settings.value("particleSpin").toInt());
 	return true;
 }
 
-void MaximizeBasic::SaveParams(std::ofstream &file)
+void MaximizeInterfaceParticles::SaveParams(std::ofstream &file)
 {
-	file << "maximizationOptions" << ":" << "maximizeType" << " " << params->maximizeType->currentIndex() << std::endl;
-	file << "maximizationOptions" << ":" << "iterationsSpin" << " " << params->iterationsSpin->value() << std::endl;
+	file << "maximizationOptions" << ":" << "samplingType" << " " << params->samplingType->currentIndex() << std::endl;
 	file << "maximizationOptions" << ":" << "varianceSpin" << " " << params->varianceSpin->value() << std::endl;
 	file << "maximizationOptions" << ":" << "adaptiveCheck" << " " << params->adaptiveCheck->isChecked() << std::endl;
-	file << "maximizationOptions" << ":" << "kSpin" << " " << params->kSpin->value() << std::endl;
+	file << "maximizationOptions" << ":" << "particleSpin" << " " << params->particleSpin->value() << std::endl;
 }
 
-bool MaximizeBasic::LoadParams(char *line, float value)
+bool MaximizeInterfaceParticles::LoadParams(char *line, float value)
 {
-	if(endsWith(line,"maximizeType")) params->maximizeType->setCurrentIndex((int)value);
-	if(endsWith(line,"iterationsSpin")) params->iterationsSpin->setValue((int)value);
+	if(endsWith(line,"samplingType")) params->samplingType->setCurrentIndex((int)value);
 	if(endsWith(line,"varianceSpin")) params->varianceSpin->setValue((float)value);
 	if(endsWith(line,"adaptiveCheck")) params->adaptiveCheck->setChecked((bool)value);
-	if(endsWith(line,"kSpin")) params->kSpin->setValue((int)value);
+	if(endsWith(line,"particleSpin")) params->particleSpin->setValue((int)value);
 	return true;
 }

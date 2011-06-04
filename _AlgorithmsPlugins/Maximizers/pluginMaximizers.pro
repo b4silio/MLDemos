@@ -11,15 +11,21 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsMaximizers.ui
+FORMS += paramsMaximizers.ui paramsGA.ui paramsParticles.ui
 HEADERS +=	\
 			$$MLDEMOS/canvas.h \
 			$$MLDEMOS/datasetManager.h \
 			$$MLDEMOS/mymaths.h \
 			maximizeRandom.h \
 			maximizePower.h \
-			interfaceMaximizers.h \
-			pluginMaximizers.h
+			maximizeGA.h \
+			maximizeParticles.h \
+			pluginMaximizers.h \
+			interfaceParticles.h \
+			interfaceGA.h \
+			gaPeon.h \
+			gaTrainer.h \
+    interfaceBasic.h
 
 SOURCES += 	\
 			$$MLDEMOS/canvas.cpp \
@@ -27,8 +33,14 @@ SOURCES += 	\
 			$$MLDEMOS/mymaths.cpp \
 			maximizeRandom.cpp \
 			maximizePower.cpp \
-			interfaceMaximizers.cpp \
-			pluginMaximizers.cpp
+			maximizeGA.cpp \
+			maximizeParticles.cpp \
+			pluginMaximizers.cpp \
+			interfaceGA.cpp \
+			interfaceParticles.cpp \
+			gaPeon.cpp \
+			gaTrainer.cpp \
+    interfaceBasic.cpp
 
 ###########################
 # Dependencies            #

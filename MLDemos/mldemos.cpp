@@ -77,7 +77,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
 	canvas->ResizeEvent();
 	canvas->repaint();
 
-    drawTime.start();
+	drawTime.start();
     if(filename != "") Load(filename);
 }
 
@@ -115,6 +115,11 @@ void MLDemos::initToolBars()
     actionClustering->setStatusTip(tr("Cluster the data"));
     actionClustering->setCheckable(true);
 
+	actionMaximizers = new QAction(QIcon(":/MLDemos/icons/maximize.png"), tr("&Maximize"), this);
+	actionMaximizers->setShortcut(QKeySequence(tr("M")));
+	actionMaximizers->setStatusTip(tr("Maximize Reward Function"));
+	actionMaximizers->setCheckable(true);
+
     actionDrawSamples = new QAction(QIcon(":/MLDemos/icons/draw.png"), tr("&Drawing"), this);
     actionDrawSamples->setShortcut(QKeySequence(tr("W")));
     actionDrawSamples->setStatusTip(tr("Show Sample Drawing Options"));
@@ -145,8 +150,9 @@ void MLDemos::initToolBars()
     connect(actionClassifiers, SIGNAL(triggered()), this, SLOT(ShowOptionClass()));
     connect(actionRegression, SIGNAL(triggered()), this, SLOT(ShowOptionRegress()));
     connect(actionDynamical, SIGNAL(triggered()), this, SLOT(ShowOptionDynamical()));
-    connect(actionClustering, SIGNAL(triggered()), this, SLOT(ShowOptionCluster()));
-    connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
+	connect(actionClustering, SIGNAL(triggered()), this, SLOT(ShowOptionCluster()));
+	connect(actionMaximizers, SIGNAL(triggered()), this, SLOT(ShowOptionMaximize()));
+	connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
@@ -166,20 +172,21 @@ void MLDemos::initToolBars()
 
 	toolBar = addToolBar("Tools");
     toolBar->setObjectName("MainToolBar");
-	//toolBar->setMovable(false);
-	//toolBar->setFloatable(false);
-    toolBar->setIconSize(QSize(64,64));
+	toolBar->setMovable(false);
+	toolBar->setFloatable(false);
+	toolBar->setIconSize(QSize(48,48));
     toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
     toolBar->addAction(actionNew);
     toolBar->addAction(actionLoad);
     toolBar->addAction(actionSave);
     toolBar->addSeparator();
-    toolBar->addAction(actionClustering);
     toolBar->addAction(actionClassifiers);
-    toolBar->addAction(actionRegression);
-    toolBar->addAction(actionDynamical);
-    toolBar->addSeparator();
+	toolBar->addAction(actionClustering);
+	toolBar->addAction(actionRegression);
+	toolBar->addAction(actionDynamical);
+	toolBar->addAction(actionMaximizers);
+	toolBar->addSeparator();
     toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
     toolBar->addSeparator();
@@ -382,9 +389,11 @@ void MLDemos::initPlugins()
 #endif
     bool bFoundPlugins = false;
 #if defined(DEBUG)
+	qDebug() << "looking for debug plugins";
     bFoundPlugins = pluginsDir.cd("pluginsDebug");
 #else
-    bFoundPlugins = pluginsDir.cd("plugins");
+	qDebug() << "looking for release plugins";
+	bFoundPlugins = pluginsDir.cd("plugins");
 #endif
 	if(!bFoundPlugins)
     {
@@ -658,6 +667,28 @@ void MLDemos::resizeEvent( QResizeEvent *event )
 	CanvasMoveEvent();
 }
 
+void MLDemos::AlgoChanged()
+{
+	ChangeInfoFile();
+	actionClassifiers->setChecked(algorithmOptions->tabClass->isVisible());
+	actionClustering->setChecked(algorithmOptions->tabClust->isVisible());
+	actionRegression->setChecked(algorithmOptions->tabRegr->isVisible());
+	actionDynamical->setChecked(algorithmOptions->tabDyn->isVisible());
+	actionMaximizers->setChecked(algorithmOptions->tabMax->isVisible());
+	if(actionMaximizers->isChecked())
+	{
+		drawToolbar->paintButton->setChecked(true);
+		drawToolbar->paintButton->setDefault(true);
+		DrawPaint();
+	}
+	if(actionDynamical->isChecked())
+	{
+		drawToolbar->trajectoryButton->setChecked(true);
+		drawToolbar->trajectoryButton->setDefault(true);
+		DrawTrajectory();
+	}
+}
+
 void MLDemos::ShowOptionClass()
 {
     if(actionClassifiers->isChecked())
@@ -668,7 +699,8 @@ void MLDemos::ShowOptionClass()
     else algorithmWidget->hide();
     actionClustering->setChecked(false);
     actionRegression->setChecked(false);
-    actionDynamical->setChecked(false);
+	actionDynamical->setChecked(false);
+	actionMaximizers->setChecked(false);
 }
 
 void MLDemos::ShowOptionRegress()
@@ -681,7 +713,8 @@ void MLDemos::ShowOptionRegress()
     else algorithmWidget->hide();
     actionClustering->setChecked(false);
     actionClassifiers->setChecked(false);
-    actionDynamical->setChecked(false);
+	actionDynamical->setChecked(false);
+	actionMaximizers->setChecked(false);
 }
 
 void MLDemos::ShowOptionDynamical()
@@ -690,11 +723,14 @@ void MLDemos::ShowOptionDynamical()
     {
         algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabDyn);
         algorithmWidget->show();
-    }
+		drawToolbar->trajectoryButton->setChecked(true);
+		DrawTrajectory();
+	}
     else algorithmWidget->hide();
     actionClustering->setChecked(false);
     actionClassifiers->setChecked(false);
     actionRegression->setChecked(false);
+	actionMaximizers->setChecked(false);
 }
 
 void MLDemos::ShowOptionCluster()
@@ -708,18 +744,19 @@ void MLDemos::ShowOptionCluster()
 	actionClassifiers->setChecked(false);
 	actionRegression->setChecked(false);
 	actionDynamical->setChecked(false);
+	actionMaximizers->setChecked(false);
 }
 
 void MLDemos::ShowOptionMaximize()
 {
-	/*
- if(actionMaximize->isChecked())
- {
-  algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
-  algorithmWidget->show();
- }
- else algorithmWidget->hide();
- */
+	if(actionMaximizers->isChecked())
+	{
+		algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
+		algorithmWidget->show();
+		drawToolbar->paintButton->setChecked(true);
+		DrawPaint();
+	}
+	else algorithmWidget->hide();
 	actionClustering->setChecked(false);
 	actionClassifiers->setChecked(false);
 	actionRegression->setChecked(false);
@@ -788,7 +825,7 @@ void MLDemos::HideOptionCluster()
 void MLDemos::HideOptionMaximize()
 {
 	if(algorithmOptions->tabMax->isVisible()) algorithmWidget->hide();
-	//actionMaximize->setChecked(false);
+	actionMaximizers->setChecked(false);
 }
 
 void MLDemos::HideSampleDrawing()
@@ -1063,8 +1100,7 @@ void MLDemos::DisplayOptionChanged()
     canvas->repaint();
 }
 
-
-void MLDemos::AlgoChanged()
+void MLDemos::ChangeInfoFile()
 {
 	QString infoFile;
 	if(algorithmOptions->tabClass->isVisible())
@@ -1176,7 +1212,7 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-	break;
+		break;
 	case 2: // spray
 	case 3: // erase
     {
@@ -1185,7 +1221,7 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-	break;
+		break;
 	case 7: // obstacles
     {
         Obstacle o;
@@ -1202,7 +1238,7 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-	break;
+		break;
 	case 8: // paint
 	{
 		float radius = drawToolbarContext4->spinRadius->value();
@@ -1212,7 +1248,7 @@ void MLDemos::DrawCrosshair()
 		canvas->bNewCrosshair = false;
 		return;
 	}
-	break;
+		break;
 	}
 
     QPointF oldPoint, point;
@@ -1271,7 +1307,7 @@ void MLDemos::Drawing( fvec sample, int label)
 		if(drawTime.elapsed() < 50/speed) return; // msec elapsed since last drawing
 		canvas->data->AddSample(sample, label);
 	}
-	break;
+		break;
 	case 2: // spray samples
 	{
 		// we don't want to draw too often
@@ -1306,7 +1342,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			}
 		}
 	}
-	break;
+		break;
 	case 3: // erase
 	{
 		float s = drawToolbarContext1->spinSize->value();
@@ -1323,7 +1359,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			canvas->ResetSamples();
 		}
 	}
-	break;
+		break;
 	case 4: // ellipse
 	{
 		if(drawTime.elapsed() < 200/speed) return; // msec elapsed since last drawing
@@ -1358,7 +1394,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			oldPoint = point;
 		}
 	}
-	break;
+		break;
 	case 5: // line
 	{
 		if(drawTime.elapsed() < 200/speed) return; // msec elapsed since last drawing
@@ -1386,7 +1422,7 @@ void MLDemos::Drawing( fvec sample, int label)
 			oldPoint = point;
 		}
 	}
-	break;
+		break;
 	case 6: // trajectory
 	{
 		if(trajectory.first == -1) // we're starting a trajectory
@@ -1398,7 +1434,7 @@ void MLDemos::Drawing( fvec sample, int label)
 		canvas->data->AddSample(sample, label, _TRAJ);
 		trajectory.second = canvas->data->GetCount()-1;
 	}
-	break;
+		break;
 	case 7: // obstacle
 	{
 		bNewObstacle = true;
@@ -1412,7 +1448,7 @@ void MLDemos::Drawing( fvec sample, int label)
 		obstacle.repulsion[0] = drawToolbarContext3->spinRepulsionX->value();
 		obstacle.repulsion[1] = drawToolbarContext3->spinRepulsionX->value();
 	}
-	break;
+		break;
 	case 8: // paint rewards
 	{
 		float radius = drawToolbarContext4->spinRadius->value();
@@ -1434,7 +1470,7 @@ void MLDemos::Drawing( fvec sample, int label)
   //qDebug() << canvas->data->GetReward()->ValueAt(sample);
   */
 	}
-	break;
+		break;
 	}
 	canvas->repaint();
 	drawTime.restart();

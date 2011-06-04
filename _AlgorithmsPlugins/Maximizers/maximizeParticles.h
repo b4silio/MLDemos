@@ -16,20 +16,31 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "pluginMaximizers.h"
-#include "interfaceBasic.h"
-#include "interfaceGA.h"
-#include "interfaceParticles.h"
+#ifndef _MAXIMIZE_PARTICLES_H_
+#define _MAXIMIZE_PARTICLES_H_
 
-using namespace std;
+#include <vector>
+#include "maximize.h"
 
-PluginMaximizer::PluginMaximizer()
+class MaximizeParticles : public Maximizer
 {
-	maximizers.push_back(new MaximizeBasic());
-	maximizers.push_back(new MaximizeInterfaceGA());
-	maximizers.push_back(new MaximizeInterfaceParticles());
-}
+private:
+	std::vector<fvec> particles;
+	fvec weights;
+	int particleCount;
+	bool bAdaptive;
+	float variance;
+public:
+	MaximizeParticles();
+	~MaximizeParticles();
 
-#ifndef PLUGIN_MAXIMIZE
-Q_EXPORT_PLUGIN2(mld_Maximizer, PluginMaximizer)
-#endif
+	void SetParams(int particleCount, float variance, bool bAdaptive, int samplingType);
+
+	void Draw(QPainter &painter);
+	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
+	fvec Test( const fvec &sample);
+	fvec Test(const fVec &sample);
+	char *GetInfoString();
+};
+
+#endif // _MAXIMIZE_PARTICLES_H_

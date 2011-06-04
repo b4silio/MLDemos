@@ -733,6 +733,11 @@ void Canvas::DrawLiveTrajectory(QPainter &painter)
 void Canvas::ResizeEvent()
 {
 	bNewCrosshair = true;
+	if(!rewardPixmap.isNull())
+	{
+		QPixmap newReward(width(), height());
+		newReward = rewardPixmap.scaled(newReward.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	}
 	RedrawAxes();
 }
 
@@ -926,6 +931,7 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
 		bitmap.clear();
 		rewardPixmap.setMask(bitmap);
 		rewardPixmap.fill(Qt::transparent);
+		rewardPixmap.fill(Qt::white);
 	}
 	QPainter painter(&rewardPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -933,9 +939,16 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
 
 	QPointF center = toCanvasCoords(sample);
 	QRadialGradient gradient( center, radius*.75);
-	if(shift > 0) gradient.setColorAt(0, QColor(255,0,0,shift*255));
-	else gradient.setColorAt(0, QColor(255,255,255,-shift*255));
-	gradient.setColorAt(1, QColor(255,255,255,0));
+	if(shift > 0)
+	{
+		gradient.setColorAt(0, QColor(255,0,0,shift*255));
+		gradient.setColorAt(1, QColor(255,0,0,0));
+	}
+	else
+	{
+		gradient.setColorAt(0, QColor(255,255,255,-shift*255));
+		gradient.setColorAt(1, QColor(255,255,255,0));
+	}
 	painter.setBrush(gradient);
 	//if(shift > 0) painter.setBrush(QColor(255,0,0,shift*255));
 	//else painter.setBrush(QColor(255,255,255,-shift*255));

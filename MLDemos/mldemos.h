@@ -54,7 +54,7 @@ class MLDemos : public QMainWindow
 	Q_OBJECT
 
 private:
-	QAction *actionClassifiers, *actionRegression, *actionDynamical,
+	QAction *actionClassifiers, *actionRegression, *actionDynamical, *actionMaximizers,
 	*actionClustering, *actionDrawSamples,
 	*actionDisplayOptions, *actionShowStats,
 	*actionClearData, *actionClearModel, *actionScreenshot,
@@ -229,6 +229,7 @@ private slots:
 	void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
 	void AlgoChanged();
+	void ChangeInfoFile();
 	void TargetButton();
 
 	void ShowContextMenuSpray(const QPoint &point);

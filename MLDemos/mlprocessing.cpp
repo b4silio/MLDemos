@@ -631,7 +631,8 @@ void MLDemos::Train(Maximizer *maximizer)
 
 	FOR(i, w*h)
 	{
-		data[i] = qRed(pixels[i]) / 255.f; // all data is in a 0-1 range
+		data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+		//data[i] = qRed(pixels[i])*(qAlpha(pixels[i]) / 255.f)/255.f; // all data is in a 0-1 range
 	}
 	fvec startingPoint;
 	if(canvas->targets.size())

@@ -49,6 +49,13 @@ public:
 	std::vector<double> &HistoryValue(){return historyValue;};
 	fvec &Maximum(){return maximum;};
 	std::vector<fvec> &Visited(){return visited;};
+	float GetValue(fvec sample)
+	{
+		int xIndex = max(0, min(w-1, (int)(sample[0]*w)));
+		int yIndex = max(0, min(h-1, (int)(sample[1]*h)));
+		int index = yIndex*w + xIndex;
+		return data[index];
+	}
 
 	virtual void Draw(QPainter &painter){};
 	virtual void Train(float *dataMap, fVec size, fvec startingPoint=fvec()){};

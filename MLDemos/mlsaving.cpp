@@ -115,6 +115,10 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("tab", optionsCluster->tabWidget->currentIndex());
 	settings.endGroup();
 
+	settings.beginGroup("maximizeOptions");
+	settings.setValue("tab", optionsMaximize->tabWidget->currentIndex());
+	settings.endGroup();
+
 	settings.beginGroup("statsOptions");
 	settings.setValue("tab", showStats->tabWidget->currentIndex());
 	settings.endGroup();
@@ -186,6 +190,7 @@ void MLDemos::LoadLayoutOptions()
 	actionRegression->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabRegr);
 	actionDynamical->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabDyn);
 	actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClust);
+	actionMaximizers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabMax);
 	actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
 	actionDisplayOptions->setChecked(displayDialog->isVisible());
 	actionShowStats->setChecked(statsDialog->isVisible());
@@ -250,6 +255,10 @@ void MLDemos::LoadLayoutOptions()
 
 	settings.beginGroup("clusterOptions");
 	if(settings.contains("tab")) optionsCluster->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+	settings.endGroup();
+
+	settings.beginGroup("maximizeOptions");
+	if(settings.contains("tab")) optionsMaximize->tabWidget->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -464,6 +473,7 @@ void MLDemos::LoadParams( QString filename )
 		actionRegression->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabRegr);
 		actionDynamical->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabDyn);
 		actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClust);
+		actionMaximizers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabMax);
 		//actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabMax);
 	}
 }

@@ -145,5 +145,4 @@ static inline fvec RandN(int dim, float mean=0.f, float sigma=1.f)
 	return res;
 }
 
-
 #endif // _MY_MATHS_H

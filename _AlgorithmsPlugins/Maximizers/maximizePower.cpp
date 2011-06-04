@@ -108,10 +108,7 @@ void MaximizePower::Train(float *dataMap, fVec size, fvec startingPoint)
 	if(startingPoint.size())
 	{
 		maximum = startingPoint;
-		int xIndex = startingPoint[0]*w;
-		int yIndex = startingPoint[1]*h;
-		int index = min(w*h, max(0, yIndex*w + xIndex));
-		float value = data[index];
+		float value = GetValue(startingPoint);
 		maximumValue = value;
 		history.push_back(maximum);
 		HistoryValue().push_back(value);
@@ -141,10 +138,7 @@ fvec MaximizePower::Test( const fvec &sample)
 				} while(randSample[d] < 0 || randSample[d] > 1.f || tries-- > 0);
 			}
 			visited.push_back(randSample);
-			int xIndex = randSample[0]*w;
-			int yIndex = randSample[1]*h;
-			int index = min(w*h, max(0, yIndex*w + xIndex));
-			float value = data[index];
+			float value = GetValue(randSample);
 			best.push_back(make_pair(value, make_pair(randSample, sigma)));
 		}
 		std::sort(best.begin(), best.end());
@@ -160,13 +154,14 @@ fvec MaximizePower::Test( const fvec &sample)
 			if(bAdaptive) randSample[d] = newSample[d] + RandN(0.f, sqrtf(lastSigma[d]));
 			else randSample[d] = newSample[d] + RandN(0.f, variance);
 		} while(randSample[d] < 0 || randSample[d] > 1.f || tries-- > 0);
+		if(randSample[d] != randSample[d]) // nan!
+		{
+			randSample[d] = drand48();
+		}
 	}
 
 	newSample = randSample;
-	int xIndex = newSample[0]*w;
-	int yIndex = newSample[1]*h;
-	int index = min(w*h, max(0, yIndex*w + xIndex));
-	float value = data[index];
+	float value = GetValue(randSample);
 	visited.push_back(newSample);
 
 	if(!bAdaptive)
@@ -189,15 +184,24 @@ fvec MaximizePower::Test( const fvec &sample)
 		{
 			FOR(d, dim)
 			{
-				maximum += (best[i].second.first*best[i].first);
-				maximumValue += best[i].first;
+				float value = best[i].first;
+				fvec sample = best[i].second.first;
+				maximum += (sample*value);
+				maximumValue += value;
 			}
 		}
-
-		maximum /= maximumValue;
+		if(maximumValue == 0)
+		{
+			maximum = newSample;
+		}
+		else
+		{
+			maximum /= maximumValue;
+		}
 		FOR(d, dim) maximum[d] = max(0.f, min(1.f,maximum[d]));
 		history.push_back(maximum);
 		historyValue.push_back(maximumValue);
+		//newSample = maximum;
 	}
 	else
 	{

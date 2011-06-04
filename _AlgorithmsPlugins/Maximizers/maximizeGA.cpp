@@ -19,33 +19,35 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "basicMath.h"
-#include "maximizeRandom.h"
+#include "maximizeGA.h"
 #include <QDebug>
 
 using namespace std;
 
-MaximizeRandom::MaximizeRandom()
+MaximizeGA::MaximizeGA()
+	: mutation(0.01), cross(0.5), survival(0.3), population(50), trainer(0)
 {
-	data = 0;
 	dim = 2;
 	maximum.resize(dim);
 	FOR(d,dim) maximum[d] = rand()/(float)RAND_MAX;
-	variance = 0;
 }
 
-MaximizeRandom::~MaximizeRandom()
+MaximizeGA::~MaximizeGA()
 {
 	KILL(data);
+	DEL(trainer);
 }
 
-void MaximizeRandom::SetParams(float variance)
+void MaximizeGA::SetParams(double mutation, double cross, double survival, int population)
 {
-	this->variance = variance;
+	this->mutation = mutation;
+	this->cross = cross;
+	this->survival = survival;
+	this->population = population;
 }
 
-void MaximizeRandom::Draw(QPainter &painter)
+void MaximizeGA::Draw(QPainter &painter)
 {
-
 	painter.setPen(QPen(Qt::black, 1.5));
 	painter.setBrush(Qt::NoBrush);
 	FOR(i, visited.size())
@@ -59,30 +61,30 @@ void MaximizeRandom::Draw(QPainter &painter)
 	{
 		QPointF point(history[i][0]*w, history[i][1]*h);
 		QPointF pointNext(history[i+1][0]*w, history[i+1][1]*h);
-
 		painter.setBrush(Qt::NoBrush);
 		painter.drawLine(point, pointNext);
-		painter.setBrush(QColor(255*(1-historyValue[i]), 255, 255*(1-historyValue[i])));
-		painter.drawEllipse(point, 5, 5);
+		painter.setBrush(Qt::white);
+		painter.drawEllipse(point, 4, 4);
+	}
+
+	if(trainer)
+	{
+		// draw the current population
+		FOR(i, trainer->Population().size())
+		{
+			fvec sample = trainer->Population()[i].ToSample();
+			QPointF point(sample[0]*w, sample[1]*h);
+			painter.setBrush(Qt::green);
+			painter.drawEllipse(point, 3, 3);
+		}
 	}
 	// we draw the current maximum
 	QPointF point(history[history.size()-1][0]*w, history[history.size()-1][1]*h);
 	painter.setBrush(QColor(255*(1-historyValue[history.size()-1]), 255, 255*(1-historyValue[history.size()-1])));
 	painter.drawEllipse(point, 5, 5);
-
-	if(variance > 0)
-	{
-		QPointF maxPoint(maximum[0]*w, maximum[1]*h);
-		int radius = (int)(variance * max(w,h));
-		painter.setBrush(Qt::NoBrush);
-		painter.setPen(QPen(Qt::black,1.5));
-		painter.drawEllipse(maxPoint, radius,radius);
-		painter.setPen(QPen(Qt::black,0.5));
-		painter.drawEllipse(maxPoint, radius*2,radius*2);
-	}
 }
 
-void MaximizeRandom::Train(float *dataMap, fVec size, fvec startingPoint)
+void MaximizeGA::Train(float *dataMap, fVec size, fvec startingPoint)
 {
 	w = size.x;
 	h = size.y;
@@ -96,58 +98,37 @@ void MaximizeRandom::Train(float *dataMap, fVec size, fvec startingPoint)
 		float value = GetValue(startingPoint);
 		maximumValue = value;
 		history.push_back(maximum);
-		HistoryValue().push_back(value);
+		historyValue.push_back(value);
 		qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
 	}
+	DEL(trainer);
+	trainer = new GATrain(data, w, h, population, dim);
+	trainer->AlphaMute(mutation);
+	trainer->AlphaCross(cross);
+	trainer->AlphaSurvivors(survival);
+	trainer->Generate(population);
 }
 
-fvec MaximizeRandom::Test( const fvec &sample)
+fvec MaximizeGA::Test( const fvec &sample)
 {
 	if(bConverged) return maximum;
-	fvec newSample;
-	if(variance == 0) // we're doing random search
-	{
-		newSample.resize(dim);
-		FOR(d, dim) newSample[d] = (rand()/(float)RAND_MAX);
-	}
-	else // we're doing random walk
-	{
-		newSample = sample;
-		if(!sample.size()) newSample = maximum;
-
-		fvec randSample; randSample.resize(dim);
-		int tries = 64;
-		bool bInsideLimits = true;
-		do
-		{
-			randSample = newSample + RandN(dim, 0, variance);
-			FOR(d, dim) bInsideLimits &= randSample[d] >= 0.f && randSample[d] <= 1.f;
-			tries--;
-		}while(tries && !bInsideLimits);
-		newSample = randSample;
-	}
-	visited.push_back(newSample);
-	float value = GetValue(newSample);
-	if(value > maximumValue)
-	{
-		maximum = newSample;
-		maximumValue = value;
-		history.push_back(maximum);
-		historyValue.push_back(value);
-		qDebug() << "new maximum found at " << maximum[0] << " : " << maximum[1] << " \tvalue: " << value;
-	}
-	return newSample;
+	//FOR(i, trainer->Population().size()) visited.push_back(trainer->Population()[i].ToSample());
+	trainer->NextGen();
+	maximum = trainer->Best().ToSample();
+	maximumValue = trainer->BestFitness();
+	history.push_back(maximum);
+	historyValue.push_back(maximumValue);
+	return maximum;
 }
 
-fvec MaximizeRandom::Test(const fVec &sample)
+fvec MaximizeGA::Test(const fVec &sample)
 {
 	return Test((fvec)sample);
 }
 
-char *MaximizeRandom::GetInfoString()
+char *MaximizeGA::GetInfoString()
 {
 	char *text = new char[1024];
-	if(variance == 0) sprintf(text, "Random Search");
-	else sprintf(text, "Random Walk\n");
+	sprintf(text, "Genetic Algorithm\n");
 	return text;
 }

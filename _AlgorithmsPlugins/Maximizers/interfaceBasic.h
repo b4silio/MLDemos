@@ -49,6 +49,8 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(std::ofstream &stream);
 	bool LoadParams(char *line, float value);
+public slots:
+	void ChangeOptions();
 };
 
 #endif // _INTERFACE_MAXIMIZERS_H_
