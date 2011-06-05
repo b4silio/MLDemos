@@ -174,8 +174,8 @@ void MLDemos::initToolBars()
     toolBar->setObjectName("MainToolBar");
 	toolBar->setMovable(false);
 	toolBar->setFloatable(false);
-	toolBar->setIconSize(QSize(48,48));
-    toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	toolBar->setIconSize(QSize(32,32));
+	toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     toolBar->addAction(actionNew);
     toolBar->addAction(actionLoad);
@@ -200,6 +200,31 @@ void MLDemos::initToolBars()
 	connect(toolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(ShowToolbar()));
 	connect(ui.actionShow_Toolbar, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
 
+	QSize iconSize(24,24);
+	drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
+	drawToolbar->singleButton->setIconSize(iconSize);
+	drawToolbar->singleButton->setText("");
+	drawToolbar->sprayButton->setIcon(QIcon(":/MLDemos/icons/airbrush.png"));
+	drawToolbar->sprayButton->setIconSize(iconSize);
+	drawToolbar->sprayButton->setText("");
+	drawToolbar->eraseButton->setIcon(QIcon(":/MLDemos/icons/erase.png"));
+	drawToolbar->eraseButton->setIconSize(iconSize);
+	drawToolbar->eraseButton->setText("");
+	drawToolbar->trajectoryButton->setIcon(QIcon(":/MLDemos/icons/trajectory.png"));
+	drawToolbar->trajectoryButton->setIconSize(iconSize);
+	drawToolbar->trajectoryButton->setText("");
+	drawToolbar->lineButton->setIcon(QIcon(":/MLDemos/icons/line.png"));
+	drawToolbar->lineButton->setIconSize(iconSize);
+	drawToolbar->lineButton->setText("");
+	drawToolbar->ellipseButton->setIcon(QIcon(":/MLDemos/icons/ellipse.png"));
+	drawToolbar->ellipseButton->setIconSize(iconSize);
+	drawToolbar->ellipseButton->setText("");
+	drawToolbar->paintButton->setIcon(QIcon(":/MLDemos/icons/bigbrush.png"));
+	drawToolbar->paintButton->setIconSize(iconSize);
+	drawToolbar->paintButton->setText("");
+	drawToolbar->obstacleButton->setIcon(QIcon(":/MLDemos/icons/obstacle.png"));
+	drawToolbar->obstacleButton->setIconSize(iconSize);
+	drawToolbar->obstacleButton->setText("");
 }
 
 void MLDemos::initDialogs()
@@ -329,6 +354,8 @@ void MLDemos::initDialogs()
 	connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
 	connect(optionsMaximize->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
 	connect(optionsMaximize->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
+	connect(optionsMaximize->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
+	connect(optionsMaximize->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
 
     optionsClassify->tabWidget->clear();
     optionsCluster->tabWidget->clear();
@@ -1084,7 +1111,6 @@ void MLDemos::DisplayOptionChanged()
 		}
 		else if(maximizer)
 		{
-			maximizers[tabUsedForTraining]->Draw(canvas, maximizer);
 			drawTimer->start(QThread::NormalPriority);
 		}
 		canvas->repaint();
@@ -1634,32 +1660,80 @@ void MLDemos::Navigation( fvec sample )
 
 void MLDemos::TargetButton()
 {
+	QDrag *drag = new QDrag(this);
+	QMimeData *mimeData = new QMimeData;
+
+	mimeData->setText("Target");
+	drag->setMimeData(mimeData);
+	QPixmap pixmap(33,33);
+	pixmap.fill();
+	QPainter painter(&pixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setPen(QPen(Qt::black, 1.5));
+	painter.setBrush(Qt::NoBrush);
+
+	int pad = 4, radius = 8;
+	painter.drawEllipse(QPoint(16,16), radius, radius);
+	painter.setBrush(Qt::black);
+	painter.drawLine(QPoint(16,16) - QPoint(radius,radius), QPoint(16,16) - QPoint(radius+pad,radius+pad));
+	painter.drawLine(QPoint(16,16) + QPoint(radius,radius), QPoint(16,16) + QPoint(radius+pad,radius+pad));
+	painter.drawLine(QPoint(16,16) - QPoint(radius,-radius), QPoint(16,16) - QPoint(radius+pad,-radius-pad));
+	painter.drawLine(QPoint(16,16) + QPoint(radius,-radius), QPoint(16,16) + QPoint(radius+pad,-radius-pad));
+	drag->setPixmap(pixmap);
+	drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
+
+	// maximization only allows one target, so we take the others out
 	if(algorithmOptions->tabMax->isVisible())
 	{
-		QDrag *drag = new QDrag(this);
-		QMimeData *mimeData = new QMimeData;
-
-		mimeData->setText("Target");
-		drag->setMimeData(mimeData);
-		//drag->setPixmap(iconPixmap);
-
-		// maximization only allows one target
 		canvas->targets.clear();
 		canvas->repaint();
-		Qt::DropAction dropAction = drag->exec();
 	}
-	else
-	{
-		QDrag *drag = new QDrag(this);
-		QMimeData *mimeData = new QMimeData;
-
-		mimeData->setText("Target");
-		drag->setMimeData(mimeData);
-		//drag->setPixmap(iconPixmap);
-
-		Qt::DropAction dropAction = drag->exec();
-	}
+	Qt::DropAction dropAction = drag->exec();
 }
+
+void MLDemos::GaussianButton()
+{
+	QDrag *drag = new QDrag(this);
+	QMimeData *mimeData = new QMimeData;
+
+	mimeData->setText("Gaussian");
+	mimeData->setColorData(QVariant(optionsMaximize->varianceSpin->value()));
+	drag->setMimeData(mimeData);
+	QPixmap pixmap(33,33);
+	pixmap.fill();
+	QPainter painter(&pixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setPen(QPen(Qt::black, 1.5));
+	painter.setBrush(Qt::NoBrush);
+	painter.drawEllipse(QPoint(16,16), 12,12);
+	painter.setBrush(Qt::black);
+	painter.drawEllipse(QPoint(16,16), 1,1);
+	drag->setPixmap(pixmap);
+	drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
+	Qt::DropAction dropAction = drag->exec();
+}
+
+void MLDemos::GradientButton()
+{
+	QDrag *drag = new QDrag(this);
+	QMimeData *mimeData = new QMimeData;
+
+	mimeData->setText("Gradient");
+	drag->setMimeData(mimeData);
+	QPixmap pixmap(33,33);
+	pixmap.fill();
+	QPainter painter(&pixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setPen(QPen(Qt::black, 1.5));
+	painter.setBrush(Qt::NoBrush);
+	painter.drawLine(QPoint(4,16), QPoint(29,4));
+	painter.drawLine(QPoint(4,16), QPoint(29,29));
+	painter.drawLine(QPoint(29,4), QPoint(29,29));
+	drag->setPixmap(pixmap);
+	drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
+	Qt::DropAction dropAction = drag->exec();
+}
+
 
 void MLDemos::SaveData()
 {

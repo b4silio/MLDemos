@@ -227,6 +227,10 @@ void DatasetManager::ResetFlags()
 	FOR(i, samples.size()) flags[i] = _UNUSED;
 }
 
+void DatasetManager::SetSample(int index, fvec sample)
+{
+	if(index >= 0 && index < samples.size()) samples[index] = sample;
+}
 
 std::vector< fvec > DatasetManager::GetSamples(u32 count, dsmFlags flag, dsmFlags replaceWith)
 {

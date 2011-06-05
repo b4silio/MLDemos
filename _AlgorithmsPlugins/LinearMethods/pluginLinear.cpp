@@ -17,23 +17,13 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "pluginLinear.h"
-#include "interfaceBoostClassifier.h"
-#include "interfaceMLPClassifier.h"
-#include "interfaceMLPRegress.h"
-#include "interfaceMLPDynamic.h"
 #include "interfaceLinearClassifier.h"
-#include "interfaceKMCluster.h"
 
 using namespace std;
 
 PluginLinear::PluginLinear()
 {
-	classifiers.push_back(new ClassBoost());
-	classifiers.push_back(new ClassMLP());
 	classifiers.push_back(new ClassLinear());
-	clusterers.push_back(new ClustKM());
-	regressors.push_back(new RegrMLP());
-	dynamicals.push_back(new DynamicMLP());
 }
 
 #ifndef PLUGIN_CLUSTER

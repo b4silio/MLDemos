@@ -1,5 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
+
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 </head><body>
 <h2>Kernel Methods for Classification</h2>
@@ -13,6 +14,10 @@ to find relations in the data. Since the mapping can be quite general
 are accordingly very general. This approach is called the kernel trick.<br>
 <br>
 More information on <a href="http://en.wikipedia.org/wiki/Kernel_methods">Wikipedia</a>.<br>
+<br>
+The model information displays Support Vectors as black or white
+circles. When both black and white circles are shown, black circles
+correspond to SVs that fall inside or beyond the SVM margin.<br>
 <br>
 Kernel Parameters:<br>
 <ul>
@@ -35,18 +40,24 @@ Methods:<br>
   </ul>
   <li>nu-SVM: Support Vector Machine</li>
   <ul>
+    
     <li>nu: fraction of support vectors to be kept (computes C automatically)</li>
+
   </ul>
   <li>RVM: Relevance Vector Machine</li>
   <ul>
+    
     <li>eps: convergence threshold<br>
     </li>
+
   </ul>
   <li>Pegasos: Primal Estimated sub-GrAdient SOlver for SVM</li>
   <ul>
     <li>lambda: convergence threshold</li>
+    
     <li>maxSV: maximum number of support vector allowed<br>
     </li>
+
   </ul>
 </ul>
 </body></html>

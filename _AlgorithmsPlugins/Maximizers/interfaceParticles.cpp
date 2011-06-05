@@ -39,7 +39,7 @@ void MaximizeInterfaceParticles::SetParams(Maximizer *maximizer)
 	double variance = params->varianceSpin->value();
 	bool adaptive = params->adaptiveCheck->isChecked();
 	int samplingType = params->samplingType->currentIndex();
-	((MaximizeParticles *)maximizer)->SetParams(particleCount, variance, adaptive, samplingType);
+	((MaximizeParticles *)maximizer)->SetParams(particleCount, variance, adaptive);
 }
 
 Maximizer *MaximizeInterfaceParticles::GetMaximizer()
@@ -47,75 +47,6 @@ Maximizer *MaximizeInterfaceParticles::GetMaximizer()
 	Maximizer *maximizer = new MaximizeParticles();
 	SetParams(maximizer);
 	return maximizer;
-}
-
-void MaximizeInterfaceParticles::DrawInfo(Canvas *canvas, Maximizer *maximizer)
-{
-	if(!canvas || !maximizer) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->infoPixmap);
-	painter.setRenderHint(QPainter::Antialiasing);
-
-	// draw the current maximum
-	//painter.drawEllipse(QPointF());
-	canvas->infoPixmap = infoPixmap;
-}
-
-void MaximizeInterfaceParticles::Draw(Canvas *canvas, Maximizer *maximizer)
-{
-	if(!maximizer || !canvas) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, maximizer);
-	int w = canvas->width();
-	int h = canvas->height();
-
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
-	painter.setRenderHint(QPainter::Antialiasing, true);
-
-	fvec sample;
-	sample.resize(2,0);
-
-	canvas->confidencePixmap.fill();
-
-	int steps = w;
-	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
-	FOR(x, steps)
-	{
-		sample = canvas->toSampleCoords(x,0);
-		fvec res = maximizer->Test(sample);
-		if(res[0] != res[0] || res[1] != res[1]) continue;
-		QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
-		QPointF pointUp = canvas->toCanvasCoords(sample[0],res[0] + res[1]);
-		pointUp.setX(0);
-		pointUp.setY(pointUp.y() - point.y());
-		QPointF pointDown = -pointUp;
-		if(x)
-		{
-			painter.setPen(QPen(Qt::black, 1));
-			painter.drawLine(point, oldPoint);
-			painter.setPen(QPen(Qt::black, 0.5));
-			painter.drawLine(pointUp, oldPointUp);
-			painter.drawLine(pointDown, oldPointDown);
-		}
-		oldPoint = point;
-		oldPointUp = pointUp;
-		oldPointDown = pointDown;
-	}
-	canvas->repaint();
 }
 
 void MaximizeInterfaceParticles::SaveOptions(QSettings &settings)

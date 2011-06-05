@@ -16,20 +16,26 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "pluginMaximizers.h"
-#include "interfaceBasic.h"
-#include "interfaceGA.h"
-//#include "interfaceParticles.h"
+#include "pluginOpenCV.h"
+#include "interfaceBoostClassifier.h"
+#include "interfaceMLPClassifier.h"
+#include "interfaceMLPRegress.h"
+#include "interfaceMLPDynamic.h"
+#include "interfaceKMCluster.h"
 
 using namespace std;
 
-PluginMaximizer::PluginMaximizer()
+PluginOpenCV::PluginOpenCV()
 {
-	maximizers.push_back(new MaximizeBasic());
-	maximizers.push_back(new MaximizeInterfaceGA());
-//	maximizers.push_back(new MaximizeInterfaceParticles());
+	classifiers.push_back(new ClassBoost());
+	classifiers.push_back(new ClassMLP());
+	clusterers.push_back(new ClustKM());
+	regressors.push_back(new RegrMLP());
+	dynamicals.push_back(new DynamicMLP());
 }
 
-#ifndef PLUGIN_MAXIMIZE
-Q_EXPORT_PLUGIN2(mld_Maximizer, PluginMaximizer)
+#ifndef PLUGIN_CLUSTER
+#ifndef PLUGIN_CLASSIFY
+Q_EXPORT_PLUGIN2(mld_OpenCV, PluginOpenCV)
+#endif
 #endif

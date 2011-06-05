@@ -16,37 +16,29 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACE_MAXIMIZERS_H_
-#define _INTERFACE_MAXIMIZERS_H_
+#ifndef _MAXIMIZE_GRADIENT_H_
+#define _MAXIMIZE_GRADIENT_H_
 
 #include <vector>
-#include <interfaces.h>
-#include "ui_paramsMaximizers.h"
-#include <QDir>
+#include "maximize.h"
 
-class MaximizeBasic : public QObject, public MaximizeInterface
+class MaximizeGradient : public Maximizer
 {
-	Q_OBJECT
-	Q_INTERFACES(MaximizeInterface)
 private:
-	QWidget *widget;
-	Ui::ParametersMaximizers *params;
+	float strength;
+	int unmoving;
+	bool adaptive;
 public:
-	MaximizeBasic();
-	// virtual functions to manage the algorithm creation
-	Maximizer *GetMaximizer();
+	MaximizeGradient();
+	~MaximizeGradient();
 
-	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("Stochastic Methods");};
-	QString GetInfoFile(){return "maximizeStochastic.html";};
-	QWidget *GetParameterWidget(){return widget;};
-	void SetParams(Maximizer *maximizer);
-	void SaveOptions(QSettings &settings);
-	bool LoadOptions(QSettings &settings);
-	void SaveParams(std::ofstream &stream);
-	bool LoadParams(char *line, float value);
-public slots:
-	void ChangeOptions();
+	void SetParams(float strength, bool adaptive);
+
+	void Draw(QPainter &painter);
+	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
+	fvec Test( const fvec &sample);
+	fvec Test(const fVec &sample);
+	char *GetInfoString();
 };
 
-#endif // _INTERFACE_MAXIMIZERS_H_
+#endif // _MAXIMIZE_GRADIENT_H_

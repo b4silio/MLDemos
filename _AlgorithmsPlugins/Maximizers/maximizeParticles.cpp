@@ -37,7 +37,7 @@ MaximizeParticles::~MaximizeParticles()
 	KILL(data);
 }
 
-void MaximizeParticles::SetParams(int particleCount, float variance, bool bAdaptive, int samplingType)
+void MaximizeParticles::SetParams(int particleCount, float variance, bool bAdaptive)
 {
 	this->particleCount = particleCount;
 	this->variance = variance;

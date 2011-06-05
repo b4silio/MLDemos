@@ -129,8 +129,6 @@ class MaximizeInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Maximizer *GetMaximizer() = 0;
-	virtual void DrawInfo(Canvas *canvas, Maximizer *maximizer) = 0;
-	virtual void Draw(Canvas *canvas, Maximizer *maximizer) = 0;
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;

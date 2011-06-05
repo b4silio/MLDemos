@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head><body>
+<h2>Stochastic Method for Reward Maximization<br>
+</h2>
+
+
+<br>
+Here are presented some stochastic methods for exploring a policy space and maximizing an arbitrary reward function.<br>
+<br><span style="font-weight: bold;">Random Search</span><br>
+Randomly sample new policies (points) at each iteration and keep the
+maximum value found. The display shows in black all visited policies,
+and in green the best policies found at each iteartion.<br>
+<br>
+<span style="font-weight: bold;">Random Walk</span><br>
+Generate samples around the current maximum drawing from a normal distribution.<br>
+<ul>
+  
+  <li>Search Variance: variance of the normal distribution used for exploration</li>
+</ul>The display shows in green the history of the best policies found
+at each iteration, in black all policies visited so far. Ellipses
+display the search distribution (bold: 1x variance, thin: 2x variance).<br>
+<br>
+<span style="font-weight: bold;">Policy learning by Weighting Exploration with the Returns (PoWER)</span><br style="font-weight: bold;">
+PoWER uses a set of the k best policies to estimate the maximum, and explores new samples
+drawing from a normal distribution whose variance can be constant or adapted to the current best
+policies. 
+Detailed information on PoWER can be found in <a href="http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/MACH_Kober_6802%5B0%5D.pdf">this paper</a>. 
+<ul>
+
+  
+    
+  <li>Search Variance: initial variance for exploration</li>
+
+    
+  <li>Adaptive: adapt search variance as a function of the current best policies</li>
+
+    
+  <li>k: size of the set of policies kept for optimization</li>
+
+  
+</ul>
+The display shows in green the set of k policies, in white the history
+of best policies throughout the iterations, and in black all visited
+policies. Ellipses display the search distribution (bold: 1x variance,
+thin: 2x variance).<br>
+<br>
+<span style="font-weight: bold;">Particle Filters</span><br>
+Particle Filters use a set of particles (samples) to model the reward
+function. New particles are generated from the best older particles at
+each new iteration, quickly discarding particles in region that have no
+reward. More information on <a href="http://en.wikipedia.org/wiki/Particle_filter">Wikipedia</a>.
+<br>
+<ul>
+<li>Search Variance: amount of exploration done at the beginning of each iteration</li><li>Adaptive: variance is adepted as a function of the best particle weight found so far</li>
+  <li>Particles: amount of particles to be generated at each iteration</li>
+</ul>
+In its implementation here, we follow 4 steps for each iteration:<br>
+
+
+<ol>
+<li>Displace previous particles ( N(0, Search Variance) )<br>
+  </li><li>Recompute the weights for each particle</li><li>Find best particle</li><li>Sample particles for the new iteration</li><li>Check for degenerated weights and replace the corresponding particles<br>
+  </li>
+</ol>
+
+
+The display shows in green the current particles, with large radii for
+larger weights. The best particles at previous iterations are shown in
+white.<br>
+<br>
+<span style="font-weight: bold;">Gradient Descent</span><br style="font-weight: bold;">
+Gradient descent methods compute the gradient of the reward in the
+neighborhood of the current minimum (or maximum in the case of gradient
+ascent), and move the search in the direction of maximum gradient. More
+information on <a href="http://en.wikipedia.org/wiki/Gradient_descent">Wikipedia</a>.<br>
+<ul>
+<li>Speed: amount of displacement in the direction of maximum gradient.<br>
+</li><li>Adaptive: Displacement is adepted as a function of the current
+gradient (i.e. faster for large gradients, slower for small gradients)</li>
+</ul>
+The display shows in white the history of best policies found at each iteration, and in green the current best policy.<br>
+<br>
+</body></html>

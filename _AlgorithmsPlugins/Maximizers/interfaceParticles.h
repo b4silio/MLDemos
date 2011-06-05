@@ -35,8 +35,6 @@ public:
 	MaximizeInterfaceParticles();
 	// virtual functions to manage the algorithm creation
 	Maximizer *GetMaximizer();
-	void DrawInfo(Canvas *canvas, Maximizer *maximizer);
-	void Draw(Canvas *canvas, Maximizer *maximizer);
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Particle Filter");};

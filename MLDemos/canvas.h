@@ -47,7 +47,9 @@ public:
 	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0;};
 	void FitToData();
 	void RedrawAxes();
+	void PaintGaussian(QPointF position, double variance);
 	void PaintReward(fvec sample, float radius, float shift);
+	void PaintGradient(QPointF position);
 	bool bDrawing;
 	QPainterPath DrawObstacle(Obstacle o);
 	fVec center;

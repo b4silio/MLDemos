@@ -20,6 +20,7 @@ HEADERS +=	\
 			maximizePower.h \
 			maximizeGA.h \
 			maximizeParticles.h \
+			maximizeGradient.h \
 			pluginMaximizers.h \
 			interfaceParticles.h \
 			interfaceGA.h \
@@ -35,6 +36,7 @@ SOURCES += 	\
 			maximizePower.cpp \
 			maximizeGA.cpp \
 			maximizeParticles.cpp \
+			maximizeGradient.cpp \
 			pluginMaximizers.cpp \
 			interfaceGA.cpp \
 			interfaceParticles.cpp \

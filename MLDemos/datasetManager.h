@@ -268,6 +268,8 @@ public:
 
 	fvec GetSample(int index=0){return index<samples.size() ? samples[index] : fvec();};
 
+	void SetSample(int index, fvec sample);
+
 	std::vector< fvec > GetSamples(){return samples;};
 
 	std::vector< fvec > GetSamples(u32 count, dsmFlags flag=_UNUSED, dsmFlags replaceWith=_TRAIN);

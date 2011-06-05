@@ -17,10 +17,15 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>80</y>
+     <y>50</y>
      <width>101</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
    </property>
    <property name="toolTip">
     <string>Linear projection methods:
@@ -36,11 +41,6 @@ Fisher: Fisher Linear Discriminant</string>
    </item>
    <item>
     <property name="text">
-     <string>ICA</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
      <string>LDA</string>
     </property>
    </item>
@@ -51,7 +51,12 @@ Fisher: Fisher Linear Discriminant</string>
    </item>
    <item>
     <property name="text">
-     <string>Naive Bayes</string>
+     <string>ICA</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>None (Naive Bayes)</string>
     </property>
    </item>
   </widget>
@@ -59,7 +64,7 @@ Fisher: Fisher Linear Discriminant</string>
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>50</y>
+     <y>20</y>
      <width>101</width>
      <height>21</height>
     </rect>
@@ -71,6 +76,42 @@ Fisher: Fisher Linear Discriminant</string>
    </property>
    <property name="text">
     <string>Projection Method</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="projectionButton">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>90</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Show Projection</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="toCanvasButton">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>90</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Set Projection</string>
    </property>
   </widget>
  </widget>

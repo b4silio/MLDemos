@@ -34,7 +34,7 @@ public:
 	MaximizeParticles();
 	~MaximizeParticles();
 
-	void SetParams(int particleCount, float variance, bool bAdaptive, int samplingType);
+	void SetParams(int particleCount, float variance, bool bAdaptive);
 
 	void Draw(QPainter &painter);
 	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());

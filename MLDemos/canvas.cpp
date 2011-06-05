@@ -91,6 +91,17 @@ void Canvas::dropEvent(QDropEvent *event)
 		//qDebug() << "Dropping Target at coordinates: " << position;
 		targets.push_back(toSampleCoords(position.x(), position.y()));
 	}
+	else if(event->mimeData()->text() == "Gaussian")
+	{
+		QPointF position = event->pos();
+		double variance = event->mimeData()->colorData().toDouble();
+		PaintGaussian(position, variance);
+	}
+	else if(event->mimeData()->text() == "Gradient")
+	{
+		QPointF position = event->pos();
+		PaintGradient(position);
+	}
 	event->acceptProposedAction();
 }
 
@@ -954,4 +965,78 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
 	//else painter.setBrush(QColor(255,255,255,-shift*255));
 	painter.setPen(Qt::NoPen);
 	painter.drawEllipse(toCanvasCoords(sample), radius, radius);
+}
+
+void Canvas::PaintGaussian(QPointF position, double variance)
+{
+	int w = width();
+	int h = height();
+	if(rewardPixmap.isNull())
+	{
+		rewardPixmap = QPixmap(w,h);
+		QBitmap bitmap(w,h);
+		bitmap.clear();
+		rewardPixmap.setMask(bitmap);
+		rewardPixmap.fill(Qt::transparent);
+		rewardPixmap.fill(Qt::white);
+	}
+
+	QImage image(w, h, QImage::Format_ARGB32);
+	image.fill(qRgb(255,255,255));
+	fVec pos(position.x()/(float)w, position.y()/(float)h);
+	fVec point;
+	float invSigma = 1./(variance*variance);
+	float a = invSigma*sqrtf(2*PIf);
+	float value;
+	float minVal = 1e30, maxVal = -1e30;
+	qDebug() << "gaussian dropped at position " << position;
+	FOR(i, w)
+	{
+		point.x = i/(float)w;
+		FOR(j, h)
+		{
+			point.y = j/(float)h;
+			value = (pos - point).lengthSquared();
+			value = expf(-0.5*value*invSigma);
+			value = (1.f - value);
+			if(value < minVal) minVal = value;
+			if(value > maxVal) maxVal = value;
+			int color = 255.f*value;
+//			if(color > 255) color = 255;
+//			if(color < -255) color = 0;
+			//int color = min(255, max(0, (int)(255.f*(1.f - value))));
+			image.setPixel(i,j,qRgba(255, color, color, 255));
+		}
+	}
+	QPainter painter(&rewardPixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setCompositionMode(QPainter::CompositionMode_Darken);
+	painter.drawPixmap(0,0,w,h,QPixmap::fromImage(image));
+}
+
+void Canvas::PaintGradient(QPointF position)
+{
+	int w = width();
+	int h = height();
+	if(rewardPixmap.isNull())
+	{
+		rewardPixmap = QPixmap(w,h);
+		QBitmap bitmap(w,h);
+		bitmap.clear();
+		rewardPixmap.setMask(bitmap);
+		rewardPixmap.fill(Qt::transparent);
+		rewardPixmap.fill(Qt::white);
+	}
+	QPainter painter(&rewardPixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+	QPointF center(w/2.f, h/2.f);
+	QPointF opposite = center - (position-center);
+	QLinearGradient gradient(opposite, position);
+	gradient.setColorAt(0, QColor(255,255,255,255));
+	gradient.setColorAt(1, QColor(255,0,0,255));
+	painter.setBrush(gradient);
+	painter.setPen(Qt::NoPen);
+	painter.drawRect(rewardPixmap.rect());
 }

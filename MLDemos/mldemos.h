@@ -231,6 +231,8 @@ private slots:
 	void AlgoChanged();
 	void ChangeInfoFile();
 	void TargetButton();
+	void GaussianButton();
+	void GradientButton();
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);

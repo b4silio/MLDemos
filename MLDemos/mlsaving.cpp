@@ -117,6 +117,7 @@ void MLDemos::SaveLayoutOptions()
 
 	settings.beginGroup("maximizeOptions");
 	settings.setValue("tab", optionsMaximize->tabWidget->currentIndex());
+	settings.setValue("varianceSpin", optionsMaximize->varianceSpin->value());
 	settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -259,6 +260,7 @@ void MLDemos::LoadLayoutOptions()
 
 	settings.beginGroup("maximizeOptions");
 	if(settings.contains("tab")) optionsMaximize->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+	if(settings.contains("varianceSpin")) optionsMaximize->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
 	settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -363,8 +365,10 @@ void MLDemos::SaveParams( QString filename )
 	if(maximizer)
 	{
 		int tab = optionsMaximize->tabWidget->currentIndex();
+		double variance = optionsMaximize->varianceSpin->value();
 		sprintf(groupName,"maximizationOptions");
 		file << groupName << ":" << "tab" << " " << optionsMaximize->tabWidget->currentIndex() << std::endl;
+		file << groupName << ":" << "varianceSpin" << " " << optionsMaximize->varianceSpin->value() << std::endl;
 		if(tab < maximizers.size() && maximizers[tab])
 		{
 			maximizers[tab]->SaveParams(file);
@@ -457,6 +461,7 @@ void MLDemos::LoadParams( QString filename )
 			bMaxim = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
 			if(endsWith(line,"tab")) optionsMaximize->tabWidget->setCurrentIndex((int)value);
+			if(endsWith(line,"varianceSpin")) optionsMaximize->varianceSpin->setValue((double)value);
 			if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
 		}
 	}
