@@ -36,8 +36,8 @@ public:
 	DynamicSVM();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
-	void DrawInfo(Canvas *canvas, Dynamical *dynamical);
-	void Draw(Canvas *canvas, Dynamical *dynamical);
+	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Kernel");};

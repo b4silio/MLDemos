@@ -27,6 +27,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QSettings>
 #include <QFileDialog>
 #include "basicMath.h"
+#include "drawSVG.h"
 
 
 MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
@@ -56,11 +57,13 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
     connect(ui.actionExportOutput, SIGNAL(triggered()), this, SLOT(ExportOutput()));
     connect(ui.actionExportAnimation, SIGNAL(triggered()), this, SLOT(ExportAnimation()));
+	connect(ui.actionExport_SVG, SIGNAL(triggered()), this, SLOT(ExportSVG()));
 
     initDialogs();
     initToolBars();
     initPlugins();
 	LoadLayoutOptions();
+	SetTextFontSize();
     DisplayOptionChanged();
     UpdateInfo();
     FitToData();
@@ -199,6 +202,7 @@ void MLDemos::initToolBars()
 
 	connect(toolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(ShowToolbar()));
 	connect(ui.actionShow_Toolbar, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
+	connect(ui.actionSmall_Icons, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
 
 	QSize iconSize(24,24);
 	drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
@@ -495,6 +499,19 @@ void MLDemos::initPlugins()
             }
         }
     }
+}
+
+void MLDemos::SetTextFontSize()
+{
+#if defined(Q_OS_MAC)
+	return; // default fontsizes are for mac already ;)
+#endif
+	QFont font("Lucida Console", 6);
+	QList<QWidget*> children = algorithmWidget->findChildren<QWidget*>();
+	FOR(i, children.size())
+	{
+		if(children[i]) children[i]->setFont(font);
+	}
 }
 
 void MLDemos::ShowContextMenuSpray(const QPoint &point)
@@ -810,6 +827,16 @@ void MLDemos::ShowOptionDisplay()
 
 void MLDemos::ShowToolbar()
 {
+	if(ui.actionSmall_Icons->isChecked())
+	{
+		toolBar->setIconSize(QSize(32,32));
+		toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	}
+	else
+	{
+		toolBar->setIconSize(QSize(64,64));
+		toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	}
 	if(ui.actionShow_Toolbar->isChecked()) toolBar->show();
 	else toolBar->hide();
 }
@@ -885,7 +912,8 @@ void MLDemos::Clear()
     drawTimer->Stop();
     drawTimer->Clear();
     QMutexLocker lock(&mutex);
-    DEL(classifier);
+	qApp->processEvents();
+	DEL(classifier);
     DEL(regressor);
     DEL(dynamical);
 	DEL(clusterer);
@@ -1829,6 +1857,26 @@ void MLDemos::dropEvent(QDropEvent *event)
         }
     }
     event->acceptProposedAction();
+}
+
+void MLDemos::ExportSVG()
+{
+	QString filename = QFileDialog::getSaveFileName(this, tr("Save Vector Image"), "", tr("Images (*.svg)"));
+	if(filename.isEmpty()) return;
+	if(!filename.endsWith(".svg")) filename += ".svg";
+
+	DrawSVG svg(canvas, &mutex);
+	svg.classifier = classifier;
+	svg.regressor = regressor;
+	svg.clusterer = clusterer;
+	svg.dynamical = dynamical;
+	svg.maximizer = maximizer;
+	if(classifier) svg.drawClass = classifiers[tabUsedForTraining];
+	if(regressor) svg.drawRegr = regressors[tabUsedForTraining];
+	if(dynamical) svg.drawDyn = dynamicals[tabUsedForTraining];
+	if(clusterer) svg.drawClust = clusterers[tabUsedForTraining];
+	svg.Write(filename);
+	ui.statusBar->showMessage("Vector Image saved successfully");
 }
 
 void MLDemos::Screenshot()

@@ -50,6 +50,8 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("ShowDrawOptions", drawToolbarWidget->isVisible());
 	settings.setValue("ShowDisplayOptions", displayDialog->isVisible());
 	settings.setValue("ShowStatsOptions", statsDialog->isVisible());
+	settings.setValue("ShowToolbar", ui.actionShow_Toolbar->isChecked());
+	settings.setValue("SmallIcons", ui.actionSmall_Icons->isChecked());
 	settings.endGroup();
 
 	settings.beginGroup("displayOptions");
@@ -185,6 +187,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("ShowDrawOptions")) drawToolbarWidget->setVisible(settings.value("ShowDrawOptions").toBool());
 	if(settings.contains("ShowDisplayOptions")) displayDialog->setVisible(settings.value("ShowDisplayOptions").toBool());
 	if(settings.contains("ShowStatsOptions")) statsDialog->setVisible(settings.value("ShowStatsOptions").toBool());
+	if(settings.contains("ShowToolbar")) ui.actionShow_Toolbar->setChecked(settings.value("ShowToolbar").toBool());
+	if(settings.contains("SmallIcons")) ui.actionSmall_Icons->setChecked(settings.value("SmallIcons").toBool());
 	settings.endGroup();
 
 	actionClassifiers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClass);

@@ -47,18 +47,9 @@ Dynamical *DynamicGMM::GetDynamical()
 	return dynamical;
 }
 
-void DynamicGMM::DrawInfo(Canvas *canvas, Dynamical *dynamical)
+void DynamicGMM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical)
 {
 	if(!canvas || !dynamical) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	Gmm *gmm = ((DynamicalGMR*)dynamical)->gmm;
@@ -66,6 +57,7 @@ void DynamicGMM::DrawInfo(Canvas *canvas, Dynamical *dynamical)
 	float sigma[10];
 	float drawMean[2];
 	float drawSigma[3];
+	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
 	{
 		gmm->getMean(i, mean);
@@ -84,25 +76,9 @@ void DynamicGMM::DrawInfo(Canvas *canvas, Dynamical *dynamical)
 		painter.setPen(QPen(Qt::white, 2));
 		painter.drawEllipse(point, 2, 2);
 	}
-
-	canvas->infoPixmap = infoPixmap;
 }
 
-void DynamicGMM::Draw(Canvas *canvas, Dynamical *dynamical)
-{
-	if(!dynamical || !canvas) return;
-	if(!dynamical) return;
-	DrawInfo(canvas, dynamical);
-	int w = canvas->width();
-	int h = canvas->height();
-	canvas->modelPixmap = QPixmap(w,h);
-	canvas->confidencePixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	canvas->repaint();
-}
+void DynamicGMM::DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}
 
 void DynamicGMM::SaveOptions(QSettings &settings)
 {

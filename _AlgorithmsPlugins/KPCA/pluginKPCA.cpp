@@ -69,61 +69,32 @@ Classifier *ClassKPCA::GetClassifier()
 	return classifier;
 }
 
-void ClassKPCA::DrawInfo(Canvas *canvas, Classifier *classifier)
-{
-	if(!canvas || !classifier) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-	canvas->infoPixmap = infoPixmap;
-}
-
-void ClassKPCA::Draw(Canvas *canvas, Classifier *classifier)
+void ClassKPCA::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
 	if(!classifier || !canvas) return;
-
-	DrawInfo(canvas, classifier);
 	int w = canvas->width();
 	int h = canvas->height();
-	QPixmap modelPixmap(w,h);
-	QPixmap confidencePixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	modelPixmap.setMask(bitmap);
-	modelPixmap.fill(Qt::transparent);
-	confidencePixmap.setMask(bitmap);
-	confidencePixmap.fill(Qt::transparent);
-	QPainter painter(&modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	ClassifierKPCA *kpca = (ClassifierKPCA*)classifier;
 
 	vector<fvec> results = kpca->GetResults();
 	ivec labels = kpca->GetLabels();
+
+	vector<fvec> samples = kpca->GetSamples();
+	painter.setPen(QPen(Qt::black, 0.2));
+	FOR(i, samples.size())
+	{
+		QPointF pt1 = canvas->toCanvasCoords(samples[i]);
+		QPointF pt2 = canvas->toCanvasCoords(results[i]);
+		painter.drawLine(pt1, pt2);
+	}
+
 	FOR(i, results.size())
 	{
 		QPointF point = canvas->toCanvasCoords(results[i]);
 		Canvas::drawSample(painter, point, 6, labels[i] == 1);
 	}
-	canvas->modelPixmap = modelPixmap;
-
-	QPainter painter2(&confidencePixmap);
-	painter2.setRenderHint(QPainter::Antialiasing);
-	vector<fvec> samples = kpca->GetSamples();
-	painter2.setPen(QPen(Qt::black, 0.2));
-	FOR(i, samples.size())
-	{
-		QPointF pt1 = canvas->toCanvasCoords(samples[i]);
-		QPointF pt2 = canvas->toCanvasCoords(results[i]);
-		painter2.drawLine(pt1, pt2);
-	}
-	canvas->confidencePixmap = confidencePixmap;
-
-	canvas->repaint();
 }
 
 void ClassKPCA::SaveOptions(QSettings &settings)

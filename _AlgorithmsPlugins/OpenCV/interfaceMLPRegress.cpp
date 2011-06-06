@@ -48,42 +48,14 @@ Regressor *RegrMLP::GetRegressor()
 	return regressor;
 }
 
-void RegrMLP::DrawInfo(Canvas *canvas, Regressor *regressor)
-{
-	if(!canvas || !regressor) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
-	painter.setRenderHint(QPainter::Antialiasing);
-	canvas->infoPixmap = infoPixmap;
-}
-
-void RegrMLP::Draw(Canvas *canvas, Regressor *regressor)
+void RegrMLP::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, regressor);
-	int w = canvas->width();
-	int h = canvas->height();
-
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
+	int w = canvas->width();
 	fvec sample;
 	sample.resize(2,0);
-	canvas->confidencePixmap = QPixmap();
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	FOR(x, steps)
@@ -99,7 +71,6 @@ void RegrMLP::Draw(Canvas *canvas, Regressor *regressor)
 		}
 		oldPoint = point;
 	}
-	canvas->repaint();
 }
 
 void RegrMLP::SaveOptions(QSettings &settings)

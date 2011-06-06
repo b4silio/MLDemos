@@ -54,6 +54,7 @@ unix{
 INCLUDEPATH += /usr/include/qt4 \
 	/usr/include/qt4/QtCore \
 	/usr/include/qt4/QtGui \
+	/usr/include/qt4/QtSvg \
 	/usr/include/qt4/QtOpenGL
 LIBS += -L/usr/local/lib
 }

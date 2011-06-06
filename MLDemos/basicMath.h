@@ -25,6 +25,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <math.h>
 
 #define PIf	3.1415926535897932384626433832795f
+#ifdef WIN32
+#define drand48() (rand()/(float)RAND_MAX)
+#endif
 
 /*!
  * Cubic interpolation class adapted from an algorithm by Marino 'Mutilate' Alge

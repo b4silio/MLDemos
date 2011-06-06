@@ -37,8 +37,8 @@ public:
 	ClassSVM();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
-	void DrawInfo(Canvas *canvas, Classifier *classifier);
-	void Draw(Canvas *canvas, Classifier *classifier);
+	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
+	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Kernel");};

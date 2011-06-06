@@ -3,6 +3,7 @@
 # ##########################
 TEMPLATE = app
 QT -= network
+QT += svg
 TARGET = mldemos
 NAME = mldemos
 MLPATH =..
@@ -38,23 +39,6 @@ macx{
 # ##########################
 # Source Files       #
 # ##########################
-macx{
-FORMS += uiMac/aboutDialog.ui \
-	uiMac/algorithmOptions.ui \
-	uiMac/optsClassify.ui \
-	uiMac/optsCluster.ui \
-	uiMac/optsRegress.ui \
-	uiMac/optsMaximize.ui \
-	uiMac/optsDynamic.ui \
-	uiMac/mldemos.ui \
-	uiMac/drawingTools.ui \
-	uiMac/drawingToolsContext1.ui \
-	uiMac/drawingToolsContext2.ui \
-	uiMac/drawingToolsContext3.ui \
-	uiMac/drawingToolsContext4.ui \
-	uiMac/statisticsDialog.ui \
-	uiMac/viewOptions.ui
-} else {
 FORMS += aboutDialog.ui \
 	algorithmOptions.ui \
 	optsClassify.ui \
@@ -70,13 +54,14 @@ FORMS += aboutDialog.ui \
 	drawingToolsContext4.ui \
 	statisticsDialog.ui \
 	viewOptions.ui
-}
+
 HEADERS += basicMath.h \
     canvas.h \
     datasetManager.h \
     gettimeofday.h \
-    drawUtils.h \
-    drawTimer.h \
+	drawUtils.h \
+	drawSVG.h \
+	drawTimer.h \
     mldemos.h \
     mymaths.h \
     public.h \
@@ -94,7 +79,8 @@ HEADERS += basicMath.h \
 SOURCES += canvas.cpp \
     datasetManager.cpp \
     drawUtils.cpp \
-    drawTimer.cpp \
+	drawSVG.cpp \
+	drawTimer.cpp \
     main.cpp \
 	mldemos.cpp \
     mlprocessing.cpp \

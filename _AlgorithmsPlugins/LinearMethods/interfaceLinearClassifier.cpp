@@ -56,19 +56,10 @@ bool ClassLinear::UsesDrawTimer()
 	return params->linearTypeCombo->currentIndex() == 4; // naive bayes is drawn "normally"
 }
 
-void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
+void ClassLinear::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
 	if(!canvas || !classifier) return;
 	if(!this->canvas) this->canvas = canvas;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 	ClassifierLinear *linear = (ClassifierLinear*)classifier;
 	fvec mean = linear->GetMean();
@@ -90,26 +81,17 @@ void ClassLinear::DrawInfo(Canvas *canvas, Classifier *classifier)
 		painter.setPen(QPen(Qt::black, 2));
 		painter.drawLine(point[0], point[1]);
 	}
-	canvas->infoPixmap = infoPixmap;
 	if(projectionWindow && projectionWindow->isVisible()) ShowProjection();
 }
 
-void ClassLinear::Draw(Canvas *canvas, Classifier *classifier)
+void ClassLinear::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
 	if(!classifier || !canvas) return;
 	if(!this->canvas) this->canvas = canvas;
-	canvas->liveTrajectory.clear();
-	int w = canvas->width();
-	int h = canvas->height();
+	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	int posClass = 1;
-
-	canvas->modelPixmap = QPixmap();
-
-	DrawInfo(canvas, classifier);
-
 	bool bUseMinMax = true;
-
 	float resMin = FLT_MAX;
 	float resMax = -FLT_MAX;
 	if(bUseMinMax)
@@ -125,18 +107,6 @@ void ClassLinear::Draw(Canvas *canvas, Classifier *classifier)
 		if(resMin == resMax) resMin -= 3;
 	}
 
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->confidencePixmap.setMask(bitmap);
-	canvas->confidencePixmap.fill(Qt::transparent);
-
-	// we draw the samples
-	canvas->modelPixmap = QPixmap(w,h);
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
-	painter.setRenderHint(QPainter::Antialiasing, true);
 	FOR(i, canvas->data->GetCount())
 	{
 		fvec sample = canvas->data->GetSample(i);
@@ -154,7 +124,6 @@ void ClassLinear::Draw(Canvas *canvas, Classifier *classifier)
 			else Canvas::drawCross(painter, point, 6, 0);
 		}
 	}
-	canvas->repaint();
 }
 
 void ClassLinear::SaveOptions(QSettings &settings)

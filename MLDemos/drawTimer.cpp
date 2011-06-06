@@ -284,7 +284,28 @@ void DrawTimer::Test(int start, int stop)
 		}
 		else if(*clusterer)
 		{
-			val = (*clusterer)->Test(sample);
+			fvec res = (*clusterer)->Test(sample);
+			float r=0,g=0,b=0;
+			if(res.size() > 1)
+			{
+				FOR(i, res.size())
+				{
+					r += CVColor[(i+1)%CVColorCnt].red()*res[i];
+					g += CVColor[(i+1)%CVColorCnt].green()*res[i];
+					b += CVColor[(i+1)%CVColorCnt].blue()*res[i];
+				}
+			}
+			else if(res.size())
+			{
+				r = (1-res[0])*255 + res[0]* 255;
+				g = (1-res[0])*255;
+				b = (1-res[0])*255;
+			}
+			if( r < 10 && g < 10 && b < 10) r = b = g = 255;
+			QColor c = QColor(r,g,b);
+			drawMutex.lock();
+			bigMap.setPixel(x,y,c.rgb());
+			drawMutex.unlock();
 		}
 		else if(*dynamical)
 		{
@@ -401,7 +422,28 @@ void DrawTimer::TestFast(int start, int stop)
 		}
 		else if(*clusterer)
 		{
-			val = (*clusterer)->Test(sample);
+			fvec res = (*clusterer)->Test(sample);
+			float r=0,g=0,b=0;
+			if(res.size() > 1)
+			{
+				FOR(i, res.size())
+				{
+					r += CVColor[(i+1)%CVColorCnt].red()*res[i];
+					g += CVColor[(i+1)%CVColorCnt].green()*res[i];
+					b += CVColor[(i+1)%CVColorCnt].blue()*res[i];
+				}
+			}
+			else if(res.size())
+			{
+				r = (1-res[0])*255 + res[0]* 255;
+				g = (1-res[0])*255;
+				b = (1-res[0])*255;
+			}
+			if( r < 10 && g < 10 && b < 10) r = b = g = 255;
+			QColor c = QColor(r,g,b);
+			drawMutex.lock();
+			bigMap.setPixel(x,y,c.rgb());
+			drawMutex.unlock();
 		}
 		else if(*dynamical)
 		{

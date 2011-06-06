@@ -46,39 +46,13 @@ Classifier *ClassKNN::GetClassifier()
 	return classifier;
 }
 
-void ClassKNN::DrawInfo(Canvas *canvas, Classifier *classifier)
-{
-	if(!canvas || !classifier) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-	canvas->infoPixmap = infoPixmap;
-}
-
-void ClassKNN::Draw(Canvas *canvas, Classifier *classifier)
+void ClassKNN::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
 	if(!classifier || !canvas) return;
-	canvas->liveTrajectory.clear();
 	int w = canvas->width();
 	int h = canvas->height();
 
 	int posClass = 1;
-
-	canvas->modelPixmap = QPixmap();
-
-	DrawInfo(canvas, classifier);
-
-	// we draw the samples
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	FOR(i, canvas->data->GetCount())
 	{
@@ -97,9 +71,6 @@ void ClassKNN::Draw(Canvas *canvas, Classifier *classifier)
 			else Canvas::drawCross(painter, point, 6, 0);
 		}
 	}
-	// drawing a bunch of tests for debugging purposes
-
-	canvas->repaint();
 }
 
 void ClassKNN::SaveOptions(QSettings &settings)

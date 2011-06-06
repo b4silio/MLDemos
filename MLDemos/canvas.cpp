@@ -117,11 +117,8 @@ void Canvas::SetModelImage(QImage image)
 	repaint();
 }
 
-void Canvas::paintEvent(QPaintEvent *event)
+void Canvas::Paint(QPainter &painter, bool bSvg)
 {
-	if(bDrawing) return;
-	bDrawing = true;
-	QPainter painter(this);
 	painter.setBackgroundMode(Qt::OpaqueMode);
 	painter.setBackground(Qt::white);
 
@@ -142,30 +139,41 @@ void Canvas::paintEvent(QPaintEvent *event)
 			painter.setBackgroundMode(Qt::TransparentMode);
 			painter.drawPixmap(geometry(), rewardPixmap);
 		}
-		DrawSamples();
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), samplesPixmap);
-		DrawObstacles();
-		painter.drawPixmap(geometry(), obstaclesPixmap);
+		if(bSvg) DrawSamples(painter);
+		else
+		{
+			DrawSamples();
+			painter.setBackgroundMode(Qt::TransparentMode);
+			painter.drawPixmap(geometry(), samplesPixmap);
+		}
+		DrawObstacles(painter);
+		//painter.drawPixmap(geometry(), obstaclesPixmap);
 	}
 	if(bDisplayTrajectories)
 	{
-		DrawTrajectories();
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), trajectoriesPixmap);
+		if(bSvg)
+		{
+			DrawTrajectories(painter);
+		}
+		else
+		{
+			DrawTrajectories();
+			painter.setBackgroundMode(Qt::TransparentMode);
+			painter.drawPixmap(geometry(), trajectoriesPixmap);
+		}
 		if(targets.size()) DrawTargets(painter);
 	}
-	if(bDisplayLearned && !modelPixmap.isNull())
+	if(!bSvg && bDisplayLearned && !modelPixmap.isNull())
 	{
 		painter.setBackgroundMode(Qt::TransparentMode);
 		painter.drawPixmap(geometry(), modelPixmap);
 	}
-	if(bDisplayInfo && !infoPixmap.isNull())
+	if(!bSvg && bDisplayInfo && !infoPixmap.isNull())
 	{
 		painter.setBackgroundMode(Qt::TransparentMode);
 		painter.drawPixmap(geometry(), infoPixmap);
 	}
-	if(bShowCrosshair)
+	if(!bSvg && bShowCrosshair)
 	{
 		if(bNewCrosshair) emit DrawCrosshair();
 		painter.setBackgroundMode(Qt::TransparentMode);
@@ -174,10 +182,26 @@ void Canvas::paintEvent(QPaintEvent *event)
 	}
 	if(bDisplayGrid)
 	{
-		if(gridPixmap.isNull()) RedrawAxes();
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), gridPixmap);
+		if(!bSvg)
+		{
+		}
+		else
+		{
+			if(gridPixmap.isNull()) RedrawAxes();
+			painter.setBackgroundMode(Qt::TransparentMode);
+			painter.drawPixmap(geometry(), gridPixmap);
+		}
 	}
+
+}
+
+
+void Canvas::paintEvent(QPaintEvent *event)
+{
+	if(bDrawing) return;
+	bDrawing = true;
+	QPainter painter(this);
+	Paint(painter);
 	bDrawing = false;
 }
 
@@ -331,15 +355,10 @@ void Canvas::FitToData()
 	SetZoom(min(1/diffY,1/diffX));
 }
 
-void Canvas::RedrawAxes()
+void Canvas::DrawAxes(QPainter &painter)
 {
 	int w = width();
 	int h = height();
-	gridPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	gridPixmap.setMask(bitmap);
-	gridPixmap.fill(Qt::transparent);
 	// we find out how 'big' the space is
 	QRectF bounding = canvasRect();
 	// we round up the size to the closest decimal
@@ -355,8 +374,8 @@ void Canvas::RedrawAxes()
 		while(scale / mult < 5 && mult != 0) mult /= 2.f; // we want at least 5 lines to draw
 	}
 	if(mult == 0) mult = 1;
+
 	// we now have the measure of the ticks, we can draw this
-	QPainter painter(&gridPixmap);
 	painter.setRenderHint(QPainter::TextAntialiasing);
 	painter.setFont(QFont("Lucida Grande", 9));
 	for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
@@ -375,6 +394,34 @@ void Canvas::RedrawAxes()
 		painter.drawLine(0, canvasY, w, canvasY);
 		painter.setPen(QPen(Qt::black, 0.5));
 		painter.drawText(2, canvasY, QString("%1").arg((int)(y/mult)*mult));
+	}
+}
+
+void Canvas::RedrawAxes()
+{
+	int w = width();
+	int h = height();
+	gridPixmap = QPixmap(w,h);
+	QBitmap bitmap(w,h);
+	bitmap.clear();
+	gridPixmap.setMask(bitmap);
+	gridPixmap.fill(Qt::transparent);
+
+	QPainter painter(&gridPixmap);
+	DrawAxes(painter);
+}
+
+void Canvas::DrawSamples(QPainter &painter)
+{
+	int radius = 10;
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
+	for(int i=0; i<data->GetCount(); i++)
+	{
+		if(data->GetFlag(i) == _TRAJ) continue;
+		int label = data->GetLabel(i);
+		QPointF point = toCanvasCoords(data->GetSample(i));
+		Canvas::drawSample(painter, point, (data->GetFlag(i)==_TRAJ)?5:radius, bDisplaySingle ? 0 : label);
 	}
 }
 
@@ -473,17 +520,8 @@ QPainterPath Canvas::DrawObstacle(Obstacle o)
 	return obstaclePath;
 }
 
-void Canvas::DrawObstacles()
+void Canvas::DrawObstacles(QPainter &painter)
 {
-	int w = width();
-	int h = height();
-	obstaclesPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	obstaclesPixmap.setMask(bitmap);
-	obstaclesPixmap.fill(Qt::transparent);
-
-	QPainter painter(&obstaclesPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 	// we draw the obstacles
@@ -513,6 +551,20 @@ void Canvas::DrawObstacles()
 		painter.setPen(QPen(Qt::black, 1,Qt::DotLine));
 		painter.drawPath(safeties[i]);
 	}
+}
+
+void Canvas::DrawObstacles()
+{
+	int w = width();
+	int h = height();
+	obstaclesPixmap = QPixmap(w,h);
+	QBitmap bitmap(w,h);
+	bitmap.clear();
+	obstaclesPixmap.setMask(bitmap);
+	obstaclesPixmap.fill(Qt::transparent);
+
+	QPainter painter(&obstaclesPixmap);
+	DrawObstacles(painter);
 }
 
 void Canvas::DrawRewards()
@@ -551,6 +603,135 @@ void Canvas::DrawRewards()
 			painter.setBrush(color);
 			painter.setPen(Qt::black);
 			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
+		}
+	}
+}
+
+void Canvas::DrawTrajectories(QPainter &painter)
+{
+	int w = width();
+	int h = height();
+	int count = data->GetCount();
+
+	bool bDrawing = false;
+
+	vector<ipair> sequences = data->GetSequences();
+	int start=0, stop=0;
+	if(data->GetFlag(count-1) == _TRAJ)
+	{
+		if(sequences.size()) stop = sequences[sequences.size()-1].second;
+		if(stop < count-1) // there's an unfinished trajectory
+		{
+			stop++;
+			for(start=count-1; start >= stop && data->GetFlag(start) == _TRAJ; start--);
+			sequences.push_back(ipair(start+(sequences.size() ? 1 : 0),count-1));
+			bDrawing = true;
+		}
+	}
+
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+	vector<fvec> samples = data->GetSamples();
+
+	map<int,int> counts;
+	centers.clear();
+	if(trajectoryCenterType)
+	{
+		FOR(i, sequences.size())
+		{
+			int index = sequences[i].first;
+			if(trajectoryCenterType==1) // end
+			{
+				index = sequences[i].second;
+			}
+			int label = data->GetLabel(index);
+			if(!centers.count(label))
+			{
+				fvec center;
+				center.resize(2,0);
+				centers[label] = center;
+				counts[label] = 0;
+			}
+			centers[label] += samples[index];
+			counts[label]++;
+		}
+
+		for(map<int,int>::iterator p = counts.begin(); p!=counts.end(); ++p)
+		{
+			int label = p->first;
+			centers[label] /= p->second;
+		}
+	}
+
+	// do the interpolation
+	vector< vector<fvec> > trajectories;
+	vector<fvec> diffs;
+	ivec trajLabels;
+	FOR(i, sequences.size())
+	{
+		start = sequences[i].first;
+		stop = sequences[i].second;
+		int label = data->GetLabel(start);
+		fvec diff;
+		if(trajectoryCenterType && (i < sequences.size()-1 || !bDrawing))
+		{
+			diff = centers[label] - samples[trajectoryCenterType==1?stop:start];
+		}
+		else diff.resize(2,0);
+		vector<fvec> trajectory;
+		trajectory.resize(stop-start+1);
+		int pos = 0;
+		for (int j=start; j<=stop; j++)
+		{
+			trajectory[pos++] = samples[j] + diff;
+		}
+		switch (trajectoryResampleType)
+		{
+		case 0: // do nothing
+			break;
+		case 1: // uniform resampling
+		{
+			if(i < sequences.size()-1 || !bDrawing)
+			{
+				trajectory = interpolate(trajectory, trajectoryResampleCount);
+			}
+		}
+			break;
+		case 2: // spline resampling
+		{
+			if(i < sequences.size()-1 || !bDrawing)
+			{
+				trajectory = interpolate(trajectory, trajectoryResampleCount);
+			}
+		}
+			break;
+		}
+		trajectories.push_back(trajectory);
+		trajLabels.push_back(data->GetLabel(start));
+	}
+
+	// let's draw the trajectories
+	FOR(i, trajectories.size())
+	{
+		fvec oldPt = trajectories[i][0];
+		int count = trajectories[i].size();
+		int label = trajLabels[i];
+		FOR(j, count-1)
+		{
+			fvec pt = trajectories[i][j+1];
+			painter.setPen(QPen(Qt::black, 0.5));
+			painter.drawLine(toCanvasCoords(pt), toCanvasCoords(oldPt));
+			if(j<count-2) Canvas::drawSample(painter, toCanvasCoords(pt), 5, bDisplaySingle ? 0 : label);
+			oldPt = pt;
+		}
+		painter.setBrush(Qt::NoBrush);
+		painter.setPen(Qt::green);
+		painter.drawEllipse(toCanvasCoords(trajectories[i][0]), 5, 5);
+		if(!bDrawing)
+		{
+			painter.setPen(Qt::red);
+			painter.drawEllipse(toCanvasCoords(trajectories[i][count-1]), 5, 5);
 		}
 	}
 }
@@ -862,44 +1043,13 @@ QPixmap Canvas::GetScreenshot()
 {
 	QPixmap screenshot(width(), height());
 	QPainter painter(&screenshot);
+	bool tmp = bShowCrosshair;
 	painter.setBackgroundMode(Qt::OpaqueMode);
 	painter.setBackground(Qt::white);
-
-	painter.fillRect(geometry(),Qt::white);
-
-	if(bDisplayMap && !confidencePixmap.isNull()) painter.drawPixmap(geometry(), confidencePixmap);
-	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing);
-
-	if(bDisplaySamples)
-	{
-		DrawSamples();
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), samplesPixmap);
-	}
-
-	if(bDisplayTrajectories)
-	{
-		DrawTrajectories();
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), trajectoriesPixmap);
-	}
-
-	if(bDisplayLearned && !modelPixmap.isNull())
-	{
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), modelPixmap);
-	}
-
-
-	if(bDisplayInfo && !infoPixmap.isNull())
-	{
-		painter.setBackgroundMode(Qt::TransparentMode);
-		painter.drawPixmap(geometry(), infoPixmap);
-	}
+	Paint(painter);
+	bShowCrosshair = tmp;
 	return screenshot;
 }
-
 
 bool Canvas::DeleteData( QPointF center, float radius )
 {

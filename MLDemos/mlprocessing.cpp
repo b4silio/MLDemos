@@ -59,7 +59,7 @@ void MLDemos::Classify()
     bool trained = Train(classifier, positive, trainRatio);
     if(trained)
     {
-        classifiers[tab]->Draw(canvas, classifier);
+		classifiers[tab]->Draw(canvas, classifier);
         if(drawTimer && classifier->UsesDrawTimer())
         {
             drawTimer->classifier = &this->classifier;
@@ -257,8 +257,12 @@ void MLDemos::Cluster()
     Train(clusterer);
 	drawTimer->Stop();
 	drawTimer->Clear();
-    clusterers[tab]->Draw(canvas,clusterer);
-    UpdateInfo();
+	clusterers[tab]->Draw(canvas,clusterer);
+
+	drawTimer->clusterer= &this->clusterer;
+	drawTimer->start(QThread::NormalPriority);
+
+	UpdateInfo();
 }
 
 void MLDemos::ClusterIterate()

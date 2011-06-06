@@ -71,23 +71,16 @@ Clusterer *ClustSVM::GetClusterer()
 	return clusterer;
 }
 
-void ClustSVM::DrawInfo(Canvas *canvas, Clusterer *clusterer)
+void ClustSVM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 {
 	if(!canvas || !clusterer) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
 
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 	if(clusterer->type == CLUS_SVR)
 	{
 		// we want to draw the support vectors
 		svm_model *svm = ((ClustererSVR*)clusterer)->GetModel();
+		painter.setBrush(Qt::NoBrush);
 		if(svm)
 		{
 			f32 sv[2];
@@ -114,65 +107,11 @@ void ClustSVM::DrawInfo(Canvas *canvas, Clusterer *clusterer)
 			}
 		}
 	}
-	canvas->infoPixmap = infoPixmap;
+
 }
 
-void ClustSVM::Draw(Canvas *canvas, Clusterer *clusterer)
+void ClustSVM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 {
-	if(!canvas || !clusterer) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, clusterer);
-	int w = canvas->width();
-	int h = canvas->height();
-
-	bool bDrawConfidence = canvas->bDisplayMap;
-
-	if(bDrawConfidence)
-	{
-		QImage pixels(QSize(canvas->width(), canvas->height()), QImage::Format_RGB32);
-		pixels.fill(0xffffff);
-
-		fvec sample;
-		sample.resize(2,0);
-		FOR(y, pixels.height())
-		{
-			FOR(x, pixels.width())
-			{
-				sample = canvas->toSampleCoords(x,y);
-				fvec res = clusterer->Test(sample);
-				float r=0,g=0,b=0;
-				if(res.size() > 1)
-				{
-					FOR(i, res.size())
-					{
-						r += CVColor[(i+1)%CVColorCnt].red()*res[i];
-						g += CVColor[(i+1)%CVColorCnt].green()*res[i];
-						b += CVColor[(i+1)%CVColorCnt].blue()*res[i];
-					}
-				}
-				else if(res.size())
-				{
-					r = (1-res[0])*255 + res[0]* 255;
-					g = (1-res[0])*255;
-					b = (1-res[0])*255;
-				}
-				if( r < 10 && g < 10 && b < 10) r = b = g = 255;
-				pixels.setPixel(x,y,qRgb(r,g,b));
-			}
-		}
-		canvas->confidencePixmap = QPixmap::fromImage(pixels);
-	}
-	else
-	{
-		canvas->confidencePixmap = QPixmap();
-	}
-
-	QPixmap modelPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	modelPixmap.setMask(bitmap);
-	modelPixmap.fill(Qt::transparent);
-	QPainter painter(&modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	FOR(i, canvas->data->GetSamples().size())
@@ -200,8 +139,6 @@ void ClustSVM::Draw(Canvas *canvas, Clusterer *clusterer)
 		painter.setPen(Qt::black);
 		painter.drawEllipse(point,5,5);
 	}
-	canvas->modelPixmap = modelPixmap;
-	canvas->repaint();
 }
 
 void ClustSVM::SaveOptions(QSettings &settings)

@@ -48,37 +48,12 @@ Classifier *ClassMLP::GetClassifier()
 	return classifier;
 }
 
-void ClassMLP::DrawInfo(Canvas *canvas, Classifier *classifier)
-{
-	if(!canvas || !classifier) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-	canvas->infoPixmap = infoPixmap;
-}
-
-void ClassMLP::Draw(Canvas *canvas, Classifier *classifier)
+void ClassMLP::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
 	if(!classifier || !canvas) return;
-	canvas->liveTrajectory.clear();
-	int w = canvas->width();
-	int h = canvas->height();
-
+	painter.setRenderHint(QPainter::Antialiasing, true);
 	int posClass = 1;
-
-	canvas->modelPixmap = QPixmap();
-
-	DrawInfo(canvas, classifier);
-
-	bool bUseMinMax = false;
-	if(classifier->type == CLASS_BOOST ||
-		classifier->type == CLASS_LINEAR ||
-		classifier->type == CLASS_MLP) bUseMinMax = true;
-
+	bool bUseMinMax = true;
 	float resMin = FLT_MAX;
 	float resMax = -FLT_MAX;
 	if(bUseMinMax)
@@ -93,15 +68,6 @@ void ClassMLP::Draw(Canvas *canvas, Classifier *classifier)
 		}
 		if(resMin == resMax) resMin -= 3;
 	}
-
-	// we draw the samples
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
-	painter.setRenderHint(QPainter::Antialiasing, true);
 	FOR(i, canvas->data->GetCount())
 	{
 		fvec sample = canvas->data->GetSample(i);
@@ -119,9 +85,6 @@ void ClassMLP::Draw(Canvas *canvas, Classifier *classifier)
 			else Canvas::drawCross(painter, point, 6, 0);
 		}
 	}
-
-	canvas->repaint();
-	canvas->confidencePixmap = QPixmap();
 }
 
 void ClassMLP::SaveOptions(QSettings &settings)

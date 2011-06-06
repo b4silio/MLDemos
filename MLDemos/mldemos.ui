@@ -80,6 +80,7 @@
      <property name="title">
       <string>Export</string>
      </property>
+     <addaction name="actionExport_SVG"/>
      <addaction name="actionExportOutput"/>
      <addaction name="actionExportAnimation"/>
     </widget>
@@ -96,13 +97,20 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <widget class="QMenu" name="menuDisplay_Options">
+     <property name="title">
+      <string>Toolbar Options</string>
+     </property>
+     <addaction name="actionShow_Toolbar"/>
+     <addaction name="actionSmall_Icons"/>
+    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionClearModel"/>
     <addaction name="actionClearData"/>
     <addaction name="separator"/>
-    <addaction name="actionShow_Toolbar"/>
+    <addaction name="menuDisplay_Options"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="enabled">
@@ -271,6 +279,22 @@
    </property>
    <property name="text">
     <string>Show Toolbar</string>
+   </property>
+  </action>
+  <action name="actionSmall_Icons">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Small Icons</string>
+   </property>
+  </action>
+  <action name="actionExport_SVG">
+   <property name="text">
+    <string>Vector Image (SVG)</string>
    </property>
   </action>
  </widget>

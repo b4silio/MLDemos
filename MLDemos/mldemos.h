@@ -126,6 +126,7 @@ private:
 	void initPlugins();
 	void SaveLayoutOptions();
 	void LoadLayoutOptions();
+	void SetTextFontSize();
 	void SaveParams(QString filename);
 	void LoadParams(QString filename);
 	void Load(QString filename);
@@ -203,6 +204,7 @@ private slots:
 	void LoadData();
 	void ExportOutput();
 	void ExportAnimation();
+	void ExportSVG();
 	void Screenshot();
 	void ToClipboard();
 

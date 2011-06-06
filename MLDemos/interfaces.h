@@ -31,6 +31,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QtPlugin>
 #include <QWidget>
 #include <QSettings>
+#include <QBitmap>
+#include <QPainter>
 #include <QUrl>
 
 class ClassifierInterface
@@ -38,8 +40,8 @@ class ClassifierInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Classifier *GetClassifier() = 0;
-	virtual void DrawInfo(Canvas *canvas, Classifier *classifier) = 0;
-	virtual void Draw(Canvas *canvas, Classifier *classifier) = 0;
+	virtual void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
+	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -50,6 +52,37 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(std::ofstream &stream) = 0;
 	virtual bool LoadParams(char *line, float value) = 0;
+
+	// drawing function
+	void Draw(Canvas *canvas, Classifier *classifier)
+	{
+		if(!classifier || !canvas) return;
+		canvas->liveTrajectory.clear();
+		int w = canvas->width();
+		int h = canvas->height();
+
+		{
+			canvas->modelPixmap = QPixmap(w,h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			canvas->modelPixmap.setMask(bitmap);
+			canvas->modelPixmap.fill(Qt::transparent);
+			QPainter painter(&canvas->modelPixmap);
+			DrawModel(canvas, painter, classifier);
+		}
+
+		{
+			canvas->infoPixmap = QPixmap(w,h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			canvas->infoPixmap.setMask(bitmap);
+			canvas->infoPixmap.fill(Qt::transparent);
+			QPainter painter(&canvas->infoPixmap);
+			DrawInfo(canvas, painter, classifier);
+		}
+		canvas->confidencePixmap = QPixmap();
+		canvas->repaint();
+	}
 };
 
 class ClustererInterface
@@ -57,8 +90,8 @@ class ClustererInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Clusterer *GetClusterer() = 0;
-	virtual void DrawInfo(Canvas *canvas, Clusterer *clusterer) = 0;
-	virtual void Draw(Canvas *canvas, Clusterer *clusterer) = 0;
+	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
+	virtual void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -69,6 +102,37 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(std::ofstream &stream) = 0;
 	virtual bool LoadParams(char *line, float value) = 0;
+
+
+	void Draw(Canvas *canvas, Clusterer *clusterer)
+	{
+		if(!canvas || !clusterer) return;
+		canvas->liveTrajectory.clear();
+		int w = canvas->width();
+		int h = canvas->height();
+		{
+			QPixmap modelPixmap(w, h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			modelPixmap.setMask(bitmap);
+			modelPixmap.fill(Qt::transparent);
+			QPainter painter(&modelPixmap);
+			DrawModel(canvas, painter, clusterer);
+			canvas->modelPixmap = modelPixmap;
+		}
+
+		{
+			QPixmap infoPixmap(w, h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			infoPixmap.setMask(bitmap);
+			infoPixmap.fill(Qt::transparent);
+			QPainter painter(&infoPixmap);
+			DrawInfo(canvas, painter, clusterer);
+			canvas->infoPixmap = infoPixmap;
+		}
+		canvas->repaint();
+	}
 };
 
 class RegressorInterface
@@ -76,8 +140,10 @@ class RegressorInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Regressor *GetRegressor() = 0;
-	virtual void DrawInfo(Canvas *canvas, Regressor *regressor) = 0;
-	virtual void Draw(Canvas *canvas, Regressor *regressor) = 0;
+	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
+	virtual void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
+	virtual void DrawConfidence(Canvas *canvas, Regressor *regressor) = 0;
+
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -88,6 +154,40 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(std::ofstream &stream) = 0;
 	virtual bool LoadParams(char *line, float value) = 0;
+
+	void Draw(Canvas *canvas, Regressor *regressor)
+	{
+		if(!regressor || !canvas) return;
+		canvas->liveTrajectory.clear();
+		int w = canvas->width();
+		int h = canvas->height();
+
+		{
+			canvas->confidencePixmap = QPixmap(w,h);
+			canvas->modelPixmap = QPixmap(w,h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			canvas->modelPixmap.setMask(bitmap);
+			canvas->modelPixmap.fill(Qt::transparent);
+			QPainter painter(&canvas->modelPixmap);
+			DrawModel(canvas, painter, regressor);
+		}
+
+		{
+			QPixmap infoPixmap(w, h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			infoPixmap.setMask(bitmap);
+			infoPixmap.fill(Qt::transparent);
+			QPainter painter(&infoPixmap);
+			DrawInfo(canvas, painter, regressor);
+			canvas->infoPixmap = infoPixmap;
+		}
+
+		DrawConfidence(canvas, regressor);
+		canvas->repaint();
+	}
+
 };
 
 class DynamicalInterface
@@ -95,8 +195,8 @@ class DynamicalInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Dynamical *GetDynamical() = 0;
-	virtual void DrawInfo(Canvas *canvas, Dynamical *dynamical) = 0;
-	virtual void Draw(Canvas *canvas, Dynamical *dynamical) = 0;
+	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
+	virtual void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -108,6 +208,38 @@ public:
 	virtual void SaveParams(std::ofstream &stream) = 0;
 	virtual bool LoadParams(char *line, float value) = 0;
 	virtual bool UsesDrawTimer() = 0;
+
+	void Draw(Canvas *canvas, Dynamical *dynamical)
+	{
+		if(!dynamical || !canvas) return;
+		int w = canvas->width();
+		int h = canvas->height();
+		canvas->confidencePixmap = QPixmap(w,h);
+
+		{
+			canvas->modelPixmap = QPixmap(w,h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			canvas->modelPixmap.setMask(bitmap);
+			canvas->modelPixmap.fill(Qt::transparent);
+			QPainter painter(&canvas->modelPixmap);
+			DrawModel(canvas, painter, dynamical);
+		}
+
+		{
+			QPixmap infoPixmap(w, h);
+			QBitmap bitmap(w,h);
+			bitmap.clear();
+			infoPixmap.setMask(bitmap);
+			infoPixmap.fill(Qt::transparent);
+
+			QPainter painter(&infoPixmap);
+			DrawInfo(canvas, painter, dynamical);
+			canvas->infoPixmap = infoPixmap;
+		}
+		canvas->repaint();
+	}
+
 };
 
 class AvoidanceInterface

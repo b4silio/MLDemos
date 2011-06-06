@@ -46,22 +46,16 @@ Regressor *RegrLWPR::GetRegressor()
 	return regressor;
 }
 
-void RegrLWPR::DrawInfo(Canvas *canvas, Regressor *regressor)
+void RegrLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!canvas || !regressor) return;
 	int w = canvas->width();
 	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	RegressorLWPR* _lwpr = (RegressorLWPR*)regressor;
 	LWPR_Object *lwpr= _lwpr->GetModel();
+	painter.setBrush(Qt::NoBrush);
 	FOR(i, lwpr->numRFS()[0])
 	{
 		LWPR_ReceptiveFieldObject rf = lwpr->getRF(0,i);
@@ -80,27 +74,15 @@ void RegrLWPR::DrawInfo(Canvas *canvas, Regressor *regressor)
 		painter.drawEllipse(point, var, var);
 		painter.drawLine(point - QPointF(30, slope*var*2),point + QPointF(30, slope*var*2));
 	}
-
-	canvas->infoPixmap = infoPixmap;
 }
 
-void RegrLWPR::Draw(Canvas *canvas, Regressor *regressor)
+void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, regressor);
 	int w = canvas->width();
 	int h = canvas->height();
 
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
-
 	fvec sample;
 	sample.resize(2,0);
 	canvas->confidencePixmap = QPixmap();
@@ -108,6 +90,7 @@ void RegrLWPR::Draw(Canvas *canvas, Regressor *regressor)
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
+	painter.setBrush(Qt::NoBrush);
 	FOR(x, steps)
 	{
 		sample = canvas->toSampleCoords(x,0);
@@ -130,7 +113,6 @@ void RegrLWPR::Draw(Canvas *canvas, Regressor *regressor)
 		oldPointUp = pointUp;
 		oldPointDown = pointDown;
 	}
-	canvas->repaint();
 }
 
 void RegrLWPR::SaveOptions(QSettings &settings)

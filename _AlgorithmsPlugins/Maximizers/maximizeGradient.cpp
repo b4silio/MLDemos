@@ -110,28 +110,34 @@ fvec MaximizeGradient::Test( const fvec &sample)
 	float value = GetValue(newSample);
 	// we compute the values of the gradient in the 9 directions around
 	float values[8];
-	values[0] = GetValue(newSample + fVec(-delta	,-delta));
-	values[1] = GetValue(newSample + fVec(0		,-delta));
-	values[2] = GetValue(newSample + fVec(delta	,-delta));
-	values[3] = GetValue(newSample + fVec(-delta	,0));
-	values[4] = GetValue(newSample + fVec(delta	,0));
-	values[5] = GetValue(newSample + fVec(-delta	,+delta));
-	values[6] = GetValue(newSample + fVec(0		,+delta));
-	values[7] = GetValue(newSample + fVec(delta	,+delta));
-
 	fVec v[8];
-	v[0] = fVec(-1,-1)*(values[0]-value);
-	v[1] = fVec( 0,-1)*(values[1]-value);
-	v[2] = fVec( 1,-1)*(values[2]-value);
-	v[3] = fVec(-1, 0)*(values[3]-value);
-	v[4] = fVec( 1, 0)*(values[4]-value);
-	v[5] = fVec(-1, 1)*(values[5]-value);
-	v[6] = fVec( 0, 1)*(values[6]-value);
-	v[7] = fVec( 1, 1)*(values[7]-value);
+	int searchType = 1;
+	switch(searchType)
+	{
+	case 2: // 8 directions
+		values[0] = GetValue(newSample + fVec(-delta	,-delta));
+		values[2] = GetValue(newSample + fVec(delta	,-delta));
+		values[5] = GetValue(newSample + fVec(-delta	,+delta));
+		values[7] = GetValue(newSample + fVec(delta	,+delta));
+		v[0] = fVec(-1,-1)*(values[0]-value);
+		v[2] = fVec( 1,-1)*(values[2]-value);
+		v[5] = fVec(-1, 1)*(values[5]-value);
+		v[7] = fVec( 1, 1)*(values[7]-value);
+	case 1: // 4 directions
+		values[1] = GetValue(newSample + fVec(0		,-delta));
+		values[3] = GetValue(newSample + fVec(-delta	,0));
+		v[1] = fVec( 0,-1)*(values[1]-value);
+		v[3] = fVec(-1, 0)*(values[3]-value);
+	case 0: // 2 directions
+		values[4] = GetValue(newSample + fVec(delta	,0));
+		values[6] = GetValue(newSample + fVec(0		,+delta));
+		v[4] = fVec( 1, 0)*(values[4]-value);
+		v[6] = fVec( 0, 1)*(values[6]-value);
+	}
 
 	fVec gradient;
 	FOR(i, 8) gradient += v[i];
-	gradient /= 8.f;
+	gradient /= (float)(1<<(searchType+1));
 	if(!adaptive) // we just use the strength as factor for moving
 	{
 		gradient.normalize();
