@@ -48,6 +48,11 @@ Regressor *RegrKNN::GetRegressor()
 	return regressor;
 }
 
+void RegrKNN::DrawConfidence(Canvas *canvas, Regressor *regressor)
+{
+	canvas->confidencePixmap = QPixmap();
+}
+
 void RegrKNN::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;

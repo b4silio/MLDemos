@@ -506,12 +506,15 @@ void MLDemos::SetTextFontSize()
 #if defined(Q_OS_MAC)
 	return; // default fontsizes are for mac already ;)
 #endif
-	QFont font("Lucida Console", 6);
+	QFont font("Lucida Sans Unicode", 7);
 	QList<QWidget*> children = algorithmWidget->findChildren<QWidget*>();
 	FOR(i, children.size())
 	{
 		if(children[i]) children[i]->setFont(font);
 	}
+	optionsMaximize->gaussianButton->setFont(QFont("Lucida Sans Unicode", 18));
+	optionsMaximize->gradientButton->setFont(QFont("Lucida Sans Unicode", 18));
+	optionsMaximize->targetButton->setFont(QFont("Lucida Sans Unicode", 18));
 }
 
 void MLDemos::ShowContextMenuSpray(const QPoint &point)
@@ -722,13 +725,11 @@ void MLDemos::AlgoChanged()
 	if(actionMaximizers->isChecked())
 	{
 		drawToolbar->paintButton->setChecked(true);
-		drawToolbar->paintButton->setDefault(true);
 		DrawPaint();
 	}
 	if(actionDynamical->isChecked())
 	{
 		drawToolbar->trajectoryButton->setChecked(true);
-		drawToolbar->trajectoryButton->setDefault(true);
 		DrawTrajectory();
 	}
 }
