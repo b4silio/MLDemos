@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head><body>
+<h2>Gaussian Mixture Models</h2>
+
+<br>
+<br>
+GMM model a distribution using a number of gaussian distributions
+dispersed across the space. The algorithm presented here uses
+Expectation Maximization (EM) to fit the GMM on the data maximizing the
+lower bound on likelihood.<br>
+
+More information on <a href="http://en.wikipedia.org/wiki/Expectation-maximization_algorithm">Wikipedia</a>.<br>
+
+<br>
+
+Parameters:<br>
+
+<ul>
+<li># of components: number of gaussians that are used to model the distribution</li><li>Covariance Matrix: shape of the covariance matrix used for fitting the distribution:</li>
+  <ul>
+    <li>Full: all elements are used<br>
+    </li>
+    <li>Diagonal: only diagonal elements are used<br>
+    </li>
+    <li>Spherical: identical values are used on the diagonal<br>
+    </li>
+  </ul>
+<li>Initialization: how the means of the gaussians are initialized</li>
+  <ul>
+    <li>Random: randomly select a position in space</li>
+    <li>Uniform: set the means at uniform intervals</li>
+    <li>KMeans: use K-Means centroids as initial means<br>
+    </li>
+  </ul>
+</ul>
+
+<br>
+
+<br>
+
+</body></html>

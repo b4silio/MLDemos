@@ -51,8 +51,7 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
     </font>
    </property>
    <property name="text">
@@ -73,8 +72,7 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
     </font>
    </property>
    <property name="text">
@@ -95,8 +93,7 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
     </font>
    </property>
    <property name="text">
@@ -117,8 +114,7 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
     </font>
    </property>
    <property name="text">
@@ -139,8 +135,8 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -158,8 +154,7 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
     </font>
    </property>
    <property name="decimals">
@@ -189,8 +184,8 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -211,8 +206,8 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -230,8 +225,7 @@
    </property>
    <property name="font">
     <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>7</pointsize>
+     <family>Lucida Grande</family>
     </font>
    </property>
    <property name="text">

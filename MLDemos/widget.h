@@ -19,11 +19,38 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef QNamedWindow_H
 #define QNamedWindow_H
 
-typedef struct _IplImage IplImage;
+//typedef struct _IplImage IplImage;
+//#include <opencv/cv.h>
+//#include <opencv/highgui.h>
 
 #include <QWidget>
 //#include <QGLWidget>
 #include <QSize>
+
+enum
+{
+	CV_EVENT_MOUSEMOVE      =0,
+	CV_EVENT_LBUTTONDOWN    =1,
+	CV_EVENT_RBUTTONDOWN    =2,
+	CV_EVENT_MBUTTONDOWN    =3,
+	CV_EVENT_LBUTTONUP      =4,
+	CV_EVENT_RBUTTONUP      =5,
+	CV_EVENT_MBUTTONUP      =6,
+	CV_EVENT_LBUTTONDBLCLK  =7,
+	CV_EVENT_RBUTTONDBLCLK  =8,
+	CV_EVENT_MBUTTONDBLCLK  =9
+};
+
+enum
+{
+	CV_EVENT_FLAG_LBUTTON   =1,
+	CV_EVENT_FLAG_RBUTTON   =2,
+	CV_EVENT_FLAG_MBUTTON   =4,
+	CV_EVENT_FLAG_CTRLKEY   =8,
+	CV_EVENT_FLAG_SHIFTKEY  =16,
+	CV_EVENT_FLAG_ALTKEY    =32
+};
+
 
 class QNamedWindow : public QWidget
 {
@@ -51,13 +78,13 @@ protected:
 public:
 	bool bNewImage;
 	QNamedWindow(QString name, bool bResizable = false, QWidget *parent = 0);
-	void ShowImage(IplImage *image);
+//	void ShowImage(IplImage *image);
 	void ShowImage(QPixmap pixmap);
 	void SetMouseCallback(void (*mouseCallback)(int, int, int, int));
 	void (*mouseCallback)(int, int, int, int);
 	QPixmap Pixmap() {return pixmap;};
-	static QPixmap toPixmap(IplImage *src);
-	static IplImage *toImage(QImage image);
+//	static QPixmap toPixmap(IplImage *src);
+//	static IplImage *toImage(QImage image);
 
 signals:
 	void MouseMoveEvent(QMouseEvent *event);

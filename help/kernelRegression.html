@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head><body>
+<h2>Kernel Methods for Regression</h2>
+
+<br>
+
+Kernel Methods approach the problem by mapping the data into a high
+dimensional feature space, where each coordinate corresponds to one
+feature of the data items, transforming the data into a set of points
+in a Euclidean space. In that space, a variety of methods can be used
+to find relations in the data. Since the mapping can be quite general
+(not necessarily linear, for example), the relations found in this way
+are accordingly very general. This approach is called the kernel trick.<br>
+
+<br>
+
+More information on <a href="http://en.wikipedia.org/wiki/Kernel_methods">Wikipedia</a>.<br>
+
+<br>
+
+Kernel Parameters:<br>
+
+<ul>
+<li>Kernel Type:</li><ul><li>Linear: linear kernel<br>
+    </li><li>Polynomial: polynomial kernel</li><li>RBF: radial basis function (gaussian) kernel</li></ul><li>Kernel Width: inverse variance for the kernel function, determines the radius of influence of each sample (RBF + Poly)</li><li>Degree: degree of the polynomial (Poly)</li>
+</ul>
+
+Methods:<br>
+
+<ul>
+<li>eps-SVR: Support Vector Regression with epsilon-tube<br>
+  </li><ul><li>C: penalty parameter</li>
+    <li>eps: size of the epsilon-tube<br>
+    </li>
+</ul><li>nu-SVR: Support Vector Regression</li><ul>
+    <li>C: penalty parameter<br>
+    </li>
+<li>nu: fraction of support vectors to be kept (computes eps automatically)</li></ul><li>RVM: Relevance Vector Regression</li><ul><li>eps: convergence threshold<br>
+    </li></ul><li>SOGP: Sparse Online Gaussian Process regression<br>
+</li><ul><li>Capacity: number of bases allowed (0: automatic, -1: standard Gaussian Process Regression)</li>
+    <li>Noise: allowed noise estimation</li>
+</ul>
+  <li>KRLS: Kernel Recursive Least Square regression</li>
+  <ul>
+    <li>Tolerance: error tolerance threshold<br>
+    </li>
+  </ul>
+</ul>
+
+</body></html>

@@ -17,7 +17,6 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "interfaceGMMCluster.h"
-#include "basicOpenCV.h"
 #include "drawUtils.h"
 #include <QPixmap>
 #include <QBitmap>
@@ -48,24 +47,16 @@ Clusterer *ClustGMM::GetClusterer()
 	return clusterer;
 }
 
-void ClustGMM::DrawInfo(Canvas *canvas, Clusterer *clusterer)
+void ClustGMM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 {
 	if(!canvas || !clusterer) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	ClustererGMM * _gmm = (ClustererGMM*)clusterer;
 	Gmm *gmm = _gmm->gmm;
 	float mean[2];
 	float sigma[4];
+	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
 	{
 		gmm->getMean(i, mean);
@@ -76,82 +67,16 @@ void ClustGMM::DrawInfo(Canvas *canvas, Clusterer *clusterer)
 		painter.setPen(QPen(Qt::black, 1));
 		DrawEllipse(mean, sigma, 2, &painter, canvas);
 		QPointF point = canvas->toCanvasCoords(mean[0], mean[1]);
-		CvScalar color = CV::color[(i+1)%CV::colorCnt];
+		QColor color = CVColor[(i+1)%CVColorCnt];
 		painter.setPen(QPen(Qt::black, 12));
 		painter.drawEllipse(point, 8, 8);
-		painter.setPen(QPen(QColor(color.val[0],color.val[1],color.val[2]),4));
+		painter.setPen(QPen(color,4));
 		painter.drawEllipse(point, 8, 8);
 	}
-
-	canvas->infoPixmap = infoPixmap;
 }
 
-void ClustGMM::Draw(Canvas *canvas, Clusterer *clusterer)
+void ClustGMM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 {
-	if(!canvas || !clusterer) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, clusterer);
-	int w = canvas->width();
-	int h = canvas->height();
-
-#define RES 256
-	bool bDrawConfidence = canvas->bDisplayMap;
-
-	if(bDrawConfidence)
-	{
-		IplImage *image = NULL;
-		image = cvCreateImage(cvSize(canvas->width(),canvas->height()), 8, 3);
-		cvSet(image, CV_RGB(255,255,255));
-
-		fvec sample;
-		sample.resize(2,0);
-		FOR(y, image->height)
-		{
-			FOR(x, image->width)
-			{
-				sample = canvas->toSampleCoords(x,y);
-				fvec res = clusterer->Test(sample);
-				float r=0,g=0,b=0;
-				if(res.size() > 1)
-				{
-					FOR(i, res.size())
-					{
-						r += CV::color[(i+1)%CV::colorCnt].val[0]*res[i];
-						g += CV::color[(i+1)%CV::colorCnt].val[1]*res[i];
-						b += CV::color[(i+1)%CV::colorCnt].val[2]*res[i];
-					}
-				}
-				else if(res.size())
-				{
-					r = (1-res[0])*255 + res[0]* 255;
-					g = (1-res[0])*255;
-					b = (1-res[0])*255;
-				}
-				if( r < 10 && g < 10 && b < 10) r = b = g = 255;
-
-				image->imageData[y*image->widthStep + x*3 + 2] = (u8)r;
-				image->imageData[y*image->widthStep + x*3 + 1] = (u8)g;
-				image->imageData[y*image->widthStep + x*3 + 0] = (u8)b;
-			}
-		}
-
-		IplImage *big = cvCreateImage(cvSize(canvas->width(), canvas->height()),8,3);
-		cvResize(image, big, CV_INTER_CUBIC);
-		canvas->confidencePixmap = Canvas::toPixmap(big);
-		IMKILL(image);
-		IMKILL(big);
-	}
-	else
-	{
-		canvas->confidencePixmap = QPixmap();
-	}
-
-	QPixmap modelPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	modelPixmap.setMask(bitmap);
-	modelPixmap.fill(Qt::transparent);
-	QPainter painter(&modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	FOR(i, canvas->data->GetSamples().size())
@@ -164,9 +89,9 @@ void ClustGMM::Draw(Canvas *canvas, Clusterer *clusterer)
 		{
 			FOR(j, res.size())
 			{
-				r += CV::color[(j+1)%CV::colorCnt].val[0]*res[j];
-				g += CV::color[(j+1)%CV::colorCnt].val[1]*res[j];
-				b += CV::color[(j+1)%CV::colorCnt].val[2]*res[j];
+				r += CVColor[(j+1)%CVColorCnt].red()*res[j];
+				g += CVColor[(j+1)%CVColorCnt].green()*res[j];
+				b += CVColor[(j+1)%CVColorCnt].blue()*res[j];
 			}
 		}
 		else if(res.size())
@@ -179,8 +104,6 @@ void ClustGMM::Draw(Canvas *canvas, Clusterer *clusterer)
 		painter.setPen(Qt::black);
 		painter.drawEllipse(point,5,5);
 	}
-	canvas->modelPixmap = modelPixmap;
-	canvas->repaint();
 }
 
 void ClustGMM::SaveOptions(QSettings &settings)

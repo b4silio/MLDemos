@@ -59,9 +59,9 @@ using std::min;
 #define Truncate(a,b) a = ( a>=b ? b : a)
 
 // delete macros
+#define DEL(a) if(a){delete a; a=NULL;} // safe delete pointer
 #define KILL(a) if(a){delete [] a; a=NULL;} // safe delete []
 #define IMKILL(a) if(a) {cvReleaseImage(&(a)); (a)=NULL;} // safe delete image
-#define DEL(a) if(a){delete a; a=NULL;} // safe delete pointer
 // reading pixels from an image
 #undef RGB
 #define RGB(image,i) (image->imageData[i])
@@ -77,6 +77,7 @@ using std::min;
 #define etoc ((u64)(cvGetTickCount()/cvGetTickFrequency()) - tic_time)
 
 //
+#include <string.h>
 static bool endsWith(const char *a,const char *b)
 {
 	bool yeah = true;

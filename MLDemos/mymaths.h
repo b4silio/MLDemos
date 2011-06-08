@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _MY_MATHS_H
 
 #include <vector>
+#include <cmath>
 #include "types.h"
 
 struct fVec
@@ -36,7 +37,8 @@ struct fVec
         fVec(const float x=0, const float y=0) : x(x),y(y){};
         fVec(const float* v) : x(v[0]),y(v[1]){};
         fVec(const fVec& v) : x(v.x),y(v.y){};
-        fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
+		fVec(fvec v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
+		//fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
         union {
                 float _[2];
                 struct {float x,y;};
@@ -89,7 +91,7 @@ struct fVec
         inline int size() const{return 2;}
         inline fVec& normalize() {if(x==0 && y==0){x=1;return *this;};float l = length();x /= l;y /= l;return *this;}
         inline float lengthSquared() const {return x * x + y * y;}
-        inline float length() const {return sqrt(lengthSquared());}
+		inline float length() const {return sqrt(lengthSquared());}
 };
 
 void operator += (fvec &a, const fvec b);
@@ -111,5 +113,36 @@ bool operator != (const fvec a, const fvec b);
 bool operator != (const fvec a, const float b);
 
 std::vector<fvec> interpolate(std::vector<fvec> a, int count);
+
+// generate random sample from normal distribution
+static inline float ranf()
+{
+	return rand()/(float)RAND_MAX;
+}
+
+static inline float RandN(float mean=0.f, float sigma=1.f)
+{
+	float x1, x2, w, y1, y2;
+
+	do {
+			x1 = 2.0 * ranf() - 1.0;
+			x2 = 2.0 * ranf() - 1.0;
+			w = x1 * x1 + x2 * x2;
+	} while ( w >= 1.0 );
+
+	w = sqrt( (-2.0 * log( w ) ) / w );
+	y1 = x1 * w;
+	//y2 = x2 * w;
+	return y1*sigma + mean;
+}
+
+static inline fvec RandN(int dim, float mean=0.f, float sigma=1.f)
+{
+	if(!dim) return fvec();
+	fvec res;
+	res.resize(dim);
+	FOR(d,dim) res[d] = RandN(mean, sigma);
+	return res;
+}
 
 #endif // _MY_MATHS_H

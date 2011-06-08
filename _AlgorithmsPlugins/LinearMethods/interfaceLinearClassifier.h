@@ -31,15 +31,21 @@ class ClassLinear : public QObject, public ClassifierInterface
 private:
 	QWidget *widget;
 	Ui::ParametersLinear *params;
+	QLabel *projectionWindow;
+	Canvas *canvas;
+	ClassifierLinear *classifier;
+	std::vector<fvec> data;
+	bool bDataIsFromCanvas;
 public:
 	ClassLinear();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
-	void DrawInfo(Canvas *canvas, Classifier *classifier);
-	void Draw(Canvas *canvas, Classifier *classifier);
+	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
+	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("Linear");};
+	QString GetName(){return QString("Linear Projections");};
+	QString GetInfoFile(){return "linearClassifiers.html";};
 	bool UsesDrawTimer();
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Classifier *classifier);
@@ -47,6 +53,10 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(std::ofstream &stream);
 	bool LoadParams(char *line, float value);
+
+private slots:
+	void ShowProjection();
+	void SendToCanvas();
 };
 
 #endif // _INTERFACELINEARCLASSIFIER_H_

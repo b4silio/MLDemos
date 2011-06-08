@@ -19,7 +19,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "basicMath.h"
-#include "basicOpenCV.h"
 #include "datasetManager.h"
 #include <fstream>
 
@@ -46,6 +45,7 @@ void DatasetManager::Clear()
 	flags.clear();
 	labels.clear();
 	sequences.clear();
+	rewards.Clear();
 	KILL(perm);
 }
 
@@ -188,6 +188,11 @@ void DatasetManager::RemoveObstacle(unsigned int index)
 	obstacles.pop_back();
 }
 
+void DatasetManager::AddReward(float *values, ivec size, fvec lowerBoundary, fvec higherBoundary)
+{
+	rewards.SetReward(values, size, lowerBoundary, higherBoundary);
+}
+
 // we compare the current sample with all the ones in the dataset
 // and return the smallest distance
 double DatasetManager::Compare(fvec sample)
@@ -200,7 +205,7 @@ double DatasetManager::Compare(fvec sample)
 	FOR(i, samples.size())
 	{
 		double dist = 0;
-		FOR(j, size) dist += abs(sample[j]-samples[i][j]);
+		FOR(j, size) dist += fabs(sample[j]-samples[i][j]);
 		dist /= size;
 		if(minDist > dist)
 		{
@@ -222,6 +227,10 @@ void DatasetManager::ResetFlags()
 	FOR(i, samples.size()) flags[i] = _UNUSED;
 }
 
+void DatasetManager::SetSample(int index, fvec sample)
+{
+	if(index >= 0 && index < samples.size()) samples[index] = sample;
+}
 
 std::vector< fvec > DatasetManager::GetSamples(u32 count, dsmFlags flag, dsmFlags replaceWith)
 {

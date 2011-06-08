@@ -175,18 +175,8 @@ void DrawArrow( const QPointF &ppt, const QPointF &pt, double sze, QPainter &pai
 	painter.drawLine(pt, pb);
 }
 
-void RegrSVM::DrawInfo(Canvas *canvas, Regressor *regressor)
+void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
-	if(!canvas || !regressor) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	if(regressor->type == REGR_RVM || regressor->type == REGR_KRLS)
@@ -195,6 +185,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, Regressor *regressor)
 				((RegressorKRLS*)regressor)->GetSVs() :
 				((RegressorRVM*)regressor)->GetSVs();
 		int radius = 9;
+		painter.setBrush(Qt::NoBrush);
 		FOR(i, sv.size())
 		{
 			QPointF point = canvas->toCanvasCoords(sv[i]);
@@ -210,6 +201,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, Regressor *regressor)
 		svm_model *svm = ((RegressorSVR*)regressor)->GetModel();
 		if(svm)
 		{
+			painter.setBrush(Qt::NoBrush);
 			std::vector<fvec> samples = canvas->data->GetSamples();
 			fvec sv;
 			sv.resize(2,0);
@@ -245,6 +237,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, Regressor *regressor)
 	{
 		RegressorGPR * gpr = (RegressorGPR*)regressor;
 		int radius = 8;
+		painter.setBrush(Qt::NoBrush);
 		FOR(i, gpr->GetBasisCount())
 		{
 			fvec basis = gpr->GetBasisVector(i);
@@ -258,26 +251,51 @@ void RegrSVM::DrawInfo(Canvas *canvas, Regressor *regressor)
 			DrawArrow(pt2,pt3,10,painter);
 		}
 	}
-	canvas->infoPixmap = infoPixmap;
 }
 
-void RegrSVM::Draw(Canvas *canvas, Regressor *regressor)
+void RegrSVM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-	if(!regressor || !canvas) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, regressor);
+	if(regressor->type == REGR_GPR)
+	{
+		RegressorGPR *gpr = (RegressorGPR *)regressor;
+		if(gpr->sogp)
+		{
+			int w = canvas->width();
+			int h = canvas->height();
+			Matrix _testout;
+			ColumnVector _testin(1);
+			QImage density(QSize(256,256), QImage::Format_RGB32);
+			density.fill(0);
+			// we draw a density map for the probability
+			for (int i=0; i < density.width(); i++)
+			{
+				fvec sampleIn = canvas->toSampleCoords(i*w/density.width(),0);
+				float testin = sampleIn[0];
+				double sigma;
+				_testin(1) = testin;
+				_testout = gpr->sogp->predict(_testin, sigma);
+				sigma = sigma*sigma;
+				float testout = _testout(1,1);
+				for (int j=0; j< density.height(); j++)
+				{
+					fvec sampleOut = canvas->toSampleCoords(0,j*h/density.height());
+					float val = gpr->GetLikelihood(testout, sigma, sampleOut[1]);
+					int color = min(255,(int)(128 + val*20));
+					density.setPixel(i,j, qRgb(color,color,color));
+				}
+			}
+			canvas->confidencePixmap = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+		}
+		else canvas->confidencePixmap = QPixmap();
+	}
+	else canvas->confidencePixmap = QPixmap();
+}
+
+void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
+{
+	painter.setRenderHint(QPainter::Antialiasing, true);
 	int w = canvas->width();
 	int h = canvas->height();
-
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
-	painter.setRenderHint(QPainter::Antialiasing, true);
-
 	fvec sample;
 	sample.resize(2,0);
 	if(regressor->type == REGR_KRLS || regressor->type == REGR_RVM)
@@ -332,44 +350,7 @@ void RegrSVM::Draw(Canvas *canvas, Regressor *regressor)
 	}
 	else if(regressor->type == REGR_GPR)
 	{
-		IplImage *image = cvCreateImage(cvSize(w,h), 8, 3);
-		cvSet(image, CV_RGB(255,255,255));
-
 		RegressorGPR *gpr = (RegressorGPR *)regressor;
-		if(gpr->sogp)
-		{
-			Matrix _testout;
-			ColumnVector _testin(1);
-			CvPoint avgPoint=cvPoint(0,0), sigmaPoint1=cvPoint(0,0), sigmaPoint2=cvPoint(0,0);
-
-			IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-			cvZero(density);
-			// we draw a density map for the probability
-			for (int i=0; i < density->width; i++)
-			{
-				fvec sampleIn = canvas->toSampleCoords(i*w/density->width,0);
-				float testin = sampleIn[0];
-				double sigma;
-				_testin(1) = testin;
-				_testout = gpr->sogp->predict(_testin, sigma);
-				sigma = sigma*sigma;
-				float testout = _testout(1,1);
-				for (int j=0; j< density->height; j++)
-				{
-					fvec sampleOut = canvas->toSampleCoords(0,j*h/density->height);
-					float val = gpr->GetLikelihood(testout, sigma, sampleOut[1]);
-					cvSet2D(density, j, i, cvScalarAll(val*100));
-				}
-			}
-			IplImage *densBig = cvCloneImage(image);
-			cvResize(density, densBig, CV_INTER_CUBIC);
-			cvAddWeighted(image, 0.5, densBig, 0.5,0,image);
-			IMKILL(density);
-			IMKILL(densBig);
-		}
-
-		canvas->confidencePixmap = Canvas::toPixmap(image);
-		IMKILL(image);
 		int steps = w;
 		QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 		QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
@@ -395,8 +376,6 @@ void RegrSVM::Draw(Canvas *canvas, Regressor *regressor)
 			oldPointDown = pointDown;
 		}
 	}
-
-	canvas->repaint();
 }
 
 void RegrSVM::SaveOptions(QSettings &settings)

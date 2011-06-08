@@ -27,8 +27,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPushButton>
 #include <QGridLayout>
   
-#include <cv.h>
-#include <highgui.h>
+#include "basicOpenCV.h"
 #include <math.h>
 
 #include "widget.h"

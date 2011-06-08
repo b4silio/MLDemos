@@ -16,7 +16,6 @@ HEADERS +=	\
 			$$MLDEMOS/canvas.h \
 			$$MLDEMOS/datasetManager.h \
 			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/basicOpenCV.h \
 			svm.h \
 			SOGP.h \
 			SOGP_aux.h \
@@ -31,7 +30,6 @@ HEADERS +=	\
 			regressorKRLS.h \
 			dynamicalSVR.h \
 			dynamicalGPR.h \
-			roc.h \
 			interfaceSVMClassifier.h \
 			interfaceSVMCluster.h \
 			interfaceSVMRegress.h \
@@ -42,7 +40,6 @@ SOURCES += 	\
 			$$MLDEMOS/canvas.cpp \
 			$$MLDEMOS/datasetManager.cpp \
 			$$MLDEMOS/mymaths.cpp \
-			$$MLDEMOS/basicOpenCV.cpp \
 			svm.cpp \
 			SOGP.cpp \
 			SOGP_aux.cpp \
@@ -57,7 +54,6 @@ SOURCES += 	\
 			regressorKRLS.cpp \
 			dynamicalSVR.cpp \
 			dynamicalGPR.cpp \
-			roc.cpp \
 			interfaceSVMClassifier.cpp \
 			interfaceSVMCluster.cpp \
 			interfaceSVMRegress.cpp \

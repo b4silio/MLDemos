@@ -47,18 +47,9 @@ Regressor *RegrGMM::GetRegressor()
 	return regressor;
 }
 
-void RegrGMM::DrawInfo(Canvas *canvas, Regressor *regressor)
+void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!canvas || !regressor) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	RegressorGMR * gmr = (RegressorGMR*)regressor;
@@ -80,53 +71,47 @@ void RegrGMM::DrawInfo(Canvas *canvas, Regressor *regressor)
 		painter.setPen(QPen(Qt::white, 2));
 		painter.drawEllipse(point, 2, 2);
 	}
-	canvas->infoPixmap = infoPixmap;
 }
 
-void RegrGMM::Draw(Canvas *canvas, Regressor *regressor)
+void RegrGMM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-	if(!regressor || !canvas) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, regressor);
 	int w = canvas->width();
 	int h = canvas->height();
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
-	painter.setRenderHint(QPainter::Antialiasing, true);
-
-	fvec sample;
-	sample.resize(2,0);
 
 	RegressorGMR *gmr = ((RegressorGMR *)regressor);
 
-	IplImage *image = cvCreateImage(cvSize(w,h), 8, 3);
-	cvSet(image, CV_RGB(255,255,255));
-	IplImage *density = cvCreateImage(cvSize(256,256), 8, 3);
-	cvZero(density);
+	QImage density(QSize(256,256), QImage::Format_RGB32);
+	density.fill(0);
 	// we draw a density map for the probability
+	fvec sample;
+	sample.resize(2,0);
 	float sigma[4];
-	for (int i=0; i < density->width; i++)
+	for (int i=0; i < density.width(); i++)
 	{
-		for (int j=0; j< density->height; j++)
+		for (int j=0; j< density.height(); j++)
 		{
-			sample = canvas->toSampleCoords(i*w/density->width,j*h/density->height);
+			sample = canvas->toSampleCoords(i*w/density.width(),j*h/density.height());
 			float val = gmr->gmm->pdf(&sample[0]);
-			cvSet2D(density, j, i, cvScalarAll(128 + val*10));
+			int color = min(255,(int)(128 + val*10));
+			density.setPixel(i,j, qRgb(color,color,color));
 		}
 	}
-	cvResize(density, image, CV_INTER_CUBIC);
-	IMKILL(density);
-	canvas->confidencePixmap = Canvas::toPixmap(image);
-	IMKILL(image);
+	canvas->confidencePixmap = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
+
+void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
+{
+	if(!regressor || !canvas) return;
+	int w = canvas->width();
+	int h = canvas->height();
+	painter.setRenderHint(QPainter::Antialiasing, true);
+
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
+	fvec sample;sample.resize(2, 0);
+	painter.setBrush(Qt::NoBrush);
 	FOR(x, steps)
 	{
 		sample = canvas->toSampleCoords(x, 0);
@@ -154,8 +139,6 @@ void RegrGMM::Draw(Canvas *canvas, Regressor *regressor)
 		oldPointUp = pointUp;
 		oldPointDown = pointDown;
 	}
-
-	canvas->repaint();
 }
 
 void RegrGMM::SaveOptions(QSettings &settings)

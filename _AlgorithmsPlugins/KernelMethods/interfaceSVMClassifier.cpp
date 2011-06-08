@@ -73,44 +73,44 @@ void ClassSVM::SetParams(Classifier *classifier)
 	switch(classifier->type)
 	{
 	case CLASS_RVM:
-		{
-			ClassifierRVM *rvm = ((ClassifierRVM *)classifier);
-			rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
-		}
+	{
+		ClassifierRVM *rvm = ((ClassifierRVM *)classifier);
+		rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
+	}
 		break;
 	case CLASS_PEG:
-		{
-			ClassifierPegasos *pegasos = ((ClassifierPegasos *)classifier);
-			pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
-		}
+	{
+		ClassifierPegasos *pegasos = ((ClassifierPegasos *)classifier);
+		pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
+	}
 	case CLASS_SVM:
+	{
+		ClassifierSVM *svm = ((ClassifierSVM *)classifier);
+		switch(svmType)
 		{
-			ClassifierSVM *svm = ((ClassifierSVM *)classifier);
-			switch(svmType)
-			{
-			case 0:
-				svm->param.svm_type = C_SVC;
-				break;
-			case 1:
-				svm->param.svm_type = NU_SVC;
-				break;
-			}
-			switch(kernelType)
-			{
-			case 0:
-				svm->param.kernel_type = LINEAR;
-				break;
-			case 1:
-				svm->param.kernel_type = POLY;
-				break;
-			case 2:
-				svm->param.kernel_type = RBF;
-				break;
-			}
-			svm->param.C = svm->param.nu = svmC;
-			svm->param.gamma = 1 / kernelGamma;
-			svm->param.degree = kernelDegree;
+		case 0:
+			svm->param.svm_type = C_SVC;
+			break;
+		case 1:
+			svm->param.svm_type = NU_SVC;
+			break;
 		}
+		switch(kernelType)
+		{
+		case 0:
+			svm->param.kernel_type = LINEAR;
+			break;
+		case 1:
+			svm->param.kernel_type = POLY;
+			break;
+		case 2:
+			svm->param.kernel_type = RBF;
+			break;
+		}
+		svm->param.C = svm->param.nu = svmC;
+		svm->param.gamma = 1 / kernelGamma;
+		svm->param.degree = kernelDegree;
+	}
 	}
 }
 
@@ -134,18 +134,8 @@ Classifier *ClassSVM::GetClassifier()
 	return classifier;
 }
 
-void ClassSVM::DrawInfo(Canvas *canvas, Classifier *classifier)
+void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
-	if(!canvas || !classifier) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 	if(classifier->type == CLASS_RVM || classifier->type == CLASS_PEG)
 	{
@@ -195,22 +185,11 @@ void ClassSVM::DrawInfo(Canvas *canvas, Classifier *classifier)
 			}
 		}
 	}
-	canvas->infoPixmap = infoPixmap;
 }
 
-void ClassSVM::Draw(Canvas *canvas, Classifier *classifier)
+void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
-	if(!classifier || !canvas) return;
-	canvas->liveTrajectory.clear();
-	int w = canvas->width();
-	int h = canvas->height();
-
 	int posClass = 1;
-
-	canvas->modelPixmap = QPixmap();
-
-	DrawInfo(canvas, classifier);
-
 	bool bUseMinMax = false;
 
 	float resMin = FLT_MAX;
@@ -229,12 +208,6 @@ void ClassSVM::Draw(Canvas *canvas, Classifier *classifier)
 	}
 
 	// we draw the samples
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	FOR(i, canvas->data->GetCount())
 	{
@@ -253,9 +226,6 @@ void ClassSVM::Draw(Canvas *canvas, Classifier *classifier)
 			else Canvas::drawCross(painter, point, 6, 0);
 		}
 	}
-
-	canvas->repaint();
-	canvas->confidencePixmap = QPixmap();
 }
 
 void ClassSVM::SaveOptions(QSettings &settings)

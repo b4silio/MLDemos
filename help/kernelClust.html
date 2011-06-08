@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head><body>
+<h2>Kernel Methods for Clustering</h2>
+
+<br>
+
+Kernel Methods approach the problem by mapping the data into a high
+dimensional feature space, where each coordinate corresponds to one
+feature of the data items, transforming the data into a set of points
+in a Euclidean space. In that space, a variety of methods can be used
+to find relations in the data. Since the mapping can be quite general
+(not necessarily linear, for example), the relations found in this way
+are accordingly very general. This approach is called the kernel trick.<br>
+
+<br>
+
+More information on <a href="http://en.wikipedia.org/wiki/Kernel_methods">Wikipedia</a>.<br>
+
+<br>
+
+Kernel Parameters:<br>
+
+<ul>
+<li>Kernel Type:</li><ul><li>Linear: linear kernel<br>
+    </li><li>Polynomial: polynomial kernel</li><li>RBF: radial basis function (gaussian) kernel</li></ul><li>Kernel Width: inverse variance for the kernel function, determines the radius of influence of each sample (RBF + Poly)</li><li>Degree: degree of the polynomial (Poly)</li>
+</ul>
+
+Methods:<br>
+
+<ul>
+<li>One-Class SVM: computes likelihood of data belonging to a cluster (shown in red)<br>
+  </li><ul><li>nu: penalty parameter  (computes nu automatically)</li></ul><li>Kernel K-Means: replaces the K-Means distance metric with the kernel function</li>
+  <ul>
+    <li>clusters: number of clusters<br>
+    </li>
+  </ul>
+</ul>
+
+</body></html>

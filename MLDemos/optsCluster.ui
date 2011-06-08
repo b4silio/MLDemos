@@ -33,7 +33,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <layout class="QVBoxLayout">
@@ -41,7 +41,7 @@
      <spacer name="spacer_2">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -59,7 +59,7 @@
      <widget class="QPushButton" name="clusterButton">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="text">
@@ -71,7 +71,7 @@
      <widget class="QPushButton" name="iterationButton">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="text">
@@ -83,7 +83,7 @@
      <widget class="QPushButton" name="clearButton">
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="text">
@@ -95,7 +95,7 @@
      <spacer>
       <property name="font">
        <font>
-        <pointsize>7</pointsize>
+        <pointsize>9</pointsize>
        </font>
       </property>
       <property name="orientation">
@@ -122,7 +122,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="currentIndex">

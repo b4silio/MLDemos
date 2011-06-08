@@ -41,14 +41,24 @@ public:
 	void DrawSamples();
 	void DrawObstacles();
 	void DrawTrajectories();
+	void DrawRewards();
+	void DrawObstacles(QPainter &painter);
+	void DrawTrajectories(QPainter &painter);
+	void DrawSamples(QPainter &painter);
+	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
 	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0;};
 	void FitToData();
+	void DrawAxes(QPainter &painter);
 	void RedrawAxes();
+	void PaintGaussian(QPointF position, double variance);
+	void PaintReward(fvec sample, float radius, float shift);
+	void PaintGradient(QPointF position);
 	bool bDrawing;
 	QPainterPath DrawObstacle(Obstacle o);
 	fVec center;
 	float zoom;
+	std::vector<fvec> targets;
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -59,10 +69,13 @@ protected:
 	void enterEvent(QEvent *event);
 	void focusOutEvent(QFocusEvent *event);
 	void leaveEvent(QEvent *event);
+	void dragEnterEvent(QDragEnterEvent *);
+	void dropEvent(QDropEvent *);
 
 public:
 	DatasetManager *data;
 	QPixmap confidencePixmap;
+	QPixmap rewardPixmap;
 	QPixmap modelPixmap;
 	QPixmap infoPixmap;
 	QPixmap gridPixmap;
@@ -95,6 +108,8 @@ public:
 	int drawnTrajectories;
 	std::vector<fvec> liveTrajectory;
 
+	void Paint(QPainter &painter, bool bSvg=false);
+
 	bool SaveScreenshot(QString filename);
 	QPixmap GetScreenshot();
 
@@ -106,28 +121,30 @@ public slots:
 signals:
 	void DrawCrosshair();
 	void Drawing(fvec sample, int label);
-        void CanvasMoveEvent();
+	void CanvasMoveEvent();
 	void Released();
 	void Navigation(fvec sample);
 
 public:
-	static QPixmap toPixmap(IplImage *src)
-	{
-		QPixmap pixmap;
-		if(src->nChannels == 4)
-		{
-			pixmap = QPixmap::fromImage(QImage((const unsigned char *)src->imageData,src->width, src->height, QImage::Format_RGB32)).copy();
-		}
-		else
-		{
-			IplImage *image = cvCreateImage(cvGetSize(src),8,4);
-			cvCvtColor(src, image, src->nChannels==1 ? CV_GRAY2BGRA : CV_BGR2BGRA);
-			QImage qimg = QImage((const unsigned char *)image->imageData, image->width, image->height, QImage::Format_RGB32);
-			pixmap = QPixmap::fromImage(qimg).copy();
-			cvReleaseImage(&image);
-		}
-		return pixmap;
-	}
+	/*
+ static QPixmap toPixmap(IplImage *src)
+ {
+  QPixmap pixmap;
+  if(src->nChannels == 4)
+  {
+   pixmap = QPixmap::fromImage(QImage((const unsigned char *)src->imageData,src->width, src->height, QImage::Format_RGB32)).copy();
+  }
+  else
+  {
+   IplImage *image = cvCreateImage(cvGetSize(src),8,4);
+   cvCvtColor(src, image, src->nChannels==1 ? CV_GRAY2BGRA : CV_BGR2BGRA);
+   QImage qimg = QImage((const unsigned char *)image->imageData, image->width, image->height, QImage::Format_RGB32);
+   pixmap = QPixmap::fromImage(qimg).copy();
+   cvReleaseImage(&image);
+  }
+  return pixmap;
+ }
+ */
 	static void drawCross(QPainter &painter, QPointF point, float radius, int label)
 	{
 		float x = point.x();

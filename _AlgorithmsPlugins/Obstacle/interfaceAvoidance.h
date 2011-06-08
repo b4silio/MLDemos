@@ -36,6 +36,7 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("DS Avoid");};
+	QString GetInfoFile(){return "avoidDS.html";};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(ObstacleAvoidance *avoid);
 	void SaveOptions(QSettings &settings);

@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLUSTERING_H_
 
 #include <vector>
+#include "mymaths.h"
 
 extern "C" enum {CLUS_SVR, CLUS_GMM, CLUS_KM, CLUS_KKM, CLUS_NONE} clusteringType;
 

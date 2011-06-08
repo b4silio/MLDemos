@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/MLDemos" >
+    <qresource prefix="/MLDemos">
         <file>icons/project.png</file>
         <file>icons/regress.png</file>
         <file>icons/save.png</file>
@@ -15,5 +15,15 @@
         <file>logo.png</file>
         <file>icons/stats.png</file>
         <file>icons/dynamical.png</file>
+        <file>icons/maximize.png</file>
+        <file>icons/airbrush.png</file>
+        <file>icons/brush.png</file>
+        <file>icons/erase.png</file>
+        <file>icons/eraser.png</file>
+        <file>icons/obstacle.png</file>
+        <file>icons/trajectory.png</file>
+        <file>icons/bigbrush.png</file>
+        <file>icons/ellipse.png</file>
+        <file>icons/line.png</file>
     </qresource>
 </RCC>

@@ -26,6 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "regressor.h"
 #include "dynamical.h"
 #include "clusterer.h"
+#include "maximize.h"
 #include <QMutex>
 #include <QMutexLocker>
 
@@ -51,17 +52,18 @@ public:
 	void TestFast(int start, int stop);
 	void Vectors(int count, int steps);
 	void VectorsFast(int count, int steps);
-        void Stop();
+	void Maximization();
+	void Stop();
 
 	Classifier **classifier;
 	Regressor **regressor;
 	Dynamical **dynamical;
 	Clusterer **clusterer;
+	Maximizer **maximizer;
 
-	QMutex *mutex;
+	QMutex *mutex, drawMutex;
 	bool bPaused;
 	bool bRunning;
-	bool bStopping;
 
 	signals:
 	void MapReady(QImage image);

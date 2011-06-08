@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include "datasetManager.h"
+#include <mymaths.h>
 
 class ObstacleAvoidance
 {
@@ -39,9 +40,8 @@ public:
 	};
 	virtual fVec Avoid(fVec &x, fVec &xdot)
 	{
-		fvec vx = x;
-		fvec vxdot = xdot;
-		return (fVec)(Avoid(vx, vxdot));
+		fvec vx=x, vxdot=xdot;
+		return fVec(Avoid(vx, vxdot));
 	}
 };
 

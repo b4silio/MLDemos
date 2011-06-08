@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _SAMPLE_MANAGER_H_
 
 #include <vector>
+#include "basicOpenCV.h"
 
 enum SampleManagerFlags
 {
@@ -30,7 +31,7 @@ enum SampleManagerFlags
 };
 typedef SampleManagerFlags smFlags;
 
-class SampleManager : public Filter
+class SampleManager
 {
 protected:
 	static u32 IDCount;

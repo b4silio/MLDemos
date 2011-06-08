@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "classifierLinear.h"
 #include "JnS/Matutil.h"
 #include "JnS/JnS.h"
+#include <QDebug>
 
 using namespace std;
 
@@ -29,83 +30,100 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 {
 	if(!samples.size()) return;
 
-	if(linearType == 0) // PCA
+	switch(linearType)
 	{
+	case 0:
 		TrainPCA(samples, labels);
-                bUsesDrawTimer = false;
-	}
-	else if(linearType == 1) // ICA
-	{
-		TrainICA(samples, labels);
-                bUsesDrawTimer = false;
-        }
-	else if(linearType == 2) // LDA
-	{
+		break;
+	case 1:
 		TrainLDA(samples, labels, false);
-                bUsesDrawTimer = false;
-        }
-	else if(linearType == 3) // Fisher LDA
-	{
+		break;
+	case 2:
 		TrainLDA(samples, labels);
-                bUsesDrawTimer = false;
-        }
-	else // Naive Bayes
+		break;
+	case 3:
+		TrainICA(samples, labels);
+		break;
+	}
+
+	vector<fvec> projected; projected.resize(samples.size());
+	FOR(i, samples.size())
 	{
-		int dim = samples[0].size();
-		meanPos.resize(dim,0);
-		meanNeg.resize(dim,0);
-		int cntPos=0, cntNeg=0;
-		FOR(i, samples.size())
+		projected[i] = Project(samples[i]);
+	}
+
+	int dim = samples[0].size();
+	meanPos.resize(dim,0);
+	meanNeg.resize(dim,0);
+	int cntPos=0, cntNeg=0;
+	FOR(i, samples.size())
+	{
+		if(labels[i]==1)
 		{
-			if(labels[i]==1)
-			{
-				FOR(d,dim) meanPos[d] += samples[i][d];
-				cntPos++;
-			}
-			else
-			{
-				FOR(d,dim) meanNeg[d] += samples[i][d];
-				cntNeg++;
-			}
+			FOR(d,dim) meanPos[d] += projected[i][d];
+			cntPos++;
 		}
-		FOR(d,dim)
+		else
 		{
-			if(cntPos) meanPos[d] /= cntPos;
-			if(cntNeg) meanNeg[d] /= cntNeg;
+			FOR(d,dim) meanNeg[d] += projected[i][d];
+			cntNeg++;
 		}
-                bUsesDrawTimer = true;
-        }
+	}
+	FOR(d,dim)
+	{
+		if(cntPos) meanPos[d] /= cntPos;
+		if(cntNeg) meanNeg[d] /= cntNeg;
+	}
+	bUsesDrawTimer = true;
+	minResponse = FLT_MAX;
+	maxResponse = -FLT_MAX;
+	float minResp = FLT_MAX;
+	float maxResp = -FLT_MAX;
+	FOR(i, samples.size())
+	{
+		float response = Test(samples[i]);
+		if(minResp > response) minResp = response;
+		if(maxResp < response) maxResp = response;
+		qDebug() << "response: " << response;
+	}
+	if(minResp == maxResp)
+	{
+			maxResp = minResp + 0.5f;
+			minResp -= 0.5f;
+	}
+	minResponse = minResp;
+	maxResponse = maxResp;
+	qDebug() << "minmax" << minResp << " " << maxResp;
 }
 
 float ClassifierLinear::Test(const fvec &sample )
 {
-	if(linearType == 1) // ICA
+	float response = 0;
+	if(linearType < 3) // pca, lda, fisher
 	{
-		if(!Transf) return 0;
-		double *Data = new double[2];
-		Data[0] = sample[0]-meanPos[0];
-		Data[1] = sample[1]-meanPos[1];
-		Transform (Data, Transf, 2, 1) ;
-		return 0;
+		fVec point(sample[0] - meanAll[0], sample[1] - meanAll[1]);
+		float estimate = W*point;
+		response = -(estimate - threshold);
 	}
-	else if(linearType < 4) // pca, lda, fisher
+	else
 	{
-		cvVec2 point(sample[0] - meanPos[0], sample[1] - meanPos[1]);
-		float estimate = W.dot(point);
-		return -(estimate - threshold);
-		//return estimate > threshold ? 2 : -2;
-	}
-	else // naive Bayes
-	{
+		fvec projected = Project(sample);
+
 		float score = 0;
 		float distPos = 0, distNeg = 0;
 		FOR(d,sample.size())
 		{
-			distPos += fabs(sample[d] - meanPos[d]);
-			distNeg += fabs(sample[d] - meanNeg[d]);
+			distPos += fabs(projected[d] - meanPos[d]);
+			distNeg += fabs(projected[d] - meanNeg[d]);
 		}
-		return (distNeg - distPos)*2;
+		response = (distNeg - distPos);
 	}
+	if(minResponse != FLT_MAX)
+	{
+		response = (response-minResponse)/fabs(maxResponse-minResponse); // 0-1 range
+		response = (response-0.5f)*6.f;
+	}
+	return response;
 }
 
 char *ClassifierLinear::GetInfoString()
@@ -118,23 +136,23 @@ char *ClassifierLinear::GetInfoString()
 		sprintf(text, "%sPCA\n", text);
 		break;
 	case 1:
-		sprintf(text, "%sICA\n", text);
-		break;
-	case 2:
 		sprintf(text, "%sLDA\n", text);
 		break;
-	case 3:
+	case 2:
 		sprintf(text, "%sFisher LDA\n", text);
+		break;
+	case 3:
+		sprintf(text, "%sICA\n", text);
 		break;
 	default:
 		sprintf(text, "%sNaive Bayes\n", text);
 		break;
 	}
-	if(linearType == 1) // ica
+	if(linearType == 3) // ica
 	{
 		sprintf(text, "%sUnmixing matrix:\n\t%.3f %.3f\n\t%.3f %.3f", text, Transf[0], Transf[1], Transf[2], Transf[3]);
 	}
-	else if(linearType < 4)
+	else if(linearType < 3)
 	{
 		sprintf(text, "%sProjection Direction:\n\t%.3f %.3f\n", text, W.x, W.y);
 	}
@@ -154,14 +172,14 @@ void Invert(double *sigma, double *invSigma)
 fvec ClassifierLinear::InvProject(const fvec &sample)
 {
 	fvec newSample = sample;
-	if(linearType == 1) // ica
+	if(linearType == 3) // ica
 	{
 		if(!Transf) return newSample;
 		double iTransf[4];
 		Invert(Transf, iTransf);
 		double *Data = new double[2];
-                Data[0] = sample[0];
-                Data[1] = sample[1];
+		Data[0] = sample[0];
+		Data[1] = sample[1];
 		//                Data[0] = sample[0]-meanPos[0];
 		//                Data[1] = sample[1]-meanPos[1];
 		Transform (Data, iTransf, 2, 1);
@@ -174,24 +192,24 @@ fvec ClassifierLinear::InvProject(const fvec &sample)
 fvec ClassifierLinear::Project(const fvec &sample)
 {
 	fvec newSample = sample;
-	if(linearType == 1) // ica
+	if(linearType == 3) // ica
 	{
 		if(!Transf) return newSample;
 		double *Data = new double[2];
-		Data[0] = sample[0]-meanPos[0];
-		Data[1] = sample[1]-meanPos[1];
+		Data[0] = sample[0]-meanAll[0];
+		Data[1] = sample[1]-meanAll[1];
 		Transform (Data, Transf, 2, 1);
-                newSample[0] = Data[0];
-                newSample[1] = Data[1];
+		newSample[0] = Data[0];
+		newSample[1] = Data[1];
 		//		newSample[0] = Data[0]+meanPos[0];
 		//		newSample[1] = Data[1]+meanPos[1];
 	}
-	else if(linearType < 4) // pca, lda, fisher
+	else if(linearType < 3) // pca, lda, fisher
 	{
-		cvVec2 mean(meanPos[0], meanPos[1]);
-		cvVec2 point(sample[0], sample[1]);
-		float dot = W.dot(point-mean);
-		cvVec2 proj(dot*W.x, dot*W.y);
+		fVec mean(meanAll[0], meanAll[1]);
+		fVec point(sample[0], sample[1]);
+		float dot = W*(point-mean);
+		fVec proj(dot*W.x, dot*W.y);
 		//proj += cvVec2(.5f,.5f);
 		proj += mean;
 		newSample[0] = proj.x;
@@ -203,7 +221,7 @@ fvec ClassifierLinear::Project(const fvec &sample)
 void ClassifierLinear::SetParams( u32 linearType )
 {
 	this->linearType = linearType;
-	if(linearType == 2 || linearType == 3) bSingleClass = false;
+	if(linearType == 1 || linearType == 2) bSingleClass = false;
 	else bSingleClass = true;
 }
 
@@ -211,20 +229,20 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 {
 	u32 dim = 2;
 
-	meanPos.resize(dim,0);
+	meanAll.resize(dim,0);
 	float **sigma = NULL;
 
 	FOR(i, samples.size())
 	{
-		meanPos += samples[i];
+		meanAll += samples[i];
 	}
-	meanPos /= samples.size();
+	meanAll /= samples.size();
 
 	fvec mean;
 	mean.resize(dim,0);
 
 	// we want zero mean samples
-	FOR(i, samples.size()) samples[i] -= meanPos;
+	FOR(i, samples.size()) samples[i] -= meanAll;
 
 	GetCovariance(samples, mean, &sigma);
 
@@ -246,7 +264,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 		printf("determinant is not positive during calculation of eigenvalues !!");
 		return;
 	}
-	cvVec2 e1, e2, tmp;
+	fVec e1, e2, tmp;
 
 	if(invSigma1[0][0] - eigenvalue1 != 0)
 		e1.x = -invSigma1[0][1]/(invSigma1[0][0]-eigenvalue1);
@@ -261,7 +279,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 	// swap the eigens
 	if (eigenvalue1 < eigenvalue2)
 	{
-		cvVec2 tmp = e1;
+		fVec tmp = e1;
 		e1 = e2;
 		e2 = tmp;
 		float lambda = eigenvalue1;
@@ -291,8 +309,8 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 		float thresh = 1.f / steps * c;
 		FOR(i, samples.size())
 		{
-			cvVec2 point(samples[i][0], samples[i][1]);
-			float estimate = W.dot(point);
+			fVec point(samples[i][0], samples[i][1]);
+			float estimate = W*point;
 			if(labels[i])
 			{
 				if (estimate < thresh) error++;
@@ -320,10 +338,10 @@ void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels,
 	// we reduce the problem to a one vs many classification
 	u32 dim = 2;
 
-	meanPos.resize(dim,0);
-	FOR(i, samples.size()) meanPos += samples[i];
-	meanPos /= samples.size();
-	FOR(i, samples.size()) samples[i] -= meanPos;
+	meanAll.resize(dim,0);
+	FOR(i, samples.size()) meanAll += samples[i];
+	meanAll /= samples.size();
+	FOR(i, samples.size()) samples[i] -= meanAll;
 
 	vector<fvec> positives, negatives;
 	FOR(i, samples.size())
@@ -389,7 +407,7 @@ void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels,
 	w[0] /= n; w[1] /= n;
 
 	float c = w[0]*(mean1[0]+mean2[0])/2 + w[0]*(mean1[1]+mean2[1])/2;
-	W = cvVec2(w[0], w[1]);
+	W = fVec(w[0], w[1]);
 	W = W.normalize();
 
 	if(sigma1 == sigma2)
@@ -437,13 +455,13 @@ void ClassifierLinear::GetCovariance(const vector<fvec> &samples, const fvec &me
 void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels )
 {
 	u32 dim = 2;
-	meanPos.resize(dim,0);
+	meanAll.resize(dim,0);
 	float **sigma = NULL;
 	FOR(i, samples.size())
 	{
-		meanPos += samples[i];
+		meanAll += samples[i];
 	}
-	meanPos /= samples.size();
+	meanAll /= samples.size();
 
 	const int nbsensors = samples[0].size();
 	const int nbsamples = samples.size(); 
@@ -459,8 +477,8 @@ void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels 
 
 	FOR(i, samples.size())
 	{
-		Data[i*nbsensors + 0] = samples[i][0] - meanPos[0];
-		Data[i*nbsensors + 1] = samples[i][1] - meanPos[1];
+		Data[i*nbsensors + 0] = samples[i][0] - meanAll[0];
+		Data[i*nbsensors + 1] = samples[i][1] - meanAll[1];
 
 		//		Data[i*nbsensors + 0] = rand()/(float)RAND_MAX/5.;
 		//		Data[i*nbsensors + 1] = 1 - rand()/(float)RAND_MAX/5.;
@@ -505,5 +523,5 @@ void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels 
 	free(Mixing);
 	free(Global);
 
-	W = cvVec2(Transf[0], Transf[2]);
+	W = fVec(Transf[0], Transf[2]);
 }

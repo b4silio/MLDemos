@@ -48,42 +48,20 @@ Regressor *RegrKNN::GetRegressor()
 	return regressor;
 }
 
-void RegrKNN::DrawInfo(Canvas *canvas, Regressor *regressor)
+void RegrKNN::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-	if(!canvas || !regressor) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-	canvas->infoPixmap = infoPixmap;
+	canvas->confidencePixmap = QPixmap();
 }
 
-void RegrKNN::Draw(Canvas *canvas, Regressor *regressor)
+void RegrKNN::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;
-	canvas->liveTrajectory.clear();
-	DrawInfo(canvas, regressor);
 	int w = canvas->width();
 	int h = canvas->height();
-
-	canvas->confidencePixmap = QPixmap(w,h);
-	canvas->modelPixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	QPainter painter(&canvas->modelPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	fvec sample;
 	sample.resize(2,0);
-	IplImage *image = cvCreateImage(cvSize(w,h), 8, 3);
-	cvSet(image, CV_RGB(255,255,255));
-	canvas->confidencePixmap = Canvas::toPixmap(image);
-	IMKILL(image);
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
@@ -110,7 +88,6 @@ void RegrKNN::Draw(Canvas *canvas, Regressor *regressor)
 		oldPointUp = pointUp;
 		oldPointDown = pointDown;
 	}
-	canvas->repaint();
 }
 
 void RegrKNN::SaveOptions(QSettings &settings)

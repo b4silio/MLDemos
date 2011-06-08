@@ -16,7 +16,6 @@ HEADERS +=	\
 			$$MLDEMOS/canvas.h \
 			$$MLDEMOS/datasetManager.h \
 			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/basicOpenCV.h \
 			$$MLDEMOS/drawUtils.h \
 			SEDS.h \
 			dynamicalSEDS.h \
@@ -26,7 +25,6 @@ SOURCES += 	\
 			$$MLDEMOS/canvas.cpp \
 			$$MLDEMOS/datasetManager.cpp \
 			$$MLDEMOS/mymaths.cpp \
-			$$MLDEMOS/basicOpenCV.cpp \
 			$$MLDEMOS/drawUtils.cpp \
 			SEDS.cpp \
 			dynamicalSEDS.cpp \

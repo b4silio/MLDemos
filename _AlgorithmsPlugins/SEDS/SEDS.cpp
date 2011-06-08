@@ -3,6 +3,11 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#include <QtGui>
+
+QPixmap pm(320,240);
+QLabel lbl;
+
 //constructor
 SEDS::SEDS()
 {
@@ -520,10 +525,68 @@ bool SEDS::initialize_value(){
 	return true;
 }
 
+
+void PaintData(std::vector<float> data)
+{
+	QPainter painter(&pm);
+	painter.fillRect(pm.rect(), Qt::white);
+
+	int w = pm.width();
+	int h = pm.height();
+	int cnt = data.size();
+	int pad = 10;
+	QPointF oldPoint;
+	double minVal = FLT_MAX;
+	double maxVal = -FLT_MAX;
+	for(int i=0; i< data.size(); i++)
+	{
+		if(minVal > data[i]) minVal = data[i];
+		if(maxVal < data[i]) maxVal = data[i];
+	}
+	if (minVal == maxVal)
+	{
+		minVal = 0;
+	}
+
+	painter.setBrush(Qt::NoBrush);
+	painter.setPen(QPen(QColor(200,200,200), 0.5));
+	int steps = 10;
+	for(int i=0; i<=steps; i++)
+	{
+		painter.drawLine(QPoint(0, i/(float)steps*(h-2*pad) + pad), QPoint(w, i/(float)steps*(h-2*pad) + pad));
+		painter.drawLine(QPoint(i/(float)steps*w, 0), QPoint(i/(float)steps*w, h));
+	}
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	painter.setPen(QPen(Qt::black, 1.5));
+	for(int i=0; i< data.size(); i++)
+	{
+		float value = data[i];
+		float x = i/(float)cnt*w;
+		float y = (1 - (value-minVal)/(maxVal - minVal)) * (float)(h-2*pad) + pad;
+		QPointF point(x, y);
+		if(i) painter.drawLine(oldPoint, point);
+		//painter.drawEllipse(point, 3, 3);
+		oldPoint = point;
+	}
+	painter.setPen(QPen(Qt::black, 0.5));
+	painter.setBrush(QColor(255,255,255,200));
+	painter.drawRect(QRect(190,5,100,45));
+	painter.setPen(QPen(Qt::black, 1));
+	painter.drawText(QPointF(200, 20), QString("J_0: %1").arg(data[0]));
+	painter.drawText(QPointF(200, 40), QString("J_F: %1").arg(data[data.size()-1]));
+	lbl.setPixmap(pm);
+	lbl.show();
+}
+
+std::vector<float> displayData;
+
 /* Running optimization solver to find the optimal values for the model.
  * The result will be saved in the variable p
 */
 bool SEDS::Optimize(){
+	displayData.clear();
+
 	initialize_value();
 	preprocess_sigma();
 	cout << "sigmas preprocessed!\n";
@@ -597,6 +660,8 @@ bool SEDS::Optimize(){
 	double c1_cond,c2_cond;
 	str[0] = (char*)"fail";
 	str[1] = (char*)"ok";
+
+	double J0 = J;
 	
 	for(int i=0; i < Options.max_iter; i++){
 		dp=-B*dJ; //set change direction
@@ -632,6 +697,8 @@ bool SEDS::Optimize(){
 		Compute_Hess(B,dJ_new-dJ,dp*alpha); //update the hessian (result in B)
 		p = p + dp*alpha; //update p
 		J=J_new;
+		displayData.push_back(J_new);
+		//PaintData(displayData);
 		dJ=dJ_new;
 		if (alpha < Options.tol_stopping*Options.tol_stopping || dJ.Norm()<Options.tol_stopping || fabs(c1_cond)<Options.tol_stopping)
 			break; //break before max_iteration if good enough

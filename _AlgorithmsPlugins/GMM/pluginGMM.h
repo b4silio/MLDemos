@@ -26,18 +26,9 @@ class PluginGMM : public QObject, public CollectionInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(CollectionInterface)
-private:
-	std::vector<ClassifierInterface *> classifiers;
-	std::vector<ClustererInterface *> clusterers;
-	std::vector<RegressorInterface *> regressors;
-	std::vector<DynamicalInterface *> dynamicals;
 public:
 	PluginGMM();
-	~PluginGMM();
-	std::vector<ClassifierInterface *> GetClassifiers() {return classifiers;};
-	std::vector<ClustererInterface *> GetClusterers() {return clusterers;};
-	std::vector<RegressorInterface *> GetRegressors() {return regressors;};
-	std::vector<DynamicalInterface *> GetDynamicals() {return dynamicals;};
+	QString GetName(){return "GMM collection";};
 };
 
 #endif // _PLUGINGMM_H_

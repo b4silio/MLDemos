@@ -16,7 +16,6 @@ HEADERS +=	\
 			$$MLDEMOS/canvas.h \
 			$$MLDEMOS/datasetManager.h \
 			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/basicOpenCV.h \
 			$$MLDEMOS/drawUtils.h \
 			classifierGMM.h \
 			clustererGMM.h \
@@ -32,7 +31,6 @@ SOURCES += 	\
 			$$MLDEMOS/canvas.cpp \
 			$$MLDEMOS/datasetManager.cpp \
 			$$MLDEMOS/mymaths.cpp \
-			$$MLDEMOS/basicOpenCV.cpp \
 			$$MLDEMOS/drawUtils.cpp \
 			classifierGMM.cpp \
 			clustererGMM.cpp \

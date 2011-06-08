@@ -46,22 +46,14 @@ Dynamical *DynamicLWPR::GetDynamical()
 	return dynamical;
 }
 
-void DynamicLWPR::DrawInfo(Canvas *canvas, Dynamical *dynamical)
+void DynamicLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical)
 {
 	if(!canvas || !dynamical) return;
-	int w = canvas->width();
-	int h = canvas->height();
-	QPixmap infoPixmap(w, h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	infoPixmap.setMask(bitmap);
-	infoPixmap.fill(Qt::transparent);
-
-	QPainter painter(&infoPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	DynamicalLWPR* _lwpr = (DynamicalLWPR*)dynamical;
 	LWPR_Object *lwpr= _lwpr->GetModel();
+	painter.setBrush(Qt::NoBrush);
 	FOR(i, lwpr->numRFS()[0])
 	{
 		LWPR_ReceptiveFieldObject rf = lwpr->getRF(0,i);
@@ -84,24 +76,6 @@ void DynamicLWPR::DrawInfo(Canvas *canvas, Dynamical *dynamical)
 		painter.drawEllipse(point, var, var);
 		painter.drawLine(point - pointDiff*var*2,point + pointDiff*var*2);
 	}
-
-	canvas->infoPixmap = infoPixmap;
-}
-
-void DynamicLWPR::Draw(Canvas *canvas, Dynamical *dynamical)
-{
-	if(!dynamical || !canvas) return;
-	if(!dynamical) return;
-	DrawInfo(canvas, dynamical);
-	int w = canvas->width();
-	int h = canvas->height();
-	canvas->modelPixmap = QPixmap(w,h);
-	canvas->confidencePixmap = QPixmap(w,h);
-	QBitmap bitmap(w,h);
-	bitmap.clear();
-	canvas->modelPixmap.setMask(bitmap);
-	canvas->modelPixmap.fill(Qt::transparent);
-	canvas->repaint();
 }
 
 void DynamicLWPR::SaveOptions(QSettings &settings)

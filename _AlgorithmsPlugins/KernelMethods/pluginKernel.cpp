@@ -32,18 +32,6 @@ PluginKernel::PluginKernel()
 	dynamicals.push_back(new DynamicSVM());
 }
 
-PluginKernel::~PluginKernel()
-{
-	FOR(i, classifiers.size()) if(classifiers[i]) delete classifiers[i];
-	FOR(i, clusterers.size()) if(clusterers[i]) delete clusterers[i];
-	FOR(i, regressors.size()) if(regressors[i]) delete regressors[i];
-	FOR(i, dynamicals.size()) if(dynamicals[i]) delete dynamicals[i];
-	classifiers.clear();
-	clusterers.clear();
-	regressors.clear();
-	dynamicals.clear();
-}
-
 #ifndef PLUGIN_CLUSTER
 #ifndef PLUGIN_CLASSIFY
 Q_EXPORT_PLUGIN2(mld_KernelMethods, PluginKernel)

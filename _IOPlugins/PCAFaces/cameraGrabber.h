@@ -6,10 +6,12 @@
 #ifndef _CAMERAGRABBER_H_
 #define _CAMERAGRABBER_H_
 
+#include "basicOpenCV.h"
+
 /*!
  *	Camera Frame Grabber, grabs images from an input webcam
  */
-class CameraGrabber : public FrameGrabber
+class CameraGrabber
 {
 private:
 	u32 currentFrame;

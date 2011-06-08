@@ -21,8 +21,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include "public.h"
-#include "types.h"
 #include "roc.h"
+#include "types.h"
+#include "mymaths.h"
 
 extern "C" enum {CLASS_SVM, CLASS_RVM, CLASS_PEG, CLASS_EM, CLASS_GMM, CLASS_KNN, CLASS_BOOST, CLASS_MLP, CLASS_LINEAR, CLASS_PERC, CLASS_NONE} classifierType;
 
