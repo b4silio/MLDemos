@@ -15,9 +15,9 @@ Vcs-Browser: http://git.debian.org/?p=collab-maint/mldemos.git;a=summary
 Package: mldemos
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: MLDemos: Machine Learning Demos, with Visualization
- MLDemos: A User-Friendly visualization toolkit for machine learning.
- Extensible architecture.  Contains modules for classification
+Description: Machine Learning Demos (MLDemos) with Visualization
+ A User-Friendly visualization toolkit for machine learning: MLDemos.
+ Extensible architecture, contains modules for classification
  (gaussian mixture models, kernel methods such as support vector
  machines, nearest neighbor, kernel PCA, boosting, multilayer
  perceptrons, linear classifiers), clustering (gaussian mixtures,
