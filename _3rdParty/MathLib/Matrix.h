@@ -1946,7 +1946,7 @@ public:
                 if(fabs(val)<=EPSILON) val = R_ZERO;
                 std::cout << val <<" ";
             }
-            std::cout << std::endl;
+            std::cout << "\n";
         }
     }
 */

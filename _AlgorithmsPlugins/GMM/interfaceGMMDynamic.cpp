@@ -95,17 +95,17 @@ bool DynamicGMM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void DynamicGMM::SaveParams(std::ofstream &file)
+void DynamicGMM::SaveParams(QTextStream &file)
 {
-	file << "dynamicalOptions" << ":" << "gmmCount" << " " << params->gmmCount->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "gmmCovariance" << " " << params->gmmCovarianceCombo->currentIndex() << std::endl;
-	file << "dynamicalOptions" << ":" << "gmmInit" << " " << params->gmmInitCombo->currentIndex() << std::endl;
+	file << "dynamicalOptions" << ":" << "gmmCount" << " " << params->gmmCount->value() << "\n";
+	file << "dynamicalOptions" << ":" << "gmmCovariance" << " " << params->gmmCovarianceCombo->currentIndex() << "\n";
+	file << "dynamicalOptions" << ":" << "gmmInit" << " " << params->gmmInitCombo->currentIndex() << "\n";
 }
 
-bool DynamicGMM::LoadParams(char *line, float value)
+bool DynamicGMM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"gmmCount")) params->gmmCount->setValue((int)value);
-	if(endsWith(line,"gmmCovariance")) params->gmmCovarianceCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"gmmInit")) params->gmmInitCombo->setCurrentIndex((int)value);
+	if(name.endsWith("gmmCount")) params->gmmCount->setValue((int)value);
+	if(name.endsWith("gmmCovariance")) params->gmmCovarianceCombo->setCurrentIndex((int)value);
+	if(name.endsWith("gmmInit")) params->gmmInitCombo->setCurrentIndex((int)value);
 	return true;
 }

@@ -28,6 +28,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QFileDialog>
 #include "basicMath.h"
 #include "drawSVG.h"
+#include <iostream>
+#include <sstream>
 
 
 MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
@@ -40,9 +42,11 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
 	  maximizer(0),
       bIsRocNew(true),
       bIsCrossNew(true),
-      trajectory(ipair(-1,-1)),
-      bNewObstacle(false),
-      tabUsedForTraining(0)
+	  compareDisplay(0),
+	  compare(0),
+	  trajectory(ipair(-1,-1)),
+	  bNewObstacle(false),
+	  tabUsedForTraining(0)
 {
     QApplication::setWindowIcon(QIcon(":/MLDemos/logo.png"));
     ui.setupUi(this);
@@ -123,6 +127,11 @@ void MLDemos::initToolBars()
 	actionMaximizers->setStatusTip(tr("Maximize Reward Function"));
 	actionMaximizers->setCheckable(true);
 
+	actionCompare = new QAction(QIcon(":/MLDemos/icons/compare.png"), tr("&Compare"), this);
+	actionCompare->setShortcut(QKeySequence(tr("M")));
+	actionCompare->setStatusTip(tr("Compare Algorithms"));
+	actionCompare->setCheckable(true);
+
     actionDrawSamples = new QAction(QIcon(":/MLDemos/icons/draw.png"), tr("&Drawing"), this);
     actionDrawSamples->setShortcut(QKeySequence(tr("W")));
     actionDrawSamples->setStatusTip(tr("Show Sample Drawing Options"));
@@ -155,6 +164,7 @@ void MLDemos::initToolBars()
     connect(actionDynamical, SIGNAL(triggered()), this, SLOT(ShowOptionDynamical()));
 	connect(actionClustering, SIGNAL(triggered()), this, SLOT(ShowOptionCluster()));
 	connect(actionMaximizers, SIGNAL(triggered()), this, SLOT(ShowOptionMaximize()));
+	connect(actionCompare, SIGNAL(triggered()), this, SLOT(ShowOptionCompare()));
 	connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
@@ -190,7 +200,8 @@ void MLDemos::initToolBars()
 	toolBar->addAction(actionDynamical);
 	toolBar->addAction(actionMaximizers);
 	toolBar->addSeparator();
-    toolBar->addAction(actionClearModel);
+	toolBar->addAction(actionCompare);
+	toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
     toolBar->addSeparator();
     toolBar->addAction(actionDrawSamples);
@@ -303,6 +314,7 @@ void MLDemos::initDialogs()
     optionsRegress = new Ui::optionsRegressWidget();
     optionsDynamic = new Ui::optionsDynamicWidget();
 	optionsMaximize = new Ui::optionsMaximizeWidget();
+	optionsCompare = new Ui::optionsCompare();
 
     algorithmWidget = new QWidget();
     algorithmOptions->setupUi(algorithmWidget);
@@ -318,7 +330,7 @@ void MLDemos::initDialogs()
 	drawContext4Widget->setWindowFlags(Qt::FramelessWindowHint);
 	drawToolbarWidget->setFixedSize(drawToolbarWidget->size());
 
-    classifyWidget = new QWidget(algorithmOptions->tabClass);
+	classifyWidget = new QWidget(algorithmOptions->tabClass);
     clusterWidget = new QWidget(algorithmOptions->tabClust);
     regressWidget = new QWidget(algorithmOptions->tabRegr);
     dynamicWidget = new QWidget(algorithmOptions->tabDyn);
@@ -328,6 +340,8 @@ void MLDemos::initDialogs()
     optionsRegress->setupUi(regressWidget);
 	optionsDynamic->setupUi(dynamicWidget);
 	optionsMaximize->setupUi(maximizeWidget);
+	compareWidget = new QWidget();
+	optionsCompare->setupUi(compareWidget);
 
     connect(displayDialog, SIGNAL(rejected()), this, SLOT(HideOptionDisplay()));
     connect(statsDialog, SIGNAL(rejected()), this, SLOT(HideStatsDialog()));
@@ -336,11 +350,13 @@ void MLDemos::initDialogs()
     connect(optionsClassify->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), this, SLOT(ShowRoc()));
     connect(optionsClassify->crossValidButton, SIGNAL(clicked()), this, SLOT(ClassifyCross()));
+	connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
     connect(optionsRegress->crossValidButton, SIGNAL(clicked()), this, SLOT(RegressionCross()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     //connect(optionsRegress->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
+	connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 
     connect(optionsCluster->clusterButton, SIGNAL(clicked()), this, SLOT(Cluster()));
     connect(optionsCluster->iterationButton, SIGNAL(clicked()), this, SLOT(ClusterIterate()));
@@ -360,6 +376,12 @@ void MLDemos::initDialogs()
 	connect(optionsMaximize->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
 	connect(optionsMaximize->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
 	connect(optionsMaximize->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
+	connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
+
+	connect(optionsCompare->compareButton, SIGNAL(clicked()), this, SLOT(Compare()));
+	connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
+	connect(optionsCompare->clearButton, SIGNAL(clicked()), this, SLOT(CompareClear()));
+	connect(optionsCompare->removeButton, SIGNAL(clicked()), this, SLOT(CompareRemove()));
 
     optionsClassify->tabWidget->clear();
     optionsCluster->tabWidget->clear();
@@ -371,6 +393,10 @@ void MLDemos::initDialogs()
     optionsRegress->tabWidget->setUsesScrollButtons(true);
 	optionsDynamic->tabWidget->setUsesScrollButtons(true);
 	optionsMaximize->tabWidget->setUsesScrollButtons(true);
+
+	QHBoxLayout *layout = new QHBoxLayout(optionsCompare->resultWidget);
+	compare = new CompareAlgorithms(optionsCompare->resultWidget);
+
 	connect(algorithmOptions->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
 	connect(optionsClassify->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
 	connect(optionsCluster->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
@@ -702,10 +728,6 @@ void MLDemos::closeEvent(QCloseEvent *event)
 
 void MLDemos::resizeEvent( QResizeEvent *event )
 {
-#ifdef MACX // ugly hack to avoid resizing problems on the mac
-    //	qDebug() << "resizing: " << ui.centralWidget->geometry() << endl;
-	// if(height() < 600) resize(width(),600);
-#endif // MACX
     if(canvas)
     {
 		canvas->resize(ui.canvasWidget->width(), ui.canvasWidget->height());
@@ -732,6 +754,74 @@ void MLDemos::AlgoChanged()
 		drawToolbar->trajectoryButton->setChecked(true);
 		DrawTrajectory();
 	}
+	if(actionRegression->isChecked() || actionClassifiers->isChecked())
+	{
+		drawToolbar->sprayButton->setChecked(true);
+		DrawTrajectory();
+	}
+}
+
+void MLDemos::CompareAdd()
+{
+	if(algorithmOptions->tabClass->isVisible())
+	{
+		int tab = optionsClassify->tabWidget->currentIndex();
+		QString name = classifiers[tab]->GetAlgoString();
+		QString parameterData;
+		QTextStream stream(&parameterData, QIODevice::WriteOnly);
+		stream << "Classification" << ":" << tab << "\n";
+		classifiers[tab]->SaveParams(stream);
+		optionsCompare->algoList->addItem(name);
+		compareOptions.push_back(parameterData);
+	}
+	if(algorithmOptions->tabRegr->isVisible())
+	{
+		int tab = optionsRegress->tabWidget->currentIndex();
+		QString name = regressors[tab]->GetAlgoString();
+		QString parameterData;
+		QTextStream stream(&parameterData, QIODevice::WriteOnly);
+		stream << "Regression" << ":" << tab << "\n";
+		regressors[tab]->SaveParams(stream);
+		optionsCompare->algoList->addItem(name);
+		compareOptions.push_back(parameterData);
+	}
+	if(algorithmOptions->tabMax->isVisible())
+	{
+		int tab = optionsMaximize->tabWidget->currentIndex();
+		QString name = maximizers[tab]->GetAlgoString();
+		QString parameterData;
+		QTextStream stream(&parameterData, QIODevice::WriteOnly);
+		stream << "Maximization" << ":" << tab << "\n";
+		maximizers[tab]->SaveParams(stream);
+		optionsCompare->algoList->addItem(name);
+		compareOptions.push_back(parameterData);
+	}
+	actionCompare->setChecked(true);
+	compareWidget->show();
+}
+
+void MLDemos::CompareClear()
+{
+	optionsCompare->algoList->clear();
+	compareOptions.clear();
+	if(compareDisplay) compareDisplay->hide();
+}
+
+void MLDemos::CompareRemove()
+{
+	int offset = 0;
+	FOR(i, optionsCompare->algoList->count())
+	{
+		if(optionsCompare->algoList->item(i)->isSelected())
+		{
+			compareOptions.removeAt(i-offset);
+			offset++;
+		}
+	}
+
+	QList<QListWidgetItem *> selected = optionsCompare->algoList->selectedItems();
+	FOR(i, selected.size()) delete selected[i];
+	if(optionsCompare->algoList->count()) optionsCompare->algoList->item(0)->setSelected(true);
 }
 
 void MLDemos::ShowOptionClass()
@@ -806,6 +896,18 @@ void MLDemos::ShowOptionMaximize()
 	actionClassifiers->setChecked(false);
 	actionRegression->setChecked(false);
 	actionDynamical->setChecked(false);
+}
+
+void MLDemos::ShowOptionCompare()
+{
+	if(actionCompare->isChecked())
+	{
+		compareWidget->show();
+	}
+	else
+	{
+		compareWidget->hide();
+	}
 }
 
 void MLDemos::ShowSampleDrawing()
@@ -1782,6 +1884,7 @@ void MLDemos :: Save(QString filename)
     }
     file.close();
     canvas->data->Save(filename.toAscii());
+	if(!canvas->rewardPixmap.isNull()) canvas->rewardPixmap.toImage().save(filename + "-reward.png");
     SaveParams(filename);
     ui.statusBar->showMessage("Data saved successfully");
 }
@@ -1807,7 +1910,9 @@ void MLDemos::Load(QString filename)
     ClearData();
     canvas->data->Load(filename.toAscii());
     LoadParams(filename);
-    ui.statusBar->showMessage("Data loaded successfully");
+	QImage reward(filename + "-reward.png");
+	if(!reward.isNull()) canvas->rewardPixmap = QPixmap::fromImage(reward);
+	ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
     UpdateInfo();
     canvas->repaint();
@@ -1887,6 +1992,15 @@ void MLDemos::Screenshot()
     if(!filename.endsWith(".jpg") && !filename.endsWith(".png")) filename += ".png";
     if(!canvas->SaveScreenshot(filename)) ui.statusBar->showMessage("WARNING: Unable to save image");
     else ui.statusBar->showMessage("Image saved successfully");
+}
+
+void MLDemos::CompareScreenshot()
+{
+	if(!canvas || !compare) return;
+	QClipboard *clipboard = QApplication::clipboard();
+	QPixmap screenshot = compare->Display().copy();
+	clipboard->setImage(screenshot.toImage());
+	//clipboard->setPixmap(screenshot);
 }
 
 void MLDemos::ToClipboard()

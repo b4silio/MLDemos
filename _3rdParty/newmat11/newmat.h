@@ -9,6 +9,8 @@
 #ifndef NEWMAT_LIB
 #define NEWMAT_LIB 0
 
+#define SETUP_C_SUBSCRIPTS
+
 #include "include.h"
 
 #include "myexcept.h"

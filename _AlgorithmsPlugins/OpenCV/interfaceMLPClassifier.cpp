@@ -41,6 +41,18 @@ void ClassMLP::SetParams(Classifier *classifier)
 	((ClassifierMLP *)classifier)->SetParams(activation, neurons, layers, alpha, beta);
 }
 
+QString ClassMLP::GetAlgoString()
+{
+	float alpha = params->mlpAlphaSpin->value();
+	float beta = params->mlpBetaSpin->value();
+	int layers = params->mlpLayerSpin->value();
+	int neurons = params->mlpNeuronSpin->value();
+	int activation = params->mlpFunctionCombo->currentIndex()+1; // 1: sigmoid, 2: gaussian
+
+	QString algo = QString("MLP %1 %2 %3 %4 %5").arg(neurons).arg(layers).arg(activation==1 ? "S" : "G").arg(alpha).arg(beta);
+	return algo;
+}
+
 Classifier *ClassMLP::GetClassifier()
 {
 	ClassifierMLP *classifier = new ClassifierMLP();
@@ -106,21 +118,21 @@ bool ClassMLP::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassMLP::SaveParams(std::ofstream &file)
+void ClassMLP::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "mlpNeuron" << " " << params->mlpNeuronSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "mlpAlpha" << " " << params->mlpAlphaSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << std::endl;
+	file << "classificationOptions" << ":" << "mlpNeuron" << " " << params->mlpNeuronSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "mlpAlpha" << " " << params->mlpAlphaSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << "\n";
 }
 
-bool ClassMLP::LoadParams(char *line, float value)
+bool ClassMLP::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"mlpNeuron")) params->mlpNeuronSpin->setValue((int)value);
-	if(endsWith(line,"mlpAlpha")) params->mlpAlphaSpin->setValue(value);
-	if(endsWith(line,"mlpBeta")) params->mlpBetaSpin->setValue(value);
-	if(endsWith(line,"mlpLayer")) params->mlpLayerSpin->setValue((int)value);
-	if(endsWith(line,"mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
+	if(name.endsWith("mlpNeuron")) params->mlpNeuronSpin->setValue((int)value);
+	if(name.endsWith("mlpAlpha")) params->mlpAlphaSpin->setValue(value);
+	if(name.endsWith("mlpBeta")) params->mlpBetaSpin->setValue(value);
+	if(name.endsWith("mlpLayer")) params->mlpLayerSpin->setValue((int)value);
+	if(name.endsWith("mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
 	return true;
 }

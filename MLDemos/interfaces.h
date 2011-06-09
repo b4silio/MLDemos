@@ -34,6 +34,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QBitmap>
 #include <QPainter>
 #include <QUrl>
+#include <QTextStream>
 
 class ClassifierInterface
 {
@@ -45,13 +46,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
+	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(Classifier *classifier) = 0;
 	virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
-	virtual void SaveParams(std::ofstream &stream) = 0;
-	virtual bool LoadParams(char *line, float value) = 0;
+	virtual void SaveParams(QTextStream &stream) = 0;
+	virtual bool LoadParams(QString name, float value) = 0;
 
 	// drawing function
 	void Draw(Canvas *canvas, Classifier *classifier)
@@ -95,13 +97,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
+	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(Clusterer *clusterer) = 0;
 	virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
-	virtual void SaveParams(std::ofstream &stream) = 0;
-	virtual bool LoadParams(char *line, float value) = 0;
+	virtual void SaveParams(QTextStream &stream) = 0;
+	virtual bool LoadParams(QString name, float value) = 0;
 
 
 	void Draw(Canvas *canvas, Clusterer *clusterer)
@@ -147,13 +150,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
+	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(Regressor *regressor) = 0;
 	virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
-	virtual void SaveParams(std::ofstream &stream) = 0;
-	virtual bool LoadParams(char *line, float value) = 0;
+	virtual void SaveParams(QTextStream &stream) = 0;
+	virtual bool LoadParams(QString name, float value) = 0;
 
 	void Draw(Canvas *canvas, Regressor *regressor)
 	{
@@ -200,13 +204,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
+	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(Dynamical *dynamical) = 0;
 	virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
-	virtual void SaveParams(std::ofstream &stream) = 0;
-	virtual bool LoadParams(char *line, float value) = 0;
+	virtual void SaveParams(QTextStream &stream) = 0;
+	virtual bool LoadParams(QString name, float value) = 0;
 	virtual bool UsesDrawTimer() = 0;
 
 	void Draw(Canvas *canvas, Dynamical *dynamical)
@@ -247,13 +252,14 @@ class AvoidanceInterface
 public:
 	virtual ObstacleAvoidance *GetObstacleAvoidance() = 0;
 	virtual QString GetName() = 0;
+	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(ObstacleAvoidance *avoid) = 0;
 	virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
-	virtual void SaveParams(std::ofstream &stream) = 0;
-	virtual bool LoadParams(char *line, float value) = 0;
+	virtual void SaveParams(QTextStream &stream) = 0;
+	virtual bool LoadParams(QString name, float value) = 0;
 };
 
 class MaximizeInterface
@@ -264,13 +270,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
+	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(Maximizer *maximizer) = 0;
 	virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
-	virtual void SaveParams(std::ofstream &stream) = 0;
-	virtual bool LoadParams(char *line, float value) = 0;
+	virtual void SaveParams(QTextStream &stream) = 0;
+	virtual bool LoadParams(QString name, float value) = 0;
 };
 
 class CollectionInterface

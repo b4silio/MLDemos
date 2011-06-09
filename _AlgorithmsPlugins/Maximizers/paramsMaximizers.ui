@@ -76,6 +76,11 @@
      <string>Gradient Descent</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>Donut</string>
+    </property>
+   </item>
   </widget>
   <widget class="QDoubleSpinBox" name="varianceSpin">
    <property name="geometry">

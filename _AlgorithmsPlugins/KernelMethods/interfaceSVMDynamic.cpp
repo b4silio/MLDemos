@@ -154,23 +154,23 @@ bool DynamicSVM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void DynamicSVM::SaveParams(std::ofstream &file)
+void DynamicSVM::SaveParams(QTextStream &file)
 {
-	file << "dynamicalOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << std::endl;
-	file << "dynamicalOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << std::endl;
+	file << "dynamicalOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+	file << "dynamicalOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
 }
 
-bool DynamicSVM::LoadParams(char *line, float value)
+bool DynamicSVM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"kernelDeg")) params->kernelDegSpin->setValue((int)value);
-	if(endsWith(line,"kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"kernelWidth")) params->kernelWidthSpin->setValue(value);
-	if(endsWith(line,"svmC")) params->svmCSpin->setValue(value);
-	if(endsWith(line,"svmP")) params->svmPSpin->setValue(value);
-	if(endsWith(line,"svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
+	if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
+	if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
+	if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
+	if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
 	return true;
 }

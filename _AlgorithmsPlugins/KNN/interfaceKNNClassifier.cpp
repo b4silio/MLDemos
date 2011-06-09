@@ -39,6 +39,15 @@ void ClassKNN::SetParams(Classifier *classifier)
 	((ClassifierKNN *)classifier)->SetParams(k, metricType, metricP);
 }
 
+QString ClassKNN::GetAlgoString()
+{
+	int k = params->knnKspin->value();
+	int metricType = params->knnNormCombo->currentIndex();
+	int metricP = params->knnNormSpin->value();
+	QString algo = QString("KNN %1 %2").arg(k).arg(metricType==3? 0 : metricType == 2 ? metricP : metricType+1);
+	return algo;
+}
+
 Classifier *ClassKNN::GetClassifier()
 {
 	ClassifierKNN *classifier = new ClassifierKNN();
@@ -88,17 +97,17 @@ bool ClassKNN::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassKNN::SaveParams(std::ofstream &file)
+void ClassKNN::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "knnK" << " " << params->knnKspin->value() << std::endl;
-	file << "classificationOptions" << ":" << "knnNorm" << " " << params->knnNormCombo->currentIndex() << std::endl;
-	file << "classificationOptions" << ":" << "knnPower" << " " << params->knnNormSpin->value() << std::endl;
+	file << "classificationOptions" << ":" << "knnK" << " " << params->knnKspin->value() << "\n";
+	file << "classificationOptions" << ":" << "knnNorm" << " " << params->knnNormCombo->currentIndex() << "\n";
+	file << "classificationOptions" << ":" << "knnPower" << " " << params->knnNormSpin->value() << "\n";
 }
 
-bool ClassKNN::LoadParams(char *line, float value)
+bool ClassKNN::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"knnK")) params->knnKspin->setValue((int)value);
-	if(endsWith(line,"knnNorm")) params->knnNormCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"knnPower")) params->knnNormSpin->setValue((int)value);
+	if(name.endsWith("knnK")) params->knnKspin->setValue((int)value);
+	if(name.endsWith("knnNorm")) params->knnNormCombo->setCurrentIndex((int)value);
+	if(name.endsWith("knnPower")) params->knnNormSpin->setValue((int)value);
 	return true;
 }

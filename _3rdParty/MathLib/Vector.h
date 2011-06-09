@@ -966,7 +966,7 @@ public:
         std::cout << "Vector " <<row<<std::endl;;
         for (unsigned int i = 0; i < row; i++)
             std::cout << _[i] <<" ";
-        std::cout << std::endl;
+        std::cout << "\n";
     }*/
 
     /// Print the vector to stdout

@@ -62,6 +62,27 @@ void ClassKPCA::SetParams(Classifier *classifier)
 	((ClassifierKPCA *)classifier)->SetParams(kernelType, kernelDegree, kernelGamma);
 }
 
+QString ClassKPCA::GetAlgoString()
+{
+	int kernelType = params->kernelTypeCombo->currentIndex();
+	float kernelGamma = params->kernelWidthSpin->value();
+	int kernelDegree = params->kernelDegSpin->value();
+	QString algo = "KPCA";
+	switch(kernelType)
+	{
+	case 0:
+		algo += " L";
+		break;
+	case 1:
+		algo += QString(" P %1").arg(kernelDegree);
+		break;
+	case 2:
+		algo += QString(" R %1").arg(kernelGamma);
+		break;
+	}
+	return algo;
+}
+
 Classifier *ClassKPCA::GetClassifier()
 {
 	ClassifierKPCA *classifier = new ClassifierKPCA();
@@ -112,18 +133,18 @@ bool ClassKPCA::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassKPCA::SaveParams(std::ofstream &file)
+void ClassKPCA::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << std::endl;
-	file << "classificationOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << std::endl;
+	file << "classificationOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+	file << "classificationOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
 }
 
-bool ClassKPCA::LoadParams(char *line, float value)
+bool ClassKPCA::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"kernelDeg")) params->kernelDegSpin->setValue((int)value);
-	if(endsWith(line,"kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"kernelWidth")) params->kernelWidthSpin->setValue(value);
+	if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
+	if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
 	return true;
 }
 

@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About MLDemos</string>
   </property>
   <property name="modal">
    <bool>true</bool>

@@ -99,7 +99,7 @@ void MaximizeParticles::Train(float *dataMap, fVec size, fvec startingPoint)
 		maximumValue = value;
 		history.push_back(maximum);
 		historyValue.push_back(value);
-		qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
+		//qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
 	}
 	particles.clear();
 	weights.clear();

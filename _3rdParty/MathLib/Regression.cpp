@@ -137,12 +137,12 @@ Vector& Regression::HermitteSplineFit(const Vector& inData, int nbSteps, Vector&
 void Regression::SaveData(Matrix &data, const char fileName[])
 {
 	std::ofstream file(fileName);
-	file << data.RowSize() << ' ' << data.ColumnSize() << std::endl;
+	file << data.RowSize() << ' ' << data.ColumnSize() << "\n";
 	for (int j = 0; j < (int)data.RowSize(); j++)
 	{
 		for (int i = 0; i < (int)data.ColumnSize(); i++)
 			file << data(j, i) << ' ';
-		file << std::endl;
+		file << "\n";
 	}
 }
 
@@ -479,16 +479,16 @@ bool Regression::LocallyWeightedRegression(Matrix &inData, Matrix &outData, int 
 void Regression::SaveCovarianceMatrices(const char fileName[])
 {
 	std::ofstream file(fileName);
-	file << covarianceMatrices[0].RowSize() << ' ' << covarianceMatrices[0].ColumnSize() << ' ' << covarianceMatricesCount << std::endl;
+	file << covarianceMatrices[0].RowSize() << ' ' << covarianceMatrices[0].ColumnSize() << ' ' << covarianceMatricesCount << "\n";
 	for (int k = 0; k < covarianceMatricesCount; k++)
 	{
 		for (int j = 0; j < (int)covarianceMatrices[k].RowSize(); j++)
 		{
 			for (int i = 0; i < (int)covarianceMatrices[k].ColumnSize(); i++)
 				file  << covarianceMatrices[k](j, i) << ' ';
-			file << std::endl;
+			file << "\n";
 		}
-		file << std::endl;
+		file << "\n";
 	}
 	
 }

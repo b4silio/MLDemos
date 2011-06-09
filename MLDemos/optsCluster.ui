@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Drawing Toolbar</string>
+   <string>Clustering</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -37,24 +37,6 @@
     </font>
    </property>
    <layout class="QVBoxLayout">
-    <item>
-     <spacer name="spacer_2">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item>
      <widget class="QPushButton" name="clusterButton">
       <property name="font">

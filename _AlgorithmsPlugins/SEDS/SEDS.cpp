@@ -240,7 +240,7 @@ bool SEDS::loadData(const char fileName[], char type)
 		FILE *file = fopen(fileName, "rb");
 		if (!file)
 		{
-			std::cout << "Error: Could not open the file!" << std::endl;
+			std::cout << "Error: Could not open the file!" << "\n";
 			return false;
 		}
 		//read from file, get nData etc
@@ -256,7 +256,7 @@ bool SEDS::loadData(const char fileName[], char type)
 		std::ifstream file(fileName);
 	
 		if(!file.is_open()){
-			std::cout << "Error: Could not open the file!" << std::endl;
+			std::cout << "Error: Could not open the file!" << "\n";
 			return false;
 		}
 
@@ -325,7 +325,7 @@ bool SEDS::loadModel(const char fileName[], char type)
 		FILE *file = fopen(fileName, "rb");
 		if (!file)
 		{
-			std::cout << "Error: Could not open the file!" << std::endl;
+			std::cout << "Error: Could not open the file!" << "\n";
 			return false;
 		}
 		//read from file, get d and K etc
@@ -354,7 +354,7 @@ bool SEDS::loadModel(const char fileName[], char type)
 		std::ifstream file(fileName);
 	
 		if(!file.is_open()){
-			std::cout << "Error: Could not open the file!" << std::endl;
+			std::cout << "Error: Could not open the file!" << "\n";
 			return false;
 		}
 		
@@ -404,7 +404,7 @@ bool SEDS::saveModel(const char fileName[])
 	std::ofstream file(fileName);
 	
 	if(!file){
-		std::cout << "Error: Could not open the file!" << std::endl;
+		std::cout << "Error: Could not open the file!" << "\n";
 		return false;
 	}
 	
@@ -635,12 +635,12 @@ bool SEDS::Optimize(){
 	str[1] = (char*)"Likelihood";
 	if (Options.display)
 	{
-		std::cout << std::endl << std::endl;
-		std::cout << "%-------------------------------------------------------------------------------------%" << std::endl;
-		std::cout << "%          Stable Estimator of Dynamical Systems (SEDS) Optimization Solver           %" << std::endl;
-		std::cout << "%       Copyright(c) 2010 S. Mohammad Khansari Zadeh, LASA Lab, EPFL, Lausanne        %" << std::endl;
-		std::cout << "%                    Switzerland, http://lasa.epfl.ch/khansari                        %" << std::endl;
-		std::cout << "%-------------------------------------------------------------------------------------%" << std::endl;
+		std::cout << "\n" << "\n";
+		std::cout << "%-------------------------------------------------------------------------------------%" << "\n";
+		std::cout << "%          Stable Estimator of Dynamical Systems (SEDS) Optimization Solver           %" << "\n";
+		std::cout << "%       Copyright(c) 2010 S. Mohammad Khansari Zadeh, LASA Lab, EPFL, Lausanne        %" << "\n";
+		std::cout << "%                    Switzerland, http://lasa.epfl.ch/khansari                        %" << "\n";
+		std::cout << "%-------------------------------------------------------------------------------------%" << "\n";
 		std::cout << "\n\nOptimization Algorithm starts ..." << endl;
 		printf("Using %s as the objective function ...\n\n",str[Options.objective]);
 		
@@ -1206,7 +1206,7 @@ bool SEDS::CheckConstraints(Matrix * A){
 	}
 	
 	if(ver)
-		cout<<"Optimization finished succesfully!"<<endl;
+		cout<<"Optimization finished successfully!"<<endl;
 	cout << endl;
 	
 	return true;

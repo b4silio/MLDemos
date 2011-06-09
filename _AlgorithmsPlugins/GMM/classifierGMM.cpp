@@ -23,7 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 ClassifierGMM::ClassifierGMM()
-: gmmPos(0), gmmNeg(0), dataPos(0), dataNeg(0), nbClusters(2), covarianceType(2), initType(1)
+	: gmmPos(0), gmmNeg(0), dataPos(0), dataNeg(0), nbClusters(2), covarianceType(2), initType(1)
 {
 	type = CLASS_GMM;
 	bSingleClass = false;
@@ -42,7 +42,7 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 	int dim = samples[0].size();
 	DEL(gmmPos);
 	DEL(gmmNeg);
-        nbClusters = min(nbClusters, (u32)samples.size());
+	nbClusters = min(nbClusters, (u32)samples.size());
 	gmmPos = new Gmm(nbClusters, dim);
 	gmmNeg = new Gmm(nbClusters, dim);
 	KILL(dataPos);
@@ -96,13 +96,13 @@ char *ClassifierGMM::GetInfoString()
 	sprintf(text, "%sCovariance Type: ", text);
 	switch(covarianceType)
 	{
-        case 2:
+	case 2:
 		sprintf(text, "%sSpherical\n", text);
 		break;
 	case 1:
 		sprintf(text, "%sDiagonal\n", text);
 		break;
-        case 0:
+	case 0:
 		sprintf(text, "%sFull\n", text);
 		break;
 	}

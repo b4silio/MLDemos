@@ -25,5 +25,6 @@
         <file>icons/bigbrush.png</file>
         <file>icons/ellipse.png</file>
         <file>icons/line.png</file>
+        <file>icons/compare.png</file>
     </qresource>
 </RCC>

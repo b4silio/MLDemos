@@ -81,7 +81,7 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 			{
 				file << ddata[j*samples.size() + i] << " ";
 			}
-			file << std::endl;
+			file << "\n";
 		}
 		file.close();
 	}

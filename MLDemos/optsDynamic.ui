@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Drawing Toolbar</string>
+   <string>Dynamical Systems</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -385,25 +385,7 @@ p, li { white-space: pre-wrap; }
      <pointsize>9</pointsize>
     </font>
    </property>
-   <layout class="QVBoxLayout" stretch="1,1,1,4">
-    <item>
-     <spacer name="spacer_2">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
+   <layout class="QVBoxLayout" stretch="1,1,4">
     <item>
      <widget class="QPushButton" name="regressionButton">
       <property name="font">

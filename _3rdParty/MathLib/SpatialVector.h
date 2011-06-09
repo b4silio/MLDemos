@@ -507,7 +507,7 @@ public:
           std::cout << mAngular._[i] <<" ";
         for (unsigned int i = 0; i < 3; i++)
           std::cout << mLinear._[i] <<" ";
-        std::cout << std::endl;
+        std::cout << "\n";
     }*/
 
 };

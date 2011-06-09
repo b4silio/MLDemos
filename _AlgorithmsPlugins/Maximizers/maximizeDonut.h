@@ -16,22 +16,39 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _DRAW_UTILS_H_
-#define _DRAW_UTILS_H_
+#ifndef _MAXIMIZE_DONUT_H_
+#define _MAXIMIZE_DONUT_H_
 
-#include "public.h"
-#include "mymaths.h"
-#include "basicMath.h"
-#include "canvas.h"
-#include "roc.h"
-#include <QPainter>
+#include <vector>
+#include "maximize.h"
 
-void DrawEllipse(float *mean, float *sigma, float rad, QPainter *painter, QSize size);
-void DrawEllipse(float *mean, float *sigma, float rad, QPainter *painter, Canvas *canvas);
-void DrawArrow( const QPointF &ppt, const QPointF &pt, double sze, QPainter &painter);
-QColor ColorFromVector(fvec a);
-QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const char *> roclabels, QSize size);
-QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
-QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
+class MaximizeDonut: public Maximizer
+{
+private:
+	int age;
+	int maxAge;
+	float variance;
+	float fingerprint;
+	int k;
+	std::vector< std::pair<double, std::pair<fvec, fvec> > > best;
+	fvec lastSigma;
+	bool bAdaptive;
 
-#endif // _DRAW_UTILS_H_
+	fvec Generate(fvec point, fvec sigma, float uniform=false);
+	fvec GetBestMean();
+	fvec GetBestSigma(fvec mean);
+	QImage DrawMap();
+
+public:
+	MaximizeDonut();
+	~MaximizeDonut();
+
+	void SetParams(int k, float variance=0.2, bool bAdaptive=false);
+	void Draw(QPainter &painter);
+	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
+	fvec Test( const fvec &sample);
+	fvec Test(const fVec &sample);
+	char *GetInfoString();
+};
+
+#endif // _MAXIMIZE_DONUT_H_

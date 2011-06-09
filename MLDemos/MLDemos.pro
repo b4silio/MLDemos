@@ -46,6 +46,7 @@ FORMS += aboutDialog.ui \
 	optsRegress.ui \
 	optsMaximize.ui \
 	optsDynamic.ui \
+	optsCompare.ui \
 	mldemos.ui \
 	drawingTools.ui \
 	drawingToolsContext1.ui \
@@ -53,7 +54,8 @@ FORMS += aboutDialog.ui \
 	drawingToolsContext3.ui \
 	drawingToolsContext4.ui \
 	statisticsDialog.ui \
-	viewOptions.ui
+	viewOptions.ui \
+    compare.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -74,7 +76,8 @@ HEADERS += basicMath.h \
 	regressor.h \
 	maximize.h \
 	dynamical.h \
-    clusterer.h
+    clusterer.h \
+    compare.h
 
 SOURCES += canvas.cpp \
     datasetManager.cpp \
@@ -88,4 +91,5 @@ SOURCES += canvas.cpp \
     mlsaving.cpp \
     mymaths.cpp \
 	roc.cpp \
-    widget.cpp
+    widget.cpp \
+    compare.cpp

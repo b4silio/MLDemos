@@ -33,6 +33,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_optsRegress.h"
 #include "ui_optsMaximize.h"
 #include "ui_optsDynamic.h"
+#include "ui_optsCompare.h"
 #include "ui_statisticsDialog.h"
 #include "ui_drawingTools.h"
 #include "ui_drawingToolsContext1.h"
@@ -46,6 +47,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dynamical.h"
 #include "clusterer.h"
 #include "interfaces.h"
+#include "compare.h"
 #include "widget.h"
 #include "drawTimer.h"
 
@@ -55,14 +57,14 @@ class MLDemos : public QMainWindow
 
 private:
 	QAction *actionClassifiers, *actionRegression, *actionDynamical, *actionMaximizers,
-	*actionClustering, *actionDrawSamples,
+	*actionClustering, *actionDrawSamples, *actionCompare,
 	*actionDisplayOptions, *actionShowStats,
 	*actionClearData, *actionClearModel, *actionScreenshot,
 	*actionNew, *actionSave, *actionLoad;
 
 	QDialog *displayDialog, *about, *statsDialog;
 
-	QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget;
+	QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *compareWidget;
 
 	QNamedWindow *rocWidget, *crossvalidWidget, *infoWidget;
 
@@ -76,6 +78,7 @@ private:
 	Ui::optionsRegressWidget *optionsRegress;
 	Ui::optionsMaximizeWidget *optionsMaximize;
 	Ui::optionsDynamicWidget *optionsDynamic;
+	Ui::optionsCompare *optionsCompare;
 	Ui::DrawingToolbar *drawToolbar;
 	Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
@@ -104,6 +107,7 @@ private:
 	void Draw(Clusterer *clusterer);
 	void Train(Maximizer *maximizer);
 	void Draw(Maximizer *maximizer);
+	void Test(Maximizer *maximizer);
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
@@ -113,6 +117,9 @@ private:
 	QList<MaximizeInterface*> maximizers;
 	QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
+	QList<QString> compareOptions;
+	QLabel *compareDisplay;
+	CompareAlgorithms *compare;
 	void AddPlugin(ClassifierInterface *iClassifier, const char *method);
 	void AddPlugin(ClustererInterface *iCluster, const char *method);
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
@@ -169,6 +176,7 @@ private slots:
 	void ShowOptionDynamical();
 	void ShowOptionCluster();
 	void ShowOptionMaximize();
+	void ShowOptionCompare();
 	void ShowSampleDrawing();
 	void ShowOptionDisplay();
 	void ShowStatsDialog();
@@ -197,6 +205,8 @@ private slots:
 	void Cluster();
 	void ClusterIterate();
 	void Avoidance();
+	void Compare();
+	void CompareScreenshot();
 	void Clear();
 	void ClearData();
 
@@ -235,6 +245,10 @@ private slots:
 	void TargetButton();
 	void GaussianButton();
 	void GradientButton();
+	void CompareAdd();
+	void CompareClear();
+	void CompareRemove();
+
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);

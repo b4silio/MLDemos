@@ -60,6 +60,49 @@ void ClassSVM::ChangeOptions()
 	}
 }
 
+QString ClassSVM::GetAlgoString()
+{
+	int C = params->svmCSpin->value();
+	int sv = params->maxSVSpin->value();
+	int kernelType = params->kernelTypeCombo->currentIndex();
+	float kernelGamma = params->kernelWidthSpin->value();
+	float kernelDegree = params->kernelDegSpin->value();
+
+	QString algo;
+	switch(params->svmTypeCombo->currentIndex())
+	{
+	case 0: // C-SVM
+		algo += "C-SVM";
+		algo += QString(" %1").arg(C);
+		break;
+	case 1: // Nu-SVM
+		algo += "Nu-SVM";
+		algo += QString(" %1").arg(C);
+		break;
+	case 2: // RVM
+		algo += "RVM";
+		algo += QString(" %1").arg(C);
+		break;
+	case 3: // Pegasos
+		algo += "Pegasos";
+		algo += QString(" %1 %2").arg(C).arg(sv);
+		break;
+	}
+	switch(kernelType)
+	{
+	case 0:
+		algo += " L";
+		break;
+	case 1:
+		algo += QString(" P %1").arg(kernelDegree);
+		break;
+	case 2:
+		algo += QString(" R %1").arg(kernelGamma);
+		break;
+	}
+	return algo;
+}
+
 void ClassSVM::SetParams(Classifier *classifier)
 {
 	if(!classifier) return;
@@ -247,21 +290,21 @@ bool ClassSVM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassSVM::SaveParams(std::ofstream &file)
+void ClassSVM::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << std::endl;
-	file << "classificationOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << std::endl;
+	file << "classificationOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+	file << "classificationOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
 }
 
-bool ClassSVM::LoadParams(char *line, float value)
+bool ClassSVM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"kernelDeg")) params->kernelDegSpin->setValue((int)value);
-	if(endsWith(line,"kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"kernelWidth")) params->kernelWidthSpin->setValue(value);
-	if(endsWith(line,"svmC")) params->svmCSpin->setValue(value);
-	if(endsWith(line,"svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
+	if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
+	if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
+	if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
 	return true;
 }
