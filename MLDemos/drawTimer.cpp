@@ -230,6 +230,17 @@ void DrawTimer::Maximization()
 
 	fvec sample = (*maximizer)->Test((*maximizer)->Maximum());
 
+	double value = (*maximizer)->MaximumValue();
+	if(value >= (*maximizer)->stopValue)
+	{
+		(*maximizer)->SetConverged(true);
+	}
+	if((*maximizer)->age >= (*maximizer)->maxAge)
+	{
+		(*maximizer)->SetConverged(true);
+	}
+	else (*maximizer)->age++;
+
 	QMutexLocker drawLock(&drawMutex);
 	int w = modelMap.width();
 	int h = modelMap.height();
@@ -241,7 +252,7 @@ void DrawTimer::Maximization()
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
-	if(*maximizer) (*maximizer)->Draw(painter);
+	(*maximizer)->Draw(painter);
 
 	QPointF point(sample[0]*w, sample[1]*h);
 	painter.setPen(QPen(Qt::black, 1.5));

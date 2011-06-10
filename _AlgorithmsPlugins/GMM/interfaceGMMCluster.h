@@ -40,13 +40,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("GMM");};
+	QString GetAlgoString(){ return GetName();};
 	QString GetInfoFile(){return "gmm.html";};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
-	void SaveParams(std::ofstream &stream);
-	bool LoadParams(char *line, float value);
+	void SaveParams(QTextStream &stream);
+	bool LoadParams(QString name, float value);
 };
 
 #endif // _INTERFACEGMMCLUSTER_H_

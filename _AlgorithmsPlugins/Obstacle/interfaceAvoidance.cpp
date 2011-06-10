@@ -49,11 +49,11 @@ bool PluginAvoid::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void PluginAvoid::SaveParams(std::ofstream &file)
+void PluginAvoid::SaveParams(QTextStream &file)
 {
 }
 
-bool PluginAvoid::LoadParams(char *line, float value)
+bool PluginAvoid::LoadParams(QString name, float value)
 {
 	return true;
 }

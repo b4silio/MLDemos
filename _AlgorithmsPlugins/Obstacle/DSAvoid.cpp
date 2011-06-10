@@ -170,21 +170,21 @@ DSObstacle::DSObstacle(int dim)
 
 void DSObstacle::Print()
 {
-	std::cout << "Axes" << std::endl;
+	std::cout << "Axes" << "\n";
 	axes.Print();
-	std::cout << "Center" << std::endl;
+	std::cout << "Center" << "\n";
 	center.Print();
-	std::cout << "Rotation" << std::endl;
+	std::cout << "Rotation" << "\n";
 	Rotation.Print();
-	std::cout << "Power" << std::endl;
+	std::cout << "Power" << "\n";
 	power.Print();
-	std::cout << "Safety Factor" << std::endl;
+	std::cout << "Safety Factor" << "\n";
 	safetyFactor.Print();
-	std::cout << "E_amp" << std::endl;
+	std::cout << "E_amp" << "\n";
 	e_amp.Print();
-	std::cout << "E" << std::endl;
+	std::cout << "E" << "\n";
 	E.Print();
-	std::cout << "M" << std::endl;
+	std::cout << "M" << "\n";
 	M.Print();
 }
 
@@ -313,7 +313,7 @@ bool DSAvoid::Avoid(Vector &x,Vector &xd)
 	obs[i_end].Rotation.Mult(nv,nv_rotated); //obs[i_end].R*nv
     if (!b_contouring && d[0] < 0.01 && nv_rotated*xd_old < 0 && xd.Norm() < 0.05){ // Gamma(x_t) <= 1
         b_contouring = true;
-		std::cout << "contouring started ... " << std::endl;
+		std::cout << "contouring started ... " << "\n";
     }
 
     if (b_contouring){
@@ -333,7 +333,7 @@ bool DSAvoid::Avoid(Vector &x,Vector &xd)
 		obs[i_end].Rotation.Mult(vec_tmp,xd_contouring); //xd_contouring = obs[i_end].R * xd_contouring;
         if (((xd_contouring*xd > 0) && xd.Norm() > 0.05) || nv_rotated*xd_old >= 0)  { //
             b_contouring = false;
-			std::cout << "contouring stopped ... " << std::endl;
+			std::cout << "contouring stopped ... " << "\n";
         }
 
         xd = xd_contouring;

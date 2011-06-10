@@ -41,6 +41,39 @@ void ClassGMM::SetParams(Classifier *classifier)
 	((ClassifierGMM *)classifier)->SetParams(clusters, covType, initType);
 }
 
+QString ClassGMM::GetAlgoString()
+{
+	int clusters = params->gmmCount->value();
+	int covType = params->gmmCovarianceCombo->currentIndex();
+	int initType = params->gmmInitCombo->currentIndex();
+	QString algo = QString("GMM %1").arg(clusters);
+	switch(covType)
+	{
+	case 0:
+		algo += " Ful";
+		break;
+	case 1:
+		algo += " Dia";
+		break;
+	case 2:
+		algo += " Sph";
+		break;
+	}
+	switch(initType)
+	{
+	case 0:
+		algo += " Rnd";
+		break;
+	case 1:
+		algo += " Uni";
+		break;
+	case 2:
+		algo += " K-M";
+		break;
+	}
+	return algo;
+}
+
 Classifier *ClassGMM::GetClassifier()
 {
 	ClassifierGMM *classifier = new ClassifierGMM();
@@ -129,17 +162,17 @@ bool ClassGMM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassGMM::SaveParams(std::ofstream &file)
+void ClassGMM::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "gmmCount" << " " << params->gmmCount->value() << std::endl;
-	file << "classificationOptions" << ":" << "gmmCovariance" << " " << params->gmmCovarianceCombo->currentIndex() << std::endl;
-	file << "classificationOptions" << ":" << "gmmInit" << " " << params->gmmInitCombo->currentIndex() << std::endl;
+	file << "classificationOptions" << ":" << "gmmCount" << " " << params->gmmCount->value() << "\n";
+	file << "classificationOptions" << ":" << "gmmCovariance" << " " << params->gmmCovarianceCombo->currentIndex() << "\n";
+	file << "classificationOptions" << ":" << "gmmInit" << " " << params->gmmInitCombo->currentIndex() << "\n";
 }
 
-bool ClassGMM::LoadParams(char *line, float value)
+bool ClassGMM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"gmmCount")) params->gmmCount->setValue((int)value);
-	if(endsWith(line,"gmmCovariance")) params->gmmCovarianceCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"gmmInit")) params->gmmInitCombo->setCurrentIndex((int)value);
+	if(name.endsWith("gmmCount")) params->gmmCount->setValue((int)value);
+	if(name.endsWith("gmmCovariance")) params->gmmCovarianceCombo->setCurrentIndex((int)value);
+	if(name.endsWith("gmmInit")) params->gmmInitCombo->setCurrentIndex((int)value);
 	return true;
 }

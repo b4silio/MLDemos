@@ -393,7 +393,7 @@ public:
     std::cout << "Vector" <<ROW<<std::endl;;
     for (unsigned int i = 0; i < ROW; i++)
       std::cout << _[i] <<" ";
-    std::cout << std::endl;    
+    std::cout << "\n";    
   }
 };
 

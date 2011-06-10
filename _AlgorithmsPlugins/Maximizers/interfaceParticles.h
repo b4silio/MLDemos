@@ -38,13 +38,14 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Particle Filter");};
+	QString GetAlgoString(){ return GetName();};
 	QString GetInfoFile(){return "particles.html";};
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Maximizer *maximizer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
-	void SaveParams(std::ofstream &stream);
-	bool LoadParams(char *line, float value);
+	void SaveParams(QTextStream &stream);
+	bool LoadParams(QString name, float value);
 };
 
 #endif // _INTERFACE_MAXIMIZER_PARTICLES_H_

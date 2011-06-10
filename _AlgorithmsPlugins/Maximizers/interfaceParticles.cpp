@@ -66,19 +66,19 @@ bool MaximizeInterfaceParticles::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void MaximizeInterfaceParticles::SaveParams(std::ofstream &file)
+void MaximizeInterfaceParticles::SaveParams(QTextStream &file)
 {
-	file << "maximizationOptions" << ":" << "samplingType" << " " << params->samplingType->currentIndex() << std::endl;
-	file << "maximizationOptions" << ":" << "varianceSpin" << " " << params->varianceSpin->value() << std::endl;
-	file << "maximizationOptions" << ":" << "adaptiveCheck" << " " << params->adaptiveCheck->isChecked() << std::endl;
-	file << "maximizationOptions" << ":" << "particleSpin" << " " << params->particleSpin->value() << std::endl;
+	file << "maximizationOptions" << ":" << "samplingType" << " " << params->samplingType->currentIndex() << "\n";
+	file << "maximizationOptions" << ":" << "varianceSpin" << " " << params->varianceSpin->value() << "\n";
+	file << "maximizationOptions" << ":" << "adaptiveCheck" << " " << params->adaptiveCheck->isChecked() << "\n";
+	file << "maximizationOptions" << ":" << "particleSpin" << " " << params->particleSpin->value() << "\n";
 }
 
-bool MaximizeInterfaceParticles::LoadParams(char *line, float value)
+bool MaximizeInterfaceParticles::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"samplingType")) params->samplingType->setCurrentIndex((int)value);
-	if(endsWith(line,"varianceSpin")) params->varianceSpin->setValue((float)value);
-	if(endsWith(line,"adaptiveCheck")) params->adaptiveCheck->setChecked((bool)value);
-	if(endsWith(line,"particleSpin")) params->particleSpin->setValue((int)value);
+	if(name.endsWith("samplingType")) params->samplingType->setCurrentIndex((int)value);
+	if(name.endsWith("varianceSpin")) params->varianceSpin->setValue((float)value);
+	if(name.endsWith("adaptiveCheck")) params->adaptiveCheck->setChecked((bool)value);
+	if(name.endsWith("particleSpin")) params->particleSpin->setValue((int)value);
 	return true;
 }

@@ -650,7 +650,7 @@ public:
         for (unsigned int j = 0; j < ROW; j++){
             for (unsigned int i = 0; i < ROW; i++)
                 std::cout << _[j*ROW+i] <<" ";
-            std::cout << std::endl;
+            std::cout << "\n";
         }
     }
 

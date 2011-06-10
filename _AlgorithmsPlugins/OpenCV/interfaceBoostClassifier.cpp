@@ -37,6 +37,26 @@ void ClassBoost::SetParams(Classifier *classifier)
 	((ClassifierBoost *)classifier)->SetParams(weakCount, weakType);
 }
 
+QString ClassBoost::GetAlgoString()
+{
+	int weakCount = params->boostCountSpin->value();
+	int weakType = params->boostLearnerType->currentIndex();
+	QString algo = QString("Boost %1").arg(weakCount);
+	switch(weakType)
+	{
+	case 0:
+		algo += " Proj";
+		break;
+	case 1:
+		algo += " Rect";
+		break;
+	case 2:
+		algo += " Circ";
+		break;
+	}
+	return algo;
+}
+
 Classifier *ClassBoost::GetClassifier()
 {
 	ClassifierBoost *classifier = new ClassifierBoost();
@@ -101,15 +121,15 @@ bool ClassBoost::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassBoost::SaveParams(std::ofstream &file)
+void ClassBoost::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "boostCount" << " " << params->boostCountSpin->value() << std::endl;
-	file << "classificationOptions" << ":" << "boostType" << " " << params->boostLearnerType->currentIndex() << std::endl;
+	file << "classificationOptions" << ":" << "boostCount" << " " << params->boostCountSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "boostType" << " " << params->boostLearnerType->currentIndex() << "\n";
 }
 
-bool ClassBoost::LoadParams(char *line, float value)
+bool ClassBoost::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"boostCount")) params->boostCountSpin->setValue((int)value);
-	if(endsWith(line,"boostType")) params->boostLearnerType->setCurrentIndex((int)value);
+	if(name.endsWith("boostCount")) params->boostCountSpin->setValue((int)value);
+	if(name.endsWith("boostType")) params->boostLearnerType->setCurrentIndex((int)value);
 	return true;
 }

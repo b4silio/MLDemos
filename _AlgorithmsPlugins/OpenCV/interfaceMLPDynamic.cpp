@@ -67,21 +67,21 @@ bool DynamicMLP::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void DynamicMLP::SaveParams(std::ofstream &file)
+void DynamicMLP::SaveParams(QTextStream &file)
 {
-	file << "dynamicalOptions" << ":" << "mlpNeuron" << " " << params->mlpNeuronSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "mlpAlpha" << " " << params->mlpAlphaSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << std::endl;
+	file << "dynamicalOptions" << ":" << "mlpNeuron" << " " << params->mlpNeuronSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "mlpAlpha" << " " << params->mlpAlphaSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << "\n";
 }
 
-bool DynamicMLP::LoadParams(char *line, float value)
+bool DynamicMLP::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"mlpNeuron")) params->mlpNeuronSpin->setValue((int)value);
-	if(endsWith(line,"mlpAlpha")) params->mlpAlphaSpin->setValue(value);
-	if(endsWith(line,"mlpBeta")) params->mlpBetaSpin->setValue(value);
-	if(endsWith(line,"mlpLayer")) params->mlpLayerSpin->setValue((int)value);
-	if(endsWith(line,"mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
+	if(name.endsWith("mlpNeuron")) params->mlpNeuronSpin->setValue((int)value);
+	if(name.endsWith("mlpAlpha")) params->mlpAlphaSpin->setValue(value);
+	if(name.endsWith("mlpBeta")) params->mlpBetaSpin->setValue(value);
+	if(name.endsWith("mlpLayer")) params->mlpLayerSpin->setValue((int)value);
+	if(name.endsWith("mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
 	return true;
 }

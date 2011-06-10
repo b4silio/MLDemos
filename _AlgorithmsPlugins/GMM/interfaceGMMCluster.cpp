@@ -121,17 +121,17 @@ bool ClustGMM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClustGMM::SaveParams(std::ofstream &file)
+void ClustGMM::SaveParams(QTextStream &file)
 {
-	file << "clusterOptions" << ":" << "gmmCount" << " " << params->gmmCount->value() << std::endl;
-	file << "clusterOptions" << ":" << "gmmCovariance" << " " << params->gmmCovarianceCombo->currentIndex() << std::endl;
-	file << "clusterOptions" << ":" << "gmmInit" << " " << params->gmmInitCombo->currentIndex() << std::endl;
+	file << "clusterOptions" << ":" << "gmmCount" << " " << params->gmmCount->value() << "\n";
+	file << "clusterOptions" << ":" << "gmmCovariance" << " " << params->gmmCovarianceCombo->currentIndex() << "\n";
+	file << "clusterOptions" << ":" << "gmmInit" << " " << params->gmmInitCombo->currentIndex() << "\n";
 }
 
-bool ClustGMM::LoadParams(char *line, float value)
+bool ClustGMM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"gmmCount")) params->gmmCount->setValue((int)value);
-	if(endsWith(line,"gmmCovariance")) params->gmmCovarianceCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"gmmInit")) params->gmmInitCombo->setCurrentIndex((int)value);
+	if(name.endsWith("gmmCount")) params->gmmCount->setValue((int)value);
+	if(name.endsWith("gmmCovariance")) params->gmmCovarianceCombo->setCurrentIndex((int)value);
+	if(name.endsWith("gmmInit")) params->gmmInitCombo->setCurrentIndex((int)value);
 	return true;
 }

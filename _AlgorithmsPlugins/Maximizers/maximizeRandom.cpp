@@ -97,7 +97,7 @@ void MaximizeRandom::Train(float *dataMap, fVec size, fvec startingPoint)
 		maximumValue = value;
 		history.push_back(maximum);
 		HistoryValue().push_back(value);
-		qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
+		//qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
 	}
 }
 
@@ -134,7 +134,7 @@ fvec MaximizeRandom::Test( const fvec &sample)
 		maximumValue = value;
 		history.push_back(maximum);
 		historyValue.push_back(value);
-		qDebug() << "new maximum found at " << maximum[0] << " : " << maximum[1] << " \tvalue: " << value;
+		//qDebug() << "new maximum found at " << maximum[0] << " : " << maximum[1] << " \tvalue: " << value;
 	}
 	return newSample;
 }

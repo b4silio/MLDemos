@@ -93,17 +93,17 @@ bool DynamicLWPR::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void DynamicLWPR::SaveParams(std::ofstream &file)
+void DynamicLWPR::SaveParams(QTextStream &file)
 {
-	file << "dynamicalOptions" << ":" << "lwprAlpha" << " " << params->lwprAlphaSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "lwprInitialD" << " " << params->lwprInitialDSpin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "lwprGen" << " " << params->lwprGenSpin->value() << std::endl;
+	file << "dynamicalOptions" << ":" << "lwprAlpha" << " " << params->lwprAlphaSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "lwprInitialD" << " " << params->lwprInitialDSpin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "lwprGen" << " " << params->lwprGenSpin->value() << "\n";
 }
 
-bool DynamicLWPR::LoadParams(char *line, float value)
+bool DynamicLWPR::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"lwprAlpha")) params->lwprAlphaSpin->setValue(value);
-	if(endsWith(line,"lwprInitialD")) params->lwprInitialDSpin->setValue(value);
-	if(endsWith(line,"lwprGen")) params->lwprGenSpin->setValue(value);
+	if(name.endsWith("lwprAlpha")) params->lwprAlphaSpin->setValue(value);
+	if(name.endsWith("lwprInitialD")) params->lwprInitialDSpin->setValue(value);
+	if(name.endsWith("lwprGen")) params->lwprGenSpin->setValue(value);
 	return true;
 }

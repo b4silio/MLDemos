@@ -39,8 +39,10 @@ protected:
 	float *data;
 
 public:
+	int age, maxAge;
+	double stopValue;
 
-	Maximizer() : dim(2), bIterative(false) , bConverged(true), data(NULL), w(1), h(1), maximumValue(-FLT_MAX){ maximum.resize(2);};
+	Maximizer() : stopValue(.99), maxAge(200), age(0), dim(2), bIterative(false) , bConverged(true), data(NULL), w(1), h(1), maximumValue(-FLT_MAX){ maximum.resize(2);};
 	~Maximizer(){if(data) delete [] data;};
 	void Maximize(float *dataMap, int w, int h) {Train(dataMap,fVec(w,h));};
 	bool hasConverged(){return bConverged;};
@@ -48,6 +50,7 @@ public:
 	std::vector<fvec> &History(){return history;};
 	std::vector<double> &HistoryValue(){return historyValue;};
 	fvec &Maximum(){return maximum;};
+	double MaximumValue(){return GetValue(maximum);};
 	std::vector<fvec> &Visited(){return visited;};
 	float GetValue(fvec sample)
 	{

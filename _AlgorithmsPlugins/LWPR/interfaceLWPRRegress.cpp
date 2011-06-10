@@ -39,6 +39,16 @@ void RegrLWPR::SetParams(Regressor *regressor)
 	((RegressorLWPR*)regressor)->SetParams(delta, alpha, gen);
 }
 
+QString RegrLWPR::GetAlgoString()
+{
+	float gen = params->lwprGenSpin->value();
+	float delta = params->lwprInitialDSpin->value();
+	float alpha = params->lwprAlphaSpin->value();
+
+	QString algo = QString("LWPR %1 %2 %3").arg(gen).arg(delta).arg(alpha);
+	return algo;
+}
+
 Regressor *RegrLWPR::GetRegressor()
 {
 	RegressorLWPR *regressor = new RegressorLWPR();
@@ -130,17 +140,17 @@ bool RegrLWPR::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void RegrLWPR::SaveParams(std::ofstream &file)
+void RegrLWPR::SaveParams(QTextStream &file)
 {
-	file << "regressionOptions" << ":" << "lwprAlpha" << " " << params->lwprAlphaSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "lwprInitialD" << " " << params->lwprInitialDSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "lwprGen" << " " << params->lwprGenSpin->value() << std::endl;
+	file << "regressionOptions" << ":" << "lwprAlpha" << " " << params->lwprAlphaSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "lwprInitialD" << " " << params->lwprInitialDSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "lwprGen" << " " << params->lwprGenSpin->value() << "\n";
 }
 
-bool RegrLWPR::LoadParams(char *line, float value)
+bool RegrLWPR::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"lwprAlpha")) params->lwprAlphaSpin->setValue(value);
-	if(endsWith(line,"lwprInitialD")) params->lwprInitialDSpin->setValue(value);
-	if(endsWith(line,"lwprGen")) params->lwprGenSpin->setValue(value);
+	if(name.endsWith("lwprAlpha")) params->lwprAlphaSpin->setValue(value);
+	if(name.endsWith("lwprInitialD")) params->lwprInitialDSpin->setValue(value);
+	if(name.endsWith("lwprGen")) params->lwprGenSpin->setValue(value);
 	return true;
 }

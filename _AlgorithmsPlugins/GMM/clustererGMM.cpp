@@ -35,7 +35,7 @@ void ClustererGMM::Train(std::vector< fvec > samples)
 		FOR(j, dim) data[i*dim + j] = samples[i][j];
 	}
 	gmm->init(data, samples.size(), initType);
-        gmm->em(data, samples.size(),-1e4,(COVARIANCE_TYPE)covarianceType);
+	gmm->em(data, samples.size(),-1e4,(COVARIANCE_TYPE)covarianceType);
 //	FOR(i, nbClusters) gmm->SetPrior(i, 1.f/nbClusters);
 }
 

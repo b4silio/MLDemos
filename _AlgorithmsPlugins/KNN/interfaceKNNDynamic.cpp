@@ -61,17 +61,17 @@ bool DynamicKNN::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void DynamicKNN::SaveParams(std::ofstream &file)
+void DynamicKNN::SaveParams(QTextStream &file)
 {
-	file << "dynamicalOptions" << ":" << "knnK" << " " << params->knnKspin->value() << std::endl;
-	file << "dynamicalOptions" << ":" << "knnNorm" << " " << params->knnNormCombo->currentIndex() << std::endl;
-	file << "dynamicalOptions" << ":" << "knnPower" << " " << params->knnNormSpin->value() << std::endl;
+	file << "dynamicalOptions" << ":" << "knnK" << " " << params->knnKspin->value() << "\n";
+	file << "dynamicalOptions" << ":" << "knnNorm" << " " << params->knnNormCombo->currentIndex() << "\n";
+	file << "dynamicalOptions" << ":" << "knnPower" << " " << params->knnNormSpin->value() << "\n";
 }
 
-bool DynamicKNN::LoadParams(char *line, float value)
+bool DynamicKNN::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"knnK")) params->knnKspin->setValue((int)value);
-	if(endsWith(line,"knnNorm")) params->knnNormCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"knnPower")) params->knnNormSpin->setValue((int)value);
+	if(name.endsWith("knnK")) params->knnKspin->setValue((int)value);
+	if(name.endsWith("knnNorm")) params->knnNormCombo->setCurrentIndex((int)value);
+	if(name.endsWith("knnPower")) params->knnNormSpin->setValue((int)value);
 	return true;
 }

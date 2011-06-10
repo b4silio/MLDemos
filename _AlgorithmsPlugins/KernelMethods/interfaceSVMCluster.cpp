@@ -162,23 +162,23 @@ bool ClustSVM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClustSVM::SaveParams(std::ofstream &file)
+void ClustSVM::SaveParams(QTextStream &file)
 {
-	file << "clusterOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << std::endl;
-	file << "clusterOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << std::endl;
-	file << "clusterOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << std::endl;
-	file << "clusterOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << std::endl;
-	file << "clusterOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << std::endl;
-	file << "clusterOptions" << ":" << "kernelCluster" << " " << params->kernelClusterSpin->value() << std::endl;
+	file << "clusterOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
+	file << "clusterOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+	file << "clusterOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
+	file << "clusterOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
+	file << "clusterOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
+	file << "clusterOptions" << ":" << "kernelCluster" << " " << params->kernelClusterSpin->value() << "\n";
 }
 
-bool ClustSVM::LoadParams(char *line, float value)
+bool ClustSVM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"kernelDeg")) params->kernelDegSpin->setValue((int)value);
-	if(endsWith(line,"kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"kernelWidth")) params->kernelWidthSpin->setValue(value);
-	if(endsWith(line,"svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"svmC")) params->svmCSpin->setValue(value);
-	if(endsWith(line,"kernelCluster")) params->kernelClusterSpin->setValue((int)value);
+	if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
+	if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
+	if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
+	if(name.endsWith("kernelCluster")) params->kernelClusterSpin->setValue((int)value);
 	return true;
 }

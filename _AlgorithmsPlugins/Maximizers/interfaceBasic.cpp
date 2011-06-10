@@ -26,6 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "maximizePower.h"
 #include "maximizeParticles.h"
 #include "maximizeGradient.h"
+#include "maximizeDonut.h"
 
 using namespace std;
 
@@ -43,6 +44,9 @@ void MaximizeBasic::ChangeOptions()
 	params->adaptiveCheck->setEnabled(false);
 	params->countLabel->setText("K");
 	params->varianceLabel->setText("Search Variance");
+	params->varianceSpin->setDecimals(2);
+	params->varianceSpin->setRange(0.01,1);
+	params->varianceSpin->setSingleStep(0.01);
 	switch(params->maximizeType->currentIndex())
 	{
 	case 0: // Random Search
@@ -65,6 +69,14 @@ void MaximizeBasic::ChangeOptions()
 		params->adaptiveCheck->setEnabled(true);
 		params->varianceSpin->setEnabled(true);
 		params->varianceLabel->setText("Speed");
+		break;
+	case 5: // Donut
+		params->adaptiveCheck->setEnabled(true);
+		params->varianceSpin->setEnabled(true);
+		params->varianceLabel->setText("Fingerprint");
+		params->kSpin->setEnabled(true);
+		params->varianceSpin->setRange(0.01,0.5);
+		params->varianceSpin->setSingleStep(0.01);
 		break;
 	}
 }
@@ -93,6 +105,9 @@ void MaximizeBasic::SetParams(Maximizer *maximizer)
 	case 4: // particle filters
 		((MaximizeGradient *)maximizer)->SetParams(variance, bAdaptive);
 		break;
+	case 5: // particle filters
+		((MaximizeDonut *)maximizer)->SetParams(k, variance*variance, bAdaptive);
+		break;
 	}
 }
 
@@ -116,9 +131,37 @@ Maximizer *MaximizeBasic::GetMaximizer()
 	case 4:
 		maximizer = new MaximizeGradient();
 		break;
+	case 5:
+		maximizer = new MaximizeDonut();
+		break;
 	}
 	SetParams(maximizer);
 	return maximizer;
+}
+
+QString MaximizeBasic::GetAlgoString()
+{
+	double variance = params->varianceSpin->value();
+	int k = params->kSpin->value();
+	bool bAdaptive = params->adaptiveCheck->isChecked();
+
+	switch(params->maximizeType->currentIndex())
+	{
+	case 0:
+		return "Random Search";
+	case 1:
+		return QString("Random Walk: %1").arg(variance);
+	case 2:
+		return QString("PoWER: %1 %2 %3").arg(k).arg(variance).arg(bAdaptive);
+	case 3:
+		return QString("Particles: %1 %2 %3").arg(k).arg(variance).arg(bAdaptive);
+	case 4:
+		return QString("Gradient Descent: %1 %2").arg(variance).arg(bAdaptive);
+	case 5:
+		return QString("Donut: %1 %2 %3").arg(k).arg(variance).arg(bAdaptive);
+	default:
+		return GetName();
+	}
 }
 
 void MaximizeBasic::SaveOptions(QSettings &settings)
@@ -138,19 +181,19 @@ bool MaximizeBasic::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void MaximizeBasic::SaveParams(std::ofstream &file)
+void MaximizeBasic::SaveParams(QTextStream &file)
 {
-	file << "maximizationOptions" << ":" << "maximizeType" << " " << params->maximizeType->currentIndex() << std::endl;
-	file << "maximizationOptions" << ":" << "varianceSpin" << " " << params->varianceSpin->value() << std::endl;
-	file << "maximizationOptions" << ":" << "adaptiveCheck" << " " << params->adaptiveCheck->isChecked() << std::endl;
-	file << "maximizationOptions" << ":" << "kSpin" << " " << params->kSpin->value() << std::endl;
+	file << "maximizationOptions:" << "maximizeType" << " " << params->maximizeType->currentIndex() << "\n";
+	file << "maximizationOptions:" << "varianceSpin" << " " << params->varianceSpin->value() << "\n";
+	file << "maximizationOptions:" << "adaptiveCheck" << " " << params->adaptiveCheck->isChecked() << "\n";
+	file << "maximizationOptions:" << "kSpin" << " " << params->kSpin->value() << "\n";
 }
 
-bool MaximizeBasic::LoadParams(char *line, float value)
+bool MaximizeBasic::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"maximizeType")) params->maximizeType->setCurrentIndex((int)value);
-	if(endsWith(line,"varianceSpin")) params->varianceSpin->setValue((float)value);
-	if(endsWith(line,"adaptiveCheck")) params->adaptiveCheck->setChecked((bool)value);
-	if(endsWith(line,"kSpin")) params->kSpin->setValue((int)value);
+	if(name.endsWith("maximizeType")) params->maximizeType->setCurrentIndex((int)value);
+	if(name.endsWith("varianceSpin")) params->varianceSpin->setValue((float)value);
+	if(name.endsWith("adaptiveCheck")) params->adaptiveCheck->setChecked((bool)value);
+	if(name.endsWith("kSpin")) params->kSpin->setValue((int)value);
 	return true;
 }

@@ -248,8 +248,8 @@ namespace dlib
         )
         {
             std::cerr << "\n**************************** FATAL ERROR DETECTED ****************************";
-            std::cerr << message() << std::endl;
-            std::cerr << "******************************************************************************\n" << std::endl;
+            std::cerr << message() << "\n";
+            std::cerr << "******************************************************************************\n" << "\n";
         }
 
         void check_for_previous_fatal_errors()
@@ -257,13 +257,13 @@ namespace dlib
             static bool is_first_fatal_error = true;
             if (is_first_fatal_error == false)
             {
-                std::cerr << "\n\n ************************** FATAL ERROR DETECTED ************************** " << std::endl;
-                std::cerr << " ************************** FATAL ERROR DETECTED ************************** " << std::endl;
-                std::cerr << " ************************** FATAL ERROR DETECTED ************************** \n" << std::endl;
+                std::cerr << "\n\n ************************** FATAL ERROR DETECTED ************************** " << "\n";
+                std::cerr << " ************************** FATAL ERROR DETECTED ************************** " << "\n";
+                std::cerr << " ************************** FATAL ERROR DETECTED ************************** \n" << "\n";
                 std::cerr << "Two fatal errors have been detected, the first was inappropriately ignored. \n"
                           << "To prevent further fatal errors from being ignored this application will be \n"
                           << "terminated immediately and you should go fix this buggy program.\n\n"
-                          << "The error message from this fatal error was:\n" << this->what() << "\n\n" << std::endl;
+                          << "The error message from this fatal error was:\n" << this->what() << "\n\n" << "\n";
                 using namespace std;
                 assert(false);
                 abort();

@@ -12,6 +12,9 @@ win32{
     MLBUILD = /tmp/MLDemos/$$NAME
 }
 
+# choices are opencv22 or opencv21
+CONFIG += opencv22
+
 mainApp{
 }else{
 	TARGET = $$qtLibraryTarget($$NAME)

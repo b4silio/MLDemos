@@ -31,6 +31,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QBitmap>
 #include <QSettings>
 #include <QFileDialog>
+#include <QProgressDialog>
 
 using namespace std;
 
@@ -298,6 +299,8 @@ void MLDemos::Maximize()
 	int tab = optionsMaximize->tabWidget->currentIndex();
 	if(tab >= maximizers.size() || !maximizers[tab]) return;
 	maximizer = maximizers[tab]->GetMaximizer();
+	maximizer->maxAge = optionsMaximize->iterationsSpin->value();
+	maximizer->stopValue = optionsMaximize->stoppingSpin->value();
 	tabUsedForTraining = tab;
 	Train(maximizer);
 
@@ -633,10 +636,16 @@ void MLDemos::Train(Maximizer *maximizer)
 	int h = rewardImage.height();
 	float *data = new float[w*h];
 
+	float maxData = 0;
 	FOR(i, w*h)
 	{
 		data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+		maxData = max(maxData, data[i]);
 		//data[i] = qRed(pixels[i])*(qAlpha(pixels[i]) / 255.f)/255.f; // all data is in a 0-1 range
+	}
+	if(maxData > 0)
+	{
+		FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
 	}
 	fvec startingPoint;
 	if(canvas->targets.size())
@@ -647,7 +656,190 @@ void MLDemos::Train(Maximizer *maximizer)
 		startingPoint[1] = starting.y()/h;
 	}
 	maximizer->Train(data, fVec(w,h), startingPoint);
+	maximizer->age = 0;
 	delete [] data;
+}
+
+void MLDemos::Test(Maximizer *maximizer)
+{
+	if(!maximizer) return;
+
+	do
+	{
+		fvec sample = maximizer->Test(maximizer->Maximum());
+		maximizer->age++;
+	}
+	while(maximizer->age < maximizer->maxAge && maximizer->MaximumValue() < maximizer->stopValue);
+}
+
+void MLDemos::Compare()
+{
+	if(!canvas) return;
+	if(!compareOptions.size()) return;
+
+	QMutexLocker lock(&mutex);
+	drawTimer->Stop();
+	DEL(clusterer);
+	DEL(regressor);
+	DEL(dynamical);
+	DEL(classifier);
+	DEL(maximizer);
+	// we start parsing the algorithm list
+	int folds = optionsCompare->foldCountSpin->value();
+	float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
+	int ratioIndex = optionsCompare->traintestRatioCombo->currentIndex();
+	float trainRatio = ratios[ratioIndex];
+	int positive = optionsCompare->positiveSpin->value();
+
+	compare->Clear();
+
+	QProgressDialog progress("Comparing Algorithms", "cancel", 0, folds*compareOptions.size());
+	progress.show();
+	FOR(i, compareOptions.size())
+	{
+		QString string = compareOptions[i];
+		QTextStream stream(&string);
+		QString line = stream.readLine();
+		QString paramString = stream.readAll();
+		if(line.startsWith("Maximization"))
+		{
+			QStringList s = line.split(":");
+			int tab = s[1].toInt();
+			if(tab >= maximizers.size() || !maximizers[tab]) continue;
+			QTextStream paramStream(&paramString);
+			QString paramName;
+			float paramValue;
+			while(!paramStream.atEnd())
+			{
+				paramStream >> paramName;
+				paramStream >> paramValue;
+				maximizers[tab]->LoadParams(paramName, paramValue);
+			}
+			QString algoName = maximizers[tab]->GetAlgoString();
+			fvec resultIt, resultVal;
+			FOR(f, folds)
+			{
+				maximizer = maximizers[tab]->GetMaximizer();
+				if(!maximizer) continue;
+				maximizer->maxAge = optionsMaximize->iterationsSpin->value();
+				maximizer->stopValue = optionsMaximize->stoppingSpin->value();
+				Train(maximizer);
+				Test(maximizer);
+				resultIt.push_back(maximizer->age);
+				resultVal.push_back(maximizer->MaximumValue());
+				progress.setValue(f + i*folds);
+				qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+				if(progress.wasCanceled())
+				{
+					compare->AddResults(resultIt, "Iterations", algoName);
+					compare->AddResults(resultVal, "Reward", algoName);
+					DEL(maximizer);
+					compare->Show();
+					return;
+				}
+			}
+			compare->AddResults(resultIt, "Iterations", algoName);
+			compare->AddResults(resultVal, "Reward", algoName);
+			DEL(maximizer);
+		}
+		if(line.startsWith("Classification"))
+		{
+			QStringList s = line.split(":");
+			int tab = s[1].toInt();
+			if(tab >= classifiers.size() || !classifiers[tab]) continue;
+			QTextStream paramStream(&paramString);
+			QString paramName;
+			float paramValue;
+			while(!paramStream.atEnd())
+			{
+				paramStream >> paramName;
+				paramStream >> paramValue;
+				classifiers[tab]->LoadParams(paramName, paramValue);
+			}
+			QString algoName = classifiers[tab]->GetAlgoString();
+			fvec resultTrain, resultTest;
+			FOR(f, folds)
+			{
+				classifier = classifiers[tab]->GetClassifier();
+				if(!classifier) continue;
+				Train(classifier, positive, trainRatio);
+				if(classifier->rocdata.size()>0)
+				{
+					resultTrain.push_back(GetBestFMeasure(classifier->rocdata[0]));
+				}
+				if(classifier->rocdata.size()>1)
+				{
+					resultTest.push_back(GetBestFMeasure(classifier->rocdata[1]));
+				}
+
+				progress.setValue(f + i*folds);
+				qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+				if(progress.wasCanceled())
+				{
+					compare->AddResults(resultTrain, "Balanced Error Rate (Training)", algoName);
+					compare->AddResults(resultTest, "Balanced Error Rate (Test)", algoName);
+					DEL(classifier);
+					compare->Show();
+					return;
+				}
+			}
+			compare->AddResults(resultTrain, "Balanced Error Rate (Training)", algoName);
+			compare->AddResults(resultTest, "Balanced Error Rate (Test)", algoName);
+			DEL(classifier);
+		}
+		if(line.startsWith("Regression"))
+		{
+			QStringList s = line.split(":");
+			int tab = s[1].toInt();
+			if(tab >= regressors.size() || !regressors[tab]) continue;
+			QTextStream paramStream(&paramString);
+			QString paramName;
+			float paramValue;
+			while(!paramStream.atEnd())
+			{
+				paramStream >> paramName;
+				paramStream >> paramValue;
+				regressors[tab]->LoadParams(paramName, paramValue);
+			}
+			QString algoName = regressors[tab]->GetAlgoString();
+			fvec resultTrain, resultTest;
+			FOR(f, folds)
+			{
+				regressor = regressors[tab]->GetRegressor();
+				if(!regressor) continue;
+				Train(regressor, trainRatio);
+				if(regressor->trainErrors.size())
+				{
+					float error = 0.f;
+					FOR(i, regressor->trainErrors.size()) error += regressor->trainErrors[i];
+					error /= regressor->trainErrors.size();
+					resultTrain.push_back(error);
+				}
+				if(regressor->testErrors.size())
+				{
+					float error = 0.f;
+					FOR(i, regressor->testErrors.size()) error += regressor->testErrors[i];
+					error /= regressor->testErrors.size();
+					resultTest = regressor->testErrors;
+				}
+
+				progress.setValue(f + i*folds);
+				qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+				if(progress.wasCanceled())
+				{
+					compare->AddResults(resultTrain, "Error (Training)", algoName);
+					compare->AddResults(resultTest, "Error (Testing)", algoName);
+					DEL(regressor);
+					compare->Show();
+					return;
+				}
+			}
+			compare->AddResults(resultTrain, "Error (Training)", algoName);
+			compare->AddResults(resultTest, "Error (Testing)", algoName);
+			DEL(regressor);
+		}
+		compare->Show();
+	}
 }
 
 void MLDemos::ExportOutput()

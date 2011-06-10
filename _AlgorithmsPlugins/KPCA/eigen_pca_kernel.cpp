@@ -27,25 +27,25 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
 	}
 	k->Compute(dataPoints);
 
-	//std::cout << "K:\n" << k->get() << std::endl;
+	//std::cout << "K:\n" << k->get() << "\n";
 
 	// ''centralize''
 	MatrixXd K_Centralized = k->get()
 							 - MatrixXd::Ones(n, n)*k->get()
 							 - k->get()*MatrixXd::Ones(n, n)
 							 + MatrixXd::Ones(n, n)*k->get()*MatrixXd::Ones(n, n);
-	//std::cout << "Centralized" << std::endl;
+	//std::cout << "Centralized" << "\n";
 
-	//std::cout << "K:\n" << k->get() << std::endl;
+	//std::cout << "K:\n" << k->get() << "\n";
 
 	// compute the eigenvalue on the K_Centralized Matrix
 	EigenSolver<MatrixXd> m_solve(K_Centralized);
-	//std::cout << "got the eigenvalues, eigenvectors" << std::endl;
+	//std::cout << "got the eigenvalues, eigenvectors" << "\n";
 	eigenvalues = m_solve.eigenvalues().real();
 	eigenVectors = m_solve.eigenvectors().real();
 
-	//std::cout << "eigv:\n" << eigenvalues << std::endl;
-	//std::cout << "eigs:\n" << eigenVectors << std::endl;
+	//std::cout << "eigv:\n" << eigenvalues << "\n";
+	//std::cout << "eigs:\n" << eigenVectors << "\n";
 
 	// sort and get the permutation indices
 	pi.clear();
@@ -98,7 +98,7 @@ float PCA::test(VectorXd point)
 	for(int i=0; i<m; i++) onePoint(i,0) = point(i);
 	k->Compute(onePoint, sourcePoints);
 
-	//std::cout << "K:\n" << k->get() << std::endl;
+	//std::cout << "K:\n" << k->get() << "\n";
 
 	// ''centralize''
 	MatrixXd K = k->get()
@@ -107,9 +107,9 @@ float PCA::test(VectorXd point)
 				 + MatrixXd::Ones(k->get().rows(), k->get().rows())*k->get()*MatrixXd::Ones(k->get().cols(), k->get().cols());
 
 
-//	std::cout << K.row(0) << std::endl;
-//	std::cout << eigenvalues << std::endl;
-//	std::cout << k->get().row(0) << std::endl;
+//	std::cout << K.row(0) << "\n";
+//	std::cout << eigenvalues << "\n";
+//	std::cout << k->get().row(0) << "\n";
 
 	float result = 0;	
 	for (int w=0; w<eigenVectors.rows(); w++)
@@ -118,7 +118,7 @@ float PCA::test(VectorXd point)
 	}
 	result = (result * 0.25f - 1)*2;
 	//result *= eigenvalues(pi[0].second);
-	//std::cout << result << std::endl;
+	//std::cout << result << "\n";
 	return result;
 }
 
@@ -145,7 +145,7 @@ MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
 	}
 	k->Compute(dataPoints, sourcePoints);
 
-	//std::cout << "K:\n" << k->get() << std::endl;
+	//std::cout << "K:\n" << k->get() << "\n";
 
 	// ''centralize''
 	MatrixXd K = k->get()

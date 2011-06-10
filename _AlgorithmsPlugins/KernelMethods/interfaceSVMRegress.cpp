@@ -133,6 +133,54 @@ void RegrSVM::SetParams(Regressor *regressor)
 	}
 }
 
+QString RegrSVM::GetAlgoString()
+{
+	int kernelMethod = params->svmTypeCombo->currentIndex();
+	float svmC = params->svmCSpin->value();
+	int kernelType = params->kernelTypeCombo->currentIndex();
+	float kernelGamma = params->kernelWidthSpin->value();
+	float kernelDegree = params->kernelDegSpin->value();
+	float svmP = params->svmPSpin->value();
+
+	QString algo;
+	switch(kernelMethod)
+	{
+	case 0:
+		algo += "eps-SVM";
+		algo += QString(" %1 %2").arg(svmC).arg(svmP);
+		break;
+	case 1:
+		algo += "nu-SVM";
+		algo += QString(" %1 %2").arg(svmC).arg(svmP);
+		break;
+	case 2:
+		algo += "RVM";
+		algo += QString(" %1").arg(svmP);
+		break;
+	case 3:
+		algo += "SOGP";
+		algo += QString(" %1 %2").arg(svmC).arg(svmP);
+		break;
+	case 4:
+		algo += "KRLS";
+		algo += QString(" %1 %2").arg(svmC).arg(svmP);
+		break;
+	}
+	switch(kernelType)
+	{
+	case 0:
+		algo += " L";
+		break;
+	case 1:
+		algo += QString(" P %1").arg(kernelDegree);
+		break;
+	case 2:
+		algo += QString(" R %1").arg(kernelGamma);
+		break;
+	}
+	return algo;
+}
+
 Regressor *RegrSVM::GetRegressor()
 {
 	int svmType = params->svmTypeCombo->currentIndex();
@@ -399,23 +447,23 @@ bool RegrSVM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void RegrSVM::SaveParams(std::ofstream &file)
+void RegrSVM::SaveParams(QTextStream &file)
 {
-	file << "regressionOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << std::endl;
-	file << "regressionOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << std::endl;
+	file << "regressionOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+	file << "regressionOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
 }
 
-bool RegrSVM::LoadParams(char *line, float value)
+bool RegrSVM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"kernelDeg")) params->kernelDegSpin->setValue((int)value);
-	if(endsWith(line,"kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"kernelWidth")) params->kernelWidthSpin->setValue(value);
-	if(endsWith(line,"svmC")) params->svmCSpin->setValue(value);
-	if(endsWith(line,"svmP")) params->svmPSpin->setValue(value);
-	if(endsWith(line,"svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
+	if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
+	if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
+	if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
+	if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
 	return true;
 }

@@ -43,6 +43,29 @@ void ClassLinear::SetParams(Classifier *classifier)
 	((ClassifierLinear *)classifier)->SetParams(type);
 }
 
+QString ClassLinear::GetAlgoString()
+{
+	int type = params->linearTypeCombo->currentIndex();
+	switch(type)
+	{
+	case 0:
+		return "PCA";
+		break;
+	case 1:
+		return "LDA";
+		break;
+	case 2:
+		return "Fisher-LDA";
+		break;
+	case 3:
+		return "ICA";
+		break;
+	case 4:
+		return "Naive Bayes";
+		break;
+	}
+}
+
 Classifier *ClassLinear::GetClassifier()
 {
 	ClassifierLinear *classifier = new ClassifierLinear();
@@ -137,14 +160,14 @@ bool ClassLinear::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClassLinear::SaveParams(std::ofstream &file)
+void ClassLinear::SaveParams(QTextStream &file)
 {
-	file << "classificationOptions" << ":" << "linearType" << " " << params->linearTypeCombo->currentIndex() << std::endl;
+	file << "classificationOptions" << ":" << "linearType" << " " << params->linearTypeCombo->currentIndex() << "\n";
 }
 
-bool ClassLinear::LoadParams(char *line, float value)
+bool ClassLinear::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"linearType")) params->linearTypeCombo->setCurrentIndex((int)value);
+	if(name.endsWith("linearType")) params->linearTypeCombo->setCurrentIndex((int)value);
 	return true;
 }
 

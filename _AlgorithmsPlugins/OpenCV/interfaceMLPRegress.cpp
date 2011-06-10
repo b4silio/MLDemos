@@ -41,6 +41,18 @@ void RegrMLP::SetParams(Regressor *regressor)
 	((RegressorMLP *)regressor)->SetParams(activation, neurons, layers, alpha, beta);
 }
 
+QString RegrMLP::GetAlgoString()
+{
+	float alpha = params->mlpAlphaSpin->value();
+	float beta = params->mlpBetaSpin->value();
+	int layers = params->mlpLayerSpin->value();
+	int neurons = params->mlpNeuronSpin->value();
+	int activation = params->mlpFunctionCombo->currentIndex()+1; // 1: sigmoid, 2: gaussian
+
+	QString algo = QString("MLP %1 %2 %3 %4 %5").arg(neurons).arg(layers).arg(activation==1 ? "S" : "G").arg(alpha).arg(beta);
+	return algo;
+}
+
 Regressor *RegrMLP::GetRegressor()
 {
 	RegressorMLP *regressor = new RegressorMLP();
@@ -97,21 +109,21 @@ bool RegrMLP::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void RegrMLP::SaveParams(std::ofstream &file)
+void RegrMLP::SaveParams(QTextStream &file)
 {
-	file << "regressionOptions" << ":" << "mlpNeuron" << " " << params->mlpNeuronSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "mlpAlpha" << " " << params->mlpAlphaSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << std::endl;
-	file << "regressionOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << std::endl;
+	file << "regressionOptions" << ":" << "mlpNeuron" << " " << params->mlpNeuronSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "mlpAlpha" << " " << params->mlpAlphaSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << "\n";
+	file << "regressionOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << "\n";
 }
 
-bool RegrMLP::LoadParams(char *line, float value)
+bool RegrMLP::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"mlpNeuron")) params->mlpNeuronSpin->setValue((int)value);
-	if(endsWith(line,"mlpAlpha")) params->mlpAlphaSpin->setValue(value);
-	if(endsWith(line,"mlpBeta")) params->mlpBetaSpin->setValue(value);
-	if(endsWith(line,"mlpLayer")) params->mlpLayerSpin->setValue((int)value);
-	if(endsWith(line,"mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
+	if(name.endsWith("mlpNeuron")) params->mlpNeuronSpin->setValue((int)value);
+	if(name.endsWith("mlpAlpha")) params->mlpAlphaSpin->setValue(value);
+	if(name.endsWith("mlpBeta")) params->mlpBetaSpin->setValue(value);
+	if(name.endsWith("mlpLayer")) params->mlpLayerSpin->setValue((int)value);
+	if(name.endsWith("mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
 	return true;
 }

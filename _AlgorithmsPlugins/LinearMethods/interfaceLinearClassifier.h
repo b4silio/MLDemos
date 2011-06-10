@@ -45,14 +45,15 @@ public:
 
 	// virtual functions to manage the GUI and I/O
 	QString GetName(){return QString("Linear Projections");};
+	QString GetAlgoString();
 	QString GetInfoFile(){return "linearClassifiers.html";};
 	bool UsesDrawTimer();
 	QWidget *GetParameterWidget(){return widget;};
 	void SetParams(Classifier *classifier);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
-	void SaveParams(std::ofstream &stream);
-	bool LoadParams(char *line, float value);
+	void SaveParams(QTextStream &stream);
+	bool LoadParams(QString name, float value);
 
 private slots:
 	void ShowProjection();

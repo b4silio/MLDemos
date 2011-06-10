@@ -271,7 +271,7 @@ void DatasetManager::Save(const char *filename)
 	ofstream file(filename);
 	if(!file.is_open()) return;
 
-	file << sampleCnt << " " << size << std::endl;
+	file << sampleCnt << " " << size << "\n";
 	FOR(i, sampleCnt)
 	{
 		FOR(j,size)
@@ -280,22 +280,22 @@ void DatasetManager::Save(const char *filename)
 		}
 		file << labels[i] << " ";
 		file << flags[i] << " ";
-		file << std::endl;
+		file << "\n";
 	}
 
 	if(sequences.size())
 	{
-		file << "s " << sequences.size() << std::endl;
+		file << "s " << sequences.size() << "\n";
 		FOR(i, sequences.size())
 		{
-			file << sequences[i].first << " " << sequences[i].second << std::endl;
+			file << sequences[i].first << " " << sequences[i].second << "\n";
 		}
 	}
 
 	// we load the obstacles
 	if(obstacles.size())
 	{
-		file << "o " << obstacles.size() << std::endl;
+		file << "o " << obstacles.size() << "\n";
 		FOR(i, obstacles.size())
 		{
 			FOR(j, size) file << obstacles[i].center[j] << " ";
@@ -304,7 +304,7 @@ void DatasetManager::Save(const char *filename)
 			file << obstacles[i].power[0] << " ";
 			file << obstacles[i].power[1] << " ";
 			file << obstacles[i].repulsion[0] << " ";
-			file << obstacles[i].repulsion[1] << std::endl;
+			file << obstacles[i].repulsion[1] << "\n";
 		}
 	}
 

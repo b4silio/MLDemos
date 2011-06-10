@@ -121,21 +121,21 @@ bool ClustKM::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void ClustKM::SaveParams(std::ofstream &file)
+void ClustKM::SaveParams(QTextStream &file)
 {
-	file << "clusterOptions" << ":" << "kmeansBeta" << " " << params->kmeansBetaSpin->value() << std::endl;
-	file << "clusterOptions" << ":" << "kmeansCluster" << " " << params->kmeansClusterSpin->value() << std::endl;
-	file << "clusterOptions" << ":" << "kmeansMethod" << " " << params->kmeansMethodCombo->currentIndex() << std::endl;
-	file << "clusterOptions" << ":" << "kmeansPower" << " " << params->kmeansNormSpin->value() << std::endl;
-	file << "clusterOptions" << ":" << "kmeansNormCombo" << " " << params->kmeansNormCombo->currentIndex() << std::endl;
+	file << "clusterOptions" << ":" << "kmeansBeta" << " " << params->kmeansBetaSpin->value() << "\n";
+	file << "clusterOptions" << ":" << "kmeansCluster" << " " << params->kmeansClusterSpin->value() << "\n";
+	file << "clusterOptions" << ":" << "kmeansMethod" << " " << params->kmeansMethodCombo->currentIndex() << "\n";
+	file << "clusterOptions" << ":" << "kmeansPower" << " " << params->kmeansNormSpin->value() << "\n";
+	file << "clusterOptions" << ":" << "kmeansNormCombo" << " " << params->kmeansNormCombo->currentIndex() << "\n";
 }
 
-bool ClustKM::LoadParams(char *line, float value)
+bool ClustKM::LoadParams(QString name, float value)
 {
-	if(endsWith(line,"kmeansBeta")) params->kmeansBetaSpin->setValue(value);
-	if(endsWith(line,"kmeansCluster")) params->kmeansClusterSpin->setValue((int)value);
-	if(endsWith(line,"kmeansMethod")) params->kmeansMethodCombo->setCurrentIndex((int)value);
-	if(endsWith(line,"kmeansPower")) params->kmeansNormSpin->setValue((int)value);
-	if(endsWith(line,"kmeansNormCombo")) params->kmeansNormCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kmeansBeta")) params->kmeansBetaSpin->setValue(value);
+	if(name.endsWith("kmeansCluster")) params->kmeansClusterSpin->setValue((int)value);
+	if(name.endsWith("kmeansMethod")) params->kmeansMethodCombo->setCurrentIndex((int)value);
+	if(name.endsWith("kmeansPower")) params->kmeansNormSpin->setValue((int)value);
+	if(name.endsWith("kmeansNormCombo")) params->kmeansNormCombo->setCurrentIndex((int)value);
 	return true;
 }
