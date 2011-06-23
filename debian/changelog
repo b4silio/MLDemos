@@ -1,5 +1,5 @@
-mldemos (0.3.5-1) unstable; urgency=low
+mldemos (0.3.6-1) unstable; urgency=low
 
   * Initial Release.
 
- -- Barak A. Pearlmutter <bap@debian.org>  Mon, 30 May 2011 17:00:10 +0100
+ -- Barak A. Pearlmutter <bap@debian.org>  Fri, 24 Jun 2011 00:05:20 +0100
