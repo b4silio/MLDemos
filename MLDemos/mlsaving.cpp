@@ -131,6 +131,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("varianceSpin", optionsMaximize->varianceSpin->value());
 	settings.setValue("iterationsSpin", optionsMaximize->iterationsSpin->value());
 	settings.setValue("stoppingSpin", optionsMaximize->stoppingSpin->value());
+	settings.setValue("benchmarkCombo", optionsMaximize->benchmarkCombo->currentIndex());
 	settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -287,6 +288,7 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("varianceSpin")) optionsMaximize->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
 	if(settings.contains("iterationsSpin")) optionsMaximize->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
 	if(settings.contains("stoppingSpin")) optionsMaximize->stoppingSpin->setValue(settings.value("stoppingSpin").toDouble());
+	if(settings.contains("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(settings.value("benchmarkCombo").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -399,6 +401,7 @@ void MLDemos::SaveParams( QString filename )
 		out << groupName << ":" << "gaussVarianceSpin" << " " << optionsMaximize->varianceSpin->value() << "\n";
 		out << groupName << ":" << "iterationsSpin" << " " << optionsMaximize->iterationsSpin->value() << "\n";
 		out << groupName << ":" << "stoppingSpin" << " " << optionsMaximize->stoppingSpin->value() << "\n";
+		out << groupName << ":" << "benchmarkCombo" << " " << optionsMaximize->benchmarkCombo->currentIndex() << "\n";
 		if(tab < maximizers.size() && maximizers[tab])
 		{
 			maximizers[tab]->SaveParams(out);
@@ -476,7 +479,7 @@ void MLDemos::LoadParams( QString filename )
 			if(line.endsWith("resampleType")) optionsDynamic->resampleCombo->setCurrentIndex((int)value);
 			if(line.endsWith("resampleCount")) optionsDynamic->resampleSpin->setValue((int)value);
 			if(line.endsWith("obstacleType")) optionsDynamic->obstacleCombo->setCurrentIndex((int)value);
-			if(line.endsWith("dT")) optionsDynamic->dtSpin->setValue((int)value);
+			if(line.endsWith("dT")) optionsDynamic->dtSpin->setValue((float)value);
 			if(line.endsWith("tab")) optionsDynamic->tabWidget->setCurrentIndex(tab = (int)value);
 			if(tab < dynamicals.size() && dynamicals[tab]) dynamicals[tab]->LoadParams(line,value);
 		}
@@ -495,6 +498,7 @@ void MLDemos::LoadParams( QString filename )
 			if(line.endsWith("gaussVarianceSpin")) optionsMaximize->varianceSpin->setValue((double)value);
 			if(line.endsWith("iterationsSpin")) optionsMaximize->iterationsSpin->setValue((int)value);
 			if(line.endsWith("stoppingSpin")) optionsMaximize->stoppingSpin->setValue((double)value);
+			if(line.endsWith("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(tab = (int)value);
 			if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
 		}
 	}

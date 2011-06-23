@@ -41,7 +41,7 @@ DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
 	  bRunning(false),
 	  bPaused(false),
 	  mutex(mutex),
-	  perm(0), w(0), h(0)
+	  perm(0), w(0), h(0), dim(2)
 {
 
 }
@@ -94,6 +94,7 @@ void DrawTimer::run()
 		if(maximizer && (*maximizer))
 		{
 			emit ModelReady(modelMap);
+			emit CurveReady();
 			//canvas->SetModelImage(modelMap);
 		}
 		else
@@ -129,25 +130,13 @@ void DrawTimer::Refine()
 		}
 		else
 		{
-			// we do a time check
-			QTime elapsed;
-			elapsed.start();
-			Test(0, 100); // we test 100 points
-			int msec = elapsed.elapsed();
-			// we want to do ~ 1 sec slices
-			if(!msec)
-			{
-				refineMax = 20;
-				refineLevel++;
-				return;
-			}
 			refineMax = 20;
 		}
 	}
 	else
 	{
 		int count = (w*h) / refineMax;
-		int start = count * (refineLevel-1) + (refineLevel == 1 ? 100 : 0);
+		int start = count * (refineLevel-1);
 		int stop = count * refineLevel;
 		if(refineLevel == refineMax) stop = w*h; // we want to be sure we paint everything in the end
 
@@ -279,9 +268,11 @@ void DrawTimer::Test(int start, int stop)
 		QMutexLocker lock(mutex);
 		if((*classifier))
 		{
+			int dim = (*classifier)->Dim();
+			sample.resize(dim, 0);
 			v = (*classifier)->Test(sample);
-			int color = (int)(abs(v)*128);
-			color = min(color, 255);
+			int color = (int)(fabs(v)*128);
+			color = max(0,min(color, 255));
 			QColor c;
 			if(v > 0) c = QColor(color,0,0);
 			else c = QColor(color,color,color);
@@ -301,9 +292,9 @@ void DrawTimer::Test(int start, int stop)
 			{
 				FOR(i, res.size())
 				{
-					r += CVColor[(i+1)%CVColorCnt].red()*res[i];
-					g += CVColor[(i+1)%CVColorCnt].green()*res[i];
-					b += CVColor[(i+1)%CVColorCnt].blue()*res[i];
+					r += SampleColor[(i+1)%SampleColorCnt].red()*res[i];
+					g += SampleColor[(i+1)%SampleColorCnt].green()*res[i];
+					b += SampleColor[(i+1)%SampleColorCnt].blue()*res[i];
 				}
 			}
 			else if(res.size())
@@ -399,10 +390,6 @@ void DrawTimer::TestFast(int start, int stop)
 	fVec sample;
 	mutex->lock();
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
-	if (w != canvas->width() || h != canvas->height())
-	{
-
-	}
 	mutex->unlock();
 	for (int i=start; i<stop; i++)
 	{
@@ -417,12 +404,42 @@ void DrawTimer::TestFast(int start, int stop)
 		QMutexLocker lock(mutex);
 		if((*classifier))
 		{
-			v = (*classifier)->Test(sample);
-			int color = (int)(abs(v)*128);
-			color = min(color, 255);
 			QColor c;
-			if(v > 0) c = QColor(color,0,0);
-			else c = QColor(color,color,color);
+			if((*classifier)->IsMultiClass())
+			{
+				fvec val = (*classifier)->TestMulti(sample);
+				if(val.size() == 2)
+				{
+					float v0 = val[0];
+					float v1 = val[1];
+					float v = v1 - v0;
+					if(v > 0) c = QColor(max(0.f,min(255.f,(v)*255.f)),0,0);
+					else
+					{
+						int color = max(0.f,min(255.f,(-v)*255.f));
+						c = QColor(color,color,color);
+					}
+				}
+				else
+				{
+					float r=0,g=0,b=0;
+					FOR(j, val.size())
+					{
+						r += SampleColor[j%SampleColorCnt].red()*val[j];
+						g += SampleColor[j%SampleColorCnt].green()*val[j];
+						b += SampleColor[j%SampleColorCnt].blue()*val[j];
+					}
+					c = QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b)));
+				}
+			}
+			else
+			{
+				v = (*classifier)->Test(sample);
+				int color = (int)(fabs(v)*128);
+				color = max(0,min(color, 255));
+				if(v > 0) c = QColor(color,0,0);
+				else c = QColor(color,color,color);
+			}
 			drawMutex.lock();
 			bigMap.setPixel(x,y,c.rgb());
 			drawMutex.unlock();
@@ -439,9 +456,9 @@ void DrawTimer::TestFast(int start, int stop)
 			{
 				FOR(i, res.size())
 				{
-					r += CVColor[(i+1)%CVColorCnt].red()*res[i];
-					g += CVColor[(i+1)%CVColorCnt].green()*res[i];
-					b += CVColor[(i+1)%CVColorCnt].blue()*res[i];
+					r += SampleColor[(i+1)%SampleColorCnt].red()*res[i];
+					g += SampleColor[(i+1)%SampleColorCnt].green()*res[i];
+					b += SampleColor[(i+1)%SampleColorCnt].blue()*res[i];
 				}
 			}
 			else if(res.size())

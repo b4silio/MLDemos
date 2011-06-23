@@ -138,7 +138,7 @@ void ClassLinear::DrawModel(Canvas *canvas, QPainter &painter, Classifier *class
 		float response = classifier->Test(sample);
 		if(response > 0)
 		{
-			if(label == posClass) Canvas::drawSample(painter, point, 9, 2);
+			if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
 			else Canvas::drawCross(painter, point, 6, 2);
 		}
 		else

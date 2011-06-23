@@ -114,6 +114,7 @@ void MaximizePower::Train(float *dataMap, fVec size, fvec startingPoint)
 		HistoryValue().push_back(value);
 		//qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
 	}
+	evaluations = 0;
 }
 
 fvec MaximizePower::Test( const fvec &sample)
@@ -139,6 +140,7 @@ fvec MaximizePower::Test( const fvec &sample)
 			}
 			visited.push_back(randSample);
 			float value = GetValue(randSample);
+			evaluations++;
 			best.push_back(make_pair(value, make_pair(randSample, sigma)));
 		}
 		std::sort(best.begin(), best.end());
@@ -162,6 +164,7 @@ fvec MaximizePower::Test( const fvec &sample)
 
 	newSample = randSample;
 	float value = GetValue(randSample);
+	evaluations++;
 	visited.push_back(newSample);
 
 	if(!bAdaptive)
@@ -200,7 +203,7 @@ fvec MaximizePower::Test( const fvec &sample)
 		}
 		FOR(d, dim) maximum[d] = max(0.f, min(1.f,maximum[d]));
 		history.push_back(maximum);
-		historyValue.push_back(maximumValue);
+		historyValue.push_back(GetValue(maximum));
 		//newSample = maximum;
 	}
 	else
@@ -228,7 +231,7 @@ fvec MaximizePower::Test( const fvec &sample)
 		FOR(d, dim) maximum[d] = current[d] + maximum[d]/totalMaximum[d];
 		FOR(d, dim) maximum[d] = max(0.f, min(1.f,maximum[d]));
 		history.push_back(maximum);
-		historyValue.push_back(maximumValue);
+		historyValue.push_back(GetValue(maximum));
 
 		fvec sigma; sigma.resize(2, variance);
 		FOR(d, dim) sigma[d] = varianceSum[d] / totalVarianceSum[d];

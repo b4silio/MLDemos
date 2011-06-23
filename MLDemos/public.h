@@ -54,7 +54,7 @@
 */
 
 #include <QColor>
-static const QColor CVColor [22]= {
+static const QColor SampleColor [22]= {
 	QColor(255,255,255), QColor(255,0,0), QColor(0,255,0), QColor(0,0,255),
 	QColor(255,255,0), QColor(255,0,255), QColor(0,255,255),
 	QColor(255,128,0), QColor(255,0,128), QColor(0,255,128),
@@ -63,7 +63,6 @@ static const QColor CVColor [22]= {
 	QColor(255,80,0), QColor(255,0,80), QColor(0,255,80),
 	QColor(80,255,0), QColor(80,0,255), QColor(0,80,255)
 };
-static const int CVColorCnt = 22;
-
+static const int SampleColorCnt = 22;
 
 #endif //_PUBLIC_H_

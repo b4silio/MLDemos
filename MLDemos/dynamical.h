@@ -45,6 +45,7 @@ public:
 	Dynamical(): type(DYN_NONE), count(100), dT(0.02f), avoid(0){}
 	~Dynamical(){if(avoid) delete avoid;};
 	std::vector< std::vector<fvec> > GetTrajectories(){return trajectories;};
+	int Dim(){return dim;};
 
 	virtual void Train(std::vector< std::vector<fvec> > trajectories, ivec labels){};
 	virtual std::vector<fvec> Test( const fvec &sample, const int count){ return std::vector<fvec>(); };

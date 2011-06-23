@@ -87,13 +87,27 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 
 	RegressorGMR * gmr = (RegressorGMR*)regressor;
 	Gmm *gmm = gmr->gmm;
+	int dim = canvas->data->GetCount() ? canvas->data->GetSample(0).size() : gmm->dim;
+	if(dim > 2) return;
 	float mean[2];
-	float sigma[4];
+	float sigma[3];
+	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
 	{
 		gmm->getMean(i, mean);
-		gmm->getCovariance(i, sigma, true);
-		//FOR(j,4) sigma[j] = sqrt(sigma[j]);
+		if(dim==2)
+		{
+			gmm->getCovariance(i, sigma, true);
+		}
+		else
+		{
+			float* bigSigma = new float[dim*dim];
+			gmm->getCovariance(i, bigSigma, false);
+			sigma[0] = bigSigma[0];
+			sigma[1] = bigSigma[1];
+			sigma[2] = bigSigma[dim + 1];
+			delete [] bigSigma;
+		}
 		painter.setPen(QPen(Qt::black, 1));
 		DrawEllipse(mean, sigma, 1, &painter, canvas);
 		painter.setPen(QPen(Qt::black, 0.5));
@@ -103,6 +117,13 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		painter.drawEllipse(point, 2, 2);
 		painter.setPen(QPen(Qt::white, 2));
 		painter.drawEllipse(point, 2, 2);
+		/*
+		QColor color = CVColor[(i+1)%CVColorCnt];
+		painter.setPen(QPen(Qt::black, 12));
+		painter.drawEllipse(point, 8, 8);
+		painter.setPen(QPen(color,4));
+		painter.drawEllipse(point, 8, 8);
+		*/
 	}
 }
 

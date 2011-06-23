@@ -49,7 +49,7 @@ QString MaximizeInterfaceGA::GetAlgoString()
 	double cross = params->crossSpin->value();
 	double survival = params->survivalSpin->value();
 	int population = params->populationSpin->value();
-	QString	algo = QString("GA %1 %2 %3 %3").arg(population).arg(mutation).arg(cross).arg(survival);
+	QString	algo = QString("GA %1 %2 %3 %4").arg(population).arg(mutation).arg(cross).arg(survival);
 	return algo;
 }
 

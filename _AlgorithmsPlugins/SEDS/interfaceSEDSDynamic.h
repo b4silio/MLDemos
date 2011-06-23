@@ -49,6 +49,8 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+public slots:
+	void OptionsChanged();
 };
 
 #endif // _INTERFACESEDSRDYNAMIC_H_

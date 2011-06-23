@@ -110,6 +110,7 @@ void MaximizeParticles::Train(float *dataMap, fVec size, fvec startingPoint)
 		particles.push_back(sample);
 		weights.push_back(1.f/particleCount);
 	}
+	evaluations = 0;
 }
 
 fvec MaximizeParticles::Test( const fvec &sample)
@@ -125,6 +126,7 @@ fvec MaximizeParticles::Test( const fvec &sample)
 		// we compute the weights
 		weights[i] = weights[i] *(1-decay) + GetValue(particles[i])*decay;
 		totalWeights += weights[i];
+		evaluations++;
 		//visited.push_back(particles[i]);
 	}
 

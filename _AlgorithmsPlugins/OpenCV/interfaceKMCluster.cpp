@@ -85,9 +85,9 @@ void ClustKM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 		{
 			FOR(j, res.size())
 			{
-				r += CVColor[(j+1)%CVColorCnt].red()*res[j];
-				g += CVColor[(j+1)%CVColorCnt].green()*res[j];
-				b += CVColor[(j+1)%CVColorCnt].blue()*res[j];
+				r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+				g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+				b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
 			}
 		}
 		else if(res.size())

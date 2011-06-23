@@ -51,12 +51,12 @@ char *ClassifierSVM::GetInfoString()
 void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 {
 	svm_problem problem;
-	svm_node *x_space;
 
 	int data_dimension = samples[0].size();
 	problem.l = samples.size();
 	problem.y = new double[problem.l];
 	problem.x = new svm_node *[problem.l];
+	KILL(x_space);
 	x_space = new svm_node[(data_dimension+1)*problem.l];
 
 	FOR(i, problem.l)
@@ -150,7 +150,7 @@ void ClassifierSVM::SetParams(int svmType, float svmC, u32 kernelType, float ker
 }
 
 ClassifierSVM::ClassifierSVM()
-: svm(0), node(0)
+: svm(0), node(0), x_space(0)
 {
 	type = CLASS_SVM;
 	// default values
@@ -180,4 +180,6 @@ ClassifierSVM::ClassifierSVM()
 ClassifierSVM::~ClassifierSVM()
 {
 	DEL(node);
+	DEL(svm);
+	DEL(x_space);
 }

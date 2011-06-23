@@ -92,6 +92,7 @@ void MaximizeGradient::Train(float *dataMap, fVec size, fvec startingPoint)
 	maximumValue = value;
 	history.push_back(maximum);
 	HistoryValue().push_back(value);
+	evaluations = 0;
 	//qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
 }
 
@@ -108,6 +109,7 @@ fvec MaximizeGradient::Test( const fvec &sample)
 
 	float delta = 0.003;
 	float value = GetValue(newSample);
+	evaluations++;
 	// we compute the values of the gradient in the 9 directions around
 	float values[8];
 	fVec v[8];
@@ -123,16 +125,19 @@ fvec MaximizeGradient::Test( const fvec &sample)
 		v[2] = fVec( 1,-1)*(values[2]-value);
 		v[5] = fVec(-1, 1)*(values[5]-value);
 		v[7] = fVec( 1, 1)*(values[7]-value);
+		evaluations += 4;
 	case 1: // 4 directions
 		values[1] = GetValue(newSample + fVec(0		,-delta));
 		values[3] = GetValue(newSample + fVec(-delta	,0));
 		v[1] = fVec( 0,-1)*(values[1]-value);
 		v[3] = fVec(-1, 0)*(values[3]-value);
+		evaluations += 2;
 	case 0: // 2 directions
 		values[4] = GetValue(newSample + fVec(delta	,0));
 		values[6] = GetValue(newSample + fVec(0		,+delta));
 		v[4] = fVec( 1, 0)*(values[4]-value);
 		v[6] = fVec( 0, 1)*(values[6]-value);
+		evaluations += 2;
 	}
 
 	fVec gradient;

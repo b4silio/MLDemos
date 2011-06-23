@@ -27,7 +27,7 @@ void DynamicalGMR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
-	dim = trajectories[0][0].size();
+	dim = trajectories[0][0].size()/2;
 	// we forget about time and just push in everything
 	vector<fvec> samples;
 	FOR(i, trajectories.size())
@@ -40,16 +40,16 @@ void DynamicalGMR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	if(!samples.size()) return;
 	DEL(gmm);
 	nbClusters = min((int)nbClusters, (int)samples.size());
-	gmm = new Gmm(nbClusters, dim);
+	gmm = new Gmm(nbClusters, dim*2);
 	KILL(data);
-	data = new float[samples.size()*dim];
+	data = new float[samples.size()*dim*2];
 	FOR(i, samples.size())
 	{
-		FOR(j, dim) data[i*dim + j] = samples[i][j];
+		FOR(j, dim*2) data[i*dim*2 + j] = samples[i][j];
 	}
 	gmm->init(data, samples.size(), initType);
 	gmm->em(data, samples.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
-	gmm->initRegression(dim-2);
+	gmm->initRegression(dim);
 }
 
 std::vector<fvec> DynamicalGMR::Test( const fvec &sample, int count)
@@ -74,7 +74,7 @@ std::vector<fvec> DynamicalGMR::Test( const fvec &sample, int count)
 
 fvec DynamicalGMR::Test( const fvec &sample)
 {
-	int dim = sample.size();
+	dim = sample.size();
 	fvec res; res.resize(dim, 0);
 	if(!gmm) return res;
 	float *velocity = new float[dim];
@@ -93,7 +93,7 @@ fVec DynamicalGMR::Test( const fVec &sample)
 	fVec res;
 	if(!gmm) return res;
 	fVec velocity;
-	float *sigma = new float[dim*(dim+1)/2];
+	float *sigma = new float[(dim*2)*((dim*2)+1)/2];
 	gmm->doRegression(sample._, velocity._, sigma);
 	res = velocity;
 	delete [] sigma;

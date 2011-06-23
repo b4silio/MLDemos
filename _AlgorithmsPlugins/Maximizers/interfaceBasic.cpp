@@ -75,7 +75,7 @@ void MaximizeBasic::ChangeOptions()
 		params->varianceSpin->setEnabled(true);
 		params->varianceLabel->setText("Fingerprint");
 		params->kSpin->setEnabled(true);
-		params->varianceSpin->setRange(0.01,0.5);
+		params->varianceSpin->setRange(0.01,0.99);
 		params->varianceSpin->setSingleStep(0.01);
 		break;
 	}

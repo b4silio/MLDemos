@@ -35,3 +35,13 @@ HEADERS += 	JnS/Matutil.h \
 			JnS/JnS.h
 SOURCES += 	JnS/Matutil.cpp \
 			JnS/JnS.cpp
+HEADERS += 	liblinear/linear.h \
+			liblinear/tron.h \
+			liblinear/blasp.h \
+			liblinear/blas.h
+SOURCES += 	liblinear/linear.cpp \
+			liblinear/tron.cpp \
+			liblinear/daxpy.c \
+			liblinear/ddot.c \
+			liblinear/dnrm2.c \
+			liblinear/dscal.c

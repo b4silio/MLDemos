@@ -101,8 +101,9 @@ private:
 	void Draw(Classifier *classifier);
 	void Train(Regressor *regressor, float trainRatio=1);
 	void Draw(Regressor *regressor);
-	void Train(Dynamical *dynamical);
+	fvec Train(Dynamical *dynamical);
 	void Draw(Dynamical *dynamical);
+	fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
 	void Train(Clusterer *clusterer);
 	void Draw(Clusterer *clusterer);
 	void Train(Maximizer *maximizer);
@@ -141,7 +142,6 @@ private:
 
 	void UpdateInfo();
 	void SetCrossValidationInfo();
-	void SetROCInfo();
 	bool bIsRocNew;
 	bool bIsCrossNew;
 public:
@@ -209,6 +209,7 @@ private slots:
 	void CompareScreenshot();
 	void Clear();
 	void ClearData();
+	void SetROCInfo();
 
 	void SaveData();
 	void LoadData();
@@ -245,6 +246,7 @@ private slots:
 	void TargetButton();
 	void GaussianButton();
 	void GradientButton();
+	void BenchmarkButton();
 	void CompareAdd();
 	void CompareClear();
 	void CompareRemove();

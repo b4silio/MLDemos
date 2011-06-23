@@ -7,6 +7,8 @@ NAME = mld_Maximizers
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
+#QMAKE_CXXFLAGS += -fopenmp
+#LIBS += -lgomp
 
 ###########################
 # Source Files            #
@@ -17,10 +19,12 @@ HEADERS +=	\
 			$$MLDEMOS/datasetManager.h \
 			$$MLDEMOS/mymaths.h \
 			$$MLDEMOS/drawUtils.h \
+			$$MLDEMOS/optimization_test_functions.h \
 			maximizeRandom.h \
 			maximizePower.h \
 			maximizeGA.h \
 			maximizeParticles.h \
+			maximizeSwarm.h \
 			maximizeGradient.h \
 			maximizeDonut.h \
 			pluginMaximizers.h \
@@ -40,6 +44,7 @@ SOURCES += 	\
 			maximizePower.cpp \
 			maximizeGA.cpp \
 			maximizeParticles.cpp \
+			maximizeSwarm.cpp \
 			maximizeGradient.cpp \
 			maximizeDonut.cpp \
 			pluginMaximizers.cpp \
@@ -47,11 +52,21 @@ SOURCES += 	\
 			interfaceParticles.cpp \
 			gaPeon.cpp \
 			gaTrainer.cpp \
-			interfaceBasic.cpp
+			interfaceBasic.cpp \
 
 ###########################
 # Dependencies            #
 ###########################
+HEADERS += \
+	PSO/pso.h \
+	PSO/memoryAllocation.h \
+	PSO/optimizer.h
+
+SOURCES += \
+	PSO/pso.cpp \
+	PSO/memoryAllocation.cpp \
+	PSO/optimizer.cpp
+
 HEADERS +=	\
 	fgmm/em.h \
 	fgmm/fgmm++.hpp \

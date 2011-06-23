@@ -107,12 +107,14 @@ void MaximizeGA::Train(float *dataMap, fVec size, fvec startingPoint)
 	trainer->AlphaCross(cross);
 	trainer->AlphaSurvivors(survival);
 	trainer->Generate(population);
+	evaluations = 0;
 }
 
 fvec MaximizeGA::Test( const fvec &sample)
 {
 	if(bConverged) return maximum;
 	//FOR(i, trainer->Population().size()) visited.push_back(trainer->Population()[i].ToSample());
+	evaluations += trainer->Population().size();
 	trainer->NextGen();
 	maximum = trainer->Best().ToSample();
 	maximumValue = trainer->BestFitness();

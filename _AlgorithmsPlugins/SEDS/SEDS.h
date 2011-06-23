@@ -4,7 +4,7 @@
 	#include <sstream>
 	#include <fstream>
 	#include <float.h>
-	#include "MathLib/MathLib.h"
+	#include <MathLib/MathLib.h>
 	using namespace MathLib;
 
 	class SEDS {

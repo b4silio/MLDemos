@@ -210,7 +210,7 @@ public:
 		else if(label == 2)
 		{
 			// 		radius = 10;
-			painter.setBrush(Qt::red);
+			painter.setBrush(Qt::green);
 			painter.setPen(Qt::black);
 			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
 		}

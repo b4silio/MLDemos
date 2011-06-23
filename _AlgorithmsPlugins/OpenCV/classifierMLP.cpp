@@ -37,7 +37,7 @@ void ClassifierMLP::Train(std::vector< fvec > samples, ivec labels)
 	u32 sampleCnt = samples.size();
 	if(!sampleCnt) return;
 	DEL(mlp);
-	int dim = samples[0].size();
+	dim = samples[0].size();
 
 	CvMat *layers;
 //	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
@@ -58,13 +58,12 @@ void ClassifierMLP::Train(std::vector< fvec > samples, ivec labels)
 
 	u32 *perm = randPerm(sampleCnt);
 
-	CvMat *trainSamples = cvCreateMat(sampleCnt, 2, CV_32FC1);
+	CvMat *trainSamples = cvCreateMat(sampleCnt, dim, CV_32FC1);
 	CvMat *trainLabels = cvCreateMat(labels.size(), 1, CV_32FC1);
 	CvMat *sampleWeights = cvCreateMat(samples.size(), 1, CV_32FC1);
 	FOR(i, sampleCnt)
 	{
-		cvSetReal2D(trainSamples, i, 0, samples[perm[i]][0]);
-		cvSetReal2D(trainSamples, i, 1, samples[perm[i]][1]);
+		FOR(d, dim) cvSetReal2D(trainSamples, i, d, samples[perm[i]][d]);
 		cvSet1D(trainLabels, i, cvScalar(labels[perm[i]]));
 		cvSet1D(sampleWeights, i, cvScalar(1));
 	}
@@ -89,12 +88,13 @@ void ClassifierMLP::Train(std::vector< fvec > samples, ivec labels)
 float ClassifierMLP::Test( const fvec &sample)
 {
 	if(!mlp) return 0;
-	float _input[2];
-	FOR(i, 2) _input[i] = sample[i];
-	CvMat input = cvMat(1,2,CV_32FC1, _input);
+	float *_input = new float[dim];
+	FOR(d, dim) _input[d] = sample[d];
+	CvMat input = cvMat(1,dim,CV_32FC1, _input);
 	float _output[1];
 	CvMat output = cvMat(1,1,CV_32FC1, _output);
 	mlp->predict(&input, &output);
+	delete [] _input;
 	return _output[0];
 }
 

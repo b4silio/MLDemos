@@ -19,66 +19,108 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "classifierGMM.h"
+#include <map>
+#include <QDebug>
 
 using namespace std;
 
 ClassifierGMM::ClassifierGMM()
-	: gmmPos(0), gmmNeg(0), dataPos(0), dataNeg(0), nbClusters(2), covarianceType(2), initType(1)
+	: nbClusters(2), covarianceType(2), initType(1)
 {
 	type = CLASS_GMM;
 	bSingleClass = false;
+	bMultiClass = true;
 }
 
+ClassifierGMM::~ClassifierGMM()
+{
+	FOR(i, gmms.size()) DEL(gmms[i]);
+	FOR(i, data.size()) KILL(data[i]);
+}
 
 void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
 	vector< fvec > positives, negatives;
+	classes.clear();
+	std::map<int, vector<fvec> > sampleMap;
+	int cnt = 0;
+	std::map<int, int > counts;
+	FOR(i, labels.size())
+	{
+		if(counts.count(labels[i])) continue;
+		counts[labels[i]] = cnt++;
+	}
+	cnt = 0;
+	FOR(i, 256)
+	{
+		if(counts.count(i)) classes[cnt++] = i;
+	}
+
 	FOR(i, samples.size())
 	{
+		sampleMap[classes[labels[i]]].push_back(samples[i]);
 		if(labels[i] == 1) positives.push_back(samples[i]);
 		else negatives.push_back(samples[i]);
 	}
 	int dim = samples[0].size();
-	DEL(gmmPos);
-	DEL(gmmNeg);
 	nbClusters = min(nbClusters, (u32)samples.size());
-	gmmPos = new Gmm(nbClusters, dim);
-	gmmNeg = new Gmm(nbClusters, dim);
-	KILL(dataPos);
-	KILL(dataNeg);
-	dataPos = new float[positives.size()*dim];
-	dataNeg = new float[negatives.size()*dim];
-	FOR(i, positives.size())
+
+	FOR(i, gmms.size()) DEL(gmms[i]);
+	FOR(i, data.size()) KILL(data[i]);
+	gmms.clear();
+	data.clear();
+	FOR(i, cnt)
 	{
-		FOR(j, dim) dataPos[i*dim + j] = positives[i][j];
+		vector<fvec> &s = sampleMap[i];
+		gmms.push_back(new Gmm(nbClusters, dim));
+		data.push_back(new float[dim*s.size()]);
+		FOR(j, s.size())
+		{
+			FOR(d, dim) data[i][j*dim + d] = s[j][d];
+		}
+		gmms[i]->init(data[i], s.size(), initType);
+		gmms[i]->em(data[i], s.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
 	}
-	FOR(i, negatives.size())
-	{
-		FOR(j, dim) dataNeg[i*dim + j] = negatives[i][j];
-	}
-	gmmPos->init(dataPos, positives.size(), initType);
-	gmmNeg->init(dataNeg, negatives.size(), initType);
-	gmmPos->em(dataPos, positives.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
-	gmmNeg->em(dataNeg, negatives.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
+
 	bFixedThreshold = false;
+}
+
+fvec ClassifierGMM::TestMulti(const fvec &sample)
+{
+	fvec pdf;
+	FOR(i, gmms.size()) pdf.push_back(gmms[i]->pdf((float*)&sample[0]));
+
+	float xmin=-10.f, xmax=10.f;
+	float sum = 0;
+	FOR(i, pdf.size())
+	{
+		pdf[i] = (min(xmax,max(xmin, log(pdf[i]))) - xmin) / (xmax);
+	}
+
+	return pdf;
 }
 
 float ClassifierGMM::Test( const fvec &sample)
 {
-	if(!gmmPos || !gmmNeg) return 0.f;
-	float pos = gmmPos->pdf((float *)&sample[0]);
-	float neg = gmmNeg->pdf((float *)&sample[0]);
-	return log(pos) - log(neg);
+	fvec pdf = TestMulti(sample);
+	if(pdf.size() < 2) return 0;
+	float res = log(pdf[1]) - log(pdf[0]);
+	return res;
 }
 
 float ClassifierGMM::Test( const fVec &_sample)
 {
-	if(!gmmPos || !gmmNeg) return 0.f;
+	if(!gmms.size()) return 0;
 	fVec sample = _sample;
-	float pos = gmmPos->pdf(sample._);
-	float neg = gmmNeg->pdf(sample._);
-	return log(pos) - log(neg);
+	float v0 = gmms[0]->pdf(sample._);
+	float v1 = 0;
+	if(gmms.size() > 1)
+	{
+		v1 = gmms[1]->pdf(sample._);
+	}
+	float res = log(v1) - log(v0);
+	return res;
 }
 
 void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)

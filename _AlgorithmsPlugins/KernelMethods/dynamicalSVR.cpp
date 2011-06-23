@@ -86,7 +86,7 @@ void DynamicalSVR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
-	dim = trajectories[0][0].size();
+	dim = trajectories[0][0].size()/2;
 	// we forget about time and just push in everything
 	vector<fvec> samples;
 	FOR(i, trajectories.size())
@@ -104,7 +104,6 @@ void DynamicalSVR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	svm_problem problem;
 	svm_node *x_space;
 
-	dim = dim/2;
 	problem.l = samples.size();
 	problem.x = new svm_node *[problem.l];
 	x_space = new svm_node[(dim+1)*problem.l];

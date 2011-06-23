@@ -44,7 +44,7 @@ void DynamicalLWPR::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 		}
 	}
 	if(!samples.size()) return;
-	int dim = samples[0].size() / 2;
+	dim = samples[0].size() / 2;
 	DEL(model);
 	model = new LWPR_Object(dim,dim);
 	model->setInitD(initD);
