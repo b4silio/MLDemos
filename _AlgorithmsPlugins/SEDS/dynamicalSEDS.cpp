@@ -24,11 +24,25 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 DynamicalSEDS::DynamicalSEDS()
-: gmm(0),seds(0), data(0), nbClusters(2), penalty(100), bPrior(true), bMu(true), bSigma(true), objectiveType(1)
+: gmm(0),seds(0), data(0), nbClusters(2), penalty(100), bPrior(true), bMu(true), bSigma(true), objectiveType(1), resizeFactor(500.f)
 {
 	type = DYN_SEDS;
 	endpoint = fvec();
 	endpoint.resize(4,0.f);
+}
+
+void DynamicalSEDS::SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType,
+							  int maxIteration, int maxMinorIteration, int constraintCriterion)
+{
+	this->nbClusters = clusters;
+	this->penalty = penalty;
+	this->bPrior = bPrior;
+	this->bMu = bMu;
+	this->bSigma = bSigma;
+	this->objectiveType = objectiveType;
+	this->maxIteration = maxIteration;
+	this->maxMinorIteration = maxMinorIteration;
+	this->constraintCriterion = constraintCriterion;
 }
 
 void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec labels)
@@ -36,12 +50,12 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
-	dim = trajectories[0][0].size();
+	dim = trajectories[0][0].size()/2;
 	// we forget about time and just push in everything
 	vector<fvec> samples;
 	endpoint = trajectories[0][trajectories[0].size()-1];
 	endpointFast = dim >= 2 ? fVec(endpoint[0], endpoint[1]) : fVec();
-	FOR(d,dim/2) endpoint[d+dim/2] = 0;
+	FOR(d,dim) endpoint[d+dim] = 0;
 	FOR(i, trajectories.size())
 	{
 		FOR(j, trajectories[i].size())
@@ -55,14 +69,14 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	DEL(gmm);
 	nbClusters = min((int)nbClusters, (int)samples.size());
 
-	gmm = new Gmm(nbClusters, dim);
+	gmm = new Gmm(nbClusters, dim*2);
 	KILL(data);
-	data = new float[samples.size()*dim];
-	double *ddata = new REALTYPE[samples.size()*dim];
+	data = new float[samples.size()*dim*2];
+	double *ddata = new REALTYPE[samples.size()*dim*2];
 	FOR(i, samples.size())
 	{
-		FOR(j, dim) data[i*dim + j] = samples[i][j]*1000.f;
-		FOR(j, dim) ddata[j*samples.size() + i] = samples[i][j]*1000.;
+		FOR(j, dim*2) data[i*dim*2 + j] = samples[i][j]*resizeFactor;
+		FOR(j, dim*2) ddata[j*samples.size() + i] = samples[i][j]*resizeFactor;
 	}
 	gmm->init(data, samples.size(), 2); // kmeans initialization
 	gmm->em(data, samples.size(), 1e-4, COVARIANCE_FULL);
@@ -92,18 +106,18 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 
 	// fill in the data
 	//seds->Data.Resize(dim, samples.size());
-	seds->Data = Matrix(ddata, dim, samples.size());
+	seds->Data = Matrix(ddata, dim*2, samples.size());
 
 	// fill in the current model
 	seds->Priors.Resize(nbClusters);
-	seds->Mu.Resize(dim, nbClusters);
+	seds->Mu.Resize(dim*2, nbClusters);
 	seds->Sigma = new Matrix[nbClusters];
 	FOR(i, nbClusters)
 	{
-		seds->Sigma[i].Resize(dim,dim);
+		seds->Sigma[i].Resize(dim*2,dim*2);
 		seds->Priors(i) = gmm->c_gmm->gauss[i].prior;
-		FOR(d, dim) seds->Mu(d, i) = gmm->c_gmm->gauss[i].mean[d];
-		FOR(d1, dim)
+		FOR(d, dim*2) seds->Mu(d, i) = gmm->c_gmm->gauss[i].mean[d];
+		FOR(d1, dim*2)
 		{
 			FOR(d2, d1+1)
 			{
@@ -112,18 +126,24 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 		}
 	}
 	seds->nData = samples.size();
-	seds->d = dim/2;
+	seds->d = dim;
 	seds->K = nbClusters;
 
 	seds->Options.cons_penalty = penalty;
 	//seds->Options.cons_penalty = pow(10.,(double)penalty);
-	seds->Options.perior_opt = bPrior;
+	//seds->Options.perior_opt = bPrior;
+	seds->Options.perior_opt = false;
 	seds->Options.mu_opt = bMu;
-	seds->Options.sigma_x_opt = bSigma;
-	seds->Options.max_iter = 600;
+	seds->Options.sigma_x_opt = false;
+	//seds->Options.sigma_x_opt = bSigma;
+	seds->Options.max_iter = maxIteration;
+	//seds->Options.maxMinorIter = maxMinorIteration;
 	seds->Options.tol_mat_bias = 1e-8;
-	seds->Options.tol_stopping = 1e-12;
+	seds->Options.tol_stopping = 1e-4;
+	//seds->Options.delta = 1e-5;
 	seds->Options.objective = objectiveType;
+	//seds->Options.constraintCriterion = constraintCriterion;
+
 
 //	seds->loadData("../../../Data.txt");
 //	seds->loadModel("../../../Model.txt");
@@ -134,16 +154,16 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	seds->Optimize();
 
 	// and we copy the values back to the source
-	float *mu = new float[dim];
-	float *sigma = new float[dim*dim];
+	float *mu = new float[dim*2];
+	float *sigma = new float[dim*2*dim*2];
 	FOR(i, nbClusters)
 	{
-		FOR(d, dim) mu[d] = seds->Mu(d, i);
-		FOR(d1, dim)
+		FOR(d, dim*2) mu[d] = seds->Mu(d, i);
+		FOR(d1, dim*2)
 		{
-			FOR(d2, dim)
+			FOR(d2, dim*2)
 			{
-				sigma[d2*dim + d1] = seds->Sigma[i](d1, d2);
+				sigma[d2*dim*2 + d1] = seds->Sigma[i](d1, d2);
 			}
 		}
 		fgmm_set_prior(gmm->c_gmm, i, seds->Priors(i));
@@ -153,7 +173,7 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	delete [] sigma;
 	delete [] mu;
 	delete [] ddata;
-	gmm->initRegression(dim/2);
+	gmm->initRegression(dim);
 
 	seds->Mu.Print();
 	FOR(i, nbClusters) seds->Sigma[i].Print();
@@ -162,7 +182,7 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 
 std::vector<fvec> DynamicalSEDS::Test( const fvec &sample, int count)
 {
-	fvec start = (sample - endpoint)*1000.f;
+	fvec start = (sample - endpoint)*resizeFactor;
 	dim = sample.size();
 	std::vector<fvec> res;
 	res.reserve(500);
@@ -174,7 +194,7 @@ std::vector<fvec> DynamicalSEDS::Test( const fvec &sample, int count)
 	float minDiff = 1e-5;
 	while(sqrtf(diff[0]*diff[0] + diff[1]*diff[1]) > minDiff)
 	{
-		res.push_back(start/1000.f + endpoint);
+		res.push_back(start/resizeFactor + endpoint);
 		start += velocity*dT;
 		gmm->doRegression(&start[0], &velocity[0], sigma);
 		if(cnt > 3) diff = res[cnt] - res[cnt-1];
@@ -192,10 +212,10 @@ fvec DynamicalSEDS::Test( const fvec &sample)
 	float *velocity = new float[dim];
 	float *sigma = new float[dim*(dim+1)/2];
 	fvec point; point.resize(2);
-	point += (sample-endpoint)*1000.f;
+	point += (sample-endpoint)*resizeFactor;
 	gmm->doRegression(&point[0], velocity, sigma);
-	res[0] = velocity[0]/1000.f;
-	res[1] = velocity[1]/1000.f;
+	res[0] = velocity[0]/resizeFactor;
+	res[1] = velocity[1]/resizeFactor;
 	delete [] velocity;
 	delete [] sigma;
 	return res;
@@ -208,21 +228,11 @@ fVec DynamicalSEDS::Test( const fVec &sample)
 	fVec velocity;;
 	float *sigma = new float[dim*(dim+1)/2];
 	fVec point;
-	point += (sample-endpointFast)*1000.f;
+	point += (sample-endpointFast)*resizeFactor;
 	gmm->doRegression(point._, velocity._, sigma);
-	res = velocity/1000.f;
+	res = velocity/resizeFactor;
 	delete [] sigma;
 	return res;
-}
-
-void DynamicalSEDS::SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType)
-{
-	this->nbClusters = clusters;
-	this->penalty = penalty;
-	this->bPrior = bPrior;
-	this->bMu = bMu;
-	this->bSigma = bSigma;
-	this->objectiveType = objectiveType;
 }
 
 char *DynamicalSEDS::GetInfoString()
@@ -238,6 +248,16 @@ char *DynamicalSEDS::GetInfoString()
 		break;
 	case 1:
 		sprintf(text, "%sLikelihood\n", text);
+		break;
+	}
+	sprintf(text, "%sConstraint Criterion: ", text);
+	switch(constraintCriterion)
+	{
+	case 0:
+		sprintf(text, "%sEigen Values\n", text);
+		break;
+	case 1:
+		sprintf(text, "%sPrincipal Minor\n", text);
 		break;
 	}
 	return text;

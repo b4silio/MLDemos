@@ -40,7 +40,7 @@ private:
 	QImage modelMap;
 	u32 *perm;
 	Canvas *canvas;
-	int w, h;
+	int w, h, dim;
 
 public:
 	DrawTimer(Canvas *canvas, QMutex *mutex);
@@ -68,6 +68,7 @@ public:
 	signals:
 	void MapReady(QImage image);
 	void ModelReady(QImage image);
+	void CurveReady();
 };
 
 #endif // _DRAWTIMER_H_

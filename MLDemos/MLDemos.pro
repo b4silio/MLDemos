@@ -60,7 +60,8 @@ FORMS += aboutDialog.ui \
 HEADERS += basicMath.h \
     canvas.h \
     datasetManager.h \
-    gettimeofday.h \
+	optimization_test_functions.h \
+	gettimeofday.h \
 	drawUtils.h \
 	drawSVG.h \
 	drawTimer.h \

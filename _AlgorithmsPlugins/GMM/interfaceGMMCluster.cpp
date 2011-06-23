@@ -54,20 +54,32 @@ void ClustGMM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 
 	ClustererGMM * _gmm = (ClustererGMM*)clusterer;
 	Gmm *gmm = _gmm->gmm;
+	int dim = gmm->dim;
 	float mean[2];
-	float sigma[4];
+	float sigma[3];
 	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
 	{
 		gmm->getMean(i, mean);
-		gmm->getCovariance(i, sigma, true);
-		//FOR(j,4) sigma[j] = sqrt(sigma[j]);
+		if(dim==2)
+		{
+			gmm->getCovariance(i, sigma, true);
+		}
+		else
+		{
+			float* bigSigma = new float[dim*dim];
+			gmm->getCovariance(i, bigSigma, false);
+			sigma[0] = bigSigma[0];
+			sigma[1] = bigSigma[1];
+			sigma[2] = bigSigma[dim + 1];
+			delete [] bigSigma;
+		}
 		painter.setPen(QPen(Qt::black, 2));
 		DrawEllipse(mean, sigma, 1, &painter, canvas);
 		painter.setPen(QPen(Qt::black, 1));
 		DrawEllipse(mean, sigma, 2, &painter, canvas);
 		QPointF point = canvas->toCanvasCoords(mean[0], mean[1]);
-		QColor color = CVColor[(i+1)%CVColorCnt];
+		QColor color = SampleColor[(i+1)%SampleColorCnt];
 		painter.setPen(QPen(Qt::black, 12));
 		painter.drawEllipse(point, 8, 8);
 		painter.setPen(QPen(color,4));
@@ -89,9 +101,9 @@ void ClustGMM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer
 		{
 			FOR(j, res.size())
 			{
-				r += CVColor[(j+1)%CVColorCnt].red()*res[j];
-				g += CVColor[(j+1)%CVColorCnt].green()*res[j];
-				b += CVColor[(j+1)%CVColorCnt].blue()*res[j];
+				r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+				g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+				b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
 			}
 		}
 		else if(res.size())

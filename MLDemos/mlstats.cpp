@@ -85,13 +85,78 @@ void MLDemos::StatsChanged()
 	}
 }
 
+void PaintData(std::vector<float> data, QPixmap &pm)
+{
+	QPainter painter(&pm);
+	painter.fillRect(pm.rect(), Qt::white);
+
+	int w = pm.width();
+	int h = pm.height();
+	int cnt = data.size();
+	int pad = 10;
+	QPointF oldPoint;
+	double minVal = FLT_MAX;
+	double maxVal = -FLT_MAX;
+	for(int i=0; i< data.size(); i++)
+	{
+		if(minVal > data[i]) minVal = data[i];
+		if(maxVal < data[i]) maxVal = data[i];
+	}
+	if (minVal == maxVal)
+	{
+		minVal = 0;
+	}
+
+	painter.setBrush(Qt::NoBrush);
+	painter.setPen(QPen(QColor(200,200,200), 0.5));
+	int steps = 10;
+	for(int i=0; i<=steps; i++)
+	{
+		painter.drawLine(QPoint(0, i/(float)steps*(h-2*pad) + pad), QPoint(w, i/(float)steps*(h-2*pad) + pad));
+		painter.drawLine(QPoint(i/(float)steps*w, 0), QPoint(i/(float)steps*w, h));
+	}
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	painter.setPen(QPen(Qt::black, 1.5));
+	for(int i=0; i< data.size(); i++)
+	{
+		float value = data[i];
+		if (value != value) continue;
+		float x = i/(float)cnt*w;
+		float y = (1 - (value-minVal)/(maxVal - minVal)) * (float)(h-2*pad) + pad;
+		QPointF point(x, y);
+		if(i) painter.drawLine(oldPoint, point);
+		//painter.drawEllipse(point, 3, 3);
+		oldPoint = point;
+	}
+	painter.setPen(QPen(Qt::black, 0.5));
+	painter.setBrush(QColor(255,255,255,200));
+	painter.drawRect(QRect(w - 100 - 15,h - 55,110,45));
+	painter.setPen(QPen(Qt::black, 1));
+	painter.drawText(QPointF(w - 107, h-57+20), QString("start: %1").arg(data[0], 3));
+	painter.drawText(QPointF(w - 107, h-57+40), QString("end: %1").arg(data[data.size()-1], 3));
+	}
+
 void MLDemos::SetROCInfo()
 {
-	if(!classifier || !bIsRocNew) return;
-	QPixmap rocImage = RocImage(classifier->rocdata, classifier->roclabels, QSize(showStats->rocWidget->width(),showStats->rocWidget->height()));
-	bIsRocNew = false;
-//	rocImage.save("roc.png");
-	rocWidget->ShowImage(rocImage);
+	QSize size(showStats->rocWidget->width(),showStats->rocWidget->height());
+	if(classifier && bIsRocNew)
+	{
+		QPixmap rocImage = RocImage(classifier->rocdata, classifier->roclabels, size);
+		bIsRocNew = false;
+	//	rocImage.save("roc.png");
+		rocWidget->ShowImage(rocImage);
+	}
+	if(maximizer)
+	{
+		vector<double> history = maximizer->HistoryValue();
+		vector<float> data;data.resize(history.size());
+		FOR(i, data.size()) data[i] = history[i];
+		if(!data.size()) return;
+		QPixmap pixmap(size);
+		PaintData(data, pixmap);
+		rocWidget->ShowImage(pixmap);
+	}
 }
 
 void MLDemos::SetCrossValidationInfo()
@@ -196,6 +261,8 @@ void MLDemos::UpdateInfo()
 	if(classifier) information += "\nClassifier: " + QString(classifier->GetInfoString());
 	if(regressor)  information += "\nRegressor: "  + QString(regressor->GetInfoString());
 	if(clusterer)  information += "\nClusterer: "  + QString(clusterer->GetInfoString());
+	if(dynamical)  information += "\nDynamical: "  + QString(dynamical->GetInfoString());
+	if(maximizer)  information += "\nMaximizer: "  + QString(maximizer->GetInfoString());
 
 	showStats->infoText->setText(information);
 }

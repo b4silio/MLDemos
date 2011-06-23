@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLASSIFIER_KNN_H_
 
 #include <vector>
+#include <map>
 #include "classifier.h"
 #include "ANN/ANN.h"
 
@@ -34,10 +35,12 @@ private:
 	int metricType;
 	int metricP;
 	int k;
+	std::map<int,int> counts;
 public:
-	ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){type = CLASS_KNN;};
+	ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){type = CLASS_KNN; bMultiClass = true;};
 	~ClassifierKNN();
 	void Train(std::vector< fvec > samples, ivec labels);
+	fvec TestMulti(const fvec &sample);
 	float Test( const fvec &sample);
 	float Test( const fVec &sample);
 	void SetParams(u32 k, int metricType, u32 metricP);

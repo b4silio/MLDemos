@@ -16,8 +16,8 @@
   <widget class="QLabel" name="label_19">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>30</y>
+     <x>30</x>
+     <y>0</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -37,9 +37,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>70</y>
-     <width>101</width>
+     <x>110</x>
+     <y>110</y>
+     <width>50</width>
      <height>20</height>
     </rect>
    </property>
@@ -49,19 +49,22 @@
     </font>
    </property>
    <property name="text">
-    <string>Estimate Sigma</string>
+    <string>Sigma</string>
    </property>
    <property name="checked">
     <bool>false</bool>
    </property>
   </widget>
   <widget class="QLabel" name="label_22">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>113</y>
-     <width>100</width>
-     <height>20</height>
+     <x>160</x>
+     <y>46</y>
+     <width>50</width>
+     <height>26</height>
     </rect>
    </property>
    <property name="font">
@@ -70,15 +73,18 @@
     </font>
    </property>
    <property name="text">
-    <string>Objective Function</string>
+    <string>Criterion</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="sedsPenaltySpin">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>60</y>
-     <width>60</width>
+     <x>220</x>
+     <y>20</y>
+     <width>50</width>
      <height>25</height>
     </rect>
    </property>
@@ -88,7 +94,7 @@
     </font>
    </property>
    <property name="decimals">
-    <number>3</number>
+    <number>2</number>
    </property>
    <property name="minimum">
     <double>0.000000000000000</double>
@@ -96,15 +102,18 @@
    <property name="maximum">
     <double>999999999.000000000000000</double>
    </property>
-   <property name="value">
+   <property name="singleStep">
     <double>0.100000000000000</double>
+   </property>
+   <property name="value">
+    <double>1.000000000000000</double>
    </property>
   </widget>
   <widget class="QSpinBox" name="sedsCount">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>30</y>
+     <x>60</x>
+     <y>20</y>
      <width>39</width>
      <height>21</height>
     </rect>
@@ -130,9 +139,9 @@
   <widget class="QComboBox" name="sedsObjectiveCombo">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>110</y>
-     <width>121</width>
+     <x>30</x>
+     <y>80</y>
+     <width>90</width>
      <height>26</height>
     </rect>
    </property>
@@ -146,21 +155,21 @@
    </property>
    <item>
     <property name="text">
-     <string>Likelihood</string>
+     <string>MSE</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>MSE</string>
+     <string>Likelihood</string>
     </property>
    </item>
   </widget>
   <widget class="QCheckBox" name="sedsCheckMu">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>50</y>
-     <width>101</width>
+     <x>70</x>
+     <y>110</y>
+     <width>40</width>
      <height>20</height>
     </rect>
    </property>
@@ -170,7 +179,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Estimate Mu</string>
+    <string>Mu</string>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -182,9 +191,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>30</y>
-     <width>101</width>
+     <x>20</x>
+     <y>110</y>
+     <width>50</width>
      <height>20</height>
     </rect>
    </property>
@@ -194,7 +203,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Estimate Prior</string>
+    <string>Prior</string>
    </property>
    <property name="checked">
     <bool>false</bool>
@@ -203,9 +212,82 @@
   <widget class="QLabel" name="label_20">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>64</y>
-     <width>101</width>
+     <x>180</x>
+     <y>20</y>
+     <width>40</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Penalty</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>60</y>
+     <width>70</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Optimize</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="sedsConstraintCombo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>46</y>
+     <width>90</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Eigen values</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Principal Minor</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_21">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>76</y>
+     <width>100</width>
      <height>20</height>
     </rect>
    </property>
@@ -215,7 +297,139 @@
     </font>
    </property>
    <property name="text">
-    <string>Constraints penalty</string>
+    <string>Maximum Iterations</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="minorIterationCount">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>120</y>
+     <width>39</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Number of mixture elements</string>
+   </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
+   <property name="maximum">
+    <number>200</number>
+   </property>
+   <property name="value">
+    <number>20</number>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="iterationCount">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>97</y>
+     <width>40</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Number of mixture elements</string>
+   </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
+   <property name="maximum">
+    <number>500</number>
+   </property>
+   <property name="value">
+    <number>100</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_23">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>-2</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Constraints</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_24">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>97</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Optimization</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_25">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>120</y>
+     <width>50</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Minor</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>

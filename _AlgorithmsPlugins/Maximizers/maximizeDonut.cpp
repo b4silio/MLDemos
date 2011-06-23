@@ -122,7 +122,7 @@ void MaximizeDonut::Train(float *dataMap, fVec size, fvec startingPoint)
 {
 	w = size.x;
 	h = size.y;
-	if(data) delete [] data;
+	KILL(data);
 	best.clear();
 	history.clear();
 	historyValue.clear();
@@ -138,6 +138,7 @@ void MaximizeDonut::Train(float *dataMap, fVec size, fvec startingPoint)
 		HistoryValue().push_back(value);
 		//qDebug() << "Starting maximization at " << maximum[0] << " " << maximum[1];
 	}
+	evaluations = 0;
 }
 
 fvec MaximizeDonut::Generate(fvec sample, fvec sigma, float uniform)
@@ -162,11 +163,9 @@ fvec MaximizeDonut::Generate(fvec sample, fvec sigma, float uniform)
 			// we do the rejection sampling
 			// step 1: generate a sample from the positive distribution
 			newSample = mvnRandN(sample, sigma);
-			/*
 			// step 2: test if we need to reject
 			u = drand48();
 			accept = 1.;
-
 			FOR(i, best.size())
 			{
 				fvec mean = best[i].second.first;
@@ -176,7 +175,6 @@ fvec MaximizeDonut::Generate(fvec sample, fvec sigma, float uniform)
 				accept *= 1. - pdf*(1-value);
 			}
 			attempts++;
-			*/
 		}
 		while(attempts < 100 && u >= accept);
 		//qDebug() << "generated after " << attempts << " attempts";
@@ -258,7 +256,7 @@ fvec MaximizeDonut::Test( const fvec &sample)
 {
 	if(bConverged) return maximum;
 
-	fvec sigma; sigma.resize(4, 0);
+	fvec sigma; sigma.resize(dim*dim, 0);
 	FOR(d, dim) sigma[d*dim + d] = fingerprint;
 
 	fvec newSample = sample;
@@ -271,6 +269,7 @@ fvec MaximizeDonut::Test( const fvec &sample)
 			fvec randSample = Generate(newSample, lastSigma, true);
 			visited.push_back(randSample);
 			float value = GetValue(randSample);
+			evaluations++;
 			if(bAdaptive)
 			{
 				FOR(d, dim) sigma[d*dim + d] = (1-value + 0.0001)*fingerprint;
@@ -285,10 +284,16 @@ fvec MaximizeDonut::Test( const fvec &sample)
 
 	newSample = randSample;
 	float value = GetValue(randSample);
+	evaluations++;
 	visited.push_back(newSample);
 	if(bAdaptive)
 	{
-		FOR(d, dim) sigma[d*dim + d] = (1-value + 0.0001)*fingerprint;
+		FOR(d, dim*dim)
+		{
+			float sign = lastSigma[d] > 0 ? 1 : -1;
+			sigma[d] = (1-value + 0.0001)*fingerprint*sign*sqrtf(fabs(lastSigma[d]));
+		}
+		//FOR(d, dim) sigma[d*dim + d] = (1-value + 0.0001)*fingerprint*sqrt(lastSigma[d*dim + d]);
 	}
 	if(best.size() < k)
 	{
@@ -316,7 +321,7 @@ fvec MaximizeDonut::Test( const fvec &sample)
 
 	FOR(d, dim) maximum[d] = max(0.f, min(1.f,maximum[d]));
 	history.push_back(maximum);
-	historyValue.push_back(maximumValue);
+	historyValue.push_back(GetValue(maximum));
 
 	return newSample;
 }

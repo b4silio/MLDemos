@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "basicMath.h"
 #include "classifierKNN.h"
+#include <map>
 using namespace std;
 
 void ClassifierKNN::Train( std::vector< fvec > samples, ivec labels )
@@ -39,6 +40,11 @@ void ClassifierKNN::Train( std::vector< fvec > samples, ivec labels )
 		FOR(j, dim) dataPts[i][j] = samples[i][j];
 	}
 	kdTree = new ANNkd_tree(dataPts, samples.size(), dim);
+
+	FOR(i, labels.size())
+	{
+		counts[i] = 0;
+	}
 }
 
 ClassifierKNN::~ClassifierKNN()
@@ -47,10 +53,10 @@ ClassifierKNN::~ClassifierKNN()
 	DEL(kdTree);
 }
 
-float ClassifierKNN::Test( const fvec &sample )
+fvec ClassifierKNN::TestMulti(const fvec &sample)
 {
-	if(!samples.size()) return 0;
-	float score = 0;
+	if(!samples.size()) return fvec();
+	fvec score;
 
 	double eps = 0; // error bound
 	ANNpoint queryPt; // query point
@@ -60,9 +66,67 @@ float ClassifierKNN::Test( const fvec &sample )
 	FOR(i, sample.size()) queryPt[i] = sample[i];
 	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
 	int cnt = 0;
+
+	for(map<int,int>::iterator it = counts.begin(); it != counts.end(); it++)
+	{
+		it->second = 0;
+	}
+
 	FOR(i, k)
 	{
 		if(nnIdx[i] >= labels.size()) continue;
+		int label = labels[nnIdx[i]];
+		if(counts.count(label)) counts[label]++;
+		cnt++;
+	}
+	delete [] nnIdx; // clean things up
+	delete [] dists;
+
+	FOR(i, 256)
+	{
+		if(counts.count(i)) score.push_back(counts[i]);
+	}
+
+	float sum = 0;
+	FOR(i, score.size())
+	{
+		sum += score[i];
+	}
+
+	if(sum > 0)
+	{
+		FOR(i, score.size())
+		{
+			score[i] /= sum;
+		}
+	}
+
+//	map<int,int>::iterator it = max_element(counts.begin(), counts.end()).second;
+//	int label = it->first;
+//	score = it->second / (float)cnt;
+
+	return score;
+}
+
+float ClassifierKNN::Test( const fvec &sample )
+{
+	if(!samples.size()) return 0;
+	float score = 0;
+	double eps = 0; // error bound
+	ANNpoint queryPt; // query point
+	queryPt = annAllocPt(sample.size()); // allocate query point
+	ANNidxArray nnIdx = new ANNidx[k]; // allocate near neigh indices
+	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
+	FOR(i, sample.size()) queryPt[i] = sample[i];
+	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
+	int cnt = 0;
+	//map<int,int> counts;
+	FOR(i, k)
+	{
+		if(nnIdx[i] >= labels.size()) continue;
+		int label = labels[nnIdx[i]];
+		//if(counts.count(label)) counts[label]++;
+		//else counts[label] = 0;
 		score += labels[nnIdx[i]];
 		cnt++;
 	}
@@ -71,7 +135,7 @@ float ClassifierKNN::Test( const fvec &sample )
 	delete [] nnIdx; // clean things up
 	delete [] dists;
 
-	return score*2;
+	return score;
 }
 
 float ClassifierKNN::Test( const fVec &sample )

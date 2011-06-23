@@ -37,7 +37,7 @@ void RegressorMLP::Train(std::vector< fvec > samples, ivec labels)
 	u32 sampleCnt = samples.size();
 	if(!sampleCnt) return;
 	DEL(mlp);
-	int dim = samples[0].size()-1;
+	dim = samples[0].size()-1;
 
 	CvMat *layers;
 	//	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
@@ -90,9 +90,9 @@ fvec RegressorMLP::Test( const fvec &sample)
 	fvec res;
 	res.resize(2);
 	if(!mlp) return res;
-	int dim = sample.size()-1;
 	float *_input = new float[dim];
-	FOR(i, dim) _input[i] = sample[i];
+	FOR(d, sample.size()) _input[d] = sample[d];
+	for(int d=sample.size(); d<dim; d++) _input[d] = 0;
 	CvMat input = cvMat(1,dim,CV_32FC1, _input);
 	float _output[1];
 	CvMat output = cvMat(1,1,CV_32FC1, _output);

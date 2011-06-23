@@ -92,12 +92,12 @@ void GATrain::NextGen()
 
 	// we normalize probabilities by fitness value
 	double fitnessSum = 0;
-	FOR(i, fitness.size()) fitnessSum += fitness[i]*9.f + 1.f;
+	FOR(i, fitness.size()) fitnessSum += fitness[i]*6.f + 4.f;
 	vector<double> probs;
 	double fitnessCounter = 0;
 	FOR(i, fitness.size())
 	{
-		fitnessCounter += (fitness[i]*9.f + 1.f)/fitnessSum;
+		fitnessCounter += (fitness[i]*6.f + 4.f)/fitnessSum;
 		probs.push_back(fitnessCounter);
 	}
 
@@ -106,15 +106,17 @@ void GATrain::NextGen()
 	newFits.clear();
 	FOR (i, max(1.f,alphaSurvivors*popSize))
 	{
-/*
+
+		/*
 		// copy the elite from the old population
-		if(i < (u32)(alphaSurvivors*fitness.size()))
+		if(i < (u32)(alphaSurvivors*popSize)/2)
 		{
 			newPop.push_back(population[i]);
 			newFits.push_back(fitness[i]);
 			continue;
 		}
-*/
+		*/
+
 		// we select two parents depending on their probability
 		u32 mom, dad, j;
 		double r = drand48();

@@ -83,49 +83,52 @@ Classifier *ClassGMM::GetClassifier()
 
 void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
+	if(!canvas || !classifier) return;
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	ClassifierGMM * gmm = (ClassifierGMM*)classifier;
-	Gmm *gmmPos = gmm->gmmPos;
-	Gmm *gmmNeg = gmm->gmmNeg;
+	vector<Gmm*> gmms = gmm->gmms;
+	if(!gmms.size()) return;
+	int dim = gmms[0]->dim;
 	float mean[2];
-	float sigma[4];
+	float sigma[3];
 	painter.setBrush(Qt::NoBrush);
-	FOR(i, gmmPos->nstates)
+	FOR(g, gmms.size())
 	{
-		gmmPos->getMean(i, mean);
-		gmmPos->getCovariance(i, sigma, true);
-		//FOR(j,4) sigma[j] = sqrt(sigma[j]);
-		painter.setPen(QPen(Qt::black, 1));
-		DrawEllipse(mean, sigma, 1, &painter, canvas);
-		painter.setPen(QPen(Qt::black, 0.5));
-		DrawEllipse(mean, sigma, 2, &painter, canvas);
-		QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
-		painter.setPen(QPen(Qt::black, 4));
-		painter.drawEllipse(point, 2, 2);
-		painter.setPen(QPen(Qt::white, 2));
-		painter.drawEllipse(point, 2, 2);
-	}
-	FOR(i, gmmNeg->nstates)
-	{
-		gmmNeg->getMean(i, mean);
-		gmmNeg->getCovariance(i, sigma, true);
-		painter.setPen(QPen(Qt::black, 1));
-		DrawEllipse(mean, sigma, 1, &painter, canvas);
-		painter.setPen(QPen(Qt::black, 0.5));
-		DrawEllipse(mean, sigma, 2, &painter, canvas);
-		//FOR(j,4) sigma[j] = sqrt(sigma[j]);
-		QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
-		painter.setPen(QPen(Qt::black, 4));
-		painter.drawEllipse(point, 2, 2);
-		painter.setPen(QPen(Qt::white, 2));
-		painter.drawEllipse(point, 2, 2);
+		FOR(i, gmms[g]->nstates)
+		{
+			gmms[g]->getMean(i, mean);
+			if(dim==2)
+			{
+				gmms[g]->getCovariance(i, sigma, true);
+			}
+			else
+			{
+				float* bigSigma = new float[dim*dim];
+				gmms[g]->getCovariance(i, bigSigma, false);
+				sigma[0] = bigSigma[0];
+				sigma[1] = bigSigma[1];
+				sigma[2] = bigSigma[dim + 1];
+				delete [] bigSigma;
+			}
+			//FOR(j,4) sigma[j] = sqrt(sigma[j]);
+			painter.setPen(QPen(Qt::black, 1));
+			DrawEllipse(mean, sigma, 1, &painter, canvas);
+			painter.setPen(QPen(Qt::black, 0.5));
+			DrawEllipse(mean, sigma, 2, &painter, canvas);
+			QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
+			QColor color = SampleColor[g%SampleColorCnt];
+			painter.setPen(QPen(Qt::black, 12));
+			painter.drawEllipse(point, 6, 6);
+			painter.setPen(QPen(color,4));
+			painter.drawEllipse(point, 6, 6);
+		}
 	}
 }
 
 void ClassGMM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
-	int posClass = 1;
+	//int posClass = 1;
 	// we draw the samples
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	FOR(i, canvas->data->GetCount())
@@ -133,6 +136,14 @@ void ClassGMM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 		fvec sample = canvas->data->GetSample(i);
 		int label = canvas->data->GetLabel(i);
 		QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
+		fvec res = classifier->TestMulti(sample);
+		int max = 0;
+		for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+		int resp = ((ClassifierGMM*) classifier)->classes[max];
+		if(label == resp) Canvas::drawSample(painter, point, 9, label);
+		else Canvas::drawCross(painter, point, 6, label);
+
+		/*
 		float response = classifier->Test(sample);
 		if(response > 0)
 		{
@@ -141,9 +152,8 @@ void ClassGMM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 		}
 		else
 		{
-			if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-			else Canvas::drawCross(painter, point, 6, 0);
 		}
+		*/
 	}
 }
 

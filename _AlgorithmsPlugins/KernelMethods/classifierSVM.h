@@ -28,6 +28,7 @@ class ClassifierSVM : public Classifier
 private:
 	svm_model *svm;
 	svm_node *node;
+	svm_node *x_space;
 public:
 	svm_parameter param;
 

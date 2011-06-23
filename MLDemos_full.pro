@@ -11,9 +11,8 @@ MLDemos.file = MLDemos/MLDemos.pro
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-SUBDIRS += Obstacle GMM KernelMethods KNN KPCA LinearMethods LWPR Maximizers SEDS OpenCV
-
-#SUBDIRS += Obstacle GMM KernelMethods KNN KPCA LinearMethods LWPR Maximizers OpenCV SEDS
+#SUBDIRS += Maximizers SEDS
+SUBDIRS += Obstacle GMM KernelMethods KNN KPCA LinearMethods LWPR Maximizers OpenCV SEDS
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
 KernelMethods.file = $$ALGOPATH/KernelMethods/pluginKernel.pro
 KNN.file = $$ALGOPATH/KNN/pluginKNN.pro

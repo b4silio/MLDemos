@@ -26,7 +26,7 @@ void DynamicalGPR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
-	dim = trajectories[0][0].size();
+	dim = trajectories[0][0].size()/2;
 	// we forget about time and just push in everything
 	vector<fvec> samples;
 	FOR(i, trajectories.size())
@@ -37,7 +37,6 @@ void DynamicalGPR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 		}
 	}
 	if(!samples.size()) return;
-	dim = dim/2;
 	Matrix inputs(dim, samples.size());
 	Matrix outputs(dim, samples.size());
 	FOR(n, samples.size())

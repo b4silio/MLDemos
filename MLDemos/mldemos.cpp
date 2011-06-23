@@ -30,6 +30,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "drawSVG.h"
 #include <iostream>
 #include <sstream>
+#include "optimization_test_functions.h"
 
 
 MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
@@ -369,6 +370,7 @@ void MLDemos::initDialogs()
     connect(optionsDynamic->resampleSpin, SIGNAL(valueChanged(int)), this, SLOT(ChangeActiveOptions()));
 	connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
 	connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
+	connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 
 	connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
 	connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
@@ -376,6 +378,7 @@ void MLDemos::initDialogs()
 	connect(optionsMaximize->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
 	connect(optionsMaximize->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
 	connect(optionsMaximize->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
+	connect(optionsMaximize->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
 	connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 
 	connect(optionsCompare->compareButton, SIGNAL(clicked()), this, SLOT(Compare()));
@@ -419,7 +422,8 @@ void MLDemos::initDialogs()
 	drawTimer->clusterer = &clusterer;
 	drawTimer->maximizer = &maximizer;
 	connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
-    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
+	connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
+	connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
 }
 
 void MLDemos::initPlugins()
@@ -757,7 +761,7 @@ void MLDemos::AlgoChanged()
 	if(actionRegression->isChecked() || actionClassifiers->isChecked())
 	{
 		drawToolbar->sprayButton->setChecked(true);
-		DrawTrajectory();
+		DrawSpray();
 	}
 }
 
@@ -782,6 +786,17 @@ void MLDemos::CompareAdd()
 		QTextStream stream(&parameterData, QIODevice::WriteOnly);
 		stream << "Regression" << ":" << tab << "\n";
 		regressors[tab]->SaveParams(stream);
+		optionsCompare->algoList->addItem(name);
+		compareOptions.push_back(parameterData);
+	}
+	if(algorithmOptions->tabDyn->isVisible())
+	{
+		int tab = optionsDynamic->tabWidget->currentIndex();
+		QString name = dynamicals[tab]->GetAlgoString();
+		QString parameterData;
+		QTextStream stream(&parameterData, QIODevice::WriteOnly);
+		stream << "Dynamical" << ":" << tab << "\n";
+		dynamicals[tab]->SaveParams(stream);
 		optionsCompare->algoList->addItem(name);
 		compareOptions.push_back(parameterData);
 	}
@@ -1475,28 +1490,25 @@ void MLDemos::Drawing( fvec sample, int label)
 		int count = drawToolbarContext1->spinCount->value();
 
 		QPointF sampleCoords = canvas->toCanvasCoords(sample);
-		if(type == 0) // uniform
+		// we generate the new data
+		float variance = sqrtf(size*size/9.f*0.5f);
+		fvec newSample; newSample.resize(2,0);
+		FOR(i, count)
 		{
-			fvec newSample;
-			newSample.resize(2,0);
-			FOR(i, count)
+			if(type == 0) // uniform
 			{
 				newSample[0] = (rand()/(float)RAND_MAX - 0.5f)*size + sampleCoords.x();
 				newSample[1] = (rand()/(float)RAND_MAX - 0.5f)*size + sampleCoords.y();
-				canvas->data->AddSample(canvas->toSampleCoords(newSample[0],newSample[1]), label);
 			}
-		}
-		else // normal
-		{
-			// we generate the new data
-			float variance = sqrtf(size*size/9.f*0.5f);
-			fvec newSample; newSample.resize(2,0);
-			FOR(i, count)
+			else // normal
 			{
 				newSample[0] = RandN((float)sampleCoords.x(), variance);
 				newSample[1] = RandN((float)sampleCoords.y(), variance);
-				canvas->data->AddSample(canvas->toSampleCoords(newSample[0],newSample[1]), label);
 			}
+			fvec canvasSample = canvas->toSampleCoords(newSample[0],newSample[1]);
+			//canvasSample.push_back(label ? RandN(1.f,0.5f) : RandN(-1.f,0.5f));
+			//canvasSample.push_back(label ? RandN(-.5f,0.5f) : RandN(.5f,0.5f));
+			canvas->data->AddSample(canvasSample, label);
 		}
 	}
 		break;
@@ -1755,7 +1767,7 @@ void MLDemos::Navigation( fvec sample )
     information += QString(string);
     sprintf(string, " | x: %.3f y: %.3f", sample[0], sample[1]);
     information += QString(string);
-    QMutexLocker lock(&mutex);
+	mutex.tryLock(500);
     if(classifier)
     {
         float score = classifier->Test(sample);
@@ -1786,6 +1798,7 @@ void MLDemos::Navigation( fvec sample )
         canvas->liveTrajectory = trajectory;
         canvas->repaint();
     }
+	mutex.unlock();
     ui.statusBar->showMessage(information);
 }
 
@@ -1865,6 +1878,100 @@ void MLDemos::GradientButton()
 	Qt::DropAction dropAction = drag->exec();
 }
 
+void MLDemos::BenchmarkButton()
+{
+	int w = canvas->width(), h = canvas->height();
+	int type = optionsMaximize->benchmarkCombo->currentIndex();
+	QImage image(w, h, QImage::Format_ARGB32);
+	image.fill(qRgb(255,255,255));
+
+	int dim = 2;
+	float minSpace = 0.f;
+	float maxSpace = 1.f;
+	float minVal = FLT_MAX;
+	float maxVal = -FLT_MAX;
+	switch(type)
+	{
+	case 0: // griewangk
+		minSpace = -60.f;
+		maxSpace = 60.f;
+		minVal = 0;
+		maxVal = 2;
+		break;
+	case 1: // rastragin
+		minSpace = -5.12f;
+		maxSpace = 5.12f;
+		minVal = 0;
+		maxVal = 82;
+		break;
+	case 2: // schwefel
+		minSpace = -500.f;
+		maxSpace = 500.f;
+		minVal = -838;
+		maxVal = 838;
+		break;
+	case 3: // ackley
+		minSpace = -2.f;
+		maxSpace = 2.f;
+		minVal = 0;
+		maxVal = 2.3504;
+	case 4: // michalewicz
+		minSpace = -2;
+		maxSpace = 2;
+		minVal = -1.03159;
+		maxVal = 5.74;
+//		minVal = -1.03159;
+//		maxVal = 55.74;
+	}
+
+	bool bSetValues = minVal == FLT_MAX;
+	Eigen::VectorXd x(2);
+	fVec point;
+	float value = 0;
+	FOR(i, w)
+	{
+		x[0] = i/(float)w*(maxSpace - minSpace) + minSpace;
+		FOR(j, h)
+		{
+			x[1] = j/(float)h*(maxSpace - minSpace) + minSpace;
+
+			switch(type)
+			{
+			case 0:
+				value = griewangk(x)(0);
+				break;
+			case 1:
+				value = rastragin(x)(0);
+				break;
+			case 2:
+				value = schwefel(x)(0);
+				break;
+			case 3:
+				value = ackley(x)(0);
+				break;
+			case 4:
+				value = sixhump(x)(0);
+				break;
+			}
+			if(bSetValues)
+			{
+				if(value < minVal) minVal = value;
+				if(value > maxVal) maxVal = value;
+			}
+			else
+			{
+				value = (value-minVal)/(maxVal-minVal);
+			}
+
+			int color = 255.f*max(0.f,min(1.f,value));
+			image.setPixel(i,j,qRgba(255, color, color, 255));
+		}
+	}
+	if(bSetValues) qDebug() << "minmax: " << minVal << " " << maxVal;
+
+	canvas->rewardPixmap = QPixmap::fromImage(image);
+	canvas->repaint();
+}
 
 void MLDemos::SaveData()
 {

@@ -20,23 +20,27 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLASSIFIER_GMM_H_
 
 #include <vector>
+#include <map>
 #include "classifier.h"
 #include <fgmm/fgmm++.hpp>
 
 class ClassifierGMM : public Classifier
 {
 public:
-	Gmm *gmmPos, *gmmNeg;
+	std::vector<Gmm*> gmms;
+	std::vector<float*> data;
+	std::map<int,int> classes;
 private:
 	u32 nbClusters;
 	u32 covarianceType;
 	u32 initType;
-	float *dataPos, *dataNeg;
 public:
 	ClassifierGMM();
+	~ClassifierGMM();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
+	fvec TestMulti(const fvec &sample);
 	char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);

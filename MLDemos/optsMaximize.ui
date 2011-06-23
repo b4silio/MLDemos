@@ -25,7 +25,7 @@
   <widget class="QPushButton" name="targetButton">
    <property name="geometry">
     <rect>
-     <x>350</x>
+     <x>400</x>
      <y>20</y>
      <width>31</width>
      <height>31</height>
@@ -35,6 +35,13 @@
     <font>
      <pointsize>30</pointsize>
     </font>
+   </property>
+   <property name="toolTip">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:30pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Starting Position&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string>¤</string>
@@ -174,32 +181,11 @@ p, li { white-space: pre-wrap; }
     </item>
    </layout>
   </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>340</x>
-     <y>50</y>
-     <width>50</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Starting</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
   <widget class="QPushButton" name="gaussianButton">
    <property name="geometry">
     <rect>
-     <x>450</x>
-     <y>20</y>
+     <x>360</x>
+     <y>60</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -226,8 +212,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>440</x>
-     <y>50</y>
+     <x>350</x>
+     <y>90</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -247,7 +233,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QDoubleSpinBox" name="varianceSpin">
    <property name="geometry">
     <rect>
-     <x>445</x>
+     <x>400</x>
      <y>70</y>
      <width>40</width>
      <height>20</height>
@@ -274,8 +260,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>50</y>
+     <x>440</x>
+     <y>90</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -295,8 +281,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QPushButton" name="gradientButton">
    <property name="geometry">
     <rect>
-     <x>400</x>
-     <y>20</y>
+     <x>450</x>
+     <y>60</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -323,9 +309,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>440</x>
-     <y>90</y>
-     <width>50</width>
+     <x>400</x>
+     <y>55</y>
+     <width>30</width>
      <height>20</height>
     </rect>
    </property>
@@ -335,7 +321,7 @@ p, li { white-space: pre-wrap; }
     </font>
    </property>
    <property name="text">
-    <string>Variance</string>
+    <string>Var</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -344,8 +330,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QSpinBox" name="iterationsSpin">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>150</y>
+     <x>360</x>
+     <y>160</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -368,8 +354,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>340</x>
-     <y>130</y>
+     <x>350</x>
+     <y>140</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -389,8 +375,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QDoubleSpinBox" name="stoppingSpin">
    <property name="geometry">
     <rect>
-     <x>430</x>
-     <y>150</y>
+     <x>440</x>
+     <y>160</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -417,14 +403,14 @@ p, li { white-space: pre-wrap; }
     <double>0.010000000000000</double>
    </property>
    <property name="value">
-    <double>0.950000000000000</double>
+    <double>0.980000000000000</double>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>420</x>
-     <y>130</y>
+     <x>430</x>
+     <y>140</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -441,6 +427,79 @@ p, li { white-space: pre-wrap; }
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
+  <widget class="QComboBox" name="benchmarkCombo">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>110</y>
+     <width>90</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <item>
+    <property name="text">
+     <string>Griewangk</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Rastragin</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Schwefel</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Ackley</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Six-Humps</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="benchmarkButton">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>110</y>
+     <width>51</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Set</string>
+   </property>
+  </widget>
+  <zorder>label_4</zorder>
+  <zorder>targetButton</zorder>
+  <zorder>tabWidget</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>gaussianButton</zorder>
+  <zorder>label_2</zorder>
+  <zorder>varianceSpin</zorder>
+  <zorder>label_3</zorder>
+  <zorder>gradientButton</zorder>
+  <zorder>iterationsSpin</zorder>
+  <zorder>label_5</zorder>
+  <zorder>stoppingSpin</zorder>
+  <zorder>label_6</zorder>
+  <zorder>benchmarkCombo</zorder>
+  <zorder>benchmarkButton</zorder>
  </widget>
  <resources/>
  <connections/>

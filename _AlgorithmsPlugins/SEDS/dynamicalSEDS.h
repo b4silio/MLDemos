@@ -29,6 +29,7 @@ class DynamicalSEDS : public Dynamical
 public:
 	Gmm *gmm;
 	SEDS *seds;
+	float resizeFactor;
 private:
 	u32 nbClusters;
 	float penalty;
@@ -36,6 +37,9 @@ private:
 	bool bMu;
 	bool bSigma;
 	int objectiveType;
+	int maxIteration;
+	int maxMinorIteration;
+	int constraintCriterion;
 	float *data;
 public:
 	fvec endpoint;
@@ -47,7 +51,8 @@ public:
 	fVec Test( const fVec &sample);
 	char *GetInfoString();
 
-	void SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType);
+	void SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType,
+				   int maxIteration, int maxMinorIteration, int constraintCriterion);
 };
 
 #endif // _DYNAMICAL_SEDS_H_

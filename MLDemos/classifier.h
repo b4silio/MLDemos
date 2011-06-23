@@ -43,17 +43,18 @@ protected:
 	s32 class2labels[255];
 	ivec labels2class;
 	bool bFixedThreshold;
-        bool bSingleClass;
-        bool bUsesDrawTimer;
+	bool bSingleClass;
+	bool bUsesDrawTimer;
+	bool bMultiClass;
 
 public:
 	std::vector<fvec> crossval;
 	fvec fmeasures;
 	int type;
 	std::vector< std::vector<f32pair> > rocdata;
-        std::vector<const char *> roclabels;
+	std::vector<const char *> roclabels;
 
-        Classifier(): posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), bSingleClass(true), bUsesDrawTimer(true),type(CLASS_NONE)
+	Classifier(): posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), bSingleClass(true), bUsesDrawTimer(true), bMultiClass(false), type(CLASS_NONE)
 	{
 		rocdata.push_back(std::vector<f32pair>());
 		rocdata.push_back(std::vector<f32pair>());
@@ -65,11 +66,14 @@ public:
 	std::vector <fvec> GetSamples(){return samples;};
 
 	virtual void Train(std::vector< fvec > samples, ivec labels){};
+	virtual fvec TestMulti(const fvec &sample){ return fvec();};
 	virtual float Test(const fvec &sample){ return 0; };
-	virtual float Test(const fVec &sample){ return Test((fvec)sample); };
+	virtual float Test(const fVec &sample){ if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);};
 	virtual char *GetInfoString(){return NULL;};
 	bool SingleClass(){return bSingleClass;};
-        bool UsesDrawTimer(){return bUsesDrawTimer;};
+	bool UsesDrawTimer(){return bUsesDrawTimer;};
+	bool IsMultiClass(){return bMultiClass;};
+	int Dim(){return dim;};
 };
 
 #endif // _CLASSIFIER_H_

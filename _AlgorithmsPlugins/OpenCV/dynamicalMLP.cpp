@@ -39,7 +39,7 @@ void DynamicalMLP::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
-	dim = trajectories[0][0].size();
+	dim = trajectories[0][0].size()/2;
 	// we forget about time and just push in everything
 	vector<fvec> samples;
 	FOR(i, trajectories.size())
@@ -52,7 +52,6 @@ void DynamicalMLP::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	u32 sampleCnt = samples.size();
 	if(!sampleCnt) return;
 	DEL(mlp);
-	dim = samples[0].size()/2;
 
 	CvMat *layers;
 	//	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
