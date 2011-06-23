@@ -8,10 +8,10 @@ just one for now
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/MLDemos/mldemos.cpp b/MLDemos/mldemos.cpp
-index 8c04505..6f7fff3 100644
+index 8510343..e8f2ca4 100644
 --- a/MLDemos/mldemos.cpp
 +++ b/MLDemos/mldemos.cpp
-@@ -156,7 +156,7 @@ void MLDemos::initToolBars()
+@@ -157,7 +157,7 @@ void MLDemos::initToolBars()
  
  	actionShowStats = new QAction(QIcon(":/MLDemos/icons/stats.png"), tr("Info/Statistics"), this);
      actionShowStats->setShortcut(QKeySequence(tr("I")));
