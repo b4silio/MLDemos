@@ -29,4 +29,4 @@ INPUTPATH = _IOPlugins
 #SUBDIRS += PCAFaces
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro
-
+Webimport.file = $$INPUTPATH/WebImport/pluginWebImport.pro

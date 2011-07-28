@@ -22,7 +22,7 @@ Makefile*
 
 #codeblocks noise
 *.layout
-*.depends
+*.depend
 
 # xcode noise
 build/*
