@@ -4,6 +4,7 @@
 	<Project>
 		<Option title="MLDemos" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../MLDemos" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -33,7 +34,7 @@
 				</MakeCommands>
 			</Target>
 			<Target title="release">
-				<Option output="../mldemos" prefix_auto="1" extension_auto="1" />
+				<Option output="../libmldemos" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -60,18 +61,22 @@
 			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro  CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="BUILD" />
 		<Unit filename="MachineLearning.rc" />
 		<Unit filename="aboutDialog.ui" />
 		<Unit filename="algorithmOptions.ui" />
 		<Unit filename="basicMath.h" />
-		<Unit filename="basicOpenCV.cpp" />
-		<Unit filename="basicOpenCV.h" />
 		<Unit filename="canvas.cpp" />
 		<Unit filename="canvas.h" />
 		<Unit filename="classifier.h" />
 		<Unit filename="clusterer.h" />
+		<Unit filename="compare.cpp" />
+		<Unit filename="compare.h" />
+		<Unit filename="compare.ui" />
 		<Unit filename="datasetManager.cpp" />
 		<Unit filename="datasetManager.h" />
+		<Unit filename="drawSVG.cpp" />
+		<Unit filename="drawSVG.h" />
 		<Unit filename="drawTimer.cpp" />
 		<Unit filename="drawTimer.h" />
 		<Unit filename="drawUtils.cpp" />
@@ -80,23 +85,13 @@
 		<Unit filename="drawingToolsContext1.ui" />
 		<Unit filename="drawingToolsContext2.ui" />
 		<Unit filename="drawingToolsContext3.ui" />
+		<Unit filename="drawingToolsContext4.ui" />
 		<Unit filename="dynamical.h" />
-		<Unit filename="fgmm/em.cpp" />
-		<Unit filename="fgmm/em.h" />
-		<Unit filename="fgmm/fgmm++.hpp" />
-		<Unit filename="fgmm/fgmm.h" />
-		<Unit filename="fgmm/gaussian.cpp" />
-		<Unit filename="fgmm/gaussian.h" />
-		<Unit filename="fgmm/gmm.cpp" />
-		<Unit filename="fgmm/gmmregression.cpp" />
-		<Unit filename="fgmm/regression.h" />
-		<Unit filename="fgmm/smat.cpp" />
-		<Unit filename="fgmm/smat.h" />
-		<Unit filename="fgmm/update.cpp" />
 		<Unit filename="gettimeofday.cc" />
 		<Unit filename="gettimeofday.h" />
 		<Unit filename="interfaces.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="maximize.h" />
 		<Unit filename="mldemos.cpp" />
 		<Unit filename="mldemos.h" />
 		<Unit filename="mldemos.ui" />
@@ -106,16 +101,17 @@
 		<Unit filename="mymaths.cpp" />
 		<Unit filename="mymaths.h" />
 		<Unit filename="obstacles.h" />
+		<Unit filename="optimization_test_functions.h" />
 		<Unit filename="optsClassify.ui" />
 		<Unit filename="optsCluster.ui" />
+		<Unit filename="optsCompare.ui" />
 		<Unit filename="optsDynamic.ui" />
+		<Unit filename="optsMaximize.ui" />
 		<Unit filename="optsRegress.ui" />
 		<Unit filename="public.h" />
 		<Unit filename="regressor.h" />
 		<Unit filename="roc.cpp" />
 		<Unit filename="roc.h" />
-		<Unit filename="sampleManager.cpp" />
-		<Unit filename="sampleManager.h" />
 		<Unit filename="statisticsDialog.ui" />
 		<Unit filename="types.h" />
 		<Unit filename="uiMac/aboutDialog.ui" />

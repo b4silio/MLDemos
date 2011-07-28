@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="GMM" />
+		<Option title="pluginGMM" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../GMM" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>

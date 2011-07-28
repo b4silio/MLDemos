@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="LinearMethods" />
+		<Option title="pluginLinear" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../LinearMethods" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -64,45 +65,37 @@
 		<Unit filename="JnS/JnS.h" />
 		<Unit filename="JnS/Matutil.cpp" />
 		<Unit filename="JnS/Matutil.h" />
-		<Unit filename="basicOpenCV.cpp" />
-		<Unit filename="basicOpenCV.h" />
-		<Unit filename="classifierBoost.cpp" />
-		<Unit filename="classifierBoost.h" />
 		<Unit filename="classifierLinear.cpp" />
 		<Unit filename="classifierLinear.h" />
-		<Unit filename="classifierMLP.cpp" />
-		<Unit filename="classifierMLP.h" />
-		<Unit filename="clustererKM.cpp" />
-		<Unit filename="clustererKM.h" />
-		<Unit filename="dynamicalMLP.cpp" />
-		<Unit filename="dynamicalMLP.h" />
-		<Unit filename="interfaceBoostClassifier.cpp" />
-		<Unit filename="interfaceBoostClassifier.h" />
-		<Unit filename="interfaceKMCluster.cpp" />
-		<Unit filename="interfaceKMCluster.h" />
 		<Unit filename="interfaceLinearClassifier.cpp" />
 		<Unit filename="interfaceLinearClassifier.h" />
-		<Unit filename="interfaceMLPClassifier.cpp" />
-		<Unit filename="interfaceMLPClassifier.h" />
-		<Unit filename="interfaceMLPDynamic.cpp" />
-		<Unit filename="interfaceMLPDynamic.h" />
-		<Unit filename="interfaceMLPRegress.cpp" />
-		<Unit filename="interfaceMLPRegress.h" />
-		<Unit filename="kmeans.cpp" />
-		<Unit filename="kmeans.h" />
-		<Unit filename="mymaths.cpp" />
-		<Unit filename="mymaths.h" />
-		<Unit filename="paramsBoost.ui" />
-		<Unit filename="paramsKM.ui" />
+		<Unit filename="liblinear/blas.h" />
+		<Unit filename="liblinear/blasp.h" />
+		<Unit filename="liblinear/daxpy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="liblinear/ddot.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="liblinear/dnrm2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="liblinear/dscal.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="liblinear/linear.cpp" />
+		<Unit filename="liblinear/linear.h" />
+		<Unit filename="liblinear/predict.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="liblinear/train.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="liblinear/tron.cpp" />
+		<Unit filename="liblinear/tron.h" />
 		<Unit filename="paramsLinear.ui" />
-		<Unit filename="paramsMLP.ui" />
-		<Unit filename="paramsMLPDynamic.ui" />
-		<Unit filename="paramsMLPRegress.ui" />
 		<Unit filename="pluginLinear.cpp" />
 		<Unit filename="pluginLinear.h" />
-		<Unit filename="pluginLinear.pro" />
-		<Unit filename="regressorMLP.cpp" />
-		<Unit filename="regressorMLP.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

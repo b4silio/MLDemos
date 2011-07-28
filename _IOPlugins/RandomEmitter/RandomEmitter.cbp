@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="RandomEmitter" />
+		<Option title="pluginRandomEmitter" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../RandomEmitter" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -64,7 +65,6 @@
 		<Unit filename="interfaceRandomEmitter.h" />
 		<Unit filename="mymaths.cpp" />
 		<Unit filename="mymaths.h" />
-		<Unit filename="pluginRandomEmitter.pro" />
 		<Extensions>
 			<code_completion />
 			<envvars />

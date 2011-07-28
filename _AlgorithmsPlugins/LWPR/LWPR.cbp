@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="LWPR" />
+		<Option title="pluginLWPR" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../LWPR" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -66,40 +67,10 @@
 		<Unit filename="interfaceLWPRDynamic.h" />
 		<Unit filename="interfaceLWPRRegress.cpp" />
 		<Unit filename="interfaceLWPRRegress.h" />
-		<Unit filename="lwpr/lwpr.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lwpr/lwpr.h" />
-		<Unit filename="lwpr/lwpr.hh" />
-		<Unit filename="lwpr/lwpr_aux.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lwpr/lwpr_aux.h" />
-		<Unit filename="lwpr/lwpr_binio.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lwpr/lwpr_binio.h" />
-		<Unit filename="lwpr/lwpr_config.h" />
-		<Unit filename="lwpr/lwpr_config_def.h" />
-		<Unit filename="lwpr/lwpr_math.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lwpr/lwpr_math.h" />
-		<Unit filename="lwpr/lwpr_mem.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lwpr/lwpr_mem.h" />
-		<Unit filename="lwpr/lwpr_xml.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lwpr/lwpr_xml.h" />
-		<Unit filename="mymaths.cpp" />
-		<Unit filename="mymaths.h" />
 		<Unit filename="paramsLWPRDynamic.ui" />
 		<Unit filename="paramsLWPRRegress.ui" />
 		<Unit filename="pluginLWPR.cpp" />
 		<Unit filename="pluginLWPR.h" />
-		<Unit filename="pluginLWPR.pro" />
 		<Unit filename="regressorLWPR.cpp" />
 		<Unit filename="regressorLWPR.h" />
 		<Extensions>
