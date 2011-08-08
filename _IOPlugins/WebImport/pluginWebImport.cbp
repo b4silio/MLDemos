@@ -7,30 +7,60 @@
 		<Option execution_dir="../WebImport" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="$make -f $makefile " />
+			<CompileFile command="$make -f $makefile $file" />
+			<Clean command="$make -f $makefile clean" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile " />
+			<SilentBuild command="$make -s -f $makefile" />
+		</MakeCommands>
 		<Build>
-			<Script file="lib_finder.script" />
 			<Target title="Debug">
-				<Option output="bin/Debug/liblibpluginWebImport" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libIO_WebImport" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
+				<ExtraCommands>
+					<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME) CONFIG+=opencv$(#opencv.version)" />
+				</ExtraCommands>
+				<MakeCommands>
+					<Build command="$make -f $makefile" />
+					<CompileFile command="$make -f $makefile " />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile" />
+					<SilentBuild command="$make -s -f $makefile " />
+				</MakeCommands>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/liblibpluginWebImport" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libIO_WebImport" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
 				</Linker>
+				<MakeCommands>
+					<Build command="$make -f $makefile " />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile" />
+					<SilentBuild command="$make -s -f $makefile" />
+				</MakeCommands>
+			</Target>
+			<Target title="standalone">
+				<Option output="pluginWebImport" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 			</Target>
 		</Build>
 		<Compiler>
@@ -40,8 +70,14 @@
 			<Add option="-DPIC" />
 			<Add directory="../../MLDemos" />
 		</Compiler>
-		<Unit filename="WebImport.cpp" />
-		<Unit filename="WebImport.h" />
+		<Unit filename="WebImport.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="WebImport.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Extensions>
 			<envvars />
 			<code_completion />

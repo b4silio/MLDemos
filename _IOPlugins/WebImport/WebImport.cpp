@@ -18,4 +18,35 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 
 #include "WebImport.h"
+
 using namespace std;
+
+int main()
+{
+    // init
+    ifstream file("iris.data");
+    map<string,unsigned int> classLabels;
+    vector<vector<string> > data;
+    pair<map<string,unsigned int>::iterator,bool> ret;
+    unsigned int id = 0;
+
+    // Parse CSV input file
+    for(CSVIterator parser(file);parser != CSVIterator();++parser)
+    {
+        // Read output (class) labels
+        ret = classLabels.insert( pair<string,unsigned int>(parser->last(),id) );
+        if (ret.second == true) id++; // new class found
+
+        // Fill dataset
+        data.push_back(parser->getParsedLine());
+    }
+    cout << "Parsing done, read " << data.size() << " entries" << endl;
+    cout << "Found " << id << " class labels" << endl;
+
+    // look for data types
+    map<unsigned int, char> inputLabels;
+    for(int i = 0;i < data.at(0).size();i++)
+    {
+
+    }
+}
