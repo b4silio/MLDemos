@@ -52,7 +52,6 @@ std::size_t CSVRow::size() const
     return m_data.size();
 }
 
-
 void CSVRow::readNextRow(std::istream& str)
 {
     // read line from file
@@ -188,16 +187,34 @@ vector<size_t> CSVParser::getMissingValIndex()
     return missingValIndex;
 }
 
-void CSVParser::cleanData(unsigned int typesToKeep)
+void CSVParser::cleanData(unsigned int acceptedTypes)
 {
+    vector<string>::iterator it;
     for(size_t i = 0; i < inputTypes.size(); i++)
-        if (!(inputTypes[i]&typesToKeep)) // data type does not correspond to a requested one
+        if (!(inputTypes[i]&acceptedTypes)) // data type does not correspond to a requested one
         {
-
+            for(size_t j = 0; j < data.size(); j++)
+            {
+                it = data.at(j).begin() + i;
+                data.at(j).erase(it); // delete the column
+            }
+            inputTypes.erase(i--); // delete the input to stay consistant
         }
 }
 
-vector<fvec> getData()
+pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
 {
-
+    vector<fvec> samples(data.size());
+    ivec labels(data.size());
+    fvec sample(data.at(0).size());
+    cleanData(acceptedTypes);
+    size_t j;
+    for(size_t i = 0; i < data.size(); i++)
+    {
+        for(j = 0; j < data.at(i).size()-1; j++) // consider last col as label
+            sample.at(j) = atof(data.at(i).at(j).c_str());
+        samples.at(i) = sample;
+        labels.at(i) = classLabels[data.at(i).at(j)]; // j is one the last col now
+    }
+    return pair<vector<fvec>,ivec>(samples,labels);
 }

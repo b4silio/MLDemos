@@ -55,7 +55,7 @@ void WebImport::Closing()
 
 void WebImport::Updating()
 {
-    pair<vector<fvec>,ivec> data;// = projector->GetData();
+    pair<vector<fvec>,ivec> data = inputParser->getData(NUMERIC_TYPES);
     if(data.first.size() < 2) return;
     emit(SetData(data.first, data.second, vector<ipair>()));
 }

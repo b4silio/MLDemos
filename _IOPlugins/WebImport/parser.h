@@ -27,6 +27,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define CHAR_TYPE           (2^4)
 #define STRING_TYPE         (2^5)
 #define UNKNOWN_TYPE        (2^6)
+#define ALL_TYPES           (2^7-1)
+#define NUMERIC_TYPES       (UNSIGNED_INT_TYPE | INT_TYPE | FLOAT_TYPE | DOUBLE_TYPE)
 
 #define MISSING_VALUE        "?"
 
@@ -98,12 +100,10 @@ private:
 class CSVParser
 {
 public:
-    CSVParser();
     void parse(char* fileName);
     vector<size_t> getMissingValIndex();
-    void cleanData(unsigned int typesToKeep);
-    vector<fvec> getData(unsigned int requestedTypes);
-    vector<fvec> getData(void);
+    void cleanData(unsigned int acceptedTypes);
+    pair<vector<fvec>,ivec> getData(unsigned int acceptedTypes = ALL_TYPES);
 private:
     ifstream file;
     map<string,unsigned int> classLabels;
