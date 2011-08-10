@@ -26,7 +26,7 @@ OpenCV.file = $$ALGOPATH/OpenCV/pluginOpenCV.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-#SUBDIRS += PCAFaces
+SUBDIRS += PCAFaces WebImport RandomEmitter
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro
-Webimport.file = $$INPUTPATH/WebImport/pluginWebImport.pro
+WebImport.file = $$INPUTPATH/WebImport/pluginWebImport.pro
