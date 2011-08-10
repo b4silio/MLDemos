@@ -157,7 +157,7 @@ void MLDemos::initToolBars()
 
 	actionShowStats = new QAction(QIcon(":/MLDemos/icons/stats.png"), tr("Info/Statistics"), this);
     actionShowStats->setShortcut(QKeySequence(tr("I")));
-	actionShowStats->setStatusTip(tr("Display Algorithm Informations and Data Statistics"));
+	actionShowStats->setStatusTip(tr("Display Algorithm Information and Data Statistics"));
     actionShowStats->setCheckable(true);
 
     connect(actionClassifiers, SIGNAL(triggered()), this, SLOT(ShowOptionClass()));
