@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="pluginMaximizers" />
+		<Option makefile_is_custom="1" />
+		<Option execution_dir="../Maximizers" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="$make -f $makefile" />
+			<CompileFile command="$make -f $makefile $file" />
+			<Clean command="$make -f $makefile clean" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile " />
+			<SilentBuild command="$make -s -f $makefile" />
+		</MakeCommands>
+		<Build>
+			<Target title="Debug">
+				<Option output="../../plugins/libmld_Maximizers" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="$make -f $makefile" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile" />
+					<SilentBuild command="$make -s -f $makefile" />
+				</MakeCommands>
+			</Target>
+			<Target title="Release">
+				<Option output="../../plugins/libmld_Maximizers" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<MakeCommands>
+					<Build command="$make -f $makefile" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile" />
+					<SilentBuild command="$make -s -f $makefile" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<ExtraCommands>
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
+		</ExtraCommands>
+		<Unit filename="PSO/memoryAllocation.cpp" />
+		<Unit filename="PSO/memoryAllocation.h" />
+		<Unit filename="PSO/optimization_test_functions.h" />
+		<Unit filename="PSO/optimizer.cpp" />
+		<Unit filename="PSO/optimizer.h" />
+		<Unit filename="PSO/pso.cpp" />
+		<Unit filename="PSO/pso.h" />
+		<Unit filename="gaPeon.cpp" />
+		<Unit filename="gaPeon.h" />
+		<Unit filename="gaTrainer.cpp" />
+		<Unit filename="gaTrainer.h" />
+		<Unit filename="interfaceBasic.cpp" />
+		<Unit filename="interfaceBasic.h" />
+		<Unit filename="interfaceGA.cpp" />
+		<Unit filename="interfaceGA.h" />
+		<Unit filename="interfaceParticles.cpp" />
+		<Unit filename="interfaceParticles.h" />
+		<Unit filename="maximizeDonut.cpp" />
+		<Unit filename="maximizeDonut.h" />
+		<Unit filename="maximizeGA.cpp" />
+		<Unit filename="maximizeGA.h" />
+		<Unit filename="maximizeGradient.cpp" />
+		<Unit filename="maximizeGradient.h" />
+		<Unit filename="maximizeParticles.cpp" />
+		<Unit filename="maximizeParticles.h" />
+		<Unit filename="maximizePower.cpp" />
+		<Unit filename="maximizePower.h" />
+		<Unit filename="maximizeRandom.cpp" />
+		<Unit filename="maximizeRandom.h" />
+		<Unit filename="maximizeSwarm.cpp" />
+		<Unit filename="maximizeSwarm.h" />
+		<Unit filename="mvnpdf.h" />
+		<Unit filename="paramsGA.ui" />
+		<Unit filename="paramsMaximizers.ui" />
+		<Unit filename="paramsParticles.ui" />
+		<Unit filename="pluginMaximizers.cpp" />
+		<Unit filename="pluginMaximizers.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

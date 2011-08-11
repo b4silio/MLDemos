@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Obstacle" />
+		<Option title="pluginAvoidance" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../Obstacle" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -63,53 +64,8 @@
 		<Unit filename="DSAvoid.cpp" />
 		<Unit filename="DSAvoid.h" />
 		<Unit filename="DSInit.cpp" />
-		<Unit filename="MathLib/Differentiator.cpp" />
-		<Unit filename="MathLib/Differentiator.h" />
-		<Unit filename="MathLib/GradientDescent.cpp" />
-		<Unit filename="MathLib/GradientDescent.h" />
-		<Unit filename="MathLib/IKGroupSolver.cpp" />
-		<Unit filename="MathLib/IKGroupSolver.h" />
-		<Unit filename="MathLib/IKSubSolver.cpp" />
-		<Unit filename="MathLib/IKSubSolver.h" />
-		<Unit filename="MathLib/Macros.cpp" />
-		<Unit filename="MathLib/Macros.h" />
-		<Unit filename="MathLib/MathLib.cpp" />
-		<Unit filename="MathLib/MathLib.h" />
-		<Unit filename="MathLib/MathLibCommon.cpp" />
-		<Unit filename="MathLib/MathLibCommon.h" />
-		<Unit filename="MathLib/Matrix.cpp" />
-		<Unit filename="MathLib/Matrix.h" />
-		<Unit filename="MathLib/Matrix3.cpp" />
-		<Unit filename="MathLib/Matrix3.h" />
-		<Unit filename="MathLib/Matrix4.cpp" />
-		<Unit filename="MathLib/Matrix4.h" />
-		<Unit filename="MathLib/ReferenceFrame.cpp" />
-		<Unit filename="MathLib/ReferenceFrame.h" />
-		<Unit filename="MathLib/Regression.cpp" />
-		<Unit filename="MathLib/Regression.h" />
-		<Unit filename="MathLib/SpatialForce.cpp" />
-		<Unit filename="MathLib/SpatialForce.h" />
-		<Unit filename="MathLib/SpatialFrame.cpp" />
-		<Unit filename="MathLib/SpatialFrame.h" />
-		<Unit filename="MathLib/SpatialInertia.cpp" />
-		<Unit filename="MathLib/SpatialInertia.h" />
-		<Unit filename="MathLib/SpatialMatrix.cpp" />
-		<Unit filename="MathLib/SpatialMatrix.h" />
-		<Unit filename="MathLib/SpatialVector.cpp" />
-		<Unit filename="MathLib/SpatialVector.h" />
-		<Unit filename="MathLib/SpatialVelocity.cpp" />
-		<Unit filename="MathLib/SpatialVelocity.h" />
-		<Unit filename="MathLib/TMatrix.cpp" />
-		<Unit filename="MathLib/TMatrix.h" />
-		<Unit filename="MathLib/TVector.cpp" />
-		<Unit filename="MathLib/TVector.h" />
-		<Unit filename="MathLib/Vector.cpp" />
-		<Unit filename="MathLib/Vector.h" />
-		<Unit filename="MathLib/Vector3.cpp" />
-		<Unit filename="MathLib/Vector3.h" />
 		<Unit filename="interfaceAvoidance.cpp" />
 		<Unit filename="interfaceAvoidance.h" />
-		<Unit filename="pluginAvoidance.pro" />
 		<Extensions>
 			<code_completion />
 			<envvars />

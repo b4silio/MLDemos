@@ -2,9 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="pluginLWPR" />
+		<Option title="pluginKPCA" />
 		<Option makefile_is_custom="1" />
-		<Option execution_dir="../LWPR" />
+		<Option execution_dir="../KPCA" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -17,7 +17,7 @@
 		</MakeCommands>
 		<Build>
 			<Target title="debug">
-				<Option output="../../plugins/libmld_LWPR" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_KPCA" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -34,7 +34,7 @@
 				</MakeCommands>
 			</Target>
 			<Target title="release">
-				<Option output="../../plugins/libmld_LWPR" prefix_auto="1" extension_auto="1" />
+				<Option output="../../plugins/libmld_KPCA" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -61,18 +61,14 @@
 			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
-		<Unit filename="dynamicalLWPR.cpp" />
-		<Unit filename="dynamicalLWPR.h" />
-		<Unit filename="interfaceLWPRDynamic.cpp" />
-		<Unit filename="interfaceLWPRDynamic.h" />
-		<Unit filename="interfaceLWPRRegress.cpp" />
-		<Unit filename="interfaceLWPRRegress.h" />
-		<Unit filename="paramsLWPRDynamic.ui" />
-		<Unit filename="paramsLWPRRegress.ui" />
-		<Unit filename="pluginLWPR.cpp" />
-		<Unit filename="pluginLWPR.h" />
-		<Unit filename="regressorLWPR.cpp" />
-		<Unit filename="regressorLWPR.h" />
+		<Unit filename="classifierKPCA.cpp" />
+		<Unit filename="classifierKPCA.h" />
+		<Unit filename="eigen_pca.h" />
+		<Unit filename="eigen_pca_kernel.cpp" />
+		<Unit filename="paramsKPCA.ui" />
+		<Unit filename="pluginKPCA.cpp" />
+		<Unit filename="pluginKPCA.h" />
+		<Unit filename="testPCA.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

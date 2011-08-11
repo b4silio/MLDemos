@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="PCAFaces" />
+		<Option title="pluginPCAFaces" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../PCAFaces" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -57,7 +58,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
+			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME) CONFIG+=opencv$(#opencv.version)" />
 			<Mode after="always" />
 		</ExtraCommands>
 		<Unit filename="PCAFaces.cpp" />
@@ -71,7 +72,6 @@
 		<Unit filename="eigenFaces.cpp" />
 		<Unit filename="eigenFaces.h" />
 		<Unit filename="launcher.cpp" />
-		<Unit filename="pluginPCAFaces.pro" />
 		<Unit filename="projector.cpp" />
 		<Unit filename="projector.h" />
 		<Unit filename="sampleManager.cpp" />

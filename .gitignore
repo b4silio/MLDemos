@@ -38,3 +38,6 @@ xcuserdata
 # svn & cvs
 .svn
 CVS
+
+# debian build debris
+/.pc/

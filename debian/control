@@ -1,0 +1,24 @@
+Source: mldemos
+Section: science
+Priority: optional
+Maintainer: Barak A. Pearlmutter <bap@debian.org>
+Build-Depends: debhelper (>= 8),
+	       libopencv-dev | libcv-dev,
+	       libopencv-dev | libcvaux-dev,
+	       libopencv-dev | libhighgui-dev,
+	       libqt4-dev
+Standards-Version: 3.9.2
+Homepage: http://mldemos.epfl.ch
+Vcs-Git: git://git.debian.org/collab-maint/mldemos.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/mldemos.git;a=summary
+
+Package: mldemos
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Machine Learning Demos (MLDemos) with Visualization
+ A User-Friendly visualization toolkit for machine learning: MLDemos.
+ Extensible architecture, contains modules for classification
+ (gaussian mixture models, kernel methods such as support vector
+ machines, nearest neighbor, kernel PCA, boosting, multilayer
+ perceptrons, linear classifiers), clustering (gaussian mixtures,
+ kernel methods, k-means), regression, etc.

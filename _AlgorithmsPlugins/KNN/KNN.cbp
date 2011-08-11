@@ -2,8 +2,9 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="KNN" />
+		<Option title="pluginKNN" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../KNN" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -60,32 +61,6 @@
 			<Add before="$(#qt4)/bin/qmake -o Makefile $PROJECT_NAME.pro CONFIG+=$(TARGET_NAME)" />
 			<Mode after="always" />
 		</ExtraCommands>
-		<Unit filename="ANN/ANN.cpp" />
-		<Unit filename="ANN/ANN.h" />
-		<Unit filename="ANN/ANNperf.h" />
-		<Unit filename="ANN/ANNx.h" />
-		<Unit filename="ANN/bd_fix_rad_search.cpp" />
-		<Unit filename="ANN/bd_pr_search.cpp" />
-		<Unit filename="ANN/bd_search.cpp" />
-		<Unit filename="ANN/bd_tree.cpp" />
-		<Unit filename="ANN/bd_tree.h" />
-		<Unit filename="ANN/brute.cpp" />
-		<Unit filename="ANN/kd_dump.cpp" />
-		<Unit filename="ANN/kd_fix_rad_search.cpp" />
-		<Unit filename="ANN/kd_fix_rad_search.h" />
-		<Unit filename="ANN/kd_pr_search.cpp" />
-		<Unit filename="ANN/kd_pr_search.h" />
-		<Unit filename="ANN/kd_search.cpp" />
-		<Unit filename="ANN/kd_search.h" />
-		<Unit filename="ANN/kd_split.cpp" />
-		<Unit filename="ANN/kd_split.h" />
-		<Unit filename="ANN/kd_tree.cpp" />
-		<Unit filename="ANN/kd_tree.h" />
-		<Unit filename="ANN/kd_util.cpp" />
-		<Unit filename="ANN/kd_util.h" />
-		<Unit filename="ANN/perf.cpp" />
-		<Unit filename="ANN/pr_queue.h" />
-		<Unit filename="ANN/pr_queue_k.h" />
 		<Unit filename="classifierKNN.cpp" />
 		<Unit filename="classifierKNN.h" />
 		<Unit filename="dynamicalKNN.cpp" />
@@ -96,14 +71,11 @@
 		<Unit filename="interfaceKNNDynamic.h" />
 		<Unit filename="interfaceKNNRegress.cpp" />
 		<Unit filename="interfaceKNNRegress.h" />
-		<Unit filename="mymaths.cpp" />
-		<Unit filename="mymaths.h" />
 		<Unit filename="paramsKNN.ui" />
 		<Unit filename="paramsKNNDynamic.ui" />
 		<Unit filename="paramsKNNRegress.ui" />
 		<Unit filename="pluginKNN.cpp" />
 		<Unit filename="pluginKNN.h" />
-		<Unit filename="pluginKNN.pro" />
 		<Unit filename="regressorKNN.cpp" />
 		<Unit filename="regressorKNN.h" />
 		<Extensions>
