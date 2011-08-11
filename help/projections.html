@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head><body>
+<h2>Linear Projections<br>
+</h2>One of the most straightforward solution for classification is to
+project the data linearly and to perform Naive Bayes classification on
+the projected data. Here we present different ways for projecting the
+data linearly onto one or two dimensions.<br>
+<br>
+<span style="font-weight: bold;">Principal Component Analysis (PCA)</span><br style="font-weight: bold;">
+PCA seeks the directions of maximum variance (corresponding to the
+eigenvectors of the data covariance matrix), and projects the data onto
+the first Principal Component (eigenvector whose eigenvalue is the
+largest). No distinction is made between samples belonging to different
+classes. More information on <a href="http://en.wikipedia.org/wiki/Principal_component_analysis">Wikipedia</a>.<br>
+<br>
+<span style="font-weight: bold;">Linear
+Discriminant Analysis (LDA)</span><br style="font-weight: bold;">
+LDA models each sample class separately and finds the direction that
+maximizes the distance between the two distributions. In its basic
+form, LDA models each class as a gaussian distribution of equal
+variance. More information on <a href="http://en.wikipedia.org/wiki/Linear_discriminant_analysis">Wikipedia</a>.<br>
+<br>
+<span style="font-weight: bold;">Fisher Linear Discriminant</span><br style="font-weight: bold;">
+Fisher-LDA extends LDA by modeling each class as a gaussian
+distribution of individual variance (instead of a single variance
+common to both distributions as in standard LDA). If the two classes
+have similar distributions, there will be no visible difference between
+LDA and Fisher-LDA. More information on <a href="http://en.wikipedia.org/wiki/Linear_discriminant_analysis#Fisher.27s_linear_discriminant">Wikipedia</a>.<br>
+<br>
+<span style="font-weight: bold;">Independent Component Analysis (ICA)</span><br>
+ICA looks for the directions that maximize data independence. While in
+the previous cases the components are always orthogonal, ICA can
+project the data along non-orthogonal dimensions. More information on <a href="http://en.wikipedia.org/wiki/Independent_component_analysis">Wikipedia</a>.<br>
+<br>
+
+<span style="font-weight: bold;">Kernel Parameters</span><br>
+More information on <a href="http://en.wikipedia.org/wiki/Kernel_principal_component_analysis">Wikipedia</a>.<br>
+<ul>
+	<li>Kernel Type:</li>
+		<ul>
+		<li>Linear: linear kernel</li>
+		<li>Polynomial: polynomial kernel</li>
+		<li>RBF: radial basis function (gaussian) kernel</li>
+		</ul>
+	<li>Kernel Width: inverse variance for the kernel function, determines the radius of influence of each sample (RBF + Poly)</li>
+	<li>Degree: degree of the polynomial (Poly)</li>
+</ul><br>
+
+<span style="font-weight: bold;">Naive Bayes</span><br>
+Regardless of the method used for projection (if any), The data is
+separated into positive and negative classes, and the probability of a
+sample belonging to each class is computed separately. The response of
+the classifier in this implementation is a Maximum A Posteriori (MAP)
+decision rule. More information on <a href="http://en.wikipedia.org/wiki/Naive_bayes">Wikipedia</a>.<br>
+<br>
+The interface presents two buttons, that allow to visualize the
+projection of the data into components space, and to switch the current
+data in the canvas from the source samples to the projected samples,
+and back again. <br>
+</body></html>

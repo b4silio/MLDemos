@@ -59,19 +59,21 @@ void MLDemos::Classify()
     if(trained)
     {
 		classifiers[tab]->Draw(canvas, classifier);
-        if(drawTimer && classifier->UsesDrawTimer())
+		UpdateInfo();
+		if(drawTimer && classifier->UsesDrawTimer())
         {
             drawTimer->classifier = &this->classifier;
             drawTimer->start(QThread::NormalPriority);
         }
-    }
+	}
     else
     {
         mutex.unlock();
         Clear();
-    }
-    UpdateInfo();
-    mutex.unlock();
+		mutex.lock();
+		UpdateInfo();
+	}
+	mutex.unlock();
 }
 
 
@@ -186,9 +188,9 @@ void MLDemos::RegressionCross()
     regressor->crossval = errors;
     ShowCross();
 
-    Train(regressor, trainRatio);
+	Train(regressor, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
-    UpdateInfo();
+	UpdateInfo();
 }
 
 void MLDemos::Dynamize()
@@ -210,16 +212,61 @@ void MLDemos::Dynamize()
     Train(dynamical);
     dynamicals[tab]->Draw(canvas,dynamical);
 
-    // the first index is "none", so we subtract 1
+	int w = canvas->width(), h = canvas->height();
+
+	int resampleType = optionsDynamic->resampleCombo->currentIndex();
+	int resampleCount = optionsDynamic->resampleSpin->value();
+	int centerType = optionsDynamic->centerCombo->currentIndex();
+	float dT = optionsDynamic->dtSpin->value();
+	int zeroEnding = optionsDynamic->zeroCheck->isChecked();
+	bool bColorMap = optionsDynamic->colorCheck->isChecked();
+
+	vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
+	if(trajectories.size())
+	{
+		canvas->modelPixmap = QPixmap(w,h);
+		QBitmap bitmap(w,h);
+		bitmap.clear();
+		canvas->modelPixmap.setMask(bitmap);
+		canvas->modelPixmap.fill(Qt::transparent);
+		QPainter painter(&canvas->modelPixmap);
+		int dim = trajectories[0][0].size() / 2;
+		fvec start(dim,0);
+		FOR(i, trajectories.size())
+		{
+			FOR(d, dim) start[d] = trajectories[i][0][d];
+			vector<fvec> result = dynamical->Test(start, 1000);
+			fvec oldPt = result[0];
+			int count = result.size();
+			FOR(j, count-1)
+			{
+				fvec pt = result[j+1];
+				painter.setPen(QPen(Qt::green, 2));
+				painter.drawLine(canvas->toCanvasCoords(pt), canvas->toCanvasCoords(oldPt));
+				//if(j<count-2) Canvas::drawSample(painter, canvas->toCanvasCoords(pt), 5, 2);
+				oldPt = pt;
+			}
+			painter.setBrush(Qt::NoBrush);
+			painter.setPen(Qt::green);
+			painter.drawEllipse(canvas->toCanvasCoords(result[0]), 5, 5);
+			painter.setPen(Qt::red);
+			painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
+		}
+	}
+
+	// the first index is "none", so we subtract 1
     int avoidIndex = optionsDynamic->obstacleCombo->currentIndex()-1;
     if(avoidIndex >=0 && avoidIndex < avoiders.size() && avoiders[avoidIndex])
     {
         DEL(dynamical->avoid);
 		dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
     }
-
-	if(dynamicals[tab]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
-    UpdateInfo();
+	UpdateInfo();
+	if(dynamicals[tab]->UsesDrawTimer())
+	{
+		drawTimer->bColorMap = bColorMap;
+		drawTimer->start(QThread::NormalPriority);
+	}
 }
 
 void MLDemos::Avoidance()
@@ -227,11 +274,13 @@ void MLDemos::Avoidance()
     if(!canvas || !dynamical) return;
     drawTimer->Stop();
     QMutexLocker lock(&mutex);
-    int index = optionsDynamic->obstacleCombo->currentIndex()-1;
+	// the first index is "none", so we subtract 1
+	int index = optionsDynamic->obstacleCombo->currentIndex()-1;
     if(index >=0 && index >= avoiders.size() || !avoiders[index]) return;
     DEL(dynamical->avoid);
     dynamical->avoid = avoiders[index]->GetObstacleAvoidance();
-    drawTimer->Clear();
+	UpdateInfo();
+	drawTimer->Clear();
     drawTimer->start(QThread::NormalPriority);
 }
 
@@ -254,10 +303,9 @@ void MLDemos::Cluster()
 	drawTimer->Clear();
 	clusterers[tab]->Draw(canvas,clusterer);
 
+	UpdateInfo();
 	drawTimer->clusterer= &this->clusterer;
 	drawTimer->start(QThread::NormalPriority);
-
-	UpdateInfo();
 }
 
 void MLDemos::ClusterIterate()
@@ -276,7 +324,7 @@ void MLDemos::ClusterIterate()
     clusterer->SetIterative(true);
     Train(clusterer);
     clusterers[tab]->Draw(canvas,clusterer);
-    UpdateInfo();
+	UpdateInfo();
 }
 
 void MLDemos::Maximize()
@@ -298,10 +346,10 @@ void MLDemos::Maximize()
 	tabUsedForTraining = tab;
 	Train(maximizer);
 
+	UpdateInfo();
 	drawTimer->Stop();
 	drawTimer->Clear();
 	drawTimer->start(QThread::NormalPriority);
-	UpdateInfo();
 }
 
 void MLDemos::MaximizeContinue()
@@ -314,11 +362,11 @@ void MLDemos::MaximizeContinue()
 	}
 	maximizer->SetConverged(!maximizer->hasConverged());
 
+	UpdateInfo();
 	if(drawTimer)
 	{
 		drawTimer->start(QThread::NormalPriority);
 	}
-	UpdateInfo();
 }
 
 bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
@@ -512,143 +560,19 @@ fvec MLDemos::Train(Dynamical *dynamical)
     int centerType = optionsDynamic->centerCombo->currentIndex();
     bool zeroEnding = optionsDynamic->zeroCheck->isChecked();
 
-    // we split the data into trajectories
-    vector< vector<fvec> > trajectories;
-    ivec trajLabels;
-    trajectories.resize(sequences.size());
-    trajLabels.resize(sequences.size());
-    FOR(i, sequences.size())
-    {
-        int length = sequences[i].second-sequences[i].first+1;
-        trajLabels[i] = canvas->data->GetLabel(sequences[i].first);
-        trajectories[i].resize(length);
-        FOR(j, length)
-        {
-            trajectories[i][j].resize(dim*2);
-            // copy data
-            FOR(d, dim) trajectories[i][j][d] = samples[sequences[i].first + j][d];
-        }
-    }
 
-    switch(resampleType)
-    {
-    case 0: // none
-    {
-        FOR(i,sequences.size())
-        {
-            int cnt = sequences[i].second-sequences[i].first+1;
-            if(count > cnt) count = cnt;
-        }
-        FOR(i, trajectories.size())
-        {
-            while(trajectories[i].size() > count) trajectories[i].pop_back();
-        }
-    }
-        break;
-    case 1: // uniform
-    {
-        FOR(i, trajectories.size())
-        {
-            vector<fvec> trajectory = trajectories[i];
-            trajectories[i] = interpolate(trajectory, count);
-        }
-    }
-        break;
-    }
+	ivec trajLabels(sequences.size());
+	FOR(i, sequences.size())
+	{
+		trajLabels[i] = canvas->data->GetLabel(sequences[i].first);
+	}
 
-
-    if(centerType)
-    {
-        map<int,int> counts;
-        map<int,fvec> centers;
-        FOR(i, sequences.size())
-        {
-            int index = centerType ? sequences[i].second : sequences[i].first; // start
-            int label = canvas->data->GetLabel(index);
-            if(!centers.count(label))
-            {
-                fvec center;
-                center.resize(2,0);
-                centers[label] = center;
-                counts[label] = 0;
-            }
-            centers[label] += samples[index];
-            counts[label]++;
-        }
-        for(map<int,int>::iterator p = counts.begin(); p!=counts.end(); ++p)
-        {
-            int label = p->first;
-            centers[label] /= p->second;
-        }
-        FOR(i, trajectories.size())
-        {
-            fvec difference = centers[trajLabels[i]] - trajectories[i][count-1];
-            FOR(j, count) trajectories[i][j] += difference;
-        }
-    }
-
-    //float dT = 10.f; // time span between each data frame
-    float dT = optionsDynamic->dtSpin->value();
-    dynamical->dT = dT;
-    //dT = 10.f;
-
-    float maxV = -FLT_MAX;
-    // we compute the velocity
-    FOR(i, trajectories.size())
-    {
-        FOR(j, count-1)
-        {
-            FOR(d, dim)
-            {
-                float velocity = (trajectories[i][j+1][d] - trajectories[i][j][d]) / dT;
-                trajectories[i][j][dim + d] = velocity;
-                if(velocity > maxV) maxV = velocity;
-            }
-        }
-        if(!zeroEnding)
-        {
-            FOR(d, dim)
-            {
-                trajectories[i][count-1][dim + d] = trajectories[i][count-2][dim + d];
-            }
-        }
-    }
-
-    // we normalize the velocities as the variance of the data
-    fvec mean, sigma;
-    mean.resize(dim,0);
-    int cnt = 0;
-    sigma.resize(dim,0);
-    FOR(i, trajectories.size())
-    {
-        FOR(j, count)
-        {
-            mean += trajectories[i][j];
-            cnt++;
-        }
-    }
-    mean /= cnt;
-    FOR(i, trajectories.size())
-    {
-        FOR(j, count)
-        {
-            fvec diff = (mean - trajectories[i][j]);
-            FOR(d,dim) sigma[d] += diff[d]*diff[d];
-        }
-    }
-    sigma /= cnt;
-
-    FOR(i, trajectories.size())
-    {
-        FOR(j, count)
-        {
-            FOR(d, dim)
-            {
-                trajectories[i][j][dim + d] /= maxV;
-                //trajectories[i][j][dim + d] /= sqrt(sigma[d]);
-            }
-        }
-    }
+	//float dT = 10.f; // time span between each data frame
+	float dT = optionsDynamic->dtSpin->value();
+	dynamical->dT = dT;
+	//dT = 10.f;
+	vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, count, centerType, dT, zeroEnding);
+	interpolate(trajectories[0],count);
 
     dynamical->Train(trajectories, labels);
 	return Test(dynamical, trajectories, labels);
@@ -710,7 +634,8 @@ void MLDemos::Test(Maximizer *maximizer)
 fvec MLDemos::Test(Dynamical *dynamical, vector< vector<fvec> > trajectories, ivec labels)
 {
 	if(!dynamical || !trajectories.size()) return fvec();
-	int dim = dynamical->Dim();
+	int dim = trajectories[0][0].size()/2;
+	//(int dim = dynamical->Dim();
 	float dT = dynamical->dT;
 	fvec sample; sample.resize(dim,0);
 	fvec vTrue; vTrue.resize(dim, 0);

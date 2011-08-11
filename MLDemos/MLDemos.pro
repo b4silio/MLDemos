@@ -18,24 +18,6 @@ include($$MLPATH/MLDemos_variables.pri)
 
 macx:INCLUDEPATH += uiMac
 
-###########################
-#        Plugins          #
-###########################
-macx{
-#	plugins.path = Contents/Resources/plugins
-#	plugins.files = \
-#	plugins/libIO_PCAFaces.dylib \
-#	plugins/libIO_RandomEmitter.dylib \
-#	plugins/libmld_GMM.dylib \
-#	plugins/libmld_KernelMethods.dylib \
-#	plugins/libmld_KNN.dylib \
-#	plugins/libmld_LinearMethods.dylib \
-#	plugins/libmld_LWPR.dylib \
-#	plugins/libmld_SEDS.dylib \
-#	plugins/libmld_DSAvoid.dylib
-
-#	QMAKE_BUNDLE_DATA += plugins
-}
 # ##########################
 # Source Files       #
 # ##########################

@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLASSIFIER_SVM_H_
 
 #include <vector>
+#include <map>
 #include <classifier.h>
 #include "svm.h"
 
@@ -29,7 +30,9 @@ private:
 	svm_model *svm;
 	svm_node *node;
 	svm_node *x_space;
+	int classCount;
 public:
+	std::map<int,int> classes;
 	svm_parameter param;
 
 	ClassifierSVM();
@@ -37,6 +40,7 @@ public:
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
+	fvec TestMulti(const fvec &sample);
 	char *GetInfoString();
 	void SetParams(int svmType, float svmC, u32 kernelType, float kernelParam);
 	svm_model *GetModel(){return svm;};

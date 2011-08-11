@@ -305,7 +305,9 @@ void MLDemos::initDialogs()
     connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
-    //	connect(displayOptions->trajectoriesCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
+	connect(displayOptions->xDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
+	connect(displayOptions->yDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
+	//	connect(displayOptions->trajectoriesCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     //	connect(displayOptions->singleclassCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
 
 
@@ -371,6 +373,7 @@ void MLDemos::initDialogs()
 	connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
 	connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
 	connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
+	connect(optionsDynamic->colorCheck, SIGNAL(clicked()), this, SLOT(ColorMapChanged()));
 
 	connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
 	connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
@@ -629,6 +632,7 @@ void MLDemos::HideContextMenus()
     drawContext1Widget->hide();
     drawContext2Widget->hide();
     drawContext3Widget->hide();
+	drawContext4Widget->hide();
 }
 
 void MLDemos::AddPlugin(InputOutputInterface *iIO)
@@ -1066,6 +1070,10 @@ void MLDemos::ResetPositiveClass()
         optionsClassify->positiveSpin->setValue(labMin);
     else if(optionsClassify->positiveSpin->value() > labMax)
         optionsClassify->positiveSpin->setValue(labMax);
+	int dimCount = max(2,canvas->data->GetDimCount());
+	displayOptions->xDimIndex->setRange(0,dimCount-1);
+	displayOptions->yDimIndex->setRange(0,dimCount-1);
+	canvas->SetDim(displayOptions->xDimIndex->value(), displayOptions->yDimIndex->value());
 }
 
 void MLDemos::ChangeActiveOptions()
@@ -1214,6 +1222,17 @@ void MLDemos::AvoidOptionChanged()
 	}
 }
 
+void MLDemos::ColorMapChanged()
+{
+	if(dynamical)
+	{
+		drawTimer->Stop();
+		drawTimer->Clear();
+		drawTimer->bColorMap = optionsDynamic->colorCheck->isChecked();
+		drawTimer->start(QThread::NormalPriority);
+	}
+}
+
 void MLDemos::DisplayOptionChanged()
 {
     if(!canvas) return;
@@ -1223,6 +1242,15 @@ void MLDemos::DisplayOptionChanged()
     canvas->bDisplaySamples = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+	{
+		int xIndex = displayOptions->xDimIndex->value();
+		int yIndex = displayOptions->yDimIndex->value();
+		if(xIndex == yIndex)
+		{
+			yIndex = xIndex+1;
+		}
+		canvas->SetDim(xIndex, yIndex);
+	}
     float zoom = displayOptions->spinZoom->value();
     if(zoom >= 0.f) zoom += 1.f;
     else zoom = 1.f / (fabs(zoom)+1.f);
@@ -1770,7 +1798,18 @@ void MLDemos::Navigation( fvec sample )
 	mutex.tryLock(500);
     if(classifier)
     {
-        float score = classifier->Test(sample);
+		float score;
+		if(classifier->IsMultiClass())
+		{
+			fvec res = classifier->TestMulti(sample);
+			int max = 0;
+			FOR(i, res.size()) if(res[max] < res[i]) max = i;
+			score = max;
+		}
+		else
+		{
+			score = classifier->Test(sample);
+		}
         drawTimer->bPaused = false;
         sprintf(string, " | value: %.4f", score);
         information += QString(string);

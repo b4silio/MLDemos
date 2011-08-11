@@ -22,14 +22,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-PluginLinear::PluginLinear()
+PluginLWPR::PluginLWPR()
 {
 	regressors.push_back(new RegrLWPR());
 	dynamicals.push_back(new DynamicLWPR());
 }
 
-#ifndef PLUGIN_CLUSTER
-#ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_LWPR, PluginLinear)
-#endif
-#endif
+Q_EXPORT_PLUGIN2(mld_LWPR, PluginLWPR)

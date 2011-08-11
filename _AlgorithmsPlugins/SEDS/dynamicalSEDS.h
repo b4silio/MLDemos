@@ -1,8 +1,4 @@
 /*********************************************************************
-MLDemos: A User-Friendly visualization toolkit for machine learning
-Copyright (C) 2010  Basilio Noris
-Contact: mldemos@b4silio.com
-
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License,
 version 3 as published by the Free Software Foundation.
@@ -27,32 +23,34 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class DynamicalSEDS : public Dynamical
 {
 public:
-	Gmm *gmm;
-	SEDS *seds;
+    static Gmm *globalGMM;
+    Gmm *gmm;
+    SEDS *seds;
 	float resizeFactor;
 private:
-	u32 nbClusters;
-	float penalty;
-	bool bPrior;
-	bool bMu;
-	bool bSigma;
-	int objectiveType;
-	int maxIteration;
-	int maxMinorIteration;
-	int constraintCriterion;
-	float *data;
+    u32 nbClusters;
+    float penalty;
+    bool bPrior;
+    bool bMu;
+    bool bSigma;
+    int objectiveType;
+    int maxIteration;
+    int maxMinorIteration;
+    int constraintCriterion;
+    float *data;
 public:
-	fvec endpoint;
-	fVec endpointFast;
-	DynamicalSEDS();
-	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
-	std::vector<fvec> Test( const fvec &sample, const int count);
-	fvec Test( const fvec &sample);
-	fVec Test( const fVec &sample);
-	char *GetInfoString();
+    fvec endpoint;
+    fVec endpointFast;
+    DynamicalSEDS();
+    ~DynamicalSEDS();
+    void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
+    std::vector<fvec> Test( const fvec &sample, const int count);
+    fvec Test( const fvec &sample);
+    fVec Test( const fVec &sample);
+    char *GetInfoString();
 
-	void SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType,
-				   int maxIteration, int maxMinorIteration, int constraintCriterion);
+    void SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, int objectiveType,
+                   int maxIteration, int constraintCriterion);
 };
 
 #endif // _DYNAMICAL_SEDS_H_

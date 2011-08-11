@@ -7,7 +7,7 @@ NAME = mld_KernelMethods
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
@@ -173,29 +173,3 @@ HEADERS +=	\
 	newmat11/newmatrm.h \
 	newmat11/precisio.h \
 	newmat11/solution.h
-SOURCES += \
-	newmat11/bandmat.cpp \
-	newmat11/cholesky.cpp \
-	newmat11/evalue.cpp \
-	newmat11/fft.cpp \
-	newmat11/hholder.cpp \
-	newmat11/jacobi.cpp \
-	newmat11/myexcept.cpp \
-	newmat11/newfft.cpp \
-	newmat11/newmat1.cpp \
-	newmat11/newmat2.cpp \
-	newmat11/newmat3.cpp \
-	newmat11/newmat4.cpp \
-	newmat11/newmat5.cpp \
-	newmat11/newmat6.cpp \
-	newmat11/newmat7.cpp \
-	newmat11/newmat8.cpp \
-	newmat11/newmat9.cpp \
-	newmat11/newmatex.cpp \
-	newmat11/newmatnl.cpp \
-	newmat11/newmatrm.cpp \
-	newmat11/nm_misc.cpp \
-	newmat11/solution.cpp \
-	newmat11/sort.cpp \
-	newmat11/submat.cpp \
-	newmat11/svd.cpp

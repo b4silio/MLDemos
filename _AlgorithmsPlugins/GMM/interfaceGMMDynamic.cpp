@@ -60,6 +60,19 @@ void DynamicGMM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamica
 	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
 	{
+/*
+		float* bigSigma = new float[dim*dim];
+		float* bigMean = new float[dim];
+		gmm->getCovariance(i, bigSigma, false);
+		sigma[0] = bigSigma[xIndex*dim + xIndex];
+		sigma[1] = bigSigma[yIndex*dim + xIndex];
+		sigma[2] = bigSigma[yIndex*dim + yIndex];
+		gmm->getMean(i, bigMean);
+		mean[0] = bigMean[xIndex];
+		mean[1] = bigMean[yIndex];
+		delete [] bigSigma;
+		delete [] bigMean;
+*/
 		gmm->getMean(i, mean);
 		gmm->getCovariance(i, sigma, true);
 		drawMean[0] = mean[0]; drawMean[1] = mean[1];
@@ -78,7 +91,10 @@ void DynamicGMM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamica
 	}
 }
 
-void DynamicGMM::DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}
+void DynamicGMM::DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical)
+{
+	if(!canvas || !dynamical) return;
+}
 
 void DynamicGMM::SaveOptions(QSettings &settings)
 {

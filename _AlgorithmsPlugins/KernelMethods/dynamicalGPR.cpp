@@ -101,6 +101,7 @@ fvec DynamicalGPR::Test( const fvec &sample )
 	fvec res;
 	res.resize(2,0);
 	if(!sogp) return res;
+	if(sample.size() < dim) return res;
 	Matrix _testout;
 	ColumnVector _testin(dim);
 	FOR(i,dim)
@@ -179,6 +180,7 @@ char *DynamicalGPR::GetInfoString()
 		sprintf(text, "%s rbf (gamma: %f)\n", text, param1);
 		break;
 	}
+	return text;
 	sprintf(text, "%sNoise: %.3f\n", param2);
 	sprintf(text, "%sBasis Functions: %d\n", text, GetBasisCount());
 	return text;

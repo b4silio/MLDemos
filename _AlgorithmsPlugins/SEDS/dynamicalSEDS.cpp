@@ -23,26 +23,20 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+Gmm *DynamicalSEDS::globalGMM = 0;
+
 DynamicalSEDS::DynamicalSEDS()
-: gmm(0),seds(0), data(0), nbClusters(2), penalty(100), bPrior(true), bMu(true), bSigma(true), objectiveType(1), resizeFactor(500.f)
+	: gmm(0),seds(0), data(0), nbClusters(2), penalty(1), bPrior(true), bMu(true), bSigma(true), objectiveType(1),
+	  maxIteration(100), maxMinorIteration(2), constraintCriterion(0), resizeFactor(500.f)
 {
 	type = DYN_SEDS;
 	endpoint = fvec();
 	endpoint.resize(4,0.f);
 }
 
-void DynamicalSEDS::SetParams(int clusters, float penalty, bool bPrior, bool bMu, bool bSigma, int objectiveType,
-							  int maxIteration, int maxMinorIteration, int constraintCriterion)
+DynamicalSEDS::~DynamicalSEDS()
 {
-	this->nbClusters = clusters;
-	this->penalty = penalty;
-	this->bPrior = bPrior;
-	this->bMu = bMu;
-	this->bSigma = bSigma;
-	this->objectiveType = objectiveType;
-	this->maxIteration = maxIteration;
-	this->maxMinorIteration = maxMinorIteration;
-	this->constraintCriterion = constraintCriterion;
+    if(gmm != globalGMM) DEL(gmm);
 }
 
 void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec labels)
@@ -50,12 +44,12 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
-	dim = trajectories[0][0].size()/2;
+	dim = trajectories[0][0].size();
 	// we forget about time and just push in everything
 	vector<fvec> samples;
 	endpoint = trajectories[0][trajectories[0].size()-1];
 	endpointFast = dim >= 2 ? fVec(endpoint[0], endpoint[1]) : fVec();
-	FOR(d,dim) endpoint[d+dim] = 0;
+	FOR(d,dim/2) endpoint[d+dim/2] = 0;
 	FOR(i, trajectories.size())
 	{
 		FOR(j, trajectories[i].size())
@@ -65,59 +59,70 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	}
 	if(!samples.size()) return;
 
-	// first learn the model with gmm
-	DEL(gmm);
-	nbClusters = min((int)nbClusters, (int)samples.size());
+	bool bKeepInitialization = false;
 
-	gmm = new Gmm(nbClusters, dim*2);
+	nbClusters = min((int)nbClusters, (int)samples.size());
 	KILL(data);
-	data = new float[samples.size()*dim*2];
-	double *ddata = new REALTYPE[samples.size()*dim*2];
+	data = new float[samples.size()*dim];
+	double *ddata = new REALTYPE[samples.size()*dim];
 	FOR(i, samples.size())
 	{
-		FOR(j, dim*2) data[i*dim*2 + j] = samples[i][j]*resizeFactor;
-		FOR(j, dim*2) ddata[j*samples.size() + i] = samples[i][j]*resizeFactor;
+		FOR(j, dim) data[i*dim + j] = samples[i][j]*resizeFactor;
+		FOR(j, dim) ddata[j*samples.size() + i] = samples[i][j]*resizeFactor;
 	}
-	gmm->init(data, samples.size(), 2); // kmeans initialization
-	gmm->em(data, samples.size(), 1e-4, COVARIANCE_FULL);
+
+	if(globalGMM && bKeepInitialization && globalGMM->nstates == nbClusters)
+	{
+		gmm = globalGMM;
+	}
+	else
+	{
+		// first learn the model with gmm
+		DEL(gmm);
+		gmm = new Gmm(nbClusters, dim);
+		gmm->init(data, samples.size(), 2); // kmeans initialization
+		gmm->em(data, samples.size(), 1e-4, COVARIANCE_FULL);
+		globalGMM = gmm;
+	}
+
 	//gmm->initRegression(dim/2);
 	//return;
 
 	/*
-	// we write down the data (for debugging purposes)
-	ofstream file;
-	file.open("last-data.txt");
-	if(file.is_open())
-	{
-		FOR(i, samples.size())
-		{
-			FOR(j, dim)
-			{
-				file << ddata[j*samples.size() + i] << " ";
-			}
-			file << "\n";
-		}
-		file.close();
-	}
-	*/
+ // we write down the data (for debugging purposes)
+ ofstream file;
+ file.open("last-data.txt");
+ if(file.is_open())
+ {
+  FOR(i, samples.size())
+  {
+   FOR(j, dim)
+   {
+	file << ddata[j*samples.size() + i] << " ";
+   }
+   file << std::endl;
+  }
+  file.close();
+ }
+ */
 	// then optimize with seds
 	DEL(seds);
 	seds = new SEDS();
 
 	// fill in the data
 	//seds->Data.Resize(dim, samples.size());
-	seds->Data = Matrix(ddata, dim*2, samples.size());
+	seds->Data = Matrix(ddata, dim, samples.size());
 
 	// fill in the current model
 	seds->Priors.Resize(nbClusters);
-	seds->Mu.Resize(dim*2, nbClusters);
+	seds->Mu.Resize(dim, nbClusters);
 	seds->Sigma = new Matrix[nbClusters];
 	FOR(i, nbClusters)
 	{
-		seds->Sigma[i].Resize(dim*2,dim*2);
+		seds->Sigma[i].Resize(dim,dim);
 		seds->Priors(i) = gmm->c_gmm->gauss[i].prior;
-		FOR(d, dim*2) seds->Mu(d, i) = gmm->c_gmm->gauss[i].mean[d];
-		FOR(d1, dim*2)
+		FOR(d, dim) seds->Mu(d, i) = gmm->c_gmm->gauss[i].mean[d];
+		FOR(d1, dim)
 		{
 			FOR(d2, d1+1)
 			{
@@ -126,44 +131,29 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 		}
 	}
 	seds->nData = samples.size();
-	seds->d = dim;
+	seds->d = dim/2;
 	seds->K = nbClusters;
 
-	seds->Options.cons_penalty = penalty;
-	//seds->Options.cons_penalty = pow(10.,(double)penalty);
-	//seds->Options.perior_opt = bPrior;
-	seds->Options.perior_opt = false;
+	seds->Options.perior_opt = bPrior;
 	seds->Options.mu_opt = bMu;
-	seds->Options.sigma_x_opt = false;
-	//seds->Options.sigma_x_opt = bSigma;
+	seds->Options.sigma_x_opt = bSigma;
 	seds->Options.max_iter = maxIteration;
-	//seds->Options.maxMinorIter = maxMinorIteration;
-	seds->Options.tol_mat_bias = 1e-8;
-	seds->Options.tol_stopping = 1e-4;
-	//seds->Options.delta = 1e-5;
 	seds->Options.objective = objectiveType;
-	//seds->Options.constraintCriterion = constraintCriterion;
+	seds->Options.constraintCriterion = constraintCriterion;
 
-
-//	seds->loadData("../../../Data.txt");
-//	seds->loadModel("../../../Model.txt");
-	seds->Data.Print();
-	seds->Mu.Print();
-	seds->Sigma->Print();
-
-	seds->Optimize();
+        seds->Optimize();
 
 	// and we copy the values back to the source
-	float *mu = new float[dim*2];
-	float *sigma = new float[dim*2*dim*2];
+	float *mu = new float[dim];
+	float *sigma = new float[dim*dim];
 	FOR(i, nbClusters)
 	{
-		FOR(d, dim*2) mu[d] = seds->Mu(d, i);
-		FOR(d1, dim*2)
+		FOR(d, dim) mu[d] = seds->Mu(d, i);
+		FOR(d1, dim)
 		{
-			FOR(d2, dim*2)
+			FOR(d2, dim)
 			{
-				sigma[d2*dim*2 + d1] = seds->Sigma[i](d1, d2);
+				sigma[d2*dim + d1] = seds->Sigma[i](d1, d2);
 			}
 		}
 		fgmm_set_prior(gmm->c_gmm, i, seds->Priors(i));
@@ -173,17 +163,18 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	delete [] sigma;
 	delete [] mu;
 	delete [] ddata;
-	gmm->initRegression(dim);
+	gmm->initRegression(dim/2);
 
-	seds->Mu.Print();
-	FOR(i, nbClusters) seds->Sigma[i].Print();
-
+	/*seds->Mu.Print();
+ FOR(i, nbClusters) seds->Sigma[i].Print();
+        */
+	dim /= 2; // we prefer to have the actual dimensions of the data;
 }
 
 std::vector<fvec> DynamicalSEDS::Test( const fvec &sample, int count)
 {
-	fvec start = (sample - endpoint)*resizeFactor;
 	dim = sample.size();
+	fvec start = (sample - endpoint)*resizeFactor;
 	std::vector<fvec> res;
 	res.reserve(500);
 	float *sigma = new float[dim*(dim+1)/2];
@@ -207,6 +198,7 @@ std::vector<fvec> DynamicalSEDS::Test( const fvec &sample, int count)
 fvec DynamicalSEDS::Test( const fvec &sample)
 {
 	int dim = sample.size();
+	if(!dim) return fvec(2,0);
 	fvec res; res.resize(dim, 0);
 	if(!gmm) return res;
 	float *velocity = new float[dim];
@@ -235,9 +227,21 @@ fVec DynamicalSEDS::Test( const fVec &sample)
 	return res;
 }
 
+void DynamicalSEDS::SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, int objectiveType,
+                              int maxIteration, int constraintCriterion)
+{
+	this->nbClusters = clusters;
+	this->bPrior = bPrior;
+	this->bMu = bMu;
+	this->bSigma = bSigma;
+	this->objectiveType = objectiveType;
+	this->maxIteration = maxIteration;
+	this->constraintCriterion = constraintCriterion;
+}
+
 char *DynamicalSEDS::GetInfoString()
 {
-	char *text = new char[1024];
+	char *text = new char[2048];
 	sprintf(text, "GMR\n");
 	sprintf(text, "%sMixture Components: %d\n", text, nbClusters);
 	sprintf(text, "%sObjective Function: ", text);
@@ -250,15 +254,16 @@ char *DynamicalSEDS::GetInfoString()
 		sprintf(text, "%sLikelihood\n", text);
 		break;
 	}
-	sprintf(text, "%sConstraint Criterion: ", text);
-	switch(constraintCriterion)
-	{
-	case 0:
-		sprintf(text, "%sEigen Values\n", text);
-		break;
-	case 1:
-		sprintf(text, "%sPrincipal Minor\n", text);
-		break;
-	}
+	/*
+        sprintf(text, "%Constraint Criterion: ", text);
+        switch(constraintCriterion)
+        {
+        case 0:
+                sprintf(text, "%sEigenvalue\n", text);
+                break;
+        case 1:
+                sprintf(text, "%sPrincipal Minor\n", text);
+                break;
+        }*/
 	return text;
 }

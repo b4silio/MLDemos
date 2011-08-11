@@ -7,7 +7,7 @@ NAME = mld_LWPR
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
@@ -46,10 +46,3 @@ HEADERS += \
 	lwpr/lwpr_mem.h \
 	lwpr/lwpr_xml.h
 
-SOURCES +=  \
-	lwpr/lwpr.c \
-	lwpr/lwpr_aux.c \
-	lwpr/lwpr_binio.c \
-	lwpr/lwpr_math.c \
-	lwpr/lwpr_mem.c \
-	lwpr/lwpr_xml.c

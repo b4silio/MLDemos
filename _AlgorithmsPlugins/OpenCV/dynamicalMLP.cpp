@@ -103,8 +103,7 @@ std::vector<fvec> DynamicalMLP::Test( const fvec &sample, const int count)
 {
 	fvec start = sample;
 	dim = sample.size();
-	std::vector<fvec> res;
-	res.resize(count);
+	std::vector<fvec> res(count);
 	FOR(i, count) res[i].resize(dim,0);
 	if(!mlp) return res;
 
@@ -128,10 +127,9 @@ std::vector<fvec> DynamicalMLP::Test( const fvec &sample, const int count)
 
 fvec DynamicalMLP::Test( const fvec &sample)
 {
-	fvec res;
-	res.resize(2);
-	if(!mlp) return res;
 	int dim = sample.size();
+	fvec res(2);
+	if(!mlp) return res;
 	float *_input = new float[dim];
 	FOR(d, dim) _input[d] = sample[d];
 	CvMat input = cvMat(1,dim,CV_32FC1, _input);

@@ -64,6 +64,7 @@ public:
 	QMutex *mutex, drawMutex;
 	bool bPaused;
 	bool bRunning;
+	bool bColorMap;
 
 	signals:
 	void MapReady(QImage image);

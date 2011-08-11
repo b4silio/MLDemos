@@ -23,15 +23,11 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-PluginLinear::PluginLinear()
+PluginKNN::PluginKNN()
 {
 	classifiers.push_back(new ClassKNN());
 	regressors.push_back(new RegrKNN());
 	dynamicals.push_back(new DynamicKNN());
 }
 
-#ifndef PLUGIN_CLUSTER
-#ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_KNN, PluginLinear)
-#endif
-#endif
+Q_EXPORT_PLUGIN2(mld_KNN, PluginKNN)

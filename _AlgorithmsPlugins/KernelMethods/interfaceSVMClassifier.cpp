@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
+#include <QDebug>
 
 using namespace std;
 
@@ -252,22 +253,18 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 
 	// we draw the samples
 	painter.setRenderHint(QPainter::Antialiasing, true);
+	map<int,int>& classes = ((ClassifierSVM*) classifier)->classes;
 	FOR(i, canvas->data->GetCount())
 	{
 		fvec sample = canvas->data->GetSample(i);
 		int label = canvas->data->GetLabel(i);
 		QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-		float response = classifier->Test(sample);
-		if(response > 0)
-		{
-			if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-			else Canvas::drawCross(painter, point, 6, 2);
-		}
-		else
-		{
-			if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-			else Canvas::drawCross(painter, point, 6, 0);
-		}
+		fvec res = classifier->TestMulti(sample);
+		int max = 0;
+		for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+		int resp = max;
+		if(label == resp) Canvas::drawSample(painter, point, 9, label);
+		else Canvas::drawCross(painter, point, 6, label);
 	}
 }
 

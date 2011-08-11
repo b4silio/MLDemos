@@ -20,7 +20,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "classifierGMM.h"
 #include <map>
-#include <QDebug>
 
 using namespace std;
 
@@ -88,8 +87,8 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 
 fvec ClassifierGMM::TestMulti(const fvec &sample)
 {
-	fvec pdf;
-	FOR(i, gmms.size()) pdf.push_back(gmms[i]->pdf((float*)&sample[0]));
+	fvec pdf(gmms.size());
+	FOR(i, gmms.size()) pdf[i] = gmms[i]->pdf((float*)&sample[0]);
 
 	float xmin=-10.f, xmax=10.f;
 	float sum = 0;

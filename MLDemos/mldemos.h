@@ -192,6 +192,7 @@ private slots:
 	void HideToolbar();
 	void AvoidOptionChanged();
 	void DisplayOptionChanged();
+	void ColorMapChanged();
 	void ActivateIO();
 	void DisactivateIO(QObject *);
 

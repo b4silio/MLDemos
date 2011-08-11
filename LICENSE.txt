@@ -35,5 +35,11 @@ mldemos@b4silio.com
 http://mldemos.b4silio.com
 
 A number of people have contributed directly or indirectly to this
-software, which makes use of several open-source libraries.
-Please refer to http://mldemos.b4silio.com for a complete list
+software, which makes use of several 3rd party open-source libraries
+in the form of dynamically loaded plugins.
+
+WARNING:
+Individual licenses apply for a number of these 3rd party libraries.
+Please refer to their respective license files for precise details.
+If one of these licenses conflicts with your use, you might not be
+allowed to use/modify their corresponding plugins.

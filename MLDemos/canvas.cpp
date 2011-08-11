@@ -57,7 +57,8 @@ Canvas::Canvas(QWidget *parent)
 	  mouseAnchor(QPoint(-1,-1)),
 	  bDrawing(false),
 	  zoom(1.f),
-	  data(new DatasetManager())
+	  data(new DatasetManager()),
+	  xIndex(0), yIndex(1), center(2,0)
 {
 	resize(640,480);
 	setAcceptDrops(true);
@@ -208,7 +209,7 @@ void Canvas::paintEvent(QPaintEvent *event)
 QPointF Canvas::toCanvasCoords(fvec sample)
 {
 	sample -= center;
-	QPointF point(sample[0]*(zoom*height()),sample[1]*(zoom*height()));
+	QPointF point(sample[xIndex]*(zoom*height()),sample[yIndex]*(zoom*height()));
 	point += QPointF(width()/2, height()/2);
 	return point;
 }
@@ -216,15 +217,15 @@ QPointF Canvas::toCanvasCoords(fvec sample)
 QPointF Canvas::toCanvas(fVec sample)
 {
 	sample -= center;
-	QPointF point(sample[0]*(zoom*height()),sample[1]*(zoom*height()));
+	QPointF point(sample[xIndex]*(zoom*height()),sample[yIndex]*(zoom*height()));
 	point += QPointF(width()/2, height()/2);
 	return point;
 }
 
 QPointF Canvas::toCanvasCoords(float x, float y)
 {
-	x -= center[0];
-	y -= center[1];
+	x -= center[xIndex];
+	y -= center[yIndex];
 	QPointF point(x*(zoom*height()),y*(zoom*height()));
 	point += QPointF(width()/2, height()/2);
 	return point;
@@ -233,8 +234,8 @@ fVec Canvas::fromCanvas(QPointF point)
 {
 	fVec sample;
 	point -= QPointF(width()/2.f,height()/2.f);
-	sample[0] = point.x()/(zoom*height());
-	sample[1] = point.y()/(zoom*height());
+	sample[xIndex] = point.x()/(zoom*height());
+	sample[yIndex] = point.y()/(zoom*height());
 	sample += center;
 	return sample;
 }
@@ -244,8 +245,8 @@ fVec Canvas::fromCanvas(float x, float y)
 	fVec sample;
 	x -= width()/2.f;
 	y -= height()/2.f;
-	sample[0] = x/(zoom*height());
-	sample[1] = y/(zoom*height());
+	sample[xIndex] = x/(zoom*height());
+	sample[yIndex] = y/(zoom*height());
 	sample += center;
 	return sample;
 }
@@ -255,8 +256,8 @@ fvec Canvas::toSampleCoords(QPointF point)
 	fvec sample;
 	sample.resize(2);
 	point -= QPointF(width()/2.f,height()/2.f);
-	sample[0] = point.x()/(zoom*height());
-	sample[1] = point.y()/(zoom*height());
+	sample[xIndex] = point.x()/(zoom*height());
+	sample[yIndex] = point.y()/(zoom*height());
 	sample += center;
 	return sample;
 }
@@ -267,8 +268,8 @@ fvec Canvas::toSampleCoords(float x, float y)
 	sample.resize(2);
 	x -= width()/2.f;
 	y -= height()/2.f;
-	sample[0] = x/(zoom*height());
-	sample[1] = y/(zoom*height());
+	sample[xIndex] = x/(zoom*height());
+	sample[yIndex] = y/(zoom*height());
 	sample += center;
 	return sample;
 }
@@ -287,7 +288,7 @@ QRectF Canvas::canvasRect()
 {
 	fvec tl = canvasTopLeft();
 	fvec br = canvasBottomRight();
-	return QRectF(tl[0], tl[1], (br-tl)[0], (br-tl)[1]);
+	return QRectF(tl[xIndex], tl[yIndex], (br-tl)[xIndex], (br-tl)[yIndex]);
 }
 
 void Canvas::SetZoom(float zoom)
@@ -301,10 +302,10 @@ void Canvas::SetZoom(float zoom)
 	infoPixmap = QPixmap();
 	ResetSamples();
 	bNewCrosshair = true;
-	repaint();
+	//repaint();
 }
 
-void Canvas::SetCenter(fVec center)
+void Canvas::SetCenter(fvec center)
 {
 	if(this->center == center) return;
 	this->center = center;
@@ -315,15 +316,41 @@ void Canvas::SetCenter(fVec center)
 	infoPixmap = QPixmap();
 	ResetSamples();
 	bNewCrosshair = true;
-	repaint();
+	//repaint();
+}
+
+void Canvas::SetDim(int xIndex, int yIndex)
+{
+	bool bChanged = false;
+	if(this->xIndex != xIndex)
+	{
+		bChanged = true;
+		this->xIndex = xIndex;
+	}
+	if(this->yIndex != yIndex)
+	{
+		bChanged = true;
+		this->yIndex = yIndex;
+	}
+	if(bChanged)
+	{
+		gridPixmap = QPixmap();
+		modelPixmap = QPixmap();
+		confidencePixmap = QPixmap();
+		//rewardPixmap = QPixmap();
+		infoPixmap = QPixmap();
+		ResetSamples();
+		bNewCrosshair = true;
+		//repaint();
+	}
 }
 
 void Canvas::FitToData()
 {
 	if(!data->GetCount())
 	{
-		center[0] = 0;
-		center[1] = 0;
+		center[xIndex] = 0;
+		center[yIndex] = 0;
 		SetZoom(1);
 		return;
 	}
@@ -343,8 +370,8 @@ void Canvas::FitToData()
 	float diffX = maxX-minX;
 	float diffY = maxY-minY;
 
-	center[0] = minX + diffX/2;
-	center[1] = minY + diffY/2;
+	center[xIndex] = minX + diffX/2;
+	center[yIndex] = minY + diffY/2;
 
 	diffX *= 1.04; // add a small margin
 	diffY *= 1.04; // add a small margin
@@ -757,7 +784,7 @@ void Canvas::DrawTrajectories()
 	int start=0, stop=0;
 	if(data->GetFlag(count-1) == _TRAJ)
 	{
-		if(sequences.size()) stop = sequences[sequences.size()-1].second;
+		if(sequences.size()) stop = sequences.back().second;
 		if(stop < count-1) // there's an unfinished trajectory
 		{
 			stop++;
@@ -783,87 +810,23 @@ void Canvas::DrawTrajectories()
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
-	vector<fvec> samples = data->GetSamples();
-
-	map<int,int> counts;
-	centers.clear();
-	if(trajectoryCenterType)
+	ivec trajLabels(sequences.size());
+	FOR(i, sequences.size())
 	{
-		FOR(i, sequences.size())
-		{
-			int index = sequences[i].first;
-			if(trajectoryCenterType==1) // end
-			{
-				index = sequences[i].second;
-			}
-			int label = data->GetLabel(index);
-			if(!centers.count(label))
-			{
-				fvec center;
-				center.resize(2,0);
-				centers[label] = center;
-				counts[label] = 0;
-			}
-			centers[label] += samples[index];
-			counts[label]++;
-		}
-
-		for(map<int,int>::iterator p = counts.begin(); p!=counts.end(); ++p)
-		{
-			int label = p->first;
-			centers[label] /= p->second;
-		}
+		trajLabels[i] = data->GetLabel(sequences[i].first);
 	}
-
-	// do the interpolation
-	vector< vector<fvec> > trajectories;
-	vector<fvec> diffs;
-	ivec trajLabels;
-	for(int i=drawnTrajectories; i< sequences.size(); i++)
+	vector< vector<fvec> > trajectories = data->GetTrajectories(trajectoryResampleType, trajectoryResampleCount, trajectoryCenterType, 0.1, true);
+	if(bDrawing)
 	{
-		start = sequences[i].first;
-		stop = sequences[i].second;
-		int label = data->GetLabel(start);
-		fvec diff;
-		if(trajectoryCenterType && (i < sequences.size()-1 || !bDrawing))
-		{
-			diff = centers[label] - samples[trajectoryCenterType==1?stop:start];
-		}
-		else diff.resize(2,0);
 		vector<fvec> trajectory;
-		trajectory.resize(stop-start+1);
-		int pos = 0;
-		for (int j=start; j<=stop; j++)
+		for(int i=sequences.back().first; i<sequences.back().second; i++)
 		{
-			trajectory[pos++] = samples[j] + diff;
+			trajectory.push_back(data->GetSample(i));
 		}
-		switch (trajectoryResampleType)
-		{
-		case 0: // do nothing
-			break;
-		case 1: // uniform resampling
-		{
-			if(i < sequences.size()-1 || !bDrawing)
-			{
-				trajectory = interpolate(trajectory, trajectoryResampleCount);
-			}
-		}
-			break;
-		case 2: // spline resampling
-		{
-			if(i < sequences.size()-1 || !bDrawing)
-			{
-				trajectory = interpolate(trajectory, trajectoryResampleCount);
-			}
-		}
-			break;
-		}
-		trajectories.push_back(trajectory);
-		trajLabels.push_back(data->GetLabel(start));
+		if(trajectory.size()) trajectories.push_back(trajectory);
 	}
-
 	// let's draw the trajectories
-	FOR(i, trajectories.size())
+	for(int i=drawnTrajectories; i<trajectories.size(); i++)
 	{
 		fvec oldPt = trajectories[i][0];
 		int count = trajectories[i].size();
@@ -900,7 +863,7 @@ void Canvas::DrawLiveTrajectory(QPainter &painter)
 		fvec pt = liveTrajectory[j+1];
 		if(!pt.size()) break;
 		int label = 1;
-		if(bDisplayMap)
+		if(false && bDisplayMap)
 		{
 			painter.setPen(QPen(Qt::white, 3));
 			painter.drawLine(toCanvasCoords(pt), toCanvasCoords(oldPt));

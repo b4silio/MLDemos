@@ -22,12 +22,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <interfaces.h>
 
-class PluginLinear : public QObject, public CollectionInterface
+class PluginLWPR : public QObject, public CollectionInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(CollectionInterface)
 public:
-	PluginLinear();
+	PluginLWPR();
 
 	QString GetName(){return "LWPR collection";};
 };

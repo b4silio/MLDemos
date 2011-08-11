@@ -7,7 +7,7 @@ NAME = mld_KNN
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
@@ -51,18 +51,3 @@ HEADERS += ANN/ANN.h \
 	ANN/kd_util.h \
 	ANN/pr_queue.h \
 	ANN/pr_queue_k.h
-
-SOURCES += ANN/ANN.cpp \
-	ANN/bd_fix_rad_search.cpp \
-	ANN/bd_pr_search.cpp \
-	ANN/bd_search.cpp \
-	ANN/bd_tree.cpp \
-	ANN/brute.cpp \
-	ANN/kd_dump.cpp \
-	ANN/kd_fix_rad_search.cpp \
-	ANN/kd_pr_search.cpp \
-	ANN/kd_search.cpp \
-	ANN/kd_split.cpp \
-	ANN/kd_tree.cpp \
-	ANN/kd_util.cpp \
-	ANN/perf.cpp

@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
+#include <QDebug>
 
 using namespace std;
 
@@ -89,6 +90,8 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 	ClassifierGMM * gmm = (ClassifierGMM*)classifier;
 	vector<Gmm*> gmms = gmm->gmms;
 	if(!gmms.size()) return;
+	int xIndex = canvas->xIndex;
+	int yIndex = canvas->yIndex;
 	int dim = gmms[0]->dim;
 	float mean[2];
 	float sigma[3];
@@ -97,20 +100,17 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 	{
 		FOR(i, gmms[g]->nstates)
 		{
-			gmms[g]->getMean(i, mean);
-			if(dim==2)
-			{
-				gmms[g]->getCovariance(i, sigma, true);
-			}
-			else
-			{
-				float* bigSigma = new float[dim*dim];
-				gmms[g]->getCovariance(i, bigSigma, false);
-				sigma[0] = bigSigma[0];
-				sigma[1] = bigSigma[1];
-				sigma[2] = bigSigma[dim + 1];
-				delete [] bigSigma;
-			}
+			float* bigSigma = new float[dim*dim];
+			float* bigMean = new float[dim];
+			gmms[g]->getCovariance(i, bigSigma, false);
+			sigma[0] = bigSigma[xIndex*dim + xIndex];
+			sigma[1] = bigSigma[yIndex*dim + xIndex];
+			sigma[2] = bigSigma[yIndex*dim + yIndex];
+			gmms[g]->getMean(i, bigMean);
+			mean[0] = bigMean[xIndex];
+			mean[1] = bigMean[yIndex];
+			delete [] bigSigma;
+			delete [] bigMean;
 			//FOR(j,4) sigma[j] = sqrt(sigma[j]);
 			painter.setPen(QPen(Qt::black, 1));
 			DrawEllipse(mean, sigma, 1, &painter, canvas);
@@ -142,18 +142,6 @@ void ClassGMM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 		int resp = ((ClassifierGMM*) classifier)->classes[max];
 		if(label == resp) Canvas::drawSample(painter, point, 9, label);
 		else Canvas::drawCross(painter, point, 6, label);
-
-		/*
-		float response = classifier->Test(sample);
-		if(response > 0)
-		{
-			if(label == posClass) Canvas::drawSample(painter, point, 9, 2);
-			else Canvas::drawCross(painter, point, 6, 2);
-		}
-		else
-		{
-		}
-		*/
 	}
 }
 

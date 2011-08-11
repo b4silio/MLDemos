@@ -40,6 +40,7 @@ DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
 	  clusterer(0),
 	  bRunning(false),
 	  bPaused(false),
+	  bColorMap(true),
 	  mutex(mutex),
 	  perm(0), w(0), h(0), dim(2)
 {
@@ -99,8 +100,8 @@ void DrawTimer::run()
 		}
 		else
 		{
-			emit MapReady(bigMap);
-			if(dynamical && (*dynamical))  emit ModelReady(modelMap);
+			if(dynamical && (*dynamical))  emit bColorMap ? MapReady(bigMap) : MapReady(modelMap);
+			else emit MapReady(bigMap);
 		}
 		drawMutex.unlock();
 		//qApp->processEvents();
@@ -149,7 +150,7 @@ void DrawTimer::Refine()
 		}
 
 		TestFast(start,stop); // we finish the current batch
-		if(dynamical && (*dynamical))
+		if(dynamical && (*dynamical) && !bColorMap)
 		{
 			int cnt = 10000 / refineMax;
 			int steps = 8;
@@ -252,8 +253,7 @@ void DrawTimer::Maximization()
 void DrawTimer::Test(int start, int stop)
 {
 	if(stop < 0 || stop > w*h) stop = w*h;
-	fvec sample;
-	sample.resize(2);
+	fvec sample(2);
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
 	for (int i=start; i<stop; i++)
 	{
@@ -309,7 +309,7 @@ void DrawTimer::Test(int start, int stop)
 			bigMap.setPixel(x,y,c.rgb());
 			drawMutex.unlock();
 		}
-		else if(*dynamical)
+		else if(*dynamical && bColorMap)
 		{
 			val = (*dynamical)->Test(sample);
 			if((*dynamical)->avoid)
@@ -422,12 +422,16 @@ void DrawTimer::TestFast(int start, int stop)
 				}
 				else
 				{
+					float sum = 0;
+					FOR(i, val.size()) sum += fabs(val[i]);
+					sum = 1.f/sum;
+
 					float r=0,g=0,b=0;
 					FOR(j, val.size())
 					{
-						r += SampleColor[j%SampleColorCnt].red()*val[j];
-						g += SampleColor[j%SampleColorCnt].green()*val[j];
-						b += SampleColor[j%SampleColorCnt].blue()*val[j];
+						r += SampleColor[j%SampleColorCnt].red()*val[j]*sum;
+						g += SampleColor[j%SampleColorCnt].green()*val[j]*sum;
+						b += SampleColor[j%SampleColorCnt].blue()*val[j]*sum;
 					}
 					c = QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b)));
 				}
@@ -473,7 +477,7 @@ void DrawTimer::TestFast(int start, int stop)
 			bigMap.setPixel(x,y,c.rgb());
 			drawMutex.unlock();
 		}
-		else if(*dynamical)
+		else if(*dynamical && bColorMap)
 		{
 			val = (*dynamical)->Test(sample);
 			if((*dynamical)->avoid)

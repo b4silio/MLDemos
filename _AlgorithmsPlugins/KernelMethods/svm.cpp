@@ -2843,6 +2843,7 @@ void svm_predict_values(const svm_model *model, const svm_node *x, double* dec_v
 
 		int p=0;
 		for(i=0;i<nr_class;i++)
+		{
 			for(int j=i+1;j<nr_class;j++)
 			{
 				double sum = 0;
@@ -2854,14 +2855,13 @@ void svm_predict_values(const svm_model *model, const svm_node *x, double* dec_v
 				int k;
 				double *coef1 = model->sv_coef[j-1];
 				double *coef2 = model->sv_coef[i];
-				for(k=0;k<ci;k++)
-					sum += coef1[si+k] * kvalue[si+k];
-				for(k=0;k<cj;k++)
-					sum += coef2[sj+k] * kvalue[sj+k];
+				for(k=0;k<ci;k++) sum += coef1[si+k] * kvalue[si+k];
+				for(k=0;k<cj;k++) sum += coef2[sj+k] * kvalue[sj+k];
 				sum -= model->rho[p];
 				dec_values[p] = sum;
 				p++;
 			}
+		}
 
 		free(kvalue);
 		free(start);
@@ -2919,6 +2919,32 @@ double svm_predict(const svm_model *model, const svm_node *x)
 		}
 		return model->label[vote_max_idx];
 	}
+}
+
+void svm_predict_votes(const svm_model *model, const svm_node *x, double *votes)
+{
+	if(model->param.svm_type == ONE_CLASS ||
+	   model->param.svm_type == EPSILON_SVR ||
+	   model->param.svm_type == NU_SVR) return;
+
+
+	int i;
+	int nr_class = model->nr_class;
+	double *dec_values = Malloc(double, nr_class*(nr_class-1)/2);
+	svm_predict_values(model, x, dec_values);
+
+	for(i=0;i<nr_class;i++) votes[i] = 0;
+	int pos=0;
+	for(i=0;i<nr_class;i++)
+	{
+		for(int j=i+1;j<nr_class;j++)
+		{
+			double dec = dec_values[pos++];
+			if(dec > 0) votes[i] += 1;
+			else votes[j] += 1;
+		}
+	}
+	free(dec_values);
 }
 
 double svm_predict_probability(

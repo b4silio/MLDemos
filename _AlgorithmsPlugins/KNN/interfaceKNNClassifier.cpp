@@ -68,16 +68,27 @@ void ClassKNN::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 		fvec sample = canvas->data->GetSample(i);
 		int label = canvas->data->GetLabel(i);
 		QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-		float response = classifier->Test(sample);
-		if(response > 0)
+		if(classifier->IsMultiClass())
 		{
-			if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-			else Canvas::drawCross(painter, point, 6, 2);
+			fvec res = classifier->TestMulti(sample);
+			int max = 0;
+			FOR(j, res.size()) if(res[max] < res[j]) max = j;
+			if(label == max) Canvas::drawSample(painter, point, 9, label);
+			else Canvas::drawCross(painter, point, 6, max);
 		}
 		else
 		{
-			if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-			else Canvas::drawCross(painter, point, 6, 0);
+			float response = classifier->Test(sample);
+			if(response > 0)
+			{
+				if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
+				else Canvas::drawCross(painter, point, 6, 2);
+			}
+			else
+			{
+				if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
+				else Canvas::drawCross(painter, point, 6, 0);
+			}
 		}
 	}
 }

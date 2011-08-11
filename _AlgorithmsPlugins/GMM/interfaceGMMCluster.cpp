@@ -51,6 +51,8 @@ void ClustGMM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 {
 	if(!canvas || !clusterer) return;
 	painter.setRenderHint(QPainter::Antialiasing);
+	int xIndex = canvas->xIndex;
+	int yIndex = canvas->yIndex;
 
 	ClustererGMM * _gmm = (ClustererGMM*)clusterer;
 	Gmm *gmm = _gmm->gmm;
@@ -60,20 +62,18 @@ void ClustGMM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
 	{
-		gmm->getMean(i, mean);
-		if(dim==2)
-		{
-			gmm->getCovariance(i, sigma, true);
-		}
-		else
-		{
-			float* bigSigma = new float[dim*dim];
-			gmm->getCovariance(i, bigSigma, false);
-			sigma[0] = bigSigma[0];
-			sigma[1] = bigSigma[1];
-			sigma[2] = bigSigma[dim + 1];
-			delete [] bigSigma;
-		}
+		float* bigSigma = new float[dim*dim];
+		float* bigMean = new float[dim];
+		gmm->getCovariance(i, bigSigma, false);
+		sigma[0] = bigSigma[xIndex*dim + xIndex];
+		sigma[1] = bigSigma[yIndex*dim + xIndex];
+		sigma[2] = bigSigma[yIndex*dim + yIndex];
+		gmm->getMean(i, bigMean);
+		mean[0] = bigMean[xIndex];
+		mean[1] = bigMean[yIndex];
+		delete [] bigSigma;
+		delete [] bigMean;
+
 		painter.setPen(QPen(Qt::black, 2));
 		DrawEllipse(mean, sigma, 1, &painter, canvas);
 		painter.setPen(QPen(Qt::black, 1));

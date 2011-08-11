@@ -47,7 +47,7 @@ public:
 	void DrawSamples(QPainter &painter);
 	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
-	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0;};
+	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0;}
 	void FitToData();
 	void DrawAxes(QPainter &painter);
 	void RedrawAxes();
@@ -56,8 +56,9 @@ public:
 	void PaintGradient(QPointF position);
 	bool bDrawing;
 	QPainterPath DrawObstacle(Obstacle o);
-	fVec center;
+	fvec center;
 	float zoom;
+	int xIndex, yIndex;
 	std::vector<fvec> targets;
 
 protected:
@@ -99,9 +100,10 @@ public:
 	fvec canvasBottomRight();
 	QRectF canvasRect();
 	void SetZoom(float zoom);
-	float GetZoom(){return zoom;};
-	void SetCenter(fVec center);
-	fvec GetCenter(){return center;};
+	float GetZoom(){return zoom;}
+	void SetCenter(fvec center);
+	fvec GetCenter(){return center;}
+	void SetDim(int xIndex, int yIndex);
 
 	std::map<int,fvec> centers;
 	int drawnSamples;
@@ -149,32 +151,13 @@ public:
 	{
 		float x = point.x();
 		float y = point.y();
-		QColor c1 = Qt::white;
-		QColor c2 = Qt::black;
 
-		switch(label)
+		QColor c1 = SampleColor[label%SampleColorCnt];
+		QColor c2 = Qt::black;
+		if(label == 1)
 		{
-		case 0:
-			c1 = Qt::white;
-			c2 = Qt::black;
-			break;
-		case 1:
 			c1 = Qt::black;
 			c2 = Qt::white;
-			break;
-		case 2:
-			c1 = Qt::red;
-			c2 = Qt::black;
-			break;
-		case 3:
-			c1 = Qt::blue;
-			c2 = Qt::white;
-			break;
-		default:
-			srand(label);
-			c1 = QColor(rand()%255,rand()%255,rand()%255);
-			c2 = Qt::black;
-			break;
 		}
 
 		QPen pen = painter.pen();
@@ -193,42 +176,18 @@ public:
 		float x = point.x();
 		float y = point.y();
 
-		if(label == 0)
+		QColor color = SampleColor[label%SampleColorCnt];
+		QColor edge = Qt::black;
+		if(label == 1)
 		{
-			//		radius = 10;
-			painter.setBrush(Qt::white);
-			painter.setPen(Qt::black);
-			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
+			color = Qt::black;
+			edge = Qt::white;
 		}
-		else if(label == 1)
-		{
-			//		radius = 10;
-			painter.setBrush(Qt::black);
-			painter.setPen(Qt::white);
-			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
-		}
-		else if(label == 2)
-		{
-			// 		radius = 10;
-			painter.setBrush(Qt::green);
-			painter.setPen(Qt::black);
-			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
-		}
-		else if(label == 3)
-		{
-			// 		radius = 10;
-			painter.setBrush(Qt::blue);
-			painter.setPen(Qt::white);
-			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
-		}
-		else
-		{
-			// 		radius = 10;
-			srand(label);
-			painter.setBrush(QColor(rand()%255,rand()%255,rand()%255));
-			painter.setPen(Qt::black);
-			painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
-		}
+		//		radius = 10;
+		painter.setBrush(color);
+		painter.setPen(edge);
+		painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
+
 	}
 };
 

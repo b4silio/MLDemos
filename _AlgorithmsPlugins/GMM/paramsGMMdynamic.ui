@@ -79,7 +79,7 @@ Uniform: uniformly split the space along the first axis and set the means there 
 K-Means: perform K-Means and assign means and variance to each mixture</string>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <item>
     <property name="text">

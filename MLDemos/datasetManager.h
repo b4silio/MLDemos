@@ -63,7 +63,7 @@ struct RewardMap
 	fvec lowerBoundary;
 	fvec higherBoundary;
 	RewardMap():rewards(0), dim(0), length(0){}
-	~RewardMap(){if(rewards) delete [] rewards;};
+	~RewardMap(){if(rewards) delete [] rewards;}
 	RewardMap& operator= (const RewardMap &r) {
 	  if (this != &r) {
 		  dim = r.dim;
@@ -262,29 +262,33 @@ public:
 
 	double Compare(fvec sample);
 
-	int GetSize(){return size;};
+	int GetSize(){return size;}
 
-	int GetCount(){return samples.size();};
+	int GetCount(){return samples.size();}
 
-	fvec GetSample(int index=0){return index<samples.size() ? samples[index] : fvec();};
+	int GetDimCount(){return samples.size() ? samples[0].size() : 0;}
+
+	fvec GetSample(int index=0){return index<samples.size() ? samples[index] : fvec();}
 
 	void SetSample(int index, fvec sample);
 
-	std::vector< fvec > GetSamples(){return samples;};
+	std::vector< fvec > GetSamples(){return samples;}
 
 	std::vector< fvec > GetSamples(u32 count, dsmFlags flag=_UNUSED, dsmFlags replaceWith=_TRAIN);
 
-	ipair GetSequence(unsigned int index){return index < sequences.size() ? sequences[index] : ipair(-1,-1);};
+	ipair GetSequence(unsigned int index){return index < sequences.size() ? sequences[index] : ipair(-1,-1);}
 
-	std::vector< ipair > GetSequences(){return sequences;};
+	std::vector< ipair > GetSequences(){return sequences;}
 
-	int GetLabel(int index){return index < labels.size() ? labels[index] : 0;};
+	std::vector< std::vector<fvec> > GetTrajectories(int resampleType, int resampleCount, int centerType, float dT, int zeroEnding);
 
-	ivec GetLabels(){return labels;};
+	int GetLabel(int index){return index < labels.size() ? labels[index] : 0;}
 
-	void SetLabel(int index, int label){if(index<labels.size())labels[index] = label;};
+	ivec GetLabels(){return labels;}
 
-	void AddObstacle(Obstacle o){obstacles.push_back(o);};
+	void SetLabel(int index, int label){if(index<labels.size())labels[index] = label;}
+
+	void AddObstacle(Obstacle o){obstacles.push_back(o);}
 
 	void AddObstacle(fvec center, fvec axes, float angle, fvec power, fvec repulsion);
 
@@ -292,21 +296,21 @@ public:
 
 	void RemoveObstacle(unsigned int index);
 
-	std::vector< Obstacle > GetObstacles(){return obstacles;};
+	std::vector< Obstacle > GetObstacles(){return obstacles;}
 
-	Obstacle GetObstacle(unsigned int index){return index < obstacles.size() ? obstacles[index] : Obstacle();};
+	Obstacle GetObstacle(unsigned int index){return index < obstacles.size() ? obstacles[index] : Obstacle();}
 
 	void AddReward(float *values, ivec size, fvec lowerBoundary, fvec higherBoundary);
 
-	RewardMap *GetReward(){return &rewards;};
+	RewardMap *GetReward(){return &rewards;}
 
 	void ResetFlags();
 
-	dsmFlags GetFlag(int index){return index < flags.size() ? flags[index] : _UNUSED;};
+	dsmFlags GetFlag(int index){return index < flags.size() ? flags[index] : _UNUSED;}
 
-	void SetFlag(int index, dsmFlags flag){if(index < flags.size()) flags[index] = flag;};
+	void SetFlag(int index, dsmFlags flag){if(index < flags.size()) flags[index] = flag;}
 
-	std::vector<dsmFlags> GetFlags(){return flags;};
+	std::vector<dsmFlags> GetFlags(){return flags;}
 
 	std::vector<bool> GetFreeFlags();
 

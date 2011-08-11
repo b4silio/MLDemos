@@ -7,7 +7,7 @@ NAME = mld_GMM
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
@@ -52,12 +52,3 @@ HEADERS +=	\
 	fgmm/gaussian.h \
 	fgmm/regression.h \
 	fgmm/smat.h
-
-SOURCES += \
-	fgmm/em.cpp \
-	fgmm/gaussian.cpp \
-	fgmm/gmm.cpp \
-	fgmm/gmmregression.cpp \
-	fgmm/smat.cpp \
-	fgmm/update.cpp
-

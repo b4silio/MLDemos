@@ -17,16 +17,16 @@ CONFIG(opencv22)|CONFIG(opencv21){
 # opencv includes
 win32:CONFIG(opencv22){
 message("please adjust the include and lib paths to fit your system")
-INCLUDEPATH += . "C:/DEV/OpenCV2.2GCC/include/"
-LIBS += -L"C:/DEV/OpenCV2.2GCC/lib/"
+INCLUDEPATH += . "C:/DEV/OpenCV2.3-GCC/include/"
+LIBS += -L"C:/DEV/OpenCV2.3-GCC/lib/"
 #        "C:/OpenCV2.2/include/"
 #LIBS += -L"C:/OpenCV2.2/lib/"
-LIBS += -lopencv_core229 \
-        -lopencv_features2d229 \
-        -lopencv_highgui229 \
-        -lopencv_imgproc229 \
-        -lopencv_legacy229 \
-        -lopencv_ml229
+LIBS += -lopencv_core230 \
+		-lopencv_features2d230 \
+		-lopencv_highgui230 \
+		-lopencv_imgproc230 \
+		-lopencv_legacy230 \
+		-lopencv_ml230
 } else:CONFIG(opencv22) {
 	INCLUDEPATH += /usr/local/include/
 	LIBS += -L/usr/local/lib

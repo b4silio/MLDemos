@@ -64,6 +64,8 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("samplesCheck", displayOptions->samplesCheck->isChecked());
 	settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
 	settings.setValue("spinZoom", displayOptions->spinZoom->value());
+	settings.setValue("xDimIndex", displayOptions->xDimIndex->value());
+	settings.setValue("yDimIndex", displayOptions->yDimIndex->value());
 	settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
@@ -114,6 +116,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("obstacleType", optionsDynamic->obstacleCombo->currentIndex());
 	settings.setValue("dT", optionsDynamic->dtSpin->value());
 	settings.setValue("tab", optionsDynamic->tabWidget->currentIndex());
+	settings.setValue("colorCheck", optionsDynamic->colorCheck->isChecked());
 	settings.endGroup();
 
 	settings.beginGroup("compareOptions");
@@ -222,6 +225,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("samplesCheck")) displayOptions->samplesCheck->setChecked(settings.value("samplesCheck").toBool());
 	if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
 	if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
+	if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
+	if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
@@ -271,6 +276,7 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("obstacleType")) optionsDynamic->obstacleCombo->setCurrentIndex(settings.value("obstacleType").toInt());
 	if(settings.contains("dT")) optionsDynamic->dtSpin->setValue(settings.value("dT").toFloat());
 	if(settings.contains("tab")) optionsDynamic->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+	if(settings.contains("colorCheck")) optionsDynamic->colorCheck->setChecked(settings.value("colorCheck").toBool());
 	settings.endGroup();
 
 	settings.beginGroup("compareOptions");
@@ -376,6 +382,7 @@ void MLDemos::SaveParams( QString filename )
 		out << groupName << ":" << "resampleCount" << " " << optionsDynamic->resampleSpin->value() << "\n";
 		out << groupName << ":" << "obstacleType" << " " << optionsDynamic->obstacleCombo->currentIndex() << "\n";
 		out << groupName << ":" << "dT" << " " << optionsDynamic->dtSpin->value() << "\n";
+		out << groupName << ":" << "colorCheck" << " " << optionsDynamic->colorCheck->isChecked() << "\n";
 		out << groupName << ":" << "tab" << " " << optionsDynamic->tabWidget->currentIndex() << "\n";
 		if(tab < dynamicals.size() && dynamicals[tab])
 		{
@@ -480,6 +487,7 @@ void MLDemos::LoadParams( QString filename )
 			if(line.endsWith("resampleCount")) optionsDynamic->resampleSpin->setValue((int)value);
 			if(line.endsWith("obstacleType")) optionsDynamic->obstacleCombo->setCurrentIndex((int)value);
 			if(line.endsWith("dT")) optionsDynamic->dtSpin->setValue((float)value);
+			if(line.endsWith("colorCheck")) optionsDynamic->colorCheck->setChecked((int)value);
 			if(line.endsWith("tab")) optionsDynamic->tabWidget->setCurrentIndex(tab = (int)value);
 			if(tab < dynamicals.size() && dynamicals[tab]) dynamicals[tab]->LoadParams(line,value);
 		}

@@ -6,23 +6,25 @@
 
 TEMPLATE = subdirs
 # the main software
-SUBDIRS = MLDemos
+CONFIG += ordered
+SUBDIRS = MLDemos 3rdParty
 MLDemos.file = MLDemos/MLDemos.pro
+3rdParty.file = _3rdParty/3rdParty.pro
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-#SUBDIRS += Maximizers SEDS
-SUBDIRS += Obstacle GMM KernelMethods KNN KPCA LinearMethods LWPR Maximizers OpenCV SEDS
+#SUBDIRS += Projections
+SUBDIRS += Obstacle GMM KernelMethods KNN Projections LWPR Maximizers OpenCV SEDS XMeans
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
 KernelMethods.file = $$ALGOPATH/KernelMethods/pluginKernel.pro
 KNN.file = $$ALGOPATH/KNN/pluginKNN.pro
-KPCA.file = $$ALGOPATH/KPCA/pluginKPCA.pro
-LinearMethods.file = $$ALGOPATH/LinearMethods/pluginLinear.pro
+Projections.file = $$ALGOPATH/Projections/pluginProjections.pro
 LWPR.file = $$ALGOPATH/LWPR/pluginLWPR.pro
 Obstacle.file = $$ALGOPATH/Obstacle/pluginAvoidance.pro
 SEDS.file = $$ALGOPATH/SEDS/pluginSEDS.pro
 Maximizers.file = $$ALGOPATH/Maximizers/pluginMaximizers.pro
 OpenCV.file = $$ALGOPATH/OpenCV/pluginOpenCV.pro
+XMeans.file = $$ALGOPATH/XMeans/pluginXMeans.pro
 
 # input plugins
 INPUTPATH = _IOPlugins

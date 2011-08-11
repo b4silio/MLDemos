@@ -7,7 +7,7 @@ NAME = mld_DSAvoid
 MLPATH =../..
 
 include("$$MLPATH/MLDemos_variables.pri")
-
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
@@ -53,27 +53,3 @@ HEADERS +=	\
 	MathLib/TVector.h \
 	MathLib/Vector.h \
 	MathLib/Vector3.h
-
-SOURCES += \
-	MathLib/Differentiator.cpp \
-	MathLib/GradientDescent.cpp \
-	MathLib/IKGroupSolver.cpp \
-	MathLib/IKSubSolver.cpp \
-	MathLib/Macros.cpp \
-	MathLib/MathLib.cpp \
-	MathLib/MathLibCommon.cpp \
-	MathLib/Matrix.cpp \
-	MathLib/Matrix3.cpp \
-	MathLib/Matrix4.cpp \
-	MathLib/ReferenceFrame.cpp \
-	MathLib/Regression.cpp \
-	MathLib/SpatialForce.cpp \
-	MathLib/SpatialFrame.cpp \
-	MathLib/SpatialInertia.cpp \
-	MathLib/SpatialMatrix.cpp \
-	MathLib/SpatialVector.cpp \
-	MathLib/SpatialVelocity.cpp \
-	MathLib/TMatrix.cpp \
-	MathLib/TVector.cpp \
-	MathLib/Vector.cpp \
-	MathLib/Vector3.cpp

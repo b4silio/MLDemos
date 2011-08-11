@@ -19,8 +19,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "basicMath.h"
+#include "mymaths.h"
 #include "datasetManager.h"
 #include <fstream>
+#include <map>
 
 using namespace std;
 
@@ -262,6 +264,153 @@ std::vector< fvec > DatasetManager::GetSamples(u32 count, dsmFlags flag, dsmFlag
 
 	return selected;
 }
+
+std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(int resampleType, int resampleCount, int centerType, float dT, int zeroEnding)
+{
+
+	// we split the data into trajectories
+	vector< vector<fvec> > trajectories;
+	if(!sequences.size() || !samples.size()) return trajectories;
+	int dim = samples[0].size();
+	trajectories.resize(sequences.size());
+	FOR(i, sequences.size())
+	{
+		int length = sequences[i].second-sequences[i].first+1;
+		trajectories[i].resize(length);
+		FOR(j, length)
+		{
+			trajectories[i][j].resize(dim*2);
+			// copy data
+			FOR(d, dim) trajectories[i][j][d] = samples[sequences[i].first + j][d];
+		}
+	}
+
+	switch(resampleType)
+	{
+	case 0: // none
+	{
+		FOR(i,sequences.size())
+		{
+			int cnt = sequences[i].second-sequences[i].first+1;
+			if(resampleCount > cnt) resampleCount = cnt;
+		}
+		FOR(i, trajectories.size())
+		{
+			while(trajectories[i].size() > resampleCount) trajectories[i].pop_back();
+		}
+	}
+		break;
+	case 1: // uniform
+	{
+		FOR(i, trajectories.size())
+		{
+			vector<fvec> trajectory = trajectories[i];
+			trajectories[i] = interpolate(trajectory, resampleCount);
+		}
+	}
+		break;
+	}
+
+
+	if(centerType)
+	{
+		map<int,int> counts;
+		map<int,fvec> centers;
+		vector<int> trajLabels(sequences.size());
+		FOR(i, sequences.size())
+		{
+			int index = centerType==1 ? sequences[i].second : sequences[i].first; // start
+			int label = GetLabel(index);
+			trajLabels[i] = label;
+			if(!centers.count(label))
+			{
+				fvec center(dim,0);
+				centers[label] = center;
+				counts[label] = 0;
+			}
+			centers[label] += samples[index];
+			counts[label]++;
+		}
+		for(map<int,int>::iterator p = counts.begin(); p!=counts.end(); ++p)
+		{
+			int label = p->first;
+			centers[label] /= p->second;
+		}
+		FOR(i, trajectories.size())
+		{
+			if(centerType == 1)
+			{
+				fvec difference = centers[trajLabels[i]] - trajectories[i].back();
+				FOR(j, resampleCount) trajectories[i][j] += difference;
+			}
+			else
+			{
+				fvec difference = centers[trajLabels[i]] - trajectories[i][0];
+				FOR(j, resampleCount) trajectories[i][j] += difference;
+			}
+		}
+	}
+
+	float maxV = -FLT_MAX;
+	// we compute the velocity
+	FOR(i, trajectories.size())
+	{
+		FOR(j, resampleCount-1)
+		{
+			FOR(d, dim)
+			{
+				float velocity = (trajectories[i][j+1][d] - trajectories[i][j][d]) / dT;
+				trajectories[i][j][dim + d] = velocity;
+				if(velocity > maxV) maxV = velocity;
+			}
+		}
+		if(!zeroEnding)
+		{
+			FOR(d, dim)
+			{
+				trajectories[i][resampleCount-1][dim + d] = trajectories[i][resampleCount-2][dim + d];
+			}
+		}
+	}
+
+	// we normalize the velocities as the variance of the data
+	fvec mean, sigma;
+	mean.resize(dim,0);
+	int cnt = 0;
+	sigma.resize(dim,0);
+	FOR(i, trajectories.size())
+	{
+		FOR(j, resampleCount)
+		{
+			mean += trajectories[i][j];
+			cnt++;
+		}
+	}
+	mean /= cnt;
+	FOR(i, trajectories.size())
+	{
+		FOR(j, resampleCount)
+		{
+			fvec diff = (mean - trajectories[i][j]);
+			FOR(d,dim) sigma[d] += diff[d]*diff[d];
+		}
+	}
+	sigma /= cnt;
+
+	FOR(i, trajectories.size())
+	{
+		FOR(j, resampleCount)
+		{
+			FOR(d, dim)
+			{
+				trajectories[i][j][dim + d] /= maxV;
+				//trajectories[i][j][dim + d] /= sqrt(sigma[d]);
+			}
+		}
+	}
+	return trajectories;
+}
+
 
 void DatasetManager::Save(const char *filename)
 {
