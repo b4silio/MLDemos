@@ -20,14 +20,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef PARSER_H
 #define PARSER_H
 
-#define UNSIGNED_INT_TYPE   (2^0)
-#define INT_TYPE            (2^1)
-#define FLOAT_TYPE          (2^2)
-#define DOUBLE_TYPE         (2^3)
-#define CHAR_TYPE           (2^4)
-#define STRING_TYPE         (2^5)
-#define UNKNOWN_TYPE        (2^6)
-#define ALL_TYPES           (2^7-1)
+#define UNSIGNED_INT_TYPE   1
+#define INT_TYPE            2
+#define FLOAT_TYPE          4
+#define DOUBLE_TYPE         8
+#define CHAR_TYPE           16
+#define STRING_TYPE         32
+#define UNKNOWN_TYPE        64
+#define ALL_TYPES           127
 #define NUMERIC_TYPES       (UNSIGNED_INT_TYPE | INT_TYPE | FLOAT_TYPE | DOUBLE_TYPE)
 
 #define MISSING_VALUE        "?"
@@ -100,7 +100,7 @@ private:
 class CSVParser
 {
 public:
-    void parse(char* fileName);
+    void parse(const char* fileName);
     vector<size_t> getMissingValIndex();
     void cleanData(unsigned int acceptedTypes);
     pair<vector<fvec>,ivec> getData(unsigned int acceptedTypes = ALL_TYPES);
@@ -108,7 +108,7 @@ private:
     ifstream file;
     map<string,unsigned int> classLabels;
     vector<vector<string> > data;
-    map<unsigned int, char> inputTypes;
+    map<unsigned int, unsigned int> inputTypes;
 };
 
 #endif // PARSER_H

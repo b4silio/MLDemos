@@ -136,7 +136,7 @@ bool CSVIterator::operator==(CSVIterator const& rhs)
 
 /* CSVParser stuff */
 
-void CSVParser::parse(char* fileName)
+void CSVParser::parse(const char* fileName)
 {
     // init
     file.open(fileName);
@@ -154,7 +154,9 @@ void CSVParser::parse(char* fileName)
         // Fill dataset
         data.push_back(parser->getParsedLine());
     }
+
     cout << "Parsing done, read " << data.size() << " entries" << endl;
+    cout << "Found " << data.at(0).size()-1 << " input labels" << endl;
     cout << "Found " << id << " class labels" << endl;
 
     // look for data types
@@ -190,15 +192,18 @@ vector<size_t> CSVParser::getMissingValIndex()
 void CSVParser::cleanData(unsigned int acceptedTypes)
 {
     vector<string>::iterator it;
-    for(size_t i = 0; i < inputTypes.size(); i++)
+    for(size_t i = 0; i < inputTypes.size() - 1; i++)
         if (!(inputTypes[i]&acceptedTypes)) // data type does not correspond to a requested one
         {
+            std::cout << "Removing colum " << i << " of type " << inputTypes[i] <<  " ... ";
             for(size_t j = 0; j < data.size(); j++)
             {
                 it = data.at(j).begin() + i;
                 data.at(j).erase(it); // delete the column
             }
+            std::cout << "and matching input reference ...  " ;
             inputTypes.erase(i--); // delete the input to stay consistant
+            std::cout << "Done" << std::endl;
         }
 }
 
@@ -207,8 +212,10 @@ pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
     vector<fvec> samples(data.size());
     ivec labels(data.size());
     fvec sample(data.at(0).size());
+    std::cout << "Cleaning dataset" << std::endl;
     cleanData(acceptedTypes);
     size_t j;
+    std::cout << "Transfering into container" << std::endl;
     for(size_t i = 0; i < data.size(); i++)
     {
         for(j = 0; j < data.at(i).size()-1; j++) // consider last col as label

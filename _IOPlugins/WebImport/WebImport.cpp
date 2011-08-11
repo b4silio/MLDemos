@@ -40,6 +40,7 @@ void WebImport::Start()
     connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
     connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
     connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
+    connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(Updating()));
     guiDialog->show();
 }
 
@@ -55,8 +56,14 @@ void WebImport::Closing()
 
 void WebImport::Updating()
 {
+    QString filename = QFileDialog::getOpenFileName(NULL, tr("Load Data"), QDir::currentPath(), tr("dataset files (*.data *.csv);;All files (*.*)"));
+    if(filename.isEmpty()) return;
+    std::cout << "Will load " << filename.toStdString() << std::endl;
+    inputParser->parse(filename.toStdString().c_str());
     pair<vector<fvec>,ivec> data = inputParser->getData(NUMERIC_TYPES);
+    std::cout << "Got dataset" << std::endl;
     if(data.first.size() < 2) return;
+    std::cout << "Sending to MLDemos" << std::endl;
     emit(SetData(data.first, data.second, vector<ipair>()));
 }
 
@@ -64,4 +71,3 @@ void WebImport::FetchResults(std::vector<fvec> results)
 {
 
 }
-

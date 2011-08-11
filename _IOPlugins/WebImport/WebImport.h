@@ -35,6 +35,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#include "widget.h"
 //#include <QMutex>
 //#include <QMutexLocker>
+//#include <QApplication>
+
+ #include <QFileDialog>
 
 class WebImport : public QObject, public InputOutputInterface
 {
@@ -73,6 +76,9 @@ public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
         void Updating();
+private slots:
+        void on_loadImgButton_released();
+        void on_loadImgButton_clicked();
 };
 
 
