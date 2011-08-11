@@ -45,3 +45,7 @@ int TableModel::columnCount(const QModelIndex &parent) const
         return 0;
 
 }
+
+bool TableModel::setData(const QModelIndex &index, const QVariant &value, int role){return false;};
+bool TableModel::insertRows(int position, int rows, const QModelIndex &index){return false;};
+bool TableModel::removeRows(int position, int rows, const QModelIndex &index){return false;};
