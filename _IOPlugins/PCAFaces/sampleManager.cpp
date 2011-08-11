@@ -28,7 +28,7 @@ using namespace std;
 u32 SampleManager::IDCount = 0;
 
 SampleManager::SampleManager(CvSize resolution)
-: size(resolution)
+	: size(resolution)
 {
 	ID = IDCount++;
 	display = NULL;
@@ -230,12 +230,12 @@ void sm_on_mouse( int event, int x, int y, int flags, void* param )
 	{
 		if(index < labels->size())
 		{
-				if (flags & CV_EVENT_FLAG_SHIFTKEY)
-				{
-					u32 newLabel = (*labels)[index] ? (*labels)[index]-1 : 255;
-					for (u32 i=index; i<labels->size(); i++) (*labels)[i] = newLabel;
-				}
-				else (*labels)[index] = (*labels)[index] ? (*labels)[index]-1 : 255;
+			if (flags & CV_EVENT_FLAG_SHIFTKEY)
+			{
+				u32 newLabel = (*labels)[index] ? (*labels)[index]-1 : 255;
+				for (u32 i=index; i<labels->size(); i++) (*labels)[i] = newLabel;
+			}
+			else (*labels)[index] = (*labels)[index] ? (*labels)[index]-1 : 255;
 		}
 	}
 }
@@ -512,7 +512,7 @@ bool SampleManager::Load(const char *filename, CvSize resolution)
 				IMKILL(sample);
 				break;
 			}
-                        u32 labelCnt = min((u32)size.width*size.height*3, (u32)samples.size() - (u32)labels.size());
+			u32 labelCnt = min((u32)size.width*size.height*3, (u32)samples.size() - (u32)labels.size());
 			FOR(j, labelCnt)
 			{
 				labels.push_back((u8)sample->imageData[j]);
@@ -521,7 +521,16 @@ bool SampleManager::Load(const char *filename, CvSize resolution)
 			continue;
 		}
 
-		if (cvSumPixels(sample) == 0)
+		bool bZero = true;
+		FOR(i, sample->imageSize)
+		{
+			if(sample->imageData[i] != 0)
+			{
+				bZero = true;
+				break;
+			}
+		}
+		if (bZero)
 		{
 			IMKILL(sample);
 			bDone = true;
@@ -602,7 +611,7 @@ void SampleManager::RandomTestSet(float ratio, bool bEnsureOnePerClass)
 		else
 		{
 			if(GetFlag(i) == UNUSED)
-			counts[index].second++;
+				counts[index].second++;
 		}
 	}
 	// if we don't have any, we set at least one sample for ever class

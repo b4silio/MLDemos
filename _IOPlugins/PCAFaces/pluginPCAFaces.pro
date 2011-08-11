@@ -17,19 +17,16 @@ CONFIG(opencv22)|CONFIG(opencv21){
 # opencv includes
 win32:CONFIG(opencv22){
 message("please adjust the include and lib paths to fit your system")
-INCLUDEPATH += . "C:/DEV/OpenCV2.2GCC/include/"
-LIBS += -L"C:/DEV/OpenCV2.2GCC/lib/"
+INCLUDEPATH += . "C:/DEV/OpenCV2.3-GCC/include/"
+LIBS += -L"C:/DEV/OpenCV2.3-GCC/lib/"
 #        "C:/OpenCV2.2/include/"
 #LIBS += -L"C:/OpenCV2.2/lib/"
-LIBS += -lopencv_core229 \
-		-lopencv_features2d229 \
-		-lopencv_highgui229 \
-		-lopencv_imgproc229 \
-		-lopencv_legacy229 \
-		-lopencv_ml229 \
-		-lopencv_video229 \
-		-lopencv_flann229 \
-		-lopencv_calib3d229
+LIBS += -lopencv_core230 \
+		-lopencv_features2d230 \
+		-lopencv_highgui230 \
+		-lopencv_imgproc230 \
+		-lopencv_legacy230 \
+		-lopencv_ml230
 } else:CONFIG(opencv22) {
 	INCLUDEPATH += /usr/local/include/
 	LIBS += -L/usr/local/lib
@@ -42,14 +39,6 @@ LIBS += -lopencv_core229 \
 		-lopencv_imgproc \
 		-lopencv_legacy \
 		-lopencv_ml
-	#	-lopencv_calib3d \
-	#	-lopencv_contrib \
-	#	-lopencv_ffmpeg \
-	#	-lopencv_flann \
-	#	-lopencv_gpu \
-	#	-lopencv_objdetect \
-	#	-lopencv_ts \
-	#	-lopencv_video
 } else:CONFIG(opencv21) {
 	INCLUDEPATH += /usr/local/include/
 	LIBS += -L/usr/local/lib

@@ -28,7 +28,8 @@ XMeans.file = $$ALGOPATH/XMeans/pluginXMeans.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-SUBDIRS += PCAFaces WebImport RandomEmitter
+SUBDIRS += PCAFaces RandomEmitter
+SUBDIRS += WebImport
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro
 WebImport.file = $$INPUTPATH/WebImport/pluginWebImport.pro

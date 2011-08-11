@@ -19,6 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef _BASICOPENCV_H_
 #define _BASICOPENCV_H_
 
+#include "public.h"
 #include <vector>
 #ifdef OPENCV22
 #include <opencv2/imgproc/imgproc.hpp>
@@ -35,10 +36,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <opencv/ml.h>
 #include <opencv/highgui.h>
 #endif
-
-#include <types.h>
-#undef RGB
-#define RGB(image,i) (image->imageData[i])
 
 /* computes the point corresponding to a certain angle on an input image */
 #define calc_point(img, angle)                                      \
@@ -213,15 +210,15 @@ namespace BasicML
 		u32 pointsCount = 0;
 
 		FOR(i,height){
-			FOR(j,width){
-				if (RGB(image,i*width+j)){
+                        FOR(j,width){
+                                if ((uchar)image->imageData[i*width+j]){
 					points[pointsCount++] = cvPoint3D32f(j,i,0);
 				}
 			}
 		}
 		CvPoint *clusters = KmeansClustering(points, pointsCount, clusterCount, width, height);
 		//FOR(i,pointsCount)
-                        //RGB(image, u32(points[i].y*width + points[i].x)) = ((u32)points[i].z + 1)*255/(clusterCount+1);
+			//RGB(image, u32(points[i].y*width + points[i].x)) = ((u32)points[i].z + 1)*255/(clusterCount+1);
 		delete points;
 		return clusters;
 	}
@@ -322,8 +319,8 @@ namespace BasicML
 		if(length != (u32)(y->widthStep*y->height)) return eig;
 		CvPoint2D32f *points = new CvPoint2D32f[length];
 		FOR(i, length){
-			points[i].x = RGB(x, i)/255.f;
-			points[i].y = RGB(y, i)/255.f;
+                        points[i].x = x->imageData[i]/255.f;
+                        points[i].y = y->imageData[i]/255.f;
 		}
 		eig = PCA(points, length);
 		delete[] points;
@@ -377,7 +374,7 @@ namespace BasicML
 		u32 height = x->height;
 		FOR(i,height){
 			FOR(j, width){
-				RGB(dst,i*width + j) = isInsideEllipse(cvPoint2D32f(RGB(x,i*width+j)/255.f, RGB(y,i*width+j)/255.f), eig, ratio) ? 255 : 0;
+                                dst->imageData[i*width + j] = isInsideEllipse(cvPoint2D32f((unsigned char)(x->imageData[i*width+j])/255.f, ((unsigned char)y->imageData[i*width+j])/255.f), eig, ratio) ? 255 : 0;
 			}
 		}
 	}

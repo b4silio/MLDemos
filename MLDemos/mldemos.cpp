@@ -370,7 +370,7 @@ void MLDemos::initDialogs()
     connect(optionsDynamic->centerCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->resampleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->resampleSpin, SIGNAL(valueChanged(int)), this, SLOT(ChangeActiveOptions()));
-<<<<<<< HEAD
+
 	connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
 	connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
 	connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
@@ -389,25 +389,6 @@ void MLDemos::initDialogs()
 	connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
 	connect(optionsCompare->clearButton, SIGNAL(clicked()), this, SLOT(CompareClear()));
 	connect(optionsCompare->removeButton, SIGNAL(clicked()), this, SLOT(CompareRemove()));
-=======
-    connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
-    connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
-    connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
-
-    connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
-    connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
-    connect(optionsMaximize->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
-    connect(optionsMaximize->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
-    connect(optionsMaximize->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
-    connect(optionsMaximize->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
-    connect(optionsMaximize->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
-    connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
-
-    connect(optionsCompare->compareButton, SIGNAL(clicked()), this, SLOT(Compare()));
-    connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
-    connect(optionsCompare->clearButton, SIGNAL(clicked()), this, SLOT(CompareClear()));
-    connect(optionsCompare->removeButton, SIGNAL(clicked()), this, SLOT(CompareRemove()));
->>>>>>> 586fb883bad075ffde9fafe26e57352d57ff2e5f
 
     optionsClassify->tabWidget->clear();
     optionsCluster->tabWidget->clear();
