@@ -15,7 +15,9 @@ include($$MLPATH/MLDemos_variables.pri)
 FORMS += WebImport.ui
 
 HEADERS +=	WebImport.h \
-    parser.h
+    parser.h \
+    tableview.h
 
 SOURCES += 	WebImport.cpp \
-    parser.cpp
+    parser.cpp \
+    tableview.cpp

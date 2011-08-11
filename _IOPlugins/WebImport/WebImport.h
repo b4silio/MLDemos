@@ -25,19 +25,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef WEBIMPORT_H_INCLUDED
 #define WEBIMPORT_H_INCLUDED
 
-//using namespace std;
-
 #include "parser.h"
 #include <interfaces.h>
-//#include <QTimerEvent>
 #include "ui_WebImport.h"
-//#include "public.h"
-//#include "widget.h"
-//#include <QMutex>
-//#include <QMutexLocker>
-//#include <QApplication>
+#include <QFileDialog>
+#include <QTableView>
+#include <QDebug>
 
- #include <QFileDialog>
+
 
 class WebImport : public QObject, public InputOutputInterface
 {
@@ -76,10 +71,6 @@ public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
         void Updating();
-private slots:
-        void on_loadImgButton_released();
-        void on_loadImgButton_clicked();
 };
-
 
 #endif // WEBIMPORT_H_INCLUDED

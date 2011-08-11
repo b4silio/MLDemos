@@ -41,6 +41,7 @@ void WebImport::Start()
     connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
     connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
     connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(Updating()));
+
     guiDialog->show();
 }
 
@@ -61,9 +62,8 @@ void WebImport::Updating()
     std::cout << "Will load " << filename.toStdString() << std::endl;
     inputParser->parse(filename.toStdString().c_str());
     pair<vector<fvec>,ivec> data = inputParser->getData(NUMERIC_TYPES);
-    std::cout << "Got dataset" << std::endl;
+    std::cout << "Dataset extracted" << std::endl;
     if(data.first.size() < 2) return;
-    std::cout << "Sending to MLDemos" << std::endl;
     emit(SetData(data.first, data.second, vector<ipair>()));
 }
 
