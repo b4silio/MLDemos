@@ -13,7 +13,7 @@ win32{
 }
 
 # choices are opencv22 or opencv21
-CONFIG += opencv22
+CONFIG += opencv21
 
 mainApp{
 }else{

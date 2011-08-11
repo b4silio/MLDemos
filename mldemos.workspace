@@ -32,7 +32,6 @@
 		<Project filename="_IOPlugins/PCAFaces/PCAFaces.cbp">
 			<Depends filename="MLDemos/MLDemos.cbp" />
 		</Project>
-		<Project filename="_AlgorithmsPlugins/OpenCV/pluginOpenCV.cbp" />
-		<Project filename="_AlgorithmsPlugins/Maximizers/pluginMaximizers.cbp" active="1" />
+		<Project filename="_IOPlugins/WebImport/pluginWebImport.cbp" active="1" />
 	</Workspace>
 </CodeBlocks_workspace_file>
