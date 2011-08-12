@@ -216,7 +216,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
 {
     vector<fvec> samples(data.size());
     ivec labels(data.size());
-    fvec sample(data.at(0).size());
+    fvec sample(data.at(0).size()-1);
     std::cout << "Cleaning dataset" << std::endl;
     cleanData(acceptedTypes);
     size_t j;
