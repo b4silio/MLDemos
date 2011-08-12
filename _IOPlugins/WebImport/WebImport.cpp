@@ -42,9 +42,10 @@ void WebImport::Start()
     //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
     //connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
 	connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile()));
-
+	connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(Download(QUrl)));
     guiDialog->show();
 	gui->browserWebView->show();
+	qDebug() << "WebImport initialized";
 }
 
 void WebImport::Stop()
@@ -55,6 +56,19 @@ void WebImport::Stop()
 void WebImport::Closing()
 {
     emit(Done(this));
+}
+
+void WebImport::Download(QUrl url)
+{
+	if(url.toString().endsWith(".data"))
+	{
+		qDebug() << "Importing!! " << url.toString();
+	}
+	else
+	{
+		qDebug() << "Loading page: " << url.toString();
+		gui->browserWebView->load(url);
+	}
 }
 
 void WebImport::LoadFile()

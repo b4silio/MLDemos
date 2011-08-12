@@ -72,6 +72,7 @@ public slots:
 	void Closing();
 	void Update(QString filename);
 	void LoadFile();
+	void Download(QUrl url);
 };
 
 #endif // WEBIMPORT_H_INCLUDED
