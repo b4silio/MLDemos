@@ -3,6 +3,7 @@
 # ##########################
 TEMPLATE = lib
 CONFIG += plugin
+QT += webkit
 NAME = IO_WebImport
 MLPATH =../..
 

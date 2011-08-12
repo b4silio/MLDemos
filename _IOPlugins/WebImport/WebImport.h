@@ -70,7 +70,8 @@ signals:
 public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
-    void Updating();
+	void Update(QString filename);
+	void LoadFile();
 };
 
 #endif // WEBIMPORT_H_INCLUDED

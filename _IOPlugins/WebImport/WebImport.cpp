@@ -38,11 +38,13 @@ void WebImport::Start()
     gui->setupUi(guiDialog = new QDialog());
     inputParser = new CSVParser();
     connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
+	connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
     //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
     //connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
-    connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(Updating()));
+	connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile()));
 
     guiDialog->show();
+	gui->browserWebView->show();
 }
 
 void WebImport::Stop()
@@ -55,9 +57,14 @@ void WebImport::Closing()
     emit(Done(this));
 }
 
-void WebImport::Updating()
+void WebImport::LoadFile()
 {
-    QString filename = QFileDialog::getOpenFileName(NULL, tr("Load Data"), QDir::currentPath(), tr("dataset files (*.data *.csv);;All files (*.*)"));
+	QString filename = QFileDialog::getOpenFileName(NULL, tr("Load Data"), QDir::currentPath(), tr("dataset files (*.data *.csv);;All files (*.*)"));
+	Update(filename);
+}
+
+void WebImport::Update(QString filename)
+{
     if(filename.isEmpty()) return;
     inputParser->parse(filename.toStdString().c_str());
     pair<vector<fvec>,ivec> data = inputParser->getData(NUMERIC_TYPES);

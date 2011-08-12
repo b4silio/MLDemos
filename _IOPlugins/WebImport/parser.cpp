@@ -217,13 +217,13 @@ pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
     vector<fvec> samples(data.size());
     ivec labels(data.size());
     fvec sample(data.at(0).size()-1);
->>>>>>> 6771d750e38b66265e8c91ae2a0ac3b24fd1d744
     std::cout << "Cleaning dataset" << std::endl;
     cleanData(acceptedTypes);
     std::cout << "Transfering into container" << std::endl;
+	size_t j;
     for(size_t i = 0; i < data.size(); i++)
     {
-        for(j = 0; j < data.at(i).size()-1; j++) // consider last col as label
+		for(j = 0; j < data.at(i).size()-1; j++) // consider last col as label
             sample.at(j) = atof(data.at(i).at(j).c_str());
         samples.at(i) = sample;
         labels.at(i) = classLabels[data.at(i).at(j)]; // j is one the last col now
