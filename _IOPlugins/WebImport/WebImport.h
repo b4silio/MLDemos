@@ -56,7 +56,7 @@ public:
 
 	Ui::WebImportDialog *gui;
 	QDialog *guiDialog;
-        CSVParser *inputParser;
+    CSVParser *inputParser;
 	WebImport();
 	~WebImport();
 signals:
@@ -70,7 +70,7 @@ signals:
 public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
-        void Updating();
+    void Updating();
 };
 
 #endif // WEBIMPORT_H_INCLUDED
