@@ -25,73 +25,73 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 struct fVec
 {
-        friend std::ostream& operator<<(std::ostream& output, const fVec& v) {
-                output << "(" <<  v.x << ", " << v.y <<")";
-                return output;  // for multiple << operators.
-        }
-        friend std::istream & operator>>(std::istream &input, fVec &v) {
-                input >> v.x >> v.y;
-                return input;  // for multiple >> operators.
-        }
+	friend std::ostream& operator<<(std::ostream& output, const fVec& v) {
+		output << "(" <<  v.x << ", " << v.y <<")";
+		return output;  // for multiple << operators.
+	}
+	friend std::istream & operator>>(std::istream &input, fVec &v) {
+		input >> v.x >> v.y;
+		return input;  // for multiple >> operators.
+	}
 
-        fVec(const float x=0, const float y=0) : x(x),y(y){};
-        fVec(const float* v) : x(v[0]),y(v[1]){};
-        fVec(const fVec& v) : x(v.x),y(v.y){};
-		fVec(fvec v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
-		//fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
-        union {
-                float _[2];
-                struct {float x,y;};
-        };
-        float& operator[] (unsigned int i){return _[i];};
-        float& operator() (unsigned int i){return _[i];};
+	fVec(const float x=0, const float y=0) : x(x),y(y){};
+	fVec(const float* v) : x(v[0]),y(v[1]){};
+	fVec(const fVec& v) : x(v.x),y(v.y){};
+	fVec(fvec v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
+	//fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
+	union {
+		float _[2];
+		struct {float x,y;};
+	};
+	float& operator[] (unsigned int i){return _[i];};
+	float& operator() (unsigned int i){return _[i];};
 
-        fVec& operator= (const fVec &v) {
-          if (this != &v) {
-                  x = v.x;
-                  y = v.y;
-          }
-          return *this;
-        }
+	fVec& operator= (const fVec &v) {
+		if (this != &v) {
+			x = v.x;
+			y = v.y;
+		}
+		return *this;
+	}
 
-        operator fvec () const {
-                fvec a;
-                a.resize(2);
-                a[0] = x;
-                a[1] = y;
-                return a;
-        }
+	operator fvec () const {
+		fvec a;
+		a.resize(2);
+		a[0] = x;
+		a[1] = y;
+		return a;
+	}
 
-        //operators
-        fVec operator-() const {return fVec(-x, -y);}
+	//operators
+	fVec operator-() const {return fVec(-x, -y);}
 
-        fVec operator+(const fVec& v) const {return fVec(x + v.x, y + v.y);}
-        fVec operator-(const fVec& v) const {return fVec(x - v.x, y - v.y);}
-        float operator*(const fVec& v) const {return x*v.x + y*v.y;}
+	fVec operator+(const fVec& v) const {return fVec(x + v.x, y + v.y);}
+	fVec operator-(const fVec& v) const {return fVec(x - v.x, y - v.y);}
+	float operator*(const fVec& v) const {return x*v.x + y*v.y;}
 
-        fVec operator+(const float& v) const {return fVec(x + v, y + v);}
-        fVec operator-(const float& v) const {return fVec(x - v, y - v);}
-        fVec operator*(const float& d) const {return fVec(x * d, y * d);}
-        fVec operator/(const float& d) const {return fVec(x / d, y / d);}
+	fVec operator+(const float& v) const {return fVec(x + v, y + v);}
+	fVec operator-(const float& v) const {return fVec(x - v, y - v);}
+	fVec operator*(const float& d) const {return fVec(x * d, y * d);}
+	fVec operator/(const float& d) const {return fVec(x / d, y / d);}
 
-        bool operator==(const fVec& v) const {return x == v.x && y == v.y;}
-        bool operator!=(const fVec& v) const {return x != v.x || y != v.y;}
+	bool operator==(const fVec& v) const {return x == v.x && y == v.y;}
+	bool operator!=(const fVec& v) const {return x != v.x || y != v.y;}
 
-        fVec& operator+=(const fVec& v) {x += v.x;y += v.y;return *this;}
-        fVec& operator-=(const fVec& v) {x -= v.x;y -= v.y;return *this;}
+	fVec& operator+=(const fVec& v) {x += v.x;y += v.y;return *this;}
+	fVec& operator-=(const fVec& v) {x -= v.x;y -= v.y;return *this;}
 
-        fVec& operator+=(const float& v) {x += v;y += v;return *this;}
-        fVec& operator-=(const float& v) {x -= v;y -= v;return *this;}
-        fVec& operator*=(const float& d) {x *= d;y *= d;return *this;}
-        fVec& operator/=(const float& d) {
-                if(d==0) {x = y = 0; return *this;}
-                float inv = 1.f / d;x *= inv;y *= inv;return *this;}
+	fVec& operator+=(const float& v) {x += v;y += v;return *this;}
+	fVec& operator-=(const float& v) {x -= v;y -= v;return *this;}
+	fVec& operator*=(const float& d) {x *= d;y *= d;return *this;}
+	fVec& operator/=(const float& d) {
+		if(d==0) {x = y = 0; return *this;}
+		float inv = 1.f / d;x *= inv;y *= inv;return *this;}
 
-        // other functions
-        inline int size() const{return 2;}
-        inline fVec& normalize() {if(x==0 && y==0){x=1;return *this;};float l = length();x /= l;y /= l;return *this;}
-        inline float lengthSquared() const {return x * x + y * y;}
-		inline float length() const {return sqrt(lengthSquared());}
+	// other functions
+	inline int size() const{return 2;}
+	inline fVec& normalize() {if(x==0 && y==0){x=1;return *this;};float l = length();x /= l;y /= l;return *this;}
+	inline float lengthSquared() const {return x * x + y * y;}
+	inline float length() const {return sqrt(lengthSquared());}
 };
 
 void operator += (fvec &a, const fvec b);
@@ -113,6 +113,7 @@ bool operator != (const fvec a, const fvec b);
 bool operator != (const fvec a, const float b);
 
 std::vector<fvec> interpolate(std::vector<fvec> a, int count);
+std::vector<fvec> interpolateSpline(std::vector<fvec> a, int count);
 
 // generate random sample from normal distribution
 static inline float ranf()
@@ -125,9 +126,9 @@ static inline float RandN(float mean=0.f, float sigma=1.f)
 	float x1, x2, w, y1, y2;
 
 	do {
-			x1 = 2.0 * ranf() - 1.0;
-			x2 = 2.0 * ranf() - 1.0;
-			w = x1 * x1 + x2 * x2;
+		x1 = 2.0 * ranf() - 1.0;
+		x2 = 2.0 * ranf() - 1.0;
+		w = x1 * x1 + x2 * x2;
 	} while ( w >= 1.0 );
 
 	w = sqrt( (-2.0 * log( w ) ) / w );

@@ -408,17 +408,13 @@ void DrawTimer::TestFast(int start, int stop)
 			if((*classifier)->IsMultiClass())
 			{
 				fvec val = (*classifier)->TestMulti(sample);
-				if(val.size() == 2)
+				if(val.size() == 1)
 				{
-					float v0 = val[0];
-					float v1 = val[1];
-					float v = v1 - v0;
-					if(v > 0) c = QColor(max(0.f,min(255.f,(v)*255.f)),0,0);
-					else
-					{
-						int color = max(0.f,min(255.f,(-v)*255.f));
-						c = QColor(color,color,color);
-					}
+					float v = val[0];
+					int color = fabs(v)*128;
+					color = max(0,min(color, 255));
+					if(v > 0) c = QColor(color,0,0);
+					else c = QColor(color,color,color);
 				}
 				else
 				{

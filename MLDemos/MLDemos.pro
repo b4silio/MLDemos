@@ -16,6 +16,9 @@ RESOURCES += mldemos.qrc
 CONFIG += mainApp
 include($$MLPATH/MLDemos_variables.pri)
 
+CONFIG += boost
+INCLUDEPATH += $$BOOST
+
 macx:INCLUDEPATH += uiMac
 
 # ##########################
@@ -60,7 +63,8 @@ HEADERS += basicMath.h \
 	maximize.h \
 	dynamical.h \
     clusterer.h \
-    compare.h
+    compare.h \
+    spline.h
 
 SOURCES += canvas.cpp \
     datasetManager.cpp \

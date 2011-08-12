@@ -9,9 +9,9 @@ MLPATH =../..
 include($$MLPATH/MLDemos_variables.pri)
 
 unix{
-BOOST = /usr/local/boost_1_47_0
+	BOOST = /usr/local/boost_1_47_0
 }else{
-BOOST = E:/DEV/boost_1_47_0
+	BOOST = E:/DEV/boost_1_47_0
 }
 INCLUDEPATH += $$BOOST
 

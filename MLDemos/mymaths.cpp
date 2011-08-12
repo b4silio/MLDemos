@@ -20,6 +20,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "mymaths.h"
 
+#ifdef WITHBOOST
+#include "spline.h"
+#endif
+
 /************************************************************************/
 /*                       std::vector<float>                             */
 /************************************************************************/
@@ -101,13 +105,13 @@ void operator /= (fvec &a, const float b)
 fvec operator + (const fvec a, const fvec b)
 {
 	fvec c = a;
-	FOR(i, c.size()) c[i] += b[i];
+	FOR(i, min(a.size(), b.size())) c[i] += b[i];
 	return c;
 }
 fvec operator - (const fvec a, const fvec b)
 {
 	fvec c = a;
-	FOR(i, c.size()) c[i] -= b[i];
+	FOR(i, min(a.size(), b.size())) c[i] -= b[i];
 	return c;
 }
 fvec operator + (const fvec a, const float b)
@@ -138,7 +142,7 @@ fvec operator / (const fvec a, const float b)
 float operator * (const fvec a, const fvec b)
 {
 	float sum = 0;
-	FOR(i, a.size()) sum += a[i] * b[i];
+	FOR(i, min(a.size(), b.size())) sum += a[i] * b[i];
 	return sum;
 }
 
@@ -177,6 +181,32 @@ bool operator != (const fvec a, const float b)
 
 std::vector<fvec> interpolate(std::vector<fvec> a, int count)
 {
+	// basic interpolation
+	std::vector<fvec> res;
+	res.resize(count);
+	FOR(i, count)
+	{
+		int length = a.size();
+		float ratio = i/(float)count;
+		int index = (int)(ratio*length);
+		float remainder = ratio*length - (float)(int)(ratio*length);
+		if(remainder == 0 || index == length-1) res[i] = a[index];
+		else // we need to interpolate
+		{
+			fvec pt0 = a[index];
+			fvec pt1 = a[index+1];
+			res[i] = pt0*(1.f-remainder) + pt1*remainder;
+		}
+	}
+	return res;
+}
+
+std::vector<fvec> interpolateSpline(std::vector<fvec> a, int count)
+{
+#ifndef WITHBOOST
+	return interpolate(a, count); // we take the easy way out
+#endif
+
 	// basic interpolation
 	std::vector<fvec> res;
 	res.resize(count);

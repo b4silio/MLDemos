@@ -165,6 +165,12 @@ float ClassifierSVM::Test( const fVec &sample )
 
 fvec ClassifierSVM::TestMulti(const fvec &sample)
 {
+	if(classCount == 2)
+	{
+		fvec res(1);
+		res[0] = Test(sample);
+		return res;
+	}
 	fvec resp(classCount,0);
 	int data_dimension = sample.size();
 	if(!svm) return resp;

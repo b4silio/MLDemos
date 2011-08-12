@@ -375,6 +375,7 @@ void MLDemos::initDialogs()
 	connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
 	connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 	connect(optionsDynamic->colorCheck, SIGNAL(clicked()), this, SLOT(ColorMapChanged()));
+	connect(optionsDynamic->resampleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
 
 	connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
 	connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
@@ -2229,8 +2230,9 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
         canvas->data->AddSequences(trajectories);
     }
     canvas->FitToData();
-    canvas->ResetSamples();
-    canvas->repaint();
+	ResetPositiveClass();
+	canvas->ResetSamples();
+	canvas->repaint();
 }
 
 void MLDemos::QueryClassifier(std::vector<fvec> samples)

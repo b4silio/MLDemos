@@ -89,6 +89,12 @@ fvec ClassifierGMM::TestMulti(const fvec &sample)
 {
 	fvec pdf(gmms.size());
 	FOR(i, gmms.size()) pdf[i] = gmms[i]->pdf((float*)&sample[0]);
+	if(gmms.size()==2)
+	{
+		fvec res(1);
+		res[0] = log(pdf[1]) - log(pdf[0]);
+		return res;
+	}
 
 	float xmin=-10.f, xmax=10.f;
 	float sum = 0;
@@ -96,7 +102,6 @@ fvec ClassifierGMM::TestMulti(const fvec &sample)
 	{
 		pdf[i] = (min(xmax,max(xmin, log(pdf[i]))) - xmin) / (xmax);
 	}
-
 	return pdf;
 }
 

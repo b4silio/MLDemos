@@ -4,6 +4,8 @@
 #                            #
 ##############################
 
+# PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
+
 MLDEMOS = $${MLPATH}/MLDemos
 win32{
         MLBUILD = C:/tmp/MLDemos/$$NAME
@@ -14,6 +16,21 @@ win32{
 
 # choices are opencv22 or opencv21
 CONFIG += opencv21
+
+CONFIG(opencv22)|CONFIG(opencv21){
+	message("You have selected to use the OpenCV library, if you do not have/desire it, please modify MLDemos_variables.pri")
+}
+
+CONFIG(boost){
+	message("You have selected to use the Boost headers library, if you do not have/desire it, please modify MLDemos_variables.pri")
+	DEFINES += WITHBOOST
+}
+
+macx|unix{
+CONFIG(boost):BOOST = /usr/local/boost_1_47_0
+}else{
+CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
+}
 
 mainApp{
 }else{

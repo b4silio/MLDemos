@@ -183,7 +183,7 @@ void Canvas::Paint(QPainter &painter, bool bSvg)
 	}
 	if(bDisplayGrid)
 	{
-		if(!bSvg)
+		if(bSvg)
 		{
 		}
 		else
@@ -349,34 +349,32 @@ void Canvas::FitToData()
 {
 	if(!data->GetCount())
 	{
-		center[xIndex] = 0;
-		center[yIndex] = 0;
+		center = fvec(2,0);
 		SetZoom(1);
 		return;
 	}
+	int dim = data->GetDimCount();
+	center = fvec(dim,0);
+
 	// we go through all the data and find the boundaries
-	float minX=FLT_MAX, minY=FLT_MAX, maxX=-FLT_MAX, maxY=-FLT_MAX;
+	fvec mins(dim,FLT_MAX), maxes(dim,-FLT_MAX);
 	vector<fvec> samples = data->GetSamples();
 	FOR(i, samples.size())
 	{
-		fvec sample = samples[i];
-		if(minX > sample[0]) minX = sample[0];
-		if(minY > sample[1]) minY = sample[1];
-		if(maxX < sample[0]) maxX = sample[0];
-		if(maxY < sample[1]) maxY = sample[1];
+		fvec& sample = samples[i];
+		FOR(d,dim)
+		{
+			if(mins[d] > sample[d]) mins[d] = sample[d];
+			if(maxes[d] < sample[d]) maxes[d] = sample[d];
+		}
 	}
 
-	// we compute the new zoom factor
-	float diffX = maxX-minX;
-	float diffY = maxY-minY;
+	fvec diff = maxes - mins;
 
-	center[xIndex] = minX + diffX/2;
-	center[yIndex] = minY + diffY/2;
-
-	diffX *= 1.04; // add a small margin
-	diffY *= 1.04; // add a small margin
-
-	float aspectRatio = width()/(float)height();
+	center = mins + diff/2;
+	float diffX = diff[xIndex]*1.04; // add a small margin
+	float diffY = diff[yIndex]*1.04; // add a small margin
+	float aspectRatio = width() / (float)height();
 	diffX /= aspectRatio;
 
 	SetZoom(min(1/diffY,1/diffX));
@@ -729,7 +727,7 @@ void Canvas::DrawTrajectories(QPainter &painter)
 		{
 			if(i < sequences.size()-1 || !bDrawing)
 			{
-				trajectory = interpolate(trajectory, trajectoryResampleCount);
+				trajectory = interpolateSpline(trajectory, trajectoryResampleCount);
 			}
 		}
 			break;

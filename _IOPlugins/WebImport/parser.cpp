@@ -214,12 +214,12 @@ void CSVParser::cleanData(unsigned int acceptedTypes)
 
 pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
 {
-    vector<fvec> samples(data.size());
-    ivec labels(data.size());
-    fvec sample(data.at(0).size());
+	vector<fvec> samples(data.size());
+	ivec labels(data.size());
+	fvec sample(data.at(0).size()-1);
     std::cout << "Cleaning dataset" << std::endl;
     cleanData(acceptedTypes);
-    size_t j;
+	size_t j;
     std::cout << "Transfering into container" << std::endl;
     for(size_t i = 0; i < data.size(); i++)
     {

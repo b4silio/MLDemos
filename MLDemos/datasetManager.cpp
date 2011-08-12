@@ -309,6 +309,15 @@ std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(int resample
 		}
 	}
 		break;
+	case 2: // spline
+	{
+		FOR(i, trajectories.size())
+		{
+			vector<fvec> trajectory = trajectories[i];
+			trajectories[i] = interpolateSpline(trajectory, resampleCount);
+		}
+	}
+		break;
 	}
 
 
