@@ -16,7 +16,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-
+#include <QDebug>
 #include "parser.h"
 
 /* CSVRow stuff */
@@ -37,11 +37,13 @@ std::string CSVRow::at(size_t column) const
 }
 std::string CSVRow::getFirstCell() const
 {
-    return m_data.at(0);
+	if(!m_data.size()) return string();
+	return m_data.at(0);
 }
 std::string CSVRow::getLastCell() const
 {
-    return m_data.at(m_data.size()-1);
+	if(!m_data.size()) return string();
+	return m_data.back();
 }
 std::vector<std::string> CSVRow::getParsedLine() const
 {
@@ -140,6 +142,7 @@ void CSVParser::parse(const char* fileName)
 {
     // init
     file.open(fileName);
+	if(!file.is_open()) return;
     pair<map<string,unsigned int>::iterator,bool> ret;
     unsigned int id = 0;
 
@@ -147,12 +150,14 @@ void CSVParser::parse(const char* fileName)
     //for(CSVIterator parser(file); parser != CSVIterator(); ++parser)
     for(CSVIterator parser(file); !parser.eof(); ++parser)
     {
-        // Read output (class) labels
+		if(!parser->size()) continue;
+		// Read output (class) labels
         ret = classLabels.insert( pair<string,unsigned int>(parser->getLastCell(),id) );
         if (ret.second == true) id++; // new class found
-
-        // Fill dataset
-        data.push_back(parser->getParsedLine());
+		vector<string> parsed = parser->getParsedLine();
+		if(!parsed.size()) continue;
+		// Fill dataset
+		data.push_back(parsed);
     }
 
     cout << "Parsing done, read " << data.size() << " entries" << endl;
