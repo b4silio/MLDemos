@@ -31,8 +31,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QFileDialog>
 #include <QTableView>
 #include <QDebug>
-
-
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 class WebImport : public QObject, public InputOutputInterface
 {
@@ -54,6 +55,7 @@ public:
 	void Start();
 	void Stop();
 
+
 	Ui::WebImportDialog *gui;
 	QDialog *guiDialog;
     CSVParser *inputParser;
@@ -72,7 +74,7 @@ public slots:
 	void Closing();
 	void Update(QString filename);
 	void LoadFile();
-	void Download(QUrl url);
+    void Download(const QUrl & url);
 };
 
 #endif // WEBIMPORT_H_INCLUDED

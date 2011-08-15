@@ -40,12 +40,13 @@ void WebImport::Start()
     connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
 	connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
     //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
-    //connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
+    //connect(gui->spinE2, SIGN.AL(valueChanged(int)), this, SLOT(Updating()));
 	connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile()));
-	connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(Download(QUrl)));
+    connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(Download(QUrl))); // link handler
+    connect(gui->backButton, SIGNAL(clicked()),gui->browserWebView,SLOT(back()));
     guiDialog->show();
 	gui->browserWebView->show();
-	qDebug() << "WebImport initialized";
+    gui->browserWebView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 }
 
 void WebImport::Stop()
@@ -58,16 +59,22 @@ void WebImport::Closing()
     emit(Done(this));
 }
 
-void WebImport::Download(QUrl url)
+void WebImport::Download(const QUrl & url)
 {
 	if(url.toString().endsWith(".data"))
-	{
-		qDebug() << "Importing!! " << url.toString();
+    {
+        qDebug() << "Importing: " << url.toString();
+        //gui->browserWebView->triggerPageAction(QWebPage::DownloadLinkToDisk);
+
+//        QNetworkRequest request(url);
+//        QNetworkAccessManager manager;
+//        QNetworkReply *reply = manager.get(request);
+
 	}
 	else
-	{
+    {
 		qDebug() << "Loading page: " << url.toString();
-		gui->browserWebView->load(url);
+        gui->browserWebView->load(url);
 	}
 }
 
