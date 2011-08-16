@@ -224,12 +224,12 @@ void MLDemos::Dynamize()
 	vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
 	if(trajectories.size())
 	{
-		canvas->modelPixmap = QPixmap(w,h);
+		canvas->maps.model = QPixmap(w,h);
 		QBitmap bitmap(w,h);
 		bitmap.clear();
-		canvas->modelPixmap.setMask(bitmap);
-		canvas->modelPixmap.fill(Qt::transparent);
-		QPainter painter(&canvas->modelPixmap);
+		canvas->maps.model.setMask(bitmap);
+		canvas->maps.model.fill(Qt::transparent);
+		QPainter painter(&canvas->maps.model);
 		int dim = trajectories[0][0].size() / 2;
 		fvec start(dim,0);
 		FOR(i, trajectories.size())
@@ -330,7 +330,7 @@ void MLDemos::ClusterIterate()
 void MLDemos::Maximize()
 {
 	if(!canvas) return;
-	if(canvas->rewardPixmap.isNull()) return;
+	if(canvas->maps.reward.isNull()) return;
 	QMutexLocker lock(&mutex);
 	drawTimer->Stop();
 	DEL(clusterer);
@@ -587,8 +587,8 @@ void MLDemos::Train(Clusterer *clusterer)
 void MLDemos::Train(Maximizer *maximizer)
 {
 	if(!maximizer) return;
-	if(canvas->rewardPixmap.isNull()) return;
-	QImage rewardImage = canvas->rewardPixmap.toImage();
+	if(canvas->maps.reward.isNull()) return;
+	QImage rewardImage = canvas->maps.reward.toImage();
 	QRgb *pixels = (QRgb*) rewardImage.bits();
 	int w = rewardImage.width();
 	int h = rewardImage.height();
@@ -850,19 +850,40 @@ void MLDemos::Compare()
 				classifiers[tab]->LoadParams(paramName, paramValue);
 			}
 			QString algoName = classifiers[tab]->GetAlgoString();
-			fvec resultTrain, resultTest;
+			fvec resultTrain, resultTest, errorTrain, errorTest;
 			FOR(f, folds)
 			{
 				classifier = classifiers[tab]->GetClassifier();
 				if(!classifier) continue;
 				Train(classifier, positive, trainRatio);
+				bool bMulti = classifier->IsMultiClass() && DatasetManager::GetClassCount(canvas->data->GetLabels());
 				if(classifier->rocdata.size()>0)
 				{
-					resultTrain.push_back(GetBestFMeasure(classifier->rocdata[0]));
+					if(!bMulti) resultTrain.push_back(GetBestFMeasure(classifier->rocdata[0]));
+					else
+					{
+						int errors = 0;
+						std::vector<f32pair> rocdata = classifier->rocdata[0];
+						FOR(i, rocdata.size())
+						{
+							if(rocdata[i].first != rocdata[i].second) errors++;
+						}
+						errorTrain.push_back(errors/(float)rocdata.size());
+					}
 				}
 				if(classifier->rocdata.size()>1)
 				{
-					resultTest.push_back(GetBestFMeasure(classifier->rocdata[1]));
+					if(!bMulti) resultTest.push_back(GetBestFMeasure(classifier->rocdata[1]));
+					else
+					{
+						int errors = 0;
+						std::vector<f32pair> rocdata = classifier->rocdata[1];
+						FOR(i, rocdata.size())
+						{
+							if(rocdata[i].first != rocdata[i].second) errors++;
+						}
+						errorTest.push_back(errors/(float)rocdata.size());
+					}
 				}
 				DEL(classifier);
 
@@ -872,12 +893,16 @@ void MLDemos::Compare()
 				{
 					compare->AddResults(resultTrain, "f-Measure (Training)", algoName);
 					compare->AddResults(resultTest, "f-Measure (Test)", algoName);
+					compare->AddResults(errorTrain, "Error (Training)", algoName);
+					compare->AddResults(errorTest, "Error (Test)", algoName);
 					compare->Show();
 					return;
 				}
 			}
 			compare->AddResults(resultTrain, "f-Measure (Training)", algoName);
 			compare->AddResults(resultTest, "f-Measure (Test)", algoName);
+			compare->AddResults(errorTrain, "Error (Training)", algoName);
+			compare->AddResults(errorTest, "Error (Test)", algoName);
 		}
 		if(line.startsWith("Regression"))
 		{

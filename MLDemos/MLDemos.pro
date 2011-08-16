@@ -66,17 +66,10 @@ HEADERS += basicMath.h \
     compare.h \
     spline.h
 
-SOURCES += canvas.cpp \
-    datasetManager.cpp \
-    drawUtils.cpp \
-	drawSVG.cpp \
-	drawTimer.cpp \
-    main.cpp \
+SOURCES += \
+	main.cpp \
 	mldemos.cpp \
     mlprocessing.cpp \
     mlstats.cpp \
-    mlsaving.cpp \
-    mymaths.cpp \
-	roc.cpp \
-    widget.cpp \
-    compare.cpp
+	mlsaving.cpp \
+	compare.cpp

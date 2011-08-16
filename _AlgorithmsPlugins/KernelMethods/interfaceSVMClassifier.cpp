@@ -199,6 +199,8 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 	}
 	else if(classifier->type == CLASS_SVM)
 	{
+		int dim = canvas->data->GetDimCount();
+		int xIndex = canvas->xIndex, yIndex = canvas->yIndex;
 		// we want to draw the support vectors
 		svm_model *svm = ((ClassifierSVM*)classifier)->GetModel();
 		if(svm)
@@ -211,7 +213,7 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 					sv[j] = (f32)svm->SV[i][j].value;
 				}
 				int radius = 9;
-				QPointF point = canvas->toCanvasCoords(sv[0], sv[1]);
+				QPointF point = canvas->toCanvasCoords(sv[xIndex], sv[yIndex]);
 				if(abs((*svm->sv_coef)[i]) == svm->param.C)
 				{
 					painter.setPen(QPen(Qt::black, 6));

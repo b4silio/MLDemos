@@ -48,7 +48,6 @@ public:
 	void run();
 	void Refine();
 	void Clear();
-	void Test(int start, int stop);
 	void TestFast(int start, int stop);
 	void Vectors(int count, int steps);
 	void VectorsFast(int count, int steps);

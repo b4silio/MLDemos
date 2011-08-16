@@ -28,6 +28,31 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPainter>
 #include <QPainterPath>
 
+struct Pixmaps
+{
+	int w, h;
+	QPixmap confidence;
+	QPixmap reward;
+	QPixmap model;
+	QPixmap info;
+	QPixmap grid;
+	QPixmap samples;
+	QPixmap trajectories;
+	QPixmap obstacles;
+	QPixmap timeseries;
+	void clear() {
+		confidence = QPixmap();
+		reward = QPixmap();
+		model = QPixmap();
+		info = QPixmap();
+		grid = QPixmap();
+		samples = QPixmap();
+		trajectories = QPixmap();
+		obstacles = QPixmap();
+		timeseries = QPixmap();
+	}
+};
+
 class Canvas : public QWidget
 {
 	Q_OBJECT
@@ -41,13 +66,14 @@ public:
 	void DrawSamples();
 	void DrawObstacles();
 	void DrawTrajectories();
+	void DrawTimeseries();
 	void DrawRewards();
 	void DrawObstacles(QPainter &painter);
 	void DrawTrajectories(QPainter &painter);
 	void DrawSamples(QPainter &painter);
 	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
-	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0;}
+	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
 	void FitToData();
 	void DrawAxes(QPainter &painter);
 	void RedrawAxes();
@@ -58,6 +84,7 @@ public:
 	QPainterPath DrawObstacle(Obstacle o);
 	fvec center;
 	float zoom;
+	fvec zooms;
 	int xIndex, yIndex;
 	std::vector<fvec> targets;
 
@@ -75,22 +102,24 @@ protected:
 
 public:
 	DatasetManager *data;
-	QPixmap confidencePixmap;
-	QPixmap rewardPixmap;
-	QPixmap modelPixmap;
-	QPixmap infoPixmap;
-	QPixmap gridPixmap;
-	QPainterPath crosshair;
-	QPixmap samplesPixmap;
-	QPixmap trajectoriesPixmap;
-	QPixmap obstaclesPixmap;
+	Pixmaps maps;
+	QPixmap& confidencePixmap(){return maps.confidence;};
+	QPixmap& rewardPixmap(){return maps.reward;};
+	QPixmap& modelPixmap(){return maps.model;};
+	QPixmap& infoPixmap(){return maps.info;};
+	QPixmap& gridPixmap(){return maps.grid;};
+	QPixmap& samplesPixmap(){return maps.samples;};
+	QPixmap& trajectoriesPixmap(){return maps.trajectories;};
+	QPixmap& obstaclesPixmap(){return maps.obstacles;};
 	QImage qimg;
-	bool bDisplayMap, bDisplayInfo, bDisplaySingle, bDisplaySamples, bDisplayTrajectories, bDisplayLearned, bDisplayGrid;
+	QPainterPath crosshair;
+	bool bDisplayMap, bDisplayInfo, bDisplaySingle, bDisplaySamples;
+	bool bDisplayTrajectories, bDisplayLearned, bDisplayGrid, bDisplayTimeSeries;
 	bool bShowCrosshair, bNewCrosshair;
 	int trajectoryCenterType, trajectoryResampleType, trajectoryResampleCount;
 	QPoint mouse, mouseAnchor;
-	fVec fromCanvas(QPointF point);
-	fVec fromCanvas(float x, float y);
+	fvec fromCanvas(QPointF point);
+	fvec fromCanvas(float x, float y);
 	QPointF toCanvasCoords(float x, float y);
 	QPointF toCanvasCoords(fvec sample);
 	QPointF toCanvas(fVec sample);
@@ -100,6 +129,7 @@ public:
 	fvec canvasBottomRight();
 	QRectF canvasRect();
 	void SetZoom(float zoom);
+	void SetZoom(fvec zooms);
 	float GetZoom(){return zoom;}
 	void SetCenter(fvec center);
 	fvec GetCenter(){return center;}
@@ -108,6 +138,7 @@ public:
 	std::map<int,fvec> centers;
 	int drawnSamples;
 	int drawnTrajectories;
+	int drawnTimeseries;
 	std::vector<fvec> liveTrajectory;
 
 	void Paint(QPainter &painter, bool bSvg=false);

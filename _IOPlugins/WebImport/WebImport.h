@@ -46,6 +46,7 @@ public:
 	const char* QueryClustererSignal() {return SIGNAL(QueryClusterer(std::vector<fvec>));}
 	const char* QueryMaximizerSignal() {return SIGNAL(QueryMaximizer(std::vector<fvec>));}
 	const char* SetDataSignal() {return SIGNAL(SetData(std::vector<fvec>, ivec, std::vector<ipair>));}
+	const char* SetTimeseriesSignal() {return SIGNAL(SetTimeseries(std::vector<TimeSerie>));}
 	const char* FetchResultsSlot() {return SLOT(FetchResults(std::vector<fvec>));}
 	const char* DoneSignal() {return SIGNAL(Done(QObject *));}
 	QObject *object(){return this;};
@@ -62,6 +63,7 @@ public:
 signals:
 	void Done(QObject *);
 	void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories);
+	void SetTimeseries(std::vector<TimeSerie> series);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);

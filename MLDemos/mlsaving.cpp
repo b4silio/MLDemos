@@ -225,8 +225,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("samplesCheck")) displayOptions->samplesCheck->setChecked(settings.value("samplesCheck").toBool());
 	if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
 	if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
-	if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
-	if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
+	//if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
+	//if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
@@ -461,7 +461,7 @@ void MLDemos::LoadParams( QString filename )
 	{
 		in >> line;
 		in >> value;
-		qDebug() << line << " " << value << endl;
+//		qDebug() << line << " " << value << endl;
 		if(line.startsWith(classGroup))
 		{
 			bClass = true;

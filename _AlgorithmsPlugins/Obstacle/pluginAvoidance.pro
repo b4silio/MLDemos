@@ -7,23 +7,19 @@ NAME = mld_DSAvoid
 MLPATH =../..
 
 include("$$MLPATH/MLDemos_variables.pri")
-LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
 HEADERS +=	\
-                        "$$MLDEMOS/canvas.h" \
-                        "$$MLDEMOS/datasetManager.h" \
-                        "$$MLDEMOS/mymaths.h" \
-                        "$$MLDEMOS/interfaces.h" \
-                        "$$MLDEMOS/obstacles.h" \
-                        DSAvoid.h \
+			canvas.h \
+			datasetManager.h \
+			mymaths.h \
+			interfaces.h \
+			obstacles.h \
+			DSAvoid.h \
 			interfaceAvoidance.h
 
 SOURCES += 	\
-                        "$$MLDEMOS/canvas.cpp" \
-                        "$$MLDEMOS/datasetManager.cpp" \
-                        "$$MLDEMOS/mymaths.cpp" \
 			DSAvoid.cpp \
 			interfaceAvoidance.cpp
 

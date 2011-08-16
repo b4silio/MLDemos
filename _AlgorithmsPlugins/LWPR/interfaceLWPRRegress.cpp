@@ -95,7 +95,7 @@ void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	fvec sample;
 	sample.resize(2,0);
-	canvas->confidencePixmap = QPixmap();
+	canvas->maps.confidence = QPixmap();
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);

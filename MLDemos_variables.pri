@@ -6,9 +6,8 @@
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
 
-MLDEMOS = $${MLPATH}/MLDemos
 win32{
-        MLBUILD = C:/tmp/MLDemos/$$NAME
+	MLBUILD = C:/tmp/MLDemos/$$NAME
     CONFIG += WIN32
 }else{
     MLBUILD = /tmp/MLDemos/$$NAME
@@ -25,14 +24,15 @@ CONFIG(boost){
 	message("You have selected to use the Boost headers library, if you do not have/desire it, please modify MLDemos_variables.pri")
 	DEFINES += WITHBOOST
 }
-
 macx|unix{
 CONFIG(boost):BOOST = /usr/local/boost_1_47_0
 }else{
 CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
 }
 
-mainApp{
+# PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP
+
+mainApp|coreLib{
 }else{
 	TARGET = $$qtLibraryTarget($$NAME)
         CONFIG(debug, debug|release):DESTDIR = "$$MLPATH/pluginsDebug"
@@ -67,9 +67,13 @@ win32{
 
 DEPENDPATH += . \
 		.. \
+		$${MLPATH}/Core \
 		$${MLPATH}/_3rdParty
 INCLUDEPATH += . \
+		$${MLPATH}/Core \
+		$${MLPATH}/MLDemos \
 		$${MLPATH}/_3rdParty
+
 unix{
 INCLUDEPATH += /usr/include/qt4 \
 	/usr/include/qt4/QtCore \
@@ -78,7 +82,12 @@ INCLUDEPATH += /usr/include/qt4 \
 	/usr/include/qt4/QtOpenGL
 LIBS += -L/usr/local/lib
 }
-INCLUDEPATH += $$MLDEMOS
+
+CONFIG(coreLib){
+}else{
+	LIBS += -L$$MLPATH/Core -lCore
+}
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 
 ################################
 # Turn the bloody warnings off #

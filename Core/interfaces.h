@@ -64,25 +64,25 @@ public:
 		int h = canvas->height();
 
 		{
-			canvas->modelPixmap = QPixmap(w,h);
+			canvas->maps.model = QPixmap(w,h);
 			QBitmap bitmap(w,h);
 			bitmap.clear();
-			canvas->modelPixmap.setMask(bitmap);
-			canvas->modelPixmap.fill(Qt::transparent);
-			QPainter painter(&canvas->modelPixmap);
+			canvas->maps.model.setMask(bitmap);
+			canvas->maps.model.fill(Qt::transparent);
+			QPainter painter(&canvas->maps.model);
 			DrawModel(canvas, painter, classifier);
 		}
 
 		{
-			canvas->infoPixmap = QPixmap(w,h);
+			canvas->maps.info = QPixmap(w,h);
 			QBitmap bitmap(w,h);
 			bitmap.clear();
-			canvas->infoPixmap.setMask(bitmap);
-			canvas->infoPixmap.fill(Qt::transparent);
-			QPainter painter(&canvas->infoPixmap);
+			canvas->maps.info.setMask(bitmap);
+			canvas->maps.info.fill(Qt::transparent);
+			QPainter painter(&canvas->maps.info);
 			DrawInfo(canvas, painter, classifier);
 		}
-		canvas->confidencePixmap = QPixmap();
+		canvas->maps.confidence = QPixmap();
 		canvas->repaint();
 	}
 };
@@ -121,7 +121,7 @@ public:
 			modelPixmap.fill(Qt::transparent);
 			QPainter painter(&modelPixmap);
 			DrawModel(canvas, painter, clusterer);
-			canvas->modelPixmap = modelPixmap;
+			canvas->maps.model = modelPixmap;
 		}
 
 		{
@@ -132,7 +132,7 @@ public:
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
 			DrawInfo(canvas, painter, clusterer);
-			canvas->infoPixmap = infoPixmap;
+			canvas->maps.info = infoPixmap;
 		}
 		canvas->repaint();
 	}
@@ -167,13 +167,13 @@ public:
 		int h = canvas->height();
 
 		{
-			canvas->confidencePixmap = QPixmap(w,h);
-			canvas->modelPixmap = QPixmap(w,h);
+			canvas->maps.confidence = QPixmap(w,h);
+			canvas->maps.model = QPixmap(w,h);
 			QBitmap bitmap(w,h);
 			bitmap.clear();
-			canvas->modelPixmap.setMask(bitmap);
-			canvas->modelPixmap.fill(Qt::transparent);
-			QPainter painter(&canvas->modelPixmap);
+			canvas->maps.model.setMask(bitmap);
+			canvas->maps.model.fill(Qt::transparent);
+			QPainter painter(&canvas->maps.model);
 			DrawModel(canvas, painter, regressor);
 		}
 
@@ -185,7 +185,7 @@ public:
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
 			DrawInfo(canvas, painter, regressor);
-			canvas->infoPixmap = infoPixmap;
+			canvas->maps.info = infoPixmap;
 		}
 
 		DrawConfidence(canvas, regressor);
@@ -219,15 +219,15 @@ public:
 		if(!dynamical || !canvas) return;
 		int w = canvas->width();
 		int h = canvas->height();
-		canvas->confidencePixmap = QPixmap(w,h);
+		canvas->maps.confidence = QPixmap(w,h);
 
 		{
-			canvas->modelPixmap = QPixmap(w,h);
+			canvas->maps.model = QPixmap(w,h);
 			QBitmap bitmap(w,h);
 			bitmap.clear();
-			canvas->modelPixmap.setMask(bitmap);
-			canvas->modelPixmap.fill(Qt::transparent);
-			QPainter painter(&canvas->modelPixmap);
+			canvas->maps.model.setMask(bitmap);
+			canvas->maps.model.fill(Qt::transparent);
+			QPainter painter(&canvas->maps.model);
 			DrawModel(canvas, painter, dynamical);
 		}
 
@@ -240,7 +240,7 @@ public:
 
 			QPainter painter(&infoPixmap);
 			DrawInfo(canvas, painter, dynamical);
-			canvas->infoPixmap = infoPixmap;
+			canvas->maps.info = infoPixmap;
 		}
 		canvas->repaint();
 	}
@@ -318,6 +318,7 @@ public:
 	virtual const char* QueryClustererSignal() = 0; // void QueryClusterer(std::vector<fvec> samples);
 	virtual const char* QueryMaximizerSignal() = 0; // void QueryMaximizer(std::vector<fvec> samples);
 	virtual const char* SetDataSignal() = 0; // void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories);
+	virtual const char* SetTimeseriesSignal() = 0; // void SetTimeseriesSignal(std::vector<TimeSerie> series);
 	virtual const char* FetchResultsSlot() = 0; // void FetchResults(std::vector<fvec> results);
 	virtual QObject *object() = 0; // trick to get access to the QObject interface for signals and slots
 	virtual const char* DoneSignal() = 0; // void Done(QObject *);

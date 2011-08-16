@@ -7,15 +7,14 @@ NAME = mld_KNN
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
 FORMS += paramsKNN.ui paramsKNNDynamic.ui paramsKNNRegress.ui
 HEADERS +=	\
-			$$MLDEMOS/canvas.h \
-			$$MLDEMOS/datasetManager.h \
-			$$MLDEMOS/mymaths.h \
+			canvas.h \
+			datasetManager.h \
+			mymaths.h \
 			classifierKNN.h \
 			regressorKNN.h \
 			dynamicalKNN.h \
@@ -25,9 +24,6 @@ HEADERS +=	\
 			pluginKNN.h
 
 SOURCES += 	\
-			$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/datasetManager.cpp \
-			$$MLDEMOS/mymaths.cpp \
 			classifierKNN.cpp \
 			regressorKNN.cpp \
 			dynamicalKNN.cpp \

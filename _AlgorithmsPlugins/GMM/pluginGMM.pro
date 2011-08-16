@@ -7,16 +7,15 @@ NAME = mld_GMM
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
 FORMS += paramsGMM.ui paramsGMMcluster.ui paramsGMMregr.ui paramsGMMdynamic.ui
 HEADERS +=	\
-			$$MLDEMOS/canvas.h \
-			$$MLDEMOS/datasetManager.h \
-			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/drawUtils.h \
+			canvas.h \
+			datasetManager.h \
+			mymaths.h \
+			drawUtils.h \
 			classifierGMM.h \
 			clustererGMM.h \
 			regressorGMR.h \
@@ -28,10 +27,6 @@ HEADERS +=	\
 			pluginGMM.h
 
 SOURCES += 	\
-			$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/datasetManager.cpp \
-			$$MLDEMOS/mymaths.cpp \
-			$$MLDEMOS/drawUtils.cpp \
 			classifierGMM.cpp \
 			clustererGMM.cpp \
 			regressorGMR.cpp \

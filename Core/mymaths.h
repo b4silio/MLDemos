@@ -100,6 +100,8 @@ void operator += (fvec &a, const float b);
 void operator -= (fvec &a, const float b);
 void operator *= (fvec &a, const float b);
 void operator /= (fvec &a, const float b);
+//fvec& operator << (fvec &a, const fvec b);
+//fvec& operator << (fvec &a, const float b);
 fvec operator + (const fvec a, const fvec b);
 fvec operator - (const fvec a, const fvec b);
 fvec operator + (const fvec a, const float b);

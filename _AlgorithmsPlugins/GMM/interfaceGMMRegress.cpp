@@ -149,7 +149,7 @@ void RegrGMM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 			density.setPixel(i,j, qRgb(color,color,color));
 		}
 	}
-	canvas->confidencePixmap = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+	canvas->maps.confidence = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)

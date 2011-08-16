@@ -101,7 +101,19 @@ void operator /= (fvec &a, const float b)
 		FOR(i, a.size()) a[i] /= b;
 	}
 }
+/*
+fvec& operator << (fvec& a, const fvec b)
+{
+	a.insert(a.end(), b.begin(), b.end());
+	return a;
+}
 
+fvec& operator << (fvec &a, const float b)
+{
+	a.push_back(b);
+	return a;
+}
+*/
 fvec operator + (const fvec a, const fvec b)
 {
 	fvec c = a;

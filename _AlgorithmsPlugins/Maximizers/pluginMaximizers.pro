@@ -9,17 +9,16 @@ MLPATH =../..
 include($$MLPATH/MLDemos_variables.pri)
 #QMAKE_CXXFLAGS += -fopenmp
 #LIBS += -lgomp
-LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
 FORMS += paramsMaximizers.ui paramsGA.ui paramsParticles.ui
 HEADERS +=	\
-			$$MLDEMOS/canvas.h \
-			$$MLDEMOS/datasetManager.h \
-			$$MLDEMOS/mymaths.h \
-			$$MLDEMOS/drawUtils.h \
-			$$MLDEMOS/optimization_test_functions.h \
+			canvas.h \
+			datasetManager.h \
+			mymaths.h \
+			drawUtils.h \
+			optimization_test_functions.h \
 			maximizeRandom.h \
 			maximizePower.h \
 			maximizeGA.h \
@@ -36,10 +35,6 @@ HEADERS +=	\
 			interfaceBasic.h
 
 SOURCES += 	\
-			$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/datasetManager.cpp \
-			$$MLDEMOS/mymaths.cpp \
-			$$MLDEMOS/drawUtils.cpp \
 			maximizeRandom.cpp \
 			maximizePower.cpp \
 			maximizeGA.cpp \

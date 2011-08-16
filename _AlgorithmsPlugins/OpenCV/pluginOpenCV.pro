@@ -58,9 +58,9 @@ LIBS += -lopencv_core230 \
 opencv{
 FORMS += paramsBoost.ui paramsMLP.ui paramsKM.ui paramsMLPDynamic.ui paramsMLPRegress.ui
 HEADERS +=	\
-			$$MLDEMOS/canvas.h \
-			$$MLDEMOS/datasetManager.h \
-			$$MLDEMOS/mymaths.h \
+			canvas.h \
+			datasetManager.h \
+			mymaths.h \
 			basicOpenCV.h \
 			classifierBoost.h \
 			classifierMLP.h \
@@ -76,9 +76,6 @@ HEADERS +=	\
 			pluginOpenCV.h
 
 SOURCES += 	\
-			$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/datasetManager.cpp \
-			$$MLDEMOS/mymaths.cpp \
 			basicOpenCV.cpp \
 			classifierBoost.cpp \
 			classifierMLP.cpp \

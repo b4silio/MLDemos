@@ -59,7 +59,7 @@ Regressor *RegrKNN::GetRegressor()
 
 void RegrKNN::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-	canvas->confidencePixmap = QPixmap();
+	canvas->maps.confidence = QPixmap();
 }
 
 void RegrKNN::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)

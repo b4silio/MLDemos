@@ -359,9 +359,9 @@ void ClassProjections::SendToCanvas()
 		bDataIsFromCanvas = true;
 		params->toCanvasButton->setText("Set Original");
 	}
-	canvas->modelPixmap = QPixmap();
-	canvas->confidencePixmap = QPixmap();
-	canvas->infoPixmap = QPixmap();
+	canvas->maps.model = QPixmap();
+	canvas->maps.confidence = QPixmap();
+	canvas->maps.info = QPixmap();
 	canvas->ResetSamples();
 	canvas->repaint();
 }

@@ -62,7 +62,7 @@ Regressor *RegrMLP::GetRegressor()
 
 void RegrMLP::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-	canvas->confidencePixmap = QPixmap();
+	canvas->maps.confidence = QPixmap();
 }
 
 void RegrMLP::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)

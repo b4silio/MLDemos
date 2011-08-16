@@ -163,6 +163,7 @@ signals:
 	void SendResults(std::vector<fvec> results);
 public slots:
 	void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories);
+	void SetTimeseries(std::vector<TimeSerie> timeseries);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);

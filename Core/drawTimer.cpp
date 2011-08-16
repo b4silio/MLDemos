@@ -250,89 +250,6 @@ void DrawTimer::Maximization()
 	painter.drawEllipse(point, 3, 3);
 }
 
-void DrawTimer::Test(int start, int stop)
-{
-	if(stop < 0 || stop > w*h) stop = w*h;
-	fvec sample(2);
-	vector<Obstacle> obstacles = canvas->data->GetObstacles();
-	for (int i=start; i<stop; i++)
-	{
-		drawMutex.lock();
-		int x = perm[i]%w;
-		int y = perm[i]/w;
-		drawMutex.unlock();
-		if(x >= bigMap.width() || y >= bigMap.height()) continue;
-		sample = canvas->toSampleCoords(x,y);
-		fvec val;
-		float v;
-		QMutexLocker lock(mutex);
-		if((*classifier))
-		{
-			int dim = (*classifier)->Dim();
-			sample.resize(dim, 0);
-			v = (*classifier)->Test(sample);
-			int color = (int)(fabs(v)*128);
-			color = max(0,min(color, 255));
-			QColor c;
-			if(v > 0) c = QColor(color,0,0);
-			else c = QColor(color,color,color);
-			drawMutex.lock();
-			bigMap.setPixel(x,y,c.rgb());
-			drawMutex.unlock();
-		}
-		else if(*regressor)
-		{
-			val = (*regressor)->Test(sample);
-		}
-		else if(*clusterer)
-		{
-			fvec res = (*clusterer)->Test(sample);
-			float r=0,g=0,b=0;
-			if(res.size() > 1)
-			{
-				FOR(i, res.size())
-				{
-					r += SampleColor[(i+1)%SampleColorCnt].red()*res[i];
-					g += SampleColor[(i+1)%SampleColorCnt].green()*res[i];
-					b += SampleColor[(i+1)%SampleColorCnt].blue()*res[i];
-				}
-			}
-			else if(res.size())
-			{
-				r = (1-res[0])*255 + res[0]* 255;
-				g = (1-res[0])*255;
-				b = (1-res[0])*255;
-			}
-			if( r < 10 && g < 10 && b < 10) r = b = g = 255;
-			QColor c = QColor(r,g,b);
-			drawMutex.lock();
-			bigMap.setPixel(x,y,c.rgb());
-			drawMutex.unlock();
-		}
-		else if(*dynamical && bColorMap)
-		{
-			val = (*dynamical)->Test(sample);
-			if((*dynamical)->avoid)
-			{
-				(*dynamical)->avoid->SetObstacles(obstacles);
-				fvec newRes = (*dynamical)->avoid->Avoid(sample, val);
-				val = newRes;
-			}
-			float speed = sqrtf(val[0]*val[0] + val[1]*val[1]);
-			speed = min(1.f,speed);
-			int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
-			QColor color = QColor::fromHsv(hue, 255, 255);
-			color.setRed(255*(1-speed) + color.red()*speed);
-			color.setGreen(255*(1-speed) + color.green()*speed);
-			color.setBlue(255*(1-speed) + color.blue()*speed);
-			drawMutex.lock();
-			bigMap.setPixel(x,y,color.rgb());
-			drawMutex.unlock();
-		}
-	}
-}
-
-
 void DrawTimer::VectorsFast(int count, int steps)
 {
 	if(!(*dynamical)) return;
@@ -387,10 +304,12 @@ void DrawTimer::VectorsFast(int count, int steps)
 void DrawTimer::TestFast(int start, int stop)
 {
 	if(stop < 0 || stop > w*h) stop = w*h;
-	fVec sample;
 	mutex->lock();
+	int dim=canvas->data->GetDimCount();
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
 	mutex->unlock();
+	if(dim > 2) return; // we dont want to draw multidimensional stuff, it's ... problematic
+	fvec sample(dim);
 	for (int i=start; i<stop; i++)
 	{
 		drawMutex.lock();
@@ -399,7 +318,7 @@ void DrawTimer::TestFast(int start, int stop)
 		if(x >= bigMap.width() || y >= bigMap.height()) continue;
 		drawMutex.unlock();
 		sample = canvas->fromCanvas(x,y);
-		fVec val;
+		fvec val(dim);
 		float v;
 		QMutexLocker lock(mutex);
 		if((*classifier))
@@ -418,6 +337,10 @@ void DrawTimer::TestFast(int start, int stop)
 				}
 				else
 				{
+					// we find the max
+					int maxVal = 0;
+					FOR(i, val.size()) if (val[maxVal] < val[i]) maxVal = i;
+					val[maxVal] *= 3;
 					float sum = 0;
 					FOR(i, val.size()) sum += fabs(val[i]);
 					sum = 1.f/sum;

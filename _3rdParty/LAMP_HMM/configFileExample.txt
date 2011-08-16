@@ -1,0 +1,82 @@
+# This is an example of a configuration file defining information needed by hmmMain.C
+# Leave the labels defining the numbers (such as "nbDimensions=") intact 
+# and edit only the numbers under them
+
+# 1. Name of sequence file where the input data are stored
+sequenceName= lenna64.seq
+#/Users/daniel/C-CODE/HMM2Movies/Source/lenna64.seq
+
+# 2. skipLearning is set to 0 if we want to compute a new HMM 
+# and to 1 if we only want to find the distance to an input HMM
+skipLearning= 0
+# 1
+
+# 3. Name of HMM file that can be used as initialization for HMM learning if skipLearning = 0
+# and is used for distance calculation if skipLearning = 1
+# If skipLearning = 0, the file is optional: put 0 instead of name if random initialization is desired
+# If skipLearning = 1, an actual file name is required.
+hmmInputName=
+# /Users/daniel/C-CODE/HMM2Movies/Source/hmmInputDiscrete.hmm
+0
+
+# 4. Prefix part of name to be used to generate names of output files. 
+# If the prefix is "output", then three files are generated:
+# a.  output.hmm: computed HMM model
+# b. output.sta: sequences of most probable states using Viterbi
+# c. outputRoot.obs: sequences of expected observations for each probable states\
+outputName=
+output
+
+# 5. Number of components that feature vectors have
+nbDimensions=
+3
+
+# 6. Numbers of symbols used for each of the feature vector components 
+# There should be as many such numbers as nbDimensions; they are not necessarily equal.
+
+nbSymbols=
+256 257 258
+
+# 7. Number of states used by HMM; this number is overwritten if a file defining an input HMM is defined above
+
+nbStates=
+5
+
+# 8. A seed is used to generate random numbers for initial transition matrix
+# Since the HMM iteration finds a local minimum, a different seed may give slightly different results
+# Change seed to see the effect of the initialization on the HMM model and the state segmentation of the data
+
+seed=
+100
+
+# Next come several keywords that define the methods used for the computation
+
+# 9. Use either plain transition matrix A 
+# or matrix A computed using explicit state duration modeling using Gamma distribution
+# See Rabiner and Huang book for details
+# Uncomment desired choice
+
+explicitDuration=
+0
+# 1
+
+# 10. Choose between discrete (with histograms) and gaussian (with mean and variance) representation 
+#  for the distributions of observations within each state (matrix B)
+# Use 0 for gaussian distribution false (discrete) and 1 for gaussian distribution true 
+
+gaussianDistribution=
+1
+# 1
+
+# 11. Choose between (1) Baum Welch, (2) Segmented K-Means, or (3) hybrid method for EM iteration method
+# Baum Welch follows (6.110) p. 369 of Rabiner-Huang. It is slow
+# Segmented K-Means follows (6.15.2) p. 383 of Rabiner-Huang
+# See code for hybrid method
+# Segmental K-Means is fastest
+# Use 1 for Baum-Welch, 2 for Segmented K-Means, and 3 for hybrid method
+
+EMMethod=
+# 1
+2
+# 3
+

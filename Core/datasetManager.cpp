@@ -26,6 +26,11 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+/******************************************/
+/*                                        */
+/*    DATASET MANAGER                     */
+/*                                        */
+/******************************************/
 u32 DatasetManager::IDCount = 0;
 
 DatasetManager::DatasetManager(int dimension)
@@ -165,6 +170,31 @@ void DatasetManager::RemoveSequence(unsigned int index)
 	if(index >= sequences.size()) return;
 	for(int i=index; i<sequences.size()-1; i++) sequences[i] = sequences[i+1];
 	sequences.pop_back();
+}
+
+void DatasetManager::AddTimeSerie(std::string name, std::vector<fvec> data, std::vector<long int>  timestamps)
+{
+	TimeSerie serie;
+	serie.name = name;
+	serie.data = data;
+	serie.timestamps = timestamps;
+	AddTimeSerie(serie);
+}
+
+void DatasetManager::AddTimeSerie(TimeSerie serie)
+{
+	series.push_back(serie);
+}
+
+void DatasetManager::AddTimeSeries(std::vector< TimeSerie > newTimeSeries)
+{
+	series.insert(series.end(), newTimeSeries.begin(), newTimeSeries.end());
+}
+
+void DatasetManager::RemoveTimeSerie(unsigned int index)
+{
+	if(index >= series.size()) return;
+	series.erase(series.begin() + index);
 }
 
 void DatasetManager::AddObstacle(fvec center, fvec axes, float angle, fvec power, fvec repulsion)
@@ -545,6 +575,17 @@ bool DatasetManager::Load(const char *filename)
 	return samples.size() > 0;
 }
 
+int DatasetManager::GetDimCount()
+{
+	int dim = 2;
+	if(samples.size()) dim = samples[0].size();
+	if(series.size() && series[0].size())
+	{
+		dim = series[0][0].size()+1;
+	}
+	return dim;
+}
+
 u32 DatasetManager::GetClassCount(ivec classes)
 {
 	u32 counts[256];
@@ -560,4 +601,157 @@ bvec DatasetManager::GetFreeFlags()
 	bvec res;
 	FOR(i, flags.size()) res.push_back(flags[i] == _UNUSED);
 	return res;
+}
+
+/******************************************/
+/*                                        */
+/*    REWARD MAPS                         */
+/*                                        */
+/******************************************/
+RewardMap& RewardMap::operator= (const RewardMap& r)
+{
+  if (this != &r) {
+	  dim = r.dim;
+	  size = r.size;
+	  length = r.length;
+	  lowerBoundary = r.lowerBoundary;
+	  higherBoundary = r.higherBoundary;
+	  if(rewards) delete [] rewards;
+	  rewards = new float[length];
+	  memcpy(rewards, r.rewards, length*sizeof(float));
+  }
+  return *this;
+}
+
+void RewardMap::SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary)
+{
+	this->lowerBoundary = lowerBoundary;
+	this->higherBoundary = higherBoundary;
+	this->size = size;
+	dim = size.size();
+	length = 1;
+	FOR(i, size.size()) length *= size[i];
+	if(this->rewards) delete [] this->rewards;
+	this->rewards = new float[length];
+	memcpy(this->rewards, rewards, length*sizeof(float));
+}
+
+void RewardMap::Clear()
+{
+	dim = 0;
+	size.clear();
+	length = 0;
+	lowerBoundary.clear();
+	higherBoundary.clear();
+	if(rewards) delete [] rewards;
+}
+
+void RewardMap::Zero()
+{
+	FOR(i, length) rewards[i] = 0;
+}
+
+// return the value of the reward function at the coordinates provided
+float RewardMap::ValueAt(fvec sample)
+{
+	if(!rewards) return 0.f;
+	ivec index;
+	index.resize(dim);
+	FOR(d, dim)
+	{
+		//we check if we're outside the boundaries
+		if(sample[d] < lowerBoundary[d]) sample[d] = lowerBoundary[d];
+		if(sample[d] > higherBoundary[d]) sample[d] = higherBoundary[d];
+		// now we get the closest index on the map
+		index[d] = (int)((sample[d] - lowerBoundary[d]) / (higherBoundary[d] - lowerBoundary[d]) * size[d]);
+	}
+
+	// we convert the map index to a vector index
+	int rewardIndex = 0;
+	FOR(d,dim)
+	{
+		rewardIndex = rewardIndex*size[dim-d-1]+index[dim-d-1];
+	}
+
+	//printf("sample: %f %f index: %d %d (%d) value: %f\n", sample[0], sample[1], index[0], index[1], rewardIndex, rewards[rewardIndex]);
+	// TODO: return interpolation of closest indices instead of the closest index itself
+	return rewards[rewardIndex];
+}
+
+void RewardMap::SetValueAt(fvec sample, float value)
+{
+	if(!rewards) return;
+	ivec index;
+	index.resize(dim);
+	FOR(d, dim)
+	{
+		//we check if we're outside the boundaries
+		if(sample[d] < lowerBoundary[d]) return;
+		if(sample[d] > higherBoundary[d]) return;
+		// now we get the closest index on the map
+		index[d] = (int)((sample[d] - lowerBoundary[d]) / (higherBoundary[d] - lowerBoundary[d]) * size[d]);
+	}
+
+	// we convert the map index to a vector index
+	int rewardIndex = 0;
+	FOR(d,dim)
+	{
+		rewardIndex = rewardIndex*size[dim-d-1]+index[dim-d-1];
+	}
+	rewards[rewardIndex] = value;
+}
+
+void RewardMap::ShiftValueAt(fvec sample, float shift)
+{
+	if(!rewards) return;
+	ivec index;
+	index.resize(dim);
+	FOR(d, dim)
+	{
+		//we check if we're outside the boundaries
+		if(sample[d] < lowerBoundary[d]) return;
+		if(sample[d] > higherBoundary[d]) return;
+		// now we get the closest index on the map
+		index[d] = (int)((sample[d] - lowerBoundary[d]) / (higherBoundary[d] - lowerBoundary[d]) * size[d]);
+	}
+	// we convert the map index to a vector index
+	int rewardIndex = 0;
+	FOR(d,dim)
+	{
+		rewardIndex = rewardIndex*size[dim-d-1]+index[dim-d-1];
+	}
+	printf("index: %d value: %f\n", rewardIndex, rewards[rewardIndex]);
+	rewards[rewardIndex] += shift;
+}
+
+void RewardMap::ShiftValueAt(fvec sample, float radius, float shift)
+{
+	if(!rewards) return;
+	ivec index;
+	index.resize(dim);
+	ivec lowIndex = index, hiIndex = index;
+	ivec steps; steps.resize(dim);
+	FOR(d, dim)
+	{
+		//we check if we're outside the boundaries
+		if(sample[d] < lowerBoundary[d]) return;
+		if(sample[d] > higherBoundary[d]) return;
+		// now we get the closest index on the map
+		steps[d] = (int)(2*radius / (higherBoundary[d] - lowerBoundary[d]) * size[d]);
+		index[d] = (int)((sample[d] - lowerBoundary[d]) / (higherBoundary[d] - lowerBoundary[d]) * size[d]);
+		lowIndex[d] = (int)((sample[d] - radius - lowerBoundary[d]) / (higherBoundary[d] - lowerBoundary[d]) * size[d]);
+	}
+	FOR(i, steps[1])
+	{
+		FOR(j, steps[0])
+		{
+			float x = 2.f*(j - steps[0]*0.5f)/float(steps[0]);
+			float y = 2.f*(i - steps[1]*0.5f)/float(steps[0]);
+			if(x*x + y*y > 1) continue;
+			// we convert the map index to a vector index
+			int rewardIndex = index[0] - steps[0]/2 + j + (index[1] - steps[1]/2 + i)*size[0];
+			if(rewardIndex < 0 || rewardIndex>=length) return;
+			rewards[rewardIndex] += shift;
+		}
+	}
 }

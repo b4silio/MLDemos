@@ -7,15 +7,14 @@ NAME = mld_KernelMethods
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
 FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui
 HEADERS +=	\
-			$$MLDEMOS/canvas.h \
-			$$MLDEMOS/datasetManager.h \
-			$$MLDEMOS/mymaths.h \
+			canvas.h \
+			datasetManager.h \
+			mymaths.h \
 			svm.h \
 			SOGP.h \
 			SOGP_aux.h \
@@ -37,9 +36,6 @@ HEADERS +=	\
 			pluginKernel.h
 
 SOURCES += 	\
-			$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/datasetManager.cpp \
-			$$MLDEMOS/mymaths.cpp \
 			svm.cpp \
 			SOGP.cpp \
 			SOGP_aux.cpp \

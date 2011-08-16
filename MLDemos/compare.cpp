@@ -35,6 +35,7 @@ void CompareAlgorithms::Clear()
 
 void CompareAlgorithms::AddResults(fvec result, QString name, QString algorithm)
 {
+	if(!result.size()) return;
 	results[name].push_back(result);
 	algorithms[name].push_back(algorithm);
 	bool exists = false;

@@ -366,3 +366,57 @@ SOURCES += 	\
 	nlopt/cdirect.c \
 	nlopt/bobyqa.c \
 	nlopt/auglag.c
+
+HEADERS += \
+	LAMP_HMM/discreteObsProb.h \
+	LAMP_HMM/explicitDurationTrans.h \
+	LAMP_HMM/gammaProb.h \
+	LAMP_HMM/gaussianObsProb.h \
+	LAMP_HMM/hmm.h \
+	LAMP_HMM/initStateProb.h \
+	LAMP_HMM/obs.h \
+	LAMP_HMM/obsProb.h \
+	LAMP_HMM/obsSeq.h \
+	LAMP_HMM/plainStateTrans.h \
+	LAMP_HMM/stateTrans.h \
+	LAMP_HMM/utils.h \
+	LAMP_HMM/vectorObsProb.h
+
+SOURCES += \
+	LAMP_HMM/checkDurationDist.cpp \
+	LAMP_HMM/discreteObsProb.cpp \
+	LAMP_HMM/explicitDurationTrans.cpp \
+	LAMP_HMM/gammaProb.cpp \
+	LAMP_HMM/gaussianObsProb.cpp \
+	LAMP_HMM/hmm.cpp \
+	LAMP_HMM/hmmFind.cpp \
+	LAMP_HMM/initStateProb.cpp \
+	LAMP_HMM/obsSeq.cpp \
+	LAMP_HMM/plainStateTrans.cpp \
+	LAMP_HMM/readConfigFile.cpp \
+	LAMP_HMM/utils.cpp \
+	LAMP_HMM/vectorObsProb.cpp
+
+
+
+#unix{
+#	BOOST = /usr/local/boost_1_47_0
+#}else{
+#	BOOST = E:/DEV/boost_1_47_0
+#}
+#INCLUDEPATH += $$BOOST
+
+#HEADERS += \
+#	HMMlib/allocator_traits.hpp \
+#	HMMlib/float_traits.hpp \
+#	HMMlib/hmm_matrix.hpp \
+#	HMMlib/hmm_table.hpp \
+#	HMMlib/hmm_vector.hpp \
+#	HMMlib/hmm.hpp \
+#	HMMlib/operator_traits.hpp \
+#	HMMlib/sse_operator_traits.hpp
+
+#SOURCES += \
+#	HMMlib/hmm_matrix_test.cpp \
+#	HMMlib/hmm_test.cpp \
+#	HMMlib/hmm_vector_test.cpp

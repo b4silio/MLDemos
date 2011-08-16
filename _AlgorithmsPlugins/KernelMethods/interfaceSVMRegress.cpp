@@ -332,11 +332,11 @@ void RegrSVM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 					density.setPixel(i,j, qRgb(color,color,color));
 				}
 			}
-			canvas->confidencePixmap = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+			canvas->maps.confidence = QPixmap::fromImage(density.scaled(QSize(w,h),Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 		}
-		else canvas->confidencePixmap = QPixmap();
+		else canvas->maps.confidence = QPixmap();
 	}
-	else canvas->confidencePixmap = QPixmap();
+	else canvas->maps.confidence = QPixmap();
 }
 
 void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
@@ -348,7 +348,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	sample.resize(2,0);
 	if(regressor->type == REGR_KRLS || regressor->type == REGR_RVM)
 	{
-		canvas->confidencePixmap = QPixmap();
+		canvas->maps.confidence = QPixmap();
 		int steps = w;
 		QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 		FOR(x, steps)
@@ -370,7 +370,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	}
 	else if(regressor->type == REGR_SVR)
 	{
-		canvas->confidencePixmap = QPixmap();
+		canvas->maps.confidence = QPixmap();
 		svm_parameter params = ((RegressorSVR *)regressor)->param;
 
 		float eps = params.p;

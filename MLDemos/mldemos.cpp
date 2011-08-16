@@ -473,7 +473,7 @@ void MLDemos::initPlugins()
         QObject *plugin = loader.instance();
         if (plugin)
         {
-            qDebug() << fileName;
+			qDebug() << "loading " << fileName;
             // check type of plugin
             CollectionInterface *iCollection = qobject_cast<CollectionInterface *>(plugin);
             if(iCollection)
@@ -642,8 +642,9 @@ void MLDemos::AddPlugin(InputOutputInterface *iIO)
     inputoutputs.push_back(iIO);
     bInputRunning.push_back(false);
     connect(this, SIGNAL(SendResults(std::vector<fvec>)), iIO->object(), iIO->FetchResultsSlot());
-    connect(iIO->object(), iIO->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>)));
-    connect(iIO->object(), iIO->QueryClassifierSignal(), this, SLOT(QueryClassifier(std::vector<fvec>)));
+	connect(iIO->object(), iIO->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>)));
+	connect(iIO->object(), iIO->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
+	connect(iIO->object(), iIO->QueryClassifierSignal(), this, SLOT(QueryClassifier(std::vector<fvec>)));
     connect(iIO->object(), iIO->QueryRegressorSignal(), this, SLOT(QueryRegressor(std::vector<fvec>)));
     connect(iIO->object(), iIO->QueryDynamicalSignal(), this, SLOT(QueryDynamical(std::vector<fvec>)));
     connect(iIO->object(), iIO->QueryClustererSignal(), this, SLOT(QueryClusterer(std::vector<fvec>)));
@@ -1042,9 +1043,9 @@ void MLDemos::Clear()
     DEL(dynamical);
     DEL(clusterer);
     DEL(maximizer);
-    canvas->confidencePixmap = QPixmap();
-    canvas->modelPixmap = QPixmap();
-    canvas->infoPixmap = QPixmap();
+    canvas->maps.confidence = QPixmap();
+    canvas->maps.model = QPixmap();
+    canvas->maps.info = QPixmap();
     canvas->liveTrajectory.clear();
     canvas->repaint();
     UpdateInfo();
@@ -1089,7 +1090,7 @@ void MLDemos::ClearData()
     {
         canvas->data->Clear();
         canvas->targets.clear();
-        canvas->rewardPixmap = QPixmap();
+        canvas->maps.reward = QPixmap();
     }
     Clear();
     ResetPositiveClass();
@@ -1242,8 +1243,9 @@ void MLDemos::DisplayOptionChanged()
     canvas->bDisplayLearned = displayOptions->modelCheck->isChecked();
     canvas->bDisplayMap = displayOptions->mapCheck->isChecked();
     canvas->bDisplaySamples = displayOptions->samplesCheck->isChecked();
-    canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
-    canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+	canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
+	canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
+	canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
 	{
 		int xIndex = displayOptions->xDimIndex->value();
 		int yIndex = displayOptions->yDimIndex->value();
@@ -1688,14 +1690,14 @@ void MLDemos::DrawingStopped()
         canvas->repaint();
     }
     if(bNewObstacle)
-    {
+	{
         bNewObstacle = false;
         canvas->data->AddObstacle(obstacle);
         canvas->repaint();
         if(dynamical && dynamical->avoid)
         {
             drawTimer->Stop();
-            drawTimer->Clear();
+			drawTimer->Clear();
             drawTimer->start(QThread::NormalPriority);
         }
     }
@@ -1761,11 +1763,11 @@ void MLDemos::CanvasMoveEvent()
     else if(clusterer)
     {
         clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-        drawTimer->start(QThread::NormalPriority);
+		drawTimer->start(QThread::NormalPriority);
     }
     else if(dynamical)
-    {
-        dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+	{
+		dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
         if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
     }
     canvas->repaint();
@@ -1773,7 +1775,7 @@ void MLDemos::CanvasMoveEvent()
 
 void MLDemos::ZoomChanged(float d)
 {
-    displayOptions->spinZoom->setValue(displayOptions->spinZoom->value()+d/4);
+	displayOptions->spinZoom->setValue(displayOptions->spinZoom->value()+d/4);
 }
 
 void MLDemos::Navigation( fvec sample )
@@ -2010,7 +2012,7 @@ void MLDemos::BenchmarkButton()
     }
     if(bSetValues) qDebug() << "minmax: " << minVal << " " << maxVal;
 
-    canvas->rewardPixmap = QPixmap::fromImage(image);
+    canvas->maps.reward = QPixmap::fromImage(image);
     canvas->repaint();
 }
 
@@ -2032,7 +2034,7 @@ void MLDemos :: Save(QString filename)
     }
     file.close();
     canvas->data->Save(filename.toAscii());
-    if(!canvas->rewardPixmap.isNull()) canvas->rewardPixmap.toImage().save(filename + "-reward.png");
+    if(!canvas->maps.reward.isNull()) canvas->maps.reward.toImage().save(filename + "-reward.png");
     SaveParams(filename);
     ui.statusBar->showMessage("Data saved successfully");
 }
@@ -2059,7 +2061,7 @@ void MLDemos::Load(QString filename)
     canvas->data->Load(filename.toAscii());
     LoadParams(filename);
     QImage reward(filename + "-reward.png");
-    if(!reward.isNull()) canvas->rewardPixmap = QPixmap::fromImage(reward);
+    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
     ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
     UpdateInfo();
@@ -2229,10 +2231,38 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     {
         canvas->data->AddSequences(trajectories);
     }
-    canvas->FitToData();
+	FitToData();
 	ResetPositiveClass();
 	canvas->ResetSamples();
 	canvas->repaint();
+}
+
+void MLDemos::SetTimeseries(std::vector<TimeSerie> timeseries)
+{
+//	qDebug() << "importing " << timeseries.size() << " timeseries";
+	canvas->data->Clear();
+	canvas->data->AddTimeSeries(timeseries);
+	FitToData();
+	ResetPositiveClass();
+	canvas->ResetSamples();
+	canvas->repaint();
+	qDebug() << "added " << canvas->data->GetTimeSeries().size() << " timeseries";
+//	qDebug() << " dim: " << dim << " count: " << count << " frames: " << frames;
+
+	/*
+ vector<TimeSerie> series = canvas->data->GetTimeSeries();
+	FOR(i, series.size())
+	{
+		FOR(j, series[i].size())
+		{
+			qDebug() << i << " " << j << ": " << series[i][j][0];
+			FOR(d, series[i][j].size())
+			{
+//				qDebug() << i << " " << j << " " << d << ": " << series[i][j][d];
+			}
+		}
+	}
+	*/
 }
 
 void MLDemos::QueryClassifier(std::vector<fvec> samples)
