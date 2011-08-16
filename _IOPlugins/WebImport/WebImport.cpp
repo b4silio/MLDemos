@@ -41,9 +41,10 @@ void WebImport::Start()
 	connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
     //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
     //connect(gui->spinE2, SIGN.AL(valueChanged(int)), this, SLOT(Updating()));
-	connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile()));
-    connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(Download(QUrl))); // link handler
+    connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
+    connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(LinkHandler(QUrl)));
     connect(gui->backButton, SIGNAL(clicked()),gui->browserWebView,SLOT(back()));
+    connect(&manager, SIGNAL(finished(QNetworkReply*)),SLOT(downloadHandler(QNetworkReply*)));
     guiDialog->show();
 	gui->browserWebView->show();
     gui->browserWebView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
@@ -59,17 +60,15 @@ void WebImport::Closing()
     emit(Done(this));
 }
 
-void WebImport::Download(const QUrl & url)
+void WebImport::LinkHandler(const QUrl & url)
 {
 	if(url.toString().endsWith(".data"))
     {
         qDebug() << "Importing: " << url.toString();
         //gui->browserWebView->triggerPageAction(QWebPage::DownloadLinkToDisk);
 
-//        QNetworkRequest request(url);
-//        QNetworkAccessManager manager;
-//        QNetworkReply *reply = manager.get(request);
-
+        QNetworkRequest request(url);
+        reply = manager.get(request);
 	}
 	else
     {
@@ -78,18 +77,53 @@ void WebImport::Download(const QUrl & url)
 	}
 }
 
+void WebImport::downloadHandler(QNetworkReply *reply)
+{
+    qDebug() << "Got network manager reply...";
+    QUrl url = reply->url();
+    if (reply->error()) {
+        qDebug() << "Download of " << url.toEncoded().constData() << " failed: " << qPrintable(reply->errorString());
+    } else {
+        QString path = url.path();
+        QString filename = QFileInfo(path).fileName();
+        if (saveFile(filename, reply))
+        {
+           qDebug() << "Download of " << url.toEncoded().constData() << " succeeded (saved to " <<  qPrintable(filename) << ")";
+           Parse(filename);
+        }
+    }
+}
+
+bool WebImport::saveFile(const QString &filename, QIODevice *data)
+{
+//    QDir dir;
+//    if (!dir.exists("datasets")) dir.mkdir("datasets");
+//    dir.cd("datasets");
+    //QDir::setCurrent(dir.dirName());
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "Could not open " << qPrintable(filename) << " for writing: " << qPrintable(file.errorString());
+        return false;
+    }
+
+    file.write(data->readAll());
+    file.close();
+
+    return true;
+}
+
 void WebImport::LoadFile()
 {
 	QString filename = QFileDialog::getOpenFileName(NULL, tr("Load Data"), QDir::currentPath(), tr("dataset files (*.data *.csv);;All files (*.*)"));
-	Update(filename);
+    Parse(filename);
 }
 
-void WebImport::Update(QString filename)
+void WebImport::Parse(QString filename)
 {
     if(filename.isEmpty()) return;
     inputParser->parse(filename.toStdString().c_str());
     pair<vector<fvec>,ivec> data = inputParser->getData(NUMERIC_TYPES);
-    std::cout << "Dataset extracted" << std::endl;
+    qDebug() << "Dataset extracted";
     if(data.first.size() < 2) return;
     gui->tableWidget->setRowCount(data.first.size());
     gui->tableWidget->setColumnCount(data.first.at(0).size()+1);
