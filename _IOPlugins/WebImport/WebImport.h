@@ -31,8 +31,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QFileDialog>
 #include <QTableView>
 #include <QDebug>
-
-
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
 
 class WebImport : public QObject, public InputOutputInterface
 {
@@ -55,11 +56,20 @@ public:
 	void Start();
 	void Stop();
 
+    WebImport();
+    ~WebImport();
+
+private:
 	Ui::WebImportDialog *gui;
 	QDialog *guiDialog;
     CSVParser *inputParser;
-	WebImport();
-	~WebImport();
+    /* net stuff begin */
+    //QNetworkRequest request;
+    QNetworkAccessManager manager;
+    QNetworkReply *reply;
+
+    bool saveFile(const QString &filename, QIODevice *data);
+
 signals:
 	void Done(QObject *);
 	void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories);
@@ -72,9 +82,10 @@ signals:
 public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
-	void Update(QString filename);
+    void Parse(QString filename);
 	void LoadFile();
-	void Download(QUrl url);
+    void LinkHandler(const QUrl & url);
+    void downloadHandler(QNetworkReply *reply);
 };
 
 #endif // WEBIMPORT_H_INCLUDED
