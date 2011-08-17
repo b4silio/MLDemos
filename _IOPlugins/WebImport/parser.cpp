@@ -137,23 +137,22 @@ bool CSVIterator::operator==(CSVIterator const& rhs)
 }
 
 /* CSVParser stuff */
+CSVParser::CSVParser()
+{
+    outputLabelColumn = -1;
+}
 
 void CSVParser::parse(const char* fileName)
 {
     // init
     file.open(fileName);
-	if(!file.is_open()) return;
-    pair<map<string,unsigned int>::iterator,bool> ret;
+    if(!file.is_open()) return;
     unsigned int id = 0;
 
     // Parse CSV input file
-    //for(CSVIterator parser(file); parser != CSVIterator(); ++parser)
     for(CSVIterator parser(file); !parser.eof(); ++parser)
     {
-		if(!parser->size()) continue;
-		// Read output (class) labels
-        ret = classLabels.insert( pair<string,unsigned int>(parser->getLastCell(),id) );
-        if (ret.second == true) id++; // new class found
+        if(!parser->size()) continue;
 		vector<string> parsed = parser->getParsedLine();
 		if(!parsed.size()) continue;
 		// Fill dataset
@@ -162,7 +161,6 @@ void CSVParser::parse(const char* fileName)
 
     cout << "Parsing done, read " << data.size() << " entries" << endl;
     cout << "Found " << data.at(0).size()-1 << " input labels" << endl;
-    cout << "Found " << id << " class labels" << endl;
 
     // look for data types
     for(size_t i = 0; i < data.at(1).size(); i++)
@@ -182,6 +180,30 @@ void CSVParser::parse(const char* fileName)
         // save input types
         inputTypes.insert( pair<unsigned int, unsigned int>(i,getType(data.at(testRow).at(i))));
     }
+
+    // Read output (class) labels
+    getOutputLabelTypes(true);
+}
+
+void CSVParser::setOutputColumn(unsigned int column)
+{
+    outputLabelColumn = column;
+    getOutputLabelTypes(true); // need to update output label types
+}
+
+map<string,unsigned int> CSVParser::getOutputLabelTypes(bool reparse)
+{
+    if (!reparse) return classLabels;
+    unsigned int id = 0;
+    pair<map<string,unsigned int>::iterator,bool> ret;
+    // Use by default the last column as output class
+    if (data.size() && outputLabelColumn == -1) outputLabelColumn = data.at(0).size()-1;
+    for(vector<vector<string> >::iterator it = data.begin(); it<data.end(); it++)
+    {
+        ret = classLabels.insert( pair<string,unsigned int>(it->at(outputLabelColumn),id) );
+        if (ret.second == true) id++; // new class found
+    }
+    return classLabels;
 }
 
 vector<size_t> CSVParser::getMissingValIndex()
@@ -194,11 +216,17 @@ vector<size_t> CSVParser::getMissingValIndex()
     return missingValIndex;
 }
 
+bool CSVParser::hasData()
+{
+    return data.size();
+}
+
 void CSVParser::cleanData(unsigned int acceptedTypes)
 {
     vector<string>::iterator it;
-    for(size_t i = 0; i < inputTypes.size() - 1; i++)
-        if (!(inputTypes[i]&acceptedTypes)) // data type does not correspond to a requested one
+    for(size_t i = 0; i < inputTypes.size(); i++)
+        if (!(inputTypes[i]&acceptedTypes)  // data type does not correspond to a requested one
+         && (i != outputLabelColumn))       // output labels are stored separately, ignore
         {
             std::cout << "Removing colum " << i << " of type " << inputTypes[i] <<  " ... ";
             for(size_t j = 0; j < data.size(); j++)
@@ -223,10 +251,13 @@ pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
 	size_t j;
     for(size_t i = 0; i < data.size(); i++)
     {
-		for(j = 0; j < data.at(i).size()-1; j++) // consider last col as label
-            sample.at(j) = atof(data.at(i).at(j).c_str());
+        for(j = 0; j < data.at(i).size(); j++)
+        {
+            if (j == outputLabelColumn) continue; // skip output col
+            sample.at(j) = atof(data.at(i).at(j).c_str()); // @note:use templates to have output in other formats as float ?
+        }
         samples.at(i) = sample;
-        labels.at(i) = classLabels[data.at(i).at(j)]; // j is one the last col now
+        labels.at(i) = classLabels[data.at(i).at(outputLabelColumn)];
     }
     return pair<vector<fvec>,ivec>(samples,labels);
 }

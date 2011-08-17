@@ -100,11 +100,17 @@ private:
 class CSVParser
 {
 public:
+    CSVParser();
     void parse(const char* fileName);
     vector<size_t> getMissingValIndex();
     void cleanData(unsigned int acceptedTypes);
     pair<vector<fvec>,ivec> getData(unsigned int acceptedTypes = ALL_TYPES);
+    map<string,unsigned int> getOutputLabelTypes(bool reparse);
+    void setOutputColumn(unsigned int column);
+    bool hasData();
+
 private:
+    int outputLabelColumn;
     ifstream file;
     map<string,unsigned int> classLabels;
     vector<vector<string> > data;
