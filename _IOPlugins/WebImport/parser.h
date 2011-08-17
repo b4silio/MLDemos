@@ -114,7 +114,7 @@ private:
     ifstream file;
     map<string,unsigned int> classLabels;
     vector<vector<string> > data;
-    map<unsigned int, unsigned int> inputTypes;
+    vector<unsigned int> dataTypes;
 };
 
 #endif // PARSER_H

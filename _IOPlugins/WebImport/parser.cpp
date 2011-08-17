@@ -139,7 +139,7 @@ bool CSVIterator::operator==(CSVIterator const& rhs)
 /* CSVParser stuff */
 CSVParser::CSVParser()
 {
-    outputLabelColumn = -1;
+    outputLabelColumn = 2;
 }
 
 void CSVParser::parse(const char* fileName)
@@ -147,7 +147,6 @@ void CSVParser::parse(const char* fileName)
     // init
     file.open(fileName);
     if(!file.is_open()) return;
-    unsigned int id = 0;
 
     // Parse CSV input file
     for(CSVIterator parser(file); !parser.eof(); ++parser)
@@ -156,7 +155,7 @@ void CSVParser::parse(const char* fileName)
 		vector<string> parsed = parser->getParsedLine();
 		if(!parsed.size()) continue;
 		// Fill dataset
-		data.push_back(parsed);
+                data.push_back(parsed);
     }
 
     cout << "Parsing done, read " << data.size() << " entries" << endl;
@@ -178,7 +177,7 @@ void CSVParser::parse(const char* fileName)
         }
 
         // save input types
-        inputTypes.insert( pair<unsigned int, unsigned int>(i,getType(data.at(testRow).at(i))));
+        dataTypes.push_back(getType(data.at(testRow).at(i)));
     }
 
     // Read output (class) labels
@@ -223,38 +222,44 @@ bool CSVParser::hasData()
 
 void CSVParser::cleanData(unsigned int acceptedTypes)
 {
-    vector<string>::iterator it;
-    for(size_t i = 0; i < inputTypes.size(); i++)
-        if (!(inputTypes[i]&acceptedTypes)  // data type does not correspond to a requested one
-         && (i != outputLabelColumn))       // output labels are stored separately, ignore
+    vector<string>::iterator it_str;
+    vector<unsigned int>::iterator it_uint = dataTypes.begin();
+    for(size_t i = 0; i < dataTypes.size(); i++)
+        if (!(dataTypes[i]&acceptedTypes) &&  // data type does not correspond to a requested one
+           (i != outputLabelColumn))       // output labels are stored separately, ignore
         {
-            std::cout << "Removing colum " << i << " of type " << inputTypes[i] <<  " ... ";
+            cout << "Removing colum " << i << " of type " << dataTypes[i] <<  " ... ";
             for(size_t j = 0; j < data.size(); j++)
             {
-                it = data.at(j).begin() + i;
-                data.at(j).erase(it); // delete the column
+                /* @note it seems that if we have --i instead of (i-1), the compiler produces bad code (SIGSEGV) */
+                it_str = data.at(j).begin() + (i-1);
+                data.at(j).erase(it_str); // delete the column
             }
-            std::cout << "and matching input reference ...  " ;
-            inputTypes.erase(i--); // delete the input to stay consistant
-            std::cout << "Done" << std::endl;
+            cout << "and matching type reference ...  " ;
+            it_uint = dataTypes.begin() + (i-1);
+            dataTypes.erase(it_uint); // delete the input to stay consistant
+            i--; if (i < outputLabelColumn) outputLabelColumn--;
         }
 }
 
 pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
 {
+    std::cout << "Cleaning dataset" << std::endl;
+    cleanData(acceptedTypes);
     vector<fvec> samples(data.size());
     ivec labels(data.size());
     fvec sample(data.at(0).size()-1);
-    std::cout << "Cleaning dataset" << std::endl;
-    cleanData(acceptedTypes);
     std::cout << "Transfering into container" << std::endl;
-	size_t j;
+    size_t j;
     for(size_t i = 0; i < data.size(); i++)
     {
-        for(j = 0; j < data.at(i).size(); j++)
+        unsigned int offset = 0;
+        for(j = 0; j < data.at(i).size()-1; j++)
         {
-            if (j == outputLabelColumn) continue; // skip output col
-            sample.at(j) = atof(data.at(i).at(j).c_str()); // @note:use templates to have output in other formats as float ?
+            if (j == outputLabelColumn)
+                offset = 1;
+            else
+                sample.at(j) = atof(data.at(i).at(j+offset).c_str()); // @note:use templates to have output in other formats as float ?
         }
         samples.at(i) = sample;
         labels.at(i) = classLabels[data.at(i).at(outputLabelColumn)];
