@@ -469,7 +469,7 @@ void MLDemos::initPlugins()
     foreach (QString fileName, pluginsDir.entryList(QDir::Files))
     {
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-        QObject *plugin = loader.instance();
+		QObject *plugin = loader.instance();
         if (plugin)
         {
             qDebug() << fileName;
@@ -532,6 +532,8 @@ void MLDemos::initPlugins()
                 continue;
             }
         }
+        else
+			qDebug() << loader.errorString();
     }
 }
 
