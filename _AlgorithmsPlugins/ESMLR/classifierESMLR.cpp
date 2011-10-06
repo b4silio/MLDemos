@@ -68,6 +68,13 @@ namespace ESMLR
 		return 1. / (1. + exp(-v));
 	}
 	
+	double sgn(double v)
+	{
+		if (v > 0) return 1;
+		if (v < 0) return -1;
+		return 0;
+	}
+	
 	struct Classifier
 	{
 		MatrixXd w;
@@ -95,7 +102,7 @@ namespace ESMLR
 		for (int i = 0; i < w.rows(); ++i)
 			sum += v(i) * (2. * sigm(beta * (w.row(i).dot(x) + w_b(i))) - 1.);
 		sum += v_b;
-		return 2. * sigm(w.rows() * sum) - 1.;
+		return 2. * sigm(w.rows() * 2 * sum) - 1.;
 		//return sum > 0 ? 1 : -1;
 	}
 	
@@ -196,13 +203,13 @@ namespace ESMLR
 	{
 		typedef std::pair<double, double> ErrorPair;
 		
-		Population(unsigned cutCount, unsigned dataSize, double dataAvrSd, double beta);
+		Population(unsigned cutCount, unsigned dataSize, double dataAvrSd, double beta, unsigned indPerDim);
 		ErrorPair evolveOneGen(const VectorXd& y, const MatrixXd& x, double dataAvrSd);
 		Classifier optimise(const VectorXd& y, const MatrixXd& x, double dataAvrSd, size_t genCount);
 	};
 	
-	Population::Population(unsigned cutCount, unsigned dataSize, double dataAvrSd, double beta):
-		vector<Individual>((cutCount*(dataSize+1+1)+1)*40)
+	Population::Population(unsigned cutCount, unsigned dataSize, double dataAvrSd, double beta, unsigned indPerDim):
+		vector<Individual>((cutCount*(dataSize+1)+1)*indPerDim)
 	{
 		// create initial population
 		for (iterator it(begin()); it != end(); ++it)
@@ -255,7 +262,12 @@ namespace ESMLR
 		for (size_t g = 0; g < genCount; ++g)
 		{
 			const ErrorPair e = evolveOneGen(y, x, dataAvrSd);
-			std::cout << g << " : " << e.first << ", " << e.second << std::endl;
+			std::cout << g << " : " << e.first << ", " << e.second << ", ";
+			// compute number of missclassified
+			unsigned missClassified(0);
+			for (int sample = 0; sample < y.size(); ++sample)
+				missClassified += fabs(sgn((*this)[0].classifier.eval(x.row(sample))) - y(sample)) / 2;
+			std::cout << missClassified << std::endl;
 		}
 		return (*this)[0].classifier;
 	}
@@ -266,6 +278,8 @@ namespace ESMLR
 ClassifierESMLR::ClassifierESMLR():
 	cutCount(2),
 	alpha(3),
+	genCount(30),
+	indPerDim(50),
 	classifier(0)
 {
 	bSingleClass = true;
@@ -311,12 +325,11 @@ void ClassifierESMLR::Train(std::vector< fvec > samples, ivec labels)
 	std::cerr << "stddev:\n" << stdDev << "\navr stddev: " << dataAvrSd << std::endl;
 	
 	const double beta(alpha / dataAvrSd);
-	ESMLR::Population pop(cutCount, dim, dataAvrSd, beta);
+	ESMLR::Population pop(cutCount, dim, dataAvrSd, beta, indPerDim);
 	if (classifier)
 		delete classifier;
-	classifier = new ESMLR::Classifier(pop.optimise(y, x, dataAvrSd, 30));
+	classifier = new ESMLR::Classifier(pop.optimise(y, x, dataAvrSd, genCount));
 	std::cerr << *classifier << std::endl;
-	// FIXME: set gen count as parameter
 }
 
 float ClassifierESMLR::Test(const fvec &sample)
@@ -330,16 +343,20 @@ float ClassifierESMLR::Test(const fvec &sample)
 char *ClassifierESMLR::GetInfoString()
 {
 	char *text = new char[1024];
-	sprintf(text, "Evolution Strategy, Mixture of Logistic Regressions\n"
-	"hyperplane count: %d"
-	"alpha:            %f",
-	cutCount, alpha
+	snprintf(text, 1024, "Evolution Strategy, Mixture of Logistic Regressions\n"
+	"hyperplane count: %d\n"
+	"alpha: %f\n"
+	"generation count: %d\n"
+	"individual per dim: %d\n",
+	cutCount, alpha, genCount, indPerDim
 	);
 	return text;
 }
 
-void ClassifierESMLR::SetParams(u32 cutCount, float alpha)
+void ClassifierESMLR::SetParams(u32 cutCount, float alpha, u32 genCount, u32 indPerDim)
 {
 	this->cutCount = cutCount;
 	this->alpha = alpha;
+	this->genCount = genCount;
+	this->indPerDim = indPerDim;
 }

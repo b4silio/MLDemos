@@ -39,18 +39,22 @@ void ClassESMLR::SetParams(Classifier *classifier)
 	
 	const u32 cutCount = params->esmlrCutSpin->value();
 	const float alpha = params->esmlrAlphaSpin->value();
+	const u32 genCount = params->esmlrGenSpin->value();
+	const u32 indPerDim = params->esmlrIndPerDimSpin->value();
 
 	ClassifierESMLR* c(dynamic_cast<ClassifierESMLR*>(classifier));
 	assert(c);
-	c->SetParams(cutCount, alpha);
+	c->SetParams(cutCount, alpha, genCount, indPerDim);
 }
 
 QString ClassESMLR::GetAlgoString()
 {
 	const u32 cutCount = params->esmlrCutSpin->value();
 	const float alpha = params->esmlrAlphaSpin->value();
+	const u32 genCount = params->esmlrGenSpin->value();
+	const u32 indPerDim = params->esmlrIndPerDimSpin->value();
 	
-	return QString("ESMLR %1 %2").arg(cutCount).arg(alpha);
+	return QString("ESMLR %1 %2 %3 %4").arg(cutCount).arg(alpha).arg(genCount).arg(indPerDim);
 }
 
 Classifier *ClassESMLR::GetClassifier()
@@ -62,53 +66,47 @@ Classifier *ClassESMLR::GetClassifier()
 
 void ClassESMLR::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
-	if(!classifier || !canvas) return;
-	/*painter.setRenderHint(QPainter::Antialiasing, true);
+	if(!classifier || !canvas)
+		return;
+	painter.setRenderHint(QPainter::Antialiasing, true);
 	int posClass = 1;
-	bool bUseMinMax = true;
-	float resMin = FLT_MAX;
-	float resMax = -FLT_MAX;
-	if(bUseMinMax)
-	{
-		// TODO: get the min and max for all samples
-		std::vector<fvec> samples = canvas->data->GetSamples();
-		FOR(i, samples.size())
-		{
-			float val = classifier->Test(samples[i]);
-			if(val > resMax) resMax = val;
-			if(val < resMin) resMin = val;
-		}
-		if(resMin == resMax) resMin -= 3;
-	}
 	FOR(i, canvas->data->GetCount())
 	{
-		fvec sample = canvas->data->GetSample(i);
-		int label = canvas->data->GetLabel(i);
-		QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-		float response = classifier->Test(sample);
+		const fvec sample = canvas->data->GetSample(i);
+		const int label = canvas->data->GetLabel(i);
+		const QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
+		const float response = classifier->Test(sample);
 		if(response > 0)
 		{
-			if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-			else Canvas::drawCross(painter, point, 6, 2);
+			if(label == posClass)
+				Canvas::drawSample(painter, point, 9, 1);
+			else
+				Canvas::drawCross(painter, point, 6, 2);
 		}
 		else
 		{
-			if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-			else Canvas::drawCross(painter, point, 6, 0);
+			if(label != posClass)
+				Canvas::drawSample(painter, point, 9, 0);
+			else
+				Canvas::drawCross(painter, point, 6, 0);
 		}
-	}*/
+	}
 }
 
 void ClassESMLR::SaveOptions(QSettings &settings)
 {
 	settings.setValue("esmlrCut", params->esmlrCutSpin->value());
 	settings.setValue("esmlrAlpha", params->esmlrAlphaSpin->value());
+	settings.setValue("esmlrGen", params->esmlrGenSpin->value());
+	settings.setValue("esmlrIndPerDim", params->esmlrIndPerDimSpin->value());
 }
 
 bool ClassESMLR::LoadOptions(QSettings &settings)
 {
-	if(settings.contains("esmlrCut")) params->esmlrCutSpin->setValue(settings.value("esmlrCut").toFloat());
+	if(settings.contains("esmlrCut")) params->esmlrCutSpin->setValue(settings.value("esmlrCut").toUInt());
 	if(settings.contains("esmlrAlpha")) params->esmlrAlphaSpin->setValue(settings.value("esmlrAlpha").toFloat());
+	if(settings.contains("esmlrGen")) params->esmlrGenSpin->setValue(settings.value("esmlrGen").toUInt());
+	if(settings.contains("esmlrIndPerDim")) params->esmlrGenSpin->setValue(settings.value("esmlrIndPerDim").toUInt());
 	return true;
 }
 
@@ -116,11 +114,15 @@ void ClassESMLR::SaveParams(QTextStream &file)
 {
 	file << "classificationOptions" << ":" << "esmlrCut" << " " << params->esmlrCutSpin->value() << "\n";
 	file << "classificationOptions" << ":" << "esmlrAlpha" << " " << params->esmlrAlphaSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "esmlrGen" << " " << params->esmlrGenSpin->value() << "\n";
+	file << "classificationOptions" << ":" << "esmlrIndPerDim" << " " << params->esmlrIndPerDimSpin->value() << "\n";
 }
 
 bool ClassESMLR::LoadParams(QString name, float value)
 {
 	if(name.endsWith("esmlrCut")) params->esmlrCutSpin->setValue((int)value);
 	if(name.endsWith("esmlrAlpha")) params->esmlrAlphaSpin->setValue(value);
+	if(name.endsWith("esmlrGen")) params->esmlrGenSpin->setValue((int)value);
+	if(name.endsWith("esmlrIndPerDim")) params->esmlrIndPerDimSpin->setValue((int)value);
 	return true;
 }

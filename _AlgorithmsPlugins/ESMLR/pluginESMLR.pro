@@ -13,10 +13,14 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 # Source Files            #
 ###########################
 FORMS += paramsESMLR.ui
-HEADERS +=	classifierESMLR.h \
+HEADERS +=	$$MLDEMOS/canvas.h \
+			$$MLDEMOS/mymaths.h \
+			classifierESMLR.h \
 			interfaceESMLRClassifier.h \
 			pluginESMLR.h
-SOURCES += 	classifierESMLR.cpp \
+SOURCES += 	$$MLDEMOS/canvas.cpp \
+			$$MLDEMOS/mymaths.cpp \
+			classifierESMLR.cpp \
 			interfaceESMLRClassifier.cpp \
 			pluginESMLR.cpp
 

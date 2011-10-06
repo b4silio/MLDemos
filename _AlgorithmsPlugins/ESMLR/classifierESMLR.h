@@ -34,6 +34,8 @@ class ClassifierESMLR : public Classifier
 {
 	u32 cutCount;
 	float alpha;
+	u32 genCount;
+	u32 indPerDim;
 	ESMLR::Classifier* classifier;
 	
 public:
@@ -42,7 +44,7 @@ public:
 	virtual void Train(std::vector< fvec > samples, ivec labels);
 	virtual float Test(const fvec &sample);
 	virtual char *GetInfoString();
-	void SetParams(u32 cutCount, float alpha);
+	void SetParams(u32 cutCount, float alpha, u32 genCount, u32 indPerDim);
 };
 
 #endif // _CLASSIFIER_ES_MLR_H_
