@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "basicMath.h"
 #include "basicOpenCV.h"
 #include "sampleManager.h"
+#include <QDebug>
 
 
 using namespace std;
@@ -526,7 +527,7 @@ bool SampleManager::Load(const char *filename, CvSize resolution)
 		{
 			if(sample->imageData[i] != 0)
 			{
-				bZero = true;
+				bZero = false;
 				break;
 			}
 		}

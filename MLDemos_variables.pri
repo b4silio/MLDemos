@@ -14,7 +14,7 @@ win32{
 }
 
 # choices are opencv22 or opencv21
-CONFIG += opencv21
+CONFIG += opencv22
 
 CONFIG(opencv22)|CONFIG(opencv21){
 	message("You have selected to use the OpenCV library, if you do not have/desire it, please modify MLDemos_variables.pri")

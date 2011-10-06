@@ -51,9 +51,9 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 		counts[labels[i]] = cnt++;
 	}
 	cnt = 0;
-	FOR(i, 256)
+    for(map<int,int>::iterator it=counts.begin(); it != counts.end(); it++)
 	{
-		if(counts.count(i)) classes[cnt++] = i;
+        classes[cnt++] = it->first;
 	}
 
 	FOR(i, samples.size())
@@ -69,9 +69,10 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 	FOR(i, data.size()) KILL(data[i]);
 	gmms.clear();
 	data.clear();
-	FOR(i, cnt)
+    int i=0;
+    for(map<int,vector<fvec> >::iterator it=sampleMap.begin(); it != sampleMap.end(); it++, i++)
 	{
-		vector<fvec> &s = sampleMap[i];
+        vector<fvec> &s = it->second;
 		gmms.push_back(new Gmm(nbClusters, dim));
 		data.push_back(new float[dim*s.size()]);
 		FOR(j, s.size())

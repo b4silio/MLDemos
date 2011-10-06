@@ -280,12 +280,10 @@ void MLDemos::initDialogs()
     aboutPanel->setupUi(about = new QDialog());
     showStats->setupUi(statsDialog = new QDialog());
     rocWidget = new QNamedWindow("ROC Curve", false, showStats->rocWidget);
-    crossvalidWidget = new QNamedWindow("Cross Validation", false, showStats->crossvalidWidget);
     infoWidget = new QNamedWindow("Info", false, showStats->informationWidget);
 
     connect(showStats->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(StatsChanged()));
     connect(rocWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
-    connect(crossvalidWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
     connect(infoWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
 
     connect(drawToolbar->singleButton, SIGNAL(clicked()), this, SLOT(DrawSingle()));

@@ -33,7 +33,9 @@ using namespace std;
 Projector::Projector( Ui::PCAFacesDialog *options )
 	: options(options), image(0), display(0), samples(0), start(QPoint(-1,-1)), grabber(0), bFromWebcam(true), timerID(0)
 {
-	imageWindow = new QNamedWindow("image", false, options->imageWidget);
+    eigenVectorLabel = NULL;
+    eigenValueLabel = NULL;
+    imageWindow = new QNamedWindow("image", false, options->imageWidget);
 	samplesWindow = new QNamedWindow("samples", false, options->dataWidget);
 	selection = QRect(0,0,256,256);
 	image = cvCreateImage(cvSize(256,256),8,3);
@@ -77,6 +79,8 @@ Projector::~Projector()
 	IMKILL(samples);
 	DEL(imageWindow);
 	DEL(samplesWindow);
+    DEL(eigenVectorLabel);
+    DEL(eigenValueLabel);
 }
 
 void Projector::timerEvent(QTimerEvent *event)
@@ -98,10 +102,20 @@ void Projector::DrawEigen()
 	SampleManager eigVecs;
 	eigVecs.AddSamples(eig.GetEigenVectorsImages());
 	IplImage *image = eigVecs.GetSampleImage();
-	cvNamedWindow("Eigen Vectors");
-	cvShowImage("Eigen Vectors", image);
+    if(!eigenVectorLabel) eigenVectorLabel = new QLabel();
+    eigenVectorLabel->setPixmap(QNamedWindow::toPixmap(image));
+    eigenVectorLabel->show();
+
+    IplImage *eigValsImg = eig.DrawEigenVals();
+    if(!eigenValueLabel) eigenValueLabel = new QLabel();
+    eigenValueLabel->setPixmap(QNamedWindow::toPixmap(eigValsImg));
+    eigenValueLabel->show();
+
+    //cvNamedWindow("Eigen Vectors");
+    //cvShowImage("Eigen Vectors", image);
 	eigVecs.Clear();
-	IMKILL(image);
+    IMKILL(image);
+    IMKILL(eigValsImg);
 }
 
 pair<vector<fvec>,ivec> Projector::GetData()
@@ -112,11 +126,22 @@ pair<vector<fvec>,ivec> Projector::GetData()
 	int e1 = options->spinE1->value()-1;
 	int e2 = options->spinE2->value()-1;
 
-	// we want at least one class to be 0, to avoid problems afterwards
+
+    vector<IplImage*>sourceSamples;
+    ivec sourceLabels;
+    FOR(i, sm.GetCount())
+    {
+        if(sm.GetLabel(i) == 0) continue;
+        sourceSamples.push_back(sm.GetSample(i));
+        sourceLabels.push_back(sm.GetLabel(i));
+    }
+    if(sourceSamples.size() < 3) return data;
+
+    // we want at least one class to be 0, to avoid problems afterwards
 	//FixLabels(sm);
 	// we do the data projection here
 	EigenFaces eig;
-	eig.Learn(sm.GetSamples(), sm.GetLabels());
+    eig.Learn(sourceSamples, sourceLabels);
 	vector<float *> projections = eig.GetProjections(max(e1,e2)+1, true);
 	if(!projections.size()) return data;
 	// the projections are normalized on a space 0-1, we want to add a bit of edges
@@ -437,7 +462,7 @@ void Projector::LoadDataset()
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly)) return;
 	file.close();
-	sm.Load(filename.toAscii());
+	sm.Load(filename.toAscii().data());
 	RefreshDataset();
 }
 

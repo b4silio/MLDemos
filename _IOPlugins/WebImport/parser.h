@@ -101,13 +101,18 @@ class CSVParser
 {
 public:
     CSVParser();
+    void clear();
     void parse(const char* fileName);
     vector<size_t> getMissingValIndex();
     void cleanData(unsigned int acceptedTypes);
-    pair<vector<fvec>,ivec> getData(unsigned int acceptedTypes = ALL_TYPES);
+    pair<vector<fvec>,ivec> getData(ivec excludeIndex = ivec());
     map<string,unsigned int> getOutputLabelTypes(bool reparse);
     void setOutputColumn(unsigned int column);
     bool hasData();
+    vector<unsigned int> getDataType(){return dataTypes;}
+    int getCount(){return data.size();}
+    vector< vector<string> > getRawData(){return data;}
+    static pair<vector<fvec>, ivec> numericFromRawData(vector< vector<string> > rawData);
 
 private:
     int outputLabelColumn;

@@ -124,8 +124,6 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 	classCount = svm->nr_class;
 	FOR(i, classCount) classes[i] = svm->label[i];
 
-	bFixedThreshold = true;
-	classThresh = 0.5f;
 }
 
 float ClassifierSVM::Test( const fvec &sample )
@@ -160,7 +158,7 @@ float ClassifierSVM::Test( const fVec &sample )
 		node[i].value = sample._[i];
 	}
 	estimate = (float)svm_predict(svm, node);
-	return estimate;
+    return estimate;
 }
 
 fvec ClassifierSVM::TestMulti(const fvec &sample)

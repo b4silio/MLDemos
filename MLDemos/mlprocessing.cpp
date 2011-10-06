@@ -397,8 +397,8 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
 	}
 	else
 	{
-		newLabels = labels;
-	}
+        newLabels = labels;
+    }
 
     classifier->rocdata.clear();
     classifier->roclabels.clear();
@@ -413,10 +413,17 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
         {
 			if(bMulticlass)
 			{
-				fvec res = classifier->TestMulti(samples[i]);
-				int max = 0;
-				for(int j=1; j<res.size(); j++) if(res[max] < res[j]) max = j;
-				rocData.push_back(f32pair(max, newLabels[i]));
+                fvec res = classifier->TestMulti(samples[i]);
+                if(res.size() == 1)
+                {
+                    rocData.push_back(f32pair(res[0], newLabels[i]));
+                }
+                else
+                {
+                    int maxClass = 0;
+                    for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
+                    rocData.push_back(f32pair(maxClass, newLabels[i]));
+                }
 			}
 			else
 			{
@@ -449,9 +456,16 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
 			if(bMulticlass)
 			{
 				fvec res = classifier->TestMulti(samples[perm[i]]);
-				int max = 0;
-				for(int j=1; j<res.size(); j++) if(res[max] < res[j]) max = j;
-				rocData.push_back(f32pair(max, newLabels[perm[i]]));
+                if(res.size() == 1)
+                {
+                    rocData.push_back(f32pair(res[0], newLabels[perm[i]]));
+                }
+                else
+                {
+                    int maxClass = 0;
+                    for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
+                    rocData.push_back(f32pair(maxClass, newLabels[perm[i]]));
+                }
 			}
 			else
 			{
@@ -466,11 +480,18 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
         {
 			if(bMulticlass)
 			{
-				fvec res = classifier->TestMulti(samples[perm[i]]);
-				int max = 0;
-				for(int j=1; j<res.size(); j++) if(res[max] < res[j]) max = j;
-				rocData.push_back(f32pair(max, newLabels[perm[i]]));
-			}
+                fvec res = classifier->TestMulti(samples[perm[i]]);
+                if(res.size() == 1)
+                {
+                    rocData.push_back(f32pair(res[0], newLabels[perm[i]]));
+                }
+                else
+                {
+                    int maxClass = 0;
+                    for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
+                    rocData.push_back(f32pair(maxClass, newLabels[perm[i]]));
+                }
+            }
 			else
 			{
 				float resp = classifier->Test(samples[perm[i]]);
@@ -851,6 +872,10 @@ void MLDemos::Compare()
 			}
 			QString algoName = classifiers[tab]->GetAlgoString();
 			fvec resultTrain, resultTest, errorTrain, errorTest;
+
+            map<int,int> classes;
+            FOR(j, canvas->data->GetLabels().size()) classes[canvas->data->GetLabels()[j]]++;
+
 			FOR(f, folds)
 			{
 				classifier = classifiers[tab]->GetClassifier();
@@ -859,31 +884,50 @@ void MLDemos::Compare()
 				bool bMulti = classifier->IsMultiClass() && DatasetManager::GetClassCount(canvas->data->GetLabels());
 				if(classifier->rocdata.size()>0)
 				{
-					if(!bMulti) resultTrain.push_back(GetBestFMeasure(classifier->rocdata[0]));
+                    if(!bMulti || classes.size() <= 2) resultTrain.push_back(GetBestFMeasure(classifier->rocdata[0]));
 					else
 					{
 						int errors = 0;
 						std::vector<f32pair> rocdata = classifier->rocdata[0];
-						FOR(i, rocdata.size())
+                        FOR(j, rocdata.size())
 						{
-							if(rocdata[i].first != rocdata[i].second) errors++;
-						}
-						errorTrain.push_back(errors/(float)rocdata.size());
-					}
+                            if(rocdata[j].first != rocdata[j].second)
+                            {
+                                if(classes.size() > 2) errors++;
+                                else if((rocdata[j].first < 0) != rocdata[j].second) errors++;
+                            }
+                        }
+                        if(classes.size() <= 2)
+                        {
+                            float e = min(errors,(int)rocdata.size()-errors)/(float)rocdata.size();
+                            resultTrain.push_back(1-e);
+                            resultTrain.push_back(1-e);
+                        }
+                        else
+                        {
+                            errorTrain.push_back(errors/(float)rocdata.size());
+                            errorTest.push_back(errors/(float)rocdata.size());
+                        }
+                    }
 				}
 				if(classifier->rocdata.size()>1)
 				{
-					if(!bMulti) resultTest.push_back(GetBestFMeasure(classifier->rocdata[1]));
+                    if(!bMulti || classes.size() <= 2) resultTest.push_back(GetBestFMeasure(classifier->rocdata[1]));
 					else
 					{
 						int errors = 0;
 						std::vector<f32pair> rocdata = classifier->rocdata[1];
-						FOR(i, rocdata.size())
-						{
-							if(rocdata[i].first != rocdata[i].second) errors++;
-						}
-						errorTest.push_back(errors/(float)rocdata.size());
-					}
+                        FOR(j, rocdata.size())
+                        {
+                            if(rocdata[j].first != rocdata[j].second)
+                            {
+                                if(classes.size() > 2) errors++;
+                                else if((rocdata[j].first < 0) != rocdata[j].second) errors++;
+                            }
+                        }
+                        if(classes.size() <= 2) errorTest.push_back(min(errors,(int)rocdata.size()-errors)/(float)rocdata.size());
+                        else errorTest.push_back(errors/(float)rocdata.size());
+                    }
 				}
 				DEL(classifier);
 

@@ -37,6 +37,7 @@ class Projector : public QObject
 	IplImage *image, *display, *samples;
 	QNamedWindow *imageWindow;
 	QNamedWindow *samplesWindow;
+    QLabel *eigenVectorLabel, *eigenValueLabel;
 	SampleManager sm;
 	QPoint start;
 	QRect selection;

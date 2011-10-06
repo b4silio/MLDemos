@@ -59,6 +59,8 @@ void PCAFaces::Stop()
 
 void PCAFaces::Closing()
 {
+    DEL(projector);
+    guiDialog->hide();
 	emit(Done(this));
 }
 

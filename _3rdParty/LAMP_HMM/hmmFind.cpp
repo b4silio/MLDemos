@@ -33,9 +33,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <iomanip.h>
-#include <fstream.h>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
 #include <string.h>
 #include <assert.h>
 #include <math.h>
@@ -52,6 +52,7 @@
 #include "explicitDurationTrans.h"
 #include "initStateProb.h"
 #include "hmm.h"
+using namespace std;
 
 //===============================================================================
 

@@ -31,9 +31,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <iomanip.h>
-#include <fstream.h>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
 #include <string.h>
 #include <assert.h>
 #include <math.h>
@@ -43,6 +43,7 @@
 #include "discreteObsProb.h"
 #include "gaussianObsProb.h"
 #include "vectorObsProb.h"
+using namespace std;
 
 //===============================================================================
 

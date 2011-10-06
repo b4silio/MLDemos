@@ -142,6 +142,14 @@ CSVParser::CSVParser()
     outputLabelColumn = 2;
 }
 
+void CSVParser::clear()
+{
+    outputLabelColumn = 0;
+    classLabels.clear();
+    data.clear();
+    dataTypes.clear();
+}
+
 void CSVParser::parse(const char* fileName)
 {
     // init
@@ -182,12 +190,13 @@ void CSVParser::parse(const char* fileName)
 
     // Read output (class) labels
     getOutputLabelTypes(true);
+    file.close();
 }
 
 void CSVParser::setOutputColumn(unsigned int column)
 {
     outputLabelColumn = column;
-    getOutputLabelTypes(true); // need to update output label types
+   //getOutputLabelTypes(true); // need to update output label types
 }
 
 map<string,unsigned int> CSVParser::getOutputLabelTypes(bool reparse)
@@ -196,7 +205,7 @@ map<string,unsigned int> CSVParser::getOutputLabelTypes(bool reparse)
     unsigned int id = 0;
     pair<map<string,unsigned int>::iterator,bool> ret;
     // Use by default the last column as output class
-    if (data.size() && outputLabelColumn == -1) outputLabelColumn = data.at(0).size()-1;
+    if ((data.size() && outputLabelColumn == -1) || outputLabelColumn >= data.size()) outputLabelColumn = data.at(0).size()-1;
     for(vector<vector<string> >::iterator it = data.begin(); it<data.end(); it++)
     {
         ret = classLabels.insert( pair<string,unsigned int>(it->at(outputLabelColumn),id) );
@@ -242,27 +251,73 @@ void CSVParser::cleanData(unsigned int acceptedTypes)
         }
 }
 
-pair<vector<fvec>,ivec> CSVParser::getData(unsigned int acceptedTypes)
+pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex)
 {
-    std::cout << "Cleaning dataset" << std::endl;
-    cleanData(acceptedTypes);
+    if(!data.size()) return pair<vector<fvec>,ivec>();
     vector<fvec> samples(data.size());
     ivec labels(data.size());
-    fvec sample(data.at(0).size()-1);
-    std::cout << "Transfering into container" << std::endl;
-    size_t j;
-    for(size_t i = 0; i < data.size(); i++)
+    int count = data.size();
+    int dim = data[0].size();
+    outputLabelColumn = min(dim-1, outputLabelColumn);
+    vector< map<string,int> > labelMaps(dim);
+    ivec labelCounters(dim,0);
+    pair<map<string,int>::iterator,bool> ret;
+    FOR(i, data.size())
     {
-        unsigned int offset = 0;
-        for(j = 0; j < data.at(i).size()-1; j++)
+        // check if it's always a number
+        fvec& sample = samples[i];
+        sample.resize(dim-1);
+        FOR(j, dim)
         {
-            if (j == outputLabelColumn)
-                offset = 1;
-            else
-                sample.at(j) = atof(data.at(i).at(j+offset).c_str()); // @note:use templates to have output in other formats as float ?
+            QString s(data[i][j].c_str());
+            bool ok;
+            float val = s.toFloat(&ok);
+            if(j==outputLabelColumn || !ok)
+            {
+                val = (float)labelCounters[j];
+                ret = labelMaps[j].insert(pair<string,int>(data[i][j], labelCounters[j]));
+                if(ret.second) labelCounters[j]++;
+            }
+            if(j==outputLabelColumn)
+            {
+                labels[i] = (int) val;
+                continue;
+            }
+            int index = j < outputLabelColumn ? j : j-1;
+            sample[index] = val;
         }
-        samples.at(i) = sample;
-        labels.at(i) = classLabels[data.at(i).at(outputLabelColumn)];
     }
-    return pair<vector<fvec>,ivec>(samples,labels);
+    if(!excludeIndex.size()) return pair<vector<fvec>,ivec>(samples,labels);
+    vector<fvec> newSamples(data.size());
+    int newDim = dim - excludeIndex.size();
+    FOR(i, excludeIndex.size())
+    {
+        // if it's the output we can ignore it but we need to reincrement the number of dimensions
+        if(excludeIndex[i] == outputLabelColumn)
+        {
+            newDim++;
+            break;
+        }
+    }
+    vector<bool> bExclude(dim, false);
+    FOR(i, excludeIndex.size())
+    {
+        bExclude[excludeIndex[i]] = true;
+    }
+    FOR(i, data.size())
+    {
+        newSamples[i].resize(newDim);
+        int nD = 0;
+        FOR(d, dim)
+        {
+            if(bExclude[d] || d == outputLabelColumn) continue;
+            if (d < outputLabelColumn) newSamples[i][nD] = samples[i][d];
+            else if(d > outputLabelColumn) newSamples[i][nD] = samples[i][d-1];
+            nD++;
+        }
+    }
+    return pair<vector<fvec>,ivec>(newSamples,labels);
 }
+
+
+

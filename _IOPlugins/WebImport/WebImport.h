@@ -86,6 +86,10 @@ public slots:
 	void LoadFile();
     void LinkHandler(const QUrl & url);
     void downloadHandler(QNetworkReply *reply);
+private slots:
+    void spinBoxChanged(int value);
+    void on_dumpButton_clicked();
+    void on_pcaButton_clicked();
 };
 
 #endif // WEBIMPORT_H_INCLUDED

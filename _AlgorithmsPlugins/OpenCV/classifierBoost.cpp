@@ -79,6 +79,18 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 			}
 			else
 			{
+                float minV = -1, maxV = 1;
+                if(weakType)
+                {
+                    FOR(i, samples.size())
+                    {
+                        FOR(d, dim)
+                        {
+                            minV = min(minV, samples[i][d]);
+                            maxV = max(maxV, samples[i][d]);
+                        }
+                    }
+                }
 				FOR(i, learnerCount)
 				{
 					learners[i].resize(dim);
@@ -88,7 +100,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 					}
 					else
 					{
-						FOR(d, dim) learners[i][d] = rand()/(float)RAND_MAX;
+                        FOR(d, dim) learners[i][d] = (rand()/(float)RAND_MAX)*(maxV-minV) + minV;
 					}
 				}
 			}
@@ -162,7 +174,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 				FOR(j, learnerCount)
 				{
 					float val = 0;
-					if(!weakType) sample * learners[j];
+                    if(!weakType) val = sample * learners[j];
 					else
 					{
 						FOR(d,dim) val += (sample[d] - learners[j][d])*(sample[d] - learners[j][d]);

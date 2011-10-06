@@ -30,8 +30,8 @@
 
 #ifndef _UTILS
 
-#define SUN
-//#define MAC
+//#define SUN
+#define MAC
 //#define LOCAL_RAND
 
 //===============================================================================

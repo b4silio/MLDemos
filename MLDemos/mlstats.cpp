@@ -191,10 +191,11 @@ void MLDemos::SetCrossValidationInfo()
 		text += "\n\n";
 	}
 	showStats->crossvalidText->setText(text);
-	QPixmap boxplot = BoxPlot(fmeasures, QSize(showStats->crossvalidWidget->width(),showStats->crossvalidWidget->height()));
+    QSize boxSize(showStats->crossvalidWidget->width(),showStats->crossvalidWidget->height());
+    QPixmap boxplot = BoxPlot(fmeasures, boxSize);
 //	boxplot.save("boxplot.png");
 	bIsCrossNew = false;
-	crossvalidWidget->ShowImage(boxplot);
+    showStats->crossvalidImage->setPixmap(boxplot);
 }
 
 

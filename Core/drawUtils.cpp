@@ -218,7 +218,7 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 	QBitmap bitmap;
 	bitmap.clear();
 	boxplot.setMask(bitmap);
-	boxplot.fill(Qt::transparent);
+    boxplot.fill(Qt::transparent);
 	QPainter painter(&boxplot);
 
 	//	painter.setRenderHint(QPainter::Antialiasing);

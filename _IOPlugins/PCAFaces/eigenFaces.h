@@ -24,7 +24,7 @@ public:
 	void Learn(std::vector<IplImage *> faces, std::vector<int> classes, std::vector<bool> isTrainingData=std::vector<bool>(), bool bColor = true);
 	void Recognize(IplImage *face);
 	void Draw(bool bMonochrome=false, int e1 = 0, int e2 = 1);
-	void DrawEigenVals();
+    IplImage *DrawEigenVals();
 	std::vector<IplImage *> GetEigenVectorsImages();
 
 	std::vector<float *> GetProjections(int dim = 0, bool bNormalized=false);

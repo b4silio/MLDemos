@@ -7,7 +7,7 @@ CompareAlgorithms::CompareAlgorithms(QWidget *parent)
 	: display(0)
 {
 	compareDisplay = new Ui::CompareDisplay();
-	compareDisplay->setupUi(compareWidget = new QWidget(parent));
+    compareDisplay->setupUi(compareWidget = new QWidget(parent));
 	if(!parent) compareWidget->setWindowTitle("Comparison Results");
 	else
 	{

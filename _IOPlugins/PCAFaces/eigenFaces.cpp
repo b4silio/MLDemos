@@ -289,15 +289,16 @@ std::vector<IplImage *> EigenFaces::GetEigenVectorsImages()
 	return result;
 }
 
-void EigenFaces::DrawEigenVals()
+IplImage *EigenFaces::DrawEigenVals()
 {
-	IplImage *eigImage = cvCreateImage(cvSize(240,240),8,3);
+    IplImage *eigImage = cvCreateImage(cvSize(440,440),8,3);
 	cvSet(eigImage, CV_RGB(255,255,255));
 
 	float *eigVal = eigenValues->data.fl;
 	float maxEigVal = 0;
-	FOR(i, dim-2) maxEigVal += eigVal[i];
+    FOR(i, dim-2) if(eigVal[i] == eigVal[i]) maxEigVal += eigVal[i];
 	float accumulator = 0;
+    maxEigVal = max(1.f,maxEigVal);
 
 	cvDrawLine(eigImage, cvPoint(0, eigImage->height-1), cvPoint(eigImage->width, eigImage->height-1), CV_RGB(180,180,180));
 	cvDrawLine(eigImage, cvPoint(0,0), cvPoint(0, eigImage->height), CV_RGB(180,180,180));
@@ -305,16 +306,19 @@ void EigenFaces::DrawEigenVals()
 	printf("eigenval\tdata\n");
 	FOR(i, dim-2) // dim -2 because for some reasons the last two eigenvalues are often fubared
 	{
-		CvPoint point2 = cvPoint(i * eigImage->width / dim, eigImage->height - (int)(eigVal[i] / maxEigVal * eigImage->height));
-		//cvDrawCircle(eigImage, point, 1, CV_RGB(0,0,0), -1, CV_AA);
-		cvDrawLine(eigImage, point, point2, CV_RGB(0,0,0));
-		accumulator += eigVal[i] / maxEigVal;
-		printf("%d\t(%.2f) %.1f%%\n", i+1, eigVal[i], accumulator*100);
-		point = point2;
-	}
+        if(eigVal[i] == eigVal[i])
+        {
+            CvPoint point2 = cvPoint(i * eigImage->width / dim, eigImage->height - (int)(eigVal[i] / maxEigVal * eigImage->height));
+            //cvDrawCircle(eigImage, point, 1, CV_RGB(0,0,0), -1, CV_AA);
+            cvDrawLine(eigImage, point, point2, CV_RGB(0,0,0));
+            accumulator += eigVal[i] / maxEigVal;
+            printf("%d\t(%.2f) %.1f%%\n", i+1, eigVal[i], accumulator*100);
+            point = point2;
+        }
+    }
 	cvDrawLine(eigImage, point, cvPoint(eigImage->width, eigImage->height), CV_RGB(0,0,0));
 
-	IplImage *display = cvCreateImage(cvSize(280,280),8,3);
+    IplImage *display = cvCreateImage(cvSize(eigImage->width+40,eigImage->height+40),8,3);
 	cvSet(display, CV_RGB(255,255,255));
 	ROI(display, cvRect((display->width - eigImage->width) / 2, (display->height- eigImage->height) / 2, eigImage->width, eigImage->height));
 	cvCopy(eigImage, display);
@@ -333,12 +337,22 @@ void EigenFaces::DrawEigenVals()
 	cvPutText(tmp, text, point, &font, CV_RGB(128,128,128));
 	IMKILL(display);
 	display = CV::Rotate90(tmp, 1);
-	IMKILL(tmp);	
+    IMKILL(tmp);
 
-	cvNamedWindow("eigen values");
-	cvShowImage("eigen values", display);
-	IMKILL(eigImage);
-	IMKILL(display);
+    IMKILL(eigImage);
+    accumulator = 0;
+    FOR(i, dim-2)
+    {
+        int y = font.line_type*(i+1);
+        if(y > display->height) continue;
+        if(eigVal[i] == eigVal[i])
+        {
+            accumulator += eigVal[i] / maxEigVal;
+            sprintf(text,"e%d: %.1f%%", i, accumulator*100);
+            cvPutText(display, text, cvPoint(display->width - 110, y), &font, CV_RGB(128,128,128));
+        }
+    }
+    return display;
 }
 
 void EigenFaces::Draw(bool bMonochrome, int e1, int e2)
