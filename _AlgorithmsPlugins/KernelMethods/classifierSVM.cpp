@@ -121,8 +121,17 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 	delete [] problem.x;
 	delete [] problem.y;
 
+	int maxClass = 0;
+	FOR(j, labels.size()) maxClass = max(maxClass, labels[j]);
+
 	classCount = svm->nr_class;
-	FOR(i, classCount) classes[i] = svm->label[i];
+	//classCount = maxClass;
+	FOR(i, classCount)
+	{
+		classes[i] = svm->label[i];
+		qDebug() << "classes: " << i << classes[i];
+	}
+	FOR(j, labels.size()) qDebug() << "label:" << j << labels[j];
 
 }
 
@@ -169,7 +178,9 @@ fvec ClassifierSVM::TestMulti(const fvec &sample)
 		res[0] = Test(sample);
 		return res;
 	}
-	fvec resp(classCount,0);
+	int maxClass = classCount;
+	FOR(i, classCount) maxClass = max(maxClass, classes[i]);
+	fvec resp(maxClass,0);
 	int data_dimension = sample.size();
 	if(!svm) return resp;
 	if(!node)
@@ -184,11 +195,11 @@ fvec ClassifierSVM::TestMulti(const fvec &sample)
 	}
 	double *decisions = new double[classCount];
 	svm_predict_votes(svm, node, decisions);
-	int max = 0;
+	//int max = 0;
 	FOR(i, classCount)
 	{
-		resp[i] = decisions[classes[i]];
-		if(resp[max] < resp[i]) max = i;
+		resp[classes[i]] = decisions[i];
+		//if(resp[max] < resp[classes[i]]) max = i;
 	}
 	//resp[max] += classCount;
 	delete [] decisions;

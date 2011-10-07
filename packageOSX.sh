@@ -6,7 +6,8 @@ opencvPath='/Users/basilio/Code/OpenCV-2.2.0/build/lib/Release/'
 #opencvPath='/usr/local/lib/'
 
 names=( libopencv_core libopencv_legacy libopencv_highgui libopencv_ml libopencv_features2d libopencv_imgproc libopencv_calib3d libopencv_video libopencv_flann)
-namesQT=( QtGui QtCore )
+namesQT=( QtGui QtCore QtNetwork QtSvg QtXml QtWebKit phonon QtDBus QtXmlPatterns)
+namesQTadd=( QtWebKit phonon QtDBus QtXmlPatterns)
 framework='@executable_path/../Frameworks/'
 frameworkQT='.framework/Versions/4/'
 
@@ -48,6 +49,43 @@ do
 	done;
 	echo '\n'
 done;
+
+for name in ${namesQT[@]}
+do
+	for name2 in ${names[@]}
+	do
+		echo 'install_name_tool -change '$name$frameworkQT$name $framework$name$frameworkQT$name $myPath'Frameworks/'$name2'.dylib'
+		eval 'install_name_tool -change '$name$frameworkQT$name $framework$name$frameworkQT$name $myPath'Frameworks/'$name2'.dylib'
+	done;
+	echo '\n'
+done;
+
+# copy frameworks from namesQTadd to the package
+# will need to create the folders Resources and Versions/4/ first
+for name in ${namesQTadd[@]}
+do
+		echo 'mkdir '$myPath'Frameworks/'$name'.framework'
+		eval 'mkdir '$myPath'Frameworks/'$name'.framework'
+		echo 'mkdir '$myPath'Frameworks/'$name'.framework/Resources'
+		eval 'mkdir '$myPath'Frameworks/'$name'.framework/Resources'
+		echo 'mkdir '$myPath'Frameworks/'$name'.framework/Versions'
+		eval 'mkdir '$myPath'Frameworks/'$name'.framework/Versions'
+		echo 'mkdir '$myPath'Frameworks/'$name'.framework/Versions/4'
+		eval 'mkdir '$myPath'Frameworks/'$name'.framework/Versions/4'
+		echo 'cp /Library/Frameworks/'$name$frameworkQT$name $myPath'Frameworks/'$name$frameworkQT$name
+		eval 'cp /Library/Frameworks/'$name$frameworkQT$name $myPath'Frameworks/'$name$frameworkQT$name
+done;
+
+for name in ${namesQT[@]}
+do
+	for name2 in ${namesQTadd[@]}
+	do
+		echo 'install_name_tool -change '$name$frameworkQT$name $framework$name$frameworkQT$name $myPath'Frameworks/'$name2$frameworkQT$name2
+		eval 'install_name_tool -change '$name$frameworkQT$name $framework$name$frameworkQT$name $myPath'Frameworks/'$name2$frameworkQT$name2
+	done;
+	echo '\n'
+done;
+
 
 # last we go through our plugins to change these guys as well
 echo 'mkdir '$myPath'MacOS/plugins'
