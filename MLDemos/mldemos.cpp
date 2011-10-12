@@ -36,6 +36,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     : QMainWindow(parent, flags),
       canvas(0),
+      expose(0),
       classifier(0),
       regressor(0),
       dynamical(0),
@@ -69,6 +70,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     initPlugins();
     LoadLayoutOptions();
     SetTextFontSize();
+    ShowToolbar();
     DisplayOptionChanged();
     UpdateInfo();
     FitToData();
@@ -303,7 +305,8 @@ void MLDemos::initDialogs()
     connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
-	connect(displayOptions->xDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
+    connect(displayOptions->exposeButton, SIGNAL(clicked()), this, SLOT(ExposeData()));
+    connect(displayOptions->xDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
 	connect(displayOptions->yDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
 	//	connect(displayOptions->trajectoriesCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     //	connect(displayOptions->singleclassCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
@@ -427,6 +430,8 @@ void MLDemos::initDialogs()
     connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
     connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
+
+    expose = new Expose(canvas);
 }
 
 void MLDemos::initPlugins()
@@ -1247,10 +1252,7 @@ void MLDemos::DisplayOptionChanged()
 	{
 		int xIndex = displayOptions->xDimIndex->value();
 		int yIndex = displayOptions->yDimIndex->value();
-		if(xIndex == yIndex)
-		{
-			yIndex = xIndex+1;
-		}
+		if(xIndex == yIndex) yIndex = xIndex+1;
 		canvas->SetDim(xIndex, yIndex);
 	}
     float zoom = displayOptions->spinZoom->value();
@@ -1699,6 +1701,15 @@ void MLDemos::DrawingStopped()
             drawTimer->start(QThread::NormalPriority);
         }
     }
+}
+
+void MLDemos::ExposeData()
+{
+    if(!expose) return;
+    if(!canvas->data->GetCount()) return;
+//    if(!canvas->data->GetSamples()[0].size() <= 2) return;
+    expose->show();
+    expose->repaint();
 }
 
 void MLDemos::FitToData()

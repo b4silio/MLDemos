@@ -50,6 +50,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "compare.h"
 #include "widget.h"
 #include "drawTimer.h"
+#include "expose.h"
 
 class MLDemos : public QMainWindow
 {
@@ -91,6 +92,7 @@ private:
 	DrawTimer *drawTimer;
 	QTime drawTime;
 	Canvas *canvas;
+    Expose *expose;
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
@@ -233,6 +235,7 @@ private slots:
 	void Drawing(fvec sample, int label);
 	void DrawingStopped();
 
+    void ExposeData();
 	void FitToData();
 	void ZoomChanged(float d);
 	void CanvasMoveEvent();

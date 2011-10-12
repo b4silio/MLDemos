@@ -23,7 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 Q_EXPORT_PLUGIN2(IO_WebImport, WebImport)
 
 WebImport::WebImport()
-: guiDialog(0)
+    : guiDialog(0), gui(0), inputParser(0)
 {
 }
 
@@ -35,23 +35,28 @@ WebImport::~WebImport()
 
 void WebImport::Start()
 {
-    gui = new Ui::WebImportDialog();
-    gui->setupUi(guiDialog = new QDialog());
+    if(!gui)
+    {
+        gui = new Ui::WebImportDialog();
+        gui->setupUi(guiDialog = new QDialog());
+        connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
+        connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
+        connect(gui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChanged(int)));
+        //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
+        //connect(gui->spinE2, SIGN.AL(valueChanged(int)), this, SLOT(Updating()));
+        connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
+        connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(LinkHandler(QUrl)));
+        connect(gui->backButton, SIGNAL(clicked()),gui->browserWebView,SLOT(back()));
+        connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(on_dumpButton_clicked()));
+        connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
+        connect(&manager, SIGNAL(finished(QNetworkReply*)),SLOT(downloadHandler(QNetworkReply*)));
+        guiDialog->show();
+        gui->browserWebView->show();
+        gui->browserWebView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    }
+    else guiDialog->show();
+    if(inputParser) delete inputParser;
     inputParser = new CSVParser();
-    connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
-	connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
-    connect(gui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChanged(int)));
-    //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
-    //connect(gui->spinE2, SIGN.AL(valueChanged(int)), this, SLOT(Updating()));
-    connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
-    connect(gui->browserWebView, SIGNAL(linkClicked(QUrl)), this, SLOT(LinkHandler(QUrl)));
-    connect(gui->backButton, SIGNAL(clicked()),gui->browserWebView,SLOT(back()));
-    connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(on_dumpButton_clicked()));
-    connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
-    connect(&manager, SIGNAL(finished(QNetworkReply*)),SLOT(downloadHandler(QNetworkReply*)));
-    guiDialog->show();
-	gui->browserWebView->show();
-    gui->browserWebView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 }
 
 void WebImport::Stop()
@@ -142,7 +147,6 @@ void WebImport::Parse(QString filename)
         }
     }
     gui->spinBox->setRange(1,rawData[0].size());
-    gui->pcaCountSpin->setRange(2, max(rawData[0].size()-1, rawData.size()-2));
 }
 
 void WebImport::FetchResults(std::vector<fvec> results)
@@ -189,10 +193,11 @@ void WebImport::on_pcaButton_clicked()
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
 
-    int pcaCount = gui->pcaCountSpin->value();
     pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices);
     PCAProjection pca;
-    pca.Train(data.first, pcaCount);
+	if(!data.first.size()) return;
+    int pcaCount = min(data.first[0].size(),data.first.size() -1);
+	pca.Train(data.first, pcaCount);
     data.first = pca.samples;
     emit(SetData(data.first, data.second, vector<ipair>()));
 }

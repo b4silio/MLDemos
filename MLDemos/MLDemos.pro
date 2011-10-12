@@ -40,7 +40,8 @@ FORMS += aboutDialog.ui \
 	drawingToolsContext4.ui \
 	statisticsDialog.ui \
 	viewOptions.ui \
-    compare.ui
+    compare.ui \
+    expose.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -64,7 +65,8 @@ HEADERS += basicMath.h \
 	dynamical.h \
     clusterer.h \
     compare.h \
-    spline.h
+    spline.h \
+    expose.h
 
 SOURCES += \
 	main.cpp \
@@ -72,4 +74,12 @@ SOURCES += \
     mlprocessing.cpp \
     mlstats.cpp \
 	mlsaving.cpp \
-	compare.cpp
+	compare.cpp \
+    expose.cpp
+
+
+
+
+
+
+

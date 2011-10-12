@@ -209,11 +209,11 @@ public:
 
 		QColor color = SampleColor[label%SampleColorCnt];
 		QColor edge = Qt::black;
-		if(label == 1)
-		{
-			color = Qt::black;
-			edge = Qt::white;
-		}
+        //if(label == 1)
+        //{
+        //	color = Qt::black;
+        //	edge = Qt::white;
+        //}
 		//		radius = 10;
 		painter.setBrush(color);
 		painter.setPen(edge);
