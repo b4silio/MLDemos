@@ -196,8 +196,9 @@ private slots:
 	void AvoidOptionChanged();
 	void DisplayOptionChanged();
 	void ColorMapChanged();
-	void ActivateIO();
-	void DisactivateIO(QObject *);
+    void ActivateIO();
+    void ActivateImport();
+    void DisactivateIO(QObject *);
 
 	void Classify();
 	void ClassifyCross();
@@ -255,6 +256,8 @@ private slots:
 	void CompareAdd();
 	void CompareClear();
 	void CompareRemove();
+    void CanvasTypeChanged();
+    void CanvasZoomChanged();
 
 
 	void ShowContextMenuSpray(const QPoint &point);

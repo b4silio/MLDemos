@@ -26,6 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QImage>
 #include <iostream>
 
+#include "expose.h"
 #include "public.h"
 #include "basicMath.h"
 #include "canvas.h"
@@ -63,6 +64,7 @@ Canvas::Canvas(QWidget *parent)
 	  zooms(2,1.f),
 	  center(2,0),
 	  xIndex(0), yIndex(1),
+      canvasType(0),
 	  data(new DatasetManager())
 {
 	resize(640,480);
@@ -123,14 +125,29 @@ void Canvas::SetModelImage(QImage image)
 	repaint();
 }
 
-void Canvas::Paint(QPainter &painter, bool bSvg)
+void Canvas::SetCanvasType(int type)
+{
+    //if(canvasType == type) return;
+//    qDebug() << "canvas type" << canvasType << "->" << type;
+    canvasType = type;
+    maps.samples = QPixmap();
+    maps.trajectories = QPixmap();
+    maps.grid = QPixmap();
+    maps.model = QPixmap();
+    maps.confidence = QPixmap();
+    maps.info = QPixmap();
+    ResetSamples();
+    bNewCrosshair = true;
+}
+
+void Canvas::PaintStandard(QPainter &painter, bool bSvg)
 {
 	painter.setBackgroundMode(Qt::OpaqueMode);
 	painter.setBackground(Qt::white);
 
 	painter.fillRect(geometry(),Qt::white);
 
-	if(bDisplayMap)
+    if(bDisplayMap)
 	{
 		if(!maps.confidence.isNull()) painter.drawPixmap(geometry(), maps.confidence);
 	}
@@ -155,7 +172,7 @@ void Canvas::Paint(QPainter &painter, bool bSvg)
 		DrawObstacles(painter);
 		//painter.drawPixmap(geometry(), maps.obstacles);
 	}
-	if(bDisplayTrajectories)
+    if(bDisplayTrajectories)
 	{
 		if(bSvg)
 		{
@@ -169,7 +186,7 @@ void Canvas::Paint(QPainter &painter, bool bSvg)
 		}
 		if(targets.size()) DrawTargets(painter);
 	}
-	if(bDisplayTimeSeries)
+    if(bDisplayTimeSeries)
 	{
 		if(bSvg)
 		{
@@ -211,16 +228,74 @@ void Canvas::Paint(QPainter &painter, bool bSvg)
 			painter.drawPixmap(geometry(), maps.grid);
 		}
 	}
-
 }
 
+void Canvas::PaintMultivariate(QPainter &painter, int type)
+{
+    painter.setBackgroundMode(Qt::OpaqueMode);
+    painter.setBackground(Qt::white);
+
+    painter.fillRect(geometry(),Qt::white);
+
+    if(bDisplaySamples)
+    {
+        if(maps.samples.isNull())
+        {
+            int w = width();
+            int h = height();
+            maps.samples = QPixmap(w,h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            maps.samples.setMask(bitmap);
+            maps.samples.fill(Qt::transparent);
+            Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), type);
+        }
+        painter.setBackgroundMode(Qt::TransparentMode);
+        painter.drawPixmap(geometry(), maps.samples);
+    }
+    if(bDisplayTrajectories && (type != 1 && type != 3))
+    {
+        if(maps.trajectories.isNull())
+        {
+            int w = width();
+            int h = height();
+            maps.trajectories = QPixmap(w,h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            maps.trajectories.setMask(bitmap);
+            maps.trajectories.fill(Qt::transparent);
+        }
+        painter.setBackgroundMode(Qt::TransparentMode);
+        painter.drawPixmap(geometry(), maps.trajectories);
+    }
+    if(bDisplayLearned && !maps.model.isNull())
+    {
+        painter.setBackgroundMode(Qt::TransparentMode);
+        painter.drawPixmap(geometry(), maps.model);
+    }
+    if(bDisplayInfo && !maps.info.isNull())
+    {
+        painter.setBackgroundMode(Qt::TransparentMode);
+        painter.drawPixmap(geometry(), maps.info);
+    }
+    if(bDisplayGrid)
+    {
+        if(maps.grid.isNull())
+        {
+        }
+        painter.setBackgroundMode(Qt::TransparentMode);
+        painter.drawPixmap(geometry(), maps.grid);
+    }
+}
 
 void Canvas::paintEvent(QPaintEvent *event)
 {
 	if(bDrawing) return;
 	bDrawing = true;
 	QPainter painter(this);
-	Paint(painter);
+    if(!canvasType) PaintStandard(painter);
+    else PaintMultivariate(painter, canvasType-1);
+
 	bDrawing = false;
 }
 
@@ -997,13 +1072,14 @@ void Canvas::DrawTimeseries()
 
 void Canvas::ResizeEvent()
 {
+    if(!canvasType && (width() != parentWidget()->width() || height() != parentWidget()->height())) resize(parentWidget()->size());
 	bNewCrosshair = true;
 	if(!maps.reward.isNull())
 	{
 		QPixmap newReward(width(), height());
 		newReward = maps.reward.scaled(newReward.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 	}
-	RedrawAxes();
+    if(!canvasType) RedrawAxes();
 }
 
 void Canvas::mousePressEvent( QMouseEvent *event )
@@ -1017,13 +1093,15 @@ void Canvas::mousePressEvent( QMouseEvent *event )
 	if(event->button()==Qt::LeftButton) label = 1;
 	if(event->button()==Qt::RightButton) label = 0;
 
-	if(event->modifiers()==Qt::AltModifier)
-	{
-		mouseAnchor = event->pos();
-		return;
-	}
-
-	emit Drawing(sample, label);
+    if(canvasType == 0)
+    {
+        if(event->modifiers()==Qt::AltModifier)
+        {
+            mouseAnchor = event->pos();
+            return;
+        }
+        emit Drawing(sample, label);
+    }
 }
 
 void Canvas::mouseReleaseEvent( QMouseEvent *event )
@@ -1037,11 +1115,13 @@ void Canvas::mouseReleaseEvent( QMouseEvent *event )
 	if(event->button()==Qt::LeftButton) label = 1;
 	if(event->button()==Qt::RightButton) label = 0;
 
-	mouseAnchor = QPoint(-1,-1);
-	if(x > 0 && x < width() && y>0 && y<height()) bShowCrosshair = true;
-
-	//emit Drawing(sample, label);
-	emit Released();
+    if(canvasType == 0)
+    {
+        mouseAnchor = QPoint(-1,-1);
+        if(x > 0 && x < width() && y>0 && y<height()) bShowCrosshair = true;
+        //emit Drawing(sample, label);
+        emit Released();
+    }
 }
 
 void Canvas::enterEvent(QEvent *event)
@@ -1067,6 +1147,7 @@ void Canvas::leaveEvent(QEvent *event)
 
 void Canvas::wheelEvent(QWheelEvent *event)
 {
+    if(canvasType) return;
 	if(event->modifiers() == Qt::ShiftModifier)
 	{
 		zooms[xIndex] += event->delta()/1000.f;
@@ -1092,6 +1173,7 @@ void Canvas::wheelEvent(QWheelEvent *event)
 
 void Canvas::mouseMoveEvent( QMouseEvent *event )
 {
+    if(canvasType) return;
 	int x = event->x();
 	int y = event->y();
 	mouse = QPoint(x,y);
@@ -1136,7 +1218,7 @@ QPixmap Canvas::GetScreenshot()
 	bool tmp = bShowCrosshair;
 	painter.setBackgroundMode(Qt::OpaqueMode);
 	painter.setBackground(Qt::white);
-	Paint(painter);
+    PaintStandard(painter);
 	bShowCrosshair = tmp;
 	return screenshot;
 }

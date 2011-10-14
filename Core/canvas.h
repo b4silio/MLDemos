@@ -77,7 +77,9 @@ public:
 	void FitToData();
 	void DrawAxes(QPainter &painter);
 	void RedrawAxes();
-	void PaintGaussian(QPointF position, double variance);
+    void SetCanvasType(int);
+
+    void PaintGaussian(QPointF position, double variance);
 	void PaintReward(fvec sample, float radius, float shift);
 	void PaintGradient(QPointF position);
 	bool bDrawing;
@@ -87,6 +89,7 @@ public:
 	fvec zooms;
 	int xIndex, yIndex;
 	std::vector<fvec> targets;
+    int canvasType;
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -141,7 +144,8 @@ public:
 	int drawnTimeseries;
 	std::vector<fvec> liveTrajectory;
 
-	void Paint(QPainter &painter, bool bSvg=false);
+    void PaintStandard(QPainter &painter, bool bSvg=false);
+    void PaintMultivariate(QPainter &painter, int type);
 
 	bool SaveScreenshot(QString filename);
 	QPixmap GetScreenshot();

@@ -65,8 +65,7 @@ HEADERS += basicMath.h \
 	dynamical.h \
     clusterer.h \
     compare.h \
-    spline.h \
-    expose.h
+    spline.h
 
 SOURCES += \
 	main.cpp \
@@ -74,8 +73,7 @@ SOURCES += \
     mlprocessing.cpp \
     mlstats.cpp \
 	mlsaving.cpp \
-	compare.cpp \
-    expose.cpp
+        compare.cpp
 
 
 

@@ -22,6 +22,195 @@ Expose::~Expose()
     delete ui;
 }
 
+void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type)
+{
+    if(!samples.size()) return;
+    int w = pixmap.width(), h = pixmap.height();
+
+    int dim = samples[0].size();
+    int gridX = dim;
+    int gridY = dim;
+
+    fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN);
+    FOR(d, dim)
+    {
+        FOR(i, samples.size())
+        {
+            mins[d] = min(mins[d], samples[i][d]);
+            maxes[d] = max(maxes[d], samples[i][d]);
+        }
+    }
+
+    int pad = 20;
+    int mapW = w - pad*2, mapH = h - pad*2;
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    switch(type)
+    {
+    case 0: // scatterplots
+    {
+        mapW = w/gridX - pad*2;
+        mapH = h/gridX - pad*2;
+
+        QList<QPixmap> maps;
+        FOR(index0, dim)
+        {
+            FOR(index1, dim)
+            {
+                QPixmap map(mapW + 2*pad,mapH + 2*pad);
+                int smallW = map.width() - 2*pad, smallH = map.height() - 2*pad;
+                map.fill(Qt::white);
+                QPainter painter(&map);
+                painter.setRenderHint(QPainter::Antialiasing);
+
+                FOR(i, samples.size())
+                {
+                    float x = samples[i][index0];
+                    float y = samples[i][index1];
+                    x = (x-mins[index0])/(maxes[index0] - mins[index0]);
+                    y = (y-mins[index1])/(maxes[index1] - mins[index1]);
+                    QPointF point(y*smallW + pad, x*smallH + pad);
+                    float radius = 5;
+                    Canvas::drawSample(painter, point, radius, labels[i]);
+                }
+                painter.setBrush(Qt::NoBrush);
+                painter.setPen(Qt::black);
+                painter.setRenderHint(QPainter::Antialiasing, false);
+                painter.drawRect(pad/2,pad/2,smallW+pad, smallH+pad);
+                painter.drawText(pad/2+1, map.height()-pad/2-1, QString("x%1  x%2").arg(index1+1).arg(index0+1));
+                maps.push_back(map);
+            }
+        }
+
+        FOR(i, maps.size())
+        {
+            int xIndex = i%gridX;
+            int yIndex = i/gridX;
+            painter.drawPixmap(QPoint(xIndex*w/gridX, yIndex*h/gridY), maps[i]);
+        }
+    }
+        break;
+    case 1: // parallel coordinates
+    {
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        FOR(d, dim)
+        {
+            float x = d*mapW/(float)(dim-1) + pad;
+            painter.setPen(Qt::black);
+            painter.drawLine(x, pad, x, mapH+pad);
+            painter.drawText(x-10, mapH+2*pad-4, QString("x%1").arg(d+1));
+        }
+
+        painter.setRenderHint(QPainter::Antialiasing);
+        FOR(i, samples.size())
+        {
+            QPointF old;
+            FOR(d, dim)
+            {
+                float x = d*mapW/(float)(dim-1) + pad;
+                float y = samples[i][d];
+                y = (y-mins[d])/(maxes[d] - mins[d]);
+                QPointF point(x,pad + y*mapH);
+                float radius = 7;
+                Canvas::drawSample(painter, point, radius, labels[i]);
+                QColor color = SampleColor[labels[i]%SampleColorCnt];
+                if(labels[i] == 0) color = Qt::black;
+                painter.setPen(color);
+                if(d) painter.drawLine(point, old);
+                old = point;
+            }
+        }
+    }
+        break;
+    case 2: // radial graphs
+    {
+        float radius = min(mapW, mapH)/3.f;
+        QPointF center(mapW*0.5f, mapH*0.5f);
+        QPointF old;
+        painter.setPen(Qt::black);
+        FOR(d, dim)
+        {
+            float theta = d/(float)(dim)*2*M_PI;
+            QPointF point = QPointF(cos(theta), sin(theta))*radius;
+            if(d) painter.drawLine(center + point, center + old);
+            painter.drawText(center + point*1.1, QString("x%1").arg(d+1));
+            old = point;
+        }
+        painter.drawLine(center + QPointF(1.f, 0.f)*radius, center + old);
+
+        FOR(i, samples.size())
+        {
+            QPointF samplePoint;
+            float dimSum = 0;
+            FOR(d, dim)
+            {
+                float theta = d/(float)(dim)*2*M_PI;
+                QPointF point = QPointF(cos(theta), sin(theta))*radius;
+                float value = (samples[i][d]-mins[d])/(maxes[d]-mins[d]);
+                samplePoint += point*value;
+                dimSum += value;
+            }
+            samplePoint /= dimSum;
+            float drawRadius = 7;
+            Canvas::drawSample(painter, center + samplePoint, drawRadius, labels[i]);
+            QColor color = SampleColor[labels[i]%SampleColorCnt];
+            painter.setPen(color);
+        }
+    }
+        break;
+    case 3: // andrews plots
+    {
+        float radius = min(mapW, mapH)/3.f;
+        QPointF center(mapW*0.5f, mapH*0.5f);
+        QPointF old;
+        painter.setPen(Qt::black);
+
+        // f(t) = x0/sqrt(2) + x1*sin(t) + x2*cos(t) + x3*sin(2t) + x4*cos(2t) + x5*sin(3t) + x6*cos(3t) + x7*sin(4t)
+        vector<fvec> values(samples.size());
+        const int steps = 200;
+        float minv=FLT_MAX, maxv=-FLT_MAX;
+        FOR(i, samples.size())
+        {
+            values[i].resize(steps);
+            FOR(j, steps)
+            {
+                float t = j/(float)steps*(M_PI*2) - M_PI;
+                float value = 0;
+                FOR(d, dim)
+                {
+                    float v = (samples[i][d]-mins[d])/(maxes[d]-mins[d]);
+                    if(!d) value += v*sqrtf(2.f);
+                    else
+                    {
+
+                        value += v * (d%2 ? sin(t*((d+1)/2)) : cos(t*((d+1)/2)));
+                    }
+                }
+                values[i][j] = value;
+                minv = min(minv, value);
+                maxv = max(maxv, value);
+            }
+        }
+
+        FOR(i, values.size())
+        {
+            FOR(j, values[i].size())
+            {
+                float value = (values[i][j]-minv)/(maxv-minv);
+                QPointF point = QPointF(j*pixmap.width()/steps, value*mapH + pad);
+                QColor color = SampleColor[labels[i]%SampleColorCnt];
+                if(!labels[i]) color = Qt::black;
+                painter.setPen(QPen(color,0.5));
+                if(j) painter.drawLine(point, old);
+                old = point;
+            }
+        }
+    }
+        break;
+    }
+}
+
 void Expose::GenerateAndrewsPlots()
 {
     std::vector<fvec> samples = canvas->data->GetSamples();

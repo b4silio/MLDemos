@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>744</width>
-    <height>462</height>
+    <width>636</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,12 +27,12 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="2,0">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -40,23 +40,104 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QWidget" name="canvasWidget" native="true">
+     <widget class="QScrollArea" name="canvasArea">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(128, 128, 128);</string>
+      <property name="widgetResizable">
+       <bool>true</bool>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <widget class="QWidget" name="canvasWidget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>634</width>
+         <height>382</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2"/>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="canvasControlsWidget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,2">
        <item>
-        <widget class="QWidget" name="widget" native="true">
-         <property name="styleSheet">
-          <string notr="true">background-color: rgb(255, 208, 0);</string>
+        <widget class="QComboBox" name="canvasTypeCombo">
+         <item>
+          <property name="text">
+           <string>Standard</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Scatterplots</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Parallel Coordinates</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Radial Graph</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Andrews Plots</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="canvasZoomSlider">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+         <property name="tickInterval">
+          <number>5</number>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -68,7 +149,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>744</width>
+     <width>636</width>
      <height>22</height>
     </rect>
    </property>
@@ -84,11 +165,17 @@
      <addaction name="actionExportOutput"/>
      <addaction name="actionExportAnimation"/>
     </widget>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
     <addaction name="actionClose"/>
     <addaction name="separator"/>
+    <addaction name="menuImport"/>
     <addaction name="menuExport"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -261,6 +348,9 @@
    </property>
   </action>
   <action name="actionManage_Plugins">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Manage Plugins</string>
    </property>
@@ -295,6 +385,11 @@
   <action name="actionExport_SVG">
    <property name="text">
     <string>Vector Image (SVG)</string>
+   </property>
+  </action>
+  <action name="actionCSV">
+   <property name="text">
+    <string>Comma Separated Values</string>
    </property>
   </action>
  </widget>

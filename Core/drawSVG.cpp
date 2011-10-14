@@ -58,7 +58,7 @@ void DrawSVG::Write(QString filename)
 	// we need to paint the different layers:
 	// confidence map
 	// samples + trajectories + reward
-	canvas->Paint(painter, true);
+	canvas->PaintStandard(painter, true);
 
 	if(canvas->bDisplayLearned)
 	{

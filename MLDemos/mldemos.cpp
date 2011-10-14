@@ -71,6 +71,8 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     LoadLayoutOptions();
     SetTextFontSize();
     ShowToolbar();
+    this->show();
+
     DisplayOptionChanged();
     UpdateInfo();
     FitToData();
@@ -82,11 +84,11 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     if(!maximizers.size()) algorithmOptions->tabWidget->setTabEnabled(4,false);
 
     algorithmWidget->setFixedSize(636,220);
-    ui.canvasWidget->resize(width(), height());
-    canvas->resize(ui.canvasWidget->width(), ui.canvasWidget->height());
-    canvas->ResizeEvent();
     canvas->repaint();
 
+    canvas->ResizeEvent();
+    CanvasMoveEvent();
+    CanvasZoomChanged();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -217,6 +219,8 @@ void MLDemos::initToolBars()
     connect(toolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(ShowToolbar()));
     connect(ui.actionShow_Toolbar, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.actionSmall_Icons, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
+    connect(ui.canvasTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(CanvasTypeChanged()));
+    connect(ui.canvasZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(CanvasZoomChanged()));
 
     QSize iconSize(24,24);
     drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
@@ -658,6 +662,10 @@ void MLDemos::AddPlugin(InputOutputInterface *iIO)
     pluginAction->setCheckable(true);
     pluginAction->setChecked(false);
     connect(pluginAction,SIGNAL(toggled(bool)), this, SLOT(ActivateIO()));
+    QAction *importAction = ui.menuImport->addAction(name);
+    importAction->setCheckable(true);
+    importAction->setChecked(false);
+    connect(importAction,SIGNAL(toggled(bool)), this, SLOT(ActivateImport()));
 }
 
 void MLDemos::AddPlugin(ClassifierInterface *iClassifier, const char *method)
@@ -742,11 +750,16 @@ void MLDemos::closeEvent(QCloseEvent *event)
 
 void MLDemos::resizeEvent( QResizeEvent *event )
 {
-    if(canvas)
+    if(!canvas) return;
+    if(canvas->canvasType)
     {
-        canvas->resize(ui.canvasWidget->width(), ui.canvasWidget->height());
-        canvas->ResizeEvent();
+        CanvasZoomChanged();
     }
+    else
+    {
+    }
+    canvas->ResizeEvent();
+
     CanvasMoveEvent();
 }
 
@@ -1094,6 +1107,9 @@ void MLDemos::ClearData()
         canvas->data->Clear();
         canvas->targets.clear();
         canvas->maps.reward = QPixmap();
+        canvas->maps.samples = QPixmap();
+        canvas->maps.trajectories = QPixmap();
+        canvas->maps.grid = QPixmap();
     }
     Clear();
     ResetPositiveClass();
@@ -1488,6 +1504,7 @@ void MLDemos::DrawCrosshair()
 
 void MLDemos::Drawing( fvec sample, int label)
 {
+    if(canvas->canvasType) return;
     int drawType = 0; // none
     if(drawToolbar->singleButton->isChecked()) drawType = 1;
     if(drawToolbar->sprayButton->isChecked()) drawType = 2;
@@ -1753,6 +1770,7 @@ void MLDemos::FitToData()
 
 void MLDemos::CanvasMoveEvent()
 {
+    if(canvas->canvasType) return;
     drawTimer->Stop();
     drawTimer->Clear();
     QMutexLocker lock(&mutex);
@@ -1785,6 +1803,59 @@ void MLDemos::CanvasMoveEvent()
 void MLDemos::ZoomChanged(float d)
 {
 	displayOptions->spinZoom->setValue(displayOptions->spinZoom->value()+d/4);
+}
+
+void MLDemos::CanvasTypeChanged()
+{
+    ui.canvasZoomSlider->setEnabled(ui.canvasTypeCombo->currentIndex() == 1);
+    if(canvas->canvasType == ui.canvasTypeCombo->currentIndex()) return;
+    canvas->SetCanvasType(ui.canvasTypeCombo->currentIndex());
+    CanvasZoomChanged();
+    canvas->repaint();
+}
+
+void MLDemos::CanvasZoomChanged()
+{
+    float zoom = 1.f + ui.canvasZoomSlider->value()/10.f;
+    QSizePolicy policy = ui.canvasWidget->sizePolicy();
+    int dims = canvas ? (canvas->data->GetCount() ? canvas->data->GetSample(0).size() : 2) : 2;
+    int w = ui.canvasArea->width();
+    int h = ui.canvasArea->height();
+    bool bNeedsZoom = false;
+    if(h/dims < 100)
+    {
+        h = 100*dims;
+        bNeedsZoom = true;
+    }
+    if(w/dims < 100)
+    {
+        w = 100*dims;
+        bNeedsZoom = true;
+    }
+    if(canvas->canvasType != 1 || (!bNeedsZoom && zoom == 1.f))
+    {
+        policy.setHorizontalPolicy(QSizePolicy::Preferred);
+        policy.setVerticalPolicy(QSizePolicy::Preferred);
+        ui.canvasWidget->setSizePolicy(policy);
+        ui.canvasWidget->setMinimumSize(ui.canvasArea->size());
+        ui.canvasWidget->resize(ui.canvasArea->size());
+        canvas->resize(ui.canvasWidget->size());
+        ui.canvasArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        canvas->SetCanvasType(canvas->canvasType);
+        canvas->ResizeEvent();
+        return;
+    }
+    policy.setHorizontalPolicy(QSizePolicy::Fixed);
+    policy.setVerticalPolicy(QSizePolicy::Fixed);
+    ui.canvasWidget->setSizePolicy(policy);
+    ui.canvasWidget->setMinimumSize(w*zoom,h*zoom);
+    ui.canvasWidget->resize(w*zoom,h*zoom);
+    canvas->resize(ui.canvasWidget->size());
+    ui.canvasArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    canvas->SetCanvasType(canvas->canvasType);
+    canvas->ResizeEvent();
 }
 
 void MLDemos::Navigation( fvec sample )
@@ -2205,6 +2276,27 @@ void MLDemos::ActivateIO()
     }
 }
 
+void MLDemos::ActivateImport()
+{
+    QList<QAction *> pluginActions = ui.menuImport->actions();
+    FOR(i, inputoutputs.size())
+    {
+        if(i<pluginActions.size() && inputoutputs[i] && pluginActions[i])
+        {
+            if(pluginActions[i]->isChecked())
+            {
+                bInputRunning[i] = true;
+                inputoutputs[i]->Start();
+            }
+            else if(bInputRunning[i])
+            {
+                bInputRunning[i] = false;
+                inputoutputs[i]->Stop();
+            }
+        }
+    }
+}
+
 void MLDemos::DisactivateIO(QObject *io)
 {
     if(!io) return;
@@ -2224,6 +2316,13 @@ void MLDemos::DisactivateIO(QObject *io)
         return; // something weird is going on!
     }
     QList<QAction *> pluginActions = ui.menuInput_Output->actions();
+    if(pluginIndex < pluginActions.size() && pluginActions[pluginIndex])
+    {
+        pluginActions[pluginIndex]->setChecked(false);
+        if(bInputRunning[pluginIndex]) inputoutputs[pluginIndex]->Stop();
+        bInputRunning[pluginIndex] = false;
+    }
+    pluginActions = ui.menuImport->actions();
     if(pluginIndex < pluginActions.size() && pluginActions[pluginIndex])
     {
         pluginActions[pluginIndex]->setChecked(false);

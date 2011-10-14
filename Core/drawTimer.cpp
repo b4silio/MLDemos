@@ -77,7 +77,7 @@ void DrawTimer::run()
 	bRunning = true;
 	while(bRunning)
 	{
-		if(!canvas) break;
+        if(!canvas || canvas->canvasType) break;
 		if((!classifier || !(*classifier)) && (!regressor || !(*regressor)) && (!dynamical || !(*dynamical)) && (!clusterer || !(*clusterer)) && (!maximizer || !(*maximizer)))
 		{
 			//if(refineLevel) Clear();

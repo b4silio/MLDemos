@@ -16,6 +16,8 @@ public:
     explicit Expose(Canvas *canvas, QWidget *parent = 0);
     ~Expose();
 
+    static void DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type);
+
 protected:
     void paintEvent(QPaintEvent *event);
     void resizeEvent( QResizeEvent *event );

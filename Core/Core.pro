@@ -15,6 +15,7 @@ win32{
 ###########################
 # Files                   #
 ###########################
+FORMS += expose.ui
 HEADERS += \
 	basicMath.h \
 	canvas.h \
@@ -24,8 +25,9 @@ HEADERS += \
 	drawUtils.h \
 	drawSVG.h \
 	drawTimer.h \
-	mymaths.h \
-	public.h \
+        mymaths.h \
+        expose.h \
+        public.h \
 	roc.h \
 	types.h \
 	widget.h \
@@ -46,6 +48,7 @@ SOURCES += \
 	drawSVG.cpp \
 	drawTimer.cpp \
 	mymaths.cpp \
-	roc.cpp \
+        expose.cpp \
+        roc.cpp \
 	fileUtils.cpp \
 	widget.cpp
