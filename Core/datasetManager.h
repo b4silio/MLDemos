@@ -153,6 +153,9 @@ protected:
 	u32 *perm;
 
 public:
+    bool bProjected;
+
+public:
 	DatasetManager(int dimension = 2);
 	~DatasetManager();
 

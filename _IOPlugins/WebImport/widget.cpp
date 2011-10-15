@@ -27,11 +27,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPushButton>
 #include <QGridLayout>
   
+#include "basicOpenCV.h"
 #include <math.h>
 
 #include "widget.h"
 
-/*
+
 QPixmap QNamedWindow::toPixmap(IplImage *src)
 {
 	QPixmap pixmap;
@@ -68,10 +69,9 @@ IplImage *QNamedWindow::toImage( QImage image )
 	}
 	return img;
 }
-*/
 
 QNamedWindow::QNamedWindow(QString name, bool bResizable, QWidget *parent)
-    : QWidget(parent), name(name)
+: QWidget(parent), name(name)
 {
 	qRegisterMetaType<QImage>("QImage");
 
@@ -91,7 +91,6 @@ QNamedWindow::QNamedWindow(QString name, bool bResizable, QWidget *parent)
 
 int counter = 0;
 bool bRedrawing = false;
-/*
 void QNamedWindow::ShowImage(IplImage *image)
 {
 	if(!image) return;
@@ -104,7 +103,6 @@ void QNamedWindow::ShowImage(IplImage *image)
 	repaint();
 	//update();
 }
-*/
 
 void QNamedWindow::ShowImage(QPixmap pixmap)
 {

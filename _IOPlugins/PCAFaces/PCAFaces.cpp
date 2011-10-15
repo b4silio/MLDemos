@@ -69,7 +69,7 @@ void PCAFaces::Updating()
 	if(!projector) return;
 	pair<vector<fvec>,ivec> data = projector->GetData();
 	if(data.first.size() < 2) return;
-	emit(SetData(data.first, data.second, vector<ipair>()));
+    emit(SetData(data.first, data.second, vector<ipair>(), true));
 }
 
 void PCAFaces::FetchResults(std::vector<fvec> results)

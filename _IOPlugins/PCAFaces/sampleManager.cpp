@@ -466,7 +466,7 @@ void SampleManager::Save(const char *filename)
 	CreateSampleImage(&image);
 	
 	// we write down the size of the samples in the last pixel of the image
-	cvSet2D(image,image->width-1,image->height-1,CV_RGB(255, size.height, size.width));
+    cvSet2D(image,image->height-1,image->width-1,CV_RGB(255, size.height, size.width));
 
 
 	FOR(i, passes+1)

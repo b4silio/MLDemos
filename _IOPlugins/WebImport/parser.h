@@ -105,7 +105,7 @@ public:
     void parse(const char* fileName);
     vector<size_t> getMissingValIndex();
     void cleanData(unsigned int acceptedTypes);
-    pair<vector<fvec>,ivec> getData(ivec excludeIndex = ivec());
+    pair<vector<fvec>,ivec> getData(ivec excludeIndex = ivec(), int maxSamples=-1);
     map<string,unsigned int> getOutputLabelTypes(bool reparse);
     void setOutputColumn(unsigned int column);
     bool hasData();

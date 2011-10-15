@@ -248,7 +248,7 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             bitmap.clear();
             maps.samples.setMask(bitmap);
             maps.samples.fill(Qt::transparent);
-            Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), type);
+            Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), type, data->bProjected);
         }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.samples);

@@ -231,7 +231,8 @@ void ClassProjections::ShowProjection()
 	}
 	if(classifierType == 3) // ICA
 	{
-		fvec meanAll; meanAll.resize(samples[0].size(), 0);
+		int dim = samples[0].size();
+		fvec meanAll; meanAll.resize(dim, 0);
 		FOR(i, samples.size())
 		{
 			meanAll += samples[i];
@@ -241,29 +242,56 @@ void ClassProjections::ShowProjection()
 		vector<fvec> projected(samples.size());
 		FOR(i, samples.size()) projected[i] = ((ClassifierLinear *)classifier)->Project(samples[i]);
 		// draw lines
+		vector<QPointF> points(samples.size());
+		vector<QPointF> originals(samples.size());
+		QPointF pointsMean(0,0), originalsMean(0,0);
+        fvec mins(2, FLT_MAX), maxes(2, -FLT_MAX);
 		FOR(i, samples.size())
 		{
 			fvec& sample = samples[i];
-			int& label = labels[i];
 			fvec& newSample = projected[i];
 
-			QPointF point = canvas->toCanvasCoords(newSample)/canvas->width()*w*0.5 + QPointF(w*0.5, 0);
-			QPointF original = canvas->toCanvasCoords(samples[i]-meanAll)/canvas->width()*w*0.5;
+			QPointF point = canvas->toCanvasCoords(newSample);
+			point = QPointF(point.x()/canvas->width(), point.y()/canvas->height());
+            mins[0] = min(mins[0], (float)point.x());
+            maxes[0] = max(maxes[0], (float)point.x());
+            mins[1] = min(mins[1], (float)point.y());
+            maxes[1] = max(maxes[1], (float)point.y());
+            QPointF original = canvas->toCanvasCoords(sample-meanAll);
+			original = QPointF(original.x()/canvas->width(), original.y()/canvas->height());
+			points[i] = point;
+			originals[i] = original;
+			pointsMean += point;
+			originalsMean += original;
+		}
+		pointsMean /= samples.size();
+		originalsMean /= samples.size();
+		qDebug() << "means" << pointsMean << originalsMean;
+		FOR(i, samples.size())
+		{
+			QPointF original = originals[i] - originalsMean;
+            original.setX(original.x()*w*0.5 + w*0.25);
+            original.setY(original.y()*h + h*0.5);
+            QPointF point = points[i];
+            point = QPointF((point.x()-mins[0])/(maxes[0]-mins[0]) - 0.5f, (point.y()-mins[1])/(maxes[1]-mins[1]) - 0.5f);
+            point.setX(point.x()*w*0.4 + w*0.75);
+            point.setY(point.y()*h*0.8 + h*0.5);
+			if(original.x() > w/2) continue;
 			painter.setPen(QPen(QColor(0,0,0,40), 0.2));
 			painter.drawLine(original, point);
 		}
-
-		// draw samples
 		FOR(i, samples.size())
 		{
-			fvec sample = samples[i];
-			int label = labels[i];
-			fvec newSample = projected[i];
-
-			QPointF point = canvas->toCanvasCoords(newSample)/canvas->width()*w*0.5 + QPointF(w*0.5, 0);
-			QPointF original = canvas->toCanvasCoords(samples[i]-meanAll)/canvas->width()*w*0.5;
-			Canvas::drawSample(painter, point, 6, label);
-			Canvas::drawSample(painter, original, 6, label);
+            QPointF original = originals[i] - originalsMean;
+            original.setX(original.x()*w*0.5 + w*0.25);
+            original.setY(original.y()*h + h*0.5);
+            QPointF point = points[i];
+            point = QPointF((point.x()-mins[0])/(maxes[0]-mins[0]) - 0.5f, (point.y()-mins[1])/(maxes[1]-mins[1]) - 0.5f);
+            point.setX(point.x()*w*0.4 + w*0.75);
+            point.setY(point.y()*h*0.8 + h*0.5);
+            Canvas::drawSample(painter, point, 6, labels[i]);
+			if(original.x() > w/2) continue;
+			Canvas::drawSample(painter, original, 6, labels[i]);
 		}
 
 		painter.setPen(QPen(Qt::black, 2.f));

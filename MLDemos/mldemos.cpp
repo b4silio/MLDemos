@@ -649,7 +649,7 @@ void MLDemos::AddPlugin(InputOutputInterface *iIO)
     inputoutputs.push_back(iIO);
     bInputRunning.push_back(false);
     connect(this, SIGNAL(SendResults(std::vector<fvec>)), iIO->object(), iIO->FetchResultsSlot());
-	connect(iIO->object(), iIO->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>)));
+    connect(iIO->object(), iIO->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
 	connect(iIO->object(), iIO->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
 	connect(iIO->object(), iIO->QueryClassifierSignal(), this, SLOT(QueryClassifier(std::vector<fvec>)));
     connect(iIO->object(), iIO->QueryRegressorSignal(), this, SLOT(QueryRegressor(std::vector<fvec>)));
@@ -2331,16 +2331,20 @@ void MLDemos::DisactivateIO(QObject *io)
     }
 }
 
-void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories)
+void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected)
 {
     canvas->data->Clear();
     canvas->data->AddSamples(samples, labels);
+    canvas->data->bProjected = bProjected;
+    if(bProjected) ui.status->setText("Projected Data (PCA, etc.)");
+    else ui.status->setText("Raw Data");
     if(trajectories.size())
     {
         canvas->data->AddSequences(trajectories);
     }
 	FitToData();
 	ResetPositiveClass();
+    CanvasZoomChanged();
 	canvas->ResetSamples();
 	canvas->repaint();
 }

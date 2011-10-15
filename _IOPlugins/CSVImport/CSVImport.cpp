@@ -23,7 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 Q_EXPORT_PLUGIN2(IO_CSVImport, CSVImport)
 
 CSVImport::CSVImport()
-    : guiDialog(0), gui(0), inputParser(0)
+    : guiDialog(0), gui(0), inputParser(0), eigLabel(0)
 {
 }
 
@@ -31,6 +31,7 @@ CSVImport::~CSVImport()
 {
     if(gui && guiDialog) guiDialog->hide();
     DEL(inputParser);
+    DEL(eigLabel);
 }
 
 void CSVImport::Start()
@@ -130,9 +131,11 @@ void CSVImport::on_dumpButton_clicked()
     {
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
+    if(eigLabel) eigLabel->hide();
+    DEL(eigLabel);
 
-    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices);
-    emit(SetData(data.first, data.second, vector<ipair>()));
+	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
+    emit(SetData(data.first, data.second, vector<ipair>(), false));
 }
 
 void CSVImport::on_pcaButton_clicked()
@@ -150,11 +153,19 @@ void CSVImport::on_pcaButton_clicked()
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
 
-    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices);
+	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, inputParser->getCount());
     PCAProjection pca;
 	if(!data.first.size()) return;
     int pcaCount = min(data.first[0].size(),data.first.size() -1);
 	pca.Train(data.first, pcaCount);
     data.first = pca.samples;
-    emit(SetData(data.first, data.second, vector<ipair>()));
+	if(data.first.size() > 2000)
+	{
+		data.first.resize(2000);
+		data.second.resize(2000);
+	}
+	DEL(eigLabel);
+    eigLabel = pca.EigenValues();
+    eigLabel->show();
+    emit(SetData(data.first, data.second, vector<ipair>(), true));
 }

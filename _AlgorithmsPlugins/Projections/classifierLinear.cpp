@@ -463,7 +463,7 @@ void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels 
 	}
 	meanAll /= samples.size();
 
-	const int nbsensors = samples[0].size();
+	const int nbsensors = dim;
 	const int nbsamples = samples.size(); 
 
 	if(!Transf)

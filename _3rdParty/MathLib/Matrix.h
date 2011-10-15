@@ -793,7 +793,6 @@ public:
         return *this;
     }
 
-
     inline virtual Matrix& operator = (const Matrix &matrix)
     {
         return Set(matrix);

@@ -60,11 +60,13 @@ FORMS += CSVImport.ui
 HEADERS += CSVImport.h \
             basicOpenCV.h \
             parser.h \
+            widget.h \
     pcaprojection.h
 
 SOURCES += CSVImport.cpp \
             basicOpenCV.cpp \
             parser.cpp \
+            widget.cpp \
     pcaprojection.cpp
 
 

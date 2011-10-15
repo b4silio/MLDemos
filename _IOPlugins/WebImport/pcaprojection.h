@@ -3,6 +3,7 @@
 
 #include <public.h>
 #include <mymaths.h>
+#include <QLabel>
 #include "basicOpenCV.h"
 
 using namespace std;
@@ -10,11 +11,14 @@ using namespace cv;
 
 class PCAProjection
 {
+    PCA pca;
 public:
     std::vector<fvec> samples;
     PCAProjection();
     PCA compressPCA(const Mat& pcaset, int maxComponents, const Mat& testset, Mat& compressed);
+    static IplImage *DrawEigenvals(Mat eigVal);
     void Train(std::vector<fvec> samples, int count=2);
+    QLabel* EigenValues();
 };
 
 #endif // PCAPROJECTION_H

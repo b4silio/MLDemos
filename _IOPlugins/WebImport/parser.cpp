@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include <QDebug>
+#include <basicMath.h>
 #include "parser.h"
 
 /* CSVRow stuff */
@@ -251,7 +252,7 @@ void CSVParser::cleanData(unsigned int acceptedTypes)
         }
 }
 
-pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex)
+pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
 {
     if(!data.size()) return pair<vector<fvec>,ivec>();
     vector<fvec> samples(data.size());
@@ -274,18 +275,59 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex)
             float val = s.toFloat(&ok);
             if(j==outputLabelColumn || !ok)
             {
-                val = (float)labelCounters[j];
-                ret = labelMaps[j].insert(pair<string,int>(data[i][j], labelCounters[j]));
-                if(ret.second) labelCounters[j]++;
+                if(labelMaps[j].count(data[i][j]) > 0) val = labelMaps[j][data[i][j]];
+                else
+                {
+                    val = (float)labelCounters[j];
+					ret = labelMaps[j].insert(pair<string,int>(data[i][j], val));
+                    if(ret.second) labelCounters[j]++;
+                }
             }
-            if(j==outputLabelColumn)
+			if(j!=outputLabelColumn)
             {
-				labels[i] = (int)val;
-                continue;
+                int index = j < outputLabelColumn ? j : j-1;
+                sample[index] = val;
             }
-            int index = j < outputLabelColumn ? j : j-1;
-            sample[index] = val;
         }
+    }
+    bool numerical = true;
+    FOR(i, data.size())
+    {
+        bool ok;
+        float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
+        if(!ok)
+        {
+            numerical = false;
+            break;
+        }
+    }
+    FOR(i, data.size())
+    {
+        bool ok;
+        float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
+        if(numerical)
+        {
+            labels[i] = val;
+        }
+        else
+        {
+			labels[i] = labelMaps[outputLabelColumn][data[i][outputLabelColumn]];
+		}
+    }
+
+    if(maxSamples != -1 && maxSamples < samples.size())
+    {
+        vector<fvec> newSamples(maxSamples);
+        ivec newLabels(maxSamples);
+        u32 *perm = randPerm(maxSamples);
+        FOR(i, maxSamples)
+        {
+            newSamples[i] = samples[perm[i]];
+            newLabels[i] = labels[perm[i]];
+        }
+        samples = newSamples;
+        labels = newLabels;
+        delete [] perm;
     }
     if(!excludeIndex.size()) return pair<vector<fvec>,ivec>(samples,labels);
     vector<fvec> newSamples(data.size());
@@ -318,6 +360,4 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex)
     }
     return pair<vector<fvec>,ivec>(newSamples,labels);
 }
-
-
 

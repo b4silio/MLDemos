@@ -15,7 +15,10 @@ EigenFaces::EigenFaces()
 EigenFaces::~EigenFaces()
 {
 	if(eigenValues) cvReleaseMat(&eigenValues);
-	FOR(i, dim) IMKILL(eigenVectors[i]);
+    if(eigenVectors)
+    {
+        FOR(i, dim) IMKILL(eigenVectors[i]);
+    }
 	KILL(eigenVectors);
 	IMKILL(avgImage);
 	IMKILL(mapImage);

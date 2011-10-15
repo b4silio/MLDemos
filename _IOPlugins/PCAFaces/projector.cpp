@@ -126,7 +126,6 @@ pair<vector<fvec>,ivec> Projector::GetData()
 	int e1 = options->spinE1->value()-1;
 	int e2 = options->spinE2->value()-1;
 
-
     vector<IplImage*>sourceSamples;
     ivec sourceLabels;
     FOR(i, sm.GetCount())

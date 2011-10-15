@@ -3,6 +3,7 @@
 #include "expose.h"
 #include "ui_expose.h"
 #include <QClipboard>
+#include <QDebug>
 
 using namespace std;
 
@@ -22,7 +23,7 @@ Expose::~Expose()
     delete ui;
 }
 
-void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type)
+void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type, bool bProjected)
 {
     if(!samples.size()) return;
     int w = pixmap.width(), h = pixmap.height();
@@ -31,7 +32,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
     int gridX = dim;
     int gridY = dim;
 
-    fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN);
+	fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN), diffs(dim, 0);
     FOR(d, dim)
     {
         FOR(i, samples.size())
@@ -39,7 +40,12 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
             mins[d] = min(mins[d], samples[i][d]);
             maxes[d] = max(maxes[d], samples[i][d]);
         }
-    }
+	}
+	FOR(d, dim)
+	{
+		diffs[d] = maxes[d] - mins[d];
+		qDebug() << d << diffs[d];
+	}
 
     int pad = 20;
     int mapW = w - pad*2, mapH = h - pad*2;
@@ -57,28 +63,33 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
         FOR(index0, dim)
         {
             FOR(index1, dim)
-            {
+			{
                 QPixmap map(mapW + 2*pad,mapH + 2*pad);
                 int smallW = map.width() - 2*pad, smallH = map.height() - 2*pad;
                 map.fill(Qt::white);
                 QPainter painter(&map);
                 painter.setRenderHint(QPainter::Antialiasing);
 
-                FOR(i, samples.size())
-                {
-                    float x = samples[i][index0];
-                    float y = samples[i][index1];
-                    x = (x-mins[index0])/(maxes[index0] - mins[index0]);
-                    y = (y-mins[index1])/(maxes[index1] - mins[index1]);
-                    QPointF point(y*smallW + pad, x*smallH + pad);
-                    float radius = 5;
-                    Canvas::drawSample(painter, point, radius, labels[i]);
-                }
+				if(diffs[index0] != 0.f && diffs[index1] != 0.f)
+				{
+					FOR(i, samples.size())
+					{
+						float x = samples[i][index0];
+						float y = samples[i][index1];
+						x = (x-mins[index0])/diffs[index0];
+						y = (y-mins[index1])/diffs[index1];
+						QPointF point(y*smallW + pad, x*smallH + pad);
+						float radius = 5;
+						Canvas::drawSample(painter, point, radius, labels[i]);
+					}
+				}
                 painter.setBrush(Qt::NoBrush);
                 painter.setPen(Qt::black);
                 painter.setRenderHint(QPainter::Antialiasing, false);
                 painter.drawRect(pad/2,pad/2,smallW+pad, smallH+pad);
-                painter.drawText(pad/2+1, map.height()-pad/2-1, QString("x%1  x%2").arg(index1+1).arg(index0+1));
+                QString text =  QString("x%1  x%2").arg(index1+1).arg(index0+1);
+                if(bProjected) text = QString("e%1  e%2").arg(index1+1).arg(index0+1);
+                painter.drawText(pad/2+1, map.height()-pad/2-1,text);
                 maps.push_back(map);
             }
         }
@@ -99,16 +110,19 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
             float x = d*mapW/(float)(dim-1) + pad;
             painter.setPen(Qt::black);
             painter.drawLine(x, pad, x, mapH+pad);
-            painter.drawText(x-10, mapH+2*pad-4, QString("x%1").arg(d+1));
+            QString text =  QString("x%1").arg(d+1);
+            if(bProjected) text = QString("e%1").arg(d+1);
+            painter.drawText(x-10, mapH+2*pad-4, text);
         }
 
         painter.setRenderHint(QPainter::Antialiasing);
         FOR(i, samples.size())
         {
             QPointF old;
-            FOR(d, dim)
+			FOR(d, dim)
             {
-                float x = d*mapW/(float)(dim-1) + pad;
+				if(diffs[d] == 0.f) continue;
+				float x = d*mapW/(float)(dim-1) + pad;
                 float y = samples[i][d];
                 y = (y-mins[d])/(maxes[d] - mins[d]);
                 QPointF point(x,pad + y*mapH);
@@ -131,10 +145,12 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
         painter.setPen(Qt::black);
         FOR(d, dim)
         {
-            float theta = d/(float)(dim)*2*M_PI;
+			float theta = d/(float)(dim)*2*M_PI;
             QPointF point = QPointF(cos(theta), sin(theta))*radius;
             if(d) painter.drawLine(center + point, center + old);
-            painter.drawText(center + point*1.1, QString("x%1").arg(d+1));
+            QString text =  QString("x%1").arg(d+1);
+            if(bProjected) text = QString("e%1").arg(d+1);
+            painter.drawText(center + point*1.1, text);
             old = point;
         }
         painter.drawLine(center + QPointF(1.f, 0.f)*radius, center + old);
@@ -145,7 +161,8 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
             float dimSum = 0;
             FOR(d, dim)
             {
-                float theta = d/(float)(dim)*2*M_PI;
+				if(diffs[d] == 0.f) continue;
+				float theta = d/(float)(dim)*2*M_PI;
                 QPointF point = QPointF(cos(theta), sin(theta))*radius;
                 float value = (samples[i][d]-mins[d])/(maxes[d]-mins[d]);
                 samplePoint += point*value;
@@ -179,7 +196,8 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
                 float value = 0;
                 FOR(d, dim)
                 {
-                    float v = (samples[i][d]-mins[d])/(maxes[d]-mins[d]);
+					if(diffs[d] == 0.f) continue;
+					float v = (samples[i][d]-mins[d])/(maxes[d]-mins[d]);
                     if(!d) value += v*sqrtf(2.f);
                     else
                     {

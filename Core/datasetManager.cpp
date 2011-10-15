@@ -36,6 +36,7 @@ u32 DatasetManager::IDCount = 0;
 DatasetManager::DatasetManager(int dimension)
 : size(dimension)
 {
+    bProjected = false;
 	ID = IDCount++;
 	perm = NULL;
 }
@@ -47,6 +48,7 @@ DatasetManager::~DatasetManager()
 
 void DatasetManager::Clear()
 {
+    bProjected = false;
 	samples.clear();
 	obstacles.clear();
 	flags.clear();

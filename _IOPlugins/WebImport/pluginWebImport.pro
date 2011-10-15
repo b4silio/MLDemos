@@ -61,11 +61,13 @@ FORMS += WebImport.ui
 HEADERS +=	WebImport.h \
             basicOpenCV.h \
             parser.h \
+            widget.h \
     pcaprojection.h
 
 SOURCES += 	WebImport.cpp \
             basicOpenCV.cpp \
             parser.cpp \
+            widget.cpp \
     pcaprojection.cpp
 
 
