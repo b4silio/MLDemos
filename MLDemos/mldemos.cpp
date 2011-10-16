@@ -42,6 +42,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
       dynamical(0),
       clusterer(0),
       maximizer(0),
+      projector(0),
       bIsRocNew(true),
       bIsCrossNew(true),
       compareDisplay(0),
@@ -82,12 +83,14 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     if(!regressors.size()) algorithmOptions->tabWidget->setTabEnabled(2,false);
     if(!dynamicals.size()) algorithmOptions->tabWidget->setTabEnabled(3,false);
     if(!maximizers.size()) algorithmOptions->tabWidget->setTabEnabled(4,false);
+    if(!projectors.size()) algorithmOptions->tabWidget->setTabEnabled(5,false);
 
     algorithmWidget->setFixedSize(636,220);
     canvas->repaint();
 
     canvas->ResizeEvent();
     CanvasMoveEvent();
+    CanvasTypeChanged();
     CanvasZoomChanged();
     drawTime.start();
     if(filename != "") Load(filename);
@@ -107,30 +110,10 @@ void MLDemos::initToolBars()
     actionLoad->setShortcut(QKeySequence(tr("Ctrl+L")));
     actionLoad->setStatusTip(tr("Load Data"));
 
-    actionClassifiers = new QAction(QIcon(":/MLDemos/icons/classify.png"), tr("&Classification"), this);
-    actionClassifiers->setShortcut(QKeySequence(tr("C")));
-    actionClassifiers->setStatusTip(tr("Classify the data"));
-    actionClassifiers->setCheckable(true);
-
-    actionRegression = new QAction(QIcon(":/MLDemos/icons/regress.png"), tr("&Regression"), this);
-    actionRegression->setShortcut(QKeySequence(tr("R")));
-    actionRegression->setStatusTip(tr("Estimate Regression"));
-    actionRegression->setCheckable(true);
-
-    actionDynamical = new QAction(QIcon(":/MLDemos/icons/dynamical.png"), tr("&Dynamical"), this);
-    actionDynamical->setShortcut(QKeySequence(tr("D")));
-    actionDynamical->setStatusTip(tr("Estimate Dynamical System"));
-    actionDynamical->setCheckable(true);
-
-    actionClustering = new QAction(QIcon(":/MLDemos/icons/cluster.png"), tr("C&lustering"), this);
-    actionClustering->setShortcut(QKeySequence(tr("L")));
-    actionClustering->setStatusTip(tr("Cluster the data"));
-    actionClustering->setCheckable(true);
-
-    actionMaximizers = new QAction(QIcon(":/MLDemos/icons/maximize.png"), tr("&Maximize"), this);
-    actionMaximizers->setShortcut(QKeySequence(tr("M")));
-    actionMaximizers->setStatusTip(tr("Maximize Reward Function"));
-    actionMaximizers->setCheckable(true);
+    actionAlgorithms = new QAction(QIcon(":/MLDemos/icons/algorithms.png"), tr("&Algorithms"), this);
+    actionAlgorithms->setShortcut(QKeySequence(tr("C")));
+    actionAlgorithms->setStatusTip(tr("Algorithm Options"));
+    actionAlgorithms->setCheckable(true);
 
     actionCompare = new QAction(QIcon(":/MLDemos/icons/compare.png"), tr("&Compare"), this);
     actionCompare->setShortcut(QKeySequence(tr("M")));
@@ -164,11 +147,7 @@ void MLDemos::initToolBars()
     actionShowStats->setStatusTip(tr("Display Algorithm Information and Data Statistics"));
     actionShowStats->setCheckable(true);
 
-    connect(actionClassifiers, SIGNAL(triggered()), this, SLOT(ShowOptionClass()));
-    connect(actionRegression, SIGNAL(triggered()), this, SLOT(ShowOptionRegress()));
-    connect(actionDynamical, SIGNAL(triggered()), this, SLOT(ShowOptionDynamical()));
-    connect(actionClustering, SIGNAL(triggered()), this, SLOT(ShowOptionCluster()));
-    connect(actionMaximizers, SIGNAL(triggered()), this, SLOT(ShowOptionMaximize()));
+    connect(actionAlgorithms, SIGNAL(triggered()), this, SLOT(ShowAlgorithmOptions()));
     connect(actionCompare, SIGNAL(triggered()), this, SLOT(ShowOptionCompare()));
     connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
@@ -180,7 +159,7 @@ void MLDemos::initToolBars()
     connect(actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
     connect(actionShowStats, SIGNAL(triggered()), this, SLOT(ShowStatsDialog()));
 
-    /*
+/*
  connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
  connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
  connect(actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
@@ -199,13 +178,9 @@ void MLDemos::initToolBars()
     toolBar->addAction(actionLoad);
     toolBar->addAction(actionSave);
     toolBar->addSeparator();
-    toolBar->addAction(actionClassifiers);
-    toolBar->addAction(actionClustering);
-    toolBar->addAction(actionRegression);
-    toolBar->addAction(actionDynamical);
-    toolBar->addAction(actionMaximizers);
-    toolBar->addSeparator();
+    toolBar->addAction(actionAlgorithms);
     toolBar->addAction(actionCompare);
+    toolBar->addSeparator();
     toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
     toolBar->addSeparator();
@@ -221,6 +196,9 @@ void MLDemos::initToolBars()
     connect(ui.actionSmall_Icons, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.canvasTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(CanvasTypeChanged()));
     connect(ui.canvasZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(CanvasZoomChanged()));
+    connect(ui.canvasX1Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
+    connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
+    connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
 
     QSize iconSize(24,24);
     drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
@@ -309,12 +287,6 @@ void MLDemos::initDialogs()
     connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
-    connect(displayOptions->exposeButton, SIGNAL(clicked()), this, SLOT(ExposeData()));
-    connect(displayOptions->xDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
-	connect(displayOptions->yDimIndex, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
-	//	connect(displayOptions->trajectoriesCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-    //	connect(displayOptions->singleclassCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-
 
     algorithmOptions = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
@@ -322,6 +294,7 @@ void MLDemos::initDialogs()
     optionsRegress = new Ui::optionsRegressWidget();
     optionsDynamic = new Ui::optionsDynamicWidget();
     optionsMaximize = new Ui::optionsMaximizeWidget();
+    optionsProject = new Ui::optionsProjectWidget();
     optionsCompare = new Ui::optionsCompare();
 
     algorithmWidget = new QWidget();
@@ -343,11 +316,13 @@ void MLDemos::initDialogs()
     regressWidget = new QWidget(algorithmOptions->tabRegr);
     dynamicWidget = new QWidget(algorithmOptions->tabDyn);
     maximizeWidget = new QWidget(algorithmOptions->tabMax);
+    projectWidget = new QWidget(algorithmOptions->tabProj);
     optionsClassify->setupUi(classifyWidget);
     optionsCluster->setupUi(clusterWidget);
     optionsRegress->setupUi(regressWidget);
     optionsDynamic->setupUi(dynamicWidget);
     optionsMaximize->setupUi(maximizeWidget);
+    optionsProject->setupUi(projectWidget);
     compareWidget = new QWidget();
     optionsCompare->setupUi(compareWidget);
 
@@ -391,6 +366,10 @@ void MLDemos::initDialogs()
 	connect(optionsMaximize->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
 	connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 
+    connect(optionsProject->projectButton, SIGNAL(clicked()), this, SLOT(Project()));
+    connect(optionsProject->revertButton, SIGNAL(clicked()), this, SLOT(ProjectRevert()));
+    connect(optionsProject->reprojectButton, SIGNAL(clicked()), this, SLOT(ProjectReproject()));
+
 	connect(optionsCompare->compareButton, SIGNAL(clicked()), this, SLOT(Compare()));
 	connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
 	connect(optionsCompare->clearButton, SIGNAL(clicked()), this, SLOT(CompareClear()));
@@ -401,11 +380,13 @@ void MLDemos::initDialogs()
     optionsRegress->tabWidget->clear();
     optionsDynamic->tabWidget->clear();
     optionsMaximize->tabWidget->clear();
+    optionsProject->tabWidget->clear();
     optionsClassify->tabWidget->setUsesScrollButtons(true);
     optionsCluster->tabWidget->setUsesScrollButtons(true);
     optionsRegress->tabWidget->setUsesScrollButtons(true);
     optionsDynamic->tabWidget->setUsesScrollButtons(true);
     optionsMaximize->tabWidget->setUsesScrollButtons(true);
+    optionsProject->tabWidget->setUsesScrollButtons(true);
 
     QHBoxLayout *layout = new QHBoxLayout(optionsCompare->resultWidget);
     compare = new CompareAlgorithms(optionsCompare->resultWidget);
@@ -416,6 +397,7 @@ void MLDemos::initDialogs()
     connect(optionsRegress->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
     connect(optionsDynamic->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
     connect(optionsMaximize->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
+    connect(optionsProject->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
 
     //canvas = new Canvas(ui.centralWidget);
     canvas = new Canvas(ui.canvasWidget);
@@ -490,11 +472,13 @@ void MLDemos::initPlugins()
                 std::vector<RegressorInterface*> regressorList = iCollection->GetRegressors();
                 std::vector<DynamicalInterface*> dynamicalList = iCollection->GetDynamicals();
                 std::vector<MaximizeInterface*> maximizerList = iCollection->GetMaximizers();
+                std::vector<ProjectorInterface*> projectorList = iCollection->GetProjectors();
                 FOR(i, classifierList.size()) AddPlugin(classifierList[i], SLOT(ChangeActiveOptions));
                 FOR(i, clustererList.size()) AddPlugin(clustererList[i], SLOT(ChangeActiveOptions));
                 FOR(i, regressorList.size()) AddPlugin(regressorList[i], SLOT(ChangeActiveOptions));
                 FOR(i, dynamicalList.size()) AddPlugin(dynamicalList[i], SLOT(ChangeActiveOptions));
                 FOR(i, maximizerList.size()) AddPlugin(maximizerList[i], SLOT(ChangeActiveOptions));
+                FOR(i, projectorList.size()) AddPlugin(projectorList[i], SLOT(ChangeActiveOptions));
                 continue;
             }
             ClassifierInterface *iClassifier = qobject_cast<ClassifierInterface *>(plugin);
@@ -525,6 +509,12 @@ void MLDemos::initPlugins()
             if (iMaximize)
             {
                 AddPlugin(iMaximize, SLOT(ChangeActiveOptions()));
+                continue;
+            }
+            ProjectorInterface *iProject = qobject_cast<ProjectorInterface *>(plugin);
+            if (iProject)
+            {
+                AddPlugin(iProject, SLOT(ChangeActiveOptions()));
                 continue;
             }
             InputOutputInterface *iIO = qobject_cast<InputOutputInterface *>(plugin);
@@ -712,6 +702,13 @@ void MLDemos::AddPlugin(MaximizeInterface *iMaximizer, const char *method)
     optionsMaximize->tabWidget->addTab(iMaximizer->GetParameterWidget(), iMaximizer->GetName());
 }
 
+void MLDemos::AddPlugin(ProjectorInterface *iProject, const char *method)
+{
+    if(!iProject) return;
+    projectors.push_back(iProject);
+    optionsProject->tabWidget->addTab(iProject->GetParameterWidget(), iProject->GetName());
+}
+
 MLDemos::~MLDemos()
 {
     Clear();
@@ -766,22 +763,18 @@ void MLDemos::resizeEvent( QResizeEvent *event )
 void MLDemos::AlgoChanged()
 {
     ChangeInfoFile();
-    actionClassifiers->setChecked(algorithmOptions->tabClass->isVisible());
-    actionClustering->setChecked(algorithmOptions->tabClust->isVisible());
-    actionRegression->setChecked(algorithmOptions->tabRegr->isVisible());
-    actionDynamical->setChecked(algorithmOptions->tabDyn->isVisible());
-    actionMaximizers->setChecked(algorithmOptions->tabMax->isVisible());
-    if(actionMaximizers->isChecked())
+    actionAlgorithms->setChecked(algorithmWidget->isVisible());
+    if(algorithmOptions->tabMax->isVisible())
     {
         drawToolbar->paintButton->setChecked(true);
         DrawPaint();
     }
-    if(actionDynamical->isChecked())
+    if(algorithmOptions->tabDyn->isVisible())
     {
         drawToolbar->trajectoryButton->setChecked(true);
         DrawTrajectory();
     }
-    if(actionRegression->isChecked() || actionClassifiers->isChecked())
+    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible())
     {
         drawToolbar->sprayButton->setChecked(true);
         DrawSpray();
@@ -862,78 +855,10 @@ void MLDemos::CompareRemove()
     if(optionsCompare->algoList->count()) optionsCompare->algoList->item(0)->setSelected(true);
 }
 
-void MLDemos::ShowOptionClass()
+void MLDemos::ShowAlgorithmOptions()
 {
-    if(actionClassifiers->isChecked())
-    {
-        algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClass);
-        algorithmWidget->show();
-    }
+    if(actionAlgorithms->isChecked()) algorithmWidget->show();
     else algorithmWidget->hide();
-    actionClustering->setChecked(false);
-    actionRegression->setChecked(false);
-    actionDynamical->setChecked(false);
-    actionMaximizers->setChecked(false);
-}
-
-void MLDemos::ShowOptionRegress()
-{
-    if(actionRegression->isChecked())
-    {
-        algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabRegr);
-        algorithmWidget->show();
-    }
-    else algorithmWidget->hide();
-    actionClustering->setChecked(false);
-    actionClassifiers->setChecked(false);
-    actionDynamical->setChecked(false);
-    actionMaximizers->setChecked(false);
-}
-
-void MLDemos::ShowOptionDynamical()
-{
-    if(actionDynamical->isChecked())
-    {
-        algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabDyn);
-        algorithmWidget->show();
-        drawToolbar->trajectoryButton->setChecked(true);
-        DrawTrajectory();
-    }
-    else algorithmWidget->hide();
-    actionClustering->setChecked(false);
-    actionClassifiers->setChecked(false);
-    actionRegression->setChecked(false);
-    actionMaximizers->setChecked(false);
-}
-
-void MLDemos::ShowOptionCluster()
-{
-    if(actionClustering->isChecked())
-    {
-        algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClust);
-        algorithmWidget->show();
-    }
-    else algorithmWidget->hide();
-    actionClassifiers->setChecked(false);
-    actionRegression->setChecked(false);
-    actionDynamical->setChecked(false);
-    actionMaximizers->setChecked(false);
-}
-
-void MLDemos::ShowOptionMaximize()
-{
-    if(actionMaximizers->isChecked())
-    {
-        algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
-        algorithmWidget->show();
-        drawToolbar->paintButton->setChecked(true);
-        DrawPaint();
-    }
-    else algorithmWidget->hide();
-    actionClustering->setChecked(false);
-    actionClassifiers->setChecked(false);
-    actionRegression->setChecked(false);
-    actionDynamical->setChecked(false);
 }
 
 void MLDemos::ShowOptionCompare()
@@ -993,36 +918,6 @@ void MLDemos::ShowAbout()
     about->show();
 }
 
-void MLDemos::HideOptionClass()
-{
-    if(algorithmOptions->tabClass->isVisible()) algorithmWidget->hide();
-    actionClassifiers->setChecked(false);
-}
-
-void MLDemos::HideOptionRegress()
-{
-    if(algorithmOptions->tabRegr->isVisible()) algorithmWidget->hide();
-    actionRegression->setChecked(false);
-}
-
-void MLDemos::HideOptionDynamical()
-{
-    if(algorithmOptions->tabDyn->isVisible()) algorithmWidget->hide();
-    actionDynamical->setChecked(false);
-}
-
-void MLDemos::HideOptionCluster()
-{
-    if(algorithmOptions->tabClust->isVisible()) algorithmWidget->hide();
-    actionClustering->setChecked(false);
-}
-
-void MLDemos::HideOptionMaximize()
-{
-    if(algorithmOptions->tabMax->isVisible()) algorithmWidget->hide();
-    actionMaximizers->setChecked(false);
-}
-
 void MLDemos::HideSampleDrawing()
 {
     drawToolbarWidget->hide();
@@ -1059,6 +954,7 @@ void MLDemos::Clear()
     DEL(dynamical);
     DEL(clusterer);
     DEL(maximizer);
+    DEL(projector);
     canvas->maps.confidence = QPixmap();
     canvas->maps.model = QPixmap();
     canvas->maps.info = QPixmap();
@@ -1090,9 +986,10 @@ void MLDemos::ResetPositiveClass()
     else if(optionsClassify->positiveSpin->value() > labMax)
         optionsClassify->positiveSpin->setValue(labMax);
 	int dimCount = max(2,canvas->data->GetDimCount());
-	displayOptions->xDimIndex->setRange(0,dimCount-1);
-	displayOptions->yDimIndex->setRange(0,dimCount-1);
-	canvas->SetDim(displayOptions->xDimIndex->value(), displayOptions->yDimIndex->value());
+    ui.canvasX1Spin->setRange(1,dimCount);
+    ui.canvasX2Spin->setRange(1,dimCount);
+    ui.canvasX3Spin->setRange(1,dimCount);
+    canvas->SetDim(ui.canvasX1Spin->value()-1,ui.canvasX2Spin->value()-1, ui.canvasX3Spin->value()-1);
 }
 
 void MLDemos::ChangeActiveOptions()
@@ -1104,6 +1001,7 @@ void MLDemos::ClearData()
 {
     if(canvas)
     {
+        canvas->sampleColors.clear();
         canvas->data->Clear();
         canvas->targets.clear();
         canvas->maps.reward = QPixmap();
@@ -1258,6 +1156,7 @@ void MLDemos::ColorMapChanged()
 void MLDemos::DisplayOptionChanged()
 {
     if(!canvas) return;
+
     canvas->bDisplayInfo = displayOptions->infoCheck->isChecked();
     canvas->bDisplayLearned = displayOptions->modelCheck->isChecked();
     canvas->bDisplayMap = displayOptions->mapCheck->isChecked();
@@ -1266,10 +1165,11 @@ void MLDemos::DisplayOptionChanged()
 	canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
 	canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
 	{
-		int xIndex = displayOptions->xDimIndex->value();
-		int yIndex = displayOptions->yDimIndex->value();
-		if(xIndex == yIndex) yIndex = xIndex+1;
-		canvas->SetDim(xIndex, yIndex);
+        int xIndex = ui.canvasX1Spin->value()-1;
+        int yIndex = ui.canvasX2Spin->value()-1;
+        int zIndex = ui.canvasX3Spin->value()-1;
+        //if(xIndex == yIndex) yIndex = xIndex+1;
+        canvas->SetDim(xIndex, yIndex, zIndex);
 	}
     float zoom = displayOptions->spinZoom->value();
     if(zoom >= 0.f) zoom += 1.f;
@@ -1307,6 +1207,9 @@ void MLDemos::DisplayOptionChanged()
         {
             drawTimer->start(QThread::NormalPriority);
         }
+        else if(projector)
+        {
+        }
         canvas->repaint();
     }
     //	canvas->bDisplayTrajectories = displayOptions->trajectoriesCheck->isChecked();
@@ -1316,6 +1219,8 @@ void MLDemos::DisplayOptionChanged()
         canvas->trajectoryResampleType = optionsDynamic->resampleCombo->currentIndex();
         canvas->trajectoryResampleCount = optionsDynamic->resampleSpin->value();
     }
+    CanvasTypeChanged();
+    CanvasZoomChanged();
     canvas->ResetSamples();
     canvas->repaint();
 }
@@ -1352,6 +1257,12 @@ void MLDemos::ChangeInfoFile()
         int tab = optionsMaximize->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)maximizers.size() || !maximizers[tab]) return;
         infoFile = maximizers[tab]->GetInfoFile();
+    }
+    if(algorithmOptions->tabProj->isVisible())
+    {
+        int tab = optionsProject->tabWidget->currentIndex();
+        if(tab < 0 || tab >= (int)projectors.size() || !projectors[tab]) return;
+        infoFile = projectors[tab]->GetInfoFile();
     }
     if(infoFile == "") infoFile = "mldemos.html"; // we want the main information page
 
@@ -1807,6 +1718,36 @@ void MLDemos::ZoomChanged(float d)
 
 void MLDemos::CanvasTypeChanged()
 {
+    bool bProjected = canvas->data->bProjected;
+    int type = ui.canvasTypeCombo->currentIndex();
+    ui.canvasZoomSlider->setEnabled(false);
+    ui.canvasZoomSlider->hide();
+    ui.canvasAxesWidget->hide();
+    switch(type)
+    {
+    case 0: // standard
+        ui.canvasAxesWidget->show();
+        ui.canvasX3Spin->setEnabled(false);
+        ui.canvasX1Label->setText(bProjected ? "e1" : "x1");
+        ui.canvasX2Label->setText(bProjected ? "e2" : "x2");
+        break;
+    case 1: // scatterplot
+        ui.canvasZoomSlider->show();
+        ui.canvasZoomSlider->setEnabled(true);
+        break;
+    case 2: // parallel coords
+        break;
+    case 3: // radial graph (radviz)
+        break;
+    case 4: // andrews plots
+        break;
+    case 5: // bubble plots
+        ui.canvasAxesWidget->show();
+        ui.canvasX3Spin->setEnabled(true);
+        ui.canvasX1Label->setText(bProjected ? "e1" : "x1");
+        ui.canvasX2Label->setText(bProjected ? "e2" : "x2");
+        break;
+    }
     ui.canvasZoomSlider->setEnabled(ui.canvasTypeCombo->currentIndex() == 1);
     if(canvas->canvasType == ui.canvasTypeCombo->currentIndex()) return;
     canvas->SetCanvasType(ui.canvasTypeCombo->currentIndex());
@@ -1832,6 +1773,7 @@ void MLDemos::CanvasZoomChanged()
         w = 100*dims;
         bNeedsZoom = true;
     }
+
     if(canvas->canvasType != 1 || (!bNeedsZoom && zoom == 1.f))
     {
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
@@ -2104,7 +2046,7 @@ void MLDemos::SaveData()
     if(!filename.endsWith(".ml")) filename += ".ml";
     Save(filename);
 }
-void MLDemos :: Save(QString filename)
+void MLDemos::Save(QString filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
@@ -2450,6 +2392,21 @@ void MLDemos::QueryMaximizer(std::vector<fvec> samples)
         FOR(i, samples.size())
         {
             results[i] = maximizer->Test(samples[i]);
+        }
+    }
+    emit SendResults(results);
+}
+
+void MLDemos::QueryProjector(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(&mutex);
+    if(projector && samples.size())
+    {
+        results.resize(samples.size());
+        FOR(i, samples.size())
+        {
+            results[i] = projector->Project(samples[i]);
         }
     }
     emit SendResults(results);

@@ -452,11 +452,16 @@ void ClassifierLinear::GetCovariance(const vector<fvec> &samples, const fvec &me
 	cov[1][0] = cov[0][1];
 }
 
+ClassifierLinear::~ClassifierLinear()
+{
+    if(Transf) free(Transf);
+}
+
 void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels )
 {
-	u32 dim = 2;
+    if(!samples.size()) return;
+    u32 dim = samples[0].size();
 	meanAll.resize(dim,0);
-	float **sigma = NULL;
 	FOR(i, samples.size())
 	{
 		meanAll += samples[i];
@@ -477,23 +482,34 @@ void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels 
 
 	FOR(i, samples.size())
 	{
-		Data[i*nbsensors + 0] = samples[i][0] - meanAll[0];
-		Data[i*nbsensors + 1] = samples[i][1] - meanAll[1];
-
-		//		Data[i*nbsensors + 0] = rand()/(float)RAND_MAX/5.;
-		//		Data[i*nbsensors + 1] = 1 - rand()/(float)RAND_MAX/5.;
+        FOR(d, nbsensors)
+        {
+            Data[i*nbsensors + d] = samples[i][d] - meanAll[d];
+            //		Data[i*nbsensors + d] = rand()/(float)RAND_MAX/5.;
+        }
 	}
 
-	Identity(Mixing, nbsensors) ;   Mixing[0] = 2.0 ;
+    Identity(Mixing, nbsensors);
+    Mixing[0] = 2.0 ;
 	Jade(Transf, Data, nbsensors, nbsamples ) ; 
 	//Shibbs(Transf, Data, nbsensors, nbsamples ) ;
 
 	FOR(i,nbsensors*nbsensors) Transf[i] /= 10;
+
+    projected = vector<fvec>(samples.size());
+    FOR(i, samples.size())
+    {
+        projected[i].resize(dim);
+        FOR(d, dim)
+        {
+            projected[i][d] = Data[i*nbsensors + d];
+        }
+    }
 
 	free(Data);
 	//	free(Transf);  
 	free(Mixing);
 	free(Global);
 
-	W = fVec(Transf[0], Transf[2]);
+    W = fVec(Transf[0], Transf[1*nbsensors]);
 }

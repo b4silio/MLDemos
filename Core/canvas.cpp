@@ -63,7 +63,7 @@ Canvas::Canvas(QWidget *parent)
 	  zoom(1.f),
 	  zooms(2,1.f),
 	  center(2,0),
-	  xIndex(0), yIndex(1),
+      xIndex(0), yIndex(1), zIndex(0),
       canvasType(0),
 	  data(new DatasetManager())
 {
@@ -127,15 +127,12 @@ void Canvas::SetModelImage(QImage image)
 
 void Canvas::SetCanvasType(int type)
 {
-    //if(canvasType == type) return;
-//    qDebug() << "canvas type" << canvasType << "->" << type;
     canvasType = type;
     maps.samples = QPixmap();
     maps.trajectories = QPixmap();
     maps.grid = QPixmap();
     maps.model = QPixmap();
-    maps.confidence = QPixmap();
-    maps.info = QPixmap();
+//    maps.info = QPixmap();
     ResetSamples();
     bNewCrosshair = true;
 }
@@ -199,8 +196,20 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
 			painter.drawPixmap(geometry(), maps.timeseries);
 		}
 	}
-	if(!bSvg && bDisplayLearned && !maps.model.isNull())
+    if(!bSvg && bDisplayLearned)
 	{
+        if(maps.model.isNull())
+        {
+            int w = width();
+            int h = height();
+            maps.model = QPixmap(w,h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            maps.model.setMask(bitmap);
+            maps.model.fill(Qt::transparent);
+            QPainter painter(&maps.model);
+            DrawSampleColors(painter);
+        }
 		painter.setBackgroundMode(Qt::TransparentMode);
 		painter.drawPixmap(geometry(), maps.model);
 	}
@@ -268,15 +277,26 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.trajectories);
     }
-    if(bDisplayLearned && !maps.model.isNull())
+    if(bDisplayLearned)
     {
+        if(maps.model.isNull() && sampleColors.size())
+        {
+            int w = width();
+            int h = height();
+            maps.model = QPixmap(w,h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            maps.model.setMask(bitmap);
+            maps.model.fill(Qt::transparent);
+            Expose::DrawData(maps.model, data->GetSamples(), sampleColors, type, data->bProjected);
+        }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.model);
     }
     if(bDisplayInfo && !maps.info.isNull())
     {
-        painter.setBackgroundMode(Qt::TransparentMode);
-        painter.drawPixmap(geometry(), maps.info);
+        //painter.setBackgroundMode(Qt::TransparentMode);
+        //painter.drawPixmap(geometry(), maps.info);
     }
     if(bDisplayGrid)
     {
@@ -288,13 +308,69 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
     }
 }
 
+void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
+{
+    painter.setBackgroundMode(Qt::OpaqueMode);
+    painter.setBackground(Qt::white);
+    painter.fillRect(geometry(),Qt::white);
+
+    if(maps.samples.isNull())
+    {
+        int w = width();
+        int h = height();
+        maps.samples = QPixmap(w,h);
+        QBitmap bitmap(w,h);
+        bitmap.clear();
+        maps.samples.setMask(bitmap);
+        maps.samples.fill(Qt::transparent);
+        Expose::DrawVariableData(maps.samples, data->GetSamples(), data->GetLabels(), type, params, data->bProjected);
+    }
+    painter.setBackgroundMode(Qt::TransparentMode);
+    painter.drawPixmap(geometry(), maps.samples);
+
+    if(maps.trajectories.isNull())
+    {
+        int w = width();
+        int h = height();
+        maps.trajectories = QPixmap(w,h);
+        QBitmap bitmap(w,h);
+        bitmap.clear();
+        maps.trajectories.setMask(bitmap);
+        maps.trajectories.fill(Qt::transparent);
+    }
+    painter.setBackgroundMode(Qt::TransparentMode);
+    painter.drawPixmap(geometry(), maps.trajectories);
+
+    if(maps.model.isNull() && sampleColors.size())
+    {
+        int w = width();
+        int h = height();
+        maps.model = QPixmap(w,h);
+        QBitmap bitmap(w,h);
+        bitmap.clear();
+        maps.model.setMask(bitmap);
+        maps.model.fill(Qt::transparent);
+        Expose::DrawVariableData(maps.model, data->GetSamples(), sampleColors, type, params, data->bProjected);
+    }
+    painter.setBackgroundMode(Qt::TransparentMode);
+    painter.drawPixmap(geometry(), maps.model);
+
+}
 void Canvas::paintEvent(QPaintEvent *event)
 {
 	if(bDrawing) return;
 	bDrawing = true;
 	QPainter painter(this);
     if(!canvasType) PaintStandard(painter);
-    else PaintMultivariate(painter, canvasType-1);
+    else if(canvasType <= 4) PaintMultivariate(painter, canvasType-1);
+    else
+    {
+        fvec params;
+        params.push_back(xIndex);
+        params.push_back(yIndex);
+        params.push_back(zIndex);
+        PaintVariable(painter, canvasType-5, params);
+    }
 
 	bDrawing = false;
 }
@@ -432,7 +508,7 @@ void Canvas::SetCenter(fvec center)
 	//repaint();
 }
 
-void Canvas::SetDim(int xIndex, int yIndex)
+void Canvas::SetDim(int xIndex, int yIndex, int zIndex)
 {
 	bool bChanged = false;
 	if(this->xIndex != xIndex)
@@ -445,6 +521,7 @@ void Canvas::SetDim(int xIndex, int yIndex)
 		bChanged = true;
 		this->yIndex = yIndex;
 	}
+    this->zIndex = zIndex;
 	if(bChanged)
 	{
 		maps.grid = QPixmap();
@@ -593,6 +670,22 @@ void Canvas::DrawSamples(QPainter &painter)
 		QPointF point = toCanvasCoords(data->GetSample(i));
 		Canvas::drawSample(painter, point, (data->GetFlag(i)==_TRAJ)?5:radius, bDisplaySingle ? 0 : label);
 	}
+}
+
+void Canvas::DrawSampleColors(QPainter &painter)
+{
+    int radius = 10;
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    for(int i=0; i<data->GetCount(); i++)
+    {
+        if(i >= sampleColors.size()) continue;
+        QColor color = sampleColors[i];
+        QPointF point = toCanvasCoords(data->GetSample(i));
+        painter.setBrush(color);
+        painter.setPen(Qt::black);
+        painter.drawEllipse(QRectF(point.x()-radius/2.,point.y()-radius/2.,radius,radius));
+    }
 }
 
 void Canvas::DrawSamples()

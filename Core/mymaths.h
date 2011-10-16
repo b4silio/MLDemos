@@ -19,6 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef _MY_MATHS_H
 #define _MY_MATHS_H
 
+#include <fstream>
 #include <vector>
 #include <cmath>
 #include "types.h"
@@ -34,17 +35,17 @@ struct fVec
 		return input;  // for multiple >> operators.
 	}
 
-	fVec(const float x=0, const float y=0) : x(x),y(y){};
-	fVec(const float* v) : x(v[0]),y(v[1]){};
-	fVec(const fVec& v) : x(v.x),y(v.y){};
-	fVec(fvec v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
-	//fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;};
+    fVec(const float x=0, const float y=0) : x(x),y(y){}
+    fVec(const float* v) : x(v[0]),y(v[1]){}
+    fVec(const fVec& v) : x(v.x),y(v.y){}
+    fVec(fvec v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;}
+    //fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;}
 	union {
 		float _[2];
 		struct {float x,y;};
 	};
-	float& operator[] (unsigned int i){return _[i];};
-	float& operator() (unsigned int i){return _[i];};
+    float& operator[] (unsigned int i){return _[i];}
+    float& operator() (unsigned int i){return _[i];}
 
 	fVec& operator= (const fVec &v) {
 		if (this != &v) {

@@ -37,6 +37,7 @@ private:
 	int threshold; /**< TODO */
 	double* Transf; /**< TODO */
 	float minResponse, maxResponse;
+    std::vector<fvec> projected;
 
 	/**
 	 * @brief Take the input samples and return its mean and covariance
@@ -74,7 +75,8 @@ public:
 	 * @brief Default Constructor
 	 *
 	 */
-	ClassifierLinear() : threshold(0), linearType(0), Transf(0) {type = CLASS_LINEAR; bUsesDrawTimer = false;};
+    ClassifierLinear() : threshold(0), linearType(0), Transf(0) {type = CLASS_LINEAR; bUsesDrawTimer = false;}
+    ~ClassifierLinear();
 	/**
 	 * @brief Perform the training, by gather the training parameters from the ui, and then training the corresponding classifier
 	 *
@@ -117,19 +119,19 @@ public:
 	 * @param positive
 	 * @return fvec
 	 */
-	fvec GetMean(bool positive=true){return positive ? meanPos : meanNeg;};
+    fvec GetMean(bool positive=true){return positive ? meanPos : meanNeg;}
 	/**
 	 * @brief
 	 *
 	 * @return fVec
 	 */
-	fVec GetW(){return W;};
+    fVec GetW(){return W;}
 	/**
 	 * @brief
 	 *
 	 * @return int
 	 */
-	int GetType(){return linearType;};
+    int GetType(){return linearType;}
 };
 
 #endif // _CLASSIFIER_LINEAR_H_

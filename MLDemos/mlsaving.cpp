@@ -65,8 +65,6 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("samplesCheck", displayOptions->samplesCheck->isChecked());
 	settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
 	settings.setValue("spinZoom", displayOptions->spinZoom->value());
-	settings.setValue("xDimIndex", displayOptions->xDimIndex->value());
-	settings.setValue("yDimIndex", displayOptions->yDimIndex->value());
 	settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
@@ -210,11 +208,7 @@ void MLDemos::LoadLayoutOptions()
 //    if(settings.contains("canvasType")) ui.canvasTypeCombo->setCurrentIndex(settings.value("canvasType").toInt());
     settings.endGroup();
 
-	actionClassifiers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClass);
-	actionRegression->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabRegr);
-	actionDynamical->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabDyn);
-	actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClust);
-	actionMaximizers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabMax);
+    actionAlgorithms->setChecked(algorithmWidget->isVisible());
 	actionCompare->setChecked(compareWidget->isVisible());
 	actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
 	actionDisplayOptions->setChecked(displayDialog->isVisible());
@@ -518,12 +512,5 @@ void MLDemos::LoadParams( QString filename )
 	if(bDyn) Dynamize();
 	if(bClust) Cluster();
 	if(bMaxim) Maximize();
-	if(algorithmWidget->isVisible())
-	{
-		actionClassifiers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClass);
-		actionRegression->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabRegr);
-		actionDynamical->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabDyn);
-		actionClustering->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabClust);
-		actionMaximizers->setChecked(algorithmOptions->tabWidget->currentWidget() == algorithmOptions->tabMax);
-	}
+    actionAlgorithms->setChecked(algorithmWidget->isVisible());
 }

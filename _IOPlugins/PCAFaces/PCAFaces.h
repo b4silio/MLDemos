@@ -23,7 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <interfaces.h>
 #include <QTimerEvent>
 #include "ui_PCAFaces.h"
-#include "projector.h"
+#include "pcaprojector.h"
 
 class PCAFaces : public QObject, public InputOutputInterface
 {
@@ -47,7 +47,7 @@ public:
 
 	Ui::PCAFacesDialog *gui;
 	QDialog *guiDialog;
-	Projector *projector;
+    PCAProjector *projector;
 	PCAFaces();
 	~PCAFaces();
 signals:

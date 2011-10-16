@@ -195,7 +195,7 @@ void WebImport::on_pcaButton_clicked()
     }
 
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, inputParser->getCount());
-    PCAProjection pca;
+    ProjectionPCA pca;
 	if(!data.first.size()) return;
     int pcaCount = min(data.first[0].size(),data.first.size() -1);
 	pca.Train(data.first, pcaCount);

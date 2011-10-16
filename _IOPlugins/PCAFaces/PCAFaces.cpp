@@ -40,7 +40,7 @@ void PCAFaces::Start()
 	{
 		gui = new Ui::PCAFacesDialog();
 		gui->setupUi(guiDialog = new QDialog());
-		projector = new Projector(gui);
+        projector = new PCAProjector(gui);
 		connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
 		connect(projector, SIGNAL(Update()), this, SLOT(Updating()));
 		connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));

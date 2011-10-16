@@ -18,7 +18,7 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
-#include "projector.h"
+#include "pcaprojector.h"
 #include "basicOpenCV.h"
 #include <QString>
 #include <QMouseEvent>
@@ -30,7 +30,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-Projector::Projector( Ui::PCAFacesDialog *options )
+PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
 	: options(options), image(0), display(0), samples(0), start(QPoint(-1,-1)), grabber(0), bFromWebcam(true), timerID(0)
 {
     eigenVectorLabel = NULL;
@@ -69,7 +69,7 @@ Projector::Projector( Ui::PCAFacesDialog *options )
 	timerID = startTimer(1000/60); // 60fps
 }
 
-Projector::~Projector()
+PCAProjector::~PCAProjector()
 {
 	if(timerID) killTimer(timerID);
 	if(grabber) grabber->Kill();
@@ -83,7 +83,7 @@ Projector::~Projector()
     DEL(eigenValueLabel);
 }
 
-void Projector::timerEvent(QTimerEvent *event)
+void PCAProjector::timerEvent(QTimerEvent *event)
 {
 	if(!bFromWebcam) return;
 	if(!grabber) grabber = new CameraGrabber();
@@ -95,7 +95,7 @@ void Projector::timerEvent(QTimerEvent *event)
 }
 
 
-void Projector::DrawEigen()
+void PCAProjector::DrawEigen()
 {
 	EigenFaces eig;
 	eig.Learn(sm.GetSamples(), sm.GetLabels());
@@ -118,7 +118,7 @@ void Projector::DrawEigen()
     IMKILL(eigValsImg);
 }
 
-pair<vector<fvec>,ivec> Projector::GetData()
+pair<vector<fvec>,ivec> PCAProjector::GetData()
 {
 	pair<vector<fvec>,ivec> data;
 	if(sm.GetCount() < 2) return data;
@@ -161,12 +161,12 @@ pair<vector<fvec>,ivec> Projector::GetData()
 	return data;
 }
 
-void Projector::FromWebcam()
+void PCAProjector::FromWebcam()
 {
 	bFromWebcam = true;
 }
 
-void Projector::SetImage( IplImage *img )
+void PCAProjector::SetImage( IplImage *img )
 {
         if(!img)
         {
@@ -198,7 +198,7 @@ void Projector::SetImage( IplImage *img )
 	imageWindow->repaint();
 }
 
-void Projector::RefreshDataset()
+void PCAProjector::RefreshDataset()
 {
 	IplImage *dataset = sm.GetSampleImage();
 	if(!dataset)
@@ -228,12 +228,12 @@ void Projector::RefreshDataset()
 	emit(Update());
 }
 
-void Projector::SelectionStart(QMouseEvent *event)
+void PCAProjector::SelectionStart(QMouseEvent *event)
 {
 	start = event->pos();
 }
 
-void Projector::SelectionStop(QMouseEvent *event)
+void PCAProjector::SelectionStop(QMouseEvent *event)
 {
 	if(event->pos() == start)
 	{
@@ -247,7 +247,7 @@ void Projector::SelectionStop(QMouseEvent *event)
 	start = QPoint(-1,-1);
 }
 
-void Projector::SelectionResize(QMouseEvent *event)
+void PCAProjector::SelectionResize(QMouseEvent *event)
 {
 	if(start.x() == -1) return;
 	int size = max(
@@ -264,7 +264,7 @@ void Projector::SelectionResize(QMouseEvent *event)
 	imageWindow->repaint();
 }
 
-void Projector::DatasetClick(QMouseEvent *event)
+void PCAProjector::DatasetClick(QMouseEvent *event)
 {
 	if(!sm.GetCount()) return;
 	int x = event->pos().x();
@@ -305,7 +305,7 @@ void Projector::DatasetClick(QMouseEvent *event)
 	RefreshDataset();
 }
 
-void Projector::DragImage(QDragEnterEvent *event)
+void PCAProjector::DragImage(QDragEnterEvent *event)
 {
 	if(!event->mimeData()->hasUrls()) return;
 	QList<QUrl> urls = event->mimeData()->urls();
@@ -320,7 +320,7 @@ void Projector::DragImage(QDragEnterEvent *event)
 	}
 }
 
-void Projector::DragDataset(QDragEnterEvent *event)
+void PCAProjector::DragDataset(QDragEnterEvent *event)
 {
 	if(!event->mimeData()->hasUrls()) return;
 	QList<QUrl> urls = event->mimeData()->urls();
@@ -335,7 +335,7 @@ void Projector::DragDataset(QDragEnterEvent *event)
 	}
 }
 
-void Projector::DropImage(QDropEvent *event)
+void PCAProjector::DropImage(QDropEvent *event)
 {
 	if(!event->mimeData()->hasUrls()) return;
 	FOR(i, event->mimeData()->urls().length())
@@ -357,7 +357,7 @@ void Projector::DropImage(QDropEvent *event)
 	event->acceptProposedAction();
 }
 
-void Projector::DropDataset(QDropEvent *event)
+void PCAProjector::DropDataset(QDropEvent *event)
 {
 	if(!event->mimeData()->hasUrls()) return;
 	FOR(i, event->mimeData()->urls().length())
@@ -375,7 +375,7 @@ void Projector::DropDataset(QDropEvent *event)
 	event->acceptProposedAction();
 }
 
-void Projector::LoadImage()
+void PCAProjector::LoadImage()
 {
 	QString filename = QFileDialog::getOpenFileName(imageWindow, tr("Load Image"), "", tr("Images (*.png *.jpg)"));
 	if(filename.isEmpty()) return;
@@ -393,7 +393,7 @@ void Projector::LoadImage()
 	IMKILL(img);
 }
 
-void Projector::FromClipboard()
+void PCAProjector::FromClipboard()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	if(!clipboard->image().isNull()) 
@@ -426,7 +426,7 @@ void Projector::FromClipboard()
 	}
 }
 
-void Projector::AddImage()
+void PCAProjector::AddImage()
 {
 	CvRect rect = cvRect(selection.x(), selection.y(), selection.width(), selection.height());
 	float ratio = image->width/(float)display->width;
@@ -453,7 +453,7 @@ void Projector::AddImage()
 	RefreshDataset();
 }
 
-void Projector::LoadDataset()
+void PCAProjector::LoadDataset()
 {
 	QString filename = QFileDialog::getOpenFileName(imageWindow, tr("Load Dataset"), "", tr("Dataset Images (*.png)"));
 	if(filename.isEmpty()) return;
@@ -465,7 +465,7 @@ void Projector::LoadDataset()
 	RefreshDataset();
 }
 
-void Projector::SaveDataset()
+void PCAProjector::SaveDataset()
 {
 	if(!sm.GetCount()) return;
 	QString filename = QFileDialog::getSaveFileName(samplesWindow, tr("Save Dataset"), "", tr("Dataset Images (*.png)"));
@@ -477,7 +477,7 @@ void Projector::SaveDataset()
 	sm.Save(filename.toAscii());
 }
 
-void Projector::AddDataset()
+void PCAProjector::AddDataset()
 {
 	QString filename = QFileDialog::getOpenFileName(imageWindow, tr("Add Dataset"), "", tr("Dataset Images (*.png)"));
 	if(filename.isEmpty()) return;
@@ -491,13 +491,13 @@ void Projector::AddDataset()
 	RefreshDataset();
 }
 
-void Projector::ClearDataset()
+void PCAProjector::ClearDataset()
 {
 	sm.Clear();
 	RefreshDataset();
 }
 
-void Projector::FixLabels(SampleManager &sm)
+void PCAProjector::FixLabels(SampleManager &sm)
 {
 	if(!sm.GetCount())
 	{

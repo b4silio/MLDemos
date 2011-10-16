@@ -24,10 +24,52 @@ CONFIG(boost){
 	message("You have selected to use the Boost headers library, if you do not have/desire it, please modify MLDemos_variables.pri")
 	DEFINES += WITHBOOST
 }
+
+############################################
+# PATHS for the BOOST and OPENCV libraries #
+############################################
 macx|unix{
 CONFIG(boost):BOOST = /usr/local/boost_1_47_0
 }else{
 CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
+}
+
+# opencv includes
+win32:CONFIG(opencv22){
+message("please adjust the include and lib paths to fit your system")
+INCLUDEPATH += . "C:/DEV/OpenCV2.3-GCC/include/"
+LIBS += -L"C:/DEV/OpenCV2.3-GCC/lib/"
+#        "C:/OpenCV2.2/include/"
+#LIBS += -L"C:/OpenCV2.2/lib/"
+LIBS += -lopencv_core230 \
+        -lopencv_features2d230 \
+        -lopencv_highgui230 \
+        -lopencv_imgproc230 \
+        -lopencv_legacy230 \
+        -lopencv_ml230
+} else:CONFIG(opencv22) {
+    INCLUDEPATH += /usr/local/include/
+    LIBS += -L/usr/local/lib
+    DEFINES += OPENCV22
+    message("using opencv22")
+    LIBS += \
+        -lopencv_core \
+        -lopencv_features2d \
+        -lopencv_highgui \
+        -lopencv_imgproc \
+        -lopencv_legacy \
+        -lopencv_ml
+} else:CONFIG(opencv21) {
+    INCLUDEPATH += /usr/local/include/
+    LIBS += -L/usr/local/lib
+    DEFINES += OPENCV21
+    message("using opencv21")
+    LIBS += \
+        -lcv \
+        -lcxcore \
+        -lcvaux \
+        -lml \
+        -lhighgui
 }
 
 # PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP

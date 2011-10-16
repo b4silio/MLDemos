@@ -91,13 +91,6 @@
          <property name="margin">
           <number>0</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QPushButton" name="pcaButton">
-           <property name="text">
-            <string>PCA</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>

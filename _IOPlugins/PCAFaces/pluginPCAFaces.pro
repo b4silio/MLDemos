@@ -62,13 +62,17 @@ HEADERS +=	PCAFaces.h \
 			basicOpenCV.h \
 			cameraGrabber.h \
 			eigenFaces.h \
-			projector.h \
-			widget.h
+			widget.h \
+    pcaprojector.h
 
 SOURCES += 	PCAFaces.cpp \
 			sampleManager.cpp \
 			basicOpenCV.cpp \
 			cameraGrabber.cpp \
 			eigenFaces.cpp \
-			projector.cpp \
-			widget.cpp
+			widget.cpp \
+    pcaprojector.cpp
+
+
+
+

@@ -39,10 +39,10 @@ void MLDemos::MouseOnRoc(QMouseEvent *event)
 	switch( event->button())
 	{
 	case Qt::LeftButton:
-        e = EVENT_LBUTTONUP;
+		e = CV_EVENT_LBUTTONUP;
 		break;
 	case Qt::RightButton:
-        e = EVENT_RBUTTONUP;
+		e = CV_EVENT_RBUTTONUP;
 		break;
 	}
 	//roc_on_mouse(e, event->x(), event->y(), 0, 0);
@@ -184,8 +184,8 @@ void MLDemos::SetCrossValidationInfo()
 		fvec meanStd = MeanStd(fmeasures[i]);
 		fvec quartiles = Quartiles(fmeasures[i]);
 		text += !i ? "Training\n" : "Testing\n";
-		sprintf(txt,"%.3f  %.3f", meanStd[0], meanStd[1]);
-		text += txt + QString(" (meanstd)\n");
+		sprintf(txt,"%.3f ± %.3f", meanStd[0], meanStd[1]);
+		text += txt + QString(" (mean±std)\n");
 		sprintf(txt,"%.3f %.3f %.3f %.3f %.3f", quartiles[0], quartiles[1], quartiles[2], quartiles[3], quartiles[4]);
 		text += txt + QString(" (quartiles)\n");
 		text += "\n\n";

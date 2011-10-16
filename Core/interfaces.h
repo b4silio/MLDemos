@@ -26,6 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "regressor.h"
 #include "dynamical.h"
 #include "maximize.h"
+#include "projector.h"
 #include "canvas.h"
 #include "drawTimer.h"
 #include <QtPlugin>
@@ -280,6 +281,56 @@ public:
 	virtual bool LoadParams(QString name, float value) = 0;
 };
 
+class ProjectorInterface
+{
+public:
+    // virtual functions to manage the algorithm creation
+    virtual Projector *GetProjector() = 0;
+    virtual void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
+    virtual void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
+
+    // virtual functions to manage the GUI and I/O
+    virtual QString GetName() = 0;
+    virtual QString GetAlgoString() = 0;
+    virtual QString GetInfoFile() = 0;
+    virtual QWidget *GetParameterWidget() = 0;
+    virtual void SetParams(Projector *projector) = 0;
+    virtual void SaveOptions(QSettings &settings) = 0;
+    virtual bool LoadOptions(QSettings &settings) = 0;
+    virtual void SaveParams(QTextStream &stream) = 0;
+    virtual bool LoadParams(QString name, float value) = 0;
+
+    void Draw(Canvas *canvas, Projector *projector)
+    {
+        if(!canvas || !projector) return;
+        canvas->liveTrajectory.clear();
+        int w = canvas->width();
+        int h = canvas->height();
+        {
+            QPixmap modelPixmap(w, h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            modelPixmap.setMask(bitmap);
+            modelPixmap.fill(Qt::transparent);
+            QPainter painter(&modelPixmap);
+            DrawModel(canvas, painter, projector);
+            canvas->maps.model = modelPixmap;
+        }
+
+        {
+            QPixmap infoPixmap(w, h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            infoPixmap.setMask(bitmap);
+            infoPixmap.fill(Qt::transparent);
+            QPainter painter(&infoPixmap);
+            DrawInfo(canvas, painter, projector);
+            canvas->maps.info = infoPixmap;
+        }
+        canvas->repaint();
+    }
+};
+
 class CollectionInterface
 {
 protected:
@@ -287,16 +338,18 @@ protected:
 	std::vector<ClustererInterface *> clusterers;
 	std::vector<RegressorInterface *> regressors;
 	std::vector<DynamicalInterface *> dynamicals;
-	std::vector<MaximizeInterface*> maximizers;
+    std::vector<MaximizeInterface*> maximizers;
+    std::vector<ProjectorInterface*> projectors;
 
 public:
 	virtual QString GetName() = 0;
 
-	std::vector<ClassifierInterface *> GetClassifiers() {return classifiers;};
-	std::vector<ClustererInterface *> GetClusterers() {return clusterers;};
-	std::vector<RegressorInterface *> GetRegressors() {return regressors;};
-	std::vector<DynamicalInterface *> GetDynamicals() {return dynamicals;};
-	std::vector<MaximizeInterface *> GetMaximizers() {return maximizers;};
+    std::vector<ClassifierInterface *> GetClassifiers() {return classifiers;}
+    std::vector<ClustererInterface *> GetClusterers() {return clusterers;}
+    std::vector<RegressorInterface *> GetRegressors() {return regressors;}
+    std::vector<DynamicalInterface *> GetDynamicals() {return dynamicals;}
+    std::vector<MaximizeInterface *> GetMaximizers() {return maximizers;}
+    std::vector<ProjectorInterface *> GetProjectors() {return projectors;}
 
 	~CollectionInterface()
 	{
@@ -304,8 +357,9 @@ public:
 		FOR(i, clusterers.size()) if(clusterers[i]) delete clusterers[i];
 		FOR(i, regressors.size()) if(regressors[i]) delete regressors[i];
 		FOR(i, dynamicals.size()) if(dynamicals[i]) delete dynamicals[i];
-		FOR(i, maximizers.size()) if(maximizers[i]) delete maximizers[i];
-	}
+        FOR(i, maximizers.size()) if(maximizers[i]) delete maximizers[i];
+        FOR(i, projectors.size()) if(projectors[i]) delete projectors[i];
+    }
 };
 
 class InputOutputInterface
@@ -334,6 +388,7 @@ Q_DECLARE_INTERFACE(RegressorInterface, "com.MLDemos.RegressorInterface/1.0")
 Q_DECLARE_INTERFACE(DynamicalInterface, "com.MLDemos.DynamicalInterface/1.0")
 Q_DECLARE_INTERFACE(AvoidanceInterface, "com.MLDemos.AvoidInterface/1.0")
 Q_DECLARE_INTERFACE(MaximizeInterface, "com.MLDemos.MaximizeInterface/1.0")
+Q_DECLARE_INTERFACE(ProjectorInterface, "com.MLDemos.ProjectorInterface/1.0")
 Q_DECLARE_INTERFACE(CollectionInterface, "com.MLDemos.CollectionInterface/1.0")
 Q_DECLARE_INTERFACE(InputOutputInterface, "com.MLDemos.InputOutputInterface/1.0")
 

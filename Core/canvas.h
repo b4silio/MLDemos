@@ -71,6 +71,7 @@ public:
 	void DrawObstacles(QPainter &painter);
 	void DrawTrajectories(QPainter &painter);
 	void DrawSamples(QPainter &painter);
+    void DrawSampleColors(QPainter &painter);
 	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
 	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
@@ -87,9 +88,10 @@ public:
 	fvec center;
 	float zoom;
 	fvec zooms;
-	int xIndex, yIndex;
+    int xIndex, yIndex, zIndex;
 	std::vector<fvec> targets;
     int canvasType;
+    std::vector<QColor> sampleColors;
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -106,14 +108,14 @@ protected:
 public:
 	DatasetManager *data;
 	Pixmaps maps;
-	QPixmap& confidencePixmap(){return maps.confidence;};
-	QPixmap& rewardPixmap(){return maps.reward;};
-	QPixmap& modelPixmap(){return maps.model;};
-	QPixmap& infoPixmap(){return maps.info;};
-	QPixmap& gridPixmap(){return maps.grid;};
-	QPixmap& samplesPixmap(){return maps.samples;};
-	QPixmap& trajectoriesPixmap(){return maps.trajectories;};
-	QPixmap& obstaclesPixmap(){return maps.obstacles;};
+    QPixmap& confidencePixmap(){return maps.confidence;}
+    QPixmap& rewardPixmap(){return maps.reward;}
+    QPixmap& modelPixmap(){return maps.model;}
+    QPixmap& infoPixmap(){return maps.info;}
+    QPixmap& gridPixmap(){return maps.grid;}
+    QPixmap& samplesPixmap(){return maps.samples;}
+    QPixmap& trajectoriesPixmap(){return maps.trajectories;}
+    QPixmap& obstaclesPixmap(){return maps.obstacles;}
 	QImage qimg;
 	QPainterPath crosshair;
 	bool bDisplayMap, bDisplayInfo, bDisplaySingle, bDisplaySamples;
@@ -136,7 +138,7 @@ public:
 	float GetZoom(){return zoom;}
 	void SetCenter(fvec center);
 	fvec GetCenter(){return center;}
-	void SetDim(int xIndex, int yIndex);
+    void SetDim(int xIndex, int yIndex, int zIndex=0);
 
 	std::map<int,fvec> centers;
 	int drawnSamples;
@@ -146,6 +148,7 @@ public:
 
     void PaintStandard(QPainter &painter, bool bSvg=false);
     void PaintMultivariate(QPainter &painter, int type);
+    void PaintVariable(QPainter &painter, int type, fvec params);
 
 	bool SaveScreenshot(QString filename);
 	QPixmap GetScreenshot();

@@ -33,6 +33,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_optsRegress.h"
 #include "ui_optsMaximize.h"
 #include "ui_optsDynamic.h"
+#include "ui_optsProject.h"
 #include "ui_optsCompare.h"
 #include "ui_statisticsDialog.h"
 #include "ui_drawingTools.h"
@@ -57,15 +58,14 @@ class MLDemos : public QMainWindow
 	Q_OBJECT
 
 private:
-	QAction *actionClassifiers, *actionRegression, *actionDynamical, *actionMaximizers,
-	*actionClustering, *actionDrawSamples, *actionCompare,
+    QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
 	*actionDisplayOptions, *actionShowStats,
 	*actionClearData, *actionClearModel, *actionScreenshot,
 	*actionNew, *actionSave, *actionLoad;
 
 	QDialog *displayDialog, *about, *statsDialog;
 
-	QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *compareWidget;
+    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *compareWidget, *projectWidget;
 
 	QNamedWindow *rocWidget, *crossvalidWidget, *infoWidget;
 
@@ -79,6 +79,7 @@ private:
 	Ui::optionsRegressWidget *optionsRegress;
 	Ui::optionsMaximizeWidget *optionsMaximize;
 	Ui::optionsDynamicWidget *optionsDynamic;
+    Ui::optionsProjectWidget *optionsProject;
 	Ui::optionsCompare *optionsCompare;
 	Ui::DrawingToolbar *drawToolbar;
 	Ui::DrawingToolbarContext1 *drawToolbarContext1;
@@ -100,25 +101,22 @@ private:
 
 	void closeEvent(QCloseEvent *event);
 	bool Train(Classifier *classifier, int positive, float trainRatio=1);
-	void Draw(Classifier *classifier);
 	void Train(Regressor *regressor, float trainRatio=1);
-	void Draw(Regressor *regressor);
 	fvec Train(Dynamical *dynamical);
-	void Draw(Dynamical *dynamical);
-	fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
-	void Train(Clusterer *clusterer);
-	void Draw(Clusterer *clusterer);
+    void Train(Clusterer *clusterer);
 	void Train(Maximizer *maximizer);
-	void Draw(Maximizer *maximizer);
-	void Test(Maximizer *maximizer);
+    void Train(Projector *projector);
+    fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
+    void Test(Maximizer *maximizer);
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
 	QList<RegressorInterface *> regressors;
 	QList<DynamicalInterface *> dynamicals;
 	QList<AvoidanceInterface *> avoiders;
-	QList<MaximizeInterface*> maximizers;
-	QList<InputOutputInterface *> inputoutputs;
+    QList<MaximizeInterface*> maximizers;
+    QList<ProjectorInterface*> projectors;
+    QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
 	QList<QString> compareOptions;
 	QLabel *compareDisplay;
@@ -128,8 +126,9 @@ private:
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
 	void AddPlugin(DynamicalInterface *iDynamical, const char *method);
 	void AddPlugin(AvoidanceInterface *iAvoid, const char *method);
-	void AddPlugin(MaximizeInterface *iMaximize, const char *method);
-	void AddPlugin(InputOutputInterface *iIO);
+    void AddPlugin(MaximizeInterface *iMaximize, const char *method);
+    void AddPlugin(ProjectorInterface *iProject, const char *method);
+    void AddPlugin(InputOutputInterface *iIO);
 
 	void initDialogs();
 	void initToolBars();
@@ -155,8 +154,14 @@ public:
 	Regressor *regressor;
 	Dynamical *dynamical;
 	Clusterer *clusterer;
-	Maximizer *maximizer;
-	QMutex mutex;
+    Maximizer *maximizer;
+    Projector *projector;
+    std::vector<fvec> sourceData;
+    std::vector<fvec> projectedData;
+    std::vector<QString> dimensionNames;
+    ivec sourceLabels;
+
+    QMutex mutex;
 	void resizeEvent( QResizeEvent *event );
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
@@ -171,24 +176,16 @@ public slots:
 	void QueryDynamical(std::vector<fvec> samples);
 	void QueryClusterer(std::vector<fvec> samples);
 	void QueryMaximizer(std::vector<fvec> samples);
+    void QueryProjector(std::vector<fvec> samples);
 
 private slots:
 	void ShowAbout();
-	void ShowOptionClass();
-	void ShowOptionRegress();
-	void ShowOptionDynamical();
-	void ShowOptionCluster();
-	void ShowOptionMaximize();
+	void ShowAlgorithmOptions();
 	void ShowOptionCompare();
 	void ShowSampleDrawing();
 	void ShowOptionDisplay();
 	void ShowStatsDialog();
 	void ShowToolbar();
-	void HideOptionClass();
-	void HideOptionRegress();
-	void HideOptionDynamical();
-	void HideOptionCluster();
-	void HideOptionMaximize();
 	void HideSampleDrawing();
 	void HideOptionDisplay();
 	void HideStatsDialog();
@@ -209,7 +206,10 @@ private slots:
 	void Dynamize();
 	void Cluster();
 	void ClusterIterate();
-	void Avoidance();
+    void Project();
+    void ProjectRevert();
+    void ProjectReproject();
+    void Avoidance();
 	void Compare();
 	void CompareScreenshot();
 	void Clear();

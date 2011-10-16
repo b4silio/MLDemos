@@ -18,12 +18,16 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "pluginProjections.h"
 #include "interfaceProjections.h"
+#include "interfaceICAProjection.h"
+#include "interfacePCAProjection.h"
 
 using namespace std;
 
 PluginProjections::PluginProjections()
 {
 	classifiers.push_back(new ClassProjections());
+    projectors.push_back(new ICAProjection());
+    projectors.push_back(new PCAProjection());
 }
 
 Q_EXPORT_PLUGIN2(mld_Projections, PluginProjections)

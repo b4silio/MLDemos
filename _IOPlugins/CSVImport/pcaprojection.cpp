@@ -1,9 +1,9 @@
 #include "pcaprojection.h"
 #include "widget.h"
-PCAProjection::PCAProjection()
+ProjectionPCA::ProjectionPCA()
 {}
 
-PCA PCAProjection::compressPCA(const Mat& pcaset, int maxComponents, const Mat& testset, Mat& compressed)
+PCA ProjectionPCA::compressPCA(const Mat& pcaset, int maxComponents, const Mat& testset, Mat& compressed)
 {
     PCA pca(pcaset, // pass the data
             Mat(), // we do not have a pre-computed mean vector,
@@ -36,7 +36,7 @@ PCA PCAProjection::compressPCA(const Mat& pcaset, int maxComponents, const Mat& 
     return pca;
 }
 
-IplImage *PCAProjection::DrawEigenvals(Mat eigVal)
+IplImage *ProjectionPCA::DrawEigenvals(Mat eigVal)
 {
     IplImage *eigImage = cvCreateImage(cvSize(440,440),8,3);
     cvSet(eigImage, CV_RGB(255,255,255));
@@ -112,7 +112,7 @@ IplImage *PCAProjection::DrawEigenvals(Mat eigVal)
     return display;
 }
 
-void PCAProjection::Train(std::vector<fvec> samples, int pcaCount)
+void ProjectionPCA::Train(std::vector<fvec> samples, int pcaCount)
 {
     if(!samples.size() || !samples[0].size()) return;
 
@@ -150,7 +150,7 @@ void PCAProjection::Train(std::vector<fvec> samples, int pcaCount)
 }
 
 
-QLabel* PCAProjection::EigenValues()
+QLabel* ProjectionPCA::EigenValues()
 {
     IplImage *eigValsImg = DrawEigenvals(pca.eigenvalues);
     QLabel* eigenValueLabel = new QLabel();

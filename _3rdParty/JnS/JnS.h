@@ -34,9 +34,6 @@ int JointDiago (
 
 
 
-
-
-
 // Below: small functions called by the test programms; could be
 // removed from the .h file in final versions.
 

@@ -31,7 +31,8 @@ FORMS += aboutDialog.ui \
 	optsRegress.ui \
 	optsMaximize.ui \
 	optsDynamic.ui \
-	optsCompare.ui \
+    optsProject.ui \
+    optsCompare.ui \
 	mldemos.ui \
 	drawingTools.ui \
 	drawingToolsContext1.ui \
@@ -73,7 +74,9 @@ SOURCES += \
     mlprocessing.cpp \
     mlstats.cpp \
 	mlsaving.cpp \
-        compare.cpp
+        compare.cpp \
+    mltrain.cpp
+
 
 
 

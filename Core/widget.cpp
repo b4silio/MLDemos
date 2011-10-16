@@ -149,10 +149,10 @@ void QNamedWindow::mousePressEvent(QMouseEvent *event)
 {
 	int x = event->x(), y = event->y();
 	int flags = 0, events = 0;
-	if(event->buttons() == Qt::LeftButton) flags |= CV_EVENT_FLAG_LBUTTON;
-	if(event->buttons() == Qt::RightButton) flags |= CV_EVENT_FLAG_RBUTTON;
-	if(event->button() == Qt::LeftButton) events = CV_EVENT_LBUTTONDOWN;
-	else if(event->button() == Qt::RightButton) events = CV_EVENT_RBUTTONDOWN;
+    if(event->buttons() == Qt::LeftButton) flags |= EVENT_FLAG_LBUTTON;
+    if(event->buttons() == Qt::RightButton) flags |= EVENT_FLAG_RBUTTON;
+    if(event->button() == Qt::LeftButton) events = EVENT_LBUTTONDOWN;
+    else if(event->button() == Qt::RightButton) events = EVENT_RBUTTONDOWN;
 	if(mouseCallback) mouseCallback(events, x, y, flags);
 	emit MousePressEvent(event);
 }
@@ -161,10 +161,10 @@ void QNamedWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	int x = event->x(), y = event->y();
 	int flags = 0, events = 0;
-	if(event->buttons() == Qt::LeftButton) flags |= CV_EVENT_FLAG_LBUTTON;
-	if(event->buttons() == Qt::RightButton) flags |= CV_EVENT_FLAG_RBUTTON;
-	if(event->button() == Qt::LeftButton) events = CV_EVENT_LBUTTONUP;
-	else if(event->button() == Qt::RightButton) events = CV_EVENT_RBUTTONUP;
+    if(event->buttons() == Qt::LeftButton) flags |= EVENT_FLAG_LBUTTON;
+    if(event->buttons() == Qt::RightButton) flags |= EVENT_FLAG_RBUTTON;
+    if(event->button() == Qt::LeftButton) events = EVENT_LBUTTONUP;
+    else if(event->button() == Qt::RightButton) events = EVENT_RBUTTONUP;
 	if(mouseCallback) mouseCallback(events, x, y, flags);
 	emit MouseReleaseEvent(event);
 }
@@ -173,8 +173,8 @@ void QNamedWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	int x = event->x(), y = event->y();
 	int flags = 0, events = 0;
-	if(event->buttons() == Qt::LeftButton) flags |= CV_EVENT_FLAG_LBUTTON;
-	if(event->buttons() == Qt::RightButton) flags |= CV_EVENT_FLAG_RBUTTON;
+    if(event->buttons() == Qt::LeftButton) flags |= EVENT_FLAG_LBUTTON;
+    if(event->buttons() == Qt::RightButton) flags |= EVENT_FLAG_RBUTTON;
 	if(mouseCallback) mouseCallback(events, x, y, flags);
 	emit MouseMoveEvent(event);
 }

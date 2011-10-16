@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>230</width>
-    <height>146</height>
+    <height>120</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,13 +22,13 @@
   <property name="minimumSize">
    <size>
     <width>230</width>
-    <height>146</height>
+    <height>120</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>230</width>
-    <height>146</height>
+    <height>120</height>
    </size>
   </property>
   <property name="font">
@@ -150,7 +150,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>120</y>
+     <y>80</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -180,7 +180,7 @@
    <property name="geometry">
     <rect>
      <x>85</x>
-     <y>120</y>
+     <y>80</y>
      <width>40</width>
      <height>20</height>
     </rect>
@@ -202,7 +202,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>120</y>
+     <y>80</y>
      <width>40</width>
      <height>20</height>
     </rect>
@@ -239,85 +239,6 @@
    </property>
    <property name="checked">
     <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>35</y>
-     <width>90</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Lucida Grande</family>
-     <pointsize>8</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Dimensions</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="xDimIndex">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>60</y>
-     <width>42</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Dimension to be displayed on the horizontal axis</string>
-   </property>
-   <property name="maximum">
-    <number>1</number>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="yDimIndex">
-   <property name="geometry">
-    <rect>
-     <x>170</x>
-     <y>60</y>
-     <width>42</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Dimension to be displayed on the vertical axis</string>
-   </property>
-   <property name="maximum">
-    <number>1</number>
-   </property>
-   <property name="value">
-    <number>1</number>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="exposeButton">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>90</y>
-     <width>90</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Lucida Grande</family>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="toolTip">
-    <string>Display all dimensions of multivariate data as Scatterplots or other visualization methods.</string>
-   </property>
-   <property name="text">
-    <string>Exposé</string>
    </property>
   </widget>
  </widget>

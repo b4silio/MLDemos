@@ -39,7 +39,8 @@ HEADERS += \
 	dynamical.h \
 	clusterer.h \
 	fileUtils.h \
-	spline.h
+	spline.h \
+    projector.h
 
 SOURCES += \
 	canvas.cpp \
@@ -52,3 +53,4 @@ SOURCES += \
         roc.cpp \
 	fileUtils.cpp \
 	widget.cpp
+

@@ -16,8 +16,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _PROJECTOR_H_
-#define _PROJECTOR_H_
+#ifndef _PCAPROJECTOR_H_
+#define _PCAPROJECTOR_H_
 
 #include "public.h"
 #include "ui_PCAFaces.h"
@@ -28,7 +28,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QMutex>
 #include <QMutexLocker>
 
-class Projector : public QObject
+class PCAProjector : public QObject
 {
 	Q_OBJECT
 
@@ -52,8 +52,8 @@ class Projector : public QObject
 	void RefreshDataset();
 	void FixLabels(SampleManager &sm);
 public:
-	Projector(Ui::PCAFacesDialog *options);
-	~Projector();
+    PCAProjector(Ui::PCAFacesDialog *options);
+    ~PCAProjector();
 	void timerEvent(QTimerEvent *event);
 	std::pair<std::vector<fvec>,ivec> GetData();
 
@@ -81,4 +81,4 @@ signals:
 		void DropDataset(QDropEvent *event);
 };
 
-#endif // _PROJECTOR_H_
+#endif // _PCAPROJECTOR_H_

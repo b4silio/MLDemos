@@ -15,8 +15,8 @@ MLDemos.depends = Core
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-#SUBDIRS += Kernel
-SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers OpenCV SEDS ESMLR
+SUBDIRS += Kernel Projections
+#SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers OpenCV SEDS ESMLR
 # SUBDIRS += HMM
 ESMLR.file = $$ALGOPATH/ESMLR/pluginESMLR.pro
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
@@ -33,8 +33,8 @@ HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-#SUBDIRS += WebImport
-SUBDIRS += PCAFaces CSVImport WebImport
+SUBDIRS += CSVImport
+#SUBDIRS += PCAFaces CSVImport WebImport
 #SUBDIRS += ImportTimeseries
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro

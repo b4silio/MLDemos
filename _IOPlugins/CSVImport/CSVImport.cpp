@@ -23,7 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 Q_EXPORT_PLUGIN2(IO_CSVImport, CSVImport)
 
 CSVImport::CSVImport()
-    : guiDialog(0), gui(0), inputParser(0), eigLabel(0)
+    : guiDialog(0), gui(0), inputParser(0)
 {
 }
 
@@ -31,7 +31,6 @@ CSVImport::~CSVImport()
 {
     if(gui && guiDialog) guiDialog->hide();
     DEL(inputParser);
-    DEL(eigLabel);
 }
 
 void CSVImport::Start()
@@ -45,7 +44,7 @@ void CSVImport::Start()
         connect(gui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChanged(int)));
         connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
         connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(on_dumpButton_clicked()));
-        connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
+//        connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
         guiDialog->show();
     }
     else guiDialog->show();
@@ -131,13 +130,12 @@ void CSVImport::on_dumpButton_clicked()
     {
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
-    if(eigLabel) eigLabel->hide();
-    DEL(eigLabel);
 
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
     emit(SetData(data.first, data.second, vector<ipair>(), false));
 }
 
+/*
 void CSVImport::on_pcaButton_clicked()
 {
     ivec excludeIndices;
@@ -154,7 +152,7 @@ void CSVImport::on_pcaButton_clicked()
     }
 
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, inputParser->getCount());
-    PCAProjection pca;
+    ProjectionPCA pca;
 	if(!data.first.size()) return;
     int pcaCount = min(data.first[0].size(),data.first.size() -1);
 	pca.Train(data.first, pcaCount);
@@ -169,3 +167,4 @@ void CSVImport::on_pcaButton_clicked()
     eigLabel->show();
     emit(SetData(data.first, data.second, vector<ipair>(), true));
 }
+*/

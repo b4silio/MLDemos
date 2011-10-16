@@ -60,7 +60,7 @@ private:
     Ui::CSVImportDialog *gui;
 	QDialog *guiDialog;
     CSVParser *inputParser;
-    QLabel *eigLabel;
+//    QLabel *eigLabel;
 
     bool saveFile(const QString &filename, QIODevice *data);
 
@@ -81,7 +81,7 @@ public slots:
 private slots:
     void spinBoxChanged(int value);
     void on_dumpButton_clicked();
-    void on_pcaButton_clicked();
+//    void on_pcaButton_clicked();
 };
 
 #endif // WEBIMPORT_H_INCLUDED

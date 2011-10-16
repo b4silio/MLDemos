@@ -179,10 +179,12 @@ public:
 	std::vector< fvec > GetSamples(){return samples;}
 	std::vector< fvec > GetSamples(u32 count, dsmFlags flag=_UNUSED, dsmFlags replaceWith=_TRAIN);
 	void SetSample(int index, fvec sample);
+    void SetSamples(std::vector<fvec> samples){this->samples = samples;}
 
 	int GetLabel(int index){return index < labels.size() ? labels[index] : 0;}
 	ivec GetLabels(){return labels;}
 	void SetLabel(int index, int label){if(index<labels.size())labels[index] = label;}
+    void SetLabels(ivec labels){this->labels = labels;}
 
 	// functions to manage sequences
 	void AddSequence(int start, int stop);
@@ -211,7 +213,7 @@ public:
 	void AddTimeSerie(TimeSerie serie);
 	void AddTimeSeries(std::vector< TimeSerie > newTimeSeries);
 	void RemoveTimeSerie(unsigned int index);
-	std::vector<TimeSerie>& GetTimeSeries(){return series;};
+    std::vector<TimeSerie>& GetTimeSeries(){return series;}
 
 	// functions to manage flags
 	dsmFlags GetFlag(int index){return index < flags.size() ? flags[index] : _UNUSED;}

@@ -17,6 +17,9 @@ public:
     ~Expose();
 
     static void DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type, bool bProjected=false);
+    static void DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, bool bProjected=false);
+    static void DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type, fvec params, bool bProjected=false);
+    static void DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, fvec params, bool bProjected=false);
 
 protected:
     void paintEvent(QPaintEvent *event);
