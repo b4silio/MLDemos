@@ -108,6 +108,7 @@ public:
     pair<vector<fvec>,ivec> getData(ivec excludeIndex = ivec(), int maxSamples=-1);
     map<string,unsigned int> getOutputLabelTypes(bool reparse);
     void setOutputColumn(unsigned int column);
+    void setFirstRowAsHeader(bool value){bFirstRowAsHeader = value;}
     bool hasData();
     vector<unsigned int> getDataType(){return dataTypes;}
     int getCount(){return data.size();}
@@ -116,6 +117,7 @@ public:
 
 private:
     int outputLabelColumn;
+    bool bFirstRowAsHeader;
     ifstream file;
     map<string,unsigned int> classLabels;
     vector<vector<string> > data;

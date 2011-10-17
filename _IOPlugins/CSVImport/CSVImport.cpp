@@ -92,15 +92,27 @@ void CSVImport::Parse(QString filename)
     qDebug() << "Dataset extracted";
 //    if(data.first.size() < 2) return;
     if(rawData.size() < 2) return;
+    bool bUseHeader = gui->headerCheck->isChecked();
+
     gui->tableWidget->clear();
     gui->tableWidget->setRowCount(rawData.size());
     gui->tableWidget->setColumnCount(rawData[0].size());
+    if(bUseHeader)
+    {
+        QStringList headerLabels;
+        FOR(i, rawData[0].size())
+        {
+            headerLabels << rawData[0][i].c_str();
+        }
+        gui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+    }
     for(size_t r = 0; r < rawData.size(); r++)
     {
+        if(!r && bUseHeader) continue;
         for(size_t c = 0; c < rawData[r].size(); c++)
         {
             QTableWidgetItem *newItem = new  QTableWidgetItem(QString(rawData[r][c].c_str()));
-            gui->tableWidget->setItem(r, c, newItem);
+            gui->tableWidget->setItem(r-bUseHeader, c, newItem);
         }
     }
     gui->spinBox->setRange(1,rawData[0].size());
@@ -130,7 +142,7 @@ void CSVImport::on_dumpButton_clicked()
     {
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
-
+    inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
     emit(SetData(data.first, data.second, vector<ipair>(), false));
 }

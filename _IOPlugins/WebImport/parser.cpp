@@ -141,6 +141,7 @@ bool CSVIterator::operator==(CSVIterator const& rhs)
 CSVParser::CSVParser()
 {
     outputLabelColumn = 2;
+    bFirstRowAsHeader = false;
 }
 
 void CSVParser::clear()
@@ -254,10 +255,12 @@ void CSVParser::cleanData(unsigned int acceptedTypes)
 
 pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
 {
-    if(!data.size()) return pair<vector<fvec>,ivec>();
-    vector<fvec> samples(data.size());
-    ivec labels(data.size());
     int count = data.size();
+    if(bFirstRowAsHeader) count--;
+    int headerSkip = bFirstRowAsHeader?1:0;
+    if(count <= 0) return pair<vector<fvec>,ivec>();
+    vector<fvec> samples(count);
+    ivec labels(count);
     int dim = data[0].size();
     outputLabelColumn = min(dim-1, outputLabelColumn);
     vector< map<string,int> > labelMaps(dim);
@@ -265,8 +268,9 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     pair<map<string,int>::iterator,bool> ret;
     FOR(i, data.size())
     {
+        if(!i && bFirstRowAsHeader) continue;
         // check if it's always a number
-        fvec& sample = samples[i];
+        fvec& sample = samples[i-headerSkip];
         sample.resize(dim-1);
         FOR(j, dim)
         {
@@ -279,11 +283,11 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
                 else
                 {
                     val = (float)labelCounters[j];
-					ret = labelMaps[j].insert(pair<string,int>(data[i][j], val));
+                    ret = labelMaps[j].insert(pair<string,int>(data[i][j], val));
                     if(ret.second) labelCounters[j]++;
                 }
             }
-			if(j!=outputLabelColumn)
+            if(j!=outputLabelColumn)
             {
                 int index = j < outputLabelColumn ? j : j-1;
                 sample[index] = val;
@@ -293,6 +297,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     bool numerical = true;
     FOR(i, data.size())
     {
+        if(!i && bFirstRowAsHeader) continue;
         bool ok;
         float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
         if(!ok)
@@ -303,16 +308,17 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     }
     FOR(i, data.size())
     {
+        if(!i && bFirstRowAsHeader) continue;
         bool ok;
         float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
         if(numerical)
         {
-            labels[i] = val;
+            labels[i-headerSkip] = val;
         }
         else
         {
-			labels[i] = labelMaps[outputLabelColumn][data[i][outputLabelColumn]];
-		}
+            labels[i-headerSkip] = labelMaps[outputLabelColumn][data[i][outputLabelColumn]];
+        }
     }
 
     if(maxSamples != -1 && maxSamples < samples.size())
@@ -330,10 +336,12 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         delete [] perm;
     }
     if(!excludeIndex.size()) return pair<vector<fvec>,ivec>(samples,labels);
-    vector<fvec> newSamples(data.size());
-    int newDim = dim - excludeIndex.size();
+    vector<fvec> newSamples(count);
+    int newDim = dim-1 - excludeIndex.size();
+    qDebug() << "Indices to be excluded: " << excludeIndex.size() << "(newDim: " << newDim << ")";
     FOR(i, excludeIndex.size())
     {
+        qDebug() << i << ":" << excludeIndex[i];
         // if it's the output we can ignore it but we need to reincrement the number of dimensions
         if(excludeIndex[i] == outputLabelColumn)
         {
@@ -346,7 +354,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     {
         bExclude[excludeIndex[i]] = true;
     }
-    FOR(i, data.size())
+    FOR(i, samples.size())
     {
         newSamples[i].resize(newDim);
         int nD = 0;
@@ -360,4 +368,3 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     }
     return pair<vector<fvec>,ivec>(newSamples,labels);
 }
-

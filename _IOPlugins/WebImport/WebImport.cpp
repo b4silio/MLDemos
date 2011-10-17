@@ -173,9 +173,10 @@ void WebImport::on_dumpButton_clicked()
     {
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
+    inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
+    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 2000);
     if(eigLabel) eigLabel->hide();
     DEL(eigLabel);
-	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 2000);
     emit(SetData(data.first, data.second, vector<ipair>(), false));
 }
 
@@ -193,8 +194,8 @@ void WebImport::on_pcaButton_clicked()
     {
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
-
-	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, inputParser->getCount());
+    inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
+    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, inputParser->getCount());
     ProjectionPCA pca;
 	if(!data.first.size()) return;
     int pcaCount = min(data.first[0].size(),data.first.size() -1);
