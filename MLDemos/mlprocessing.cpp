@@ -66,7 +66,20 @@ void MLDemos::Classify()
             drawTimer->classifier = &this->classifier;
             drawTimer->start(QThread::NormalPriority);
         }
-	}
+        if(canvas->canvasType) CanvasZoomChanged();
+        // we fill in the canvas sampleColors
+        vector<fvec> samples = canvas->data->GetSamples();
+        canvas->sampleColors.resize(samples.size());
+        FOR(i, samples.size())
+        {
+            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i]);
+        }
+        if(canvas->canvasType)
+        {
+            canvas->maps.model = QPixmap();
+            CanvasZoomChanged();
+        }
+    }
     else
     {
         mutex.unlock();

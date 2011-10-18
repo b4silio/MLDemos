@@ -53,6 +53,7 @@ public:
 	void VectorsFast(int count, int steps);
 	void Maximization();
 	void Stop();
+    static QColor GetColor(Classifier *classifier, fvec sample);
 
 	Classifier **classifier;
 	Regressor **regressor;

@@ -301,6 +301,51 @@ void DrawTimer::VectorsFast(int count, int steps)
 	}
 }
 
+QColor DrawTimer::GetColor(Classifier *classifier, fvec sample)
+{
+    QColor c;
+    if(classifier->IsMultiClass())
+    {
+        fvec val = classifier->TestMulti(sample);
+        if(val.size() == 1)
+        {
+            float v = val[0];
+            int color = fabs(v)*128;
+            color = max(0,min(color, 255));
+            if(v > 0) c = QColor(color,0,0);
+            else c = QColor(color,color,color);
+        }
+        else
+        {
+            // we find the max
+            int maxVal = 0;
+            FOR(i, val.size()) if (val[maxVal] < val[i]) maxVal = i;
+            val[maxVal] *= 3;
+            float sum = 0;
+            FOR(i, val.size()) sum += fabs(val[i]);
+            sum = 1.f/sum;
+
+            float r=0,g=0,b=0;
+            FOR(j, val.size())
+            {
+                r += SampleColor[j%SampleColorCnt].red()*val[j]*sum;
+                g += SampleColor[j%SampleColorCnt].green()*val[j]*sum;
+                b += SampleColor[j%SampleColorCnt].blue()*val[j]*sum;
+            }
+            c = QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b)));
+        }
+    }
+    else
+    {
+        float v = classifier->Test(sample);
+        int color = (int)(fabs(v)*128);
+        color = max(0,min(color, 255));
+        if(v > 0) c = QColor(color,0,0);
+        else c = QColor(color,color,color);
+    }
+    return c;
+}
+
 void DrawTimer::TestFast(int start, int stop)
 {
 	if(stop < 0 || stop > w*h) stop = w*h;
@@ -323,46 +368,7 @@ void DrawTimer::TestFast(int start, int stop)
 		QMutexLocker lock(mutex);
 		if((*classifier))
 		{
-			QColor c;
-			if((*classifier)->IsMultiClass())
-			{
-				fvec val = (*classifier)->TestMulti(sample);
-				if(val.size() == 1)
-				{
-					float v = val[0];
-					int color = fabs(v)*128;
-					color = max(0,min(color, 255));
-					if(v > 0) c = QColor(color,0,0);
-					else c = QColor(color,color,color);
-				}
-				else
-				{
-					// we find the max
-					int maxVal = 0;
-					FOR(i, val.size()) if (val[maxVal] < val[i]) maxVal = i;
-					val[maxVal] *= 3;
-					float sum = 0;
-					FOR(i, val.size()) sum += fabs(val[i]);
-					sum = 1.f/sum;
-
-					float r=0,g=0,b=0;
-					FOR(j, val.size())
-					{
-						r += SampleColor[j%SampleColorCnt].red()*val[j]*sum;
-						g += SampleColor[j%SampleColorCnt].green()*val[j]*sum;
-						b += SampleColor[j%SampleColorCnt].blue()*val[j]*sum;
-					}
-					c = QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b)));
-				}
-			}
-			else
-			{
-				v = (*classifier)->Test(sample);
-				int color = (int)(fabs(v)*128);
-				color = max(0,min(color, 255));
-				if(v > 0) c = QColor(color,0,0);
-				else c = QColor(color,color,color);
-			}
+            QColor c = GetColor(*classifier, sample);
 			drawMutex.lock();
 			bigMap.setPixel(x,y,c.rgb());
 			drawMutex.unlock();

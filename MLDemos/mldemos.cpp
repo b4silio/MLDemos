@@ -988,7 +988,7 @@ void MLDemos::ResetPositiveClass()
 	int dimCount = max(2,canvas->data->GetDimCount());
     ui.canvasX1Spin->setRange(1,dimCount);
     ui.canvasX2Spin->setRange(1,dimCount);
-    ui.canvasX3Spin->setRange(1,dimCount);
+    ui.canvasX3Spin->setRange(0,dimCount);
     canvas->SetDim(ui.canvasX1Spin->value()-1,ui.canvasX2Spin->value()-1, ui.canvasX3Spin->value()-1);
 }
 
@@ -999,6 +999,10 @@ void MLDemos::ChangeActiveOptions()
 
 void MLDemos::ClearData()
 {
+    sourceData.clear();
+    sourceLabels.clear();
+    projectedData.clear();
+    dimensionNames.clear();
     if(canvas)
     {
         canvas->sampleColors.clear();
@@ -2275,6 +2279,11 @@ void MLDemos::DisactivateIO(QObject *io)
 
 void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected)
 {
+    sourceData.clear();
+    sourceLabels.clear();
+    projectedData.clear();
+    dimensionNames.clear();
+    canvas->sampleColors.clear();
     canvas->data->Clear();
     canvas->data->AddSamples(samples, labels);
     canvas->data->bProjected = bProjected;
@@ -2294,7 +2303,12 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
 void MLDemos::SetTimeseries(std::vector<TimeSerie> timeseries)
 {
 //	qDebug() << "importing " << timeseries.size() << " timeseries";
-	canvas->data->Clear();
+    sourceData.clear();
+    sourceLabels.clear();
+    projectedData.clear();
+    dimensionNames.clear();
+    canvas->sampleColors.clear();
+    canvas->data->Clear();
 	canvas->data->AddTimeSeries(timeseries);
 	FitToData();
 	ResetPositiveClass();

@@ -39,9 +39,11 @@ void CSVImport::Start()
     {
         gui = new Ui::CSVImportDialog();
         gui->setupUi(guiDialog = new QDialog());
+        guiDialog->setWindowTitle("CVS Import");
         connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
         connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
         connect(gui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChanged(int)));
+        connect(gui->headerCheck, SIGNAL(clicked()), this, SLOT(headerChanged()));
         connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
         connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(on_dumpButton_clicked()));
 //        connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
@@ -90,7 +92,6 @@ void CSVImport::Parse(QString filename)
     inputParser->parse(filename.toStdString().c_str());
     vector<vector<string> > rawData = inputParser->getRawData();
     qDebug() << "Dataset extracted";
-//    if(data.first.size() < 2) return;
     if(rawData.size() < 2) return;
     bool bUseHeader = gui->headerCheck->isChecked();
 
@@ -102,7 +103,7 @@ void CSVImport::Parse(QString filename)
         QStringList headerLabels;
         FOR(i, rawData[0].size())
         {
-            headerLabels << rawData[0][i].c_str();
+            headerLabels <<  QString("%1:").arg(i) + rawData[0][i].c_str();
         }
         gui->tableWidget->setHorizontalHeaderLabels(headerLabels);
     }
@@ -121,6 +122,37 @@ void CSVImport::Parse(QString filename)
 void CSVImport::FetchResults(std::vector<fvec> results)
 {
 
+}
+
+void CSVImport::headerChanged()
+{
+    vector<vector<string> > rawData = inputParser->getRawData();
+    qDebug() << "Dataset extracted";
+    if(rawData.size() < 2) return;
+    bool bUseHeader = gui->headerCheck->isChecked();
+
+    gui->tableWidget->clear();
+    gui->tableWidget->setRowCount(rawData.size());
+    gui->tableWidget->setColumnCount(rawData[0].size());
+    if(bUseHeader)
+    {
+        QStringList headerLabels;
+        FOR(i, rawData[0].size())
+        {
+            headerLabels <<  QString("%1:").arg(i) + rawData[0][i].c_str();
+        }
+        gui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+    }
+    for(size_t r = 0; r < rawData.size(); r++)
+    {
+        if(!r && bUseHeader) continue;
+        for(size_t c = 0; c < rawData[r].size(); c++)
+        {
+            QTableWidgetItem *newItem = new  QTableWidgetItem(QString(rawData[r][c].c_str()));
+            gui->tableWidget->setItem(r-bUseHeader, c, newItem);
+        }
+    }
+    gui->spinBox->setRange(1,rawData[0].size());
 }
 
 void CSVImport::spinBoxChanged(int value)

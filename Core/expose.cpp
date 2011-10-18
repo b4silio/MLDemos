@@ -3,6 +3,7 @@
 #include "expose.h"
 #include "ui_expose.h"
 #include <QClipboard>
+#include <QBitmap>
 #include <QDebug>
 
 using namespace std;
@@ -35,7 +36,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
     DrawData(pixmap, samples, sampleColors, type, bProjected);
 }
 
-void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, bool bProjected)
+void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, bool bProjected, bool bLearned)
 {
     if(!samples.size()) return;
     int w = pixmap.width(), h = pixmap.height();
@@ -69,6 +70,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
     {
         mapW = w/gridX - pad*2;
         mapH = h/gridX - pad*2;
+        int radiusBase = max(5.f, 5 * sqrtf(mapW / 200.f));
 
         QList<QPixmap> maps;
         FOR(index0, dim)
@@ -77,7 +79,14 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
 			{
                 QPixmap map(mapW + 2*pad,mapH + 2*pad);
                 int smallW = map.width() - 2*pad, smallH = map.height() - 2*pad;
-                map.fill(Qt::white);
+                if(!bLearned) map.fill(Qt::white);
+                else
+                {
+                    QBitmap bitmap(map.size());
+                    bitmap.clear();
+                    map.setMask(bitmap);
+                    map.fill(Qt::transparent);
+                }
                 QPainter painter(&map);
                 painter.setRenderHint(QPainter::Antialiasing);
 
@@ -90,10 +99,23 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
 						x = (x-mins[index0])/diffs[index0];
 						y = (y-mins[index1])/diffs[index1];
 						QPointF point(y*smallW + pad, x*smallH + pad);
-						float radius = 5;
-                        if(i < sampleColors.size()) painter.setBrush(sampleColors[i]);
-                        painter.setPen(Qt::black);
-                        painter.drawEllipse(QRectF(point.x()-radius/2.,point.y()-radius/2.,radius,radius));
+                        float radius = radiusBase;
+                        if(bLearned)
+                        {
+                            radius = radiusBase + radiusBase/2;
+                            if(i < sampleColors.size()) painter.setPen(QPen(sampleColors[i], radiusBase/2));
+                            painter.setBrush(Qt::NoBrush);
+                            painter.drawEllipse(QRectF(point.x()-radius/2.,point.y()-radius/2.,radius,radius));
+                            radius += radiusBase/2-1;
+                            painter.setPen(QPen(Qt::black, 0.5));
+                            painter.drawEllipse(QRectF(point.x()-radius/2.,point.y()-radius/2.,radius,radius));
+                        }
+                        else
+                        {
+                            if(i < sampleColors.size()) painter.setBrush(sampleColors[i]);
+                            painter.setPen(Qt::black);
+                            painter.drawEllipse(QRectF(point.x()-radius/2.,point.y()-radius/2.,radius,radius));
+                        }
 					}
 				}
                 painter.setBrush(Qt::NoBrush);
@@ -282,7 +304,7 @@ void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, ivec l
     DrawVariableData(pixmap, samples, sampleColors, type, params, bProjected);
 }
 
-void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, fvec params, bool bProjected)
+void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, fvec params, bool bProjected, bool bLearned)
 {
     if(!samples.size()) return;
     int w = pixmap.width(), h = pixmap.height();
@@ -322,14 +344,28 @@ void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::v
         int xIndex = params[0];
         int yIndex = params[1];
         int sIndex = params[2];
+        if(sIndex == -1)
+        {
+            srand48(0);
+            srand(0);
+        }
         painter.setRenderHint(QPainter::Antialiasing);
         FOR(i, samples.size())
         {
             float x = (samples[i][xIndex]-mins[xIndex])/(diffs[xIndex]);
             float y = (samples[i][yIndex]-mins[yIndex])/(diffs[yIndex]);
-            float radius = (samples[i][sIndex]-mins[sIndex])/(diffs[sIndex]);
             QPointF point(x*mapW + pad,y*mapH + pad);
-            radius = radius*100 + 3;
+
+            float radius = 10;
+            if(sIndex != -1)
+            {
+                radius = (samples[i][sIndex]-mins[sIndex])/(diffs[sIndex]);
+                radius = radius*60 + 3;
+            }
+            else
+            {
+                radius = drand48()*40 + 3;
+            }
 
             QColor color = Qt::black;
             if(i < sampleColors.size()) color = sampleColors[i];

@@ -63,7 +63,7 @@ Canvas::Canvas(QWidget *parent)
 	  zoom(1.f),
 	  zooms(2,1.f),
 	  center(2,0),
-      xIndex(0), yIndex(1), zIndex(0),
+      xIndex(0), yIndex(1), zIndex(-1),
       canvasType(0),
 	  data(new DatasetManager())
 {
@@ -288,7 +288,7 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             bitmap.clear();
             maps.model.setMask(bitmap);
             maps.model.fill(Qt::transparent);
-            Expose::DrawData(maps.model, data->GetSamples(), sampleColors, type, data->bProjected);
+            Expose::DrawData(maps.model, data->GetSamples(), sampleColors, type, data->bProjected, true);
         }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.model);
@@ -608,7 +608,7 @@ void Canvas::DrawAxes(QPainter &painter)
 	QRectF bounding = canvasRect();
 	// we round up the size to the closest decimal
 	float scale = bounding.height();
-	if(scale <= 0) return;
+    if(scale <= 1e-10) return;
 	float mult = 1;
 	if(scale > 10)
 	{

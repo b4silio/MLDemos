@@ -76,7 +76,8 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
     painter.drawText(0,0,w,2*pad,Qt::AlignCenter, "reconstruction error");
     FOR(i, dim)
     {
-        painter.drawText(pad + i*(w-2*pad)/(dim-1) - 3, h-1, QString("e%1").arg(i+1));
+        int x = dim==1? w/2 : i*(w-2*pad)/(dim-1);
+        painter.drawText(pad + x - 3, h-1, QString("e%1").arg(i+1));
     }
 }
 
@@ -122,7 +123,10 @@ void ProjectorPCA::Train(std::vector< fvec > samples, int startIndex, int stopIn
     if(!samples.size()) return;
     dim = samples[0].size();
     if(!dim) return;
-    int pcaCount = (stopIndex != -1) ? stopIndex : min((int)dim, (int)samples.size()-1);
+    if(stopIndex >= (int)dim) stopIndex = -1;
+    if(startIndex && startIndex >= (int)dim) startIndex = dim-1;
+    if(stopIndex != -1 && startIndex > stopIndex) stopIndex = startIndex;
+    int pcaCount = (stopIndex != -1) ? stopIndex+1 : min((int)dim, (int)samples.size()-1);
     TrainPCA(samples, pcaCount);
     if(startIndex)
     {

@@ -32,15 +32,16 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
     fvec values = pca->GetEigenValues();
     float accumulator = 0;
     float maxEigVal = 0;
-    FOR(i, values.size()) if(values[i] == values[i]) maxEigVal += values[i];
+    FOR(i, values.size()) if(values[i] == values[i] && values[i] >= 0) maxEigVal += values[i];
 
     FOR(i, values.size())
     {
         float eigval = values[i];
-        if(eigval == eigval)
+        if(eigval == eigval && eigval >= 0)
         {
             accumulator += eigval / maxEigVal;
         }
+        else eigval = 0;
         params->eigenList->addItem(QString("e%1 %2 %3%%").arg(i).arg(eigval, 0, 'f', 2).arg(accumulator*100, 0, 'f', 1));
     }
 }
@@ -61,8 +62,10 @@ void PCAProjection::SetParams(Projector *projector)
     if(!projector) return;
     if(params->useRangeCheck->isChecked())
     {
-        projector->startIndex = params->startRangeSpin->value()-1;
-        projector->stopIndex = params->stopRangeSpin->value()-1;
+        int startIndex = params->startRangeSpin->value()-1;
+        int stopIndex = params->stopRangeSpin->value()-1;
+        projector->startIndex = min(startIndex, stopIndex);
+        projector->stopIndex = max(startIndex, stopIndex);
     }
     else
     {

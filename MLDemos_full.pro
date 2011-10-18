@@ -34,7 +34,7 @@ HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 # input plugins
 INPUTPATH = _IOPlugins
 #SUBDIRS += CSVImport
-SUBDIRS += PCAFaces CSVImport WebImport
+SUBDIRS += PCAFaces CSVImport
 #SUBDIRS += ImportTimeseries
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro

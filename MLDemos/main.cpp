@@ -29,6 +29,6 @@ int main(int argc, char *argv[])
 	QString filename = "";
 	if(argc > 1) filename = QString(argv[1]);
 	MLDemos w(filename);
-	w.show();
+    w.show();
 	return a.exec();
 }
