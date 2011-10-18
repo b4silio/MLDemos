@@ -1,4 +1,5 @@
 #include <public.h>
+#include <basicMath.h>
 #include <mymaths.h>
 #include "expose.h"
 #include "ui_expose.h"
