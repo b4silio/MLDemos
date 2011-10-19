@@ -27,7 +27,6 @@ class ClustererKM : public Clusterer
 {
 private:
 	float beta;
-	u32 clusters;
 	bool bSoft;
 	bool bGmm;
 	int power;
@@ -41,7 +40,7 @@ public:
 	fvec Test( const fVec &sample);
 	char *GetInfoString();
 
-	void SetParams(u32 clusters, int method, float beta, int power);
+    void SetParams(u32 nbClusters, int method, float beta, int power);
 };
 
 #endif // _CLUSTERER_KM_H_

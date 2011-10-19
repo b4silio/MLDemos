@@ -79,6 +79,7 @@ void MLDemos::Classify()
             canvas->maps.model = QPixmap();
             CanvasZoomChanged();
         }
+        canvas->repaint();
     }
     else
     {
@@ -302,6 +303,31 @@ void MLDemos::Avoidance()
     drawTimer->start(QThread::NormalPriority);
 }
 
+fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores)
+{
+    fvec results;
+    results.push_back(drand48());
+    results.push_back(drand48());
+    if(!samples.size()) return results;
+    int dim = samples[0].size();
+    // compute bic
+    fvec mean(dim);
+    FOR(i, samples.size())
+    {
+        mean += samples[i];
+    }
+    mean /= samples.size();
+    double stdev = 0;
+    FOR(i, samples.size())
+    {
+        fvec diff = samples[i]-mean;
+        stdev += diff*diff;
+    }
+
+    return results;
+}
+
+
 void MLDemos::Cluster()
 {
     if(!canvas || !canvas->data->GetCount()) return;
@@ -320,6 +346,79 @@ void MLDemos::Cluster()
     Train(clusterer);
 	drawTimer->Stop();
 	drawTimer->Clear();
+    clusterers[tab]->Draw(canvas,clusterer);
+
+    // we compute the stats on the clusters (f-measure, bic etc)
+
+    vector<fvec> samples = canvas->data->GetSamples();
+    ivec labels = canvas->data->GetLabels();
+    vector<fvec> clusterScores(samples.size());
+    FOR(i, canvas->data->GetCount())
+    {
+        fvec result = clusterer->Test(samples[i]);
+        if(result.size()>1) clusterScores[i] = result;
+        else if(result.size())
+        {
+            fvec res(clusterer->NbClusters(),0);
+            res[result[0]] = 1.f;
+        }
+    }
+
+    fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores);
+    float fmeasure = clusterMetrics[0];
+    float bic = clusterMetrics[1];
+
+    optionsCluster->resultList->clear();
+    optionsCluster->resultList->addItem(QString("fmeasure: %1").arg(fmeasure, 0, 'f', 3));
+    optionsCluster->resultList->addItem(QString("bic: %1").arg(bic, 0, 'f', 3));
+
+
+    // we fill in the canvas sampleColors for the alternative display types
+    canvas->sampleColors.resize(samples.size());
+    FOR(i, samples.size())
+    {
+        fvec res = clusterer->Test(samples[i]);
+        float r=0,g=0,b=0;
+        if(res.size() > 1)
+        {
+            FOR(j, res.size())
+            {
+                r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+                g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+                b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
+            }
+        }
+        else if(res.size())
+        {
+            r = (1-res[0])*255 + res[0]* 255;
+            g = (1-res[0])*255;
+            b = (1-res[0])*255;
+        }
+        canvas->sampleColors[i] = QColor(r,g,b);
+    }
+    canvas->maps.model = QPixmap();
+    canvas->repaint();
+
+	UpdateInfo();
+	drawTimer->clusterer= &this->clusterer;
+	drawTimer->start(QThread::NormalPriority);
+}
+
+void MLDemos::ClusterIterate()
+{
+    if(!canvas || !canvas->data->GetCount()) return;
+    drawTimer->Stop();
+    int tab = optionsCluster->tabWidget->currentIndex();
+    if(tab >= clusterers.size() || !clusterers[tab]) return;
+    QMutexLocker lock(&mutex);
+    if(!clusterer)
+    {
+        clusterer = clusterers[tab]->GetClusterer();
+        tabUsedForTraining = tab;
+    }
+    else clusterers[tab]->SetParams(clusterer);
+    clusterer->SetIterative(true);
+    Train(clusterer);
     clusterers[tab]->Draw(canvas,clusterer);
 
     // we fill in the canvas sampleColors
@@ -347,29 +446,9 @@ void MLDemos::Cluster()
         canvas->sampleColors[i] = QColor(r,g,b);
     }
     canvas->maps.model = QPixmap();
+    canvas->repaint();
 
-	UpdateInfo();
-	drawTimer->clusterer= &this->clusterer;
-	drawTimer->start(QThread::NormalPriority);
-}
-
-void MLDemos::ClusterIterate()
-{
-    if(!canvas || !canvas->data->GetCount()) return;
-    drawTimer->Stop();
-    int tab = optionsCluster->tabWidget->currentIndex();
-    if(tab >= clusterers.size() || !clusterers[tab]) return;
-    QMutexLocker lock(&mutex);
-    if(!clusterer)
-    {
-        clusterer = clusterers[tab]->GetClusterer();
-        tabUsedForTraining = tab;
-    }
-    else clusterers[tab]->SetParams(clusterer);
-    clusterer->SetIterative(true);
-    Train(clusterer);
-    clusterers[tab]->Draw(canvas,clusterer);
-	UpdateInfo();
+    UpdateInfo();
 }
 
 void MLDemos::Maximize()

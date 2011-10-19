@@ -54,6 +54,7 @@ bool is(const std::string &s)
 class CSVRow
 {
 public:
+    CSVRow(std::string separator = ","):separator(separator){}
     std::string const& operator[](std::size_t index) const;
     std::string at(size_t column) const;
     std::string getFirstCell() const;
@@ -65,6 +66,7 @@ public:
 
 private:
     std::vector<std::string>    m_data;
+    string separator;
 };
 
 class CSVIterator
@@ -76,7 +78,7 @@ public:
     typedef CSVRow*                     pointer;
     typedef CSVRow&                     reference;
 
-    CSVIterator(std::istream& str);
+    CSVIterator(std::istream& str, std::string separator=",");
     CSVIterator();
 
     bool eof();
@@ -93,6 +95,7 @@ public:
     bool operator==(CSVIterator const& rhs);
 
 private:
+    std::string separator;
     std::istream*       m_str;
     CSVRow              m_row;
 };
@@ -116,8 +119,8 @@ public:
     static pair<vector<fvec>, ivec> numericFromRawData(vector< vector<string> > rawData);
 
 private:
-    int outputLabelColumn;
     bool bFirstRowAsHeader;
+    int outputLabelColumn;
     ifstream file;
     map<string,unsigned int> classLabels;
     vector<vector<string> > data;

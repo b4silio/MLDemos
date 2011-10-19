@@ -116,6 +116,16 @@
     </attribute>
    </widget>
   </widget>
+  <widget class="QListWidget" name="resultList">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>20</y>
+     <width>150</width>
+     <height>160</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

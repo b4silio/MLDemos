@@ -26,7 +26,7 @@ char *ClustererKKM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Kernel K-Means\n");
-	sprintf(text, "%sClusters: %d\n", text, clusters);
+    sprintf(text, "%sClusters: %d\n", text, nbClusters);
 	sprintf(text, "%sKernel: ", text);
 	switch(kernelType)
 	{
@@ -69,22 +69,22 @@ void ClustererKKM::Train(std::vector< fvec > _samples)
 	case 0:
 		DEL(linKmeans);
 		linKmeans = new dlib::kkmeans<lin_kernel>(linKc);
-		linKmeans->set_number_of_centers(clusters);
-		pick_initial_centers(clusters, initial_centers, samples, linKmeans->get_kernel());
+        linKmeans->set_number_of_centers(nbClusters);
+        pick_initial_centers(nbClusters, initial_centers, samples, linKmeans->get_kernel());
 		linKmeans->train(samples,initial_centers);
 		break;
 	case 1:
 		DEL(polKmeans);
 		polKmeans = new dlib::kkmeans<pol_kernel>(polKc);
-		polKmeans->set_number_of_centers(clusters);
-		pick_initial_centers(clusters, initial_centers, samples, polKmeans->get_kernel());
+        polKmeans->set_number_of_centers(nbClusters);
+        pick_initial_centers(nbClusters, initial_centers, samples, polKmeans->get_kernel());
 		polKmeans->train(samples,initial_centers);
 		break;
 	case 2:
 		DEL(rbfKmeans);
 		rbfKmeans = new dlib::kkmeans<rbf_kernel>(rbfKc);
-		rbfKmeans->set_number_of_centers(clusters);
-		pick_initial_centers(clusters, initial_centers, samples, rbfKmeans->get_kernel());
+        rbfKmeans->set_number_of_centers(nbClusters);
+        pick_initial_centers(nbClusters, initial_centers, samples, rbfKmeans->get_kernel());
 		rbfKmeans->train(samples,initial_centers);
 		break;
 	}
@@ -97,7 +97,7 @@ fvec ClustererKKM::Test( const fvec &_sample )
 	sample(0) = _sample[0];
 	sample(1) = _sample[1];
 	fvec res;
-	res.resize(clusters, 0);
+    res.resize(nbClusters, 0);
 	int index;
 	switch(kernelType)
 	{
@@ -121,7 +121,7 @@ fvec ClustererKKM::Test( const fVec &_sample )
 	sample(0) = _sample._[0];
 	sample(1) = _sample._[1];
 	fvec res;
-	res.resize(clusters, 0);
+    res.resize(nbClusters, 0);
 	int index;
 	switch(kernelType)
 	{

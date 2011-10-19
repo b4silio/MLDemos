@@ -38,13 +38,13 @@ std::string CSVRow::at(size_t column) const
 }
 std::string CSVRow::getFirstCell() const
 {
-	if(!m_data.size()) return string();
-	return m_data.at(0);
+    if(!m_data.size()) return string();
+    return m_data.at(0);
 }
 std::string CSVRow::getLastCell() const
 {
-	if(!m_data.size()) return string();
-	return m_data.back();
+    if(!m_data.size()) return string();
+    return m_data.back();
 }
 std::vector<std::string> CSVRow::getParsedLine() const
 {
@@ -61,14 +61,19 @@ void CSVRow::readNextRow(std::istream& str)
     std::string line;
     std::getline(str,line);
 
+    // we try using commas, semi-colons and tabs
+
     // convert to stream
     std::stringstream lineStream(line);
     std::string cell;
 
     // update row (array) content
     m_data.clear();
-    while(std::getline(lineStream,cell,','))
+    while(std::getline(lineStream,cell,separator[0]))
     {
+        std::string test = cell;
+        std::remove(test.begin(), test.end(), ' ');
+        if(test.empty()) continue;
         m_data.push_back(cell);
     }
 }
@@ -85,7 +90,8 @@ unsigned int getType(string input)
 
 /* CSVIterator stuff */
 
-CSVIterator::CSVIterator(std::istream& str)  :m_str(str.good()?&str:NULL)
+CSVIterator::CSVIterator(std::istream& str, std::string separator)
+    : m_str(str.good()?&str:NULL), separator(separator), m_row(separator)
 {
     ++(*this);
 }
@@ -140,8 +146,8 @@ bool CSVIterator::operator==(CSVIterator const& rhs)
 /* CSVParser stuff */
 CSVParser::CSVParser()
 {
-    outputLabelColumn = 2;
     bFirstRowAsHeader = false;
+    outputLabelColumn = 2;
 }
 
 void CSVParser::clear()
@@ -158,16 +164,38 @@ void CSVParser::parse(const char* fileName)
     file.open(fileName);
     if(!file.is_open()) return;
 
-    // Parse CSV input file
-    for(CSVIterator parser(file); !parser.eof(); ++parser)
+    std::string separators[] = {",", ";", "\t", " "};
+    int separatorCount = 4;
+    int bestSeparator = 0;
+    int dim=0;
+
+    // we test the separators to find which one is best
+    for(int i=0; i<separatorCount; i++)
+    {
+        file.seekg(0);
+        // Parse CSV input file
+        CSVIterator parser(file, separators[i]);
+        ++parser; // we skip the first line as it might be a header line
+        if(parser.eof() || !parser->size()) continue;
+        vector<string> parsed = parser->getParsedLine();
+        qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
+        if(parsed.size() > dim)
+        {
+            dim = parsed.size();
+            bestSeparator = i;
+        }
+    }
+    file.seekg(0);
+
+    data.clear();
+    for(CSVIterator parser(file, separators[bestSeparator]);!parser.eof(); ++parser)
     {
         if(!parser->size()) continue;
-		vector<string> parsed = parser->getParsedLine();
-		if(!parsed.size()) continue;
-		// Fill dataset
-                data.push_back(parsed);
+        vector<string> parsed = parser->getParsedLine();
+        if(!parsed.size()) continue;
+        // Fill dataset
+        data.push_back(parsed);
     }
-
     cout << "Parsing done, read " << data.size() << " entries" << endl;
     cout << "Found " << data.at(0).size()-1 << " input labels" << endl;
 
@@ -294,6 +322,13 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
             }
         }
     }
+
+    qDebug() << "label indices";
+    for(map<string,int>::iterator it = labelMaps[outputLabelColumn].begin(); it != labelMaps[outputLabelColumn].end(); it++)
+    {
+        qDebug() << (it->first).c_str() << " " << it->second;
+    }
+
     bool numerical = true;
     FOR(i, data.size())
     {
@@ -317,7 +352,8 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         }
         else
         {
-            labels[i-headerSkip] = labelMaps[outputLabelColumn][data[i][outputLabelColumn]];
+            int label = labelMaps[outputLabelColumn][data[i][outputLabelColumn]];
+            labels[i-headerSkip] = label;
         }
     }
 
@@ -333,6 +369,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         }
         samples = newSamples;
         labels = newLabels;
+        count = samples.size();
         delete [] perm;
     }
     if(!excludeIndex.size()) return pair<vector<fvec>,ivec>(samples,labels);
@@ -366,5 +403,6 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
             nD++;
         }
     }
+    qDebug() << "newSamples: " << newSamples.size() << " labels: " << labels.size();
     return pair<vector<fvec>,ivec>(newSamples,labels);
 }

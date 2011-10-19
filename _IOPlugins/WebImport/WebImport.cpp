@@ -50,6 +50,7 @@ void WebImport::Start()
         connect(gui->backButton, SIGNAL(clicked()),gui->browserWebView,SLOT(back()));
         connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(on_dumpButton_clicked()));
         connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
+        connect(gui->headerCheck, SIGNAL(clicked()), this, SLOT(headerChanged()));
         connect(&manager, SIGNAL(finished(QNetworkReply*)),SLOT(downloadHandler(QNetworkReply*)));
         guiDialog->show();
         gui->browserWebView->show();
@@ -71,7 +72,7 @@ void WebImport::Closing()
 
 void WebImport::LinkHandler(const QUrl & url)
 {
-	if(url.toString().endsWith(".data"))
+    if(url.toString().endsWith(".data") || url.toString().endsWith(".csv"))
     {
         qDebug() << "Importing: " << url.toString();
         //gui->browserWebView->triggerPageAction(QWebPage::DownloadLinkToDisk);
@@ -133,17 +134,28 @@ void WebImport::Parse(QString filename)
     inputParser->parse(filename.toStdString().c_str());
     vector<vector<string> > rawData = inputParser->getRawData();
     qDebug() << "Dataset extracted";
-//    if(data.first.size() < 2) return;
     if(rawData.size() < 2) return;
+    bool bUseHeader = gui->headerCheck->isChecked();
+
     gui->tableWidget->clear();
     gui->tableWidget->setRowCount(rawData.size());
     gui->tableWidget->setColumnCount(rawData[0].size());
+    if(bUseHeader)
+    {
+        QStringList headerLabels;
+        FOR(i, rawData[0].size())
+        {
+            headerLabels <<  QString("%1:").arg(i) + rawData[0][i].c_str();
+        }
+        gui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+    }
     for(size_t r = 0; r < rawData.size(); r++)
     {
+        if(!r && bUseHeader) continue;
         for(size_t c = 0; c < rawData[r].size(); c++)
         {
             QTableWidgetItem *newItem = new  QTableWidgetItem(QString(rawData[r][c].c_str()));
-            gui->tableWidget->setItem(r, c, newItem);
+            gui->tableWidget->setItem(r-bUseHeader, c, newItem);
         }
     }
     gui->spinBox->setRange(1,rawData[0].size());
@@ -152,6 +164,38 @@ void WebImport::Parse(QString filename)
 void WebImport::FetchResults(std::vector<fvec> results)
 {
 
+}
+
+
+void WebImport::headerChanged()
+{
+    vector<vector<string> > rawData = inputParser->getRawData();
+    qDebug() << "Dataset extracted";
+    if(rawData.size() < 2) return;
+    bool bUseHeader = gui->headerCheck->isChecked();
+
+    gui->tableWidget->clear();
+    gui->tableWidget->setRowCount(rawData.size());
+    gui->tableWidget->setColumnCount(rawData[0].size());
+    if(bUseHeader)
+    {
+        QStringList headerLabels;
+        FOR(i, rawData[0].size())
+        {
+            headerLabels <<  QString("%1:").arg(i) + rawData[0][i].c_str();
+        }
+        gui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+    }
+    for(size_t r = 0; r < rawData.size(); r++)
+    {
+        if(!r && bUseHeader) continue;
+        for(size_t c = 0; c < rawData[r].size(); c++)
+        {
+            QTableWidgetItem *newItem = new  QTableWidgetItem(QString(rawData[r][c].c_str()));
+            gui->tableWidget->setItem(r-bUseHeader, c, newItem);
+        }
+    }
+    gui->spinBox->setRange(1,rawData[0].size());
 }
 
 void WebImport::spinBoxChanged(int value)
@@ -174,7 +218,7 @@ void WebImport::on_dumpButton_clicked()
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
-    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 2000);
+    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
     if(eigLabel) eigLabel->hide();
     DEL(eigLabel);
     emit(SetData(data.first, data.second, vector<ipair>(), false));
@@ -201,10 +245,10 @@ void WebImport::on_pcaButton_clicked()
     int pcaCount = min(data.first[0].size(),data.first.size() -1);
 	pca.Train(data.first, pcaCount);
     data.first = pca.samples;
-	if(data.first.size() > 2000)
+    if(data.first.size() > 1000)
 	{
-		data.first.resize(2000);
-		data.second.resize(2000);
+        data.first.resize(1000);
+        data.second.resize(1000);
 	}
 	DEL(eigLabel);
     eigLabel = pca.EigenValues();

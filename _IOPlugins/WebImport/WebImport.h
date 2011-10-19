@@ -88,6 +88,7 @@ public slots:
     void LinkHandler(const QUrl & url);
     void downloadHandler(QNetworkReply *reply);
 private slots:
+    void headerChanged();
     void spinBoxChanged(int value);
     void on_dumpButton_clicked();
     void on_pcaButton_clicked();
