@@ -1,6 +1,7 @@
 #include <public.h>
 #include <basicMath.h>
 #include <mymaths.h>
+#include <basicMath.h>
 #include "expose.h"
 #include "ui_expose.h"
 #include <QClipboard>

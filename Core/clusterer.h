@@ -28,20 +28,23 @@ class Clusterer
 {
 protected:
 	u32 dim;
+    u32 nbClusters;
 	bool bIterative;
 
 public:
 	int type;
 
-	Clusterer() : type(CLUS_NONE), dim(2), bIterative(false) {};
-	~Clusterer(){};
-	void Cluster(std::vector< fvec > allsamples) {Train(allsamples);};
-	void SetIterative(bool iterative){bIterative = iterative;};
+    Clusterer() : type(CLUS_NONE), dim(2), bIterative(false), nbClusters(1) {}
+    ~Clusterer(){}
+    void Cluster(std::vector< fvec > allsamples) {Train(allsamples);}
+    void SetIterative(bool iterative){bIterative = iterative;}
+    int NbClusters(){return nbClusters;}
 
-	virtual void Train(std::vector< fvec > samples){};
-	virtual fvec Test( const fvec &sample){ return fvec(); };
-	virtual fvec Test(const fVec &sample){ return Test((fvec)sample); };
-	virtual char *GetInfoString(){return NULL;};
+    virtual void Train(std::vector< fvec > samples){}
+    virtual fvec Test( const fvec &sample){ return fvec(); }
+    virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
+    virtual char *GetInfoString(){return NULL;}
+
 };
 
 #endif // _CLUSTERING_H_

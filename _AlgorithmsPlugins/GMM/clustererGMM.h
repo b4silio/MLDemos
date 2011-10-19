@@ -28,12 +28,11 @@ class ClustererGMM : public Clusterer
 public:
 	Gmm *gmm;
 private:
-	u32 nbClusters;
 	u32 covarianceType;
 	u32 initType;
 	float *data;
 public:
-	ClustererGMM() : gmm(0), data(0), nbClusters(2), covarianceType(2), initType(1){type = CLUS_GMM;};
+    ClustererGMM() : gmm(0), data(0), covarianceType(2), initType(1){type = CLUS_GMM;}
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);

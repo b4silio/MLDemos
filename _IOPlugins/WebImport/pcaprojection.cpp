@@ -1,10 +1,7 @@
 #include "pcaprojection.h"
 #include "widget.h"
-#include <QDebug>
-
 ProjectionPCA::ProjectionPCA()
-{
-}
+{}
 
 PCA ProjectionPCA::compressPCA(const Mat& pcaset, int maxComponents, const Mat& testset, Mat& compressed)
 {
@@ -132,14 +129,6 @@ void ProjectionPCA::Train(std::vector<fvec> samples, int pcaCount)
     }
     Mat output;
     pca = compressPCA(pcaData, pcaCount, pcaData, output);
-    qDebug() << "PCA size: " << pca.eigenvalues.rows << pca.eigenvalues.cols;
-    FOR(i, pca.eigenvalues.rows)
-    {
-        FOR(j, pca.eigenvalues.cols)
-        {
-            qDebug() << i << pca.eigenvalues.at<float>(i);
-        }
-    }
     this->samples = vector<fvec>(count);
 	vector<bool> bNan(pcaCount,false);
 	int nanCnt = 0;
@@ -147,18 +136,19 @@ void ProjectionPCA::Train(std::vector<fvec> samples, int pcaCount)
 	{
 		if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
 	}
-	FOR(i, count)
-	{
+    FOR(i, count)
+    {
 		this->samples[i].resize(pcaCount-nanCnt);
 		int D = 0;
-		FOR(d, pcaCount)
-		{
+        FOR(d, pcaCount)
+        {
 			if(bNan[d]) continue;
 			this->samples[i][D] = output.at<float>(i,d);
 			D++;
-		}
-	}
+        }
+    }
 }
+
 
 QLabel* ProjectionPCA::EigenValues()
 {

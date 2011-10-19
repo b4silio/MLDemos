@@ -32,7 +32,6 @@ private:
 	float kernelGamma;
 	float kernelDegree;
 
-	int clusters;
 	int maxVectors;
 
 	dlib::kkmeans<lin_kernel> *linKmeans;
@@ -41,14 +40,14 @@ private:
 
 public:
 
-	ClustererKKM() : linKmeans(NULL), polKmeans(NULL), rbfKmeans(NULL), clusters(1), kernelType(2), kernelGamma(0.01), kernelDegree(2), maxVectors(8) {type = CLUS_KKM;};
+    ClustererKKM() : linKmeans(NULL), polKmeans(NULL), rbfKmeans(NULL), kernelType(2), kernelGamma(0.01), kernelDegree(2), maxVectors(8) {type = CLUS_KKM;}
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(int clusters, int kernelType, float kernelGamma, int kernelDegree)
-	{this->clusters=clusters;this->kernelType=kernelType;this->kernelGamma=kernelGamma;this->kernelDegree=kernelDegree;};
+    {this->nbClusters=clusters;this->kernelType=kernelType;this->kernelGamma=kernelGamma;this->kernelDegree=kernelDegree;}
 };
 
 #endif // _CLUSTERER_KKM_H_

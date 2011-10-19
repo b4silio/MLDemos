@@ -18,7 +18,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 
 #include "CSVImport.h"
-#include "pcaprojection.h"
 
 Q_EXPORT_PLUGIN2(IO_CSVImport, CSVImport)
 
@@ -178,37 +177,3 @@ void CSVImport::on_dumpButton_clicked()
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
     emit(SetData(data.first, data.second, vector<ipair>(), false));
 }
-
-/*
-void CSVImport::on_pcaButton_clicked()
-{
-    ivec excludeIndices;
-    vector<bool> bExcluded(gui->tableWidget->columnCount(), false);
-    QModelIndexList indexes = gui->tableWidget->selectionModel()->selection().indexes();
-    FOR(i, indexes.count())
-    {
-        QModelIndex index = indexes.at(i);
-        bExcluded[index.column()] = true;
-    }
-    FOR(i, bExcluded.size())
-    {
-        if(bExcluded[i]) excludeIndices.push_back(i);
-    }
-
-	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, inputParser->getCount());
-    ProjectionPCA pca;
-	if(!data.first.size()) return;
-    int pcaCount = min(data.first[0].size(),data.first.size() -1);
-	pca.Train(data.first, pcaCount);
-    data.first = pca.samples;
-	if(data.first.size() > 2000)
-	{
-		data.first.resize(2000);
-		data.second.resize(2000);
-	}
-	DEL(eigLabel);
-    eigLabel = pca.EigenValues();
-    eigLabel->show();
-    emit(SetData(data.first, data.second, vector<ipair>(), true));
-}
-*/

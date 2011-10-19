@@ -24,7 +24,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 ClustererKM::ClustererKM()
-: beta(1), clusters(1), bSoft(false), bGmm(false), kmeans(0)
+: beta(1), bSoft(false), bGmm(false), kmeans(0)
 {
 	type = CLUS_KM;
 }
@@ -41,7 +41,7 @@ void ClustererKM::Train(std::vector< fvec > samples)
 	if(!kmeans)
 	{
 		bInit = true;
-		kmeans = new KMeansCluster(clusters);
+        kmeans = new KMeansCluster(nbClusters);
 		kmeans->AddPoints(samples);
 		kmeans->ResetClusters();
 	}
@@ -66,7 +66,7 @@ void ClustererKM::Train(std::vector< fvec > samples)
 fvec ClustererKM::Test( const fvec &sample)
 {
 	fvec res;
-	res.resize(clusters,0);
+    res.resize(nbClusters,0);
 	if(!kmeans) return res;
 	kmeans->Test(sample, res);
 	float sum = 0;
@@ -78,7 +78,7 @@ fvec ClustererKM::Test( const fvec &sample)
 fvec ClustererKM::Test( const fVec &sample)
 {
 	fvec res;
-	res.resize(clusters,0);
+    res.resize(nbClusters,0);
 	if(!kmeans) return res;
 	kmeans->Test(sample, res);
 	float sum = 0;
@@ -89,7 +89,7 @@ fvec ClustererKM::Test( const fVec &sample)
 
 void ClustererKM::SetParams(u32 clusters, int method, float beta, int power)
 {
-	this->clusters = clusters;
+    this->nbClusters = clusters;
 	this->beta = beta;
 	this->power = power;
 	switch(method)
@@ -114,7 +114,7 @@ char *ClustererKM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "K-Means\n");
-	sprintf(text, "%sClusters: %d\n", text, clusters);
+    sprintf(text, "%sClusters: %d\n", text, nbClusters);
 	sprintf(text, "%sType:", text);
 	if(!bSoft && !bGmm) sprintf(text, "%sK-Means\n", text);
 	else if(bSoft) sprintf(text, "%sSoft K-Means (beta: %.3f)\n", text, beta);
