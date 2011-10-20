@@ -32,13 +32,14 @@ public:
 	svm_parameter param;
 
 	ClustererSVR();
+    ~ClustererSVR();
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
 	char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
-	svm_model *GetModel(){return svm;};
+    svm_model *GetModel(){return svm;}
 };
 
 #endif // _CLUSTERER_SVR_H_

@@ -29,6 +29,11 @@ ClustererKM::ClustererKM()
 	type = CLUS_KM;
 }
 
+ClustererKM::~ClustererKM()
+{
+    DEL(kmeans);
+}
+
 void ClustererKM::Train(std::vector< fvec > samples)
 {
 	if(!samples.size()) return;
@@ -38,6 +43,7 @@ void ClustererKM::Train(std::vector< fvec > samples)
 		DEL(kmeans);
 	}
 	bool bInit = false;
+    if(kmeans && kmeans->GetClusters() != nbClusters) DEL(kmeans);
 	if(!kmeans)
 	{
 		bInit = true;

@@ -50,6 +50,11 @@ ClustererSVR::ClustererSVR()
 	param.normalizeKernel = false;
 }
 
+ClustererSVR::~ClustererSVR()
+{
+    DEL(svm);
+}
+
 void ClustererSVR::Train(std::vector< fvec > samples)
 {
 	svm_problem problem;

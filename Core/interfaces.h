@@ -107,7 +107,6 @@ public:
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
 
-
 	void Draw(Canvas *canvas, Clusterer *clusterer)
 	{
 		if(!canvas || !clusterer) return;

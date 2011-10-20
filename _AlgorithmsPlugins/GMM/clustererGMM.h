@@ -33,6 +33,7 @@ private:
 	float *data;
 public:
     ClustererGMM() : gmm(0), data(0), covarianceType(2), initType(1){type = CLUS_GMM;}
+    ~ClustererGMM();
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
