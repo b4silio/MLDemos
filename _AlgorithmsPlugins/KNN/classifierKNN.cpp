@@ -58,6 +58,12 @@ fvec ClassifierKNN::TestMulti(const fvec &sample)
 	if(!samples.size()) return fvec();
 	fvec score;
 
+    int cnt=0;
+    FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+    ivec newLabels(labels.size());
+    FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
+
 	double eps = 0; // error bound
 	ANNpoint queryPt; // query point
 	queryPt = annAllocPt(sample.size()); // allocate query point
@@ -65,7 +71,7 @@ fvec ClassifierKNN::TestMulti(const fvec &sample)
 	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
 	FOR(i, sample.size()) queryPt[i] = sample[i];
 	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
-	int cnt = 0;
+    cnt = 0;
 
 	for(map<int,int>::iterator it = counts.begin(); it != counts.end(); it++)
 	{
@@ -74,8 +80,8 @@ fvec ClassifierKNN::TestMulti(const fvec &sample)
 
 	FOR(i, k)
 	{
-		if(nnIdx[i] >= labels.size()) continue;
-		int label = labels[nnIdx[i]];
+        if(nnIdx[i] >= newLabels.size()) continue;
+        int label = newLabels[nnIdx[i]];
 		if(counts.count(label)) counts[label]++;
 		cnt++;
 	}

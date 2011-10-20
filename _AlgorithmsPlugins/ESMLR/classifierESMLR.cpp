@@ -283,9 +283,6 @@ ClassifierESMLR::ClassifierESMLR():
 	classifier(0)
 {
 	bSingleClass = true;
-	//bUseDrawTimer = false;
-	classThresh = 0;
-	classSpan = 1;
 	dim = 0;
 }
 

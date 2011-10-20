@@ -41,13 +41,13 @@ private:
 
 public:
 
-	ClassifierRVM():epsilon(0.001), kernelType(2){type = CLASS_RVM;};
+    ClassifierRVM():epsilon(0.001), kernelType(2){}
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
 	char *GetInfoString();
 	void SetParams(float epsilon, int kernelType, float kernelParam, int kernelDegree)
-		{this->epsilon=epsilon;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;};
+        {this->epsilon=epsilon;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;}
 	std::vector<fvec> GetSVs();
 };
 

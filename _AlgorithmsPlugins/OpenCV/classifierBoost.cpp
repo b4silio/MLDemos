@@ -27,7 +27,6 @@ ClassifierBoost::ClassifierBoost()
 : model(0), weakCount(0), scoreMultiplier(1.f)
 {
 	bSingleClass = false;
-	type = CLASS_BOOST;
 }
 
 ClassifierBoost::~ClassifierBoost()
@@ -256,8 +255,6 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 	trainLabels = 0;
 	sampleWeights = 0;
 	varType = 0;
-	bFixedThreshold = false;
-	classSpan = 0.01f;
 }
 
 float ClassifierBoost::Test( const fvec &sample )

@@ -42,13 +42,13 @@ private:
 
 public:
 
-	ClassifierPegasos():maxSV(10),lambda(0.001), kernelType(2){type = CLASS_PEG;};
+    ClassifierPegasos():maxSV(10),lambda(0.001), kernelType(2){}
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
 	char *GetInfoString();
 	void SetParams(float lambda, int maxSV, int kernelType, float kernelParam, int kernelDegree)
-		{this->lambda = lambda; this->maxSV = maxSV; this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;};
+        {this->lambda = lambda; this->maxSV = maxSV; this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;}
 	std::vector<fvec> GetSVs();
 };
 

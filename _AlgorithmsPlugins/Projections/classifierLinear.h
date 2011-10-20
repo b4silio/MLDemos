@@ -75,7 +75,7 @@ public:
 	 * @brief Default Constructor
 	 *
 	 */
-    ClassifierLinear() : threshold(0), linearType(0), Transf(0) {type = CLASS_LINEAR; bUsesDrawTimer = false;}
+    ClassifierLinear() : threshold(0), linearType(0), Transf(0) {bUsesDrawTimer = false;}
     ~ClassifierLinear();
 	/**
 	 * @brief Perform the training, by gather the training parameters from the ui, and then training the corresponding classifier

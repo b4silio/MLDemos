@@ -26,7 +26,6 @@ using namespace std;
 ClassifierSVM::ClassifierSVM()
 : svm(0), node(0), x_space(0)
 {
-	type = CLASS_SVM;
 	bMultiClass = true;
 	classCount = 0;
 	// default values
@@ -103,7 +102,14 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 	KILL(x_space);
 	x_space = new svm_node[(data_dimension+1)*problem.l];
 
-	FOR(i, problem.l)
+    int cnt=0;
+    FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+    ivec newLabels(labels.size());
+    FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
+
+
+    FOR(i, problem.l)
 	{
 		FOR(j, data_dimension)
 		{
@@ -112,7 +118,7 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 		}
 		x_space[(data_dimension+1)*i + data_dimension].index = -1;
 		problem.x[i] = &x_space[(data_dimension+1)*i];
-		problem.y[i] = labels[i];
+        problem.y[i] = newLabels[i];
 	}
 
 	DEL(svm);
@@ -122,16 +128,16 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 	delete [] problem.y;
 
 	int maxClass = 0;
-	FOR(j, labels.size()) maxClass = max(maxClass, labels[j]);
+    FOR(j, newLabels.size()) maxClass = max(maxClass, newLabels[j]);
 
 	classCount = svm->nr_class;
 	//classCount = maxClass;
 	FOR(i, classCount)
 	{
 		classes[i] = svm->label[i];
-		qDebug() << "classes: " << i << classes[i];
+        //qDebug() << "classes: " << i << classes[i];
 	}
-	FOR(j, labels.size()) qDebug() << "label:" << j << labels[j];
+    //FOR(j, labels.size()) qDebug() << "label:" << j << labels[j];
 
 }
 

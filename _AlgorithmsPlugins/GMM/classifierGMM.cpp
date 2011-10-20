@@ -26,7 +26,6 @@ using namespace std;
 ClassifierGMM::ClassifierGMM()
 	: nbClusters(2), covarianceType(2), initType(1)
 {
-	type = CLASS_GMM;
 	bSingleClass = false;
 	bMultiClass = true;
 }
@@ -42,8 +41,17 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 	if(!samples.size()) return;
 	vector< fvec > positives, negatives;
 	classes.clear();
-	std::map<int, vector<fvec> > sampleMap;
-	int cnt = 0;
+    classMap.clear();
+    inverseMap.clear();
+
+    int cnt=0;
+    FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+    ivec newLabels(labels.size());
+    FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
+
+    std::map<int, vector<fvec> > sampleMap;
+    /*
 	std::map<int, int > counts;
 	FOR(i, labels.size())
 	{
@@ -55,11 +63,12 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 	{
         classes[cnt++] = it->first;
 	}
+    */
 
-	FOR(i, samples.size())
+    FOR(i, samples.size())
 	{
-		sampleMap[classes[labels[i]]].push_back(samples[i]);
-		if(labels[i] == 1) positives.push_back(samples[i]);
+        sampleMap[newLabels[i]].push_back(samples[i]);
+        if(newLabels[i] == 1) positives.push_back(samples[i]);
 		else negatives.push_back(samples[i]);
 	}
 	int dim = samples[0].size();
@@ -82,8 +91,6 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 		gmms[i]->init(data[i], s.size(), initType);
 		gmms[i]->em(data[i], s.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
 	}
-
-	bFixedThreshold = false;
 }
 
 fvec ClassifierGMM::TestMulti(const fvec &sample)

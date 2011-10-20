@@ -31,8 +31,8 @@ private:
 	svm_node *node;
 	svm_node *x_space;
 	int classCount;
+    int type;
 public:
-	std::map<int,int> classes;
 	svm_parameter param;
 
 	ClassifierSVM();
@@ -43,7 +43,7 @@ public:
 	fvec TestMulti(const fvec &sample);
 	char *GetInfoString();
 	void SetParams(int svmType, float svmC, u32 kernelType, float kernelParam);
-	svm_model *GetModel(){return svm;};
+    svm_model *GetModel(){return svm;}
 };
 
 #endif // _CLASSIFIER_SVM_H_

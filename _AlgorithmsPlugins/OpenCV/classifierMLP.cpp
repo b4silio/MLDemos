@@ -21,12 +21,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "basicMath.h"
 #include "classifierMLP.h"
 
-ClassifierMLP::ClassifierMLP()
-: functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0)
-{
-	type = CLASS_MLP;
-}
-
 ClassifierMLP::~ClassifierMLP()
 {
 	DEL(mlp);

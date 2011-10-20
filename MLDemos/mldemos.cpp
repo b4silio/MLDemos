@@ -1835,7 +1835,7 @@ void MLDemos::Navigation( fvec sample )
 			fvec res = classifier->TestMulti(sample);
 			int max = 0;
 			FOR(i, res.size()) if(res[max] < res[i]) max = i;
-			score = max;
+            score = classifier->inverseMap[max];
 		}
 		else
 		{

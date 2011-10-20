@@ -71,9 +71,7 @@ void ClassBoost::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classi
 
 	int posClass = 1;
 	bool bUseMinMax = false;
-	if(classifier->type == CLASS_BOOST ||
-		classifier->type == CLASS_LINEAR ||
-		classifier->type == CLASS_MLP) bUseMinMax = true;
+    bUseMinMax = true;
 
 	float resMin = FLT_MAX;
 	float resMax = -FLT_MAX;
