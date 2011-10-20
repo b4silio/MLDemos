@@ -20,41 +20,32 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLASSIFIER_H_
 
 #include <vector>
+#include <map>
 #include "public.h"
 #include "roc.h"
 #include "types.h"
 #include "mymaths.h"
 
-extern "C" enum {CLASS_SVM, CLASS_RVM, CLASS_PEG, CLASS_EM, CLASS_GMM, CLASS_KNN, CLASS_BOOST, CLASS_MLP, CLASS_LINEAR, CLASS_PERC, CLASS_NONE} classifierType;
-
 class Classifier
 {
 protected:
 	std::vector< fvec > samples;
-	ivec classes;
 	ivec labels;
-	std::vector< fvec >testSamples;
-	ivec testClasses;
-	ivec testLabels;
 	u32 dim;
 	u32 posClass;
-	f32 classThresh;
-	f32 classSpan;
-	s32 class2labels[255];
-	ivec labels2class;
-	bool bFixedThreshold;
 	bool bSingleClass;
 	bool bUsesDrawTimer;
 	bool bMultiClass;
 
 public:
-	std::vector<fvec> crossval;
+    std::map<int,int> classMap, inverseMap;
+    std::map<int,int> classes;
+    std::vector<fvec> crossval;
 	fvec fmeasures;
-	int type;
 	std::vector< std::vector<f32pair> > rocdata;
 	std::vector<const char *> roclabels;
 
-	Classifier(): posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), bSingleClass(true), bUsesDrawTimer(true), bMultiClass(false), type(CLASS_NONE)
+    Classifier(): posClass(0), bSingleClass(true), bUsesDrawTimer(true), bMultiClass(false)
 	{
 		rocdata.push_back(std::vector<f32pair>());
 		rocdata.push_back(std::vector<f32pair>());
@@ -62,18 +53,18 @@ public:
 		roclabels.push_back("testing");
 	};
 
-	virtual ~Classifier(){};
-	std::vector <fvec> GetSamples(){return samples;};
+    virtual ~Classifier(){}
+    std::vector <fvec> GetSamples(){return samples;}
 
-	virtual void Train(std::vector< fvec > samples, ivec labels){};
-	virtual fvec TestMulti(const fvec &sample){ return fvec(1,Test(sample));};
-	virtual float Test(const fvec &sample){ return 0; };
-	virtual float Test(const fVec &sample){ if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);};
-	virtual char *GetInfoString(){return NULL;};
-	bool SingleClass(){return bSingleClass;};
-	bool UsesDrawTimer(){return bUsesDrawTimer;};
-	bool IsMultiClass(){return bMultiClass;};
-	int Dim(){return dim;};
+    virtual void Train(std::vector< fvec > samples, ivec labels){}
+    virtual fvec TestMulti(const fvec &sample){ return fvec(1,Test(sample));}
+    virtual float Test(const fvec &sample){ return 0; }
+    virtual float Test(const fVec &sample){ if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
+    virtual char *GetInfoString(){return NULL;}
+    bool SingleClass(){return bSingleClass;}
+    bool UsesDrawTimer(){return bUsesDrawTimer;}
+    bool IsMultiClass(){return bMultiClass;}
+    int Dim(){return dim;}
 };
 
 #endif // _CLASSIFIER_H_

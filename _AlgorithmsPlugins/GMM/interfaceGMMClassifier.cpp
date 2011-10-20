@@ -117,7 +117,7 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 			painter.setPen(QPen(Qt::black, 0.5));
 			DrawEllipse(mean, sigma, 2, &painter, canvas);
 			QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
-			QColor color = SampleColor[g%SampleColorCnt];
+            QColor color = SampleColor[classifier->inverseMap[g]%SampleColorCnt];
 			painter.setPen(QPen(Qt::black, 12));
 			painter.drawEllipse(point, 6, 6);
 			painter.setPen(QPen(color,4));
@@ -142,12 +142,12 @@ void ClassGMM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 			float response = res[0];
 			if(response > 0)
 			{
-				if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
+                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
 				else Canvas::drawCross(painter, point, 6, 2);
 			}
 			else
 			{
-				if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
+                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
 				else Canvas::drawCross(painter, point, 6, 0);
 			}
 		}
@@ -155,7 +155,7 @@ void ClassGMM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 		{
 			int max = 0;
 			for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-			int resp = ((ClassifierGMM*) classifier)->classes[max];
+            int resp = classifier->inverseMap[max];
 			if(label == resp) Canvas::drawSample(painter, point, 9, label);
 			else Canvas::drawCross(painter, point, 6, label);
 		}

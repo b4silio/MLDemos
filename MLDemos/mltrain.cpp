@@ -42,6 +42,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
     ivec newLabels;
     newLabels.resize(labels.size(), 1);
     bool bMulticlass = classifier->IsMultiClass();
+    //std::map<int,int> classMap, inverseMap;
     if(!bMulticlass)
     {
         if(positive == 0)
@@ -64,6 +65,13 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
     else
     {
         newLabels = labels;
+        /*
+        int cnt=0;
+        FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
+        for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+        newLabels.resize(labels.size());
+        FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
+        */
     }
 
     classifier->rocdata.clear();
@@ -88,7 +96,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
                 {
                     int maxClass = 0;
                     for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
-                    rocData.push_back(f32pair(maxClass, newLabels[i]));
+                    rocData.push_back(f32pair(classifier->inverseMap[maxClass], newLabels[i]));
                 }
             }
             else
@@ -130,7 +138,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
                 {
                     int maxClass = 0;
                     for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
-                    rocData.push_back(f32pair(maxClass, newLabels[perm[i]]));
+                    rocData.push_back(f32pair(classifier->inverseMap[maxClass], newLabels[perm[i]]));
                 }
             }
             else
@@ -155,7 +163,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio)
                 {
                     int maxClass = 0;
                     for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
-                    rocData.push_back(f32pair(maxClass, newLabels[perm[i]]));
+                    rocData.push_back(f32pair(classifier->inverseMap[maxClass], newLabels[perm[i]]));
                 }
             }
             else

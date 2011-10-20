@@ -40,7 +40,7 @@ private:
 
 public:
 
-    ClustererKKM() : linKmeans(NULL), polKmeans(NULL), rbfKmeans(NULL), kernelType(2), kernelGamma(0.01), kernelDegree(2), maxVectors(8) {type = CLUS_KKM;}
+    ClustererKKM() : linKmeans(NULL), polKmeans(NULL), rbfKmeans(NULL), kernelType(2), kernelGamma(0.01), kernelDegree(2), maxVectors(8) {}
     ~ClustererKKM();
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);

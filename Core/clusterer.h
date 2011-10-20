@@ -22,8 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include "mymaths.h"
 
-extern "C" enum {CLUS_SVR, CLUS_GMM, CLUS_KM, CLUS_KKM, CLUS_NONE} clusteringType;
-
 class Clusterer
 {
 protected:
@@ -32,9 +30,7 @@ protected:
 	bool bIterative;
 
 public:
-	int type;
-
-    Clusterer() : type(CLUS_NONE), dim(2), bIterative(false), nbClusters(1) {}
+    Clusterer() : dim(2), bIterative(false), nbClusters(1) {}
     ~Clusterer(){}
     void Cluster(std::vector< fvec > allsamples) {Train(allsamples);}
     void SetIterative(bool iterative){bIterative = iterative;}

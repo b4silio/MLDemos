@@ -114,48 +114,42 @@ void ClassSVM::SetParams(Classifier *classifier)
 	float kernelGamma = params->kernelWidthSpin->value();
 	float kernelDegree = params->kernelDegSpin->value();
 
-	switch(classifier->type)
-	{
-	case CLASS_RVM:
-	{
-		ClassifierRVM *rvm = ((ClassifierRVM *)classifier);
-		rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
-	}
-		break;
-	case CLASS_PEG:
-	{
-		ClassifierPegasos *pegasos = ((ClassifierPegasos *)classifier);
-		pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
-	}
-	case CLASS_SVM:
-	{
-		ClassifierSVM *svm = ((ClassifierSVM *)classifier);
-		switch(svmType)
-		{
-		case 0:
-			svm->param.svm_type = C_SVC;
-			break;
-		case 1:
-			svm->param.svm_type = NU_SVC;
-			break;
-		}
-		switch(kernelType)
-		{
-		case 0:
-			svm->param.kernel_type = LINEAR;
-			break;
-		case 1:
-			svm->param.kernel_type = POLY;
-			break;
-		case 2:
-			svm->param.kernel_type = RBF;
-			break;
-		}
-		svm->param.C = svm->param.nu = svmC;
-		svm->param.gamma = 1 / kernelGamma;
-		svm->param.degree = kernelDegree;
-	}
-	}
+
+    ClassifierRVM *rvm = dynamic_cast<ClassifierRVM *>(classifier);
+    if(rvm) rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
+
+    ClassifierPegasos *pegasos = dynamic_cast<ClassifierPegasos *>(classifier);
+    if(pegasos) pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
+
+    ClassifierSVM *svm = dynamic_cast<ClassifierSVM *>(classifier);
+    if(svm)
+    {
+        switch(svmType)
+        {
+        case 0:
+            svm->param.svm_type = C_SVC;
+            break;
+        case 1:
+            svm->param.svm_type = NU_SVC;
+            break;
+        }
+        switch(kernelType)
+        {
+        case 0:
+            svm->param.kernel_type = LINEAR;
+            break;
+        case 1:
+            svm->param.kernel_type = POLY;
+            break;
+        case 2:
+            svm->param.kernel_type = RBF;
+            break;
+        }
+        svm->param.C = svm->param.nu = svmC;
+        svm->param.gamma = 1 / kernelGamma;
+        svm->param.degree = kernelDegree;
+    }
+
 }
 
 Classifier *ClassSVM::GetClassifier()
@@ -181,12 +175,13 @@ Classifier *ClassSVM::GetClassifier()
 void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
 	painter.setRenderHint(QPainter::Antialiasing);
-	if(classifier->type == CLASS_RVM || classifier->type == CLASS_PEG)
+
+    if(dynamic_cast<ClassifierRVM*>(classifier) || dynamic_cast<ClassifierPegasos*>(classifier))
 	{
 		// we want to draw the support vectors
 		vector<fvec> sv;
-		if(classifier->type == CLASS_RVM) sv = ((ClassifierRVM*)classifier)->GetSVs();
-		else sv = ((ClassifierPegasos*)classifier)->GetSVs();
+        if(dynamic_cast<ClassifierRVM*>(classifier)) sv = dynamic_cast<ClassifierRVM*>(classifier)->GetSVs();
+        else sv = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
 		int radius = 9;
 		FOR(i, sv.size())
 		{
@@ -197,12 +192,12 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 			painter.drawEllipse(point, radius, radius);
 		}
 	}
-	else if(classifier->type == CLASS_SVM)
+    else if(dynamic_cast<ClassifierSVM*>(classifier))
 	{
 		int dim = canvas->data->GetDimCount();
 		int xIndex = canvas->xIndex, yIndex = canvas->yIndex;
 		// we want to draw the support vectors
-		svm_model *svm = ((ClassifierSVM*)classifier)->GetModel();
+        svm_model *svm = dynamic_cast<ClassifierSVM*>(classifier)->GetModel();
 		if(svm)
 		{
 			f32 sv[2];
@@ -255,7 +250,7 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 
 	// we draw the samples
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	map<int,int>& classes = ((ClassifierSVM*) classifier)->classes;
+    map<int,int>& classes = classifier->classes;
 	FOR(i, canvas->data->GetCount())
 	{
 		fvec sample = canvas->data->GetSample(i);
@@ -267,12 +262,12 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 			float response = res[0];
 			if(response > 0)
 			{
-				if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
+                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
 				else Canvas::drawCross(painter, point, 6, 2);
 			}
 			else
 			{
-				if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
+                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
 				else Canvas::drawCross(painter, point, 6, 0);
 			}
 		}
@@ -280,9 +275,9 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
 		{
 			int max = 0;
 			for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-			int resp = max;
+            int resp = classifier->inverseMap[max];
 			if(label == resp) Canvas::drawSample(painter, point, 9, label);
-			else Canvas::drawCross(painter, point, 6, label);
+            else Canvas::drawCross(painter, point, 6, resp);
 		}
 	}
 }

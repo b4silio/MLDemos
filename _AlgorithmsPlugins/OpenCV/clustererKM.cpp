@@ -23,12 +23,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-ClustererKM::ClustererKM()
-: beta(1), bSoft(false), bGmm(false), kmeans(0)
-{
-	type = CLUS_KM;
-}
-
 ClustererKM::~ClustererKM()
 {
     DEL(kmeans);

@@ -76,38 +76,35 @@ void ClustSVM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 	if(!canvas || !clusterer) return;
 
 	painter.setRenderHint(QPainter::Antialiasing);
-	if(clusterer->type == CLUS_SVR)
-	{
-		// we want to draw the support vectors
-		svm_model *svm = ((ClustererSVR*)clusterer)->GetModel();
-		painter.setBrush(Qt::NoBrush);
-		if(svm)
-		{
-			f32 sv[2];
-			FOR(i, svm->l)
-			{
-				FOR(j, 2)
-				{
-					sv[j] = (f32)svm->SV[i][j].value;
-				}
-				int radius = 11;
-				QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
-				if(abs((*svm->sv_coef)[i]) == svm->param.C)
-				{
-					painter.setPen(QPen(Qt::black, 4));
-					painter.drawEllipse(point, radius, radius);
-					painter.setPen(Qt::white);
-					painter.drawEllipse(point, radius, radius);
-				}
-				else
-				{
-					painter.setPen(Qt::black);
-					painter.drawEllipse(point, radius, radius);
-				}
-			}
-		}
-	}
 
+    // we want to draw the support vectors
+    svm_model *svm = dynamic_cast<ClustererSVR*>(clusterer)->GetModel();
+    painter.setBrush(Qt::NoBrush);
+    if(svm)
+    {
+        f32 sv[2];
+        FOR(i, svm->l)
+        {
+            FOR(j, 2)
+            {
+                sv[j] = (f32)svm->SV[i][j].value;
+            }
+            int radius = 11;
+            QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
+            if(abs((*svm->sv_coef)[i]) == svm->param.C)
+            {
+                painter.setPen(QPen(Qt::black, 4));
+                painter.drawEllipse(point, radius, radius);
+                painter.setPen(Qt::white);
+                painter.drawEllipse(point, radius, radius);
+            }
+            else
+            {
+                painter.setPen(Qt::black);
+                painter.drawEllipse(point, radius, radius);
+            }
+        }
+    }
 }
 
 void ClustSVM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)

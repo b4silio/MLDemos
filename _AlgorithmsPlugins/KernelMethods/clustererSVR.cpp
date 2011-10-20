@@ -25,7 +25,6 @@ using namespace std;
 ClustererSVR::ClustererSVR()
 : svm(0)
 {
-	type = CLUS_SVR;
 	// default values
 	param.svm_type = ONE_CLASS;
 	//param.svm_type = NU_SVR;

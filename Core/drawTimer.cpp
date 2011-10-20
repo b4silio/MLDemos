@@ -328,9 +328,10 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample)
             float r=0,g=0,b=0;
             FOR(j, val.size())
             {
-                r += SampleColor[j%SampleColorCnt].red()*val[j]*sum;
-                g += SampleColor[j%SampleColorCnt].green()*val[j]*sum;
-                b += SampleColor[j%SampleColorCnt].blue()*val[j]*sum;
+                int index = classifier->inverseMap[j];
+                r += SampleColor[index%SampleColorCnt].red()*val[j]*sum;
+                g += SampleColor[index%SampleColorCnt].green()*val[j]*sum;
+                b += SampleColor[index%SampleColorCnt].blue()*val[j]*sum;
             }
             c = QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b)));
         }

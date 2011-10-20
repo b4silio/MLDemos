@@ -29,7 +29,6 @@ class ClassifierGMM : public Classifier
 public:
 	std::vector<Gmm*> gmms;
 	std::vector<float*> data;
-	std::map<int,int> classes;
 private:
 	u32 nbClusters;
 	u32 covarianceType;
