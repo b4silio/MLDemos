@@ -34,7 +34,8 @@ private:
 public:
 	KMeansCluster *kmeans;
 
-	ClustererKM();
+    ClustererKM();
+    ~ClustererKM();
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);

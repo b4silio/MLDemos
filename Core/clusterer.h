@@ -43,8 +43,8 @@ public:
     virtual void Train(std::vector< fvec > samples){}
     virtual fvec Test( const fvec &sample){ return fvec(); }
     virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
-    virtual char *GetInfoString(){return NULL;}
-
+    virtual char *GetInfoString(){ return NULL; }
+    virtual void SetNbClusters(int count){ nbClusters = count; }
 };
 
 #endif // _CLUSTERING_H_

@@ -125,8 +125,10 @@ void MLDemos::SaveLayoutOptions()
 	settings.endGroup();
 
 	settings.beginGroup("clusterOptions");
-	settings.setValue("tab", optionsCluster->tabWidget->currentIndex());
-	settings.endGroup();
+    settings.setValue("tab", optionsCluster->tabWidget->currentIndex());
+    settings.setValue("trainRatio", optionsCluster->trainRatioCombo->currentIndex());
+    settings.setValue("optimizeCombo", optionsCluster->optimizeCombo->currentIndex());
+    settings.endGroup();
 
 	settings.beginGroup("maximizeOptions");
 	settings.setValue("tab", optionsMaximize->tabWidget->currentIndex());
@@ -283,7 +285,9 @@ void MLDemos::LoadLayoutOptions()
 
 	settings.beginGroup("clusterOptions");
 	if(settings.contains("tab")) optionsCluster->tabWidget->setCurrentIndex(settings.value("tab").toInt());
-	settings.endGroup();
+    if(settings.contains("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
+    if(settings.contains("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(settings.value("optimizeCombo").toInt());
+    settings.endGroup();
 
 	settings.beginGroup("maximizeOptions");
 	if(settings.contains("tab")) optionsMaximize->tabWidget->setCurrentIndex(settings.value("tab").toInt());
@@ -389,8 +393,10 @@ void MLDemos::SaveParams( QString filename )
 	{
 		int tab = optionsCluster->tabWidget->currentIndex();
 		sprintf(groupName,"clusterOptions");
-		out << groupName << ":" << "tab" << " " << optionsCluster->tabWidget->currentIndex() << "\n";
-		if(tab < clusterers.size() && clusterers[tab])
+        out << groupName << ":" << "tab" << " " << optionsCluster->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "trainRatio" << " " << optionsCluster->trainRatioCombo->currentIndex() << "\n";
+        out << groupName << ":" << "optimizeCombo" << " " << optionsCluster->optimizeCombo->currentIndex() << "\n";
+        if(tab < clusterers.size() && clusterers[tab])
 		{
 			clusterers[tab]->SaveParams(out);
 		}
@@ -491,8 +497,10 @@ void MLDemos::LoadParams( QString filename )
 		{
 			bClust = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClust);
-			if(line.endsWith("tab")) optionsCluster->tabWidget->setCurrentIndex(tab = (int)value);
-			if(tab < clusterers.size() && clusterers[tab]) clusterers[tab]->LoadParams(line,value);
+            if(line.endsWith("tab")) optionsCluster->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(tab = (int)value);
+            if(tab < clusterers.size() && clusterers[tab]) clusterers[tab]->LoadParams(line,value);
 		}
 		if(line.startsWith(maximGroup))
 		{

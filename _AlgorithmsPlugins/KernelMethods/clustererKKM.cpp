@@ -22,6 +22,13 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+ClustererKKM::~ClustererKKM()
+{
+    DEL(linKmeans);
+    DEL(polKmeans);
+    DEL(rbfKmeans);
+}
+
 char *ClustererKKM::GetInfoString()
 {
 	char *text = new char[1024];

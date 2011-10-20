@@ -1309,6 +1309,7 @@ QPixmap Canvas::GetScreenshot()
 	QPixmap screenshot(width(), height());
 	QPainter painter(&screenshot);
 	bool tmp = bShowCrosshair;
+    bShowCrosshair = false;
 	painter.setBackgroundMode(Qt::OpaqueMode);
 	painter.setBackground(Qt::white);
     PaintStandard(painter);

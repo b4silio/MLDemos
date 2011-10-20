@@ -303,7 +303,7 @@ void MLDemos::Avoidance()
     drawTimer->start(QThread::NormalPriority);
 }
 
-fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores)
+fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores, float ratio = 1.f)
 {
     fvec results(4, 0);
     results[0] = drand48();
@@ -326,23 +326,6 @@ fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> sc
         }
         means[k] /= contrib;
     }
-
-    /*
-    FOR(i, count)
-    {
-        double stdev = 0;
-        double contrib = 0;
-        FOR(k, nbClusters)
-        {
-            fvec diff = samples[i]-means[k];
-            contrib += scores[i][k];
-            stdev += (diff*diff)*scores[i][k];
-        }
-        //stdev /= contrib;
-        loglik += log(stdev);
-    }
-    loglik /= count;
-    */
 
     float log_lik=0;
     float like;
@@ -367,7 +350,7 @@ fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> sc
     FOR(k, nbClusters) loglik += loglikes[k];
     //loglik /= nbClusters;
 
-    results[0] = 0; // The Silhouette method
+    results[0] = loglik; // RSS
     results[1] = log(count)*nbClusters + loglik; // BIC
     results[2] = 2*nbClusters + loglik; // AIC
 
@@ -381,15 +364,39 @@ fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> sc
     fvec clusterScores(nbClusters);
     map<int,float> labelScores;
 
-    FOR(i, samples.size())
+    if(ratio == 1.f)
     {
-        labelScores[labels[i]] += 1.f;
-        if(!classScores.count(labels[i]))classScores[labels[i]].resize(nbClusters);
-        FOR(k, nbClusters)
+        FOR(i, labels.size())
         {
-            classScores[labels[i]][k] += scores[i][k];
-            clusterScores[k] += scores[i][k];
+            labelScores[labels[i]] += 1.f;
+            if(!classScores.count(labels[i]))classScores[labels[i]].resize(nbClusters);
+            FOR(k, nbClusters)
+            {
+                classScores[labels[i]][k] += scores[i][k];
+                clusterScores[k] += scores[i][k];
+            }
         }
+    }
+    else
+    {
+        u32 *perm = randPerm(labels.size());
+        map<int, ivec> indices;
+        FOR(i, labels.size()) indices[labels[perm[i]]].push_back(perm[i]);
+        for(map<int,ivec>::iterator it = indices.begin(); it != indices.end(); it++)
+        {
+            int labelCount = max(1,int(it->second.size()*ratio));
+            FOR(i, labelCount)
+            {
+                labelScores[labels[it->second[i]]] += 1.f;
+                if(!classScores.count(labels[it->second[i]]))classScores[labels[it->second[i]]].resize(nbClusters);
+                FOR(k, nbClusters)
+                {
+                    classScores[labels[it->second[i]]][k] += scores[it->second[i]][k];
+                    clusterScores[k] += scores[it->second[i]][k];
+                }
+            }
+        }
+        delete [] perm;
     }
 
     float fmeasure = 0;
@@ -406,9 +413,12 @@ fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> sc
         }
         fmeasure += maxScore;
     }
-    fmeasure /= classCount;
+    int classAndClusterCount = classCount;
+    // we penalize empty clusters
+    FOR(k, nbClusters) if(clusterScores[k] == 0) classAndClusterCount++; // we have an empty cluster!
+    fmeasure /= classAndClusterCount;
 
-    results[3] = fmeasure; // F-Measure
+    results[3] = -fmeasure; // F-Measure
 
     return results;
 }
@@ -451,13 +461,21 @@ void MLDemos::Cluster()
         }
     }
 
-    fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores);
+    int ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
+    float ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
+    float ratio = ratios[ratioIndex];
+
+    fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores, ratio);
 
     optionsCluster->resultList->clear();
-    //optionsCluster->resultList->addItem(QString("silouhette: %1").arg(clusterMetrics[0], 0, 'f', 3));
-    optionsCluster->resultList->addItem(QString("bic: %1").arg(clusterMetrics[1], 0, 'f', 3));
-    optionsCluster->resultList->addItem(QString("aic: %1").arg(clusterMetrics[2], 0, 'f', 3));
-    optionsCluster->resultList->addItem(QString("fmeasure: %1").arg(clusterMetrics[3], 0, 'f', 3));
+    optionsCluster->resultList->addItem(QString("rss: %1").arg(clusterMetrics[0], 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("bic: %1").arg(clusterMetrics[1], 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("aic: %1").arg(clusterMetrics[2], 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("f1: %1").arg(clusterMetrics[3], 0, 'f', 2));
+    FOR(i, clusterMetrics.size())
+    {
+        optionsCluster->resultList->item(i)->setForeground(i ? SampleColor[i%SampleColorCnt] : Qt::gray);
+    }
 
 
     // we fill in the canvas sampleColors for the alternative display types
@@ -489,6 +507,173 @@ void MLDemos::Cluster()
 	UpdateInfo();
 	drawTimer->clusterer= &this->clusterer;
 	drawTimer->start(QThread::NormalPriority);
+}
+
+void MLDemos::ClusterOptimize()
+{
+    if(!canvas || !canvas->data->GetCount()) return;
+    drawTimer->Stop();
+    drawTimer->Clear();
+    QMutexLocker lock(&mutex);
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    DEL(classifier);
+    DEL(maximizer);
+    DEL(projector);
+
+    int tab = optionsCluster->tabWidget->currentIndex();
+    if(tab >= clusterers.size() || !clusterers[tab]) return;
+    clusterer = clusterers[tab]->GetClusterer();
+    tabUsedForTraining = tab;
+
+    int startCount=1, stopCount=11;
+
+    vector<fvec> samples = canvas->data->GetSamples();
+    ivec labels = canvas->data->GetLabels();
+    int ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
+    float ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
+    float ratio = ratios[ratioIndex];
+
+    ivec kCounts;
+    vector<fvec> results(4);
+    for(int k=startCount; k<stopCount; k++)
+    {
+        clusterer->SetNbClusters(k);
+        Train(clusterer);
+
+        int folds = 10;
+        fvec metricMeans(results.size());
+        ivec foldCount(results.size());
+        FOR(f, folds)
+        {
+            vector<fvec> clusterScores(samples.size());
+            FOR(i, canvas->data->GetCount())
+            {
+                fvec result = clusterer->Test(samples[i]);
+                if(clusterer->NbClusters()==1) clusterScores[i] = result;
+                else if(result.size()>1) clusterScores[i] = result;
+                else if(result.size())
+                {
+                    fvec res(clusterer->NbClusters(),0);
+                    res[result[0]] = 1.f;
+                }
+            }
+            fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores, ratio);
+            FOR(d, clusterMetrics.size())
+            {
+                if(clusterMetrics[d] != clusterMetrics[d]) continue;
+                metricMeans[d] += clusterMetrics[d];
+                foldCount[d]++;
+            }
+        }
+        FOR(d, metricMeans.size()) metricMeans[d] /= foldCount[d];
+        kCounts.push_back(k);
+        FOR(i, metricMeans.size()) results[i].push_back(metricMeans[i]);
+    }
+
+    int w = optionsCluster->graphLabel->width();
+    int h = optionsCluster->graphLabel->height();
+    int pad = 6;
+    QPixmap pixmap(w,h);
+    QBitmap bitmap(w,h);
+    bitmap.clear();
+    pixmap.setMask(bitmap);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+
+    painter.setPen(QPen(Qt::black, 1.f));
+    painter.drawLine(pad, h - 2*pad, w-pad, h-2*pad);
+    painter.drawLine(pad, 0, pad, h-2*pad);
+    QFont font = painter.font();
+    font.setPointSize(9);
+    painter.setFont(font);
+    FOR(k, kCounts.size())
+    {
+        float x = k/(float)(kCounts.size()-1);
+        painter.drawLine(x*(w-2*pad)+pad, h-2*pad-1, x*(w-2*pad)+pad, h-2*pad+1);
+        if(k == kCounts.size()-1) x -= 0.05;
+        painter.drawText(x*(w-2*pad)-2+pad, h-1, QString("%1").arg(kCounts[k]));
+    }
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    fvec mins(results.size(), FLT_MAX), maxes(results.size(), -FLT_MAX);
+    FOR(i, results.size())
+    {
+        FOR(j, results[i].size())
+        {
+            mins[i] = min(mins[i], results[i][j]);
+            maxes[i] = max(maxes[i], results[i][j]);
+        }
+    }
+    vector< pair<float,int> > bests(results.size());
+    FOR(i, results.size())
+    {
+        QPointF old;
+        painter.setPen(QPen(i ? SampleColor[i%SampleColorCnt] : Qt::gray,2));
+        bests[i] = make_pair(FLT_MAX, 0);
+        FOR(k, kCounts.size())
+        {
+            if(results[i][k] < bests[i].first)
+            {
+                bests[i] = make_pair(results[i][k], kCounts[k]);
+            }
+            float x = k/(float)(kCounts.size()-1);
+            float y = (results[i][k] - mins[i])/(maxes[i]-mins[i]);
+            if(i == 3) y = 1.f - y; // fmeasures needs to be maximized
+            QPointF point(x*(w-2*pad)+pad, (1.f-y)*(h-2*pad));
+            if(k) painter.drawLine(old, point);
+            old = point;
+        }
+    }
+    optionsCluster->graphLabel->setPixmap(pixmap);
+
+    optionsCluster->resultList->clear();
+    optionsCluster->resultList->addItem(QString("rss: %1 (%2)").arg(bests[0].second).arg(bests[0].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("bic: %1 (%2)").arg(bests[1].second).arg(bests[1].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("aic: %1 (%2)").arg(bests[2].second).arg(bests[2].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("f1: %1 (%2)").arg(bests[3].second).arg(-bests[3].first, 0, 'f', 2));
+    FOR(i, results.size())
+    {
+        optionsCluster->resultList->item(i)->setForeground(i ? SampleColor[i%SampleColorCnt] : Qt::gray);
+    }
+
+    int bestIndex = optionsCluster->optimizeCombo->currentIndex();
+    clusterer->SetNbClusters(bests[bestIndex].second);
+    Train(clusterer);
+
+    // we fill in the canvas sampleColors for the alternative display types
+    canvas->sampleColors.resize(samples.size());
+    FOR(i, samples.size())
+    {
+        fvec res = clusterer->Test(samples[i]);
+        float r=0,g=0,b=0;
+        if(res.size() > 1)
+        {
+            FOR(j, res.size())
+            {
+                r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+                g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+                b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
+            }
+        }
+        else if(res.size())
+        {
+            r = (1-res[0])*255 + res[0]* 255;
+            g = (1-res[0])*255;
+            b = (1-res[0])*255;
+        }
+        canvas->sampleColors[i] = QColor(r,g,b);
+    }
+    canvas->maps.model = QPixmap();
+
+    clusterers[tab]->Draw(canvas, clusterer);
+    drawTimer->Clear();
+    UpdateInfo();
+    drawTimer->clusterer= &this->clusterer;
+    drawTimer->start(QThread::NormalPriority);
+    canvas->repaint();
+
 }
 
 void MLDemos::ClusterIterate()

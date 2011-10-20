@@ -22,6 +22,11 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+ClustererGMM::~ClustererGMM()
+{
+    DEL(gmm);
+}
+
 void ClustererGMM::Train(std::vector< fvec > samples)
 {
 	if(!samples.size()) return;
