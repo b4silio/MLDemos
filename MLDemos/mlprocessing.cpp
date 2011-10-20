@@ -305,24 +305,110 @@ void MLDemos::Avoidance()
 
 fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores)
 {
-    fvec results;
-    results.push_back(drand48());
-    results.push_back(drand48());
-    if(!samples.size()) return results;
+    fvec results(4, 0);
+    results[0] = drand48();
+    if(!samples.size() || !scores.size()) return results;
     int dim = samples[0].size();
+    int nbClusters = scores[0].size();
+    int count = samples.size();
     // compute bic
-    fvec mean(dim);
+    double loglik = 0;
+
+    vector<fvec> means(nbClusters);
+    FOR(k, nbClusters)
+    {
+        means[k] = fvec(dim, 0);
+        float contrib = 0;
+        FOR(i, count)
+        {
+            contrib += scores[i][k];
+            means[k] += samples[i]*scores[i][k];
+        }
+        means[k] /= contrib;
+    }
+
+    /*
+    FOR(i, count)
+    {
+        double stdev = 0;
+        double contrib = 0;
+        FOR(k, nbClusters)
+        {
+            fvec diff = samples[i]-means[k];
+            contrib += scores[i][k];
+            stdev += (diff*diff)*scores[i][k];
+        }
+        //stdev /= contrib;
+        loglik += log(stdev);
+    }
+    loglik /= count;
+    */
+
+    float log_lik=0;
+    float like;
+    float *pxi = new float[nbClusters];
+    int data_i=0;
+    int state_i;
+
+    fvec loglikes(nbClusters);
+    FOR(k, nbClusters)
+    {
+        float rss = 0;
+        double contrib = 0;
+        FOR(i, count)
+        {
+            contrib += scores[i][k];
+            if(contrib==0) continue;
+            fvec diff = samples[i]-means[k];
+            rss += diff*diff*scores[i][k];
+        }
+        loglikes[k] = rss;
+    }
+    FOR(k, nbClusters) loglik += loglikes[k];
+    //loglik /= nbClusters;
+
+    results[0] = 0; // The Silhouette method
+    results[1] = log(count)*nbClusters + loglik; // BIC
+    results[2] = 2*nbClusters + loglik; // AIC
+
+
+    // we compute the f-measures for each class
+    map<int,int> classcounts;
+    int cnt = 0;
+    FOR(i, labels.size()) if(!classcounts.count(labels[i])) classcounts[labels[i]] = cnt++;
+    int classCount = classcounts.size();
+    map<int, fvec> classScores;
+    fvec clusterScores(nbClusters);
+    map<int,float> labelScores;
+
     FOR(i, samples.size())
     {
-        mean += samples[i];
+        labelScores[labels[i]] += 1.f;
+        if(!classScores.count(labels[i]))classScores[labels[i]].resize(nbClusters);
+        FOR(k, nbClusters)
+        {
+            classScores[labels[i]][k] += scores[i][k];
+            clusterScores[k] += scores[i][k];
+        }
     }
-    mean /= samples.size();
-    double stdev = 0;
-    FOR(i, samples.size())
+
+    float fmeasure = 0;
+    map<int,float>::iterator it2 = labelScores.begin();
+    for(map<int,fvec>::iterator it = classScores.begin(); it != classScores.end(); it++, it2++)
     {
-        fvec diff = samples[i]-mean;
-        stdev += diff*diff;
+        float maxScore = -FLT_MAX;
+        FOR(k, nbClusters)
+        {
+            float precision = it->second[k] / it2->second;
+            float recall = it->second[k] / clusterScores[k];
+            float f1 = 2*precision*recall/(precision+recall);
+            maxScore = max(maxScore,f1);
+        }
+        fmeasure += maxScore;
     }
+    fmeasure /= classCount;
+
+    results[3] = fmeasure; // F-Measure
 
     return results;
 }
@@ -356,7 +442,8 @@ void MLDemos::Cluster()
     FOR(i, canvas->data->GetCount())
     {
         fvec result = clusterer->Test(samples[i]);
-        if(result.size()>1) clusterScores[i] = result;
+        if(clusterer->NbClusters()==1) clusterScores[i] = result;
+        else if(result.size()>1) clusterScores[i] = result;
         else if(result.size())
         {
             fvec res(clusterer->NbClusters(),0);
@@ -365,12 +452,12 @@ void MLDemos::Cluster()
     }
 
     fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores);
-    float fmeasure = clusterMetrics[0];
-    float bic = clusterMetrics[1];
 
     optionsCluster->resultList->clear();
-    optionsCluster->resultList->addItem(QString("fmeasure: %1").arg(fmeasure, 0, 'f', 3));
-    optionsCluster->resultList->addItem(QString("bic: %1").arg(bic, 0, 'f', 3));
+    //optionsCluster->resultList->addItem(QString("silouhette: %1").arg(clusterMetrics[0], 0, 'f', 3));
+    optionsCluster->resultList->addItem(QString("bic: %1").arg(clusterMetrics[1], 0, 'f', 3));
+    optionsCluster->resultList->addItem(QString("aic: %1").arg(clusterMetrics[2], 0, 'f', 3));
+    optionsCluster->resultList->addItem(QString("fmeasure: %1").arg(clusterMetrics[3], 0, 'f', 3));
 
 
     // we fill in the canvas sampleColors for the alternative display types
