@@ -34,7 +34,7 @@ using namespace std;
 DrawSVG::DrawSVG(Canvas *canvas, QMutex *mutex)
 	: canvas(canvas),
 	  classifier(0), regressor(0), dynamical(0), clusterer(0),
-	  drawClass(0), drawRegr(0), drawDyn(0), drawClust(0),
+      drawClass(0), drawRegr(0), drawDyn(0), drawClust(0), drawProj(0),
 	  mutex(mutex),
 	  perm(0), w(0), h(0)
 {
@@ -66,8 +66,9 @@ void DrawSVG::Write(QString filename)
 		if(classifier) drawClass->DrawModel(canvas, painter, classifier);
 		if(regressor) drawRegr->DrawModel(canvas, painter, regressor);
 		if(dynamical) drawDyn->DrawModel(canvas, painter, dynamical);
-		if(clusterer) drawClust->DrawModel(canvas, painter, clusterer);
-		if(dynamical)
+        if(clusterer) drawClust->DrawModel(canvas, painter, clusterer);
+        if(projector) drawProj->DrawModel(canvas, painter, projector);
+        if(dynamical)
 		{
 			int cnt = 10000; // not too many or it will make unreadable files
 			int steps = 8;
@@ -86,7 +87,8 @@ void DrawSVG::Write(QString filename)
 		if(regressor) drawRegr->DrawInfo(canvas, painter, regressor);
 		if(dynamical) drawDyn->DrawInfo(canvas, painter, dynamical);
 		if(clusterer) drawClust->DrawInfo(canvas, painter, clusterer);
-	}
+        if(projector) drawProj->DrawInfo(canvas, painter, projector);
+    }
 	painter.end();
 }
 

@@ -15,7 +15,7 @@ public:
     ProjectorICA(int method=0);
     ~ProjectorICA();
 
-    void Train(std::vector< fvec > samples, int startIndex=0, int stopIndex=-1);
+    void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
     char *GetInfoString(){return "Independent Component Analysis";}
     double *GetTransf(){return Transf;}

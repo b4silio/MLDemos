@@ -51,11 +51,13 @@ public:
 	Dynamical *dynamical;
 	Clusterer *clusterer;
 	Maximizer *maximizer;
+    Projector *projector;
 
 	ClassifierInterface *drawClass;
 	RegressorInterface *drawRegr;
 	DynamicalInterface *drawDyn;
 	ClustererInterface *drawClust;
+    ProjectorInterface *drawProj;
 
 	QMutex *mutex;
 };

@@ -20,7 +20,7 @@ public:
     void DrawEigenvals(QPainter &painter);
     fvec GetEigenValues();
 
-    void Train(std::vector< fvec > samples, int startIndex=0, int stopIndex=-1);
+    void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
     char *GetInfoString(){return "Principal Component Analysis";}
 

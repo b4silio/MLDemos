@@ -118,9 +118,12 @@ void ProjectorPCA::TrainPCA(std::vector<fvec> samples, int pcaCount)
     }
 }
 
-void ProjectorPCA::Train(std::vector< fvec > samples, int startIndex, int stopIndex)
+void ProjectorPCA::Train(std::vector< fvec > samples, ivec labels)
 {
+    projected.clear();
+    source.clear();
     if(!samples.size()) return;
+    source = samples;
     dim = samples[0].size();
     if(!dim) return;
     if(stopIndex >= (int)dim) stopIndex = -1;

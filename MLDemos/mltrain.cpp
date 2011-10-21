@@ -281,7 +281,7 @@ void MLDemos::Train(Clusterer *clusterer)
 void MLDemos::Train(Projector *projector)
 {
     if(!projector) return;
-    projector->Train(canvas->data->GetSamples(), projector->startIndex, projector->stopIndex);
+    projector->Train(canvas->data->GetSamples(), canvas->data->GetLabels());
 }
 
 void MLDemos::Train(Maximizer *maximizer)

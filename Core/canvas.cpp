@@ -127,12 +127,15 @@ void Canvas::SetModelImage(QImage image)
 
 void Canvas::SetCanvasType(int type)
 {
-    canvasType = type;
+    if(canvasType || type)
+    {
+        maps.model = QPixmap();
+        maps.info = QPixmap();
+    }
     maps.samples = QPixmap();
     maps.trajectories = QPixmap();
     maps.grid = QPixmap();
-    maps.model = QPixmap();
-//    maps.info = QPixmap();
+    canvasType = type;
     ResetSamples();
     bNewCrosshair = true;
 }
@@ -541,12 +544,12 @@ void Canvas::FitToData()
 	{
 		center = fvec(2,0);
 		SetZoom(1);
-		qDebug() << "nothing to fit";
+        //qDebug() << "nothing to fit";
 		return;
 	}
 	int dim = data->GetDimCount();
 	center = fvec(dim,0);
-	qDebug() << "fit to data, dim: " << dim;
+    //qDebug() << "fit to data, dim: " << dim;
 
 	// we go through all the data and find the boundaries
 	fvec mins(dim,FLT_MAX), maxes(dim,-FLT_MAX);
@@ -580,7 +583,7 @@ void Canvas::FitToData()
 	}
 	FOR(d, dim)
 	{
-		qDebug() << d << ": " << mins[d] << " - " << maxes[d];
+        //qDebug() << d << ": " << mins[d] << " - " << maxes[d];
 	}
 
 	fvec diff = maxes - mins;

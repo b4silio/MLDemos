@@ -14,12 +14,12 @@ ProjectorICA::~ProjectorICA()
     KILL(Transf);
 }
 
-void ProjectorICA::Train(std::vector<fvec> samples, int startIndex, int stopIndex)
+void ProjectorICA::Train(std::vector<fvec> samples, ivec labels)
 {
-    this->startIndex=startIndex;
-    this->stopIndex=stopIndex;
-
+    projected.clear();
+    source.clear();
     if(!samples.size()) return;
+    source = samples;
     dim = samples[0].size();
     meanAll.resize(dim,0);
     FOR(i, samples.size())
@@ -70,6 +70,7 @@ void ProjectorICA::Train(std::vector<fvec> samples, int startIndex, int stopInde
         {
             projected[i][d] = Data[i*nbsensors + d];
         }
+        projected[i] *= 0.25f;
     }
 
     delete [] Data;
@@ -80,7 +81,12 @@ fvec ProjectorICA::Project(const fvec &sample)
 {
     int dim = sample.size();
     if(!dim) return sample;
-    double *X;
-    if((X = (double *) calloc(dim*1, sizeof(double))) == NULL) OutOfMemory();
+    double *X = new double[dim];
+    FOR(d, dim) X[d] = sample[d];
     Transform(X, Transf, dim, 1);
+    fvec newSample(dim);
+    FOR(d, dim) newSample[d] = X[d];
+    delete [] X;
+    newSample *= 0.25f;
+    return newSample;
 }
