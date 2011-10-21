@@ -130,13 +130,17 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("optimizeCombo", optionsCluster->optimizeCombo->currentIndex());
     settings.endGroup();
 
-	settings.beginGroup("maximizeOptions");
-	settings.setValue("tab", optionsMaximize->tabWidget->currentIndex());
-	settings.setValue("varianceSpin", optionsMaximize->varianceSpin->value());
-	settings.setValue("iterationsSpin", optionsMaximize->iterationsSpin->value());
-	settings.setValue("stoppingSpin", optionsMaximize->stoppingSpin->value());
-	settings.setValue("benchmarkCombo", optionsMaximize->benchmarkCombo->currentIndex());
-	settings.endGroup();
+    settings.beginGroup("maximizeOptions");
+    settings.setValue("tab", optionsMaximize->tabWidget->currentIndex());
+    settings.setValue("varianceSpin", optionsMaximize->varianceSpin->value());
+    settings.setValue("iterationsSpin", optionsMaximize->iterationsSpin->value());
+    settings.setValue("stoppingSpin", optionsMaximize->stoppingSpin->value());
+    settings.setValue("benchmarkCombo", optionsMaximize->benchmarkCombo->currentIndex());
+    settings.endGroup();
+
+    settings.beginGroup("projectOptions");
+    settings.setValue("tab", optionsProject->tabWidget->currentIndex());
+    settings.endGroup();
 
 	settings.beginGroup("statsOptions");
 	settings.setValue("tab", showStats->tabWidget->currentIndex());
@@ -170,13 +174,20 @@ void MLDemos::SaveLayoutOptions()
 		dynamicals[i]->SaveOptions(settings);
 		settings.endGroup();
 	}
-	FOR(i,maximizers.size())
-	{
-		if(!maximizers[i]) continue;
-		settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
-		maximizers[i]->SaveOptions(settings);
-		settings.endGroup();
-	}
+    FOR(i,maximizers.size())
+    {
+        if(!maximizers[i]) continue;
+        settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
+        maximizers[i]->SaveOptions(settings);
+        settings.endGroup();
+    }
+    FOR(i,projectors.size())
+    {
+        if(!projectors[i]) continue;
+        settings.beginGroup(QString("plugins::projectors::") + projectors[i]->GetName());
+        projectors[i]->SaveOptions(settings);
+        settings.endGroup();
+    }
 }
 
 void MLDemos::LoadLayoutOptions()
@@ -289,13 +300,17 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(settings.value("optimizeCombo").toInt());
     settings.endGroup();
 
-	settings.beginGroup("maximizeOptions");
-	if(settings.contains("tab")) optionsMaximize->tabWidget->setCurrentIndex(settings.value("tab").toInt());
-	if(settings.contains("varianceSpin")) optionsMaximize->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
-	if(settings.contains("iterationsSpin")) optionsMaximize->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
-	if(settings.contains("stoppingSpin")) optionsMaximize->stoppingSpin->setValue(settings.value("stoppingSpin").toDouble());
-	if(settings.contains("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(settings.value("benchmarkCombo").toInt());
-	settings.endGroup();
+    settings.beginGroup("maximizeOptions");
+    if(settings.contains("tab")) optionsMaximize->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("varianceSpin")) optionsMaximize->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
+    if(settings.contains("iterationsSpin")) optionsMaximize->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
+    if(settings.contains("stoppingSpin")) optionsMaximize->stoppingSpin->setValue(settings.value("stoppingSpin").toDouble());
+    if(settings.contains("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(settings.value("benchmarkCombo").toInt());
+    settings.endGroup();
+
+    settings.beginGroup("projectOptions");
+    if(settings.contains("tab")) optionsProject->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    settings.endGroup();
 
 	settings.beginGroup("statsOptions");
 	if(settings.contains("tab")) showStats->tabWidget->setCurrentIndex(settings.value("tab").toInt());
@@ -329,14 +344,21 @@ void MLDemos::LoadLayoutOptions()
 		dynamicals[i]->LoadOptions(settings);
 		settings.endGroup();
 	}
-	FOR(i,maximizers.size())
-	{
-		if(!maximizers[i]) continue;
-		settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
-		maximizers[i]->LoadOptions(settings);
-		settings.endGroup();
-	}
-	canvas->repaint();
+    FOR(i,maximizers.size())
+    {
+        if(!maximizers[i]) continue;
+        settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
+        maximizers[i]->LoadOptions(settings);
+        settings.endGroup();
+    }
+    FOR(i,projectors.size())
+    {
+        if(!projectors[i]) continue;
+        settings.beginGroup(QString("plugins::projectors::") + projectors[i]->GetName());
+        projectors[i]->LoadOptions(settings);
+        settings.endGroup();
+    }
+    canvas->repaint();
 }
 
 
@@ -416,6 +438,16 @@ void MLDemos::SaveParams( QString filename )
 			maximizers[tab]->SaveParams(out);
 		}
 	}
+    if(projector)
+    {
+        int tab = optionsProject->tabWidget->currentIndex();
+        sprintf(groupName,"projectOptions");
+        out << groupName << ":" << "tab" << " " << optionsProject->tabWidget->currentIndex() << "\n";
+        if(tab < projectors.size() && projectors[tab])
+        {
+            projectors[tab]->SaveParams(out);
+        }
+    }
 }
 
 bool startsWith(char *a, char *b)
@@ -446,17 +478,19 @@ void MLDemos::LoadParams( QString filename )
 	char regrGroup[255];
 	char dynGroup[255];
 	char clustGroup[255];
-	char maximGroup[255];
-	sprintf(classGroup,"classificationOptions");
+    char maximGroup[255];
+    char projGroup[255];
+    sprintf(classGroup,"classificationOptions");
 	sprintf(regrGroup,"regressionOptions");
 	sprintf(dynGroup,"dynamicalOptions");
 	sprintf(clustGroup,"clusteringOptions");
-	sprintf(maximGroup,"maximizationOptions");
+    sprintf(maximGroup,"maximizationOptions");
+    sprintf(projGroup,"projectOptions");
 
 	// we skip the samples themselves
 	qDebug() << "Skipping "<< sampleCnt <<" samples" << endl;
 	FOR(i, sampleCnt) line = in.readLine();
-	bool bClass = false, bRegr = false, bDyn = false, bClust = false, bMaxim = false;
+    bool bClass = false, bRegr = false, bDyn = false, bClust = false, bMaxim = false, bProj = false;
 	qDebug() << "Loading parameter list" << endl;
 	int tab = 0;
 	while(!in.atEnd())
@@ -513,6 +547,13 @@ void MLDemos::LoadParams( QString filename )
 			if(line.endsWith("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(tab = (int)value);
 			if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
 		}
+        if(line.startsWith(projGroup))
+        {
+            bProj = true;
+            algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabProj);
+            if(line.endsWith("tab")) optionsProject->tabWidget->setCurrentIndex(tab = (int)value);
+            if(tab < projectors.size() && projectors[tab]) projectors[tab]->LoadParams(line,value);
+        }
 	}
 	ResetPositiveClass();
 	if(bClass) Classify();
@@ -520,5 +561,6 @@ void MLDemos::LoadParams( QString filename )
 	if(bDyn) Dynamize();
 	if(bClust) Cluster();
 	if(bMaxim) Maximize();
+    if(bProj) Project();
     actionAlgorithms->setChecked(algorithmWidget->isVisible());
 }
