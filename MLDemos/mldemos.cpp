@@ -91,7 +91,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     canvas->ResizeEvent();
     CanvasMoveEvent();
     CanvasTypeChanged();
-    CanvasZoomChanged();
+    CanvasOptionsChanged();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -195,7 +195,7 @@ void MLDemos::initToolBars()
     connect(ui.actionShow_Toolbar, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.actionSmall_Icons, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.canvasTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(CanvasTypeChanged()));
-    connect(ui.canvasZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(CanvasZoomChanged()));
+    connect(ui.canvasZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(CanvasOptionsChanged()));
     connect(ui.canvasX1Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
     connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
     connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
@@ -751,7 +751,7 @@ void MLDemos::resizeEvent( QResizeEvent *event )
     if(!canvas) return;
     if(canvas->canvasType)
     {
-        CanvasZoomChanged();
+        CanvasOptionsChanged();
     }
     else
     {
@@ -1173,7 +1173,6 @@ void MLDemos::DisplayOptionChanged()
         int xIndex = ui.canvasX1Spin->value()-1;
         int yIndex = ui.canvasX2Spin->value()-1;
         int zIndex = ui.canvasX3Spin->value()-1;
-        //if(xIndex == yIndex) yIndex = xIndex+1;
         canvas->SetDim(xIndex, yIndex, zIndex);
 	}
     float zoom = displayOptions->spinZoom->value();
@@ -1184,36 +1183,40 @@ void MLDemos::DisplayOptionChanged()
         drawTimer->Stop();
         drawTimer->Clear();
         canvas->SetZoom(zoom);
-        QMutexLocker lock(&mutex);
-        if(classifier)
+        if(!canvas->canvasType)
         {
-            classifiers[tabUsedForTraining]->Draw(canvas, classifier);
-            if(classifier->UsesDrawTimer())
+            QMutexLocker lock(&mutex);
+            if(classifier)
+            {
+                classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+                if(classifier->UsesDrawTimer())
+                {
+                    drawTimer->start(QThread::NormalPriority);
+                }
+            }
+            else if(regressor)
+            {
+                regressors[tabUsedForTraining]->Draw(canvas, regressor);
+                //drawTimer->start(QThread::NormalPriority);
+            }
+            else if(clusterer)
+            {
+                clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+                drawTimer->start(QThread::NormalPriority);
+            }
+            else if(dynamical)
+            {
+                dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+                if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+            }
+            else if(maximizer)
             {
                 drawTimer->start(QThread::NormalPriority);
             }
-        }
-        else if(regressor)
-        {
-            regressors[tabUsedForTraining]->Draw(canvas, regressor);
-            //drawTimer->start(QThread::NormalPriority);
-        }
-        else if(clusterer)
-        {
-            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-            drawTimer->start(QThread::NormalPriority);
-        }
-        else if(dynamical)
-        {
-            dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
-            if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
-        }
-        else if(maximizer)
-        {
-            drawTimer->start(QThread::NormalPriority);
-        }
-        else if(projector)
-        {
+            else if(projector)
+            {
+                projectors[tabUsedForTraining]->Draw(canvas, projector);
+            }
         }
         canvas->repaint();
     }
@@ -1225,7 +1228,7 @@ void MLDemos::DisplayOptionChanged()
         canvas->trajectoryResampleCount = optionsDynamic->resampleSpin->value();
     }
     CanvasTypeChanged();
-    CanvasZoomChanged();
+    CanvasOptionsChanged();
     canvas->ResetSamples();
     canvas->repaint();
 }
@@ -1657,29 +1660,33 @@ void MLDemos::FitToData()
     displayOptions->spinZoom->blockSignals(false);
     drawTimer->Stop();
     drawTimer->Clear();
-    QMutexLocker lock(&mutex);
-    if(classifier)
+    if(!canvas->canvasType)
     {
-        classifiers[tabUsedForTraining]->Draw(canvas, classifier);
-        if(classifier->UsesDrawTimer())
+        QMutexLocker lock(&mutex);
+        if(classifier)
         {
+            classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            if(classifier->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+        }
+        else if(regressor)
+        {
+            regressors[tabUsedForTraining]->Draw(canvas, regressor);
+            //drawTimer->start(QThread::NormalPriority);
+        }
+        else if(clusterer)
+        {
+            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
             drawTimer->start(QThread::NormalPriority);
         }
-    }
-    else if(regressor)
-    {
-        regressors[tabUsedForTraining]->Draw(canvas, regressor);
-        //drawTimer->start(QThread::NormalPriority);
-    }
-    else if(clusterer)
-    {
-        clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-        drawTimer->start(QThread::NormalPriority);
-    }
-    else if(dynamical)
-    {
-        dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
-        if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+        else if(dynamical)
+        {
+            dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+            if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+        }
+        else if(projector)
+        {
+            projectors[tabUsedForTraining]->Draw(canvas, projector);
+        }
     }
     canvas->repaint();
 }
@@ -1712,6 +1719,10 @@ void MLDemos::CanvasMoveEvent()
 	{
 		dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
         if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+    }
+    else if(projector)
+    {
+        projectors[tabUsedForTraining]->Draw(canvas, projector);
     }
     canvas->repaint();
 }
@@ -1756,11 +1767,11 @@ void MLDemos::CanvasTypeChanged()
     ui.canvasZoomSlider->setEnabled(ui.canvasTypeCombo->currentIndex() == 1);
     if(canvas->canvasType == ui.canvasTypeCombo->currentIndex()) return;
     canvas->SetCanvasType(ui.canvasTypeCombo->currentIndex());
-    CanvasZoomChanged();
+    CanvasOptionsChanged();
     canvas->repaint();
 }
 
-void MLDemos::CanvasZoomChanged()
+void MLDemos::CanvasOptionsChanged()
 {
     float zoom = 1.f + ui.canvasZoomSlider->value()/10.f;
     QSizePolicy policy = ui.canvasWidget->sizePolicy();
@@ -1802,6 +1813,34 @@ void MLDemos::CanvasZoomChanged()
     ui.canvasArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     canvas->SetCanvasType(canvas->canvasType);
+
+    if(!canvas->canvasType)
+    {
+        QMutexLocker lock(&mutex);
+        if(classifier)
+        {
+            classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+        }
+        else if(regressor)
+        {
+            regressors[tabUsedForTraining]->Draw(canvas, regressor);
+        }
+        else if(clusterer)
+        {
+            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+        }
+        else if(dynamical)
+        {
+            dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+        }
+        else if(maximizer)
+        {
+        }
+        else if(projector)
+        {
+            projectors[tabUsedForTraining]->Draw(canvas, projector);
+        }
+    }
     canvas->ResizeEvent();
 }
 
@@ -2154,10 +2193,12 @@ void MLDemos::ExportSVG()
     svg.clusterer = clusterer;
     svg.dynamical = dynamical;
     svg.maximizer = maximizer;
+    svg.projector = projector;
     if(classifier) svg.drawClass = classifiers[tabUsedForTraining];
     if(regressor) svg.drawRegr = regressors[tabUsedForTraining];
     if(dynamical) svg.drawDyn = dynamicals[tabUsedForTraining];
     if(clusterer) svg.drawClust = clusterers[tabUsedForTraining];
+    if(projector) svg.drawProj = projectors[tabUsedForTraining];
     svg.Write(filename);
     ui.statusBar->showMessage("Vector Image saved successfully");
 }
@@ -2296,7 +2337,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     }
 	FitToData();
 	ResetPositiveClass();
-    CanvasZoomChanged();
+    CanvasOptionsChanged();
 	canvas->ResetSamples();
 	canvas->repaint();
 }

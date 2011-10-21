@@ -66,7 +66,7 @@ void MLDemos::Classify()
             drawTimer->classifier = &this->classifier;
             drawTimer->start(QThread::NormalPriority);
         }
-        if(canvas->canvasType) CanvasZoomChanged();
+        if(canvas->canvasType) CanvasOptionsChanged();
         // we fill in the canvas sampleColors
         vector<fvec> samples = canvas->data->GetSamples();
         canvas->sampleColors.resize(samples.size());
@@ -77,7 +77,7 @@ void MLDemos::Classify()
         if(canvas->canvasType)
         {
             canvas->maps.model = QPixmap();
-            CanvasZoomChanged();
+            CanvasOptionsChanged();
         }
         canvas->repaint();
     }
@@ -771,6 +771,7 @@ void MLDemos::Project()
     if(!canvas) return;
     QMutexLocker lock(&mutex);
     drawTimer->Stop();
+    drawTimer->Clear();
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
@@ -801,37 +802,39 @@ void MLDemos::Project()
         canvas->data->SetSamples(projectedData);
         canvas->data->bProjected = true;
     }
-    QPixmap infoPixmap;
-    QPainter painter(&infoPixmap);
-    projectors[tab]->DrawInfo(canvas, painter, projector);
-    canvas->FitToData();
+    //canvas->FitToData();
     CanvasTypeChanged();
-    CanvasZoomChanged();
+    CanvasOptionsChanged();
+    if(!canvas->canvasType)
+    {
+        projectors[tab]->Draw(canvas, projector);
+    }
     canvas->repaint();
     UpdateInfo();
-    if(drawTimer->isRunning())
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
 }
 
 void MLDemos::ProjectRevert()
 {
+    QMutexLocker lock(&mutex);
+    drawTimer->Stop();
+    drawTimer->Clear();
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    DEL(classifier);
+    DEL(maximizer);
+    DEL(projector);
     if(!sourceData.size()) return;
     canvas->data->SetSamples(sourceData);
     canvas->data->SetLabels(sourceLabels);
     canvas->data->bProjected = false;
+    canvas->maps.info = QPixmap();
+    canvas->maps.model = QPixmap();
     canvas->FitToData();
     CanvasTypeChanged();
-    CanvasZoomChanged();
+    CanvasOptionsChanged();
     canvas->repaint();
     UpdateInfo();
-    if(drawTimer->isRunning())
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
     sourceData.clear();
     sourceLabels.clear();
 }
@@ -839,42 +842,11 @@ void MLDemos::ProjectRevert()
 void MLDemos::ProjectReproject()
 {
     if(!canvas) return;
-    QMutexLocker lock(&mutex);
-    drawTimer->Stop();
-    DEL(clusterer);
-    DEL(regressor);
-    DEL(dynamical);
-    DEL(classifier);
-    DEL(maximizer);
-    DEL(projector);
-    int tab = optionsProject->tabWidget->currentIndex();
-    if(tab >= projectors.size() || !projectors[tab]) return;
-    projector = projectors[tab]->GetProjector();
-    projectors[tab]->SetParams(projector);
-    tabUsedForTraining = tab;
-    Train(projector);
+    mutex.lock();
     sourceData = canvas->data->GetSamples();
     sourceLabels = canvas->data->GetLabels();
-    projectedData = projector->GetProjected();
-    if(projectedData.size())
-    {
-        canvas->data->SetSamples(projectedData);
-        canvas->data->bProjected = true;
-    }
-    QPixmap infoPixmap;
-    QPainter painter(&infoPixmap);
-    projectors[tab]->DrawInfo(canvas, painter, projector);
-    canvas->FitToData();
-    CanvasTypeChanged();
-    CanvasZoomChanged();
-    canvas->repaint();
-
-    UpdateInfo();
-    if(drawTimer->isRunning())
-    {
-        drawTimer->Stop();
-        drawTimer->Clear();
-    }
+    mutex.unlock();
+    Project();
 }
 
 void MLDemos::ExportOutput()

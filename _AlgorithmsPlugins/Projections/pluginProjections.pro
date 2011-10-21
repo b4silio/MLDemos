@@ -19,6 +19,7 @@ include($$MLPATH/MLDemos_variables.pri)
 FORMS += \
 	paramsProjections.ui \
     paramsICA.ui \
+    paramsLDA.ui \
     paramsPCA.ui
 HEADERS +=	\
             basicOpenCV.h \
@@ -31,9 +32,11 @@ HEADERS +=	\
 			interfaceProjections.h \
 			pluginProjections.h \
             interfaceICAProjection.h \
+            interfaceLDAProjection.h \
             interfacePCAProjection.h \
     projectorPCA.h \
-    projectorICA.h
+    projectorICA.h \
+    projectorLDA.h
 
 SOURCES += 	\
             basicOpenCV.cpp \
@@ -43,9 +46,11 @@ SOURCES += 	\
 			interfaceProjections.cpp \
 			pluginProjections.cpp \
             interfaceICAProjection.cpp \
+            interfaceLDAProjection.cpp \
             interfacePCAProjection.cpp \
     projectorPCA.cpp \
-    projectorICA.cpp
+    projectorICA.cpp \
+    projectorLDA.cpp
 
 ###########################
 # Dependencies            #
@@ -57,6 +62,8 @@ HEADERS += 	liblinear/linear.h \
 			liblinear/tron.h \
 			liblinear/blasp.h \
 			liblinear/blas.h
+
+
 
 
 

@@ -32,7 +32,7 @@ class PluginESMLR : public QObject, public CollectionInterface
 public:
 	PluginESMLR();
 	
-    QString GetName() { return "ESMLR"; };
+    QString GetName() { return "ESMLR"; }
 };
 
 #endif // _PLUGIN_ESMLR_H_

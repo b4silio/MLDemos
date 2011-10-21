@@ -258,7 +258,7 @@ private slots:
 	void CompareClear();
 	void CompareRemove();
     void CanvasTypeChanged();
-    void CanvasZoomChanged();
+    void CanvasOptionsChanged();
 
 
 	void ShowContextMenuSpray(const QPoint &point);
