@@ -1,6 +1,7 @@
 #include "projectorPCA.h"
 #include "widget.h"
 #include <QPainter>
+#include <QDebug>
 
 ProjectorPCA::ProjectorPCA()
 {}
@@ -48,11 +49,13 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
     int dim = eigVal.rows;
     float maxEigVal = 0;
     FOR(i, dim) if(eigVal.at<float>(i) == eigVal.at<float>(i)) maxEigVal += eigVal.at<float>(i);
-    float accumulator = 0;
     maxEigVal = max(1.f,maxEigVal);
+    float maxAccumulator = 0;
+    FOR(i, dim) if(eigVal.at<float>(i) == eigVal.at<float>(i)) maxAccumulator += eigVal.at<float>(i) / maxEigVal;
+    float accumulator = 0;
 
     painter.setPen(Qt::black);
-    painter.drawLine(QPointF(pad, h-2*pad), QPointF(w-2*pad, h-2*pad));
+    painter.drawLine(QPointF(pad, h-2*pad), QPointF(w-pad, h-2*pad));
     painter.drawLine(QPointF(pad, pad), QPointF(pad, h-2*pad));
     painter.setRenderHint(QPainter::Antialiasing);
     QPointF point(pad,pad);
@@ -62,22 +65,31 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
         float eigval = eigVal.at<float>(i);
         if(eigval == eigval)
         {
-            QPointF point2 = QPointF(i * (w-2*pad) / dim + pad+(!i?1:0), (h-2*pad) - (int)(eigval / maxEigVal * (h-2*pad)));
-            painter.drawLine(point, point2);
             accumulator += eigval / maxEigVal;
+            qDebug() << "accumulator: " << accumulator << accumulator/maxAccumulator;
+            QPointF point2 = QPointF(i * (w-2*pad) / (dim-1) + pad+(!i?1:0), (int)(accumulator/maxAccumulator * (h-2*pad)));
+            painter.drawLine(point, point2);
             point = point2;
         }
+        else
+        {
+            point.setX(i * (w-2*pad) / (dim-1) + pad+(!i?1:0));
+        }
     }
-    painter.drawLine(point, QPoint(w-2*pad, h-2*pad));
+    //painter.drawLine(point, QPoint(w-2*pad, h-2*pad));
     QFont font = painter.font();
     font.setPointSize(8);
     painter.setFont(font);
     painter.setPen(Qt::black);
     painter.drawText(0,0,w,2*pad,Qt::AlignCenter, "reconstruction error");
-    FOR(i, dim)
+    int step = 1;
+    while((dim/step > 8)) step++;
+    for(int i=0; i<dim; i+=step)
     {
-        int x = dim==1? w/2 : i*(w-2*pad)/(dim-1);
-        painter.drawText(pad + x - 3, h-1, QString("e%1").arg(i+1));
+        int x = dim==1? w/2 : i * (w-2*pad) / (dim-1) + pad+(!i?1:0);
+        if(i==dim-1) x -= 4;
+//        int x = dim==1? w/2 : i*(w-2*pad)/(dim-1);
+        painter.drawText(x - 4, h-1, QString("e%1").arg(i+1));
     }
 }
 
