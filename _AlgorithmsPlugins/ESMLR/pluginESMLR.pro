@@ -2,7 +2,7 @@
 # Configuration      #
 # ##########################
 TEMPLATE = lib
-CONFIG += plugin
+CONFIG += plugin debug
 NAME = mld_ESMLR
 MLPATH =../..
 
@@ -15,11 +15,15 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 FORMS += paramsESMLR.ui
 HEADERS +=	$$MLDEMOS/canvas.h \
 			$$MLDEMOS/mymaths.h \
+			MixtureLogisticRegression.h \
+			EvolutionStrategy.h \
 			classifierESMLR.h \
 			interfaceESMLRClassifier.h \
 			pluginESMLR.h
 SOURCES += 	$$MLDEMOS/canvas.cpp \
 			$$MLDEMOS/mymaths.cpp \
+			MixtureLogisticRegression.cpp \
+			EvolutionStrategy.cpp \
 			classifierESMLR.cpp \
 			interfaceESMLRClassifier.cpp \
 			pluginESMLR.cpp

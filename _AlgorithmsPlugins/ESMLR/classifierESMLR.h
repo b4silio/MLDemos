@@ -25,7 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "classifier.h"
 
-namespace ESMLR
+namespace MLR
 {
 	struct Classifier;
 }
@@ -36,7 +36,7 @@ class ClassifierESMLR : public Classifier
 	float alpha;
 	u32 genCount;
 	u32 indPerDim;
-	ESMLR::Classifier* classifier;
+	MLR::Classifier* classifier;
 	
 public:
 	ClassifierESMLR();

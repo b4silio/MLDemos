@@ -41,3 +41,6 @@ CVS
 
 # debian build debris
 /.pc/
+
+# temp files
+*~

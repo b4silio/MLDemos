@@ -129,7 +129,7 @@ p, li { white-space: pre-wrap; }
 
 beta = alpha / avr(stddev(data))
 
-sigmoid function: (1-exp(-beta*sum))</string>
+sigmoid function: tanh</string>
      </property>
      <property name="maximum">
       <double>999.990000000000009</double>
