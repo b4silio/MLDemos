@@ -55,8 +55,14 @@ void MLDemos::Classify()
     int ratioIndex = optionsClassify->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
     int positive = optionsClassify->positiveSpin->value();
+    vector<bool> trainList;
+    if(optionsClassify->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
 
-    bool trained = Train(classifier, positive, trainRatio);
+    bool trained = Train(classifier, positive, trainRatio, trainList);
     if(trained)
     {
 		classifiers[tab]->Draw(canvas, classifier);
@@ -112,6 +118,12 @@ void MLDemos::ClassifyCross()
     float trainRatio = ratios[ratioIndex];
     int positive = optionsClassify->positiveSpin->value();
     int foldCount = optionsClassify->foldCountSpin->value();
+    vector<bool> trainList;
+    if(optionsClassify->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
 
     vector<fvec> fmeasures;
     fmeasures.resize(2);
@@ -120,21 +132,40 @@ void MLDemos::ClassifyCross()
     {
         DEL(classifier);
         classifier = classifiers[tab]->GetClassifier();
-        trained = Train(classifier, positive, trainRatio);
+        trained = Train(classifier, positive, trainRatio, trainList);
         if(!trained) break;
         if(classifier->rocdata.size()>0)
         {
-            fmeasures[0].push_back(GetBestFMeasure(classifier->rocdata[0]));
+            fmeasures[0].push_back(GetBestFMeasure(classifier->rocdata[0])[0]);
         }
         if(classifier->rocdata.size()>1)
         {
-            fmeasures[1].push_back(GetBestFMeasure(classifier->rocdata[1]));
+            fmeasures[1].push_back(GetBestFMeasure(classifier->rocdata[1])[0]);
         }
     }
     classifier->crossval = fmeasures;
     ShowCross();
     if(trained) classifiers[tab]->Draw(canvas, classifier);
     UpdateInfo();
+}
+
+vector<bool> MLDemos::GetManualSelection()
+{
+    vector<bool> trainList;
+    if(!canvas || !canvas->data->GetCount()) return trainList;
+    trainList.resize(manualSelection->sampleList->count(), false);
+    QList<QListWidgetItem*> selected = manualSelection->sampleList->selectedItems();
+    if(!selected.size()) // if nothing is selected we use all samples as training
+    {
+        trainList = vector<bool>(canvas->data->GetCount(), true);
+        return trainList;
+    }
+    FOR(i, selected.size())
+    {
+        int index = manualSelection->sampleList->row(selected[i]);
+        trainList[index] = true;
+    }
+    return trainList;
 }
 
 void MLDemos::Regression()
@@ -159,7 +190,14 @@ void MLDemos::Regression()
     int ratioIndex = optionsRegress->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
 
-    Train(regressor, trainRatio);
+    vector<bool> trainList;
+    if(optionsRegress->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
+
+    Train(regressor, trainRatio, trainList);
     regressors[tab]->Draw(canvas, regressor);
     UpdateInfo();
 }
@@ -439,7 +477,13 @@ void MLDemos::Cluster()
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
-    Train(clusterer);
+    vector<bool> trainList;
+    if(optionsCluster->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
+    Train(clusterer, trainList);
 	drawTimer->Stop();
 	drawTimer->Clear();
     clusterers[tab]->Draw(canvas,clusterer);
@@ -535,12 +579,19 @@ void MLDemos::ClusterOptimize()
     float ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
     float ratio = ratios[ratioIndex];
 
+    vector<bool> trainList;
+    if(optionsCluster->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
+
     ivec kCounts;
     vector<fvec> results(4);
     for(int k=startCount; k<stopCount; k++)
     {
         clusterer->SetNbClusters(k);
-        Train(clusterer);
+        Train(clusterer, trainList);
 
         int folds = 10;
         fvec metricMeans(results.size());
@@ -790,7 +841,13 @@ void MLDemos::Project()
         canvas->data->SetSamples(sourceData);
         canvas->data->SetLabels(sourceLabels);
     }
-    Train(projector);
+    vector<bool> trainList;
+    if(optionsProject->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
+    Train(projector, trainList);
     if(!bHasSource)
     {
         sourceData = canvas->data->GetSamples();

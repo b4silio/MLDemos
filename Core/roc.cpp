@@ -337,9 +337,9 @@ float GetBestThreshold( std::vector<f32pair> data )
 	return tmax;
 }
 
-float GetBestFMeasure( std::vector<f32pair> data )
+fvec GetBestFMeasure( std::vector<f32pair> data )
 {
-	if(!data.size()) return 0;
+    if(!data.size()) return fvec(1,0);
 
 	std::vector< std::vector<f32> > measures;
 
@@ -374,22 +374,32 @@ float GetBestFMeasure( std::vector<f32pair> data )
 		dat.push_back(val.y);
 		dat.push_back(thresh);
 		dat.push_back(fmeasure);
-		measures.push_back(dat);
+        dat.push_back(precision);
+        dat.push_back(recall);
+        measures.push_back(dat);
 
 		oldVal = val;
 	}
 
 	float tmax = 0;
 	float fmax = 0;
-	FOR(j, measures.size())
+    float pmax = 0;
+    float rmax = 0;
+    FOR(j, measures.size())
 	{
 		if(measures[j][3] > fmax)
 		{
 			tmax = measures[j][2];
 			fmax = measures[j][3];
-		}
+            pmax = measures[j][4];
+            rmax = measures[j][5];
+        }
 	}
-	return fmax;
+    fvec res(3);
+    res[0] = fmax;
+    res[1] = pmax;
+    res[2] = rmax;
+    return res;
 }
 
 

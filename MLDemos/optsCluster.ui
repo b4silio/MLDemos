@@ -28,7 +28,7 @@
      <x>500</x>
      <y>10</y>
      <width>124</width>
-     <height>171</height>
+     <height>182</height>
     </rect>
    </property>
    <property name="font">
@@ -96,6 +96,21 @@
        </size>
       </property>
      </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="manualTrainButton">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Manual Selection</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QPushButton" name="clearButton">

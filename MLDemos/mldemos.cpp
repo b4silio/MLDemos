@@ -259,16 +259,24 @@ void MLDemos::initDialogs()
     displayOptions = new Ui::viewOptionDialog();
     aboutPanel = new Ui::aboutDialog();
     showStats = new Ui::statisticsDialog();
+    manualSelection = new Ui::ManualSelection();
 
     displayOptions->setupUi(displayDialog = new QDialog());
     aboutPanel->setupUi(about = new QDialog());
     showStats->setupUi(statsDialog = new QDialog());
+    manualSelection->setupUi(manualSelectDialog = new QDialog());
     rocWidget = new QNamedWindow("ROC Curve", false, showStats->rocWidget);
     infoWidget = new QNamedWindow("Info", false, showStats->informationWidget);
+
 
     connect(showStats->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(StatsChanged()));
     connect(rocWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
     connect(infoWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
+    connect(manualSelection->sampleList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(ManualSelectionChanged()));
+    connect(manualSelection->clearSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionClear()));
+    connect(manualSelection->invertSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionInvert()));
+    connect(manualSelection->removeSampleButton, SIGNAL(clicked()), this, SLOT(ManualSelectionRemove()));
+    connect(manualSelection->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionRandom()));
 
     connect(drawToolbar->singleButton, SIGNAL(clicked()), this, SLOT(DrawSingle()));
     connect(drawToolbar->sprayButton, SIGNAL(clicked()), this, SLOT(DrawSpray()));
@@ -328,23 +336,27 @@ void MLDemos::initDialogs()
 
     connect(displayDialog, SIGNAL(rejected()), this, SLOT(HideOptionDisplay()));
     connect(statsDialog, SIGNAL(rejected()), this, SLOT(HideStatsDialog()));
+    //connect(manualSelectDialog, SIGNAL(rejected()), this, SLOT(HideManualSelectionDialog()));
 
     connect(optionsClassify->classifyButton, SIGNAL(clicked()), this, SLOT(Classify()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), this, SLOT(ShowRoc()));
     connect(optionsClassify->crossValidButton, SIGNAL(clicked()), this, SLOT(ClassifyCross()));
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
+    connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
 
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
     connect(optionsRegress->crossValidButton, SIGNAL(clicked()), this, SLOT(RegressionCross()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     //connect(optionsRegress->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
+    connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
 
     connect(optionsCluster->clusterButton, SIGNAL(clicked()), this, SLOT(Cluster()));
     connect(optionsCluster->iterationButton, SIGNAL(clicked()), this, SLOT(ClusterIterate()));
     connect(optionsCluster->optimizeButton, SIGNAL(clicked()), this, SLOT(ClusterOptimize()));
     connect(optionsCluster->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
+    connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
 
     connect(optionsDynamic->regressionButton, SIGNAL(clicked()), this, SLOT(Dynamize()));
     connect(optionsDynamic->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
@@ -370,6 +382,7 @@ void MLDemos::initDialogs()
     connect(optionsProject->projectButton, SIGNAL(clicked()), this, SLOT(Project()));
     connect(optionsProject->revertButton, SIGNAL(clicked()), this, SLOT(ProjectRevert()));
     connect(optionsProject->reprojectButton, SIGNAL(clicked()), this, SLOT(ProjectReproject()));
+    connect(optionsProject->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
 
 	connect(optionsCompare->compareButton, SIGNAL(clicked()), this, SLOT(Compare()));
 	connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
@@ -919,6 +932,11 @@ void MLDemos::ShowAbout()
     about->show();
 }
 
+void MLDemos::ManualSelection()
+{
+    manualSelectDialog->show();
+}
+
 void MLDemos::HideSampleDrawing()
 {
     drawToolbarWidget->hide();
@@ -991,6 +1009,7 @@ void MLDemos::ResetPositiveClass()
     ui.canvasX2Spin->setRange(1,dimCount);
     ui.canvasX3Spin->setRange(0,dimCount);
     canvas->SetDim(ui.canvasX1Spin->value()-1,ui.canvasX2Spin->value()-1, ui.canvasX3Spin->value()-1);
+    ManualSelectionUpdated();
 }
 
 void MLDemos::ChangeActiveOptions()
@@ -1016,6 +1035,7 @@ void MLDemos::ClearData()
     }
     Clear();
     ResetPositiveClass();
+    ManualSelectionUpdated();
     UpdateInfo();
 }
 
@@ -1302,6 +1322,94 @@ void MLDemos::ChangeInfoFile()
     //qDebug() << "loading info from: " << filePath;
     showStats->algoText->clear();
     showStats->algoText->setSource(QUrl::fromLocalFile(filePath));
+}
+
+void MLDemos::ManualSelectionUpdated()
+{
+    if(!canvas) return;
+    // we add the samples
+    vector<fvec> samples = canvas->data->GetSamples();
+    int dim = samples.size() ? samples[0].size() : 0;
+    ivec labels = canvas->data->GetLabels();
+    manualSelection->sampleList->clear();
+    FOR(i, samples.size())
+    {
+        QString item = QString("%1: (%2)").arg(i).arg(labels[i]);
+        FOR(d, dim) item += QString(" %1").arg(samples[i][d], 0, 'f', 2);
+        manualSelection->sampleList->addItem(item);
+    }
+    ManualSelectionChanged();
+}
+
+void MLDemos::ManualSelectionChanged()
+{
+    int count = manualSelection->sampleList->count();
+    int trainCount = count, testCount = 0;
+    QList<QListWidgetItem*> selected = manualSelection->sampleList->selectedItems();
+    if(selected.size())
+    {
+        trainCount = selected.size();
+        testCount = count - trainCount;
+    }
+    manualSelection->TrainLabel->setText(QString("Train: %1").arg(trainCount));
+    manualSelection->TestLabel->setText(QString("Test: %1").arg(testCount));
+}
+
+void MLDemos::ManualSelectionClear()
+{
+    manualSelection->sampleList->clearSelection();
+    ManualSelectionChanged();
+}
+
+void MLDemos::ManualSelectionInvert()
+{
+    FOR(i, manualSelection->sampleList->count())
+    {
+        manualSelection->sampleList->item(i)->setSelected(!manualSelection->sampleList->item(i)->isSelected());
+    }
+    ManualSelectionChanged();
+}
+
+void MLDemos::ManualSelectionRandom()
+{
+    float ratio = (manualSelection->randomCombo->currentIndex()+1.f)/10.f;
+    manualSelection->sampleList->clearSelection();
+    u32* perm = randPerm(manualSelection->sampleList->count());
+    FOR(i, ratio*manualSelection->sampleList->count())
+    {
+        manualSelection->sampleList->item(perm[i])->setSelected(true);
+    }
+    KILL(perm);
+    ManualSelectionChanged();
+}
+
+void MLDemos::ManualSelectionRemove()
+{
+    if(!canvas || !canvas->data->GetCount()) return;
+    QList<QListWidgetItem*> selected = manualSelection->sampleList->selectedItems();
+    if(!selected.size()) return;
+    ivec removeList(selected.count());
+    FOR(i, selected.count())
+    {
+        removeList[i] = manualSelection->sampleList->row(selected[i]);
+    }
+    canvas->data->RemoveSamples(removeList);
+    if(canvas->sampleColors.size() && removeList.size() < canvas->sampleColors.size())
+    {
+        int offset = 0;
+        FOR(i, removeList.size())
+        {
+            int index = i - offset;
+            if(index < 0 || index >= canvas->sampleColors.size()) continue;
+            canvas->sampleColors.erase(canvas->sampleColors.begin()+index);
+            offset++;
+        }
+    }
+    ManualSelectionUpdated();
+    ManualSelectionChanged();
+    canvas->ResetSamples();
+    CanvasOptionsChanged();
+    canvas->repaint();
 }
 
 void MLDemos::DrawCrosshair()
@@ -1612,6 +1720,7 @@ void MLDemos::Drawing( fvec sample, int label)
     canvas->repaint();
     drawTime.restart();
     ResetPositiveClass();
+    ManualSelectionUpdated();
     UpdateInfo();
 }
 
@@ -2130,6 +2239,7 @@ void MLDemos::Load(QString filename)
     if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
     ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
+    ManualSelectionUpdated();
     UpdateInfo();
     canvas->repaint();
 }
@@ -2174,6 +2284,7 @@ void MLDemos::dropEvent(QDropEvent *event)
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");
             ResetPositiveClass();
+            ManualSelectionUpdated();
             UpdateInfo();
             canvas->repaint();
         }
@@ -2337,6 +2448,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     }
 	FitToData();
 	ResetPositiveClass();
+    ManualSelectionUpdated();
     CanvasOptionsChanged();
 	canvas->ResetSamples();
 	canvas->repaint();
@@ -2354,7 +2466,8 @@ void MLDemos::SetTimeseries(std::vector<TimeSerie> timeseries)
 	canvas->data->AddTimeSeries(timeseries);
 	FitToData();
 	ResetPositiveClass();
-	canvas->ResetSamples();
+    ManualSelectionUpdated();
+    canvas->ResetSamples();
 	canvas->repaint();
 	qDebug() << "added " << canvas->data->GetTimeSeries().size() << " timeseries";
 //	qDebug() << " dim: " << dim << " count: " << count << " frames: " << frames;

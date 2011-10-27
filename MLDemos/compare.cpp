@@ -33,6 +33,12 @@ void CompareAlgorithms::Clear()
 	compareDisplay->resultCombo->clear();
 }
 
+void CompareAlgorithms::SetActiveResult(int index)
+{
+    if(index >= compareDisplay->resultCombo->count()) return;
+    compareDisplay->resultCombo->setCurrentIndex(index);
+}
+
 void CompareAlgorithms::AddResults(fvec result, QString name, QString algorithm)
 {
 	if(!result.size()) return;
@@ -78,16 +84,25 @@ void CompareAlgorithms::Update()
 		painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop, names[i]);
 	}
 
-	if(displayType==0)
-	{
+    switch(displayType)
+    {
+    case 0:
+    {
 		QPixmap box = BoxPlot(result, boxSize);
 		painter.drawPixmap(0,2*hPad,box.width(), box.height(), box);
 	}
-	else
+        break;
+    case 1:
 	{
 		QPixmap box = Histogram(result, boxSize);
 		painter.drawPixmap(0,2*hPad,box.width(), box.height(), box);
 	}
+        break;
+    case 2:
+        QPixmap box = RawData(result, boxSize);
+        painter.drawPixmap(0,2*hPad,box.width(), box.height(), box);
+        break;
+    }
 	display->setPixmap(pixmap);
 }
 

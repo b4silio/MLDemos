@@ -129,11 +129,9 @@ QColor ColorFromVector(fvec a)
 QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const char *> roclabels, QSize size)
 {
 	QPixmap pixmap(size);
-	QPainter painter(&pixmap);
+    pixmap.fill(Qt::white);
+    QPainter painter(&pixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setBackgroundMode(Qt::OpaqueMode);
-	painter.setBackground(Qt::white);
-	painter.fillRect(QRect(0,0,size.width(),size.height()), Qt::white);
 
 	int PAD = 16;
 
@@ -148,7 +146,6 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 		std::sort(data.begin(), data.end());
 
 		std::vector<fvec> allData;
-		fVec oldVal(1,0);
 		FOR(i, data.size())
 		{
 			float thresh = data[i].first;
@@ -184,12 +181,10 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 			dat.push_back(data[i].first);
 			dat.push_back(fmeasure);
 			allData.push_back(dat);
-
-			oldVal = val;
 		}
 
-		painter.setPen(QColor(color,color,color));
-		// we highlight the current roc curve
+        painter.setPen(QPen(QColor(color,color,color), 1.f));
+
 		fVec pt1, pt2;
 		FOR(i, allData.size()-1)
 		{
@@ -200,12 +195,10 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 		pt1 = fVec(0,size.width());
 		painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
 
-		//cvDrawLine(roc, cvPoint(0 + PAD,resolution.height + PAD), cvPoint(oldVal.x*resolution.width+vpad.x,oldVal.y*resolution.height+vpad.y), color);
 		if(d < roclabels.size())
 		{
 			QPointF pos(3*size.width()/4,size.height() - (d+1)*16);
-			painter.drawText(pos,QString(roclabels[roclabels.size()-1-d]));
-			//cvPutText(roc, roclabels[d], point, rocfont, color);
+            painter.drawText(pos,QString(roclabels[d]));
 		}
 	}
 	return pixmap;
@@ -419,4 +412,74 @@ QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal, float min
 		painter.drawText(QPointF(hpad+36,minusPoint.y()+12), QString(text));
 	}
 	return histogram;
+}
+
+QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVal)
+{
+    QPixmap rawData(size);
+    if(!allData.size()) return rawData;
+    QBitmap bitmap;
+    bitmap.clear();
+    rawData.setMask(bitmap);
+    rawData.fill(Qt::transparent);
+    QPainter painter(&rawData);
+
+    //	painter.setRenderHint(QPainter::Antialiasing);
+
+    FOR(d,allData.size())
+    {
+        fvec data = allData[d];
+        if(!data.size()) continue;
+        FOR(i, data.size()) maxVal = max(maxVal, data[i]);
+        FOR(i, data.size()) minVal = min(minVal, data[i]);
+    }
+    if(minVal == maxVal)
+    {
+        minVal = minVal/2;
+        minVal = minVal*3/2;
+    }
+
+    FOR(d,allData.size())
+    {
+        int minCol = 70;
+        int color = (allData.size() == 1) ? minCol : (255-minCol) * d / allData.size() + minCol;
+
+        fvec data = allData[d];
+        if(!data.size()) continue;
+        int hpad = 15 + (d*size.width()/(allData.size()));
+        int hsize = (size.width()/allData.size() - 15);
+        int pad = -16;
+        int res = size.height()+2*pad;
+
+        float mean = 0;
+        float sigma = 0;
+        FOR(i, data.size()) mean += data[i] / data.size();
+        FOR(i, data.size()) sigma += powf(data[i]-mean,2);
+        sigma = sqrtf(sigma/data.size());
+
+        float edge = minVal;
+        float delta = maxVal - minVal;
+
+        FOR(i, data.size())
+        {
+            QPointF point = QPointF(hpad + (drand48() - 0.5)*hsize, size.height() - (int)((data[i]-edge)/delta*res) + pad);
+            painter.setPen(QPen(Qt::black, 0.5));
+            painter.setBrush(QColor(color,color,color));
+            painter.drawEllipse(point, 5, 5);
+        }
+        /*
+        const char *longFormat = "%.3f";
+        const char *shortFormat = "%.0f";
+        const char *format = (maxVal - minVal) > 10 ? shortFormat : longFormat;
+        painter.setPen(Qt::black);
+        char text[255];
+        sprintf(text, format, mean);
+        painter.drawText(QPointF(hpad-8,topPoint.y()+6), QString(text));
+        sprintf(text, format, mean+sigma);
+        painter.drawText(QPointF(hpad+36,plusPoint.y()-6), QString(text));
+        sprintf(text, format, mean-sigma);
+        painter.drawText(QPointF(hpad+36,minusPoint.y()+12), QString(text));
+        */
+    }
+    return rawData;
 }

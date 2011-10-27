@@ -42,7 +42,8 @@ FORMS += aboutDialog.ui \
 	statisticsDialog.ui \
 	viewOptions.ui \
     compare.ui \
-    expose.ui
+    expose.ui \
+    manualSelection.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -76,6 +77,7 @@ SOURCES += \
 	mlsaving.cpp \
         compare.cpp \
     mltrain.cpp
+
 
 
 
