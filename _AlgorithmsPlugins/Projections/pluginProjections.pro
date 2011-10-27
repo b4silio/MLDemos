@@ -6,13 +6,15 @@ CONFIG += plugin
 NAME = mld_Projections
 MLPATH =../..
 
+include($$MLPATH/MLDemos_variables.pri)
+DEFINES += OPENCV22
+
 CONFIG(opencv22)|CONFIG(opencv21){
     CONFIG += opencv
 }else{
     message("this plugin requires opencv, skipping")
 }
 
-include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
