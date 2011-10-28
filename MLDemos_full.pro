@@ -16,7 +16,7 @@ MLDemos.depends = Core
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
 #SUBDIRS += Kernel Projections
-SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers OpenCV SEDS ESMLR
+SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers OpenCV SEDS ESMLR MLR
 # SUBDIRS += HMM
 ESMLR.file = $$ALGOPATH/ESMLR/pluginESMLR.pro
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
@@ -28,6 +28,7 @@ Obstacle.file = $$ALGOPATH/Obstacle/pluginAvoidance.pro
 SEDS.file = $$ALGOPATH/SEDS/pluginSEDS.pro
 Maximizers.file = $$ALGOPATH/Maximizers/pluginMaximizers.pro
 OpenCV.file = $$ALGOPATH/OpenCV/pluginOpenCV.pro
+MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
 XMeans.file = $$ALGOPATH/XMeans/pluginXMeans.pro
 HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 
