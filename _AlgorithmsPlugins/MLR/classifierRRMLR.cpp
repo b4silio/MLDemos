@@ -153,8 +153,8 @@ char *ClassifierRRMLR::GetInfoString()
 	snprintf(text, 1024, "Random restart, Mixture of Logistic Regressions\n"
 	"hyperplane count: %d\n"
 	"alpha: %f\n"
-	"generation count: %d\n"
-	"individual per dim: %d\n",
+	"restart count: %d\n"
+	"max LD_SLSQP iter: %d\n",
 	cutCount, alpha, restartCount, maxIter
 	);
 	return text;
