@@ -20,19 +20,19 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _PLUGIN_ESMLR_H_
-#define _PLUGIN_ESMLR_H_
+#ifndef _PLUGIN_MLR_H_
+#define _PLUGIN_MLR_H_
 
 #include "interfaces.h"
 
-class PluginESMLR : public QObject, public CollectionInterface
+class PluginMLR : public QObject, public CollectionInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(CollectionInterface)
 public:
-	PluginESMLR();
+	PluginMLR();
 	
-	QString GetName() { return "Evolution Strategy, Mixture of Logistic Regression Collection"; };
+	QString GetName() { return "Mixture of Logistic Regression Collection"; };
 };
 
 #endif // _PLUGIN_ESMLR_H_

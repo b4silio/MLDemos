@@ -21,16 +21,17 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 
-#include "pluginESMLR.h"
+#include "pluginMLR.h"
 #include "interfaceESMLRClassifier.h"
 
-PluginESMLR::PluginESMLR()
+PluginMLR::PluginMLR()
 {
+	//classifiers.push_back(new ClassRRMLR());
 	classifiers.push_back(new ClassESMLR());
 }
 
 #ifndef PLUGIN_CLUSTER
 #ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_ESMLR, PluginESMLR)
+Q_EXPORT_PLUGIN2(mld_MLR, PluginMLR)
 #endif
 #endif
