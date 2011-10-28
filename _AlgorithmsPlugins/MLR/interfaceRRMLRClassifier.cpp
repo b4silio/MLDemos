@@ -106,7 +106,7 @@ bool ClassRRMLR::LoadOptions(QSettings &settings)
 	if(settings.contains("rrmlrCut")) params->rrmlrCutSpin->setValue(settings.value("rrmlrCut").toUInt());
 	if(settings.contains("rrmlrAlpha")) params->rrmlrAlphaSpin->setValue(settings.value("rrmlrAlpha").toFloat());
 	if(settings.contains("rrmlrRestart")) params->rrmlrRestartSpin->setValue(settings.value("rrmlrRestart").toUInt());
-	if(settings.contains("rrmlrMaxIter")) params->rrmlrRestartSpin->setValue(settings.value("rrmlrMaxIter").toUInt());
+	if(settings.contains("rrmlrMaxIter")) params->rrmlrMaxIterSpin->setValue(settings.value("rrmlrMaxIter").toUInt());
 	return true;
 }
 
