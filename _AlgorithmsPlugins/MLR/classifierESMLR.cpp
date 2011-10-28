@@ -23,6 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "classifierESMLR.h"
 #include "MixtureLogisticRegression.h"
+#include "EvolutionStrategy.h"
 
 #include <iostream>
 #include <algorithm>
@@ -39,7 +40,6 @@ ClassifierESMLR::ClassifierESMLR():
 {
 	bSingleClass = true;
 	//bUseDrawTimer = false;
-	type = CLASS_ESMLR;
 	classThresh = 0;
 	classSpan = 1;
 	dim = 0;
@@ -84,7 +84,7 @@ void ClassifierESMLR::Train(std::vector< fvec > samples, ivec labels)
 	
 	/*
 	ES + gradient descent
-	// ES
+	*/
 	ES::Population pop(cutCount, dim, dataAvrSd, beta, indPerDim);
 	if (classifier)
 		delete classifier;
@@ -115,66 +115,6 @@ void ClassifierESMLR::Train(std::vector< fvec > samples, ivec labels)
 	std::cerr << "Score after local opt: " << opt_f << std::endl;
 	
 	*classifier = MLR::Classifier::fromRawVector(&v[0], cutCount, dim, beta);
-	std::cerr << "Classifier:" << std::endl;
-	std::cerr << *classifier << std::endl;
-	*/
-	
-	/*
-		random restart + gradient descient
-	*/
-	double bestVal(HUGE_VAL);
-	double bestInitVal(HUGE_VAL);
-	for (int rrc = 0; rrc < 100; ++rrc)
-	{
-		MLR::Classifier testClassifier(cutCount, dim, beta);
-		double newError;
-		unsigned randomCount(0);
-		do
-		{
-			testClassifier.setRandom(dataAvrSd);
-			newError = testClassifier.sumSquareError(data.y, data.x);
-			bestInitVal = std::min(bestInitVal, newError);
-		}
-		while ((bestInitVal != HUGE_VAL) && (newError > 2 * bestInitVal) && (++randomCount < 1000));
-		
-		// local opt
-		nlopt::opt localOpt(nlopt::LD_SLSQP, testClassifier.getSize());
-		//nlopt::opt localOpt(nlopt::LD_LBFGS, testClassifier.getSize());
-		localOpt.set_lower_bounds(testClassifier.lowerBounds());
-		localOpt.set_upper_bounds(testClassifier.upperBounds());
-		localOpt.set_min_objective(MLR::f, &data);
-		localOpt.set_ftol_abs(1e-6);
-		localOpt.set_maxeval(1000);
-		typedef std::vector<MLR::Norm2ConstraintData> ConstraintVector;
-		ConstraintVector wConstraints(cutCount, MLR::Norm2ConstraintData(0, dim));
-		for (size_t i = 0; i < wConstraints.size(); ++i)
-		{
-			wConstraints[i].start = i * dim;
-			localOpt.add_equality_constraint(MLR::norm2_constraint, &(wConstraints[i]));
-		}
-		MLR::Norm2ConstraintData vConstraint(testClassifier.vIdx(), cutCount);
-		localOpt.add_equality_constraint(MLR::norm2_constraint, &vConstraint);
-		
-		double opt_f;
-		std::vector<double> v(testClassifier.toRawVector());
-		try {
-			nlopt::result res = localOpt.optimize(v, opt_f);
-		} catch (nlopt::roundoff_limited e) {
-			// we can safely ignore this exception, the result being still valid
-		}
-		
-		if (opt_f < bestVal)
-		{
-			if (!classifier)
-				classifier = new MLR::Classifier(MLR::Classifier::fromRawVector(&v[0], cutCount, dim, beta));
-			else
-				*classifier = MLR::Classifier::fromRawVector(&v[0], cutCount, dim, beta);
-			bestVal = opt_f;
-		}
-		
-		std::cerr << "Step " << rrc << ", value " << opt_f << ", best: " << bestVal << ", bestInit: " << bestInitVal << std::endl;
-	}
-	
 	std::cerr << *classifier << std::endl;
 }
 

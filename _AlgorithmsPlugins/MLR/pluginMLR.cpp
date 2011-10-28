@@ -22,11 +22,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 
 #include "pluginMLR.h"
+#include "interfaceRRMLRClassifier.h"
 #include "interfaceESMLRClassifier.h"
 
 PluginMLR::PluginMLR()
 {
-	//classifiers.push_back(new ClassRRMLR());
+	classifiers.push_back(new ClassRRMLR());
 	classifiers.push_back(new ClassESMLR());
 }
 
