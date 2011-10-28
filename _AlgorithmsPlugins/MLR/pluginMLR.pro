@@ -13,18 +13,14 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 # Source Files            #
 ###########################
 FORMS += paramsRRMLR.ui paramsESMLR.ui 
-HEADERS +=	$$MLDEMOS/canvas.h \
-			$$MLDEMOS/mymaths.h \
-			MixtureLogisticRegression.h \
+HEADERS +=	MixtureLogisticRegression.h \
 			EvolutionStrategy.h \
 			classifierRRMLR.h \
 			interfaceRRMLRClassifier.h \
 			classifierESMLR.h \
 			interfaceESMLRClassifier.h \
 			pluginMLR.h
-SOURCES += 	$$MLDEMOS/canvas.cpp \
-			$$MLDEMOS/mymaths.cpp \
-			MixtureLogisticRegression.cpp \
+SOURCES += 	MixtureLogisticRegression.cpp \
 			EvolutionStrategy.cpp \
 			classifierRRMLR.cpp \
 			interfaceRRMLRClassifier.cpp \
