@@ -97,8 +97,8 @@ public:
 static u32 *randPerm(u32 length, s32 seed=-1)
 {
     u32 i=0;
-    u32 *perm = (u32 *) malloc(sizeof(u32) * length);
-    u32 *usable = (u32 *) malloc(sizeof(u32) * length);
+    u32 *perm = new u32[length];
+    u32 *usable = new u32[length];
     int uLength = length;
     if(seed != -1) srand(seed);
 
@@ -122,7 +122,7 @@ static u32 *randPerm(u32 length, s32 seed=-1)
         usable[uLength] = 0;
         if(!uLength) break;
     }
-    free(usable);
+    delete [] usable;
 
     return perm;
 }

@@ -134,6 +134,12 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
         }
         else
         {
+            map<int,int> classCnt, trainClassCnt, testClassCnt;
+            FOR(i, labels.size())
+            {
+                classCnt[labels[i]]++;
+            }
+
             trainCnt = (int)(samples.size()*trainRatio);
             testCnt = samples.size() - trainCnt;
             trainSamples.resize(trainCnt);
@@ -145,11 +151,31 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             {
                 trainSamples[i] = samples[perm[i]];
                 trainLabels[i] = newLabels[perm[i]];
+                trainClassCnt[trainLabels[i]]++;
             }
             for(int i=trainCnt; i<samples.size(); i++)
             {
                 testSamples[i-trainCnt] = samples[perm[i]];
                 testLabels[i-trainCnt] = newLabels[perm[i]];
+                testClassCnt[trainLabels[i]]++;
+            }
+            // we need to make sure that we have at least one sample per class
+            for(map<int,int>::iterator it=classCnt.begin();it!=classCnt.end();it++)
+            {
+                if(!trainClassCnt.count(it->first))
+                {
+                    FOR(i, testSamples.size())
+                    {
+                        if(testLabels[i] != it->first) continue;
+                        trainSamples[i] = testSamples[i];
+                        trainLabels[i] = testLabels[i];
+                        testSamples.erase(testSamples.begin() + i);
+                        testLabels.erase(testLabels.begin() + i);
+                        trainCnt++;
+                        testCnt--;
+                        break;
+                    }
+                }
             }
         }
         classifier->Train(trainSamples, trainLabels);

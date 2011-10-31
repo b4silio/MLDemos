@@ -48,6 +48,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 	u32 *perm = randPerm(sampleCnt);
 
 	int learnerCount = max((!weakType?360 : 1000), (int)weakCount);
+    if(dim > 2) learnerCount = 2000;
 	if(currentLearnerType != weakType)
 	{
 		srand(1); // so we always generate the same weak learner
@@ -55,8 +56,21 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 		learners.resize(learnerCount);
 		// we generate a bunch of random directions as learners
 	//	srand(1);
-		if(weakType != 1) // random projection
+        if(weakType != 1) // random projection or random circle
 		{
+            float minV = -1, maxV = 1;
+            if(weakType)
+            {
+                FOR(i, samples.size())
+                {
+                    FOR(d, dim)
+                    {
+                        minV = min(minV, samples[i][d]);
+                        maxV = max(maxV, samples[i][d]);
+                    }
+                }
+            }
+
 			if(dim==2)
 			{
 				FOR(i, learnerCount)
@@ -71,33 +85,28 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 						}
 						else
 						{
-							learners[i][0] = rand()/(float)RAND_MAX;
-							learners[i][1] = rand()/(float)RAND_MAX;
+                            learners[i][0] =  (rand()/(float)RAND_MAX)*(maxV-minV) + minV;
+                            learners[i][1] =  (rand()/(float)RAND_MAX)*(maxV-minV) + minV;
 						}
 				}
 			}
 			else
 			{
-                float minV = -1, maxV = 1;
-                if(weakType)
-                {
-                    FOR(i, samples.size())
-                    {
-                        FOR(d, dim)
-                        {
-                            minV = min(minV, samples[i][d]);
-                            maxV = max(maxV, samples[i][d]);
-                        }
-                    }
-                }
 				FOR(i, learnerCount)
 				{
 					learners[i].resize(dim);
-					if(!weakType)
+                    if(!weakType) // random projection
 					{
-						FOR(d, dim) learners[i][d] = rand()/(float)RAND_MAX*2. -1.;
-					}
-					else
+                        fvec projection(dim,0);
+                        float norm = 0;
+                        FOR(d, dim)
+                        {
+                            projection[d] = drand48();
+                            norm += projection[d];
+                        }
+                        FOR(d, dim) learners[i][d] = projection[d] / norm;
+                    }
+                    else // random circles
 					{
                         FOR(d, dim) learners[i][d] = (rand()/(float)RAND_MAX)*(maxV-minV) + minV;
 					}
@@ -107,8 +116,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 		else // random rectangle
 		{
 			// we need to find the boundaries
-			float *xMin = new float[dim];
-			float *xMax = new float[dim];
+            fvec xMin(dim, FLT_MAX), xMax(dim, -FLT_MAX);
 			FOR(i, samples.size())
 			{
 				FOR(d,dim)
@@ -129,8 +137,6 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 					learners[i][2*d+1] = l;
 				}
 			}
-			delete [] xMin;
-			delete [] xMax;
 		}
 		currentLearnerType = weakType;
 	}
@@ -139,23 +145,24 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 	CvMat *trainLabels = cvCreateMat(labels.size(), 1, CV_32FC1);
 	CvMat *sampleWeights = cvCreateMat(samples.size(), 1, CV_32FC1);
 
-	if(weakType != 1)
+    if(weakType != 1) // random projection or random circle
 	{
 		if(dim == 2)
 		{
 			FOR(i, sampleCnt)
 			{
-				FOR(j, learnerCount)
+                fvec sample = samples[perm[i]];
+                FOR(j, learnerCount)
 				{
 					float val = 0;
 					if(!weakType)
 					{
-						val = samples[perm[i]][0]* learners[j][0] + samples[perm[i]][1]* learners[j][1];
+                        val = sample[0]* learners[j][0] + sample[1]* learners[j][1];
 					}
 					else
 					{
-						val = sqrtf((samples[perm[i]][0] - learners[j][0])*(samples[perm[i]][0] - learners[j][0])+
-							(samples[perm[i]][1] - learners[j][1])*(samples[perm[i]][1] - learners[j][1]));
+                        val = sqrtf((sample[0] - learners[j][0])*(sample[0] - learners[j][0])+
+                            (sample[1] - learners[j][1])*(sample[1] - learners[j][1]));
 					}
 					cvSetReal2D(trainSamples, i, j, val);
 				}
@@ -173,7 +180,10 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 				FOR(j, learnerCount)
 				{
 					float val = 0;
-                    if(!weakType) val = sample * learners[j];
+                    if(!weakType)
+                    {
+                        FOR(d, dim) val += sample[d] * learners[j][d];
+                    }
 					else
 					{
 						FOR(d,dim) val += (sample[d] - learners[j][d])*(sample[d] - learners[j][d]);
@@ -244,6 +254,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 	{
 		CvBoostTree *predictor = *CV_SEQ_ELEM(predictors, CvBoostTree*, i);
 		CvDTreeSplit *split = predictor->get_root()->split;
+        if(!split) continue;
 		features.push_back(split->var_idx);
 	}
 
