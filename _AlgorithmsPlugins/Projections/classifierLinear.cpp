@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "classifierLinear.h"
 #include "JnS/Matutil.h"
 #include "JnS/JnS.h"
+#include <roc.h>
 #include <QDebug>
 
 using namespace std;
@@ -77,6 +78,7 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 	bUsesDrawTimer = false;
 	minResponse = FLT_MAX;
 	maxResponse = -FLT_MAX;
+    midResponse = 0.5;
 	float minResp = FLT_MAX;
 	float maxResp = -FLT_MAX;
 	FOR(i, samples.size())
@@ -92,6 +94,23 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 	}
 	minResponse = minResp;
 	maxResponse = maxResp;
+
+    if(linearType < 3)
+    {
+        vector<f32pair> roc(samples.size());
+        FOR(i, samples.size())
+        {
+            fVec point(samples[i][0] - meanAll[0], samples[i][1] - meanAll[1]);
+            float estimate = W*point;
+            float response = -(estimate - threshold);
+            if(minResponse != FLT_MAX)
+            {
+                response = (response-minResponse)/fabs(maxResponse-minResponse); // 0-1 range
+            }
+            roc[i] = make_pair(response, labels[i]);
+        }
+        midResponse = GetBestThreshold(roc);
+    }
 }
 
 float ClassifierLinear::Test(const fvec &sample )
@@ -121,7 +140,7 @@ float ClassifierLinear::Test(const fvec &sample )
 	if(minResponse != FLT_MAX)
 	{
 		response = (response-minResponse)/fabs(maxResponse-minResponse); // 0-1 range
-		response = (response-0.5f)*6.f;
+        response = (response-midResponse)*6.f;
 	}
 	return response;
 }
@@ -297,7 +316,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 
 	KILL(sigma);
 
-	float threshold = 0;
+    threshold = 0;
 	bool inverted = false;
 	// we do the actual classification
 	u32 steps = 1000;

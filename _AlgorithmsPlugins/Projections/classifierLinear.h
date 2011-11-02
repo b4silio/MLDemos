@@ -36,7 +36,7 @@ private:
 	fVec W; /**< TODO */
 	int threshold; /**< TODO */
 	double* Transf; /**< TODO */
-	float minResponse, maxResponse;
+    float minResponse, maxResponse, midResponse;
     std::vector<fvec> projected;
 
 	/**
