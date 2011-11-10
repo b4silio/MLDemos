@@ -24,7 +24,8 @@ public:
 	void AddResults(fvec results, QString name, QString algorithm);
 	void Show();
 	void Clear();
-	QPixmap &Display(){return pixmap;};
+    void SetActiveResult(int index);
+    QPixmap &Display(){return pixmap;}
 
 public slots:
 	void Update();

@@ -556,6 +556,7 @@ void MLDemos::LoadParams( QString filename )
         }
 	}
 	ResetPositiveClass();
+    ManualSelectionUpdated();
 	if(bClass) Classify();
 	if(bRegr) Regression();
 	if(bDyn) Dynamize();

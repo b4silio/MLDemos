@@ -49,7 +49,7 @@ DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
 
 DrawTimer::~DrawTimer()
 {
-
+    KILL(perm);
 }
 
 void DrawTimer::Stop()

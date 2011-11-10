@@ -51,7 +51,7 @@ LIBS += -lopencv_core230 \
     INCLUDEPATH += /usr/local/include/
     LIBS += -L/usr/local/lib
     DEFINES += OPENCV22
-    message("using opencv22")
+    message("using opencv22 or later")
     LIBS += \
         -lopencv_core \
         -lopencv_features2d \

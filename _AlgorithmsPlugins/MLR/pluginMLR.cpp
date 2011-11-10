@@ -20,31 +20,19 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _CLASSIFIER_ES_MLR_H_
-#define _CLASSIFIER_ES_MLR_H_
 
-#include "classifier.h"
+#include "pluginMLR.h"
+#include "interfaceRRMLRClassifier.h"
+#include "interfaceESMLRClassifier.h"
 
-namespace ESMLR
+PluginMLR::PluginMLR()
 {
-	struct Classifier;
+	classifiers.push_back(new ClassRRMLR());
+	classifiers.push_back(new ClassESMLR());
 }
 
-class ClassifierESMLR : public Classifier
-{
-	u32 cutCount;
-	float alpha;
-	u32 genCount;
-	u32 indPerDim;
-	ESMLR::Classifier* classifier;
-	
-public:
-	ClassifierESMLR();
-	~ClassifierESMLR();
-	virtual void Train(std::vector< fvec > samples, ivec labels);
-	virtual float Test(const fvec &sample);
-	virtual char *GetInfoString();
-	void SetParams(u32 cutCount, float alpha, u32 genCount, u32 indPerDim);
-};
-
-#endif // _CLASSIFIER_ES_MLR_H_
+#ifndef PLUGIN_CLUSTER
+#ifndef PLUGIN_CLASSIFY
+Q_EXPORT_PLUGIN2(mld_MLR, PluginMLR)
+#endif
+#endif

@@ -106,7 +106,7 @@ bool ClassESMLR::LoadOptions(QSettings &settings)
 	if(settings.contains("esmlrCut")) params->esmlrCutSpin->setValue(settings.value("esmlrCut").toUInt());
 	if(settings.contains("esmlrAlpha")) params->esmlrAlphaSpin->setValue(settings.value("esmlrAlpha").toFloat());
 	if(settings.contains("esmlrGen")) params->esmlrGenSpin->setValue(settings.value("esmlrGen").toUInt());
-	if(settings.contains("esmlrIndPerDim")) params->esmlrGenSpin->setValue(settings.value("esmlrIndPerDim").toUInt());
+	if(settings.contains("esmlrIndPerDim")) params->esmlrIndPerDimSpin->setValue(settings.value("esmlrIndPerDim").toUInt());
 	return true;
 }
 

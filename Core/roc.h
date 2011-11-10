@@ -36,7 +36,7 @@ std::vector<f32pair> LoadRoc(const char *filename);
 
 std::vector<float> GetBestFMeasures();
 float GetBestThreshold(std::vector<f32pair> data);
-float GetBestFMeasure(std::vector<f32pair> data);
+std::vector<float> GetBestFMeasure(std::vector<f32pair> data);
 float GetAveragePrecision(std::vector<f32pair> data);
 float GetRocValueAt(std::vector<f32pair> data, float threshold);
 

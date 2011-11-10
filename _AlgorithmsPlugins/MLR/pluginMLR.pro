@@ -3,7 +3,7 @@
 # ##########################
 TEMPLATE = lib
 CONFIG += plugin
-NAME = mld_mlpESMLR
+NAME = mld_MLR
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
@@ -12,13 +12,21 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsESMLR.ui
-HEADERS +=	classifierESMLR.h \
+FORMS += paramsRRMLR.ui paramsESMLR.ui 
+HEADERS +=	MixtureLogisticRegression.h \
+			EvolutionStrategy.h \
+			classifierRRMLR.h \
+			interfaceRRMLRClassifier.h \
+			classifierESMLR.h \
 			interfaceESMLRClassifier.h \
-			pluginESMLR.h
-SOURCES += 	classifierESMLR.cpp \
+			pluginMLR.h
+SOURCES += 	MixtureLogisticRegression.cpp \
+			EvolutionStrategy.cpp \
+			classifierRRMLR.cpp \
+			interfaceRRMLRClassifier.cpp \
+			classifierESMLR.cpp \
 			interfaceESMLRClassifier.cpp \
-			pluginESMLR.cpp
+			pluginMLR.cpp
 
 ###########################
 # Dependencies            #

@@ -41,6 +41,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_drawingToolsContext2.h"
 #include "ui_drawingToolsContext3.h"
 #include "ui_drawingToolsContext4.h"
+#include "ui_manualSelection.h"
 
 #include "canvas.h"
 #include "classifier.h"
@@ -63,7 +64,7 @@ private:
 	*actionClearData, *actionClearModel, *actionScreenshot,
 	*actionNew, *actionSave, *actionLoad;
 
-	QDialog *displayDialog, *about, *statsDialog;
+    QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog;
 
     QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *compareWidget, *projectWidget;
 
@@ -86,6 +87,7 @@ private:
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
 	Ui::DrawingToolbarContext3 *drawToolbarContext3;
 	Ui::DrawingToolbarContext4 *drawToolbarContext4;
+    Ui::ManualSelection* manualSelection;
 	QWidget *drawToolbarWidget;
 	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget, *drawContext4Widget;
 	QToolBar *toolBar;
@@ -97,15 +99,15 @@ private:
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
-
+    QString lastTrainingInfo;
 
 	void closeEvent(QCloseEvent *event);
-	bool Train(Classifier *classifier, int positive, float trainRatio=1);
-	void Train(Regressor *regressor, float trainRatio=1);
+    bool Train(Classifier *classifier, int positive, float trainRatio=1, bvec trainList = bvec());
+    void Train(Regressor *regressor, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
-    void Train(Clusterer *clusterer);
+    void Train(Clusterer *clusterer, bvec trainList = bvec());
 	void Train(Maximizer *maximizer);
-    void Train(Projector *projector);
+    void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
     void Test(Maximizer *maximizer);
 
@@ -141,7 +143,8 @@ private:
 	void Load(QString filename);
 	void Save(QString filename);
 
-	void UpdateInfo();
+    std::vector<bool> GetManualSelection();
+    void UpdateInfo();
 	void SetCrossValidationInfo();
 	bool bIsRocNew;
 	bool bIsCrossNew;
@@ -237,6 +240,8 @@ private slots:
 	void Drawing(fvec sample, int label);
 	void DrawingStopped();
 
+
+    void ManualSelection();
     void ExposeData();
 	void FitToData();
 	void ZoomChanged(float d);
@@ -250,7 +255,13 @@ private slots:
 	void StatsChanged();
 	void AlgoChanged();
 	void ChangeInfoFile();
-	void TargetButton();
+    void ManualSelectionUpdated();
+    void ManualSelectionChanged();
+    void ManualSelectionClear();
+    void ManualSelectionInvert();
+    void ManualSelectionRemove();
+    void ManualSelectionRandom();
+    void TargetButton();
 	void GaussianButton();
 	void GradientButton();
 	void BenchmarkButton();

@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "mymaths.h"
 #include "datasetManager.h"
 #include <fstream>
+#include <algorithm>
 #include <map>
 
 using namespace std;
@@ -138,6 +139,21 @@ void DatasetManager::RemoveSample(unsigned int index)
 			i--;
 		}
 	}
+}
+
+void DatasetManager::RemoveSamples(ivec indices)
+{
+    if(indices.size() > samples.size()) return;
+    // we sort the indices
+    sort(indices.begin(), indices.end(), less<int>());
+    int offset = 0;
+    FOR(i, indices.size())
+    {
+        int index = indices[i] - offset;
+        if(index < 0 || index > samples.size()) continue;
+        RemoveSample(index);
+        offset++;
+    }
 }
 
 void DatasetManager::AddSequence(int start, int stop)

@@ -33,5 +33,6 @@ QColor ColorFromVector(fvec a);
 QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const char *> roclabels, QSize size);
 QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
+QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 
 #endif // _DRAW_UTILS_H_

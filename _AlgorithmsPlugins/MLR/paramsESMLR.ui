@@ -110,26 +110,6 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QDoubleSpinBox" name="esmlrAlphaSpin">
-     <property name="toolTip">
-      <string>Vary the slope of the sigmoid function of hyperplanes activations. This factor will be divided by the average of standard deviation of data.
-
-beta = alpha / avr(stddev(data))
-
-sigmoid function: (1-exp(-beta*sum))</string>
-     </property>
-     <property name="maximum">
-      <double>999.990000000000009</double>
-     </property>
-     <property name="singleStep">
-      <double>0.100000000000000</double>
-     </property>
-     <property name="value">
-      <double>2.000000000000000</double>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_16">
      <property name="font">
@@ -139,6 +119,26 @@ sigmoid function: (1-exp(-beta*sum))</string>
      </property>
      <property name="text">
       <string>alpha</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QDoubleSpinBox" name="esmlrAlphaSpin">
+     <property name="toolTip">
+      <string>Vary the slope of the sigmoid function of hyperplanes activations. This factor will be divided by the average of standard deviation of data.
+
+beta = alpha / avr(stddev(data))
+
+sigmoid function: tanh</string>
+     </property>
+     <property name="maximum">
+      <double>999.990000000000009</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="value">
+      <double>2.000000000000000</double>
      </property>
     </widget>
    </item>

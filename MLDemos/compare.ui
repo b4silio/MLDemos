@@ -72,6 +72,11 @@
           <string>Histograms</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Raw Data</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

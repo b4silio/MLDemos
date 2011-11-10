@@ -174,6 +174,7 @@ public:
 	void AddSamples(std::vector< fvec > samples, ivec newLabels=ivec(), std::vector<dsmFlags> newFlags=std::vector<dsmFlags>());
 	void AddSamples(DatasetManager &newSamples);	
 	void RemoveSample(unsigned int index);
+    void RemoveSamples(ivec indices);
 
 	fvec GetSample(int index=0){return index<samples.size() ? samples[index] : fvec();}
 	std::vector< fvec > GetSamples(){return samples;}
