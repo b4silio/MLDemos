@@ -99,7 +99,7 @@ private:
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
-
+    QString lastTrainingInfo;
 
 	void closeEvent(QCloseEvent *event);
     bool Train(Classifier *classifier, int positive, float trainRatio=1, bvec trainList = bvec());

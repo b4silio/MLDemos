@@ -47,6 +47,7 @@ void MLDemos::Classify()
     DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsClassify->tabWidget->currentIndex();
     if(tab >= classifiers.size() || !classifiers[tab]) return;
     classifier = classifiers[tab]->GetClassifier();
@@ -109,6 +110,7 @@ void MLDemos::ClassifyCross()
     DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsClassify->tabWidget->currentIndex();
     if(tab >= classifiers.size() || !classifiers[tab]) return;
     tabUsedForTraining = tab;
@@ -145,7 +147,8 @@ void MLDemos::ClassifyCross()
     }
     classifier->crossval = fmeasures;
     ShowCross();
-    if(trained) classifiers[tab]->Draw(canvas, classifier);
+    //if(trained) classifiers[tab]->Draw(canvas, classifier);
+    DEL(classifier);
     UpdateInfo();
 }
 
@@ -181,6 +184,7 @@ void MLDemos::Regression()
     DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
     regressor = regressors[tab]->GetRegressor();
@@ -214,6 +218,7 @@ void MLDemos::RegressionCross()
     DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
     regressor = regressors[tab]->GetRegressor();
@@ -261,6 +266,7 @@ void MLDemos::Dynamize()
     DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsDynamic->tabWidget->currentIndex();
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     dynamical = dynamicals[tab]->GetDynamical();
@@ -473,6 +479,7 @@ void MLDemos::Cluster()
     DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsCluster->tabWidget->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     clusterer = clusterers[tab]->GetClusterer();
@@ -565,6 +572,7 @@ void MLDemos::ClusterOptimize()
     DEL(classifier);
     DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
 
     int tab = optionsCluster->tabWidget->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
@@ -786,6 +794,7 @@ void MLDemos::Maximize()
 	DEL(classifier);
 	DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsMaximize->tabWidget->currentIndex();
 	if(tab >= maximizers.size() || !maximizers[tab]) return;
 	maximizer = maximizers[tab]->GetMaximizer();
@@ -829,6 +838,7 @@ void MLDemos::Project()
     DEL(classifier);
     DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     int tab = optionsProject->tabWidget->currentIndex();
     if(tab >= projectors.size() || !projectors[tab]) return;
     projector = projectors[tab]->GetProjector();
@@ -881,6 +891,7 @@ void MLDemos::ProjectRevert()
     DEL(classifier);
     DEL(maximizer);
     DEL(projector);
+    lastTrainingInfo = "";
     if(!sourceData.size()) return;
     canvas->data->SetSamples(sourceData);
     canvas->data->SetLabels(sourceLabels);

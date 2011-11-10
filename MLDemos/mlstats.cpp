@@ -250,20 +250,25 @@ void MLDemos::UpdateInfo()
 	}
 
 	QString information;
-	information += "Current Dataset:\n";
-	char string[255];
-	sprintf(string, "    %d Samples\n    %d Positives\n    %d Negatives\n\n", count, pcount, ncount);
-	information += QString(string);
-	information +=    "       Min - Max          Mean  ,    Var\n";
-	sprintf(string,   "    %.3f    %.3f      %.3f   ,   %.3f  %.3f\n", sMin[0], sMax[0], sMean[0], sSigma[0], sSigma[1]);
-	sprintf(string, "%s    %.3f    %.3f      %.3f   ,   %.3f  %.3f\n", string, sMin[1], sMax[1], sMean[1], sSigma[2], sSigma[3]);
-	information += string;
 
-	if(classifier) information += "\nClassifier: " + QString(classifier->GetInfoString());
+    if(classifier)
+    {
+        information += "Classification Performance:\n" + lastTrainingInfo;
+        information += "\nClassifier: " + QString(classifier->GetInfoString());
+    }
 	if(regressor)  information += "\nRegressor: "  + QString(regressor->GetInfoString());
 	if(clusterer)  information += "\nClusterer: "  + QString(clusterer->GetInfoString());
 	if(dynamical)  information += "\nDynamical: "  + QString(dynamical->GetInfoString());
 	if(maximizer)  information += "\nMaximizer: "  + QString(maximizer->GetInfoString());
+
+    information += "\nCurrent Dataset:\n";
+    char string[255];
+    sprintf(string, "    %d Samples\n    %d Positives\n    %d Negatives\n\n", count, pcount, ncount);
+    information += QString(string);
+    information +=    "       Min - Max          Mean  ,    Var\n";
+    sprintf(string,   "    %.3f    %.3f      %.3f   ,   %.3f  %.3f\n", sMin[0], sMax[0], sMean[0], sSigma[0], sSigma[1]);
+    sprintf(string, "%s    %.3f    %.3f      %.3f   ,   %.3f  %.3f\n", string, sMin[1], sMax[1], sMean[1], sSigma[2], sSigma[3]);
+    information += string;
 
 	showStats->infoText->setText(information);
 }
