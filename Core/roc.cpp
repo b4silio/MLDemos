@@ -44,194 +44,6 @@ bool UDLesser(f32pair e1, f32pair e2)
 	return e1.first < e2.first;
 }
 
-/*
-void RocCurve(std::vector<f32pair> data)
-{
-	if(!data.size()) return;
-	if (!rocfont) 
-	{
-		rocfont = new CvFont;
-		cvInitFont(rocfont, CV_FONT_HERSHEY_PLAIN, 0.75, 0.75, 0, 1, CV_AA);
-	}
-	u32 res = RES;
-
-	if(!roc) roc = cvCreateImage(cvSize(res,res), 8, 3);
-	
-	cvSet(roc, CV_RGB(40,40,40));
-
-	rocCallBackAllData.clear();
-	rocCallBackData.clear();
-
-	std::sort(data.begin(), data.end(), UDLesser);
-
-	cvVec2 oldVal(1,0);
-	FOR(i, data.size())
-	{
-		float thresh = data[i].first;
-		u32 tp = 0, fp = 0;
-		u32 fn = 0, tn = 0;
-		FOR(j, data.size())
-		{
-			if(data[j].second == 1)
-			{
-				if(data[j].first >= thresh) tp++;
-				else fn++;
-			}
-			else 
-			{
-				if(data[j].first >= thresh) fp++;
-				else tn++;
-			}
-		}
-		cvVec2 val(fp/float(fp+tn), 1 - tp/float(tp+fn));
-		float precision = tp / float(tp+fp);
-		float recall = tp /float(tp+fn);
-		float fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
-		cvDrawLine(roc, (oldVal*(float)res).to2d(), (val*(float)res).to2d(), CV_RGB(255,255,255));
-		//draw_cross(roc, (val*(float)res).to2d(),CV_RGB(255,255,255), 2);
-
-		std::vector<f32> dat;
-		dat.push_back(val.x);
-		dat.push_back(val.y);
-		dat.push_back(data[i].first);
-		dat.push_back(fmeasure);
-		rocCallBackData.push_back(dat);
-
-		oldVal = val;
-	}
-	rocCallBackAllData.push_back(rocCallBackData);
-	rocIndex = rocCallBackAllData.size() - 1;
-	cvDrawLine(roc, cvPoint(0,res), (oldVal*(float)res).to2d(), CV_RGB(255,255,255));
-	cvNamedWindow("roc");
-	cvShowImage("roc", roc);
-	cvSetMouseCallback("roc", roc_on_mouse);
-	roc_on_mouse(0,0,0,0,0);
-}
-
-void RocCurves(std::vector<std::vector<f32pair> > dataVector, std::vector<char *> legend)
-{
-	IplImage *roc = RocImage(dataVector, legend);
-	cvNamedWindow("roc");
-	cvShowImage("roc", roc);
-	cvSetMouseCallback("roc", roc_on_mouse);
-	roc_on_mouse(0,0,0,0,0);
-}
-
-IplImage *RocImage(std::vector<std::vector<f32pair> > dataVector, std::vector<char *> legend, CvSize resolution)
-{
-	if (!rocfont) 
-	{
-		rocfont = new CvFont;
-		cvInitFont(rocfont, CV_FONT_HERSHEY_PLAIN, 1, 1, 0, 1, CV_AA);
-	}
-
-	//u32 res = RES;
-	cvVec2 vpad(PAD,PAD);
-	if(!roc || roc->width != resolution.width+2*PAD || roc->height != resolution.height + 2*PAD)
-	{
-		IMKILL(roc);
-		roc = cvCreateImage(cvSize(resolution.width+2*PAD,resolution.height+2*PAD), 8, 3);
-		IMKILL(rocBackup);
-		rocBackup = cvCloneImage(roc);
-	}
-	cvSet(roc, CV_RGB(40,40,40));
-
-	CvScalar colors [] = {
-		cvScalarAll(255),
-		cvScalarAll(225),
-		cvScalarAll(205),
-		cvScalarAll(185),
-		cvScalarAll(165),
-		cvScalarAll(150),
-		cvScalarAll(135),
-		cvScalarAll(120),
-		cvScalarAll(105),
-		cvScalarAll( 90),
-		cvScalarAll( 75),
-		cvScalarAll( 55),
-	};
-	int colorCnt = 12;
-
-	rocCallBackAllData.clear();
-	FOR(d, dataVector.size())
-	{
-		int minCol = 70;
-		CvScalar color = (dataVector.size() == 1) ? cvScalarAll(255) : cvScalarAll((255 - minCol)*(dataVector.size() - d -1)/(dataVector.size()-1) + minCol);
-		//CvScalar color = colors[d%colorCnt];
-
-		std::vector<f32pair> data = dataVector[d];
-		if(!data.size()) continue;
-		std::sort(data.begin(), data.end(), UDLesser);
-
-		rocCallBackData.clear();
-
-		cvVec2 oldVal(1,0);
-		FOR(i, data.size())
-		{
-			float thresh = data[i].first;
-			u32 tp = 0, fp = 0;
-			u32 fn = 0, tn = 0;
-
-			FOR(j, data.size())
-			{
-				if(data[j].second == 1)
-				{
-					if(data[j].first >= thresh) tp++;
-					else fn++;
-				}
-				else 
-				{
-					if(data[j].first >= thresh) fp++;
-					else tn++;
-				}
-			}
-
-			cvVec2 val;
-			float fmeasure = 0;
-			if((fp+tn)>0 && (tp+fn)>0 && (tp+fp)>0)
-			{
-				val=cvVec2(fp/float(fp+tn), 1 - tp/float(tp+fn));
-				float precision = tp / float(tp+fp);
-				float recall = tp /float(tp+fn);
-				fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
-			}
-
-			std::vector<f32> dat;
-			dat.push_back(val.x);
-			dat.push_back(val.y);
-			dat.push_back(data[i].first);
-			dat.push_back(fmeasure);
-			rocCallBackData.push_back(dat);
-
-			oldVal = val;
-		}
-
-		// we highlight the current roc curve
-		cvVec2 pt1, pt2;
-		FOR(i, rocCallBackData.size()-1)
-		{
-			pt1 = cvVec2(rocCallBackData[i][0]*resolution.width, rocCallBackData[i][1]*resolution.height);
-			pt2 = cvVec2(rocCallBackData[i+1][0]*resolution.width, rocCallBackData[i+1][1]*resolution.height);
-			cvDrawLine(roc, (pt1+vpad).to2d(), (pt2+vpad).to2d(), color, 2, CV_AA);
-		}
-		pt1 = cvVec2(0,resolution.width);
-		cvDrawLine(roc, (pt1+vpad).to2d(), (pt2+vpad).to2d(), color, 2, CV_AA);
-
-		rocCallBackAllData.push_back(rocCallBackData);
-		rocIndex = rocCallBackAllData.size() - 1;
-		cvDrawLine(roc, cvPoint(0 + PAD,resolution.height + PAD), cvPoint(oldVal.x*resolution.width+vpad.x,oldVal.y*resolution.height+vpad.y), color);
-		if(d < legend.size())
-		{
-			CvPoint point = cvPoint(2*resolution.width/3,(d+4)*rocfont->line_type);
-			//CvPoint point = cvPoint(res - strlen(legend[d])*8,(d+2)*rocfont->line_type);
-			cvPutText(roc, legend[d], point, rocfont, color);
-		}
-	}
-	cvCopy(roc, rocBackup);
-	return roc;
-}
-*/
-
 std::vector<float> GetBestFMeasures()
 {
 	std::vector<float> fmeasures;
@@ -281,6 +93,30 @@ std::vector<f32pair> LoadRoc(const char *filename)
 	return data;
 }
 
+// fixrocdata takes as input binary roc data and decides whether the two classes should be split
+// this should be done when the binary classifier is performing worse than random
+std::vector<f32pair> FixRocData(std::vector<f32pair> data)
+{
+    if(!data.size()) return data;
+    std::vector<f32pair> invData = data;
+    int rocType = 0; // -1 or 1
+    FOR(i, data.size())
+    {
+        if(data[i].second != 1 && data[i].second != -1) rocType = 1; // 0 1 2 ...
+    }
+    if(rocType == 0)
+    {
+        FOR(i, data.size()) invData[i].second = -invData[i].second;
+    }
+    else
+    {
+        FOR(i, data.size()) invData[i].second = 1 - invData[i].second;
+    }
+
+    float fData = GetBestFMeasure(data)[0];
+    float fInvData = GetBestFMeasure(invData)[0];
+    return (fData >= fInvData) ? data : invData;
+}
 
 float GetBestThreshold( std::vector<f32pair> data )
 {

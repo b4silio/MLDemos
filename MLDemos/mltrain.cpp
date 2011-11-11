@@ -274,6 +274,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             if(bMulticlass) countPerClass[trainLabels[i]]++;
             else countPerClass[trainLabels[i] == 1]++;
         }
+        rocData = FixRocData(rocData);
         classifier->rocdata.push_back(rocData);
         classifier->roclabels.push_back("training");
         lastTrainingInfo += QString("\nTraining Set (%1 samples):\n").arg(trainSamples.size());
@@ -348,6 +349,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             if(bMulticlass) countPerClass[testLabels[i]]++;
             else countPerClass[testLabels[i] == 1]++;
         }
+        rocData = FixRocData(rocData);
         classifier->rocdata.push_back(rocData);
         classifier->roclabels.push_back("test");
         lastTrainingInfo += QString("\nTesting Set (%1 samples):\n").arg(testSamples.size());

@@ -34,6 +34,7 @@ void SaveRocImage(const char *filename);
 void SaveRoc(std::vector<f32pair> data, const char *filename);
 std::vector<f32pair> LoadRoc(const char *filename);
 
+std::vector<f32pair> FixRocData(std::vector<f32pair> data);
 std::vector<float> GetBestFMeasures();
 float GetBestThreshold(std::vector<f32pair> data);
 std::vector<float> GetBestFMeasure(std::vector<f32pair> data);
