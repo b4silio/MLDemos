@@ -84,6 +84,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     vector<fvec> samples = canvas->data->GetSamples();
     if(trainRatio == 1 && !trainList.size())
     {
+        bool bTrueMulti = bMulticlass;
         classifier->Train(samples, newLabels);
         // we generate the roc curve for this guy
         vector<f32pair> rocData;
@@ -100,6 +101,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
                     else if(resp > 0 && newLabels[i] != 1) falsePerClass[0]++;
                     else if(newLabels[i] == 1) falsePerClass[1]++;
                     else truePerClass[0]++;
+                    bTrueMulti = false;
                 }
                 else
                 {
@@ -129,29 +131,32 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
         classifier->rocdata.push_back(rocData);
         classifier->roclabels.push_back("training");
         lastTrainingInfo += QString("\nTraining Set (% samples):\n").arg(samples.size());
-        if(bMulticlass)
+        if(bTrueMulti)
         {
             for(map<int,int>::iterator it = countPerClass.begin(); it != countPerClass.end(); it++)
             {
                 int c = it->first;
                 int tp = truePerClass[c];
                 int fp = falsePerClass[c];
-                float ratio = it->second != 0 ? tp / (float)it->second : 0;
+                float ratio = (it->second != 0) ? tp / (float)it->second : 0;
                 lastTrainingInfo += QString("Class %1 (%5 samples): %2 correct (%4%)\n%3 incorrect\n").arg(c).arg(tp).arg(fp).arg((int)(ratio*100)).arg(it->second);
             }
         }
         else
         {
             int posClass = 1;
-            if(truePerClass[posClass] / (float) countPerClass[posClass] < 0.5) posClass = 0;
-            int tp = truePerClass[posClass];
-            int fp = falsePerClass[posClass];
-            int count = countPerClass[posClass];
+            if(truePerClass[1] / (float) countPerClass[1] < 0.25)
+            {
+                posClass = 0;
+            }
+            int tp = posClass ? truePerClass[1] : falsePerClass[1];
+            int fp = posClass ? falsePerClass[1] : truePerClass[1];
+            int count = countPerClass[1];
             float ratio = count != 0 ? tp/(float)count : 1;
             lastTrainingInfo += QString("Positive (%4 samples): %1 correct (%3%)\n%2 incorrect\n").arg(tp).arg(fp).arg((int)(ratio*100)).arg(count);
-            tp = truePerClass[1-posClass];
-            fp = falsePerClass[1-posClass];
-            count = countPerClass[1-posClass];
+            tp = posClass ? truePerClass[0] : falsePerClass[0];
+            fp = posClass ? falsePerClass[0] : truePerClass[0];
+            count = countPerClass[0];
             ratio = count != 0 ? tp/(float)count : 1;
             lastTrainingInfo += QString("Negative (%4 samples): %1 correct (%3%)\n%2 incorrect\n").arg(tp).arg(fp).arg((int)(ratio*100)).arg(count);
         }
@@ -289,7 +294,6 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             if(truePerClass[1] / (float) countPerClass[1] < 0.25)
             {
                 posClass = 0;
-                qDebug() << "swapping classes";
             }
             int tp = posClass ? truePerClass[1] : falsePerClass[1];
             int fp = posClass ? falsePerClass[1] : truePerClass[1];
@@ -355,7 +359,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
                 int tp = truePerClass[c];
                 int fp = falsePerClass[c];
                 float ratio = it->second != 0 ? tp / (float)it->second : 0;
-                lastTrainingInfo += QString("Class %1 (%5 samples): %2 correct (%4%)\n%3 incorrect\n").arg(c).arg(tp).arg(fp).arg((int)ratio*100).arg(it->second);
+                lastTrainingInfo += QString("Class %1 (%5 samples): %2 correct (%4%)\n%3 incorrect\n").arg(c).arg(tp).arg(fp).arg((int)(ratio*100)).arg(it->second);
             }
         }
         else
