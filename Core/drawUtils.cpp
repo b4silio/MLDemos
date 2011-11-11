@@ -462,7 +462,7 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 
         FOR(i, data.size())
         {
-            QPointF point = QPointF(hpad + (drand48() - 0.5)*hsize, size.height() - (int)((data[i]-edge)/delta*res) + pad);
+            QPointF point = QPointF(hpad + (drand48() - 0.5)*hsize/2 + hsize/2, size.height() - (int)((data[i]-edge)/delta*res) + pad);
             painter.setPen(QPen(Qt::black, 0.5));
             painter.setBrush(QColor(color,color,color));
             painter.drawEllipse(point, 5, 5);
