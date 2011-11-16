@@ -1,6 +1,7 @@
 #ifndef SPLINE_H
 #define SPLINE_H
 
+#ifdef WITHBOOST
 /*  dynamo:- Event driven molecular dynamics simulator
 	http://www.marcusbannerman.co.uk/dynamo
 	Copyright (C) 2011  Marcus N Campbell Bannerman <m.bannerman@gmail.com>
@@ -284,4 +285,5 @@ namespace magnet {
   }
 }
 
+#endif // WITHBOOST
 #endif // SPLINE_H

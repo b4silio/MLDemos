@@ -16,8 +16,8 @@ RESOURCES += mldemos.qrc
 CONFIG += mainApp
 include($$MLPATH/MLDemos_variables.pri)
 
-CONFIG += boost
-INCLUDEPATH += $$BOOST
+#CONFIG += boost
+#INCLUDEPATH += $$BOOST
 
 macx:INCLUDEPATH += uiMac
 

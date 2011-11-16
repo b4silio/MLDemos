@@ -390,6 +390,9 @@ void MLDemos::Train(Regressor *regressor, float trainRatio, bvec trainList)
     if(!regressor) return;
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
+
+    regressor->GetInfoString();
+
     fvec trainErrors, testErrors;
     if(trainRatio == 1.f && !trainList.size())
     {
