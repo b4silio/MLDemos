@@ -57,6 +57,8 @@ void RegressorKRLS::Train(std::vector< fvec > _samples, ivec _labels)
 	if(capacity == 1) capacity = 2;
 	samples.clear();
 	labels.clear();
+    if(!_samples.size()) return;
+    if(_samples[0].size() > 2) return; // no multi-dim for now...
 
 	FOR(i, _samples.size())
 	{
@@ -67,10 +69,10 @@ void RegressorKRLS::Train(std::vector< fvec > _samples, ivec _labels)
 	}
 	randomize_samples(samples, labels);
 
-	DEL(linTrainer);
-	DEL(polTrainer);
-	DEL(rbfTrainer);
-	switch(kernelType)
+    DEL(linTrainer);
+    DEL(polTrainer);
+    DEL(rbfTrainer);
+    switch(kernelType)
 	{
 	case 0:
 		{
@@ -109,7 +111,8 @@ fvec  RegressorKRLS::Test( const fvec &_sample )
 {
 	fvec res;
 	res.resize(2,0);
-	reg_sample_type sample;
+    if(!linTrainer && !polTrainer && !rbfTrainer) return res;
+    reg_sample_type sample;
 	sample(0) = _sample[0];
 	switch(kernelType)
 	{

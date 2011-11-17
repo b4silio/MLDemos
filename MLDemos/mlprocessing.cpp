@@ -187,6 +187,7 @@ void MLDemos::Regression()
     lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
+    int outputDim = optionsRegress->outputDimSpin->value()-1;
     regressor = regressors[tab]->GetRegressor();
     tabUsedForTraining = tab;
 
@@ -201,7 +202,12 @@ void MLDemos::Regression()
         trainList = GetManualSelection();
     }
 
-    Train(regressor, trainRatio, trainList);
+    Train(regressor, outputDim, trainRatio, trainList);
+    if(outputDim != -1)
+    {
+        ui.canvasX2Spin->setValue(outputDim+1);
+        DisplayOptionChanged();
+    }
     regressors[tab]->Draw(canvas, regressor);
     UpdateInfo();
 }
@@ -221,6 +227,7 @@ void MLDemos::RegressionCross()
     lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
+    int outputDim = optionsRegress->outputDimSpin->value()-1;
     regressor = regressors[tab]->GetRegressor();
     tabUsedForTraining = tab;
 
@@ -231,7 +238,6 @@ void MLDemos::RegressionCross()
 
     vector<fvec> errors;
     errors.resize(2);
-    bool trained = false;
     FOR(f,foldCount)
     {
         DEL(regressor);
@@ -249,7 +255,7 @@ void MLDemos::RegressionCross()
     regressor->crossval = errors;
     ShowCross();
 
-	Train(regressor, trainRatio);
+    Train(regressor, outputDim, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
 	UpdateInfo();
 }

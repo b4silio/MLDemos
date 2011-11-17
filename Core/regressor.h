@@ -46,14 +46,16 @@ public:
 	fvec fmeasures;
 	fvec trainErrors, testErrors;
 	int type;
+    int outputDim;
 
-	Regressor() : posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), type(REGR_NONE){}
-	std::vector <fvec> GetSamples(){return samples;};
+    Regressor() : posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), outputDim(-1), type(REGR_NONE){}
+    std::vector <fvec> GetSamples(){return samples;}
+    void SetOutputDim(int outputDim){this->outputDim = outputDim;}
 
-	virtual void Train(std::vector< fvec > samples, ivec labels){};
-	virtual fvec Test( const fvec &sample){ return fvec(); };
-	virtual fVec Test(const fVec &sample){ if (dim==2) return fVec(Test((fvec)sample)); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);};
-	virtual char *GetInfoString(){return NULL;};
+    virtual void Train(std::vector< fvec > samples, ivec labels){}
+    virtual fvec Test( const fvec &sample){ return fvec(); }
+    virtual fVec Test(const fVec &sample){ if (dim==2) return fVec(Test((fvec)sample)); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
+    virtual char *GetInfoString(){return NULL;}
 };
 
 #endif // _REGRESSOR_H_

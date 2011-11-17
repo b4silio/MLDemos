@@ -25,7 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+    QApplication a(argc, argv);
 	QString filename = "";
 	if(argc > 1) filename = QString(argv[1]);
 	MLDemos w(filename);

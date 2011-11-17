@@ -37,6 +37,10 @@ void RegressorKNN::Train( std::vector< fvec > samples, ivec labels )
 	FOR(i, samples.size())
 	{
 		FOR(j, dim) dataPts[i][j] = samples[i][j];
+        if(outputDim != -1 && outputDim < dim)
+        {
+            dataPts[i][outputDim] = samples[i][dim];
+        }
 	}
 	kdTree = new ANNkd_tree(dataPts, samples.size(), dim);
 }
@@ -53,13 +57,18 @@ fvec RegressorKNN::Test( const fvec &sample )
 	res.resize(2,0);
 	if(!samples.size()) return res;
 	int dim = sample.size()-1;
+    int oDim = outputDim == -1 || outputDim > dim ? dim : outputDim;
 	double eps = 0; // error bound
     ANNpoint queryPt; // query point
 	queryPt = annAllocPt(dim); // allocate query point
 	ANNidxArray nnIdx = new ANNidx[k]; // allocate near neigh indices
 	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
-	FOR(i, dim) queryPt[i] = sample[i];
-	if(k > samples.size()) k = samples.size();
+    FOR(i, dim) queryPt[i] = sample[i];
+    if(outputDim != -1 && outputDim < dim)
+    {
+        queryPt[outputDim] = sample[dim];
+    }
+    if(k > samples.size()) k = samples.size();
 	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
 
     float dsum = 0;
@@ -70,7 +79,7 @@ fvec RegressorKNN::Test( const fvec &sample )
                 if(nnIdx[i] >= samples.size()) continue;
                 if(dists[i] == 0) dsum += 0;
                 else dsum += 1./dists[i];
-                scores[i] = samples[nnIdx[i]][dim];
+                scores[i] = samples[nnIdx[i]][oDim];
 	}
         FOR(i, k)
         {

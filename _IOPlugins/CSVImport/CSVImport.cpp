@@ -41,10 +41,11 @@ void CSVImport::Start()
         guiDialog->setWindowTitle("CVS Import");
         connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
         connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
-        connect(gui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChanged(int)));
+        connect(gui->classColumnSpin, SIGNAL(valueChanged(int)), this, SLOT(classColumnChanged(int)));
         connect(gui->headerCheck, SIGNAL(clicked()), this, SLOT(headerChanged()));
         connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
         connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(on_dumpButton_clicked()));
+        connect(gui->classIgnoreCheck, SIGNAL(clicked()), this, SLOT(classIgnoreChanged()));
 //        connect(gui->pcaButton, SIGNAL(clicked()),this,SLOT(on_pcaButton_clicked()));
         guiDialog->show();
     }
@@ -102,7 +103,7 @@ void CSVImport::Parse(QString filename)
         QStringList headerLabels;
         FOR(i, rawData[0].size())
         {
-            headerLabels <<  QString("%1:").arg(i) + rawData[0][i].c_str();
+            headerLabels <<  QString("%1:").arg(i+1) + rawData[0][i].c_str();
         }
         gui->tableWidget->setHorizontalHeaderLabels(headerLabels);
     }
@@ -115,12 +116,17 @@ void CSVImport::Parse(QString filename)
             gui->tableWidget->setItem(r-bUseHeader, c, newItem);
         }
     }
-    gui->spinBox->setRange(1,rawData[0].size());
+    gui->classColumnSpin->setRange(1,rawData[0].size());
 }
 
 void CSVImport::FetchResults(std::vector<fvec> results)
 {
 
+}
+
+void CSVImport::classIgnoreChanged()
+{
+    classColumnChanged(0);
 }
 
 void CSVImport::headerChanged()
@@ -151,12 +157,16 @@ void CSVImport::headerChanged()
             gui->tableWidget->setItem(r-bUseHeader, c, newItem);
         }
     }
-    gui->spinBox->setRange(1,rawData[0].size());
+    gui->classColumnSpin->setRange(1,rawData[0].size());
 }
 
-void CSVImport::spinBoxChanged(int value)
+void CSVImport::classColumnChanged(int value)
 {
-    inputParser->setOutputColumn(value-1);
+    if(gui->classIgnoreCheck->isChecked())
+    {
+        inputParser->setOutputColumn(-1);
+    }
+    else  inputParser->setOutputColumn(value-1);
 }
 
 void CSVImport::on_dumpButton_clicked()

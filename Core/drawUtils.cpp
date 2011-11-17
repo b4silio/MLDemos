@@ -133,11 +133,17 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
     QPainter painter(&pixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 
+    int w = pixmap.width(), h = pixmap.height();
 	int PAD = 16;
+
+    QFont font = painter.font();
+    font.setPointSize(12);
+    font.setBold(true);
+    painter.setFont(font);
 
 	FOR(d, rocdata.size())
 	{
-		int minCol = 70;
+        int minCol = 128;
 		int color = (rocdata.size() == 1) ? 255 : (255 - minCol)*(rocdata.size() - d -1)/(rocdata.size()-1) + minCol;
 		color = 255 - color;
 
@@ -201,6 +207,18 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
             painter.drawText(pos,QString(roclabels[d]));
 		}
 	}
+
+    font = painter.font();
+    font.setPointSize(10);
+    font.setBold(false);
+    font.setCapitalization(QFont::SmallCaps);
+    painter.setFont(font);
+    painter.setPen(Qt::black);
+    painter.drawText(0, 0, size.width(), 16, Qt::AlignCenter, "False Positives");
+    painter.translate(0, size.height());
+    painter.rotate(-90);
+    painter.drawText(0,0, size.height(), 16, Qt::AlignCenter, "True Positives");
+
 	return pixmap;
 }
 

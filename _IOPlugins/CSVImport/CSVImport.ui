@@ -40,14 +40,14 @@
        <height>0</height>
       </size>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
-      <item>
+      <item row="0" column="0" colspan="2">
        <widget class="QPushButton" name="loadFile">
         <property name="font">
          <font>
@@ -62,7 +62,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="1" column="0" colspan="2">
        <widget class="QCheckBox" name="headerCheck">
         <property name="font">
          <font>
@@ -74,7 +74,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="2" column="0">
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
@@ -82,21 +82,18 @@
          </font>
         </property>
         <property name="text">
-         <string>Output column :</string>
+         <string>Class Column:</string>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QSpinBox" name="spinBox"/>
-      </item>
-      <item>
+      <item row="5" column="0" colspan="2">
        <widget class="QPushButton" name="dumpButton">
         <property name="text">
          <string>Send Data</string>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="6" column="0">
        <widget class="QWidget" name="widget_3" native="true">
         <layout class="QGridLayout" name="gridLayout">
          <property name="horizontalSpacing">
@@ -111,7 +108,7 @@
         </layout>
        </widget>
       </item>
-      <item>
+      <item row="7" column="0" colspan="2">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -124,7 +121,7 @@
         </property>
        </spacer>
       </item>
-      <item>
+      <item row="8" column="0" colspan="2">
        <widget class="QPushButton" name="closeButton">
         <property name="font">
          <font>
@@ -133,6 +130,21 @@
         </property>
         <property name="text">
          <string>Close</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="classColumnSpin"/>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QCheckBox" name="classIgnoreCheck">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Ignore Class (set to 0)</string>
         </property>
        </widget>
       </item>

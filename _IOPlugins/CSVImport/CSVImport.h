@@ -79,8 +79,9 @@ public slots:
     void Parse(QString filename);
 	void LoadFile();
 private slots:
+    void classIgnoreChanged();
     void headerChanged();
-    void spinBoxChanged(int value);
+    void classColumnChanged(int value);
     void on_dumpButton_clicked();
 //    void on_pcaButton_clicked();
 };

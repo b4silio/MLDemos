@@ -88,9 +88,17 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	RegressorGMR * gmr = (RegressorGMR*)regressor;
 	Gmm *gmm = gmr->gmm;
 	int dim = canvas->data->GetCount() ? canvas->data->GetSample(0).size() : gmm->dim;
+    int outputDim = regressor->outputDim;
 	int xIndex = canvas->xIndex;
 	int yIndex = canvas->yIndex;
-	float mean[2];
+    if(outputDim != -1 && outputDim < dim-1);
+    {
+        if(xIndex == dim-1) xIndex = outputDim;
+        else if (xIndex == outputDim) xIndex = dim-1;
+        if(yIndex == dim-1) yIndex = outputDim;
+        else if(yIndex == outputDim) yIndex = dim-1;
+    }
+    float mean[2];
 	float sigma[3];
 	painter.setBrush(Qt::NoBrush);
 	FOR(i, gmm->nstates)
@@ -132,6 +140,7 @@ void RegrGMM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 	int h = canvas->height();
 
 	RegressorGMR *gmr = ((RegressorGMR *)regressor);
+    int outputDim = regressor->outputDim;
 
 	QImage density(QSize(256,256), QImage::Format_RGB32);
 	density.fill(0);
@@ -144,6 +153,13 @@ void RegrGMM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 		for (int j=0; j< density.height(); j++)
 		{
 			sample = canvas->toSampleCoords(i*w/density.width(),j*h/density.height());
+            int dim = sample.size();
+            if(outputDim != -1 && outputDim < dim)
+            {
+                float tmp = sample[outputDim];
+                sample[outputDim] = sample[dim-1];
+                sample[dim-1] = tmp;
+            }
 			float val = gmr->gmm->pdf(&sample[0]);
 			int color = min(255,(int)(128 + val*10));
 			density.setPixel(i,j, qRgb(color,color,color));
@@ -158,6 +174,9 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	int w = canvas->width();
 	int h = canvas->height();
 	painter.setRenderHint(QPainter::Antialiasing, true);
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int outputDim = regressor->outputDim;
 
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
@@ -167,14 +186,22 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	painter.setBrush(Qt::NoBrush);
 	FOR(x, steps)
 	{
-		sample = canvas->toSampleCoords(x, 0);
-		fvec res = regressor->Test(sample);
+        sample = canvas->toSampleCoords(x, 0);
+        int dim = sample.size();
+        if(outputDim==-1) outputDim = dim-1;
+        fvec res = regressor->Test(sample);
 		if(res[0] != res[0] || res[1] != res[1]) continue;
-		QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
-		QPointF pointUp = canvas->toCanvasCoords(sample[0],res[0] + res[1]);
-		pointUp.setX(0);
-		pointUp.setY(pointUp.y() - point.y());
-		QPointF pointDown = -pointUp;
+        sample[outputDim] = res[0];
+        QPointF point = canvas->toCanvasCoords(sample);
+        sample[outputDim] = res[0]+res[1];
+        QPointF pointUp = canvas->toCanvasCoords(sample);
+        pointUp.setX(0);
+        pointUp.setY(pointUp.y() - point.y());
+        sample[outputDim] = res[0]-res[1];
+        QPointF pointDown = canvas->toCanvasCoords(sample);
+        //pointDown = -pointUp;
+        pointDown.setX(0);
+        pointDown.setY(pointDown.y() - point.y());
 		if(x)
 		{
 			painter.setPen(QPen(Qt::black, 1));

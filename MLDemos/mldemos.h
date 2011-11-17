@@ -103,7 +103,7 @@ private:
 
 	void closeEvent(QCloseEvent *event);
     bool Train(Classifier *classifier, int positive, float trainRatio=1, bvec trainList = bvec());
-    void Train(Regressor *regressor, float trainRatio=1, bvec trainList = bvec());
+    void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
     void Train(Clusterer *clusterer, bvec trainList = bvec());
 	void Train(Maximizer *maximizer);

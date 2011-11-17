@@ -104,6 +104,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.beginGroup("regressionOptions");
 	settings.setValue("foldCount", optionsRegress->foldCountSpin->value());
 	settings.setValue("trainRatio", optionsRegress->traintestRatioCombo->currentIndex());
+    settings.setValue("outputDimSpin", optionsRegress->outputDimSpin->value());
 	settings.setValue("tab", optionsRegress->tabWidget->currentIndex());
 	settings.endGroup();
 
@@ -273,8 +274,9 @@ void MLDemos::LoadLayoutOptions()
 
 	settings.beginGroup("regressionOptions");
 	if(settings.contains("foldCount")) optionsRegress->foldCountSpin->setValue(settings.value("foldCount").toFloat());
-	if(settings.contains("trainRatio")) optionsRegress->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
-	if(settings.contains("tab")) optionsRegress->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("trainRatio")) optionsRegress->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
+    if(settings.contains("outputDimSpin")) optionsRegress->outputDimSpin->setValue(settings.value("outputDimSpin").toFloat());
+    if(settings.contains("tab")) optionsRegress->tabWidget->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("dynamicalOptions");
@@ -388,8 +390,9 @@ void MLDemos::SaveParams( QString filename )
 	{
 		int tab = optionsRegress->tabWidget->currentIndex();
 		sprintf(groupName,"regressionOptions");
-		out << groupName << ":" << "tab" << " " << optionsRegress->tabWidget->currentIndex() << "\n";
-		if(tab < regressors.size() && regressors[tab])
+        out << groupName << ":" << "tab" << " " << optionsRegress->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "outputDimSpin" << " " << optionsRegress->outputDimSpin->value() << "\n";
+        if(tab < regressors.size() && regressors[tab])
 		{
 			regressors[tab]->SaveParams(out);
 		}
@@ -510,8 +513,9 @@ void MLDemos::LoadParams( QString filename )
 		{
 			bRegr = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabRegr);
-			if(line.endsWith("tab")) optionsRegress->tabWidget->setCurrentIndex(tab = (int)value);
-			if(tab < regressors.size() && regressors[tab]) regressors[tab]->LoadParams(line,value);
+            if(line.endsWith("tab")) optionsRegress->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("outputDimSpin")) optionsRegress->outputDimSpin->setValue((int)value);
+            if(tab < regressors.size() && regressors[tab]) regressors[tab]->LoadParams(line,value);
 		}
 		if(line.startsWith(dynGroup))
 		{

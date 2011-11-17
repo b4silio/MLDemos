@@ -110,7 +110,7 @@ public:
     void cleanData(unsigned int acceptedTypes);
     pair<vector<fvec>,ivec> getData(ivec excludeIndex = ivec(), int maxSamples=-1);
     map<string,unsigned int> getOutputLabelTypes(bool reparse);
-    void setOutputColumn(unsigned int column);
+    void setOutputColumn(int column);
     void setFirstRowAsHeader(bool value){bFirstRowAsHeader = value;}
     bool hasData();
     vector<unsigned int> getDataType(){return dataTypes;}

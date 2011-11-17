@@ -23,13 +23,16 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 void RegressorGPR::Train( std::vector<fvec> input, ivec labels)
 {
 	if(!input.size()) return;
-	RowVector inputs(input.size()),outputs(input.size());
-	int dim = input[0].size()-1;
+    int dim = input[0].size()-1;
+    Matrix inputs(dim, input.size());
+    RowVector outputs(input.size());
+    int oDim = outputDim != -1 ? min(outputDim, dim) : dim;
 	FOR(n, input.size())
 	{
-		inputs(n+1) = input[n][0];
-		outputs(n+1) = input[n][dim];
-	}
+        FOR(d, dim) inputs(d+1, n+1) = input[n][d];
+        outputs(n+1) = input[n][oDim];
+        if(outputDim != -1 && outputDim < dim) inputs(outputDim+1, n+1) = input[n][dim];
+    }
 
 	if(sogp) delete sogp;
 	if(kernelType == kerPOL)
@@ -64,11 +67,13 @@ fvec RegressorGPR::Test( const fvec &sample )
 	if(!sogp) return res;
 	double confidence;
 	Matrix _testout;
+    int dim = sogp->dim();
 	ColumnVector _testin(dim);
 	FOR(i,dim)
 	{
 		_testin(1+i) = sample[i];
 	}
+    if(outputDim != -1 && outputDim < dim) _testin(1+outputDim) = sample[dim];
 	_testout = sogp->predict(_testin,confidence);
 	res[0] = _testout(1,1);
 	res[1] = confidence*confidence;
@@ -116,10 +121,13 @@ fvec RegressorGPR::GetBasisVector( int index )
 {
 	if(!sogp) return fvec();
 	if(index > sogp->size()) return fvec();
-	fvec res;
-	res.resize(2,0);
-	res[0] = sogp->BVloc(index, 0);
-	res[1] = sogp->alpha_acc(index, 0);
+    int dim = sogp->dim();
+    fvec res(dim*2,0);
+    FOR(d, dim)
+    {
+        res[d] = sogp->BVloc(index, d);
+        res[dim + d] = sogp->alpha_acc(index, d);
+    }
 	return res;
 }
 

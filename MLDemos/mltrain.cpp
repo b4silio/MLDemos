@@ -385,13 +385,15 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     return true;
 }
 
-void MLDemos::Train(Regressor *regressor, float trainRatio, bvec trainList)
+void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList)
 {
     if(!regressor) return;
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
+    if(!samples.size()) return;
+    int dim = samples[0].size();
 
-    regressor->GetInfoString();
+    regressor->SetOutputDim(outputDim);
 
     fvec trainErrors, testErrors;
     if(trainRatio == 1.f && !trainList.size())
@@ -919,6 +921,7 @@ void MLDemos::Compare()
             QStringList s = line.split(":");
             int tab = s[1].toInt();
             if(tab >= regressors.size() || !regressors[tab]) continue;
+            int outputDim = optionsCompare->outputDimSpin->value();
             QTextStream paramStream(&paramString);
             QString paramName;
             float paramValue;
@@ -929,7 +932,7 @@ void MLDemos::Compare()
                 regressors[tab]->LoadParams(paramName, paramValue);
             }
             bvec trainList;
-            if(optionsClassify->manualTrainButton->isChecked())
+            if(optionsRegress->manualTrainButton->isChecked())
             {
                 // we get the list of samples that are checked
                 trainList = GetManualSelection();
@@ -941,7 +944,7 @@ void MLDemos::Compare()
             {
                 regressor = regressors[tab]->GetRegressor();
                 if(!regressor) continue;
-                Train(regressor, trainRatio, trainList);
+                Train(regressor, outputDim, trainRatio, trainList);
                 if(regressor->trainErrors.size())
                 {
                     float error = 0.f;

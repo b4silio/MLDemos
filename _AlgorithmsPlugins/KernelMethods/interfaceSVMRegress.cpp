@@ -226,8 +226,9 @@ void DrawArrow( const QPointF &ppt, const QPointF &pt, double sze, QPainter &pai
 void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	painter.setRenderHint(QPainter::Antialiasing);
-
-	if(regressor->type == REGR_RVM || regressor->type == REGR_KRLS)
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    if(regressor->type == REGR_RVM || regressor->type == REGR_KRLS)
 	{
 		vector<fvec> sv = (regressor->type == REGR_KRLS) ?
 				((RegressorKRLS*)regressor)->GetSVs() :
@@ -251,21 +252,21 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		{
 			painter.setBrush(Qt::NoBrush);
 			std::vector<fvec> samples = canvas->data->GetSamples();
-			fvec sv;
-			sv.resize(2,0);
+            int dim = canvas->data->GetDimCount();
+            fvec sv(2,0);
 			FOR(i, svm->l)
 			{
-				sv[0] = (f32)svm->SV[i][0].value;
+                sv[0] = (f32)svm->SV[i][xIndex].value;
 				FOR(j, samples.size())
 				{
-					if(sv[0] == samples[j][0])
+                    if(sv[0] == samples[j][xIndex])
 					{
-						sv[1] = samples[j][1];
+                        sv[1] = samples[j][yIndex];
 						break;
 					}
 				}
 				int radius = 7;
-				QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
+                QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
 				if(abs((*svm->sv_coef)[i]) == svm->param.C)
 				{
 					painter.setPen(QPen(Qt::black, 4));
@@ -285,17 +286,20 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	{
 		RegressorGPR * gpr = (RegressorGPR*)regressor;
 		int radius = 8;
+        int dim = canvas->data->GetDimCount()-1;
 		painter.setBrush(Qt::NoBrush);
 		FOR(i, gpr->GetBasisCount())
 		{
 			fvec basis = gpr->GetBasisVector(i);
-			fvec res = gpr->Test(basis);
-			QPointF pt1 = canvas->toCanvasCoords(basis[0],res[0]);
-			QPointF pt2 = pt1 + QPointF(0,(basis[1]>0 ? 1 : -1)*radius);
-			QPointF pt3 = pt2 + QPointF(0,(basis[1]>0 ? 1 : -1)*50);
+            fvec testBasis(dim+1);
+            FOR(d, dim) testBasis[d] = basis[d];
+            fvec res = gpr->Test(testBasis);
+            QPointF pt1 = canvas->toCanvasCoords(basis[xIndex],res[0]);
+            QPointF pt2 = pt1 + QPointF(0,(basis[dim + xIndex]>0 ? 1 : -1)*radius);
+            QPointF pt3 = pt2 + QPointF(0,(basis[dim + xIndex]>0 ? 1 : -1)*50);
 			painter.setPen(QPen(Qt::red,3));
 			painter.drawEllipse(pt1, radius, radius);
-			painter.setPen(QPen(Qt::red,min(4.f,max(fabs(basis[1])/5,0.5f))));
+            painter.setPen(QPen(Qt::red,min(4.f,max(fabs(basis[dim + xIndex])/5,0.5f))));
 			DrawArrow(pt2,pt3,10,painter);
 		}
 	}
@@ -308,26 +312,30 @@ void RegrSVM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 		RegressorGPR *gpr = (RegressorGPR *)regressor;
 		if(gpr->sogp)
 		{
-			int w = canvas->width();
+            int w = canvas->width();
 			int h = canvas->height();
-			Matrix _testout;
-			ColumnVector _testin(1);
+            int dim = canvas->data->GetDimCount()-1;
+            int outputDim = regressor->outputDim;
+            int xIndex = canvas->xIndex;
+            int yIndex = canvas->yIndex;
+            Matrix _testout;
+            ColumnVector _testin(dim);
 			QImage density(QSize(256,256), QImage::Format_RGB32);
 			density.fill(0);
 			// we draw a density map for the probability
 			for (int i=0; i < density.width(); i++)
 			{
 				fvec sampleIn = canvas->toSampleCoords(i*w/density.width(),0);
-				float testin = sampleIn[0];
+                FOR(d, dim) _testin(d+1) = sampleIn[d];
+                if(outputDim != -1 && outputDim < dim) _testin(outputDim+1) = sampleIn[dim];
 				double sigma;
-				_testin(1) = testin;
 				_testout = gpr->sogp->predict(_testin, sigma);
 				sigma = sigma*sigma;
 				float testout = _testout(1,1);
 				for (int j=0; j< density.height(); j++)
 				{
-					fvec sampleOut = canvas->toSampleCoords(0,j*h/density.height());
-					float val = gpr->GetLikelihood(testout, sigma, sampleOut[1]);
+                    fvec sampleOut = canvas->toSampleCoords(i*w/density.width(),j*h/density.height());
+                    float val = gpr->GetLikelihood(testout, sigma, sampleOut[yIndex]);
 					int color = min(255,(int)(128 + val*20));
 					density.setPixel(i,j, qRgb(color,color,color));
 				}
@@ -344,6 +352,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	int w = canvas->width();
 	int h = canvas->height();
+    int xIndex = canvas->xIndex;
 	fvec sample;
 	sample.resize(2,0);
 	if(regressor->type == REGR_KRLS || regressor->type == REGR_RVM)
@@ -356,7 +365,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 			sample = canvas->toSampleCoords(x,0);
 			fvec res = regressor->Test(sample);
 			if(res[0] != res[0]) continue;
-			QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
+            QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
 			if(x)
 			{
 				painter.setPen(QPen(Qt::black, 1));
@@ -384,7 +393,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 			sample = canvas->toSampleCoords(x,0);
 			fvec res = regressor->Test(sample);
 			if(res[0] != res[0]) continue;
-			QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
+            QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
 			if(x)
 			{
 				painter.setPen(QPen(Qt::black, 1));
@@ -408,9 +417,9 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 			sample = canvas->toSampleCoords(x,0);
 			fvec res = regressor->Test(sample);
 			if(res[0] != res[0] || res[1] != res[1]) continue;
-			QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
-			QPointF pointUp = canvas->toCanvasCoords(sample[0],res[0] + res[1]);
-			QPointF pointDown = canvas->toCanvasCoords(sample[0],res[0] - res[1]);
+            QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
+            QPointF pointUp = canvas->toCanvasCoords(sample[xIndex],res[0] + res[1]);
+            QPointF pointDown = canvas->toCanvasCoords(sample[xIndex],res[0] - res[1]);
 			if(x)
 			{
 				painter.setPen(QPen(Qt::black, 1));

@@ -63,7 +63,7 @@ void ClassSVM::ChangeOptions()
 
 QString ClassSVM::GetAlgoString()
 {
-	int C = params->svmCSpin->value();
+    double C = params->svmCSpin->value();
 	int sv = params->maxSVSpin->value();
 	int kernelType = params->kernelTypeCombo->currentIndex();
 	float kernelGamma = params->kernelWidthSpin->value();
@@ -78,27 +78,27 @@ QString ClassSVM::GetAlgoString()
 		break;
 	case 1: // Nu-SVM
 		algo += "Nu-SVM";
-		algo += QString(" %1").arg(C);
+        algo += QString(" %1").arg(C);
 		break;
 	case 2: // RVM
 		algo += "RVM";
-		algo += QString(" %1").arg(C);
+        algo += QString(" %1").arg(C);
 		break;
 	case 3: // Pegasos
 		algo += "Pegasos";
-		algo += QString(" %1 %2").arg(C).arg(sv);
+        algo += QString(" %1 %2").arg(C).arg(sv);
 		break;
 	}
 	switch(kernelType)
 	{
 	case 0:
-		algo += " L";
+        algo += " Lin";
 		break;
 	case 1:
-		algo += QString(" P %1").arg(kernelDegree);
+        algo += QString(" Pol %1").arg(kernelDegree);
 		break;
 	case 2:
-		algo += QString(" R %1").arg(kernelGamma);
+        algo += QString(" RBF %1").arg(kernelGamma);
 		break;
 	}
 	return algo;

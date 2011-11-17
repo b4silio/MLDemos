@@ -69,18 +69,19 @@ void RegrMLP::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;
 	painter.setRenderHint(QPainter::Antialiasing, true);
+    int xIndex = canvas->xIndex;
 
-	int w = canvas->width();
-	fvec sample;
+    int w = canvas->width();
+    fvec sample;
 	sample.resize(2,0);
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	FOR(x, steps)
 	{
-		sample = canvas->toSampleCoords(x, 0);
+        sample = canvas->toSampleCoords(x,0);
 		fvec res = regressor->Test(sample);
-		if(res[0] != res[0]) continue;
-		QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
+        if(res[0] != res[0]) continue; // NaN!
+        QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
 		if(x)
 		{
 			painter.setPen(QPen(Qt::black, 1));
