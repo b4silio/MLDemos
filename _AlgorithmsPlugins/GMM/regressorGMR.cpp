@@ -26,15 +26,29 @@ void RegressorGMR::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
 	int dim = samples[0].size();
-	DEL(gmm);
+
+    if(outputDim != -1 && outputDim < dim-1)
+    {
+        // we need to swap the current last dimension with the desired output
+        FOR(i, samples.size())
+        {
+            float val = samples[i][dim-1];
+            samples[i][dim-1] = samples[i][outputDim];
+            samples[i][outputDim] = val;
+        }
+    }
+
+    DEL(gmm);
 	nbClusters = min((int)nbClusters, (int)samples.size());
 	gmm = new Gmm(nbClusters, dim);
 	KILL(data);
 	data = new float[samples.size()*dim];
-	FOR(i, samples.size())
+
+    FOR(i, samples.size())
 	{
-		FOR(j, dim) data[i*dim + j] = samples[i][j];
+        FOR(d, dim) data[i*dim + d] = samples[i][d];
 	}
+
 	gmm->init(data, samples.size(), initType);
 	gmm->em(data, samples.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
 	bFixedThreshold = false;
@@ -43,12 +57,25 @@ void RegressorGMR::Train(std::vector< fvec > samples, ivec labels)
 
 fvec RegressorGMR::Test( const fvec &sample)
 {
-	fvec res;
+    fvec res;
 	res.resize(2,0);
 	if(!gmm) return res;
 	float estimate;
 	float sigma;
-	gmm->doRegression(&sample[0], &estimate, &sigma);
+    int dim = sample.size();
+    if(outputDim != -1 && outputDim < dim-1)
+    {
+        // we need to swap the current last dimension with the desired output
+        fvec newSample = sample;
+        float val = newSample[dim-1];
+        newSample[dim-1] = newSample[outputDim];
+        newSample[outputDim] = val;
+        gmm->doRegression(&newSample[0], &estimate, &sigma);
+    }
+    else
+    {
+        gmm->doRegression(&sample[0], &estimate, &sigma);
+    }
 	res[0] = estimate;
 	res[1] = sqrt(sigma);
 	return res;

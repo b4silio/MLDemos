@@ -86,22 +86,24 @@ void RegressorSVR::Train(std::vector< fvec > samples, ivec labels)
 	svm_problem problem;
 	svm_node *x_space;
 
-	int data_dimension = samples[0].size()-1;
+    int dim = samples[0].size()-1;
+    int oDim = outputDim != -1 && outputDim < dim ? outputDim : dim;
 	problem.l = samples.size();
 	problem.y = new double[problem.l];
 	problem.x = new svm_node *[problem.l];
-	x_space = new svm_node[(data_dimension+1)*problem.l];
+    x_space = new svm_node[(dim+1)*problem.l];
 
 	FOR(i, problem.l)
 	{
-		FOR(j, data_dimension)
+        FOR(j, dim)
 		{
-			x_space[(data_dimension+1)*i + j].index = j+1;
-			x_space[(data_dimension+1)*i + j].value = samples[i][j];
+            x_space[(dim+1)*i + j].index = j+1;
+            x_space[(dim+1)*i + j].value = samples[i][j];
 		}
-		x_space[(data_dimension+1)*i + data_dimension].index = -1;
-		problem.x[i] = &x_space[(data_dimension+1)*i];
-		problem.y[i] = samples[i][data_dimension];
+        x_space[(dim+1)*i + dim].index = -1;
+        if(outputDim != -1 && outputDim < dim) x_space[(dim+1)*i + outputDim].value = samples[i][dim];
+        problem.x[i] = &x_space[(dim+1)*i];
+        problem.y[i] = samples[i][oDim];
 	}
 
 	DEL(svm);
@@ -117,18 +119,19 @@ void RegressorSVR::Train(std::vector< fvec > samples, ivec labels)
 
 fvec RegressorSVR::Test( const fvec &sample )
 {
-	int data_dimension = sample.size()-1;
+    int dim = sample.size()-1;
 	float estimate;
 	if(!node)
 	{
-		node = new svm_node[data_dimension+1];
-		node[data_dimension].index = -1;
+        node = new svm_node[dim+1];
+        node[dim].index = -1;
 	}
-	FOR(i, data_dimension)
+    FOR(i, dim)
 	{
 		node[i].index = i+1;
 		node[i].value = sample[i];
 	}
+    if(outputDim != -1 && outputDim < dim) node[outputDim].value = sample[dim];
 	estimate = (float)svm_predict(svm, node);
 	fvec res;
 	res.push_back(estimate);
@@ -138,15 +141,15 @@ fvec RegressorSVR::Test( const fvec &sample )
 
 fVec RegressorSVR::Test( const fVec &sample )
 {
-	int data_dimension = 1;
+    int dim = 1;
 	float estimate;
-	if(!node) node = new svm_node[data_dimension+1];
-	FOR(i, data_dimension)
+    if(!node) node = new svm_node[dim+1];
+    FOR(i, dim)
 	{
 		node[i].index = i+1;
 		node[i].value = sample._[i];
 	}
-	node[data_dimension].index = -1;
+    node[dim].index = -1;
 	estimate = (float)svm_predict(svm, node);
 	return fVec(estimate,1);
 }

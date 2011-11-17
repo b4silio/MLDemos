@@ -36,8 +36,19 @@ void RegressorMLP::Train(std::vector< fvec > samples, ivec labels)
 {
 	u32 sampleCnt = samples.size();
 	if(!sampleCnt) return;
-	DEL(mlp);
-	dim = samples[0].size()-1;
+    dim = samples[0].size();
+    if(outputDim != -1 && outputDim < dim -1)
+    {
+        // we need to swap the current last dimension with the desired output
+        FOR(i, samples.size())
+        {
+            float val = samples[i][dim-1];
+            samples[i][dim-1] = samples[i][outputDim];
+            samples[i][outputDim] = val;
+        }
+    }
+    DEL(mlp);
+    dim = samples[0].size()-1;
 
 	CvMat *layers;
 	//	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
@@ -91,8 +102,19 @@ fvec RegressorMLP::Test( const fvec &sample)
 	res.resize(2);
 	if(!mlp) return res;
 	float *_input = new float[dim];
-	FOR(d, sample.size()) _input[d] = sample[d];
-	for(int d=sample.size(); d<dim; d++) _input[d] = 0;
+    if(outputDim != -1 & outputDim < sample.size())
+    {
+        fvec newSample = sample;
+        newSample[outputDim] = sample[sample.size()-1];
+        newSample[sample.size()-1] = sample[outputDim];
+        FOR(d, min(dim,(u32)sample.size())) _input[d] = newSample[d];
+        for(int d=min(dim,(u32)sample.size()); d<dim; d++) _input[d] = 0;
+    }
+    else
+    {
+        FOR(d, min(dim,(u32)sample.size())) _input[d] = sample[d];
+        for(int d=min(dim,(u32)sample.size()); d<dim; d++) _input[d] = 0;
+    }
 	CvMat input = cvMat(1,dim,CV_32FC1, _input);
 	float _output[1];
 	CvMat output = cvMat(1,1,CV_32FC1, _output);

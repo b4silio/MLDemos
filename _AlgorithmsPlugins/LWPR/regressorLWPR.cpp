@@ -32,20 +32,25 @@ void RegressorLWPR::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
 	int dim = samples[0].size();
-	DEL(model);
-	model = new LWPR_Object(1,1);
+    DEL(model);
+    model = new LWPR_Object(dim-1,1);
 	model->setInitD(initD);
 	model->setInitAlpha(initAlpha);
 	model->wGen(wGen);
 
 	dvec x;
 	dvec y;
-	x.resize(1);
+    x.resize(dim-1);
 	y.resize(1);
 	FOR(i, samples.size())
 	{
-		x[0] = samples[i][0];
-		y[0] = samples[i][1];
+        FOR(d, dim-1) x[d] = samples[i][d];
+        if(outputDim != -1 && outputDim < dim-1)
+        {
+            x[outputDim] = samples[i][dim-1];
+            y[0] = samples[i][outputDim];
+        }
+        else y[0] = samples[i][dim-1];
 		model->update(x,y);
 	}
 }
@@ -55,11 +60,15 @@ fvec RegressorLWPR::Test( const fvec &sample)
 	fvec res;
 	res.resize(2,0);
 	if(!model) return res;
-	float estimate;
 	float sigma = 0;
-	dvec x;
-	x.push_back(sample[0]);
-	dvec y = model->predict(x);
+    int dim = sample.size();
+    dvec x(dim-1);
+    FOR(d, dim-1) x[d] = sample[d];
+    if(outputDim != -1 && outputDim < dim-1)
+    {
+        x[outputDim] = sample[dim-1];
+    }
+    dvec y = model->predict(x, sigma);
 	res[0] = y[0];
 	res[1] = sigma;
 	return res;

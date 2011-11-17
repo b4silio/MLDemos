@@ -93,6 +93,8 @@ class SOGP{
     m_params.capacity=cap;
   }
 
+  int dim(){return BV.Nrows();}
+
  private: 
   int current_size;  //how many points do I have
   Matrix alpha;      //Alpha and C are the parameters of the GP

@@ -61,6 +61,9 @@ void RegrLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	if(!canvas || !regressor) return;
 	int w = canvas->width();
 	int h = canvas->height();
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int outputDim = regressor->outputDim;
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	RegressorLWPR* _lwpr = (RegressorLWPR*)regressor;
@@ -71,8 +74,8 @@ void RegrLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		LWPR_ReceptiveFieldObject rf = lwpr->getRF(0,i);
 		double var = sqrt(rf.varX()[0]);
 		var = fabs((canvas->toCanvasCoords(0,0) - canvas->toCanvasCoords(var,0)).x());
-		double centerX = rf.center()[0];
-		double centerY = lwpr->predict(rf.center())[0];
+        double centerX = rf.center()[xIndex];
+        double centerY = lwpr->predict(rf.center())[0];
 		double radius = rf.D()[0][0];
 		double slope = rf.slope()[0];
 		QPointF point = canvas->toCanvasCoords(centerX, centerY);
@@ -91,6 +94,8 @@ void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
 	if(!regressor || !canvas) return;
 	int w = canvas->width();
 	int h = canvas->height();
+    int outputDim = regressor->outputDim;
+    int xIndex = canvas->xIndex;
 
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	fvec sample;
@@ -106,8 +111,8 @@ void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
 		sample = canvas->toSampleCoords(x,0);
 		fvec res = regressor->Test(sample);
 		if(res[0] != res[0]) continue;
-		QPointF point = canvas->toCanvasCoords(sample[0], res[0]);
-		QPointF pointUp = canvas->toCanvasCoords(sample[0],res[0] + res[1]);
+        QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
+        QPointF pointUp = canvas->toCanvasCoords(sample[xIndex],res[0] + res[1]);
 		pointUp.setX(0);
 		pointUp.setY(pointUp.y() - point.y());
 		QPointF pointDown = -pointUp;
