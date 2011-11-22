@@ -65,8 +65,7 @@ _fgmm_real fgmm_e_step(struct gmm * GMM,
         }
         if(like<= FLT_MIN)
         {
-            printf("too far from current distrib %d\n",data_i);
-            // we try to recover somehow
+            //printf("too far from current distrib %d\n",data_i);
             // exit(0);
         }
         else log_lik += log(like);
