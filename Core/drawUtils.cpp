@@ -442,7 +442,7 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
     rawData.fill(Qt::transparent);
     QPainter painter(&rawData);
 
-    //	painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
 
     FOR(d,allData.size())
     {
@@ -478,6 +478,10 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
         float edge = minVal;
         float delta = maxVal - minVal;
 
+        QPointF topPoint = QPointF(0, size.height() - (int)((mean-edge)/delta*res) + pad);
+        QPointF plusPoint = QPointF(0, size.height() - (int)((mean+sigma-edge)/delta*res) + pad);
+        QPointF minusPoint = QPointF(0, size.height() - (int)((mean-sigma-edge)/delta*res) + pad);
+
         FOR(i, data.size())
         {
             QPointF point = QPointF(hpad + (drand48() - 0.5)*hsize/2 + hsize/2, size.height() - (int)((data[i]-edge)/delta*res) + pad);
@@ -485,7 +489,6 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
             painter.setBrush(QColor(color,color,color));
             painter.drawEllipse(point, 5, 5);
         }
-        /*
         const char *longFormat = "%.3f";
         const char *shortFormat = "%.0f";
         const char *format = (maxVal - minVal) > 10 ? shortFormat : longFormat;
@@ -494,10 +497,9 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
         sprintf(text, format, mean);
         painter.drawText(QPointF(hpad-8,topPoint.y()+6), QString(text));
         sprintf(text, format, mean+sigma);
-        painter.drawText(QPointF(hpad+36,plusPoint.y()-6), QString(text));
+        painter.drawText(QPointF(hpad-8,plusPoint.y()-6), QString(text));
         sprintf(text, format, mean-sigma);
-        painter.drawText(QPointF(hpad+36,minusPoint.y()+12), QString(text));
-        */
+        painter.drawText(QPointF(hpad-8,minusPoint.y()+12), QString(text));
     }
     return rawData;
 }
