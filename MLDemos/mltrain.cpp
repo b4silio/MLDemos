@@ -405,7 +405,7 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
             fvec sample = samples[i];
             int dim = sample.size();
             fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample[dim-1]);
+            float error = fabs(res[0] - sample[outputDim]);
             trainErrors.push_back(error);
         }
         regressor->trainErrors = trainErrors;
@@ -458,7 +458,7 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
             fvec sample = samples[perm[i]];
             int dim = sample.size();
             fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample[dim-1]);
+            float error = fabs(res[0] - sample[outputDim]);
             trainErrors.push_back(error);
         }
         FOR(i, testCnt)
@@ -466,7 +466,7 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
             fvec sample = testSamples[i];
             int dim = sample.size();
             fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample[dim-1]);
+            float error = fabs(res[0] - sample[outputDim]);
             testErrors.push_back(error);
         }
         regressor->trainErrors = trainErrors;
@@ -965,14 +965,14 @@ void MLDemos::Compare()
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
                 if(progress.wasCanceled())
                 {
-                    compare->AddResults(resultTrain, "Error (Training)", algoName);
                     compare->AddResults(resultTest, "Error (Testing)", algoName);
+                    compare->AddResults(resultTrain, "Error (Training)", algoName);
                     compare->Show();
                     return;
                 }
             }
-            compare->AddResults(resultTrain, "Error (Training)", algoName);
             compare->AddResults(resultTest, "Error (Testing)", algoName);
+            compare->AddResults(resultTrain, "Error (Training)", algoName);
         }
         if(line.startsWith("Dynamical"))
         {
