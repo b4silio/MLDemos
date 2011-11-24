@@ -338,7 +338,7 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 
 		const char *longFormat = "%.3f";
 		const char *shortFormat = "%.0f";
-		const char *format = (maxVal - minVal) > 10 ? shortFormat : longFormat;
+        const char *format = (maxVal - minVal) > 100 ? shortFormat : longFormat;
 		painter.setPen(Qt::black);
 		char text[255];
 		sprintf(text, format, median);

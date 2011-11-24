@@ -176,9 +176,11 @@ public:
 	void RemoveSample(unsigned int index);
     void RemoveSamples(ivec indices);
 
-	fvec GetSample(int index=0){return index<samples.size() ? samples[index] : fvec();}
-	std::vector< fvec > GetSamples(){return samples;}
+    fvec GetSample(int index=0){ return (index < samples.size()) ? samples[index] : fvec(); }
+    fvec GetSampleDim(int index, ivec inputDims, int outputDim=-1);
+    std::vector< fvec > GetSamples(){return samples;}
 	std::vector< fvec > GetSamples(u32 count, dsmFlags flag=_UNUSED, dsmFlags replaceWith=_TRAIN);
+    std::vector< fvec > GetSampleDims(ivec inputDims, int outputDim=-1);
 	void SetSample(int index, fvec sample);
     void SetSamples(std::vector<fvec> samples){this->samples = samples;}
 

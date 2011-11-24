@@ -65,6 +65,8 @@ void RegrLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     int yIndex = canvas->yIndex;
     int outputDim = regressor->outputDim;
 	painter.setRenderHint(QPainter::Antialiasing);
+    fvec sample = canvas->toSampleCoords(0,0);
+    if(sample.size() > 2) return;
 
 	RegressorLWPR* _lwpr = (RegressorLWPR*)regressor;
 	LWPR_Object *lwpr= _lwpr->GetModel();
@@ -98,8 +100,9 @@ void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
     int xIndex = canvas->xIndex;
 
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	fvec sample;
-	sample.resize(2,0);
+    fvec sample = canvas->toSampleCoords(0,0);
+    int dim = sample.size();
+    if(dim > 2) return;
 	canvas->maps.confidence = QPixmap();
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);

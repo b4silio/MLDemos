@@ -188,6 +188,7 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	{
         sample = canvas->toSampleCoords(x, 0);
         int dim = sample.size();
+        if(dim > 2) continue;
         if(outputDim==-1) outputDim = dim-1;
         fvec res = regressor->Test(sample);
 		if(res[0] != res[0] || res[1] != res[1]) continue;

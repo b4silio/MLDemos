@@ -380,6 +380,7 @@ void Canvas::paintEvent(QPaintEvent *event)
 
 QPointF Canvas::toCanvasCoords(fvec sample)
 {
+    if(sample.size() != center.size()) return QPointF(0,0);
 	sample -= center;
 	QPointF point(sample[xIndex]*(zoom*zooms[xIndex]*height()),sample[yIndex]*(zoom*zooms[yIndex]*height()));
 	point += QPointF(width()/2, height()/2);
@@ -598,9 +599,9 @@ void Canvas::FitToData()
 	SetZoom(min(1/diffY,1/diffX));
 	*/
 
-	zooms = fvec(dim, 1.f);
-	FOR(d, dim) zooms[d] = 1.f / diff[d];
-	SetZoom(1.f);
+    zooms = fvec(dim, 1.f);
+    FOR(d, dim) zooms[d] = 1.f / diff[d];
+    SetZoom(1.f);
 }
 
 void Canvas::DrawAxes(QPainter &painter)
@@ -727,7 +728,8 @@ void Canvas::DrawSamples()
 	{
 		if(data->GetFlag(i) == _TRAJ) continue;
 		int label = data->GetLabel(i);
-		QPointF point = toCanvasCoords(data->GetSample(i));
+        fvec sample = data->GetSample(i);
+        QPointF point = toCanvasCoords(sample);
 		Canvas::drawSample(painter, point, (data->GetFlag(i)==_TRAJ)?5:radius, bDisplaySingle ? 0 : label);
 	}
 	drawnSamples = data->GetCount();

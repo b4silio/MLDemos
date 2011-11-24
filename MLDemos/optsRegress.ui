@@ -202,7 +202,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>120</y>
+      <y>140</y>
       <width>110</width>
       <height>32</height>
      </rect>
@@ -258,7 +258,7 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>100</width>
+      <width>110</width>
       <height>21</height>
      </rect>
     </property>
@@ -268,7 +268,28 @@ p, li { white-space: pre-wrap; }
      </font>
     </property>
     <property name="text">
-     <string>Output Dimension</string>
+     <string>Regression Dimension</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="inputDimButton">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>110</y>
+      <width>110</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Input Dimensions</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

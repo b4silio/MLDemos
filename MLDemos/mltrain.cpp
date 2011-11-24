@@ -387,11 +387,22 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
 
 void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList)
 {
-    if(!regressor) return;
-    vector<fvec> samples = canvas->data->GetSamples();
+    if(!regressor || !canvas->data->GetCount()) return;
+    ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
+    int outputIndexInList = -1;
+    FOR(i, inputDims.size()) if(outputDim == inputDims[i])
+    {
+        outputIndexInList = i;
+        outputDim = i;
+        break;
+    }
+
+    vector<fvec> samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
     ivec labels = canvas->data->GetLabels();
     if(!samples.size()) return;
+    int cnt = samples.size();
     int dim = samples[0].size();
+    if(dim < 2) return;
 
     regressor->SetOutputDim(outputDim);
 

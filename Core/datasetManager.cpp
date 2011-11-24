@@ -282,6 +282,36 @@ void DatasetManager::SetSample(int index, fvec sample)
 	if(index >= 0 && index < samples.size()) samples[index] = sample;
 }
 
+fvec DatasetManager::GetSampleDim(int index, ivec inputDims, int outputDim)
+{
+    if(index>=samples.size()) return fvec();
+    if(!inputDims.size()) return samples[index];
+    int dim = inputDims.size();
+    fvec sample(dim + outputDim!=-1?1:0);
+    FOR(d, dim) sample[d] = samples[index][inputDims[d]];
+    if(outputDim != -1) sample[dim] = samples[index][outputDim];
+    return sample;
+}
+
+std::vector< fvec > DatasetManager::GetSampleDims(ivec inputDims, int outputDim)
+{
+    if(!inputDims.size()) return samples;
+
+    vector<fvec> newSamples = samples;
+    int newDim = inputDims.size() + (outputDim != -1 ? 1 : 0);
+    FOR(i, samples.size())
+    {
+        fvec newSample(newDim);
+        FOR(d, inputDims.size())
+        {
+            newSample[d] = samples[i][inputDims[d]];
+        }
+        if(outputDim != -1) newSample[newDim-1] = samples[i][outputDim];
+        newSamples[i] = newSample;
+    }
+    return newSamples;
+}
+
 std::vector< fvec > DatasetManager::GetSamples(u32 count, dsmFlags flag, dsmFlags replaceWith)
 {
 	std::vector< fvec > selected;
@@ -620,6 +650,7 @@ bvec DatasetManager::GetFreeFlags()
 	FOR(i, flags.size()) res.push_back(flags[i] == _UNUSED);
 	return res;
 }
+
 
 /******************************************/
 /*                                        */
