@@ -42,6 +42,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_drawingToolsContext3.h"
 #include "ui_drawingToolsContext4.h"
 #include "ui_manualSelection.h"
+#include "ui_inputDimensions.h"
 
 #include "canvas.h"
 #include "classifier.h"
@@ -64,7 +65,7 @@ private:
 	*actionClearData, *actionClearModel, *actionScreenshot,
 	*actionNew, *actionSave, *actionLoad;
 
-    QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog;
+    QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
     QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *compareWidget, *projectWidget;
 
@@ -88,7 +89,8 @@ private:
 	Ui::DrawingToolbarContext3 *drawToolbarContext3;
 	Ui::DrawingToolbarContext4 *drawToolbarContext4;
     Ui::ManualSelection* manualSelection;
-	QWidget *drawToolbarWidget;
+    Ui::InputDimensions* inputDimensions;
+    QWidget *drawToolbarWidget;
 	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget, *drawContext4Widget;
 	QToolBar *toolBar;
 
@@ -144,6 +146,7 @@ private:
 	void Save(QString filename);
 
     std::vector<bool> GetManualSelection();
+    ivec GetInputDimensions();
     void UpdateInfo();
 	void SetCrossValidationInfo();
 	bool bIsRocNew;
@@ -242,6 +245,7 @@ private slots:
 
 
     void ManualSelection();
+    void InputDimensions();
     void ExposeData();
 	void FitToData();
 	void ZoomChanged(float d);
@@ -261,6 +265,11 @@ private slots:
     void ManualSelectionInvert();
     void ManualSelectionRemove();
     void ManualSelectionRandom();
+    void InputDimensionsUpdated();
+    void InputDimensionsChanged();
+    void InputDimensionsClear();
+    void InputDimensionsInvert();
+    void InputDimensionsRandom();
     void TargetButton();
 	void GaussianButton();
 	void GradientButton();

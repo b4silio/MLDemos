@@ -43,7 +43,8 @@ FORMS += aboutDialog.ui \
 	viewOptions.ui \
     compare.ui \
     expose.ui \
-    manualSelection.ui
+    manualSelection.ui \
+    inputDimensions.ui
 
 HEADERS += basicMath.h \
     canvas.h \

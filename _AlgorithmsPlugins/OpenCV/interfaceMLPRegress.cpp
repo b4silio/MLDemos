@@ -72,8 +72,9 @@ void RegrMLP::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     int xIndex = canvas->xIndex;
 
     int w = canvas->width();
-    fvec sample;
-	sample.resize(2,0);
+    fvec sample = canvas->toSampleCoords(0,0);
+    int dim = sample.size();
+    if(dim > 2) return;
 	int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	FOR(x, steps)

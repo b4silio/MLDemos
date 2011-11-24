@@ -561,7 +561,8 @@ void MLDemos::LoadParams( QString filename )
 	}
 	ResetPositiveClass();
     ManualSelectionUpdated();
-	if(bClass) Classify();
+    InputDimensionsUpdated();
+    if(bClass) Classify();
 	if(bRegr) Regression();
 	if(bDyn) Dynamize();
 	if(bClust) Cluster();

@@ -260,11 +260,13 @@ void MLDemos::initDialogs()
     aboutPanel = new Ui::aboutDialog();
     showStats = new Ui::statisticsDialog();
     manualSelection = new Ui::ManualSelection();
+    inputDimensions = new Ui::InputDimensions();
 
     displayOptions->setupUi(displayDialog = new QDialog());
     aboutPanel->setupUi(about = new QDialog());
     showStats->setupUi(statsDialog = new QDialog());
     manualSelection->setupUi(manualSelectDialog = new QDialog());
+    inputDimensions->setupUi(inputDimensionsDialog = new QDialog());
     rocWidget = new QNamedWindow("ROC Curve", false, showStats->rocWidget);
     infoWidget = new QNamedWindow("Info", false, showStats->informationWidget);
 
@@ -277,6 +279,11 @@ void MLDemos::initDialogs()
     connect(manualSelection->invertSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionInvert()));
     connect(manualSelection->removeSampleButton, SIGNAL(clicked()), this, SLOT(ManualSelectionRemove()));
     connect(manualSelection->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionRandom()));
+    connect(inputDimensions->dimList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(InputDimensionsChanged()));
+    connect(inputDimensions->clearSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsClear()));
+    connect(inputDimensions->invertSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsInvert()));
+    connect(inputDimensions->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsRandom()));
+
 
     connect(drawToolbar->singleButton, SIGNAL(clicked()), this, SLOT(DrawSingle()));
     connect(drawToolbar->sprayButton, SIGNAL(clicked()), this, SLOT(DrawSpray()));
@@ -351,6 +358,7 @@ void MLDemos::initDialogs()
     //connect(optionsRegress->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
+    connect(optionsRegress->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
 
     connect(optionsCluster->clusterButton, SIGNAL(clicked()), this, SLOT(Cluster()));
     connect(optionsCluster->iterationButton, SIGNAL(clicked()), this, SLOT(ClusterIterate()));
@@ -939,6 +947,11 @@ void MLDemos::ManualSelection()
     manualSelectDialog->show();
 }
 
+void MLDemos::InputDimensions()
+{
+    inputDimensionsDialog->show();
+}
+
 void MLDemos::HideSampleDrawing()
 {
     drawToolbarWidget->hide();
@@ -1014,6 +1027,7 @@ void MLDemos::ResetPositiveClass()
     ui.canvasX3Spin->setRange(0,dimCount);
     canvas->SetDim(ui.canvasX1Spin->value()-1,ui.canvasX2Spin->value()-1, ui.canvasX3Spin->value()-1);
     ManualSelectionUpdated();
+    InputDimensionsUpdated();
 }
 
 void MLDemos::ChangeActiveOptions()
@@ -1338,7 +1352,7 @@ void MLDemos::ManualSelectionUpdated()
     manualSelection->sampleList->clear();
     FOR(i, samples.size())
     {
-        QString item = QString("%1: (%2)").arg(i).arg(labels[i]);
+        QString item = QString("%1: (%2)").arg(i+1).arg(labels[i]);
         FOR(d, dim) item += QString(" %1").arg(samples[i][d], 0, 'f', 2);
         manualSelection->sampleList->addItem(item);
     }
@@ -1414,6 +1428,74 @@ void MLDemos::ManualSelectionRemove()
     canvas->ResetSamples();
     CanvasOptionsChanged();
     canvas->repaint();
+}
+
+void MLDemos::InputDimensionsUpdated()
+{
+    if(!canvas) return;
+    int dim = canvas->data->GetDimCount();
+    inputDimensions->dimList->clear();
+    fvec xMin(dim,FLT_MAX), xMax(dim,-FLT_MAX);
+    vector<fvec> samples = canvas->data->GetSamples();
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            xMin[d] = min(xMin[d], samples[i][d]);
+            xMax[d] = max(xMax[d], samples[i][d]);
+        }
+    }
+
+    FOR(d, dim)
+    {
+        QString item = QString("%1").arg(d+1);
+        if(sourceLabels.size() > d) item += QString("-%2").arg(sourceLabels[d]);
+        item += QString(" rng: [%1 --> %2]").arg(xMin[d], 0, 'f', 3).arg(xMax[d], 0, 'f', 3);
+        inputDimensions->dimList->addItem(item);
+    }
+    ManualSelectionChanged();
+}
+
+void MLDemos::InputDimensionsChanged()
+{
+    int count = inputDimensions->dimList->count();
+    int trainCount = count, testCount = 0;
+    QList<QListWidgetItem*> selected = inputDimensions->dimList->selectedItems();
+    if(selected.size())
+    {
+        trainCount = selected.size();
+        testCount = count - trainCount;
+    }
+    inputDimensions->TrainLabel->setText(QString("Used: %1").arg(trainCount));
+    inputDimensions->TestLabel->setText(QString("Unused: %1").arg(testCount));
+}
+
+void MLDemos::InputDimensionsClear()
+{
+    inputDimensions->dimList->clearSelection();
+    ManualSelectionChanged();
+}
+
+void MLDemos::InputDimensionsInvert()
+{
+    FOR(i, inputDimensions->dimList->count())
+    {
+        inputDimensions->dimList->item(i)->setSelected(!inputDimensions->dimList->item(i)->isSelected());
+    }
+    ManualSelectionChanged();
+}
+
+void MLDemos::InputDimensionsRandom()
+{
+    float ratio = (inputDimensions->randomCombo->currentIndex()+1.f)/10.f;
+    inputDimensions->dimList->clearSelection();
+    u32* perm = randPerm(inputDimensions->dimList->count());
+    FOR(i, ratio*inputDimensions->dimList->count())
+    {
+        inputDimensions->dimList->item(perm[i])->setSelected(true);
+    }
+    KILL(perm);
+    ManualSelectionChanged();
 }
 
 void MLDemos::DrawCrosshair()
@@ -1767,7 +1849,11 @@ void MLDemos::FitToData()
     float zoom = canvas->GetZoom();
     if(zoom >= 1) zoom -=1;
     else zoom = 1/(-zoom) - 1;
-    if(zoom == displayOptions->spinZoom->value()) return; // nothing to be done!
+    if(zoom == displayOptions->spinZoom->value())
+    {
+        DisplayOptionChanged();
+        return;
+    }
     displayOptions->spinZoom->blockSignals(true);
     displayOptions->spinZoom->setValue(zoom);
     displayOptions->spinZoom->blockSignals(false);
@@ -1801,7 +1887,7 @@ void MLDemos::FitToData()
             projectors[tabUsedForTraining]->Draw(canvas, projector);
         }
     }
-    canvas->repaint();
+    DisplayOptionChanged();
 }
 
 void MLDemos::CanvasMoveEvent()

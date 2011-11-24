@@ -69,9 +69,10 @@ void RegrKNN::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	int h = canvas->height();
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
-	fvec sample;
-	sample.resize(2,0);
-	int steps = w;
+    fvec sample = canvas->toSampleCoords(0,0);
+    int dim = sample.size();
+    if(dim > 2) return;
+    int steps = w;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);

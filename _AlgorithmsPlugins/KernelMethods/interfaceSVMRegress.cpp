@@ -353,8 +353,9 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	int w = canvas->width();
 	int h = canvas->height();
     int xIndex = canvas->xIndex;
-	fvec sample;
-	sample.resize(2,0);
+    fvec sample = canvas->toSampleCoords(0,0);
+    int dim = sample.size();
+    if(dim > 2) return;
 	if(regressor->type == REGR_KRLS || regressor->type == REGR_RVM)
 	{
 		canvas->maps.confidence = QPixmap();
@@ -391,6 +392,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		FOR(x, steps)
 		{
 			sample = canvas->toSampleCoords(x,0);
+            int dim = sample.size();
 			fvec res = regressor->Test(sample);
 			if(res[0] != res[0]) continue;
             QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
