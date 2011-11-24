@@ -274,12 +274,12 @@ void MLDemos::initDialogs()
     connect(showStats->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(StatsChanged()));
     connect(rocWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
     connect(infoWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
-    connect(manualSelection->sampleList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(ManualSelectionChanged()));
+    connect(manualSelection->sampleList, SIGNAL(itemSelectionChanged()), this, SLOT(ManualSelectionChanged()));
     connect(manualSelection->clearSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionClear()));
     connect(manualSelection->invertSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionInvert()));
     connect(manualSelection->removeSampleButton, SIGNAL(clicked()), this, SLOT(ManualSelectionRemove()));
     connect(manualSelection->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionRandom()));
-    connect(inputDimensions->dimList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(InputDimensionsChanged()));
+    connect(inputDimensions->dimList, SIGNAL(itemSelectionChanged()), this, SLOT(InputDimensionsChanged()));
     connect(inputDimensions->clearSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsClear()));
     connect(inputDimensions->invertSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsInvert()));
     connect(inputDimensions->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsRandom()));
@@ -351,6 +351,7 @@ void MLDemos::initDialogs()
     connect(optionsClassify->crossValidButton, SIGNAL(clicked()), this, SLOT(ClassifyCross()));
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
+    connect(optionsClassify->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
 
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
     connect(optionsRegress->crossValidButton, SIGNAL(clicked()), this, SLOT(RegressionCross()));
@@ -396,6 +397,7 @@ void MLDemos::initDialogs()
 	connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
 	connect(optionsCompare->clearButton, SIGNAL(clicked()), this, SLOT(CompareClear()));
 	connect(optionsCompare->removeButton, SIGNAL(clicked()), this, SLOT(CompareRemove()));
+    connect(optionsCompare->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
 
     optionsClassify->tabWidget->clear();
     optionsCluster->tabWidget->clear();
@@ -1459,15 +1461,9 @@ void MLDemos::InputDimensionsUpdated()
 void MLDemos::InputDimensionsChanged()
 {
     int count = inputDimensions->dimList->count();
-    int trainCount = count, testCount = 0;
     QList<QListWidgetItem*> selected = inputDimensions->dimList->selectedItems();
-    if(selected.size())
-    {
-        trainCount = selected.size();
-        testCount = count - trainCount;
-    }
-    inputDimensions->TrainLabel->setText(QString("Used: %1").arg(trainCount));
-    inputDimensions->TestLabel->setText(QString("Unused: %1").arg(testCount));
+    inputDimensions->TrainLabel->setText(QString("Used: %1").arg(selected.size()));
+    inputDimensions->TestLabel->setText(QString("Unused: %1").arg(count-selected.size()));
 }
 
 void MLDemos::InputDimensionsClear()
@@ -2062,7 +2058,7 @@ void MLDemos::Navigation( fvec sample )
     }
     sprintf(string, "samples: %d (o:%.3d|x:%.3d)", count, pcount, ncount);
     information += QString(string);
-    sprintf(string, " | x: %.3f y: %.3f", sample[0], sample[1]);
+    sprintf(string, " | x%d: %.3f x%d: %.3f", canvas->xIndex+1, sample[canvas->xIndex], canvas->yIndex+1, sample[canvas->yIndex]);
     information += QString(string);
     mutex.tryLock(500);
     if(classifier)

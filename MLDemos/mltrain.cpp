@@ -81,7 +81,10 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     map<int, int> truePerClass;
     map<int, int> falsePerClass;
     map<int, int> countPerClass;
-    vector<fvec> samples = canvas->data->GetSamples();
+
+    ivec inputDims = GetInputDimensions();
+    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
+    //vector<fvec> samples = canvas->data->GetSamples();
     if(trainRatio == 1 && !trainList.size())
     {
         bool bTrueMulti = bMulticlass;
@@ -388,12 +391,12 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
 void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList)
 {
     if(!regressor || !canvas->data->GetCount()) return;
-    ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
+    ivec inputDims = GetInputDimensions();
     int outputIndexInList = -1;
+    if(inputDims.size()==1 && inputDims[0] == outputDim) return; // we dont have enough dimensions for training
     FOR(i, inputDims.size()) if(outputDim == inputDims[i])
     {
         outputIndexInList = i;
-        outputDim = i;
         break;
     }
 
@@ -751,7 +754,8 @@ void MLDemos::Compare()
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
     int ratioIndex = optionsCompare->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
-    int positive = optionsCompare->positiveSpin->value();
+    //int positive = optionsCompare->positiveSpin->value();
+    int positive = 1;
 
     compare->Clear();
 
@@ -932,7 +936,7 @@ void MLDemos::Compare()
             QStringList s = line.split(":");
             int tab = s[1].toInt();
             if(tab >= regressors.size() || !regressors[tab]) continue;
-            int outputDim = optionsCompare->outputDimSpin->value();
+            int outputDim = optionsCompare->outputDimSpin->value()-1;
             QTextStream paramStream(&paramString);
             QString paramName;
             float paramValue;
@@ -968,7 +972,7 @@ void MLDemos::Compare()
                     float error = 0.f;
                     FOR(i, regressor->testErrors.size()) error += regressor->testErrors[i];
                     error /= regressor->testErrors.size();
-                    resultTest = regressor->testErrors;
+                    resultTest.push_back(error);
                 }
                 DEL(regressor);
 

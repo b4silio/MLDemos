@@ -225,7 +225,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>110</y>
+      <y>140</y>
       <width>110</width>
       <height>32</height>
      </rect>
@@ -237,6 +237,27 @@
     </property>
     <property name="text">
      <string>Manual Selection</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="inputDimButton">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>110</y>
+      <width>110</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Input Dimensions</string>
     </property>
     <property name="checkable">
      <bool>true</bool>

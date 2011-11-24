@@ -330,7 +330,11 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
 
     if(outputLabelColumn == -1)
     {
-        FOR(i, data.size()) labels[i-headerSkip] = 0;
+        FOR(i, data.size())
+        {
+            if(!i && bFirstRowAsHeader) continue;
+            labels[i-headerSkip] = 0;
+        }
     }
     else
     {
