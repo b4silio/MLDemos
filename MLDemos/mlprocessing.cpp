@@ -50,6 +50,7 @@ void MLDemos::Classify()
     lastTrainingInfo = "";
     int tab = optionsClassify->tabWidget->currentIndex();
     if(tab >= classifiers.size() || !classifiers[tab]) return;
+
     classifier = classifiers[tab]->GetClassifier();
     tabUsedForTraining = tab;
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
@@ -175,7 +176,7 @@ ivec MLDemos::GetInputDimensions()
 {
     if(!canvas || !canvas->data->GetCount()) return ivec();
     QList<QListWidgetItem*> selected = inputDimensions->dimList->selectedItems();
-    if(!selected.size()) return ivec(); // if nothing is selected we use all dimensions for training
+    if(!selected.size() || selected.size() == inputDimensions->dimList->count()) return ivec(); // if nothing is selected we use all dimensions for training
     ivec dimList(selected.size());
     FOR(i, selected.size())
     {
@@ -201,7 +202,9 @@ void MLDemos::Regression()
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
     int outputDim = optionsRegress->outputDimSpin->value()-1;
-    ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
+    ivec inputDims = GetInputDimensions();
+    //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
+     if(inputDims.size()==1 && inputDims[0] == outputDim) return;
 
     int outputIndexInList = -1;
     FOR(i, inputDims.size()) if(outputDim == inputDims[i])
@@ -251,13 +254,15 @@ void MLDemos::Regression()
             painter.drawEllipse(point, 6,6);
         }
         // we draw the estimated sample
+        painter.setPen(Qt::white);
+        painter.setBrush(Qt::black);
         FOR(i, samples.size())
         {
             fvec sample = samples[i];
             fvec estimate = regressor->Test(subsamples[i]);
             sample[outputDim] = estimate[0];
             QPointF point2 = canvas->toCanvasCoords(sample);
-            painter.drawEllipse(point2, 6,6);
+            painter.drawEllipse(point2, 5,5);
         }
         painter.setOpacity(1);
         // we draw the error bars

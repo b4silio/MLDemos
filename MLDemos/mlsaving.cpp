@@ -120,7 +120,6 @@ void MLDemos::SaveLayoutOptions()
 	settings.endGroup();
 
 	settings.beginGroup("compareOptions");
-	settings.setValue("positiveClass", optionsCompare->positiveSpin->value());
 	settings.setValue("foldCount", optionsCompare->foldCountSpin->value());
 	settings.setValue("trainRatio", optionsCompare->traintestRatioCombo->currentIndex());
 	settings.endGroup();
@@ -291,7 +290,6 @@ void MLDemos::LoadLayoutOptions()
 	settings.endGroup();
 
 	settings.beginGroup("compareOptions");
-	if(settings.contains("positiveClass")) optionsCompare->positiveSpin->setValue(settings.value("positiveClass").toFloat());
 	if(settings.contains("foldCount")) optionsCompare->foldCountSpin->setValue(settings.value("foldCount").toFloat());
 	if(settings.contains("trainRatio")) optionsCompare->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
 	settings.endGroup();
