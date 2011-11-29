@@ -54,6 +54,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "widget.h"
 #include "drawTimer.h"
 #include "expose.h"
+#include "dataImporter.h"
 
 class MLDemos : public QMainWindow
 {
@@ -98,6 +99,7 @@ private:
 	QTime drawTime;
 	Canvas *canvas;
     Expose *expose;
+    DataImporter *import;
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
@@ -144,6 +146,7 @@ private:
 	void LoadParams(QString filename);
 	void Load(QString filename);
 	void Save(QString filename);
+    void ImportData(QString filename);
 
     std::vector<bool> GetManualSelection();
     ivec GetInputDimensions();
@@ -164,7 +167,6 @@ public:
     Projector *projector;
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
-    std::vector<QString> dimensionNames;
     ivec sourceLabels;
 
     QMutex mutex;
@@ -177,6 +179,7 @@ signals:
 public slots:
     void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected);
 	void SetTimeseries(std::vector<TimeSerie> timeseries);
+    void SetDimensionNames(QStringList headers);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);
@@ -225,6 +228,7 @@ private slots:
 
 	void SaveData();
 	void LoadData();
+    void ImportData();
 	void ExportOutput();
 	void ExportAnimation();
 	void ExportSVG();
@@ -249,6 +253,7 @@ private slots:
     void ExposeData();
 	void FitToData();
 	void ZoomChanged(float d);
+    void UpdateLearnedModel();
 	void CanvasMoveEvent();
 	void Navigation(fvec sample);
 	void ResetPositiveClass();

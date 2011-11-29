@@ -27,13 +27,14 @@ RegrSVM::RegrSVM()
 {
 	params = new Ui::ParametersRegr();
 	params->setupUi(widget = new QWidget());
-	connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
 }
 
 void RegrSVM::ChangeOptions()
 {
 	params->svmCLabel->setText("C");
-	params->svmPSpin->setRange(0.0001, 1.0);
+    params->svmPSpin->setRange(0.0001, 1.0);
 	params->svmPSpin->setSingleStep(0.01);
 	params->svmPSpin->setDecimals(4);
 	params->svmCSpin->setEnabled(true);
@@ -43,7 +44,8 @@ void RegrSVM::ChangeOptions()
 	{
 	case 0: // C-SVM
 		params->svmEpsLabel->setText("eps");
-		break;
+        params->svmPSpin->setRange(0.0001, 100.0);
+        break;
 	case 1: // Nu-SVM
 		params->svmEpsLabel->setText("Nu");
 		break;
@@ -70,6 +72,20 @@ void RegrSVM::ChangeOptions()
 		params->svmPSpin->setDecimals(4);
 		break;
 	}
+    switch(params->kernelTypeCombo->currentIndex())
+    {
+    case 0: // linear
+        params->kernelDegSpin->setEnabled(false);
+        break;
+    case 1: // poly
+        params->kernelDegSpin->setEnabled(true);
+        params->kernelWidthSpin->setEnabled(true);
+        break;
+    case 2: // RBF
+        params->kernelDegSpin->setEnabled(false);
+        params->kernelWidthSpin->setEnabled(true);
+        break;
+    }
 }
 
 void RegrSVM::SetParams(Regressor *regressor)

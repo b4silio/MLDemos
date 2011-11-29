@@ -15,7 +15,8 @@ win32{
 ###########################
 # Files                   #
 ###########################
-FORMS += expose.ui
+FORMS += expose.ui \
+    dataImport.ui
 HEADERS += \
 	basicMath.h \
 	canvas.h \
@@ -25,9 +26,10 @@ HEADERS += \
 	drawUtils.h \
 	drawSVG.h \
 	drawTimer.h \
-        mymaths.h \
-        expose.h \
-        public.h \
+    mymaths.h \
+    expose.h \
+    public.h \
+    parser.h \
 	roc.h \
 	types.h \
 	widget.h \
@@ -40,7 +42,8 @@ HEADERS += \
 	clusterer.h \
 	fileUtils.h \
 	spline.h \
-    projector.h
+    projector.h \
+    dataImporter.h
 
 SOURCES += \
 	canvas.cpp \
@@ -49,8 +52,18 @@ SOURCES += \
 	drawSVG.cpp \
 	drawTimer.cpp \
 	mymaths.cpp \
-        expose.cpp \
-        roc.cpp \
+    expose.cpp \
+    roc.cpp \
 	fileUtils.cpp \
-	widget.cpp
+    parser.cpp \
+    widget.cpp \
+    dataImporter.cpp
+
+
+
+
+
+
+
+
 

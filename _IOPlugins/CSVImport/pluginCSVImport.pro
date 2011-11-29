@@ -13,10 +13,8 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 FORMS += CSVImport.ui
 
-HEADERS += CSVImport.h \
-            parser.h
+HEADERS += CSVImport.h
 
-SOURCES += CSVImport.cpp \
-            parser.cpp
+SOURCES += CSVImport.cpp
 
 

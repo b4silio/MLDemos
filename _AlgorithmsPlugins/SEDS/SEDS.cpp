@@ -5,7 +5,6 @@
 
 #include <QtGui>
 
-
 double NLOpt_Compute_J(unsigned nPar, const double *x, double *grad, void *f_data)
 {
     SEDS *seds = (SEDS *) f_data;
@@ -60,7 +59,6 @@ SEDS::SEDS()
     d = 0;
     nData = 0;
 }
-
 
 /* Parsing the input commands to the solver */
 bool SEDS::Parse_Input(int argc, char **argv, char** file_data, char** file_model, char** file_output)
@@ -253,7 +251,6 @@ bool SEDS::Parse_Input(int argc, char **argv, char** file_data, char** file_mode
     return 1;
 }
 
-
 /* Loading demonstration detapoint
  * fileName: name of the file containing datapoints
   * For binary files use the file extension .bin and for
@@ -328,7 +325,6 @@ bool SEDS::loadData(const char fileName[], char type)
     }
     return true;
 }
-
 
 /* Loading initial guess of the model
  * fileName: name of the file containing the model
@@ -423,7 +419,6 @@ bool SEDS::loadModel(const char fileName[], char type)
 
     return true;
 }
-
 
 /* Saving the optimal obtained model from SEDS
  * fileName: name of the file to save the model.
@@ -718,9 +713,6 @@ bool SEDS::Optimize(){
     CheckConstraints(A);
 }
 
-
-
-
 /* This function computes the sensitivity of Cost function w.r.t. optimization parameters.
  * The result is saved in the Vector dJ. The returned value of function is J.
  * Don't mess with this function. Very sensitive and a bit complicated!
@@ -920,7 +912,6 @@ double SEDS::Compute_J(Vector pp, Vector& dJ) //compute the objective function a
     dJ /= nData;
     return J;
 }
-
 
 /* This function computes the sensitivity of Cost function w.r.t. optimization parameters.
  * The result is saved in the Vector dJ. The returned value of function is J.
@@ -1324,8 +1315,6 @@ void SEDS::Compute_Constraints(Vector &c){
     }
 }
 
-
-
 /* Transforming the GMM model into the vector of optimization's parameters.*/
 bool SEDS::GMM_2_Parameters_Likelihood(Vector &p){ //this is used to transform GMM to the optimization parameters
     int counter_mu = Options.perior_opt*K; //the index at which mu should start
@@ -1437,8 +1426,6 @@ bool SEDS::Parameters_2_GMM_Likelihood(Vector pp){ //this is used to unpack the 
     return true;
 }
 
-
-
 /* Transforming the GMM model into the vector of optimization's parameters.*/
 bool SEDS::GMM_2_Parameters_MSE(Vector &p){ //this is used to transform GMM to the optimization parameters
 
@@ -1485,7 +1472,6 @@ bool SEDS::GMM_2_Parameters_MSE(Vector &p){ //this is used to transform GMM to t
 
     return true;
 }
-
 
 /* Transforming the vector of optimization's parameters into a GMM model.*/
 bool SEDS::Parameters_2_GMM_MSE(Vector pp){ //this is used to unpack the parameters in p after optimization, to reconstruct the
@@ -1544,7 +1530,6 @@ bool SEDS::Parameters_2_GMM_MSE(Vector pp){ //this is used to unpack the paramet
     }
     return true;
 }
-
 
 /* checking if every thing goes well. Sometimes if the parameter
  * 'Options.cons_penalty' is not big enough, the constrains may be violated.

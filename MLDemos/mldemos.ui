@@ -288,6 +288,8 @@
      <property name="title">
       <string>Import</string>
      </property>
+     <addaction name="actionImportData"/>
+     <addaction name="separator"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
@@ -509,6 +511,11 @@
   <action name="actionCSV">
    <property name="text">
     <string>Comma Separated Values</string>
+   </property>
+  </action>
+  <action name="actionImportData">
+   <property name="text">
+    <string>Data (csv, txt)</string>
    </property>
   </action>
  </widget>

@@ -25,7 +25,7 @@ Expose::~Expose()
     delete ui;
 }
 
-void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type, bool bProjected)
+void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, std::vector<dsmFlags> flags, int type, bool bProjected, QStringList names, std::pair<fvec,fvec> bounds)
 {
     if(!samples.size() || !labels.size()) return;
     vector<QColor> sampleColors(labels.size());
@@ -34,10 +34,10 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, i
         QColor color = SampleColor[labels[i]%SampleColorCnt];
         sampleColors[i] = color;
     }
-    DrawData(pixmap, samples, sampleColors, type, bProjected);
+    DrawData(pixmap, samples, sampleColors, flags, type, bProjected, false, names, bounds);
 }
 
-void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, bool bProjected, bool bLearned)
+void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, std::vector<dsmFlags> flags, int type, bool bProjected, bool bLearned, QStringList names, std::pair<fvec,fvec> bounds)
 {
     if(!samples.size()) return;
     int w = pixmap.width(), h = pixmap.height();
@@ -46,16 +46,25 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
     int gridX = dim;
     int gridY = dim;
 
-	fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN), diffs(dim, 0);
-    FOR(d, dim)
+    fvec mins = bounds.first;
+    fvec maxes = bounds.second;
+    if(!bounds.first.size())
     {
-        FOR(i, samples.size())
+        mins.resize(dim, FLT_MAX);
+        maxes.resize(dim, -FLT_MIN);
+        FOR(d, dim)
         {
-            mins[d] = min(mins[d], samples[i][d]);
-            maxes[d] = max(maxes[d], samples[i][d]);
+            FOR(i, samples.size())
+            {
+                mins[d] = min(mins[d], samples[i][d]);
+                maxes[d] = max(maxes[d], samples[i][d]);
+            }
         }
-	}
-	FOR(d, dim)
+        bounds.first = mins;
+        bounds.second = maxes;
+    }
+    fvec diffs(dim, 0);
+    FOR(d, dim)
 	{
 		diffs[d] = maxes[d] - mins[d];
 	}
@@ -95,6 +104,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
 				{
 					FOR(i, samples.size())
 					{
+                        if(flags[i] == _TRAJ || flags[i] == _OBST) continue;
 						float x = samples[i][index0];
 						float y = samples[i][index1];
 						x = (x-mins[index0])/diffs[index0];
@@ -118,12 +128,13 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
                             painter.drawEllipse(QRectF(point.x()-radius/2.,point.y()-radius/2.,radius,radius));
                         }
 					}
-				}
+                }
                 painter.setBrush(Qt::NoBrush);
                 painter.setPen(Qt::black);
                 painter.setRenderHint(QPainter::Antialiasing, false);
                 painter.drawRect(pad/2,pad/2,smallW+pad, smallH+pad);
                 QString text =  QString("x%1  x%2").arg(index1+1).arg(index0+1);
+                if(index0 < names.size() && index1 < names.size()) text = names.at(index1) + " " + names.at(index0);
                 if(bProjected) text = QString("e%1  e%2").arg(index1+1).arg(index0+1);
                 painter.drawText(pad/2+1, map.height()-pad/2-1,text);
                 maps.push_back(map);
@@ -147,6 +158,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
             painter.setPen(Qt::black);
             painter.drawLine(x, pad, x, mapH+pad);
             QString text =  QString("x%1").arg(d+1);
+            if(d < names.size()) text = names.at(d);
             if(bProjected) text = QString("e%1").arg(d+1);
             painter.drawText(x-10, mapH+2*pad-4, text);
         }
@@ -191,6 +203,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
             painter.setBrush(Qt::white);
             painter.drawEllipse(center+point, 4, 4);
             QString text =  QString("x%1").arg(d+1);
+            if(d < names.size()) text = names.at(d);
             if(bProjected) text = QString("e%1").arg(d+1);
             painter.drawText(center + point*1.1, text);
             old = point;
@@ -293,7 +306,146 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
     }
 }
 
-void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type, fvec params, bool bProjected)
+void Expose::DrawTrajectories(QPixmap& pixmap, vector< vector<fvec> > trajectories, ivec labels, int type, int drawMode, std::pair<fvec,fvec> bounds)
+{
+    if(!trajectories.size() || !labels.size()) return;
+    vector<QColor> sampleColors(labels.size());
+    FOR(i, labels.size())
+    {
+        QColor color = SampleColor[labels[i]%SampleColorCnt];
+        sampleColors[i] = color;
+    }
+    DrawTrajectories(pixmap, trajectories, sampleColors, type, drawMode, bounds);
+}
+
+void Expose::DrawTrajectories(QPixmap& pixmap, vector< vector<fvec> > trajectories, std::vector<QColor> sampleColors, int type, int drawMode, std::pair<fvec,fvec> bounds)
+{
+    if(!trajectories.size()) return;
+    int w = pixmap.width(), h = pixmap.height();
+
+    int dim = trajectories[0][0].size()/2; // trajectories have velocity embedded so we only want half the dimensions
+    if(!sampleColors.size()) dim = trajectories[0][0].size(); // unless we are actually drawing the trajectories without velocity
+    int gridX = dim;
+    int gridY = dim;
+
+    fvec mins = bounds.first;
+    fvec maxes = bounds.second;
+    if(!bounds.first.size())
+    {
+        mins.resize(dim, FLT_MAX);
+        maxes.resize(dim, -FLT_MIN);
+        FOR(d, dim)
+        {
+            FOR(i, trajectories.size())
+            {
+                FOR(j, trajectories[i].size())
+                {
+                    mins[d] = min(mins[d], trajectories[i][j][d]);
+                    maxes[d] = max(maxes[d], trajectories[i][j][d]);
+                }
+            }
+        }
+        bounds.first = mins;
+        bounds.second = maxes;
+    }
+    fvec diffs(dim, 0);
+    FOR(d, dim)
+    {
+        diffs[d] = maxes[d] - mins[d];
+    }
+
+    int pad = 20;
+    int mapW = w - pad*2, mapH = h - pad*2;
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    if(type==0)
+    {
+        mapW = w/gridX - pad*2;
+        mapH = h/gridX - pad*2;
+        int radiusBase = max(4.f, 4 * sqrtf(mapW / 200.f));
+
+        QList<QPixmap> maps;
+        FOR(index0, dim)
+        {
+            FOR(index1, dim)
+            {
+                QPixmap map(mapW + 2*pad,mapH + 2*pad);
+                int smallW = map.width() - 2*pad, smallH = map.height() - 2*pad;
+
+                QBitmap bitmap(map.size());
+                bitmap.clear();
+                map.setMask(bitmap);
+                map.fill(Qt::transparent);
+
+                QPainter painter(&map);
+                painter.setRenderHint(QPainter::Antialiasing);
+
+                if(diffs[index0] != 0.f && diffs[index1] != 0.f)
+                {
+                    int sampleColorCounter = 0;
+                    FOR(i, trajectories.size())
+                    {
+                        QPointF oldPoint, firstPoint, point;
+                        int count = trajectories[i].size();
+                        if(drawMode == 0 && i < sampleColors.size()) painter.setBrush(sampleColors[sampleColorCounter]);
+                        else painter.setBrush(Qt::black);
+                        FOR(j, count)
+                        {
+                            fvec pt = trajectories[i][j];
+                            float x = pt[index0];
+                            float y = pt[index1];
+                            x = (x-mins[index0])/diffs[index0];
+                            y = (y-mins[index1])/diffs[index1];
+                            point = QPointF(y*smallW + pad, x*smallH + pad);
+                            if(drawMode == 0) painter.setPen(QPen(Qt::black, 0.5));
+                            else if(drawMode == 1) painter.setPen(QPen(Qt::green, 1));
+                            if(j)
+                            {
+                                painter.drawLine(point, oldPoint);
+                                if(j<count-1 && sampleColors.size())
+                                {
+                                    painter.drawEllipse(point, max(1,radiusBase/4), max(1,radiusBase/4));
+                                }
+                            }
+                            else firstPoint = point;
+                            oldPoint = point;
+                            sampleColorCounter++;
+                        }
+                        if(drawMode == 0)
+                        {
+                            painter.setBrush(Qt::NoBrush);
+                            painter.setPen(Qt::green);
+                            painter.drawEllipse(firstPoint, radiusBase, radiusBase);
+                            painter.setPen(Qt::red);
+                            painter.drawEllipse(point, radiusBase/2, radiusBase/2);
+                        }
+                    }
+                }
+                /*
+                painter.setBrush(Qt::NoBrush);
+                painter.setPen(Qt::black);
+                painter.setRenderHint(QPainter::Antialiasing, false);
+                painter.drawRect(pad/2,pad/2,smallW+pad, smallH+pad);
+                QString text =  QString("x%1  x%2").arg(index1+1).arg(index0+1);
+                if(index0 < names.size() && index1 < names.size()) text = names.at(index1) + " " + names.at(index0);
+                if(bProjected) text = QString("e%1  e%2").arg(index1+1).arg(index0+1);
+                painter.drawText(pad/2+1, map.height()-pad/2-1,text);
+                */
+                maps.push_back(map);
+            }
+        }
+
+        FOR(i, maps.size())
+        {
+            int xIndex = i%gridX;
+            int yIndex = i/gridX;
+            painter.drawPixmap(QPoint(xIndex*w/gridX, yIndex*h/gridY), maps[i]);
+        }
+    }
+}
+
+void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, ivec labels, int type, fvec params, bool bProjected, QStringList names)
 {
     if(!samples.size() || !labels.size()) return;
     vector<QColor> sampleColors(labels.size());
@@ -302,10 +454,10 @@ void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, ivec l
         QColor color = SampleColor[labels[i]%SampleColorCnt];
         sampleColors[i] = color;
     }
-    DrawVariableData(pixmap, samples, sampleColors, type, params, bProjected);
+    DrawVariableData(pixmap, samples, sampleColors, type, params, bProjected, false, names);
 }
 
-void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, fvec params, bool bProjected, bool bLearned)
+void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QColor> sampleColors, int type, fvec params, bool bProjected, bool bLearned, QStringList names)
 {
     if(!samples.size()) return;
     int w = pixmap.width(), h = pixmap.height();

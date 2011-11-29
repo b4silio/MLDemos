@@ -166,8 +166,8 @@ public:
 	int GetSize(){return size;}
 	int GetCount(){return samples.size();}
 	int GetDimCount();
+    std::pair<fvec, fvec> GetBounds();
 	static u32 GetClassCount(ivec classes);
-
 
 	// functions to manage samples
 	void AddSample(fvec sample, int label = 0, dsmFlags flag = _UNUSED);

@@ -99,7 +99,6 @@ void MLDemos::Classify()
 	mutex.unlock();
 }
 
-
 void MLDemos::ClassifyCross()
 {
     if(!canvas || !canvas->data->GetCount()) return;
@@ -201,7 +200,7 @@ void MLDemos::Regression()
     lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
-    int outputDim = optionsRegress->outputDimSpin->value()-1;
+    int outputDim = optionsRegress->outputDimCombo->currentIndex();
     ivec inputDims = GetInputDimensions();
     //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
      if(inputDims.size()==1 && inputDims[0] == outputDim) return;
@@ -297,7 +296,7 @@ void MLDemos::RegressionCross()
     lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
-    int outputDim = optionsRegress->outputDimSpin->value()-1;
+    int outputDim = optionsRegress->outputDimCombo->currentIndex();
     regressor = regressors[tab]->GetRegressor();
     tabUsedForTraining = tab;
 
@@ -360,37 +359,55 @@ void MLDemos::Dynamize()
 	int zeroEnding = optionsDynamic->zeroCheck->isChecked();
 	bool bColorMap = optionsDynamic->colorCheck->isChecked();
 
+    // we draw the current trajectories
 	vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
+    vector< vector<fvec> > testTrajectories;
+    int steps = 300;
 	if(trajectories.size())
 	{
-		canvas->maps.model = QPixmap(w,h);
-		QBitmap bitmap(w,h);
-		bitmap.clear();
-		canvas->maps.model.setMask(bitmap);
-		canvas->maps.model.fill(Qt::transparent);
-		QPainter painter(&canvas->maps.model);
-		int dim = trajectories[0][0].size() / 2;
-		fvec start(dim,0);
-		FOR(i, trajectories.size())
-		{
-			FOR(d, dim) start[d] = trajectories[i][0][d];
-			vector<fvec> result = dynamical->Test(start, 1000);
-			fvec oldPt = result[0];
-			int count = result.size();
-			FOR(j, count-1)
-			{
-				fvec pt = result[j+1];
-				painter.setPen(QPen(Qt::green, 2));
-				painter.drawLine(canvas->toCanvasCoords(pt), canvas->toCanvasCoords(oldPt));
-				//if(j<count-2) Canvas::drawSample(painter, canvas->toCanvasCoords(pt), 5, 2);
-				oldPt = pt;
-			}
-			painter.setBrush(Qt::NoBrush);
-			painter.setPen(Qt::green);
-			painter.drawEllipse(canvas->toCanvasCoords(result[0]), 5, 5);
-			painter.setPen(Qt::red);
-			painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
-		}
+        testTrajectories.resize(trajectories.size());
+        int dim = trajectories[0][0].size() / 2;
+        FOR(i, trajectories.size())
+        {
+            fvec start(dim,0);
+            FOR(d, dim) start[d] = trajectories[i][0][d];
+            vector<fvec> result = dynamical->Test(start, steps);
+            testTrajectories[i] = result;
+        }
+        canvas->maps.model = QPixmap(w,h);
+        QBitmap bitmap(w,h);
+        bitmap.clear();
+        canvas->maps.model.setMask(bitmap);
+        canvas->maps.model.fill(Qt::transparent);
+
+        if(canvas->canvasType == 0) // standard canvas
+        {
+            QPainter painter(&canvas->maps.model);
+            painter.setRenderHint(QPainter::Antialiasing);
+            FOR(i, testTrajectories.size())
+            {
+                vector<fvec> &result = testTrajectories[i];
+                fvec oldPt = result[0];
+                int count = result.size();
+                FOR(j, count-1)
+                {
+                    fvec pt = result[j+1];
+                    painter.setPen(QPen(Qt::green, 2));
+                    painter.drawLine(canvas->toCanvasCoords(pt), canvas->toCanvasCoords(oldPt));
+                    oldPt = pt;
+                }
+                painter.setBrush(Qt::NoBrush);
+                painter.setPen(Qt::green);
+                painter.drawEllipse(canvas->toCanvasCoords(result[0]), 5, 5);
+                painter.setPen(Qt::red);
+                painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
+            }
+        }
+        else
+        {
+            pair<fvec,fvec> bounds = canvas->data->GetBounds();
+            Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
+        }
 	}
 
 	// the first index is "none", so we subtract 1
@@ -1004,3 +1021,167 @@ void MLDemos::ExportAnimation()
     if(!canvas->data->GetSamples().size()) return;
 }
 
+
+void MLDemos::UpdateLearnedModel()
+{
+    if(!canvas) return;
+    if(!clusterer && !regressor && !dynamical && !classifier && !projector) return;
+    if(classifier)
+    {
+        QMutexLocker lock(&mutex);
+        classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+        if(classifier->UsesDrawTimer() && !drawTimer->isRunning())
+        {
+            drawTimer->start(QThread::NormalPriority);
+        }
+    }
+    if(clusterer)
+    {
+        QMutexLocker lock(&mutex);
+        clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+    }
+    if(regressor)
+    {
+        QMutexLocker lock(&mutex);
+        regressors[tabUsedForTraining]->Draw(canvas, regressor);
+        // here we draw the errors for each sample
+        int outputDim = optionsRegress->outputDimCombo->currentIndex();
+        ivec inputDims = GetInputDimensions();
+        //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
+         if(inputDims.size()==1 && inputDims[0] == outputDim) return;
+
+        int outputIndexInList = -1;
+        FOR(i, inputDims.size()) if(outputDim == inputDims[i])
+        {
+            outputIndexInList = i;
+            break;
+        }
+        if(canvas->data->GetDimCount() > 2 && canvas->canvasType == 0)
+        {
+            vector<fvec> samples = canvas->data->GetSamples();
+            vector<fvec> subsamples = canvas->data->GetSampleDims(inputDims, outputIndexInList==-1 ? outputDim : -1);
+            ivec labels = canvas->data->GetLabels();
+            QPainter painter(&canvas->maps.model);
+            painter.setRenderHint(QPainter::Antialiasing);
+            // we draw the starting sample
+            painter.setOpacity(0.4);
+            painter.setPen(Qt::black);
+            painter.setBrush(Qt::white);
+            FOR(i, samples.size())
+            {
+                fvec sample = samples[i];
+                QPointF point = canvas->toCanvasCoords(sample);
+                painter.drawEllipse(point, 6,6);
+            }
+            // we draw the estimated sample
+            painter.setPen(Qt::white);
+            painter.setBrush(Qt::black);
+            FOR(i, samples.size())
+            {
+                fvec sample = samples[i];
+                fvec estimate = regressor->Test(subsamples[i]);
+                sample[outputDim] = estimate[0];
+                QPointF point2 = canvas->toCanvasCoords(sample);
+                painter.drawEllipse(point2, 5,5);
+            }
+            painter.setOpacity(1);
+            // we draw the error bars
+            FOR(i, samples.size())
+            {
+                fvec sample = samples[i];
+                fvec estimate = regressor->Test(subsamples[i]);
+                QPointF point = canvas->toCanvasCoords(sample);
+                sample[outputDim] = estimate[0];
+                QPointF point2 = canvas->toCanvasCoords(sample);
+                QColor color = SampleColor[labels[i]%SampleColorCnt];
+                if(!labels[i]) color = Qt::black;
+                painter.setPen(QPen(color, 1));
+                painter.drawLine(point, point2);
+            }
+        }
+    }
+    if(dynamical)
+    {
+        QMutexLocker lock(&mutex);
+        dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+        int w = canvas->width(), h = canvas->height();
+
+        int resampleType = optionsDynamic->resampleCombo->currentIndex();
+        int resampleCount = optionsDynamic->resampleSpin->value();
+        int centerType = optionsDynamic->centerCombo->currentIndex();
+        float dT = optionsDynamic->dtSpin->value();
+        int zeroEnding = optionsDynamic->zeroCheck->isChecked();
+        bool bColorMap = optionsDynamic->colorCheck->isChecked();
+
+        // we draw the current trajectories
+        vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
+        vector< vector<fvec> > testTrajectories;
+        int steps = 300;
+        if(trajectories.size())
+        {
+            testTrajectories.resize(trajectories.size());
+            int dim = trajectories[0][0].size() / 2;
+            FOR(i, trajectories.size())
+            {
+                fvec start(dim,0);
+                FOR(d, dim) start[d] = trajectories[i][0][d];
+                vector<fvec> result = dynamical->Test(start, steps);
+                testTrajectories[i] = result;
+            }
+            canvas->maps.model = QPixmap(w,h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            canvas->maps.model.setMask(bitmap);
+            canvas->maps.model.fill(Qt::transparent);
+
+            if(canvas->canvasType == 0) // standard canvas
+            {
+                QPainter painter(&canvas->maps.model);
+                painter.setRenderHint(QPainter::Antialiasing);
+                FOR(i, testTrajectories.size())
+                {
+                    vector<fvec> &result = testTrajectories[i];
+                    fvec oldPt = result[0];
+                    int count = result.size();
+                    FOR(j, count-1)
+                    {
+                        fvec pt = result[j+1];
+                        painter.setPen(QPen(Qt::green, 2));
+                        painter.drawLine(canvas->toCanvasCoords(pt), canvas->toCanvasCoords(oldPt));
+                        oldPt = pt;
+                    }
+                    painter.setBrush(Qt::NoBrush);
+                    painter.setPen(Qt::green);
+                    painter.drawEllipse(canvas->toCanvasCoords(result[0]), 5, 5);
+                    painter.setPen(Qt::red);
+                    painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
+                }
+            }
+            else
+            {
+                pair<fvec,fvec> bounds = canvas->data->GetBounds();
+                Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
+            }
+        }
+
+        // the first index is "none", so we subtract 1
+        int avoidIndex = optionsDynamic->obstacleCombo->currentIndex()-1;
+        if(avoidIndex >=0 && avoidIndex < avoiders.size() && avoiders[avoidIndex])
+        {
+            DEL(dynamical->avoid);
+            dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
+        }
+        UpdateInfo();
+        if(dynamicals[tabUsedForTraining]->UsesDrawTimer())
+        {
+            drawTimer->bColorMap = bColorMap;
+            drawTimer->start(QThread::NormalPriority);
+        }
+
+    }
+    if(projector)
+    {
+        projectors[tabUsedForTraining]->Draw(canvas, projector);
+    }
+    UpdateInfo();
+}

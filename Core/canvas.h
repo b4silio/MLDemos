@@ -88,10 +88,12 @@ public:
 	fvec center;
 	float zoom;
 	fvec zooms;
+    fvec mins, maxes;
     int xIndex, yIndex, zIndex;
 	std::vector<fvec> targets;
     int canvasType;
     std::vector<QColor> sampleColors;
+    QStringList dimNames;
 
 protected:
 	void paintEvent(QPaintEvent *event);
