@@ -62,6 +62,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
+    connect(ui.actionImportData, SIGNAL(triggered()), this, SLOT(ImportData()));
     connect(ui.actionExportOutput, SIGNAL(triggered()), this, SLOT(ExportOutput()));
     connect(ui.actionExportAnimation, SIGNAL(triggered()), this, SLOT(ExportAnimation()));
     connect(ui.actionExport_SVG, SIGNAL(triggered()), this, SLOT(ExportSVG()));
@@ -399,6 +400,9 @@ void MLDemos::initDialogs()
 	connect(optionsCompare->removeButton, SIGNAL(clicked()), this, SLOT(CompareRemove()));
     connect(optionsCompare->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
 
+    connect(optionsRegress->outputDimCombo, SIGNAL(currentIndexChanged(int)), optionsCompare->outputDimCombo, SLOT(setCurrentIndex(int)));
+    connect(optionsCompare->outputDimCombo, SIGNAL(currentIndexChanged(int)), optionsRegress->outputDimCombo, SLOT(setCurrentIndex(int)));
+
     optionsClassify->tabWidget->clear();
     optionsCluster->tabWidget->clear();
     optionsRegress->tabWidget->clear();
@@ -442,6 +446,10 @@ void MLDemos::initDialogs()
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
 
     expose = new Expose(canvas);
+    import = new DataImporter();
+    connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
+    connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
+    connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
 }
 
 void MLDemos::initPlugins()
@@ -1017,8 +1025,25 @@ void MLDemos::ResetPositiveClass()
         }
     }
     int dimCount = max(2,canvas->data->GetDimCount());
-    optionsRegress->outputDimSpin->setRange(1,dimCount);
-    optionsCompare->outputDimSpin->setRange(1,dimCount);
+    int currentOutputDim = optionsCompare->outputDimCombo->currentIndex();
+
+    optionsCompare->outputDimCombo->clear();
+    optionsRegress->outputDimCombo->clear();
+    FOR(i, dimCount)
+    {
+        if(i < canvas->dimNames.size())
+        {
+            optionsCompare->outputDimCombo->addItem(QString("%1) %2").arg(i+1).arg(canvas->dimNames.at(i)));
+            optionsRegress->outputDimCombo->addItem(QString("%1) %2").arg(i+1).arg(canvas->dimNames.at(i)));
+        }
+        else
+        {
+            optionsCompare->outputDimCombo->addItem(QString("%1").arg(i+1));
+            optionsRegress->outputDimCombo->addItem(QString("%1").arg(i+1));
+        }
+    }
+    if(currentOutputDim < dimCount) optionsCompare->outputDimCombo->setCurrentIndex(currentOutputDim);
+
     optionsClassify->positiveSpin->setRange(labMin,labMax);
     if(optionsClassify->positiveSpin->value() < labMin)
         optionsClassify->positiveSpin->setValue(labMin);
@@ -1042,9 +1067,9 @@ void MLDemos::ClearData()
     sourceData.clear();
     sourceLabels.clear();
     projectedData.clear();
-    dimensionNames.clear();
     if(canvas)
     {
+        canvas->dimNames.clear();
         canvas->sampleColors.clear();
         canvas->data->Clear();
         canvas->targets.clear();
@@ -1447,12 +1472,11 @@ void MLDemos::InputDimensionsUpdated()
             xMax[d] = max(xMax[d], samples[i][d]);
         }
     }
-
     FOR(d, dim)
     {
         QString item = QString("%1").arg(d+1);
-        if(sourceLabels.size() > d) item += QString("-%2").arg(sourceLabels[d]);
-        item += QString(" rng: [%1 --> %2]").arg(xMin[d], 0, 'f', 3).arg(xMax[d], 0, 'f', 3);
+        if(d < canvas->dimNames.size()) item += QString(") %2").arg(canvas->dimNames.at(d));
+        item += QString(" : [%1 --> %2]").arg(xMin[d], 0, 'f', 3).arg(xMax[d], 0, 'f', 3);
         inputDimensions->dimList->addItem(item);
     }
     ManualSelectionChanged();
@@ -1892,6 +1916,8 @@ void MLDemos::CanvasMoveEvent()
     drawTimer->Stop();
     drawTimer->Clear();
     QMutexLocker lock(&mutex);
+    UpdateLearnedModel();
+
     if(classifier)
     {
         classifiers[tabUsedForTraining]->Draw(canvas, classifier);
@@ -1963,6 +1989,7 @@ void MLDemos::CanvasTypeChanged()
     if(canvas->canvasType == ui.canvasTypeCombo->currentIndex()) return;
     canvas->SetCanvasType(ui.canvasTypeCombo->currentIndex());
     CanvasOptionsChanged();
+    UpdateLearnedModel();
     canvas->repaint();
 }
 
@@ -2330,6 +2357,25 @@ void MLDemos::Load(QString filename)
     canvas->repaint();
 }
 
+void MLDemos::ImportData()
+{
+    if(!canvas || !import) return;
+    QString filename = QFileDialog::getOpenFileName(this, tr("Import Data Data"), "", tr("Dataset Files (*.csv *.data *.txt)"));
+    if(filename.isEmpty()) return;
+    import->Start();
+    import->Parse(filename);
+    import->SendData();
+}
+
+void MLDemos::ImportData(QString filename)
+{
+    import->Start();
+    import->Parse(filename);
+    import->SendData();
+    if(import->GetHeaders().size()) canvas->dimNames = import->GetHeaders();
+    ui.statusBar->showMessage("Data loaded successfully");
+}
+
 void MLDemos::dragEnterEvent(QDragEnterEvent *event)
 {
     QList<QUrl> dragUrl;
@@ -2337,7 +2383,7 @@ void MLDemos::dragEnterEvent(QDragEnterEvent *event)
     {
         QList<QUrl> urls = event->mimeData()->urls();
         QStringList dataType;
-        dataType << ".ml";
+        dataType << ".ml" << ".csv" << ".data";
         for(int i=0; i<urls.size(); i++)
         {
             QString filename = urls[i].path();
@@ -2363,12 +2409,22 @@ void MLDemos::dropEvent(QDropEvent *event)
     FOR(i, event->mimeData()->urls().length())
     {
         QString filename = event->mimeData()->urls()[i].toLocalFile();
+        qDebug() << "accepted drop file:" << filename;
         if(filename.toLower().endsWith(".ml"))
         {
             ClearData();
             canvas->data->Load(filename.toAscii());
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");
+            ResetPositiveClass();
+            ManualSelectionUpdated();
+            UpdateInfo();
+            canvas->repaint();
+        }
+        else if(filename.toLower().endsWith(".csv") || filename.toLower().endsWith(".data"))
+        {
+            ClearData();
+            ImportData(filename);
             ResetPositiveClass();
             ManualSelectionUpdated();
             UpdateInfo();
@@ -2463,7 +2519,7 @@ void MLDemos::ActivateIO()
 
 void MLDemos::ActivateImport()
 {
-    QList<QAction *> pluginActions = ui.menuImport->actions();
+    QList<QAction *> pluginActions = ui.menuInput_Output->actions();
     FOR(i, inputoutputs.size())
     {
         if(i<pluginActions.size() && inputoutputs[i] && pluginActions[i])
@@ -2521,7 +2577,8 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     sourceData.clear();
     sourceLabels.clear();
     projectedData.clear();
-    dimensionNames.clear();
+    if(!canvas) return;
+    canvas->dimNames.clear();
     canvas->sampleColors.clear();
     canvas->data->Clear();
     canvas->data->AddSamples(samples, labels);
@@ -2536,8 +2593,18 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
 	ResetPositiveClass();
     ManualSelectionUpdated();
     CanvasOptionsChanged();
-	canvas->ResetSamples();
+    canvas->ResetSamples();
 	canvas->repaint();
+}
+
+void MLDemos::SetDimensionNames(QStringList headers)
+{
+    qDebug() << "setting dimension names" << headers;
+    canvas->dimNames = headers;
+    ResetPositiveClass();
+    CanvasOptionsChanged();
+    canvas->ResetSamples();
+    canvas->repaint();
 }
 
 void MLDemos::SetTimeseries(std::vector<TimeSerie> timeseries)
@@ -2546,7 +2613,8 @@ void MLDemos::SetTimeseries(std::vector<TimeSerie> timeseries)
     sourceData.clear();
     sourceLabels.clear();
     projectedData.clear();
-    dimensionNames.clear();
+    if(!canvas) return;
+    canvas->dimNames.clear();
     canvas->sampleColors.clear();
     canvas->data->Clear();
 	canvas->data->AddTimeSeries(timeseries);

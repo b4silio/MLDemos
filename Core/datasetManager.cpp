@@ -634,6 +634,24 @@ int DatasetManager::GetDimCount()
 	return dim;
 }
 
+std::pair<fvec, fvec> DatasetManager::GetBounds()
+{
+    if(!samples.size()) return make_pair(fvec(),fvec());
+    int dim = samples[0].size();
+    fvec mins(dim,FLT_MAX), maxes(dim,-FLT_MAX);
+    FOR(i, samples.size())
+    {
+        fvec& sample = samples[i];
+        int dim = sample.size();
+        FOR(d,dim)
+        {
+            if(mins[d] > sample[d]) mins[d] = sample[d];
+            if(maxes[d] < sample[d]) maxes[d] = sample[d];
+        }
+    }
+    return make_pair(mins, maxes);
+}
+
 u32 DatasetManager::GetClassCount(ivec classes)
 {
 	u32 counts[256];

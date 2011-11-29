@@ -249,6 +249,8 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
 
     painter.fillRect(geometry(),Qt::white);
 
+    std::pair<fvec,fvec> bounds = data->GetBounds();
+
     if(bDisplaySamples)
     {
         if(maps.samples.isNull())
@@ -260,7 +262,7 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             bitmap.clear();
             maps.samples.setMask(bitmap);
             maps.samples.fill(Qt::transparent);
-            Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), type, data->bProjected);
+            Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), data->GetFlags(), type, data->bProjected, dimNames, bounds);
         }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.samples);
@@ -276,6 +278,7 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             bitmap.clear();
             maps.trajectories.setMask(bitmap);
             maps.trajectories.fill(Qt::transparent);
+            Expose::DrawTrajectories(maps.trajectories, data->GetTrajectories(trajectoryResampleType, trajectoryResampleCount, trajectoryCenterType, 0.1, true), data->GetLabels(), type, 0, bounds);
         }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.trajectories);
@@ -291,7 +294,7 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             bitmap.clear();
             maps.model.setMask(bitmap);
             maps.model.fill(Qt::transparent);
-            Expose::DrawData(maps.model, data->GetSamples(), sampleColors, type, data->bProjected, true);
+            Expose::DrawData(maps.model, data->GetSamples(), sampleColors, data->GetFlags(), type, data->bProjected, true, dimNames);
         }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.model);
@@ -380,7 +383,8 @@ void Canvas::paintEvent(QPaintEvent *event)
 
 QPointF Canvas::toCanvasCoords(fvec sample)
 {
-    if(sample.size() != center.size()) return QPointF(0,0);
+    if(sample.size() < center.size()) return QPointF(0,0);
+    //else if(sample.size() > center.size()) center = fvec(sample.size(), 0);
 	sample -= center;
 	QPointF point(sample[xIndex]*(zoom*zooms[xIndex]*height()),sample[yIndex]*(zoom*zooms[yIndex]*height()));
 	point += QPointF(width()/2, height()/2);
@@ -553,19 +557,11 @@ void Canvas::FitToData()
     //qDebug() << "fit to data, dim: " << dim;
 
 	// we go through all the data and find the boundaries
-	fvec mins(dim,FLT_MAX), maxes(dim,-FLT_MAX);
+    std::pair<fvec,fvec> bounds = data->GetBounds();
+    fvec mins = bounds.first, maxes = bounds.second;
 	vector<fvec> samples = data->GetSamples();
-	FOR(i, samples.size())
-	{
-		fvec& sample = samples[i];
-		int dim = sample.size();
-		FOR(d,dim)
-		{
-			if(mins[d] > sample[d]) mins[d] = sample[d];
-			if(maxes[d] < sample[d]) maxes[d] = sample[d];
-		}
-	}
-	vector<TimeSerie>& series = data->GetTimeSeries();
+
+    vector<TimeSerie>& series = data->GetTimeSeries();
 	FOR(i, series.size())
 	{
 		TimeSerie& serie = series[i];
@@ -582,11 +578,6 @@ void Canvas::FitToData()
 			}
 		}
 	}
-	FOR(d, dim)
-	{
-        //qDebug() << d << ": " << mins[d] << " - " << maxes[d];
-	}
-
 	fvec diff = maxes - mins;
 
 	center = mins + diff/2;
@@ -1072,9 +1063,14 @@ void Canvas::DrawTrajectories()
 		FOR(j, count-1)
 		{
 			fvec pt = trajectories[i][j+1];
+            int dim = pt.size();
+            float x = pt[xIndex];
+            float y = pt[yIndex];
 			painter.setPen(QPen(Qt::black, 0.5));
-			painter.drawLine(toCanvasCoords(pt), toCanvasCoords(oldPt));
-			if(j<count-2) Canvas::drawSample(painter, toCanvasCoords(pt), 5, bDisplaySingle ? 0 : label);
+            QPointF point = toCanvasCoords(pt);
+            QPointF oldPoint = toCanvasCoords(oldPt);
+            painter.drawLine(point, toCanvasCoords(oldPt));
+            if(j<count-2) Canvas::drawSample(painter, point, 5, bDisplaySingle ? 0 : label);
 			oldPt = pt;
 		}
 		painter.setBrush(Qt::NoBrush);

@@ -178,7 +178,7 @@ void CSVParser::parse(const char* fileName)
         ++parser; // we skip the first line as it might be a header line
         if(parser.eof() || !parser->size()) continue;
         vector<string> parsed = parser->getParsedLine();
-        qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
+        //qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
         if(parsed.size() > dim)
         {
             dim = parsed.size();
@@ -338,11 +338,13 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     }
     else
     {
+        /*
         qDebug() << "label indices";
         for(map<string,int>::iterator it = labelMaps[outputLabelColumn].begin(); it != labelMaps[outputLabelColumn].end(); it++)
         {
             qDebug() << (it->first).c_str() << " " << it->second;
         }
+        */
         bool numerical = true;
         FOR(i, data.size())
         {
@@ -390,10 +392,10 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     vector<fvec> newSamples(count);
     int newDim = dim - excludeIndex.size();
     if(outputLabelColumn != -1) newDim--;
-    qDebug() << "Indices to be excluded: " << excludeIndex.size() << "(newDim: " << newDim << ")";
+    //qDebug() << "Indices to be excluded: " << excludeIndex.size() << "(newDim: " << newDim << ")";
     FOR(i, excludeIndex.size())
     {
-        qDebug() << i << ":" << excludeIndex[i];
+        //qDebug() << i << ":" << excludeIndex[i];
         // if it's the output we can ignore it but we need to reincrement the number of dimensions
         if(excludeIndex[i] == outputLabelColumn)
         {
@@ -419,6 +421,6 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
             nD++;
         }
     }
-    qDebug() << "newSamples: " << newSamples.size() << " labels: " << labels.size();
+    qDebug() << "Imported samples: " << newSamples.size() << " labels: " << labels.size();
     return pair<vector<fvec>,ivec>(newSamples,labels);
 }

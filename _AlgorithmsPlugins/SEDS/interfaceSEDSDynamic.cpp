@@ -71,35 +71,41 @@ void DynamicSEDS::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
 
 	float resize = ((DynamicalSEDS*)dynamical)->resizeFactor;
 
-	Gmm *gmm = ((DynamicalSEDS*)dynamical)->gmm;
-	float mean[4];
-	float sigma[10];
-	float drawMean[2];
-	float drawSigma[3];
-	painter.setBrush(Qt::NoBrush);
-	FOR(i, gmm->nstates)
-	{
-		gmm->getMean(i, mean);
-		gmm->getCovariance(i, sigma, true);
-		drawMean[0] = mean[0]; drawMean[1] = mean[1];
-		drawSigma[0] = sigma[0];
-		drawSigma[1] = sigma[1];
-		drawSigma[2] = sigma[4];
+    Gmm *gmm = ((DynamicalSEDS*)dynamical)->gmm;
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int dim = gmm->dim;
+    float mean[2];
+    float sigma[3];
+    painter.setBrush(Qt::NoBrush);
+    FOR(i, gmm->nstates)
+    {
+        float* bigSigma = new float[dim*dim];
+        float* bigMean = new float[dim];
+        gmm->getCovariance(i, bigSigma, false);
+        sigma[0] = bigSigma[xIndex*dim + xIndex];
+        sigma[1] = bigSigma[yIndex*dim + xIndex];
+        sigma[2] = bigSigma[yIndex*dim + yIndex];
+        gmm->getMean(i, bigMean);
+        mean[0] = bigMean[xIndex];
+        mean[1] = bigMean[yIndex];
+        delete [] bigSigma;
+        delete [] bigMean;
 
-		fvec endpoint = ((DynamicalSEDS*)dynamical)->endpoint;
-		FOR(j,2) drawMean[j] = drawMean[j]/resize + endpoint[j];
-		FOR(j,3) drawSigma[j] /= resize*resize;
+        fvec endpoint = ((DynamicalSEDS*)dynamical)->endpoint;
+        FOR(j,2) mean[j] = mean[j]/resize + endpoint[j];
+        FOR(j,3) sigma[j] /= resize*resize;
 
-		painter.setPen(QPen(Qt::black, 1));
-		DrawEllipse(drawMean, drawSigma, 1, &painter, canvas);
-		painter.setPen(QPen(Qt::black, 0.5));
-		DrawEllipse(drawMean, drawSigma, 2, &painter, canvas);
-		QPointF point = canvas->toCanvasCoords(drawMean[0],drawMean[1]);
-		painter.setPen(QPen(Qt::black, 4));
-		painter.drawEllipse(point, 2, 2);
-		painter.setPen(QPen(Qt::white, 2));
-		painter.drawEllipse(point, 2, 2);
-	}
+        painter.setPen(QPen(Qt::black, 1));
+        DrawEllipse(mean, sigma, 1, &painter, canvas);
+        painter.setPen(QPen(Qt::black, 0.5));
+        DrawEllipse(mean, sigma, 2, &painter, canvas);
+        QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
+        painter.setPen(QPen(Qt::black, 4));
+        painter.drawEllipse(point, 2, 2);
+        painter.setPen(QPen(Qt::white, 2));
+        painter.drawEllipse(point, 2, 2);
+    }
 }
 
 void DynamicSEDS::SaveOptions(QSettings &settings)

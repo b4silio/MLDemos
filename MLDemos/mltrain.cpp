@@ -612,9 +612,8 @@ fvec MLDemos::Test(Dynamical *dynamical, vector< vector<fvec> > trajectories, iv
     float dT = dynamical->dT;
     fvec sample; sample.resize(dim,0);
     fvec vTrue; vTrue.resize(dim, 0);
-    fvec xMin, xMax;
-    xMin.resize(dim, FLT_MAX);
-    xMax.resize(dim, -FLT_MAX);
+    fvec xMin(dim, FLT_MAX);
+    fvec xMax(dim, -FLT_MAX);
 
     // test each trajectory for errors
     int errorCnt=0;
@@ -650,14 +649,13 @@ fvec MLDemos::Test(Dynamical *dynamical, vector< vector<fvec> > trajectories, iv
 
     float errorTarget = 0;
     // test each trajectory for target
+    fvec pos(dim), end(dim);
     FOR(i, trajectories.size())
     {
-        fvec pos = trajectories[i][0];
-        fvec end = trajectories[i][trajectories[i].size()-1];
         FOR(d, dim)
         {
-            pos.pop_back();
-            end.pop_back();
+            pos[d] = trajectories[i].front()[d];
+            end[d] = trajectories[i].back()[d];
         }
         if(!endpoints.size()) endpoints.push_back(end);
         else
@@ -696,7 +694,6 @@ fvec MLDemos::Test(Dynamical *dynamical, vector< vector<fvec> > trajectories, iv
     res.push_back(errorTarget);
 
     fvec xDiff = xMax - xMin;
-    fvec pos; pos.resize(dim);
     errorTarget = 0;
     int testCount = 100;
     FOR(i, testCount)
@@ -936,7 +933,7 @@ void MLDemos::Compare()
             QStringList s = line.split(":");
             int tab = s[1].toInt();
             if(tab >= regressors.size() || !regressors[tab]) continue;
-            int outputDim = optionsCompare->outputDimSpin->value()-1;
+            int outputDim = optionsCompare->outputDimCombo->currentIndex();
             QTextStream paramStream(&paramString);
             QString paramName;
             float paramValue;
