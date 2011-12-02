@@ -48,7 +48,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 	u32 *perm = randPerm(sampleCnt);
 
 	int learnerCount = max((!weakType?360 : 1000), (int)weakCount);
-    if(dim > 2) learnerCount = 2000;
+    if(dim > 2) learnerCount = 1000;
 	if(currentLearnerType != weakType)
 	{
 		srand(1); // so we always generate the same weak learner
@@ -131,9 +131,10 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 				learners[i].resize(dim*2);
 				FOR(d, dim)
 				{
-					float x = (rand() / (float)RAND_MAX)*(xMax[d] - xMin[d]) + xMin[d]; // starting point
-					float l = (rand() / (float)RAND_MAX)*(xMax[d] - xMin[d]); // width
-					learners[i][2*d] = x;
+                    float x = (rand() / (float)RAND_MAX)*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
+                    float l = (rand() / (float)RAND_MAX)*(xMax[d] - xMin[d]); // width
+                    //float l = ((rand()+1) / (float)RAND_MAX); // width ratio
+                    learners[i][2*d] = x;
 					learners[i][2*d+1] = l;
 				}
 			}
@@ -154,7 +155,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
                 fvec sample = samples[perm[i]];
                 FOR(j, learnerCount)
 				{
-					float val = 0;
+                    float val = 0;
 					if(!weakType)
 					{
                         val = sample[0]* learners[j][0] + sample[1]* learners[j][1];
@@ -204,16 +205,20 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 			const fvec sample = samples[perm[i]];
 			FOR(j, learnerCount)
 			{
-				float val = 1;
+                float val = 1;
 				FOR(d, dim)
 				{
-					if(sample[d] < learners[j][2*d] || sample[d] > learners[j][2*d]+learners[j][2*d+1])
-					{
-						val = 0;
-						break;
-					}
-				}
-				cvSetReal2D(trainSamples, i, j, val);
+                    //float v = fabs(sample[d] - learners[j][2*d]);
+                    //float v = fabs(sample[d] - learners[j][2*d]) / learners[j][2*d+1];
+                    //val += v;
+
+                    if(sample[d] < learners[j][2*d] || sample[d] > learners[j][2*d]+learners[j][2*d+1])
+                    {
+                        val = 0;
+                        break;
+                    }
+                }
+                cvSetReal2D(trainSamples, i, j, val + rand()/(float)RAND_MAX*0.1);
 			}
 			cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
 			cvSet1D(sampleWeights, i, cvScalar(1));
@@ -298,7 +303,7 @@ float ClassifierBoost::Test( const fvec &sample )
 			FOR(i, features.size())
 			{
 				float val = 0;
-				if(!weakType) sample * learners[features[i]];
+                if(!weakType) sample * learners[features[i]];
 				else
 				{
 					FOR(d,dim) val += (sample[d] - learners[features[i]][d])*(sample[d] - learners[features[i]][d]);
@@ -312,17 +317,21 @@ float ClassifierBoost::Test( const fvec &sample )
 	{
 		FOR(i, features.size())
 		{
-			int val = 1;
+            int val = 1;
 			FOR(d, dim)
 			{
-				if(sample[d] < learners[features[i]][2*d] ||
-					sample[d] > learners[features[i]][2*d]+learners[features[i]][2*d+1])
-				{
-					val = 0;
-					break;
-				}
+                //float v = fabs(sample[d] - learners[features[i]][2*d]);
+                //float v = fabs(sample[d] - learners[features[i]][2*d]) / learners[features[i]][2*d+1];
+                //val += v;
+
+                if(sample[d] < learners[features[i]][2*d] ||
+                    sample[d] > learners[features[i]][2*d]+learners[features[i]][2*d+1])
+                {
+                    val = 0;
+                    break;
+                }
 			}
-			cvSetReal2D(x, 0, features[i], val);
+            cvSetReal2D(x, 0, features[i], val + rand()/(float)RAND_MAX*0.1);
 		}
 	}
 
