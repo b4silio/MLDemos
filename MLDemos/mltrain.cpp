@@ -109,6 +109,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
                 else
                 {
                     int maxClass = 0;
+                    qDebug() << "res[" << i << "]: " << newLabels[i] << classifier->classMap[newLabels[i]] << " : " << res[0] << res[1] << res[2] << res[3];
                     for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
                     int c = classifier->inverseMap[maxClass];
                     rocData.push_back(f32pair(c, newLabels[i]));
@@ -277,7 +278,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             if(bMulticlass) countPerClass[trainLabels[i]]++;
             else countPerClass[trainLabels[i] == 1]++;
         }
-        rocData = FixRocData(rocData);
+        if(!bTrueMulti) FixRocData(rocData);
         classifier->rocdata.push_back(rocData);
         classifier->roclabels.push_back("training");
         lastTrainingInfo += QString("\nTraining Set (%1 samples):\n").arg(trainSamples.size());
@@ -352,7 +353,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             if(bMulticlass) countPerClass[testLabels[i]]++;
             else countPerClass[testLabels[i] == 1]++;
         }
-        rocData = FixRocData(rocData);
+        if(!bTrueMulti) rocData = FixRocData(rocData);
         classifier->rocdata.push_back(rocData);
         classifier->roclabels.push_back("test");
         lastTrainingInfo += QString("\nTesting Set (%1 samples):\n").arg(testSamples.size());
@@ -855,6 +856,7 @@ void MLDemos::Compare()
                         std::vector<f32pair> rocdata = classifier->rocdata[0];
                         FOR(j, rocdata.size())
                         {
+                            qDebug() << "rocdata: " << j << rocdata[j].first << rocdata[j].second;
                             if(rocdata[j].first != rocdata[j].second)
                             {
                                 if(classes.size() > 2) errors++;

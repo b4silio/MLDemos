@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "classifierGMM.h"
 #include <map>
+#include <QDebug>
 
 using namespace std;
 
@@ -50,20 +51,10 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
     ivec newLabels(labels.size());
     FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
 
+    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++) qDebug() << "inverse: " << it->first << it->second;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) qDebug() << "class: " << it->first << it->second;
+
     std::map<int, vector<fvec> > sampleMap;
-    /*
-	std::map<int, int > counts;
-	FOR(i, labels.size())
-	{
-		if(counts.count(labels[i])) continue;
-		counts[labels[i]] = cnt++;
-	}
-	cnt = 0;
-    for(map<int,int>::iterator it=counts.begin(); it != counts.end(); it++)
-	{
-        classes[cnt++] = it->first;
-	}
-    */
 
     FOR(i, samples.size())
 	{
@@ -104,11 +95,13 @@ fvec ClassifierGMM::TestMulti(const fvec &sample)
 		return res;
 	}
 
-	float xmin=-10.f, xmax=10.f;
+    float xmin=-100.f, xmax=100.f;
 	float sum = 0;
 	FOR(i, pdf.size())
 	{
-		pdf[i] = (min(xmax,max(xmin, log(pdf[i]))) - xmin) / (xmax);
+        float value = log(pdf[i]);
+        value = (min(xmax,max(xmin, value)) - xmin) / (xmax);
+        pdf[i] = value;
 	}
 	return pdf;
 }

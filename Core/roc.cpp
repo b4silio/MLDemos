@@ -93,7 +93,7 @@ std::vector<f32pair> LoadRoc(const char *filename)
 	return data;
 }
 
-// fixrocdata takes as input binary roc data and decides whether the two classes should be split
+// fixrocdata takes as input binary roc data and decides whether the two classes should be swapped
 // this should be done when the binary classifier is performing worse than random
 std::vector<f32pair> FixRocData(std::vector<f32pair> data)
 {
