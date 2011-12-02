@@ -106,6 +106,37 @@ void CompareAlgorithms::Update()
 	display->setPixmap(pixmap);
 }
 
+QString CompareAlgorithms::ToString()
+{
+    QString text;
+    FOR(x, compareDisplay->resultCombo->count())
+    {
+        QString name = compareDisplay->resultCombo->itemText(x);
+        vector<fvec> result = results[name];
+        QStringList names = algorithms[name];
+        if(!names.size() || !results.size()) return text;
+        text += name + "\n";
+        FOR(n, names.size())
+        {
+            fvec& data = result[n];
+            int nanCount = 0;
+            FOR(i, data.size()) if(data[i] != data[i]) nanCount++;
+            float mean = 0;
+            float sigma = 0;
+            FOR(i, data.size()) if(data[i]==data[i]) mean += data[i] / (data.size()-nanCount);
+            FOR(i, data.size()) if(data[i]==data[i]) sigma += powf(data[i]-mean,2);
+            sigma = sqrtf(sigma/(data.size()-nanCount));
+
+            text += names[n] + "\t";
+            text += QString("%1\t%2").arg(mean, 0, 'f', 4).arg(sigma, 0, 'f', 4);
+            text += "\n";
+        }
+        text += "\n";
+    }
+    return text;
+}
+
+
 void CompareAlgorithms::Show()
 {
 	Update();

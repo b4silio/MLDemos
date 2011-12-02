@@ -26,6 +26,7 @@ public:
 	void Clear();
     void SetActiveResult(int index);
     QPixmap &Display(){return pixmap;}
+    QString ToString();
 
 public slots:
 	void Update();

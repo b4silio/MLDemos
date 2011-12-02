@@ -386,9 +386,9 @@ QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal, float min
 		int hpad = 15 + (d*size.width()/(allData.size()));
 		int pad = -16;
 		int res = size.height()+2*pad;
+
         int nanCount = 0;
         FOR(i, data.size()) if(data[i] != data[i]) nanCount++;
-
 		float mean = 0;
 		float sigma = 0;
         FOR(i, data.size()) if(data[i]==data[i]) mean += data[i] / (data.size()-nanCount);

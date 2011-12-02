@@ -2472,6 +2472,7 @@ void MLDemos::CompareScreenshot()
     QPixmap screenshot = compare->Display().copy();
     clipboard->setImage(screenshot.toImage());
     //clipboard->setPixmap(screenshot);
+    clipboard->setText(compare->ToString());
 }
 
 void MLDemos::ToClipboard()
