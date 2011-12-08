@@ -24,6 +24,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <QDebug>
 #include "roc.h"
 
 #define RES 512
@@ -86,7 +87,7 @@ std::vector<f32pair> LoadRoc(const char *filename)
 	FOR(i, size)
 	{
 		f32pair pair;
-		file.read(reinterpret_cast<char *>(&pair), sizeof(f32pair));
+        file.read(reinterpret_cast<char *>(&pair), sizeof(f32pair));
 		data.push_back(pair);
 	}
 	file.close();
@@ -102,7 +103,11 @@ std::vector<f32pair> FixRocData(std::vector<f32pair> data)
     int rocType = 0; // -1 or 1
     FOR(i, data.size())
     {
-        if(data[i].second != 1 && data[i].second != -1) rocType = 1; // 0 1 2 ...
+        if(data[i].second != 1 && data[i].second != -1)
+        {
+            rocType = 1; // 0 1 2 ...
+            break;
+        }
     }
     if(rocType == 0)
     {
@@ -306,96 +311,3 @@ float GetRocValueAt(std::vector<f32pair> data, float threshold)
 	return fmeasure;
 }
 
-/*
-void SaveRocImage(const char *filename)
-{
-	cvSaveImage(filename, roc);
-}
-*/
-
-/****************************************************/
-/*     mouse listener (for filter configuration)    */
-/****************************************************/
-/*
-void roc_on_mouse( int event, int x, int y, int flags, void* param )
-{
-	if(!roc || !rocCallBackAllData.size()) return;
-	int w = roc->width-2*PAD;
-	int h = roc->height-2*PAD;
-	cvVec2 mouse((x-PAD)/(float)w,(y-PAD)/(float)h);
-	cvVec2 vpad(PAD,PAD);
-
-	rocCallBackData = rocCallBackAllData[rocIndex];
-
-	if(!rocCallBackData.size())return;
-
-	cvCopy(rocBackup, roc);
-
-
-	// we highlight the current roc curve
-	cvVec2 pt1, pt2;
-	FOR(i, rocCallBackData.size()-1)
-	{
-		pt1 = cvVec2(rocCallBackData[i][0]*w, rocCallBackData[i][1]*h);
-		pt2 = cvVec2(rocCallBackData[i+1][0]*w, rocCallBackData[i+1][1]*h);
-		cvDrawLine(roc, (pt1+vpad).to2d(), (pt2+vpad).to2d(), CV_RGB(255,0,0), 2, CV_AA);
-	}
-	pt1 = cvVec2(0,h);
-	cvDrawLine(roc, (pt1+vpad).to2d(), (pt2+vpad).to2d(), CV_RGB(255,0,0), 2, CV_AA);
-
-	// we find the closest point in our curve
-	u32 minInd = 0;
-	float minDist = 2;
-	FOR(i, rocCallBackData.size())
-	{
-		cvVec2 p(rocCallBackData[i][0],rocCallBackData[i][1]);
-		if((p-mouse).length() < minDist)
-		{
-			minDist = (p-mouse).length();
-			minInd = i;
-		}
-	}
-
-	CvPoint rocPoint = cvPoint((u32)(rocCallBackData[minInd][0]*w+PAD), (u32)(rocCallBackData[minInd][1]*h+PAD));
-
-	char text[255];
-	sprintf(text,"thresh: %.3f TP: %.2f FP: %.2f",rocCallBackData[minInd][2],1-rocCallBackData[minInd][1],rocCallBackData[minInd][0]);
-	CvPoint pt = cvPoint(PAD + w - strlen(text)*7, h - PAD - rocfont->line_type);
-	cvPutText(roc, text, pt, rocfont, CV_RGB(255,255,255));
-	if(rocCallBackData[minInd].size() >= 4)
-	{
-		sprintf(text,"f-measure: %.3f",rocCallBackData[minInd][3]);
-		pt.y += rocfont->line_type;
-		cvPutText(roc, text, pt, rocfont, CV_RGB(255,255,255));
-	}
-
-	cvDrawCircle(roc, rocPoint, 3, CV_RGB(255,255,255), 1, CV_AA);
-
-
-	if(rocCallBackAllData.size() > 1)
-	{
-		pt = cvPoint(w*2/3, (rocIndex+4)*rocfont->line_type + 4);
-		CvPoint pt2 = cvPoint(w, (rocIndex+4)*rocfont->line_type + 4);
-		cvDrawLine(roc, pt, pt2, CV_RGB(255,0,0));
-	}
-
-	//cvShowImage("roc", roc);
-
-	switch( event )
-    {
-    case CV_EVENT_LBUTTONUP:
-		rocIndex++;
-		rocIndex %= rocCallBackAllData.size();
-        break;
-	case CV_EVENT_RBUTTONUP:
-		rocIndex = rocIndex ? rocIndex-1 : rocCallBackAllData.size()-1;
-		rocIndex %= rocCallBackAllData.size();
-        break;
-    }
-}
-
-IplImage *GetRocImage()
-{
-	return roc;
-}
-*/
