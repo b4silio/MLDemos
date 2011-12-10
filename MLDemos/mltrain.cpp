@@ -144,8 +144,8 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
                 FOR(i, testSamples.size())
                 {
                     if(testLabels[i] != it->first) continue;
-                    trainSamples[i] = testSamples[i];
-                    trainLabels[i] = testLabels[i];
+                    trainSamples.push_back(testSamples[i]);
+                    trainLabels.push_back(testLabels[i]);
                     testSamples.erase(testSamples.begin() + i);
                     testLabels.erase(testLabels.begin() + i);
                     trainCnt++;
