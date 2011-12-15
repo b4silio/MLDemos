@@ -257,7 +257,7 @@ public :
    */
 	void doRegression(const _fgmm_real * input, _fgmm_real * output, _fgmm_real * covar=NULL)
 	{
-		fgmm_regression(c_reg,input,output,covar);
+        fgmm_regression(c_reg,input,output,covar);
 	};
 
 
