@@ -1630,7 +1630,7 @@ bool SEDS::CheckConstraints(Matrix * A){
     }
 
     if (nCtrViolated == 0)
-        cout<<"Optimization finished succesfully!"<<endl;
+        cout<<"Optimization finished successfully!"<<endl;
     else{
         QMessageBox *qmes = new QMessageBox ();
         qmes->addButton("Ok",QMessageBox::AcceptRole);
