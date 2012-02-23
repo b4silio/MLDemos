@@ -16,35 +16,35 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACESVMRDYNAMIC_H_
-#define _INTERFACESVMRDYNAMIC_H_
+#ifndef _INTERFACEGPRREGRESS_H_
+#define _INTERFACEGPRREGRESS_H_
 
 #include <vector>
 #include <interfaces.h>
-#include "dynamicalSVR.h"
-#include "ui_paramsSVMdynamic.h"
+#include "regressorGPR.h"
+#include "ui_paramsGPR.h"
 
-class DynamicSVM : public QObject, public DynamicalInterface
+class RegrGPR : public QObject, public RegressorInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(DynamicalInterface)
+	Q_INTERFACES(RegressorInterface)
 private:
 	QWidget *widget;
-	Ui::ParametersDynamic *params;
+        Ui::ParametersGPRregr *params;
 public:
-	DynamicSVM();
+        RegrGPR();
 	// virtual functions to manage the algorithm creation
-	Dynamical *GetDynamical();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
-	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+	Regressor *GetRegressor();
+	void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor);
+	void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor);
+	void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVR");}
-        QString GetAlgoString(){return GetName();}
-        QString GetInfoFile(){return "kernelDynamic.html";}
-        bool UsesDrawTimer(){return true;}
+        QString GetName(){return QString("GPR");}
+        QString GetAlgoString();
+        QString GetInfoFile(){return "GPR.html";}
         QWidget *GetParameterWidget(){return widget;}
-	void SetParams(Dynamical *dynamical);
+        void SetParams(Regressor *regressor);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
@@ -53,4 +53,4 @@ public slots:
 	void ChangeOptions();
 };
 
-#endif // _INTERFACESVMRDYNAMIC_H_
+#endif // _INTERFACEGPRREGRESS_H_

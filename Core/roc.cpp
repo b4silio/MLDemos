@@ -87,7 +87,7 @@ std::vector<f32pair> LoadRoc(const char *filename)
 	FOR(i, size)
 	{
 		f32pair pair;
-		file.read(reinterpret_cast<char *>(&pair), sizeof(f32pair));
+        file.read(reinterpret_cast<char *>(&pair), sizeof(f32pair));
 		data.push_back(pair);
 	}
 	file.close();

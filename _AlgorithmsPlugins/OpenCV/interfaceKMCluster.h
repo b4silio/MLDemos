@@ -39,15 +39,17 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("KMeans");};
-	QString GetAlgoString(){return GetName();};
-	QString GetInfoFile(){return "kmeans.html";};
-	QWidget *GetParameterWidget(){return widget;};
+        QString GetName(){return QString("KMeans");}
+        QString GetAlgoString(){return GetName();}
+        QString GetInfoFile(){return "kmeans.html";}
+        QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+public slots:
+        void ChangeOptions();
 };
 
 #endif // _INTERFACEKMCLUSTER_H_

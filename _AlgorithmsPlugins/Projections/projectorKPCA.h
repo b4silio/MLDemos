@@ -16,30 +16,33 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "pluginKernel.h"
-#include "interfaceSVMClassifier.h"
-#include "interfaceSVMCluster.h"
-#include "interfaceSVMRegress.h"
-#include "interfaceSVMDynamic.h"
-#include "interfaceGPRRegress.h"
-#include "interfaceGPRDynamic.h"
-#include "interfaceKKM.h"
+#ifndef _PROJECTOR_KPCA_H_
+#define _PROJECTOR_KPCA_H_
 
-using namespace std;
+#include <vector>
+#include <projector.h>
+#include "eigen_pca.h"
 
-PluginKernel::PluginKernel()
+class ProjectorKPCA : public Projector
 {
-    classifiers.push_back(new ClassSVM());
-    clusterers.push_back(new ClustKKM());
-    clusterers.push_back(new ClustSVM());
-    regressors.push_back(new RegrSVM());
-    regressors.push_back(new RegrGPR());
-    dynamicals.push_back(new DynamicSVM());
-    dynamicals.push_back(new DynamicGPR());
-}
+private:
+	PCA *pca;
+	fvec mean;
+	fvec minValues, maxValues;
+	ivec labels;
+	int kernelType;
+	int kernelDegree;
+	float kernelGamma;
+public:
+	std::vector<fvec> Project(std::vector<fvec> samples);
+        ivec GetLabels(){return labels;}
 
-#ifndef PLUGIN_CLUSTER
-#ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_KernelMethods, PluginKernel)
-#endif
-#endif
+        ProjectorKPCA();
+        void Train(std::vector< fvec > samples, ivec labels);
+        fvec Project(const fvec &sample);
+
+        char *GetInfoString();
+        void SetParams(int kernelType, int kernelDegree, float kernelGamma);
+};
+
+#endif // _PROJECTOR_KPCA_H_

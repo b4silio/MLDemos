@@ -144,8 +144,13 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
                 FOR(i, testSamples.size())
                 {
                     if(testLabels[i] != it->first) continue;
+<<<<<<< HEAD
                     trainSamples[i] = testSamples[i];
                     trainLabels[i] = testLabels[i];
+=======
+                    trainSamples.push_back(testSamples[i]);
+                    trainLabels.push_back(testLabels[i]);
+>>>>>>> devel
                     testSamples.erase(testSamples.begin() + i);
                     testLabels.erase(testLabels.begin() + i);
                     trainCnt++;
@@ -343,7 +348,7 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
             fvec sample = samples[i];
             int dim = sample.size();
             fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample[outputDim]);
+            float error = fabs(res[0] - sample.back());
             trainErrors.push_back(error);
         }
         regressor->trainErrors = trainErrors;
@@ -393,10 +398,10 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
 
         FOR(i, trainCnt)
         {
-            fvec sample = samples[perm[i]];
+            fvec sample = trainSamples[i];
             int dim = sample.size();
             fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample[outputDim]);
+            float error = fabs(res[0] - sample.back());
             trainErrors.push_back(error);
         }
         FOR(i, testCnt)
@@ -404,8 +409,9 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
             fvec sample = testSamples[i];
             int dim = sample.size();
             fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample[outputDim]);
+            float error = fabs(res[0] - sample.back());
             testErrors.push_back(error);
+            qDebug() << " test error: " << i << error;
         }
         regressor->trainErrors = trainErrors;
         regressor->testErrors = testErrors;
@@ -688,7 +694,7 @@ void MLDemos::Compare()
         QTextStream stream(&string);
         QString line = stream.readLine();
         QString paramString = stream.readAll();
-        if(line.startsWith("Maximization"))
+        if(line.startsWith("Optimization"))
         {
             QStringList s = line.split(":");
             int tab = s[1].toInt();
@@ -882,6 +888,7 @@ void MLDemos::Compare()
             {
                 regressor = regressors[tab]->GetRegressor();
                 if(!regressor) continue;
+                qDebug() << " training: " << regressors[tab]->GetName();
                 Train(regressor, outputDim, trainRatio, trainList);
                 if(regressor->trainErrors.size())
                 {

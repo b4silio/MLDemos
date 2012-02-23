@@ -77,7 +77,7 @@ fvec RegressorGMR::Test( const fvec &sample)
         gmm->doRegression(&sample[0], &estimate, &sigma);
     }
 	res[0] = estimate;
-	res[1] = sqrt(sigma);
+    res[1] = sqrt(sigma);
 	return res;
 }
 

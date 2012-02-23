@@ -115,16 +115,16 @@ char *DynamicalGMR::GetInfoString()
 	sprintf(text, "%sCovariance Type: ", text);
 	switch(covarianceType)
 	{
-	case 0:
-		sprintf(text, "%sSpherical\n", text);
-		break;
+        case 0:
+                sprintf(text, "%sFull\n", text);
+                break;
 	case 1:
 		sprintf(text, "%sDiagonal\n", text);
 		break;
-	case 2:
-		sprintf(text, "%sFull\n", text);
-		break;
-	}
+        case 2:
+                sprintf(text, "%sSpherical\n", text);
+                break;
+        }
 	sprintf(text, "%sInitialization Type: ", text);
 	switch(initType)
 	{

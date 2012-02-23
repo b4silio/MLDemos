@@ -39,13 +39,13 @@ void MLDemos::Classify()
 {
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
-	drawTimer->Clear();
-	mutex.lock();
+    drawTimer->Clear();
+    mutex.lock();
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-	DEL(maximizer);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsClassify->tabWidget->currentIndex();
@@ -67,9 +67,9 @@ void MLDemos::Classify()
     bool trained = Train(classifier, positive, trainRatio, trainList);
     if(trained)
     {
-		classifiers[tab]->Draw(canvas, classifier);
-		UpdateInfo();
-		if(drawTimer && classifier->UsesDrawTimer())
+        classifiers[tab]->Draw(canvas, classifier);
+        UpdateInfo();
+        if(drawTimer && classifier->UsesDrawTimer())
         {
             drawTimer->classifier = &this->classifier;
             drawTimer->start(QThread::NormalPriority);
@@ -93,10 +93,10 @@ void MLDemos::Classify()
     {
         mutex.unlock();
         Clear();
-		mutex.lock();
-		UpdateInfo();
-	}
-	mutex.unlock();
+        mutex.lock();
+        UpdateInfo();
+    }
+    mutex.unlock();
 }
 
 void MLDemos::ClassifyCross()
@@ -108,7 +108,7 @@ void MLDemos::ClassifyCross()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-	DEL(maximizer);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsClassify->tabWidget->currentIndex();
@@ -188,14 +188,14 @@ void MLDemos::Regression()
 {
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
-	drawTimer->Clear();
+    drawTimer->Clear();
 
     QMutexLocker lock(&mutex);
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-	DEL(maximizer);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
@@ -203,7 +203,7 @@ void MLDemos::Regression()
     int outputDim = optionsRegress->outputDimCombo->currentIndex();
     ivec inputDims = GetInputDimensions();
     //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
-     if(inputDims.size()==1 && inputDims[0] == outputDim) return;
+    if(inputDims.size()==1 && inputDims[0] == outputDim) return;
 
     int outputIndexInList = -1;
     FOR(i, inputDims.size()) if(outputDim == inputDims[i])
@@ -285,13 +285,13 @@ void MLDemos::RegressionCross()
 {
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
-	drawTimer->Clear();
-	QMutexLocker lock(&mutex);
+    drawTimer->Clear();
+    QMutexLocker lock(&mutex);
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-	DEL(maximizer);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsRegress->tabWidget->currentIndex();
@@ -326,20 +326,20 @@ void MLDemos::RegressionCross()
 
     Train(regressor, outputDim, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
-	UpdateInfo();
+    UpdateInfo();
 }
 
 void MLDemos::Dynamize()
 {
     if(!canvas || !canvas->data->GetCount() || !canvas->data->GetSequences().size()) return;
     drawTimer->Stop();
-	drawTimer->Clear();
+    drawTimer->Clear();
     QMutexLocker lock(&mutex);
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-	DEL(maximizer);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsDynamic->tabWidget->currentIndex();
@@ -350,21 +350,21 @@ void MLDemos::Dynamize()
     Train(dynamical);
     dynamicals[tab]->Draw(canvas,dynamical);
 
-	int w = canvas->width(), h = canvas->height();
+    int w = canvas->width(), h = canvas->height();
 
-	int resampleType = optionsDynamic->resampleCombo->currentIndex();
-	int resampleCount = optionsDynamic->resampleSpin->value();
-	int centerType = optionsDynamic->centerCombo->currentIndex();
-	float dT = optionsDynamic->dtSpin->value();
-	int zeroEnding = optionsDynamic->zeroCheck->isChecked();
-	bool bColorMap = optionsDynamic->colorCheck->isChecked();
+    int resampleType = optionsDynamic->resampleCombo->currentIndex();
+    int resampleCount = optionsDynamic->resampleSpin->value();
+    int centerType = optionsDynamic->centerCombo->currentIndex();
+    float dT = optionsDynamic->dtSpin->value();
+    int zeroEnding = optionsDynamic->zeroCheck->isChecked();
+    bool bColorMap = optionsDynamic->colorCheck->isChecked();
 
     // we draw the current trajectories
-	vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
+    vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
     vector< vector<fvec> > testTrajectories;
     int steps = 300;
-	if(trajectories.size())
-	{
+    if(trajectories.size())
+    {
         testTrajectories.resize(trajectories.size());
         int dim = trajectories[0][0].size() / 2;
         FOR(i, trajectories.size())
@@ -408,21 +408,21 @@ void MLDemos::Dynamize()
             pair<fvec,fvec> bounds = canvas->data->GetBounds();
             Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
         }
-	}
+    }
 
-	// the first index is "none", so we subtract 1
+    // the first index is "none", so we subtract 1
     int avoidIndex = optionsDynamic->obstacleCombo->currentIndex()-1;
     if(avoidIndex >=0 && avoidIndex < avoiders.size() && avoiders[avoidIndex])
     {
         DEL(dynamical->avoid);
-		dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
+        dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
     }
-	UpdateInfo();
-	if(dynamicals[tab]->UsesDrawTimer())
-	{
-		drawTimer->bColorMap = bColorMap;
-		drawTimer->start(QThread::NormalPriority);
-	}
+    UpdateInfo();
+    if(dynamicals[tab]->UsesDrawTimer())
+    {
+        drawTimer->bColorMap = bColorMap;
+        drawTimer->start(QThread::NormalPriority);
+    }
 }
 
 void MLDemos::Avoidance()
@@ -430,13 +430,13 @@ void MLDemos::Avoidance()
     if(!canvas || !dynamical) return;
     drawTimer->Stop();
     QMutexLocker lock(&mutex);
-	// the first index is "none", so we subtract 1
-	int index = optionsDynamic->obstacleCombo->currentIndex()-1;
+    // the first index is "none", so we subtract 1
+    int index = optionsDynamic->obstacleCombo->currentIndex()-1;
     if(index >=0 && index >= avoiders.size() || !avoiders[index]) return;
     DEL(dynamical->avoid);
     dynamical->avoid = avoiders[index]->GetObstacleAvoidance();
-	UpdateInfo();
-	drawTimer->Clear();
+    UpdateInfo();
+    drawTimer->Clear();
     drawTimer->start(QThread::NormalPriority);
 }
 
@@ -570,7 +570,7 @@ void MLDemos::Cluster()
     DEL(regressor);
     DEL(dynamical);
     DEL(classifier);
-	DEL(maximizer);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsCluster->tabWidget->currentIndex();
@@ -584,8 +584,8 @@ void MLDemos::Cluster()
         trainList = GetManualSelection();
     }
     Train(clusterer, trainList);
-	drawTimer->Stop();
-	drawTimer->Clear();
+    drawTimer->Stop();
+    drawTimer->Clear();
     clusterers[tab]->Draw(canvas,clusterer);
 
     // we compute the stats on the clusters (f-measure, bic etc)
@@ -648,9 +648,9 @@ void MLDemos::Cluster()
     canvas->maps.model = QPixmap();
     canvas->repaint();
 
-	UpdateInfo();
-	drawTimer->clusterer= &this->clusterer;
-	drawTimer->start(QThread::NormalPriority);
+    UpdateInfo();
+    drawTimer->clusterer= &this->clusterer;
+    drawTimer->start(QThread::NormalPriority);
 }
 
 void MLDemos::ClusterOptimize()
@@ -877,46 +877,46 @@ void MLDemos::ClusterIterate()
 
 void MLDemos::Maximize()
 {
-	if(!canvas) return;
-	if(canvas->maps.reward.isNull()) return;
-	QMutexLocker lock(&mutex);
-	drawTimer->Stop();
-	DEL(clusterer);
-	DEL(regressor);
-	DEL(dynamical);
-	DEL(classifier);
-	DEL(maximizer);
+    if(!canvas) return;
+    if(canvas->maps.reward.isNull()) return;
+    QMutexLocker lock(&mutex);
+    drawTimer->Stop();
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    DEL(classifier);
+    DEL(maximizer);
     DEL(projector);
     lastTrainingInfo = "";
     int tab = optionsMaximize->tabWidget->currentIndex();
-	if(tab >= maximizers.size() || !maximizers[tab]) return;
-	maximizer = maximizers[tab]->GetMaximizer();
-	maximizer->maxAge = optionsMaximize->iterationsSpin->value();
-	maximizer->stopValue = optionsMaximize->stoppingSpin->value();
-	tabUsedForTraining = tab;
-	Train(maximizer);
+    if(tab >= maximizers.size() || !maximizers[tab]) return;
+    maximizer = maximizers[tab]->GetMaximizer();
+    maximizer->maxAge = optionsMaximize->iterationsSpin->value();
+    maximizer->stopValue = optionsMaximize->stoppingSpin->value();
+    tabUsedForTraining = tab;
+    Train(maximizer);
 
-	UpdateInfo();
-	drawTimer->Stop();
-	drawTimer->Clear();
-	drawTimer->start(QThread::NormalPriority);
+    UpdateInfo();
+    drawTimer->Stop();
+    drawTimer->Clear();
+    drawTimer->start(QThread::NormalPriority);
 }
 
 void MLDemos::MaximizeContinue()
 {
-	if(!canvas || !maximizer) return;
-	QMutexLocker lock(&mutex);
-	if(drawTimer)
-	{
-		drawTimer->Stop();
-	}
-	maximizer->SetConverged(!maximizer->hasConverged());
+    if(!canvas || !maximizer) return;
+    QMutexLocker lock(&mutex);
+    if(drawTimer)
+    {
+        drawTimer->Stop();
+    }
+    maximizer->SetConverged(!maximizer->hasConverged());
 
-	UpdateInfo();
-	if(drawTimer)
-	{
-		drawTimer->start(QThread::NormalPriority);
-	}
+    UpdateInfo();
+    if(drawTimer)
+    {
+        drawTimer->start(QThread::NormalPriority);
+    }
 }
 
 void MLDemos::Project()
@@ -1048,7 +1048,7 @@ void MLDemos::UpdateLearnedModel()
         int outputDim = optionsRegress->outputDimCombo->currentIndex();
         ivec inputDims = GetInputDimensions();
         //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
-         if(inputDims.size()==1 && inputDims[0] == outputDim) return;
+        if(inputDims.size()==1 && inputDims[0] == outputDim) return;
 
         int outputIndexInList = -1;
         FOR(i, inputDims.size()) if(outputDim == inputDims[i])

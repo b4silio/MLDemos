@@ -28,31 +28,31 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 class ClassSVM : public QObject, public ClassifierInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(ClassifierInterface)
+    Q_OBJECT
+    Q_INTERFACES(ClassifierInterface)
 private:
-	QWidget *widget;
-	Ui::Parameters *params;
+    QWidget *widget;
+    Ui::Parameters *params;
 public:
-	ClassSVM();
-	// virtual functions to manage the algorithm creation
-	Classifier *GetClassifier();
-	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
-	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
+    ClassSVM();
+    // virtual functions to manage the algorithm creation
+    Classifier *GetClassifier();
+    void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
+    void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
-	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("Kernel");}
-	QString GetAlgoString();
+    // virtual functions to manage the GUI and I/O
+    QString GetName(){return QString("SVM");}
+    QString GetAlgoString();
     QString GetInfoFile(){return "kernelClass.html";}
     bool UsesDrawTimer(){return true;}
     QWidget *GetParameterWidget(){return widget;}
-	void SetParams(Classifier *classifier);
-	void SaveOptions(QSettings &settings);
-	bool LoadOptions(QSettings &settings);
-	void SaveParams(QTextStream &stream);
-	bool LoadParams(QString name, float value);
+    void SetParams(Classifier *classifier);
+    void SaveOptions(QSettings &settings);
+    bool LoadOptions(QSettings &settings);
+    void SaveParams(QTextStream &stream);
+    bool LoadParams(QString name, float value);
 public slots:
-	void ChangeOptions();
+    void ChangeOptions();
 };
 
 #endif // _INTERFACESVMCLASSIFIER_H_
