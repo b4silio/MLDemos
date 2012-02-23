@@ -395,15 +395,15 @@ bool SEDS::loadModel(const char fileName[], char type)
 
         file >> d >> K;
 
-        d /= 2;
+//        d /= 2; // correction by Manuel Muehlig
 
         Priors.Resize(K);
         for (int k = 0; k < K; k++)
             file >> Priors[k];
 
         Mu.Resize(2*d,K);
-        for (int k = 0; k < K; k++)
-            for (int i = 0; i < 2*d; i++)
+        for (int i = 0; i < 2*d; i++)
+            for (int k = 0; k < K; k++) // loop order swapped, correction by Manuel Muehlig
                 file >> Mu(i,k);
 
         Sigma = new Matrix[K];
@@ -704,7 +704,8 @@ bool SEDS::Optimize(){
                 for (int j=0;j<d;j++){
                     Sigma[k](i,j) = Sigma_x[k](i,j);
                     Sigma[k](i+d,j) = Sigma_xdx[k](i,j);
-                    Sigma[k](j,i+d) = Sigma_xdx[k](j,i);
+                    Sigma[k](j,i+d) = Sigma_xdx[k](i,j); // corrected version from Manuel Muehlig
+                    //Sigma[k](j,i+d) = Sigma_xdx[k](j,i);
                 }
             }
         }

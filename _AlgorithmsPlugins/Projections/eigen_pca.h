@@ -153,8 +153,8 @@ public:
 	int degree;
 	float gamma;
 	MatrixXd sourcePoints;
-	PCA() : k(0), kernelType(0), degree(2), gamma(0.01f){};
-	~ PCA(){if(k) delete k;};
+        PCA() : k(0), kernelType(0), degree(2), gamma(0.01f){}
+        ~ PCA(){if(k) delete k;}
 	//
 	// compute the kernel pca
 	//
@@ -162,7 +162,7 @@ public:
 	MatrixXd project(MatrixXd &dataPoints, unsigned int dimSpace);
 	float test(VectorXd point);
 	// get
-	const MatrixXd & get() const { return _result; };
+        const MatrixXd & get() const { return _result; }
 
 private:
 	MatrixXd _result;

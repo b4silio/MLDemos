@@ -22,7 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <interfaces.h>
 #include "clustererSVR.h"
-#include "clustererKKM.h"
 #include "ui_paramsSVMcluster.h"
 
 class ClustSVM : public QObject, public ClustererInterface
@@ -40,15 +39,17 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("Kernel");};
-	QString GetAlgoString(){return GetName();};
-	QString GetInfoFile(){return "kernelClust.html";};
-	QWidget *GetParameterWidget(){return widget;};
+        QString GetName(){return QString("SVM");}
+        QString GetAlgoString(){return GetName();}
+        QString GetInfoFile(){return "kernelClust.html";}
+        QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+public slots:
+        void ChangeOptions();
 };
 
 #endif // _INTERFACESVMCLUSTER_H_

@@ -10,11 +10,11 @@ PCA ProjectorPCA::compressPCA(const Mat& pcaset, int maxComponents, const Mat& t
 {
     PCA pca(pcaset, // pass the data
             Mat(), // we do not have a pre-computed mean vector,
-                   // so let the PCA engine to compute it
+            // so let the PCA engine to compute it
             CV_PCA_DATA_AS_ROW, // indicate that the vectors
-                                // are stored as matrix rows
-                                // (use CV_PCA_DATA_AS_COL if the vectors are
-                                // the matrix columns)
+            // are stored as matrix rows
+            // (use CV_PCA_DATA_AS_COL if the vectors are
+            // the matrix columns)
             maxComponents // specify, how many principal components to retain
             );
     // if there is no test data, just return the computed basis, ready-to-use
@@ -67,13 +67,13 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
         {
             accumulator += eigval / maxEigVal;
             qDebug() << "accumulator: " << accumulator << accumulator/maxAccumulator;
-            QPointF point2 = QPointF(i * (w-2*pad) / (dim-1) + pad+(!i?1:0), (int)(accumulator/maxAccumulator * (h-2*pad)));
+            QPointF point2 = QPointF(dim==1 ? w/2 : i * (w-2*pad) / (dim-1) + pad+(!i?1:0), (int)(accumulator/maxAccumulator * (h-2*pad)));
             painter.drawLine(point, point2);
             point = point2;
         }
         else
         {
-            point.setX(i * (w-2*pad) / (dim-1) + pad+(!i?1:0));
+            point.setX(dim==1 ? w/2 : i * (w-2*pad) / (dim-1) + pad+(!i?1:0));
         }
     }
     //painter.drawLine(point, QPoint(w-2*pad, h-2*pad));
@@ -88,7 +88,7 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
     {
         int x = dim==1? w/2 : i * (w-2*pad) / (dim-1) + pad+(!i?1:0);
         if(i==dim-1) x -= 4;
-//        int x = dim==1? w/2 : i*(w-2*pad)/(dim-1);
+        //        int x = dim==1? w/2 : i*(w-2*pad)/(dim-1);
         painter.drawText(x - 4, h-1, QString("e%1").arg(i+1));
     }
 }
@@ -111,21 +111,21 @@ void ProjectorPCA::TrainPCA(std::vector<fvec> samples, int pcaCount)
     Mat output;
     pca = compressPCA(pcaData, pcaCount, pcaData, output);
     projected = vector<fvec>(count);
-	vector<bool> bNan(pcaCount,false);
-	int nanCnt = 0;
-	FOR(d, pcaCount)
-	{
-		if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
-	}
+    vector<bool> bNan(pcaCount,false);
+    int nanCnt = 0;
+    FOR(d, pcaCount)
+    {
+        if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
+    }
     FOR(i, count)
     {
         projected[i].resize(pcaCount-nanCnt);
-		int D = 0;
+        int D = 0;
         FOR(d, pcaCount)
         {
-			if(bNan[d]) continue;
+            if(bNan[d]) continue;
             projected[i][D] = output.at<float>(i,d);
-			D++;
+            D++;
         }
     }
 }

@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Reward Maximization</string>
+   <string>Optimization</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
