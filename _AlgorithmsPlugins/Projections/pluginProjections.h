@@ -29,7 +29,7 @@ class PluginProjections : public QObject, public CollectionInterface
 public:
 	PluginProjections();
 
-	QString GetName(){return "Projections Collection";};
+        QString GetName(){return "Projections Collection";}
 };
 
 #endif // _PLUGINPROJECTIONS_H_

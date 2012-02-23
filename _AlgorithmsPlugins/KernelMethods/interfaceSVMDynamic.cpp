@@ -25,104 +25,97 @@ using namespace std;
 
 DynamicSVM::DynamicSVM()
 {
-	params = new Ui::ParametersDynamic();
-	params->setupUi(widget = new QWidget());
-	connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    params = new Ui::ParametersDynamic();
+    params->setupUi(widget = new QWidget());
+    connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
 }
 
 void DynamicSVM::ChangeOptions()
 {
-	params->svmCLabel->setText("C");
-	params->svmPSpin->setRange(0.0001, 1.0);
-	params->svmPSpin->setSingleStep(0.01);
-	params->svmPSpin->setDecimals(4);
-	params->svmCSpin->setEnabled(true);
-	params->svmCSpin->setRange(0.1, 9999.9);
-	params->svmCSpin->setDecimals(1);
-	switch(params->svmTypeCombo->currentIndex())
-	{
-	case 0: // C-SVM
-		params->svmEpsLabel->setText("eps");
-		break;
-	case 1: // Nu-SVM
-		params->svmEpsLabel->setText("Nu");
-		break;
-	case 2: // SOGP
-		params->svmEpsLabel->setText("Noise");
-		params->svmCLabel->setText("Capacity");
-		params->svmCSpin->setRange(-1, 500);
-		params->svmCSpin->setDecimals(0);
-		params->svmPSpin->setRange(0.001, 1.0);
-		params->svmPSpin->setSingleStep(0.01);
-		params->svmPSpin->setDecimals(3);
-		break;
-	}
+    params->svmCLabel->setText("C");
+    params->svmPSpin->setRange(0.0001, 1.0);
+    params->svmPSpin->setSingleStep(0.01);
+    params->svmPSpin->setDecimals(4);
+    params->svmCSpin->setEnabled(true);
+    params->svmCSpin->setRange(0.1, 9999.9);
+    params->svmCSpin->setDecimals(1);
+    switch(params->svmTypeCombo->currentIndex())
+    {
+    case 0: // C-SVM
+        params->svmEpsLabel->setText("eps");
+        break;
+    case 1: // Nu-SVM
+        params->svmEpsLabel->setText("Nu");
+        break;
+    }
+    switch(params->kernelTypeCombo->currentIndex())
+    {
+    case 0: // linear
+        params->kernelDegSpin->setEnabled(false);
+        params->kernelDegSpin->setVisible(false);
+        break;
+    case 1: // poly
+        params->kernelDegSpin->setEnabled(true);
+        params->kernelDegSpin->setVisible(true);
+        params->kernelWidthSpin->setEnabled(false);
+        params->kernelWidthSpin->setVisible(false);
+        break;
+    case 2: // RBF
+        params->kernelDegSpin->setEnabled(false);
+        params->kernelDegSpin->setVisible(false);
+        params->kernelWidthSpin->setEnabled(true);
+        params->kernelWidthSpin->setVisible(true);
+        break;
+    }
 }
 
 void DynamicSVM::SetParams(Dynamical *dynamical)
 {
-	if(!dynamical) return;
-	int kernelMethod = params->svmTypeCombo->currentIndex();
-	float svmC = params->svmCSpin->value();
-	int kernelType = params->kernelTypeCombo->currentIndex();
-	float kernelGamma = params->kernelWidthSpin->value();
-	float kernelDegree = params->kernelDegSpin->value();
-	float svmP = params->svmPSpin->value();
+    if(!dynamical) return;
+    int kernelMethod = params->svmTypeCombo->currentIndex();
+    float svmC = params->svmCSpin->value();
+    int kernelType = params->kernelTypeCombo->currentIndex();
+    float kernelGamma = params->kernelWidthSpin->value();
+    float kernelDegree = params->kernelDegSpin->value();
+    float svmP = params->svmPSpin->value();
 
-	if(kernelMethod == 2) // sogp
-	{
-		DynamicalGPR *gpr = (DynamicalGPR*)dynamical;
-		int capacity = svmC;
-		double kernelNoise = svmP;
-		gpr->SetParams(kernelGamma, kernelNoise, capacity, kernelType, kernelDegree);
-	}
-	else
-	{
-		DynamicalSVR *svm = (DynamicalSVR*)dynamical;
-		switch(kernelMethod)
-		{
-		case 0:
-			svm->param.svm_type = EPSILON_SVR;
-			break;
-		case 1:
-			svm->param.svm_type = NU_SVR;
-			break;
-		}
-		switch(kernelType)
-		{
-		case 0:
-			svm->param.kernel_type = LINEAR;
-			break;
-		case 1:
-			svm->param.kernel_type = POLY;
-			break;
-		case 2:
-			svm->param.kernel_type = RBF;
-			break;
-		}
-		svm->param.C = svmC;
-		svm->param.nu = svmP;
-		svm->param.p = svmP;
-		svm->param.gamma = 1 / kernelGamma;
-		svm->param.degree = kernelDegree;
-	}
+    DynamicalSVR *svm = dynamic_cast<DynamicalSVR*>(dynamical);
+    if(!svm) return;
+    switch(kernelMethod)
+    {
+    case 0:
+        svm->param.svm_type = EPSILON_SVR;
+        break;
+    case 1:
+        svm->param.svm_type = NU_SVR;
+        break;
+    }
+    switch(kernelType)
+    {
+    case 0:
+        svm->param.kernel_type = LINEAR;
+        break;
+    case 1:
+        svm->param.kernel_type = POLY;
+        break;
+    case 2:
+        svm->param.kernel_type = RBF;
+        break;
+    }
+    svm->param.C = svmC;
+    svm->param.nu = svmP;
+    svm->param.p = svmP;
+    svm->param.gamma = 1 / kernelGamma;
+    svm->param.degree = kernelDegree;
 }
 
 Dynamical *DynamicSVM::GetDynamical()
 {
-	int svmType = params->svmTypeCombo->currentIndex();
-	Dynamical *dynamical = 0;
-	switch(svmType)
-	{
-	case 2:
-		dynamical = new DynamicalGPR();
-		break;
-	default:
-		dynamical = new DynamicalSVR();
-		break;
-	}
-	SetParams(dynamical);
-	return dynamical;
+    int svmType = params->svmTypeCombo->currentIndex();
+    Dynamical *dynamical = new DynamicalSVR();
+    SetParams(dynamical);
+    return dynamical;
 }
 
 void DynamicSVM::DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical)
@@ -135,42 +128,44 @@ void DynamicSVM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamica
 
 void DynamicSVM::SaveOptions(QSettings &settings)
 {
-	settings.setValue("kernelDeg", params->kernelDegSpin->value());
-	settings.setValue("kernelType", params->kernelTypeCombo->currentIndex());
-	settings.setValue("kernelWidth", params->kernelWidthSpin->value());
-	settings.setValue("svmC", params->svmCSpin->value());
-	settings.setValue("svmP", params->svmPSpin->value());
-	settings.setValue("svmType", params->svmTypeCombo->currentIndex());
+    settings.setValue("kernelDeg", params->kernelDegSpin->value());
+    settings.setValue("kernelType", params->kernelTypeCombo->currentIndex());
+    settings.setValue("kernelWidth", params->kernelWidthSpin->value());
+    settings.setValue("svmC", params->svmCSpin->value());
+    settings.setValue("svmP", params->svmPSpin->value());
+    settings.setValue("svmType", params->svmTypeCombo->currentIndex());
 }
 
 bool DynamicSVM::LoadOptions(QSettings &settings)
 {
-	if(settings.contains("kernelDeg")) params->kernelDegSpin->setValue(settings.value("kernelDeg").toFloat());
-	if(settings.contains("kernelType")) params->kernelTypeCombo->setCurrentIndex(settings.value("kernelType").toInt());
-	if(settings.contains("kernelWidth")) params->kernelWidthSpin->setValue(settings.value("kernelWidth").toFloat());
-	if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
-	if(settings.contains("svmP")) params->svmPSpin->setValue(settings.value("svmP").toFloat());
-	if(settings.contains("svmType")) params->svmTypeCombo->setCurrentIndex(settings.value("svmType").toInt());
-	return true;
+    if(settings.contains("kernelDeg")) params->kernelDegSpin->setValue(settings.value("kernelDeg").toFloat());
+    if(settings.contains("kernelType")) params->kernelTypeCombo->setCurrentIndex(settings.value("kernelType").toInt());
+    if(settings.contains("kernelWidth")) params->kernelWidthSpin->setValue(settings.value("kernelWidth").toFloat());
+    if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
+    if(settings.contains("svmP")) params->svmPSpin->setValue(settings.value("svmP").toFloat());
+    if(settings.contains("svmType")) params->svmTypeCombo->setCurrentIndex(settings.value("svmType").toInt());
+    ChangeOptions();
+    return true;
 }
 
 void DynamicSVM::SaveParams(QTextStream &file)
 {
-	file << "dynamicalOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
-	file << "dynamicalOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
-	file << "dynamicalOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
-	file << "dynamicalOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
-	file << "dynamicalOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
-	file << "dynamicalOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
+    file << "dynamicalOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
+    file << "dynamicalOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+    file << "dynamicalOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
+    file << "dynamicalOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
+    file << "dynamicalOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
+    file << "dynamicalOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
 }
 
 bool DynamicSVM::LoadParams(QString name, float value)
 {
-	if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
-	if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-	if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
-	if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
-	if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
-	if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
-	return true;
+    if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
+    if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
+    if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
+    if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
+    if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
+    if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+    ChangeOptions();
+    return true;
 }

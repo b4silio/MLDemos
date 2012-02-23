@@ -10,7 +10,7 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui
+FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsGPR.ui paramsGPRdynamic.ui paramsKKM.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
@@ -33,14 +33,17 @@ HEADERS +=	\
 			interfaceSVMCluster.h \
 			interfaceSVMRegress.h \
 			interfaceSVMDynamic.h \
-			pluginKernel.h
+                        interfaceGPRRegress.h \
+                        interfaceGPRDynamic.h \
+                        interfaceKKM.h \
+                        pluginKernel.h
 
 SOURCES += 	\
 			svm.cpp \
 			SOGP.cpp \
 			SOGP_aux.cpp \
 			classifierSVM.cpp \
-			classifierRVM.cpp \
+                        classifierRVM.cpp \
 			classifierPegasos.cpp \
 			clustererKKM.cpp \
 			clustererSVR.cpp \
@@ -52,9 +55,12 @@ SOURCES += 	\
 			dynamicalGPR.cpp \
 			interfaceSVMClassifier.cpp \
 			interfaceSVMCluster.cpp \
-			interfaceSVMRegress.cpp \
-			interfaceSVMDynamic.cpp \
-			pluginKernel.cpp
+                        interfaceSVMRegress.cpp \
+                        interfaceSVMDynamic.cpp \
+                        interfaceGPRRegress.cpp \
+                        interfaceGPRDynamic.cpp \
+                        interfaceKKM.cpp \
+                        pluginKernel.cpp
 
 ###########################
 # Dependencies            #

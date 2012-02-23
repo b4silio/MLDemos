@@ -16,30 +16,31 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACESVMRDYNAMIC_H_
-#define _INTERFACESVMRDYNAMIC_H_
+#ifndef _INTERFACEGPRRDYNAMIC_H_
+#define _INTERFACEGPRRDYNAMIC_H_
 
 #include <vector>
 #include <interfaces.h>
 #include "dynamicalSVR.h"
-#include "ui_paramsSVMdynamic.h"
+#include "dynamicalGPR.h"
+#include "ui_paramsGPRdynamic.h"
 
-class DynamicSVM : public QObject, public DynamicalInterface
+class DynamicGPR : public QObject, public DynamicalInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(DynamicalInterface)
 private:
 	QWidget *widget;
-	Ui::ParametersDynamic *params;
+        Ui::ParametersGPRDynamic* params;
 public:
-	DynamicSVM();
+        DynamicGPR();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
 	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVR");}
+        QString GetName(){return QString("GPR");}
         QString GetAlgoString(){return GetName();}
         QString GetInfoFile(){return "kernelDynamic.html";}
         bool UsesDrawTimer(){return true;}
@@ -53,4 +54,4 @@ public slots:
 	void ChangeOptions();
 };
 
-#endif // _INTERFACESVMRDYNAMIC_H_
+#endif // _INTERFACEGPRRDYNAMIC_H_

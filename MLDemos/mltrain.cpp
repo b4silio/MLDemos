@@ -689,7 +689,7 @@ void MLDemos::Compare()
         QTextStream stream(&string);
         QString line = stream.readLine();
         QString paramString = stream.readAll();
-        if(line.startsWith("Maximization"))
+        if(line.startsWith("Optimization"))
         {
             QStringList s = line.split(":");
             int tab = s[1].toInt();

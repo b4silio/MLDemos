@@ -267,6 +267,9 @@ RBF and Polynomial only</string>
    <property name="toolTip">
     <string>kernel function</string>
    </property>
+   <property name="currentIndex">
+    <number>2</number>
+   </property>
    <item>
     <property name="text">
      <string>Linear</string>

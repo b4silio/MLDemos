@@ -50,7 +50,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideRight</enum>
@@ -106,6 +106,19 @@
        </property>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabProj">
+      <attribute name="title">
+       <string>Projections</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabDyn">
       <attribute name="title">
        <string>Dynamical</string>
@@ -121,22 +134,9 @@
      </widget>
      <widget class="QWidget" name="tabMax">
       <attribute name="title">
-       <string>Maximize</string>
+       <string>Optimization</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="margin">
-        <number>0</number>
-       </property>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabProj">
-      <attribute name="title">
-       <string>Projections</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
        <property name="spacing">
         <number>0</number>
        </property>

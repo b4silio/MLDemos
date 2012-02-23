@@ -16,41 +16,40 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACESVMRDYNAMIC_H_
-#define _INTERFACESVMRDYNAMIC_H_
+#ifndef _INTERFACEKKMCLUSTER_H_
+#define _INTERFACEKKMCLUSTER_H_
 
 #include <vector>
 #include <interfaces.h>
-#include "dynamicalSVR.h"
-#include "ui_paramsSVMdynamic.h"
+#include "clustererKKM.h"
+#include "ui_paramsKKM.h"
 
-class DynamicSVM : public QObject, public DynamicalInterface
+class ClustKKM : public QObject, public ClustererInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(DynamicalInterface)
+	Q_INTERFACES(ClustererInterface)
 private:
 	QWidget *widget;
-	Ui::ParametersDynamic *params;
+        Ui::ParametersKKM *params;
 public:
-	DynamicSVM();
+        ClustKKM();
 	// virtual functions to manage the algorithm creation
-	Dynamical *GetDynamical();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
-	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+	Clusterer *GetClusterer();
+	void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
+	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVR");}
+        QString GetName(){return QString("Kernel K-Means");}
         QString GetAlgoString(){return GetName();}
-        QString GetInfoFile(){return "kernelDynamic.html";}
-        bool UsesDrawTimer(){return true;}
+        QString GetInfoFile(){return "KKM.html";}
         QWidget *GetParameterWidget(){return widget;}
-	void SetParams(Dynamical *dynamical);
+	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
 public slots:
-	void ChangeOptions();
+        void ChangeOptions();
 };
 
-#endif // _INTERFACESVMRDYNAMIC_H_
+#endif // _INTERFACEKKMCLUSTER_H_
