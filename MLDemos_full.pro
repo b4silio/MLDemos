@@ -28,7 +28,7 @@ SEDS.file = $$ALGOPATH/SEDS/pluginSEDS.pro
 Maximizers.file = $$ALGOPATH/Maximizers/pluginMaximizers.pro
 OpenCV.file = $$ALGOPATH/OpenCV/pluginOpenCV.pro
 MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
-XMeans.file = $$ALGOPATH/XMeans/pluginXMeans.pro
+QTMeans.file = $$ALGOPATH/QTMeans/pluginQTMeans.pro
 HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 
 # input plugins

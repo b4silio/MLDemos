@@ -21,9 +21,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include "public.h"
 #include "basicMath.h"
-#include "basicOpenCV.h"
 #include <mymaths.h>
 #include "kmeans.h"
+#include <QTime>
 
 using namespace std;
 
@@ -145,106 +145,6 @@ void KMeansCluster::Update(bool bEStep)
     }
 }
 
-void KMeansCluster::Draw(IplImage *image)
-{
-    if(!points.size()) return;
-    if (!bSoft && !bGMM) {
-        // used for overlay colors
-        float over[6][3] = {{0,0,1},{1,0,0},{0,1,0},{0.5f,0,0.5f},{0,0.5f,0.5f},{0.5f,0.5f,0}};
-        // and now lets draw them points!
-        FOR(i, points.size()){
-            u32 cluster = points[i].cluster;
-
-            register u32 index = ((u32)(points[i].point[0]*image->width) + (u32)(points[i].point[1]*image->height)*image->width)*3;
-            FOR(c,3){
-                //u8 color = RGB(image, index + c);
-                u8 color = 255;
-                //				RGB(image, index + c) = (u8)(color);
-                //RGB(image, index + c) = (u8)(color*over[cluster%6][c]);
-            }
-        }
-    }
-    else {
-        // used for overlay colors
-        float over[6][3] = {{0,0,1},{1,0,0},{0,1,0},{0.5f,0,0.5f},{0,0.5f,0.5f},{0.5f,0.5f,0}};
-        // and now lets draw them points!
-        FOR(i, points.size()){
-            register u32 index = ((u32)(points[i].point[0]*image->width) + (u32)(points[i].point[1]*image->height)*image->width)*3;
-            FOR(c,3){
-                //u8 color = RGB(image, index + c);
-                u8 color = 255;
-                float colorSum = 0;
-                FOR(cl, clusters){
-                    colorSum += points[i].weights[cl]*over[cl%6][c];
-                }
-                //				RGB(image, index + c) = u8(color*colorSum);
-            }
-        }
-    }
-
-    FOR(i, clusters){
-        if(i<points.size()) {draw_cross(image, cvPoint((u32)(means[i][0]*image->width), (u32)(means[i][1]*image->height)),CV_RGB(255,255,255),4);}
-        //		cvCircle(image, cvPoint((u32)(points[closestIndices[i]].point.x*image->width), (u32)(points[closestIndices[i]].point.y*image->height)), 4, CV_RGB(0,255,0), 1, CV_AA);
-    }
-}
-
-void KMeansCluster::DrawMap(IplImage *image)
-{
-    if(!points.size()) return;
-    if (!bSoft && !bGMM) {
-        // and now lets draw them points!
-        fvec dists;
-        dists.resize(clusters);
-        FOR(i, image->width*image->height)
-        {
-            fvec point;
-            point.push_back((i%image->width)/(float)image->width);
-            point.push_back((i/image->width)/(float)image->height);
-            FOR(j, clusters) dists[j] = SquareNorm(point, means[j]);
-            u32 cluster = FindSmallest(dists);
-
-            register u32 index = ((u32)(point[0]*image->width) + (u32)(point[1]*image->height)*image->width)*3;
-
-            CvScalar color = CV::color[(cluster+1)% CV::colorCnt];
-            cvSet1D(image, i, color);
-        }
-    }
-    else {
-        // and now lets draw them points!
-        f32 *dists = new f32[clusters];
-        f32 *weights = new f32[clusters];
-        FOR(i, image->width*image->height)
-        {
-            fvec point;
-            point.push_back((i%image->width)/(float)image->width);
-            point.push_back((i/image->width)/(float)image->height);
-            f32 sum = 0;
-            FOR(j, clusters)
-            {
-                dists[j] = expf(-beta * sqrt((means[j] - point)*(means[j] - point)));
-                sum += dists[j];
-            }
-            FOR(j, clusters) weights[j] = dists[j] / sum;
-
-            register u32 index = ((u32)(point[0]*image->width) + (u32)(point[1]*image->height)*image->width)*3;
-            CvScalar color = cvScalarAll(0);
-            FOR(j, clusters)
-            {
-                CvScalar col = CV::color[(j+1)% CV::colorCnt];
-                FOR(c,3) color.val[c] += col.val[c]*weights[j];
-            }
-            cvSet1D(image, i, color);
-        }
-    }
-    /*
- FOR(i, clusters){
-  if(i<points.size()) {draw_cross(image, cvPoint((u32)(means[i].x*image->width), (u32)(means[i].y*image->height)),CV_RGB(255,255,255),4);}
-  cvCircle(image, cvPoint((u32)(points[closestIndices[i]].point.x*image->width), (u32)(points[closestIndices[i]].point.y*image->height)), 4, CV_RGB(0,255,0), 1, CV_AA);
- }
- */
-}
-
-
 void KMeansCluster::AddPoint(fvec point)
 {
     if(point.size() != dim) dim = point.size();
@@ -271,7 +171,7 @@ void KMeansCluster::SetClusters(u32 clusters)
 
 void KMeansCluster::ResetClusters()
 {
-    srand((u32)cvGetTickCount());
+    srand(QTime::currentTime().msec());
 
     KILL(pi);
     if(sigma) FOR(i, clusters) KILL(sigma[i]);
@@ -585,7 +485,7 @@ void KMeansCluster::SoftKmeansClustering(std::vector<ClusterPoint> &points, vect
 
     // Random number generation for initial means of clusters
     // initialize the random seed with the current cpu time
-    srand((u32)cvGetTickCount());
+    srand(QTime::currentTime().msec());
 
     means = oldMeans;
 
@@ -648,7 +548,7 @@ void KMeansCluster::GMMClustering(std::vector<ClusterPoint> &points, vector<fvec
 
     // Random number generation for initial means of clusters
     // initialize the random seed with the current cpu time
-    srand((u32)cvGetTickCount());
+    srand(QTime::currentTime().msec());
 
     // initialize the means as the old values
     // divide by [320x240] to avoid numerical precision problems

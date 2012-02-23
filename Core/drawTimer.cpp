@@ -93,7 +93,7 @@ void DrawTimer::run()
 		//emit MapReady(bigMap);
 		//if(dynamical && (*dynamical) || maximizer && (*maximizer) ) emit ModelReady(modelMap);
 		if(maximizer && (*maximizer))
-		{
+		{            
 			emit ModelReady(modelMap);
 			emit CurveReady();
 			//canvas->SetModelImage(modelMap);
@@ -235,12 +235,11 @@ void DrawTimer::Maximization()
 	int w = modelMap.width();
 	int h = modelMap.height();
 	if(modelMap.isNull() || !w || !h) return;
-
 	modelMap.fill(qRgba(255, 255, 255, 0));
 
 	QPainter painter(&modelMap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+    //painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
 	(*maximizer)->Draw(painter);
 

@@ -45,7 +45,6 @@ void MaximizeRandom::SetParams(float variance)
 
 void MaximizeRandom::Draw(QPainter &painter)
 {
-
 	painter.setPen(QPen(Qt::black, 1.5));
 	painter.setBrush(Qt::NoBrush);
 	FOR(i, visited.size())
@@ -56,7 +55,7 @@ void MaximizeRandom::Draw(QPainter &painter)
 
 	painter.setPen(QPen(Qt::black, 1.5));
 	FOR(i, history.size()-1 )
-	{
+    {
 		QPointF point(history[i][0]*w, history[i][1]*h);
 		QPointF pointNext(history[i+1][0]*w, history[i+1][1]*h);
 

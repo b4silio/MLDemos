@@ -21,7 +21,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interfaceMLPClassifier.h"
 #include "interfaceMLPRegress.h"
 #include "interfaceMLPDynamic.h"
-#include "interfaceKMCluster.h"
 
 using namespace std;
 
@@ -29,7 +28,6 @@ PluginOpenCV::PluginOpenCV()
 {
 	classifiers.push_back(new ClassBoost());
 	classifiers.push_back(new ClassMLP());
-	clusterers.push_back(new ClustKM());
 	regressors.push_back(new RegrMLP());
 	dynamicals.push_back(new DynamicMLP());
 }
