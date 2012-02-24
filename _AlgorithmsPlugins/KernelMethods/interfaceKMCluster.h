@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <interfaces.h>
 #include "clustererKM.h"
+#include "clustererKKM.h"
 #include "ui_paramsKM.h"
 
 class ClustKM : public QObject, public ClustererInterface

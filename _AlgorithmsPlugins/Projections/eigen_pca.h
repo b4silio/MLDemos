@@ -118,7 +118,7 @@ class RBFKernel : public Kernel
 {
 	double gamma;
 public:
-	RBFKernel(float gamma) : gamma(gamma){};
+    RBFKernel(float gamma) : gamma(gamma){}
 	void Compute(MatrixXd &data)
 	{
 		_kernel = MatrixXd::Zero(data.cols(), data.cols());

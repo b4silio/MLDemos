@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>291</width>
-    <height>154</height>
+    <height>117</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>20</y>
+     <y>60</y>
      <width>50</width>
      <height>16</height>
     </rect>
@@ -35,7 +35,7 @@
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>40</y>
+     <y>80</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -60,7 +60,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
+     <y>60</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -78,7 +78,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>40</y>
+     <y>80</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -109,7 +109,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>20</y>
+     <y>60</y>
      <width>50</width>
      <height>16</height>
     </rect>
@@ -127,7 +127,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
+     <y>80</y>
      <width>91</width>
      <height>22</height>
     </rect>
@@ -163,7 +163,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>100</y>
+     <y>30</y>
      <width>60</width>
      <height>22</height>
     </rect>
@@ -197,7 +197,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>80</y>
+     <y>10</y>
      <width>50</width>
      <height>16</height>
     </rect>
