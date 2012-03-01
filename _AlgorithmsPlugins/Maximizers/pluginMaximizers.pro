@@ -7,8 +7,6 @@ NAME = mld_Maximizers
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-#QMAKE_CXXFLAGS += -fopenmp
-#LIBS += -lgomp
 ###########################
 # Source Files            #
 ###########################

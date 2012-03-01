@@ -4,8 +4,7 @@
 #include <public.h>
 #include <mymaths.h>
 #include <projector.h>
-#include <QLabel>
-#define OPENCV22
+#include <QLabel>zyy
 #include "basicOpenCV.h"
 
 using namespace std;

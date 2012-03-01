@@ -15,12 +15,14 @@ mldemos
 profile
 
 # qt noise
+*.new
+*.a
 Makefile*
 *.pro.user*
 *.app
 *.dylib
 
-#codeblocks noise
+# codeblocks noise
 *.layout
 *.depend
 
