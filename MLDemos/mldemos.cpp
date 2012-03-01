@@ -285,7 +285,6 @@ void MLDemos::initDialogs()
     connect(inputDimensions->invertSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsInvert()));
     connect(inputDimensions->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsRandom()));
 
-
     connect(drawToolbar->singleButton, SIGNAL(clicked()), this, SLOT(DrawSingle()));
     connect(drawToolbar->sprayButton, SIGNAL(clicked()), this, SLOT(DrawSpray()));
     connect(drawToolbar->lineButton, SIGNAL(clicked()), this, SLOT(DrawLine()));
@@ -585,45 +584,57 @@ void MLDemos::SetTextFontSize()
 
 void MLDemos::ShowContextMenuSpray(const QPoint &point)
 {
+    HideContextMenus();
     QPoint pt = QPoint(30, 0);
     drawContext1Widget->move(drawToolbar->sprayButton->mapToGlobal(pt));
     drawContext1Widget->show();
     drawContext1Widget->setFocus();
+    drawContext1Widget->repaint();
 }
 void MLDemos::ShowContextMenuLine(const QPoint &point)
 {
+    HideContextMenus();
     QPoint pt = QPoint(30, 0);
     drawContext2Widget->move(drawToolbar->lineButton->mapToGlobal(pt));
     drawContext2Widget->show();
     drawContext2Widget->setFocus();
+    drawContext2Widget->repaint();
 }
 void MLDemos::ShowContextMenuEllipse(const QPoint &point)
 {
+    HideContextMenus();
     QPoint pt = QPoint(30, 0);
     drawContext2Widget->move(drawToolbar->ellipseButton->mapToGlobal(pt));
     drawContext2Widget->show();
     drawContext2Widget->setFocus();
+    drawContext2Widget->repaint();
 }
 void MLDemos::ShowContextMenuErase(const QPoint &point)
 {
+    HideContextMenus();
     QPoint pt = QPoint(30, 0);
     drawContext1Widget->move(drawToolbar->eraseButton->mapToGlobal(pt));
     drawContext1Widget->show();
     drawContext1Widget->setFocus();
+    drawContext1Widget->repaint();
 }
 void MLDemos::ShowContextMenuObstacle(const QPoint &point)
 {
+    HideContextMenus();
     QPoint pt = QPoint(30, 0);
     drawContext3Widget->move(drawToolbar->obstacleButton->mapToGlobal(pt));
     drawContext3Widget->show();
     drawContext3Widget->setFocus();
+    drawContext3Widget->repaint();
 }
 void MLDemos::ShowContextMenuReward(const QPoint &point)
 {
+    HideContextMenus();
     QPoint pt = QPoint(30, 0);
     drawContext4Widget->move(drawToolbar->paintButton->mapToGlobal(pt));
     drawContext4Widget->show();
     drawContext4Widget->setFocus();
+    drawContext4Widget->repaint();
 }
 
 bool IsChildOf(QObject *child, QObject *parent)

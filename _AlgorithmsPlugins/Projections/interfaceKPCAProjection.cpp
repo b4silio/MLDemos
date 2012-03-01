@@ -16,17 +16,13 @@ void KPCAProjection::ChangeOptions()
 {
     switch(params->kernelTypeCombo->currentIndex())
     {
-    case 0: // linear
-        params->kernelDegSpin->setEnabled(false);
-        params->kernelDegSpin->setVisible(false);
-        break;
-    case 1: // poly
+    case 0: // poly
         params->kernelDegSpin->setEnabled(true);
         params->kernelDegSpin->setVisible(true);
         params->kernelWidthSpin->setEnabled(false);
         params->kernelWidthSpin->setVisible(false);
         break;
-    case 2: // RBF
+    case 1: // RBF
         params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
@@ -105,7 +101,8 @@ void KPCAProjection::SetParams(Projector *projector)
     if(!projector) return;
     ProjectorKPCA *kpca = dynamic_cast<ProjectorKPCA*>(projector);
     if(!kpca) return;
-    kpca->SetParams(params->kernelTypeCombo->currentIndex(), params->kernelDegSpin->value(), params->kernelWidthSpin->value());
+    // we add 1 to the kernel type because we have taken out the linear kernel
+    kpca->SetParams(params->kernelTypeCombo->currentIndex()+1, params->kernelDegSpin->value(), params->kernelWidthSpin->value());
 }
 
 void KPCAProjection::SaveOptions(QSettings &settings)

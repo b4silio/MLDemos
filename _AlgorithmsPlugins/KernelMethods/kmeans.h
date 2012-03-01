@@ -20,13 +20,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _KMEANS_H_
 
 #include <vector>
-#include "basicOpenCV.h"
 
 struct ClusterPoint{
 	fvec point;
 	u32 cluster;
 	float *weights;
-	ClusterPoint() : point(0,0), cluster(0), weights(NULL){};
+    ClusterPoint() : point(0,0), cluster(0), weights(NULL){}
 	~ClusterPoint()
 	{
 		if(weights) delete [] weights;
@@ -61,33 +60,31 @@ public:
 	~KMeansCluster();
 
 	void Update(bool bEStep=false);
-	void Draw(IplImage *image);
-	void DrawMap(IplImage *image);
 
 	void Clear();
 	void Test(fvec sample, fvec &res);
 
-	void SetPoint(u32 index, fvec point){if(index<points.size()) points[index].point = point;};
+    void SetPoint(u32 index, fvec point){if(index<points.size()) points[index].point = point;}
 
 	void AddPoint(fvec sample);
 	void AddPoints(std::vector<fvec> points);
 
-	fvec GetMean(u32 index=0) {return index<clusters ? means[index] : fvec();};
-	std::vector<fvec> GetMeans(){return means;};
+    fvec GetMean(u32 index=0) {return index<clusters ? means[index] : fvec();}
+    std::vector<fvec> GetMeans(){return means;}
 	ivec GetClosestPoints();
 
 	void SetClusters(u32 clusters);
-	u32 GetClusters(){return clusters;};
+    u32 GetClusters(){return clusters;}
 	void ResetClusters();
 
 	inline float Distance(fvec a, fvec b);
 	inline float Distance2(fvec a, fvec b);
 
-	void SetSoft(bool soft){bSoft = soft;};
-	void SetBeta(float b){beta = b > 0 ? b : 0.01f;};
-	void SetGMM(bool gmm){bGMM = gmm;};
-	void SetPower(int p){power = p;};
-	float GetBeta(){return beta;};
+    void SetSoft(bool soft){bSoft = soft;}
+    void SetBeta(float b){beta = b > 0 ? b : 0.01f;}
+    void SetGMM(bool gmm){bGMM = gmm;}
+    void SetPower(int p){power = p;}
+    float GetBeta(){return beta;}
 
 private:
 	void Mean(std::vector<ClusterPoint> &points, std::vector<fvec> &means, int nbClusters);

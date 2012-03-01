@@ -23,14 +23,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interfaceSVMDynamic.h"
 #include "interfaceGPRRegress.h"
 #include "interfaceGPRDynamic.h"
-#include "interfaceKKM.h"
+#include "interfaceKMCluster.h"
 
 using namespace std;
 
 PluginKernel::PluginKernel()
 {
     classifiers.push_back(new ClassSVM());
-    clusterers.push_back(new ClustKKM());
+    clusterers.push_back(new ClustKM());
     clusterers.push_back(new ClustSVM());
     regressors.push_back(new RegrSVM());
     regressors.push_back(new RegrGPR());

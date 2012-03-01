@@ -1316,7 +1316,16 @@ QPixmap Canvas::GetScreenshot()
     bShowCrosshair = false;
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
-    PaintStandard(painter);
+    if(!canvasType) PaintStandard(painter);
+    else if(canvasType <= 4) PaintMultivariate(painter, canvasType-1);
+    else
+    {
+        fvec params;
+        params.push_back(xIndex);
+        params.push_back(yIndex);
+        params.push_back(zIndex);
+        PaintVariable(painter, canvasType-5, params);
+    }
     bShowCrosshair = tmp;
     return screenshot;
 }

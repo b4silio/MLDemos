@@ -11,7 +11,7 @@ include($$MLPATH/MLDemos_variables.pri)
 # Source Files            #
 ###########################
 opencv{
-FORMS += paramsBoost.ui paramsMLP.ui paramsKM.ui paramsMLPDynamic.ui paramsMLPRegress.ui
+FORMS += paramsBoost.ui paramsMLP.ui paramsMLPDynamic.ui paramsMLPRegress.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
@@ -21,10 +21,7 @@ HEADERS +=	\
 			classifierMLP.h \
 			regressorMLP.h \
 			dynamicalMLP.h \
-			clustererKM.h \
-			kmeans.h \
 			interfaceMLPClassifier.h \
-			interfaceKMCluster.h \
 			interfaceBoostClassifier.h \
 			interfaceMLPRegress.h \
 			interfaceMLPDynamic.h \
@@ -36,10 +33,7 @@ SOURCES += 	\
 			classifierMLP.cpp \
 			regressorMLP.cpp \
 			dynamicalMLP.cpp \
-			clustererKM.cpp \
-			kmeans.cpp \
 			interfaceMLPClassifier.cpp \
-			interfaceKMCluster.cpp \
 			interfaceBoostClassifier.cpp \
 			interfaceMLPRegress.cpp \
 			interfaceMLPDynamic.cpp \
