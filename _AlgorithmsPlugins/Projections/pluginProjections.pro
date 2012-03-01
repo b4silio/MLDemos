@@ -7,7 +7,6 @@ NAME = mld_Projections
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
-DEFINES += OPENCV22
 
 CONFIG(opencv22)|CONFIG(opencv21){
     CONFIG += opencv
