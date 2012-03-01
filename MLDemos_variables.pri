@@ -21,7 +21,7 @@ unix:MLBUILD = /tmp/MLDemos/$$NAME
 win32{
 	CONFIG += opencv22
 #	CONFIG += opencv21
-	OPENCV_VER = 2.3.1
+	OPENCV_VER = 231
 }else{
 	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
 #	CONFIG += opencv22
@@ -55,6 +55,7 @@ win32{
 #			/usr/include/qt4/QtOpenGL
 #	LIBS += -L/usr/local/lib
 
+
 # PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP
 
 ##########################
@@ -79,14 +80,46 @@ win32:CONFIG(opencv22){
         	-lopencv_imgproc$$OPENCV_VER \
 		-lopencv_legacy$$OPENCV_VER \
 		-lopencv_ml$$OPENCV_VER
-} else:CONFIG(opencv22) {
-	PKGCONFIG += opencv
+}
+
+# some issues between qmake and pkgconfig
+# invoking pkg-config manually instead
+unix{
+    CONFIG(opencv22){
+        PKGCONFIG += opencv
         DEFINES += OPENCV22
-	message("Using opencv22 or later")
-} else:CONFIG(opencv21) {
+        message("Using opencv22 or later")
+        LIBS += $$system(pkg-config --libs opencv)
+    }
+    CONFIG(opencv21) {
 	PKGCONFIG += opencv
 	DEFINES += OPENCV21
-	message("Using opencv21")
+        message("Using opencv21")
+        LIBS += $$system(pkg-config --libs opencv)
+    }
+}
+
+macx{
+    CONFIG(opencv22){
+        DEFINES += OPENCV22
+        message("Using opencv22 or later")
+        LIBS += -lopencv_core \
+                -lopencv_features2d \
+                -lopencv_highgui \
+                -lopencv_imgproc \
+                -lopencv_legacy \
+                -lopencv_ml
+
+    }
+    CONFIG(opencv21) {
+        DEFINES += OPENCV21
+        message("Using opencv21")
+        LIBS += -lcv \
+                -lcxcore \
+                -lcvaux \
+                -lml \
+                -lhighgui
+    }
 }
 
 # BOOST
