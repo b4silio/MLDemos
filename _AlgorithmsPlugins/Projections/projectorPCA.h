@@ -20,6 +20,7 @@ public:
     ProjectorPCA();
     void DrawEigenvals(QPainter &painter);
     fvec GetEigenValues();
+    std::vector<fvec> GetEigenVectors();
 
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);

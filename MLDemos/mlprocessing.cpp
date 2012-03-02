@@ -146,7 +146,7 @@ void MLDemos::ClassifyCross()
         }
     }
     classifier->crossval = fmeasures;
-    ShowCross();
+    //ShowCross();
     //if(trained) classifiers[tab]->Draw(canvas, classifier);
     DEL(classifier);
     UpdateInfo();
@@ -322,7 +322,7 @@ void MLDemos::RegressionCross()
         }
     }
     regressor->crossval = errors;
-    ShowCross();
+    //ShowCross();
 
     Train(regressor, outputDim, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
@@ -962,7 +962,7 @@ void MLDemos::Project()
         canvas->data->SetSamples(projectedData);
         canvas->data->bProjected = true;
     }
-    //canvas->FitToData();
+    if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();
     if(!canvas->canvasType)
@@ -991,7 +991,7 @@ void MLDemos::ProjectRevert()
     canvas->data->bProjected = false;
     canvas->maps.info = QPixmap();
     canvas->maps.model = QPixmap();
-    canvas->FitToData();
+    if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();
     canvas->repaint();

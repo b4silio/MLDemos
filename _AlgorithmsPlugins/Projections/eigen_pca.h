@@ -25,7 +25,7 @@ class Kernel
 // in this toy example we materialize the kernel, which is not necessary
 
 public:
-	const MatrixXd & get() const { return _kernel; };
+    const MatrixXd & get() const { return _kernel; }
 
 	virtual void Compute(MatrixXd &data)
 	{
@@ -89,7 +89,7 @@ class PolyKernel : public Kernel
 {
 	double degree;
 public:
-	PolyKernel(int degree) : degree(degree){};
+    PolyKernel(int degree) : degree(degree){}
 	void Compute(MatrixXd &data)
 	{
 		_kernel = MatrixXd::Zero(data.cols(), data.cols());
@@ -159,8 +159,9 @@ public:
 	// compute the kernel pca
 	//
 	void kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace);
-	MatrixXd project(MatrixXd &dataPoints, unsigned int dimSpace);
-	float test(VectorXd point);
+    VectorXd project(VectorXd &point);
+    MatrixXd project(MatrixXd &dataPoints, unsigned int dimSpace);
+    float test(VectorXd point);
 	// get
         const MatrixXd & get() const { return _result; }
 

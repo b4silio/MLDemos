@@ -366,24 +366,6 @@ p, li { white-space: pre-wrap; }
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="crossValidButton">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Perform Cross-Validation and display results BoxPlot</string>
-      </property>
-      <property name="text">
-       <string>Cross Valid</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <spacer>
       <property name="font">
        <font>

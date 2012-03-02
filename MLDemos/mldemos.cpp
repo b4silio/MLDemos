@@ -348,13 +348,11 @@ void MLDemos::initDialogs()
     connect(optionsClassify->classifyButton, SIGNAL(clicked()), this, SLOT(Classify()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), this, SLOT(ShowRoc()));
-    connect(optionsClassify->crossValidButton, SIGNAL(clicked()), this, SLOT(ClassifyCross()));
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsClassify->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
 
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
-    connect(optionsRegress->crossValidButton, SIGNAL(clicked()), this, SLOT(RegressionCross()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     //connect(optionsRegress->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));

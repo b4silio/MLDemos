@@ -23,8 +23,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-ProjectorKPCA::ProjectorKPCA()
-    : pca(0)
+ProjectorKPCA::ProjectorKPCA(int targetDims)
+    : pca(0), targetDims(targetDims)
 {}
 
 
@@ -43,7 +43,7 @@ std::vector<fvec> ProjectorKPCA::Project(std::vector<fvec> samples)
         FOR(d, dim) data(d,i) = samples[i][d];
     }
 
-    MatrixXd projections = pca->project(data, dim);
+    MatrixXd projections = pca->project(data, targetDims);
     projected.clear();
     projected.resize(projections.rows());
     fvec sample;
@@ -77,6 +77,7 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     source = samples;
     dim = samples[0].size();
     if(!dim) return;
+    if(targetDims > samples.size()) targetDims = samples.size();
 
     this->labels = labels;
     int count = samples.size();
@@ -101,7 +102,7 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     pca->degree = kernelDegree;
     pca->gamma = kernelGamma;
 
-    pca->kernel_pca(data, dim);
+    pca->kernel_pca(data, targetDims);
     MatrixXd projections = pca->get();
     projected.resize(projections.rows());
     fvec sample;

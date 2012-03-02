@@ -259,7 +259,7 @@ private slots:
 	void ResetPositiveClass();
 	void ChangeActiveOptions();
 	void ShowRoc();
-	void ShowCross();
+//	void ShowCross();
 	void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
 	void AlgoChanged();

@@ -59,15 +59,6 @@ void MLDemos::ShowRoc()
 	ShowStatsDialog();
 }
 
-void MLDemos::ShowCross()
-{
-	if(!classifier && !regressor) return;
-	SetCrossValidationInfo();
-	actionShowStats->setChecked(true);
-	showStats->tabWidget->setCurrentWidget(showStats->crossvalidTab);
-	ShowStatsDialog();
-}
-
 void MLDemos::StatsChanged()
 {
 	int tab = showStats->tabWidget->currentIndex();
@@ -190,12 +181,12 @@ void MLDemos::SetCrossValidationInfo()
 		text += txt + QString(" (quartiles)\n");
 		text += "\n\n";
 	}
-	showStats->crossvalidText->setText(text);
-    QSize boxSize(showStats->crossvalidWidget->width(),showStats->crossvalidWidget->height());
-    QPixmap boxplot = BoxPlot(fmeasures, boxSize);
+//	showStats->crossvalidText->setText(text);
+//    QSize boxSize(showStats->crossvalidWidget->width(),showStats->crossvalidWidget->height());
+//    QPixmap boxplot = BoxPlot(fmeasures, boxSize);
 //	boxplot.save("boxplot.png");
-	bIsCrossNew = false;
-    showStats->crossvalidImage->setPixmap(boxplot);
+//	bIsCrossNew = false;
+//    showStats->crossvalidImage->setPixmap(boxplot);
 }
 
 

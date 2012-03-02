@@ -170,3 +170,19 @@ fvec ProjectorPCA::GetEigenValues()
     }
     return values;
 }
+
+vector<fvec> ProjectorPCA::GetEigenVectors()
+{
+    int cols = pca.eigenvectors.cols;
+    int rows = pca.eigenvectors.rows;
+    vector<fvec> eigenVectors(rows);
+    FOR(i, rows)
+    {
+        eigenVectors[i].resize(cols);
+        FOR(j, cols)
+        {
+            eigenVectors[i][j] = pca.eigenvectors.at<float>(i, j);
+        }
+    }
+    return eigenVectors;
+}

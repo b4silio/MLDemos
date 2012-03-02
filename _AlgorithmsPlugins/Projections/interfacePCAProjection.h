@@ -4,6 +4,7 @@
 #include <interfaces.h>
 #include <projector.h>
 #include "ui_paramsPCA.h"
+#include <QTableWidget>
 
 class PCAProjection : public QObject, public ProjectorInterface
 {
@@ -12,6 +13,8 @@ class PCAProjection : public QObject, public ProjectorInterface
 private:
     QWidget *widget;
     Ui::paramsPCA *params;
+    QWidget *eigenWidget;
+    QTableWidget *eigenTable;
 public:
     PCAProjection();
     // virtual functions to manage the algorithm creation
@@ -29,6 +32,9 @@ public:
     bool LoadOptions(QSettings &settings);
     void SaveParams(QTextStream &stream);
     bool LoadParams(QString name, float value);
+
+public slots:
+    void ShowEigenVectors();
 };
 
 #endif // INTERFACEPCAPROJECTION_H
