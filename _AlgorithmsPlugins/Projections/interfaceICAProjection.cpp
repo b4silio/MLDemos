@@ -17,8 +17,10 @@ Projector *ICAProjection::GetProjector()
 void ICAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
+    ProjectorICA *ica = dynamic_cast<ProjectorICA*>(projector);
+    if(!ica) return;
     int dim = projector->dim;
-    double *trans = ((ProjectorICA*)projector)->GetTransf();
+    double *trans = ica->GetTransf();
     params->mixingTable->clear();
     params->mixingTable->setRowCount(dim);
     params->mixingTable->setColumnCount(dim);

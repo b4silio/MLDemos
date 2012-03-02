@@ -1927,32 +1927,35 @@ void MLDemos::CanvasMoveEvent()
     UpdateLearnedModel();
 
     QMutexLocker lock(&mutex);
-    if(classifier)
+    if(canvas->canvasType)
     {
-        classifiers[tabUsedForTraining]->Draw(canvas, classifier);
-        if(classifier->UsesDrawTimer())
+        if(classifier)
         {
+            classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            if(classifier->UsesDrawTimer())
+            {
+                drawTimer->start(QThread::NormalPriority);
+            }
+        }
+        else if(regressor)
+        {
+            regressors[tabUsedForTraining]->Draw(canvas, regressor);
+            //drawTimer->start(QThread::NormalPriority);
+        }
+        else if(clusterer)
+        {
+            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
             drawTimer->start(QThread::NormalPriority);
         }
-    }
-    else if(regressor)
-    {
-        regressors[tabUsedForTraining]->Draw(canvas, regressor);
-        //drawTimer->start(QThread::NormalPriority);
-    }
-    else if(clusterer)
-    {
-        clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-        drawTimer->start(QThread::NormalPriority);
-    }
-    else if(dynamical)
-    {
-        dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
-        if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
-    }
-    else if(projector)
-    {
-        projectors[tabUsedForTraining]->Draw(canvas, projector);
+        else if(dynamical)
+        {
+            dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+            if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+        }
+        else if(projector)
+        {
+            projectors[tabUsedForTraining]->Draw(canvas, projector);
+        }
     }
     canvas->repaint();
 }

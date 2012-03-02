@@ -1179,7 +1179,7 @@ void MLDemos::UpdateLearnedModel()
         }
 
     }
-    if(projector)
+    if(!canvas->canvasType && projector)
     {
         projectors[tabUsedForTraining]->Draw(canvas, projector);
     }
