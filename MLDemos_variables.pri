@@ -23,8 +23,8 @@ win32{
 #	CONFIG += opencv21
 	OPENCV_VER = 231
 }else{
-	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
-#	CONFIG += opencv22
+#	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+    CONFIG += opencv22
 #	CONFIG += opencv21
 }
 
@@ -43,9 +43,9 @@ win32{
 win32{
 	CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
 	CONFIG(opencv22|opencv21):OPENCV = C:/DEV/OpenCV2.3-GCC
-}else{
-#	CONFIG(boost):BOOST = /usr/local/boost_1_47_0
-#	CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
+}else:macx{
+    CONFIG(boost):BOOST = /usr/local/boost_1_47_0
+    CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
 }
 
 #	INCLUDEPATH +=	/usr/include/qt4 \
@@ -75,29 +75,13 @@ win32:CONFIG(opencv22){
 	INCLUDEPATH += . "$$OPENCV/include/"
 	LIBS += -L"$$OPENCV/lib/"
 	LIBS += -lopencv_core$$OPENCV_VER \
-             	-lopencv_features2d$$OPENCV_VER \
-	        -lopencv_highgui$$OPENCV_VER \
-        	-lopencv_imgproc$$OPENCV_VER \
-		-lopencv_legacy$$OPENCV_VER \
-		-lopencv_ml$$OPENCV_VER
+            -lopencv_features2d$$OPENCV_VER \
+            -lopencv_highgui$$OPENCV_VER \
+            -lopencv_imgproc$$OPENCV_VER \
+            -lopencv_legacy$$OPENCV_VER \
+            -lopencv_ml$$OPENCV_VER
 }
 
-# some issues between qmake and pkgconfig
-# invoking pkg-config manually instead
-unix{
-    CONFIG(opencv22){
-        PKGCONFIG += opencv
-        DEFINES += OPENCV22
-        message("Using opencv22 or later")
-        LIBS += $$system(pkg-config --libs opencv)
-    }
-    CONFIG(opencv21) {
-	PKGCONFIG += opencv
-	DEFINES += OPENCV21
-        message("Using opencv21")
-        LIBS += $$system(pkg-config --libs opencv)
-    }
-}
 
 macx{
     CONFIG(opencv22){
@@ -120,19 +104,39 @@ macx{
                 -lml \
                 -lhighgui
     }
+}else:unix{
+# some issues between qmake and pkgconfig
+# invoking pkg-config manually instead
+    CONFIG(opencv22){
+        PKGCONFIG += opencv
+        DEFINES += OPENCV22
+        message("Using opencv22 or later")
+        LIBS += $$system(pkg-config --libs opencv)
+    }
+    CONFIG(opencv21) {
+	PKGCONFIG += opencv
+	DEFINES += OPENCV21
+        message("Using opencv21")
+        LIBS += $$system(pkg-config --libs opencv)
+    }
 }
 
 # BOOST
 CONFIG(boost){
-	PKGCONFIG += boost
-	DEFINES += WITHBOOST
-	message("Using boost libraries")
-	win32:INCLUDEPATH += "$$BOOST/include"
+    DEFINES += WITHBOOST
+    message("Using boost libraries")
+    macx{
+        INCLUDEPATH += "$$BOOST"
+    }else:unix{
+        PKGCONFIG += boost
+    }else:win32{
+        INCLUDEPATH += "$$BOOST/include"
+    }
 }
 
 # QT
 unix{
-	PKGCONFIG = QtCore QtGui QtSvg QtOpenGL
+#	PKGCONFIG = QtCore QtGui QtSvg QtOpenGL
 }
 
 
@@ -190,7 +194,7 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ################################
 # Turn the bloody warnings off #
 ################################
-macx|unix {
+win32-g++|macx|unix {
 	QMAKE_CXXFLAGS_WARN_ON = ""
 	QMAKE_CXXFLAGS += -Wno-all
 	QMAKE_CXXFLAGS += -Wno-endif-labels
@@ -200,7 +204,7 @@ macx|unix {
 	QMAKE_CXXFLAGS += -Wtrigraphs
 	QMAKE_CXXFLAGS += -Wreturn-type
 	#QMAKE_CXXFLAGS += -Wnon-virtual-dtor
-	QMAKE_CXXFLAGS += -Woverloaded-virtual
+    #QMAKE_CXXFLAGS += -Woverloaded-virtual
 	#QMAKE_CXXFLAGS += -Wunused-variable
 	#QMAKE_CXXFLAGS += -Wunused-value
 	QMAKE_CXXFLAGS += -Wunknown-pragmas

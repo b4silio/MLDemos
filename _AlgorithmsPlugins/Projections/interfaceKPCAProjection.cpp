@@ -86,6 +86,7 @@ void KPCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proj
     */
 }
 
+QLabel *label = new QLabel();
 void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
@@ -93,6 +94,18 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     if(!kpca) return;
     painter.setRenderHint(QPainter::Antialiasing, false);
     PCA *pca = kpca->pca;
+    vector<fvec> samples = projector->source;
+
+
+    int dimSpace=2;
+    MatrixXd dataPoints(samples.size(), dimSpace);
+    FOR(i, samples.size())
+    {
+        FOR(j, dimSpace)
+        {
+
+        }
+    }
 
     int W = canvas->width();
     int H = canvas->height();
@@ -101,7 +114,8 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     int yIndex = canvas->yIndex;
     float xmin=FLT_MAX,xmax=-FLT_MAX;
     float ymin=FLT_MAX,ymax=-FLT_MAX;
-    vector<fvec> samples = projector->source;
+
+
     fvec mean;
     FOR(i, samples.size())
     {
@@ -112,6 +126,12 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         if(!i) mean = samples[0];
         else mean += samples[i];
     }
+    int xdiff = (xmax - xmin);
+    int ydiff = (ymax - ymin);
+    xmin -= xdiff/2;
+    xmax += xdiff/2;
+    ymin -= ydiff/2;
+    ymax += ydiff/2;
     mean /= samples.size();
 
     int w = 64;
@@ -128,8 +148,9 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         {
             point(xIndex) = i/(float)w*(xmax-xmin) + xmin;
             point(yIndex) = j/(float)h*(ymax-ymin) + ymin;
-            VectorXd res = pca->project(point);
-            float value = res(0);
+            float value = pca->test(point);
+            //VectorXd res = pca->project(point);
+            //float value = res(0);
             vmin = min(value, vmin);
             vmax = max(value, vmax);
             values[j*w + i] = value;
@@ -143,8 +164,10 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
             image.setPixel(i,j, qRgb((int)value,value,value));
         }
     }
-    QPixmap contours = QPixmap::fromImage(image).scaled(W,H, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    painter.drawPixmap(0,0,contours);
+    QPixmap contours = QPixmap::fromImage(image).scaled(512,512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    label->setPixmap(contours);
+    label->show();;
+    //painter.drawPixmap(0,0,contours);
 
     /*
     vector<fvec> samples = projector->source;

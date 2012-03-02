@@ -101,6 +101,7 @@ float PCA::test(VectorXd point)
 
     //std::cout << "K:\n" << k->get() << "\n";
 
+    /*
     // ''centralize''
     int kRows = k->get().rows();
     int kCols = k->get().cols();
@@ -108,6 +109,7 @@ float PCA::test(VectorXd point)
         - MatrixXd::Ones(kRows, kRows)*k->get()
         - k->get()*MatrixXd::Ones(kCols, kCols)
         + MatrixXd::Ones(kRows, kRows)*k->get()*MatrixXd::Ones(kCols, kCols);
+    */
 
     //	std::cout << K.row(0) << "\n";
     //	std::cout << eigenvalues << "\n";
