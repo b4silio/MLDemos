@@ -10,7 +10,7 @@
 # Location of intermediate build files #
 ########################################
 win32:MLBUILD = C:/tmp/MLDemos/$$NAME
-unix:MLBUILD = /tmp/MLDemos/$$NAME
+unix:MLBUILD = build
 
 ######################
 # Optional libraries #
@@ -159,21 +159,21 @@ CONFIG(debug, debug|release){
 
 win32{
 	CONFIG(Debug, Debug|Release){
-		MOC_DIR = $${MLBUILD}/Debug
-		UI_DIR = $${MLBUILD}/Debug
-		RCC_DIR = $${MLBUILD}/Debug
-		OBJECTS_DIR = $${MLBUILD}/Debug
+        MOC_DIR = $${MLBUILD}/Debug
+        UI_DIR = $${MLBUILD}/Debug
+        RCC_DIR = $${MLBUILD}/Debug
+        OBJECTS_DIR = $${MLBUILD}/Debug
 	}else{
-		MOC_DIR = $${MLBUILD}/Release
-		UI_DIR = $${MLBUILD}/Release
-		RCC_DIR = $${MLBUILD}/Release
-		OBJECTS_DIR = $${MLBUILD}/Release
+        MOC_DIR = $${MLBUILD}/Release
+        UI_DIR = $${MLBUILD}/Release
+        RCC_DIR = $${MLBUILD}/Release
+        OBJECTS_DIR = $${MLBUILD}/Release
 	}
 }else{
-	MOC_DIR = $${MLBUILD}/build
-	UI_DIR = $${MLBUILD}/build
-	RCC_DIR = $${MLBUILD}/build
-	OBJECTS_DIR = $${MLBUILD}/build
+    MOC_DIR = $${MLBUILD}
+    UI_DIR = $${MLBUILD}
+    RCC_DIR = $${MLBUILD}
+    OBJECTS_DIR = $${MLBUILD}
 }
 
 DEPENDPATH += . \

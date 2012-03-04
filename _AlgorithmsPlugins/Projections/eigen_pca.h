@@ -161,7 +161,7 @@ public:
 	void kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace);
     VectorXd project(VectorXd &point);
     MatrixXd project(MatrixXd &dataPoints, unsigned int dimSpace);
-    float test(VectorXd point);
+    float test(VectorXd point, int dim=0);
 	// get
         const MatrixXd & get() const { return _result; }
 

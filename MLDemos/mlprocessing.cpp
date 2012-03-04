@@ -991,6 +991,7 @@ void MLDemos::ProjectRevert()
     canvas->data->bProjected = false;
     canvas->maps.info = QPixmap();
     canvas->maps.model = QPixmap();
+    canvas->maps.confidence = QPixmap();
     if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();

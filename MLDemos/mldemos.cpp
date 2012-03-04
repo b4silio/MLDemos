@@ -995,7 +995,6 @@ void MLDemos::HideStatsDialog()
     actionShowStats->setChecked(false);
 }
 
-
 void MLDemos::Clear()
 {
     drawTimer->Stop();
@@ -1012,6 +1011,7 @@ void MLDemos::Clear()
     canvas->maps.model = QPixmap();
     canvas->maps.info = QPixmap();
     canvas->liveTrajectory.clear();
+    canvas->sampleColors.clear();
     canvas->repaint();
     UpdateInfo();
 }
@@ -2495,12 +2495,10 @@ void MLDemos::ToClipboard()
         ui.statusBar->showMessage("WARNING: Nothing to copy to clipboard");
         return;
     }
-
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setImage(screenshot.toImage());
     clipboard->setPixmap(screenshot);
     ui.statusBar->showMessage("Image copied successfully to clipboard");
-
 }
 
 /************************************/
