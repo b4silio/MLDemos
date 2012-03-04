@@ -66,6 +66,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionExportOutput, SIGNAL(triggered()), this, SLOT(ExportOutput()));
     connect(ui.actionExportAnimation, SIGNAL(triggered()), this, SLOT(ExportAnimation()));
     connect(ui.actionExport_SVG, SIGNAL(triggered()), this, SLOT(ExportSVG()));
+    ui.actionImportData->setShortcut(QKeySequence(tr("Ctrl+I")));
 
     initDialogs();
     initToolBars();
@@ -2610,7 +2611,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
 
 void MLDemos::SetDimensionNames(QStringList headers)
 {
-    qDebug() << "setting dimension names" << headers;
+    //qDebug() << "setting dimension names" << headers;
     canvas->dimNames = headers;
     ResetPositiveClass();
     CanvasOptionsChanged();
