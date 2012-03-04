@@ -163,7 +163,7 @@ fvec DynamicalGPR::GetBasisVector( int index )
 	return res;
 }
 
-char *DynamicalGPR::GetInfoString()
+const char *DynamicalGPR::GetInfoString()
 {
 	char *text = new char[2048];
 	sprintf(text, "Sparse Optimized Gaussian Processes\n");

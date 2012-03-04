@@ -94,7 +94,7 @@ public:
 	 * @brief Get the algorithm information and statistics to be displayed in the main interface
 	 *
 	 */
-	char *GetInfoString();
+    const char *GetInfoString();
 	/**
 	 * @brief Project the input sample into local space
 	 *

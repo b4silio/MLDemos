@@ -195,7 +195,7 @@ void ClassifierKNN::SetParams( u32 k, int metricType, u32 metricP )
 	}
 }
 
-char *ClassifierKNN::GetInfoString()
+const char *ClassifierKNN::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "KNN\n");

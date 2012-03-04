@@ -101,7 +101,7 @@ void ClassifierMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount,
 	this->beta = beta; 
 }
 
-char *ClassifierMLP::GetInfoString()
+const char *ClassifierMLP::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Multi-Layer Perceptron\n");

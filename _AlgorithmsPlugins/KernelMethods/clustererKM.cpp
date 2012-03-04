@@ -109,7 +109,7 @@ void ClustererKM::SetParams(u32 clusters, int method, float beta, int power)
 }
 
 
-char *ClustererKM::GetInfoString()
+const char *ClustererKM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "K-Means\n");

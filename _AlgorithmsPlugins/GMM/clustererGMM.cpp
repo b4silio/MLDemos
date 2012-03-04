@@ -80,7 +80,7 @@ void ClustererGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 	this->initType = initType;
 }
 
-char *ClustererGMM::GetInfoString()
+const char *ClustererGMM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "GMM\n");

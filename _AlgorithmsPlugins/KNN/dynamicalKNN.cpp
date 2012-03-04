@@ -238,7 +238,7 @@ void DynamicalKNN::SetParams( u32 k, int metricType, u32 metricP )
 	}
 }
 
-char *DynamicalKNN::GetInfoString()
+const char *DynamicalKNN::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "KNN\n");

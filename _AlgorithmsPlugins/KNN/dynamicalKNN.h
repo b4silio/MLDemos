@@ -37,13 +37,13 @@ private:
 	std::vector<fvec> points;
 	std::vector<fvec> velocities;
 public:
-	DynamicalKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){type = DYN_KNN;};
+    DynamicalKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){type = DYN_KNN;}
 	~DynamicalKNN();
 	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
 	fVec Test( const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(u32 k, int metricType, u32 metricP);
 };

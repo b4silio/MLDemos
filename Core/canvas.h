@@ -74,9 +74,10 @@ public:
     void DrawSampleColors(QPainter &painter);
 	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
-	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
+    void DrawLegend(QPainter &painter);
+    void DrawAxes(QPainter &painter);
+    void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
 	void FitToData();
-	void DrawAxes(QPainter &painter);
 	void RedrawAxes();
     void SetCanvasType(int);
 
@@ -121,7 +122,7 @@ public:
 	QImage qimg;
 	QPainterPath crosshair;
 	bool bDisplayMap, bDisplayInfo, bDisplaySingle, bDisplaySamples;
-	bool bDisplayTrajectories, bDisplayLearned, bDisplayGrid, bDisplayTimeSeries;
+    bool bDisplayTrajectories, bDisplayLearned, bDisplayGrid, bDisplayTimeSeries, bDisplayLegend;
 	bool bShowCrosshair, bNewCrosshair;
 	int trajectoryCenterType, trajectoryResampleType, trajectoryResampleCount;
 	QPoint mouse, mouseAnchor;

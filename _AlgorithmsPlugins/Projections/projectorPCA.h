@@ -4,7 +4,7 @@
 #include <public.h>
 #include <mymaths.h>
 #include <projector.h>
-#include <QLabel>zyy
+#include <QLabel>
 #include "basicOpenCV.h"
 
 using namespace std;
@@ -23,7 +23,7 @@ public:
 
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
-    char *GetInfoString(){return "Principal Component Analysis";}
+    const char *GetInfoString(){return "Principal Component Analysis";}
 
 };
 

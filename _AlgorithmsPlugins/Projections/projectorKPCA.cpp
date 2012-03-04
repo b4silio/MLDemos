@@ -177,7 +177,7 @@ void ProjectorKPCA::SetParams(int kernelType, int kernelDegree, float kernelGamm
     this->kernelGamma = kernelGamma;
 }
 
-char *ProjectorKPCA::GetInfoString()
+const char *ProjectorKPCA::GetInfoString()
 {
     char *text = new char[1024];
 

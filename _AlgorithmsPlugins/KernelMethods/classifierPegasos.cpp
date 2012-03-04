@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-char *ClassifierPegasos::GetInfoString()
+const char *ClassifierPegasos::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "pegasos SVM\n");

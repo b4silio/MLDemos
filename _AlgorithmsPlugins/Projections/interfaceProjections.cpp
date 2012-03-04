@@ -59,22 +59,18 @@ QString ClassProjections::GetAlgoString()
     {
     case 0:
         return "PCA";
-        break;
     case 1:
         return "LDA";
-        break;
     case 2:
         return "Fisher-LDA";
-        break;
     case 3:
         return "ICA";
-        break;
     case 4:
         return "Kernel PCA";
-        break;
     case 5:
         return "Naive Bayes";
-        break;
+    default:
+        return "None";
     }
 }
 

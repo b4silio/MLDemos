@@ -40,7 +40,7 @@ public:
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
 	fvec TestMulti(const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
 	void Update();

@@ -65,7 +65,8 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("samplesCheck", displayOptions->samplesCheck->isChecked());
 	settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
 	settings.setValue("spinZoom", displayOptions->spinZoom->value());
-	settings.endGroup();
+    settings.setValue("legendCheck", displayOptions->legendCheck->isChecked());
+    settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
 	settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
@@ -234,7 +235,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("samplesCheck")) displayOptions->samplesCheck->setChecked(settings.value("samplesCheck").toBool());
 	if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
 	if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
-	//if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
+    if(settings.contains("legendCheck")) displayOptions->legendCheck->setChecked(settings.value("legendCheck").toBool());
+    //if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
 	//if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
 	settings.endGroup();
 

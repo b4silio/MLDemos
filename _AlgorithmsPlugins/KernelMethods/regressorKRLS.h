@@ -45,15 +45,15 @@ private:
 
 public:
 
-	RegressorKRLS(): linTrainer(0), polTrainer(0), rbfTrainer(0), capacity(0), epsilon(0.001), kernelType(2){type = REGR_KRLS;};
+    RegressorKRLS(): linTrainer(0), polTrainer(0), rbfTrainer(0), capacity(0), epsilon(0.001), kernelType(2){type = REGR_KRLS;}
 	~RegressorKRLS();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
 	fVec Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(float epsilon, int capacity, int kernelType, float kernelParam, int kernelDegree)
-	{this->epsilon=epsilon;this->capacity=capacity;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;};
+    {this->epsilon=epsilon;this->capacity=capacity;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;}
 	std::vector<fvec> GetSVs();
 };
 

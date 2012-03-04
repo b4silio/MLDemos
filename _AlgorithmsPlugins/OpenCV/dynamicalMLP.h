@@ -37,7 +37,7 @@ public:
 	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta);
 };

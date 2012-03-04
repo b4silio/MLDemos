@@ -47,7 +47,7 @@ public:
     std::vector<fvec> Test( const fvec &sample, const int count);
     fvec Test( const fvec &sample);
     fVec Test( const fVec &sample);
-    char *GetInfoString();
+    const char *GetInfoString();
 
     void SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, int objectiveType,
                    int maxIteration, int constraintCriterion);

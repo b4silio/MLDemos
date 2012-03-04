@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-char *RegressorKRLS::GetInfoString()
+const char *RegressorKRLS::GetInfoString()
 {
 	char *text = new char[255];
 	sprintf(text, "Kernel Ridge Least Squares\n");

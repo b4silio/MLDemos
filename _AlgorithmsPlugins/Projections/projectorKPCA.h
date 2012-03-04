@@ -43,7 +43,7 @@ public:
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
 
-    char *GetInfoString();
+    const char *GetInfoString();
     void SetParams(int kernelType, int kernelDegree, float kernelGamma);
 };
 

@@ -236,7 +236,8 @@ private slots:
 	void ToClipboard();
 
 	void DrawCrosshair();
-	void DrawSingle();
+    void DrawNone();
+    void DrawSingle();
 	void DrawSpray();
 	void DrawLine();
 	void DrawTrajectory();
@@ -246,7 +247,6 @@ private slots:
 	void DrawPaint();
 	void Drawing(fvec sample, int label);
 	void DrawingStopped();
-
 
     void ManualSelection();
     void InputDimensions();

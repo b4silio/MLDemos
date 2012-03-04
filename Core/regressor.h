@@ -55,7 +55,7 @@ public:
     virtual void Train(std::vector< fvec > samples, ivec labels){}
     virtual fvec Test( const fvec &sample){ return fvec(); }
     virtual fVec Test(const fVec &sample){ if (dim==2) return fVec(Test((fvec)sample)); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
-    virtual char *GetInfoString(){return NULL;}
+    virtual const char *GetInfoString(){return NULL;}
 };
 
 #endif // _REGRESSOR_H_

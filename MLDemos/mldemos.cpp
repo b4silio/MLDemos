@@ -303,6 +303,7 @@ void MLDemos::initDialogs()
     connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
+    connect(displayOptions->legendCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
 
     algorithmOptions = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
@@ -818,7 +819,7 @@ void MLDemos::AlgoChanged()
         drawToolbar->trajectoryButton->setChecked(true);
         DrawTrajectory();
     }
-    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible())
+    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible() || algorithmOptions->tabProj->isVisible())
     {
         drawToolbar->sprayButton->setChecked(true);
         DrawSpray();
@@ -1094,6 +1095,19 @@ void MLDemos::ClearData()
     UpdateInfo();
 }
 
+
+void MLDemos::DrawNone()
+{
+    drawToolbar->singleButton->setChecked(false);
+    drawToolbar->sprayButton->setChecked(false);
+    drawToolbar->eraseButton->setChecked(false);
+    drawToolbar->ellipseButton->setChecked(false);
+    drawToolbar->lineButton->setChecked(false);
+    drawToolbar->trajectoryButton->setChecked(false);
+    drawToolbar->obstacleButton->setChecked(false);
+    drawToolbar->paintButton->setChecked(false);
+}
+
 void MLDemos::DrawSingle()
 {
     if(drawToolbar->singleButton->isChecked())
@@ -1244,6 +1258,7 @@ void MLDemos::DisplayOptionChanged()
     canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    canvas->bDisplayLegend = displayOptions->legendCheck->isChecked();
     {
         int xIndex = ui.canvasX1Spin->value()-1;
         int yIndex = ui.canvasX2Spin->value()-1;
@@ -2605,6 +2620,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     ResetPositiveClass();
     ManualSelectionUpdated();
     CanvasOptionsChanged();
+    DrawNone();
     canvas->ResetSamples();
     canvas->repaint();
 }

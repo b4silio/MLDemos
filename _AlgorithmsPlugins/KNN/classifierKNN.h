@@ -37,14 +37,14 @@ private:
 	int k;
 	std::map<int,int> counts;
 public:
-    ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){bMultiClass = true;};
+    ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){bMultiClass = true;}
 	~ClassifierKNN();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec TestMulti(const fvec &sample);
 	float Test( const fvec &sample);
 	float Test( const fVec &sample);
 	void SetParams(u32 k, int metricType, u32 metricP);
-	char *GetInfoString();
+    const char *GetInfoString();
 };
 
 #endif // _CLASSIFIER_KNN_H_

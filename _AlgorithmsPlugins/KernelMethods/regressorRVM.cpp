@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-char *RegressorRVM::GetInfoString()
+const char *RegressorRVM::GetInfoString()
 {
 	char *text = new char[255];
 	sprintf(text, "Relevance Vector Regression\n");

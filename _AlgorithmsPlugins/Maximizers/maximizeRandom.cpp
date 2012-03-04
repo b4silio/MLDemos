@@ -145,7 +145,7 @@ fvec MaximizeRandom::Test(const fVec &sample)
 	return Test((fvec)sample);
 }
 
-char *MaximizeRandom::GetInfoString()
+const char *MaximizeRandom::GetInfoString()
 {
 	char *text = new char[1024];
 	if(variance == 0) sprintf(text, "Random Search");

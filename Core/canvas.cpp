@@ -47,6 +47,7 @@ Canvas::Canvas(QWidget *parent)
       bDisplayTimeSeries(true),
       bDisplayLearned(true),
       bDisplayGrid(true),
+      bDisplayLegend(true),
       crosshair(QPainterPath()),
       bShowCrosshair(false),
       bNewCrosshair(true),
@@ -239,6 +240,11 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
             painter.setBackgroundMode(Qt::TransparentMode);
             painter.drawPixmap(geometry(), maps.grid);
         }
+    }
+    if(bDisplayLegend)
+    {
+        painter.setBackgroundMode(Qt::TransparentMode);
+        DrawLegend(painter);
     }
 }
 
@@ -594,6 +600,72 @@ void Canvas::FitToData()
     zooms = fvec(dim, 1.f);
     FOR(d, dim) zooms[d] = 1.f / diff[d];
     SetZoom(1.f);
+}
+
+void Canvas::DrawLegend(QPainter &painter)
+{
+    int w = painter.viewport().width(), h = painter.viewport().height();
+    QFont font = painter.font();
+    font.setPointSize(10);
+    painter.setFont(font);
+
+    // we draw the reward colorbar
+    if(!maps.reward.isNull())
+    {
+        // we draw the colorbar
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        painter.setOpacity(0.8);
+        int barW = 20;
+        QRect rect(w - barW - 32, 40, barW, 256);
+        painter.setBrush(Qt::NoBrush);
+        for(int i=0; i<rect.height(); i++)
+        {
+            float v = (1.f - i/(float)rect.height())*255.f;
+            painter.setPen(QColor(255,255-v,255-v));
+            painter.drawLine(rect.x(), rect.y() + i, rect.x() + rect.width(), rect.y() + i);
+        }
+
+        // we draw the values on the colorbar
+        painter.setOpacity(1);
+        int steps = 4;
+        float vmax = 1.0;
+        float vmin = 0.0;
+        for(int i=0; i<steps+1; i++)
+        {
+            float v = (1.f - i/(float)steps);
+            QString text = QString("%1").arg(v*(vmax-vmin) + vmin, 0, 'f', 2);
+            int y = rect.y() + i*rect.height()/steps;
+            QRect textRect = QRect(rect.x()-40, y - 10, 40-6, 20);
+            painter.setPen(Qt::black);
+            painter.drawText(textRect, Qt::AlignRight + Qt::AlignVCenter, text);
+            painter.drawLine(rect.x(), y, rect.x()-4, y);
+        }
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawRect(rect);
+    }
+    else // we draw the samples legend
+    {
+        if(!data->GetCount()) return;
+        std::map<int,bool> labelList;
+        ivec labels = data->GetLabels();
+        FOR(i, labels.size())
+        {
+            labelList[labels[i]] = true;
+        }
+        painter.setPen(QPen(Qt::black, 1));
+        int x = w - 100, y = 40;
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        painter.drawRect(x-12,y-10, 70, 20*labelList.size());
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
+        {
+            int label = it->first;
+            QPointF point(x, y);
+            drawSample(painter, point, 10, label);
+            painter.drawText(QRect(x + 4, point.y()-10, 50, 20), Qt::AlignLeft + Qt::AlignCenter, QString("Class %1").arg(label));
+            y += 20;
+        }
+    }
 }
 
 void Canvas::DrawAxes(QPainter &painter)

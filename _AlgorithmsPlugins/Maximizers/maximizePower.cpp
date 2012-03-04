@@ -250,7 +250,7 @@ fvec MaximizePower::Test(const fVec &sample)
 	return Test((fvec)sample);
 }
 
-char *MaximizePower::GetInfoString()
+const char *MaximizePower::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "POWER\n");
