@@ -965,6 +965,7 @@ void MLDemos::Project()
     if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     if(!canvas->canvasType)
     {
         projectors[tab]->Draw(canvas, projector);
@@ -995,6 +996,7 @@ void MLDemos::ProjectRevert()
     if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     canvas->repaint();
     UpdateInfo();
     sourceData.clear();
