@@ -14,7 +14,7 @@ public:
 
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
-    char *GetInfoString(){return "Linear Discriminant Analysis";}
+    const char *GetInfoString(){return "Linear Discriminant Analysis";}
 };
 
 #endif // PROJECTORLDA_H

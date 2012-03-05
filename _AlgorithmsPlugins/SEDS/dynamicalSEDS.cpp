@@ -239,7 +239,7 @@ void DynamicalSEDS::SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, 
 	this->constraintCriterion = constraintCriterion;
 }
 
-char *DynamicalSEDS::GetInfoString()
+const char *DynamicalSEDS::GetInfoString()
 {
 	char *text = new char[2048];
 	sprintf(text, "GMR\n");

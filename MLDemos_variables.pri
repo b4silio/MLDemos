@@ -6,73 +6,143 @@
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
 
+########################################
+# Location of intermediate build files #
+########################################
+win32:MLBUILD = C:/tmp/MLDemos/$$NAME
+unix:MLBUILD = build
+
+######################
+# Optional libraries #
+######################
+# OpenCV : We currently support 2.1 and upwards. You may select which version
+# you have or let qmake find it out for you.
+
 win32{
-	MLBUILD = C:/tmp/MLDemos/$$NAME
-    CONFIG += WIN32
+	CONFIG += opencv22
+#	CONFIG += opencv21
+	OPENCV_VER = 231
 }else{
-    MLBUILD = /tmp/MLDemos/$$NAME
+#	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+    CONFIG += opencv22
+#	CONFIG += opencv21
 }
 
-# choices are opencv22 or opencv21
-CONFIG += opencv22
-
-CONFIG(opencv22)|CONFIG(opencv21){
-	message("You have selected to use the OpenCV library, if you do not have/desire it, please modify MLDemos_variables.pri")
-}
-
-CONFIG(boost){
-	message("You have selected to use the Boost headers library, if you do not have/desire it, please modify MLDemos_variables.pri")
-	DEFINES += WITHBOOST
-}
+# Boost
+	CONFIG += boost
 
 ############################################
 # PATHS for the BOOST and OPENCV libraries #
 ############################################
-macx|unix{
-CONFIG(boost):BOOST = /usr/local/boost_1_47_0
-}else{
-CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
+# Give here the library and include paths if they are non-standard
+# (like /usr/local/[lib|include] for instance).
+# For windows, please specifiy it. For linux (macosx?) the libraries
+# are autodetected provided you have installed using your package
+# manager
+
+win32{
+	CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
+	CONFIG(opencv22|opencv21):OPENCV = C:/DEV/OpenCV2.3-GCC
+}else:macx{
+    CONFIG(boost):BOOST = /usr/local/boost_1_47_0
+    CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
 }
 
-# opencv includes
-win32:CONFIG(opencv22){
-message("please adjust the include and lib paths to fit your system")
-INCLUDEPATH += . "C:/DEV/OpenCV2.3-GCC/include/"
-LIBS += -L"C:/DEV/OpenCV2.3-GCC/lib/"
-#        "C:/OpenCV2.2/include/"
-#LIBS += -L"C:/OpenCV2.2/lib/"
-LIBS += -lopencv_core230 \
-        -lopencv_features2d230 \
-        -lopencv_highgui230 \
-        -lopencv_imgproc230 \
-        -lopencv_legacy230 \
-        -lopencv_ml230
-} else:CONFIG(opencv22) {
-    INCLUDEPATH += /usr/local/include/
-    LIBS += -L/usr/local/lib
-    DEFINES += OPENCV22
-    message("using opencv22 or later")
-    LIBS += \
-        -lopencv_core \
-        -lopencv_features2d \
-        -lopencv_highgui \
-        -lopencv_imgproc \
-        -lopencv_legacy \
-        -lopencv_ml
-} else:CONFIG(opencv21) {
-    INCLUDEPATH += /usr/local/include/
-    LIBS += -L/usr/local/lib
-    DEFINES += OPENCV21
-    message("using opencv21")
-    LIBS += \
-        -lcv \
-        -lcxcore \
-        -lcvaux \
-        -lml \
-        -lhighgui
-}
+#	INCLUDEPATH +=	/usr/include/qt4 \
+#			/usr/include/qt4/QtCore \
+#			/usr/include/qt4/QtGui \
+#			/usr/include/qt4/QtSvg \
+#			/usr/include/qt4/QtOpenGL
+#	LIBS += -L/usr/local/lib
+
 
 # PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP
+
+##########################
+# Autoconfiguration part #
+##########################
+
+win32{
+	DEFINES += WIN32
+	CONFIG += WIN32
+}unix{
+	macx:DEFINES += MACX
+	CONFIG += link_pkgconfig
+}
+
+# OPENCV
+win32:CONFIG(opencv22){
+	INCLUDEPATH += . "$$OPENCV/include/"
+	LIBS += -L"$$OPENCV/lib/"
+	LIBS += -lopencv_core$$OPENCV_VER \
+            -lopencv_features2d$$OPENCV_VER \
+            -lopencv_highgui$$OPENCV_VER \
+            -lopencv_imgproc$$OPENCV_VER \
+            -lopencv_legacy$$OPENCV_VER \
+            -lopencv_ml$$OPENCV_VER
+}
+
+
+macx{
+    CONFIG(opencv22){
+        DEFINES += OPENCV22
+        message("Using opencv22 or later")
+        LIBS += -lopencv_core \
+                -lopencv_features2d \
+                -lopencv_highgui \
+                -lopencv_imgproc \
+                -lopencv_legacy \
+                -lopencv_ml
+
+    }
+    CONFIG(opencv21) {
+        DEFINES += OPENCV21
+        message("Using opencv21")
+        LIBS += -lcv \
+                -lcxcore \
+                -lcvaux \
+                -lml \
+                -lhighgui
+    }
+}else:unix{
+# some issues between qmake and pkgconfig
+# invoking pkg-config manually instead
+    CONFIG(opencv22){
+        PKGCONFIG += opencv
+        DEFINES += OPENCV22
+        message("Using opencv22 or later")
+        LIBS += $$system(pkg-config --libs opencv)
+    }
+    CONFIG(opencv21) {
+	PKGCONFIG += opencv
+	DEFINES += OPENCV21
+        message("Using opencv21")
+        LIBS += $$system(pkg-config --libs opencv)
+    }
+}
+
+# BOOST
+CONFIG(boost){
+    DEFINES += WITHBOOST
+    message("Using boost libraries")
+    macx{
+        INCLUDEPATH += "$$BOOST"
+    }else:unix{
+        PKGCONFIG += boost
+    }else:win32{
+        INCLUDEPATH += "$$BOOST/include"
+    }
+}
+
+# QT
+unix{
+#	PKGCONFIG = QtCore QtGui QtSvg QtOpenGL
+}
+
+
+###############
+# Misc. stuff #
+###############
 
 mainApp|coreLib{
 }else{
@@ -86,25 +156,24 @@ CONFIG(debug, debug|release){
 }else{
 	message("release mode")
 }
-macx:DEFINES += MACX
-win32:DEFINES += WIN32
+
 win32{
 	CONFIG(Debug, Debug|Release){
-		MOC_DIR = $${MLBUILD}/Debug
-		UI_DIR = $${MLBUILD}/Debug
-		RCC_DIR = $${MLBUILD}/Debug
-		OBJECTS_DIR = $${MLBUILD}/Debug
+        MOC_DIR = $${MLBUILD}/Debug
+        UI_DIR = $${MLBUILD}/Debug
+        RCC_DIR = $${MLBUILD}/Debug
+        OBJECTS_DIR = $${MLBUILD}/Debug
 	}else{
-		MOC_DIR = $${MLBUILD}/Release
-		UI_DIR = $${MLBUILD}/Release
-		RCC_DIR = $${MLBUILD}/Release
-		OBJECTS_DIR = $${MLBUILD}/Release
+        MOC_DIR = $${MLBUILD}/Release
+        UI_DIR = $${MLBUILD}/Release
+        RCC_DIR = $${MLBUILD}/Release
+        OBJECTS_DIR = $${MLBUILD}/Release
 	}
 }else{
-	MOC_DIR = $${MLBUILD}/build
-	UI_DIR = $${MLBUILD}/build
-	RCC_DIR = $${MLBUILD}/build
-	OBJECTS_DIR = $${MLBUILD}/build
+    MOC_DIR = $${MLBUILD}
+    UI_DIR = $${MLBUILD}
+    RCC_DIR = $${MLBUILD}
+    OBJECTS_DIR = $${MLBUILD}
 }
 
 DEPENDPATH += . \
@@ -116,15 +185,6 @@ INCLUDEPATH += . \
 		$${MLPATH}/MLDemos \
 		$${MLPATH}/_3rdParty
 
-unix{
-INCLUDEPATH += /usr/include/qt4 \
-	/usr/include/qt4/QtCore \
-	/usr/include/qt4/QtGui \
-	/usr/include/qt4/QtSvg \
-	/usr/include/qt4/QtOpenGL
-LIBS += -L/usr/local/lib
-}
-
 CONFIG(coreLib){
 }else{
 	LIBS += -L$$MLPATH/Core -lCore
@@ -134,7 +194,7 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ################################
 # Turn the bloody warnings off #
 ################################
-macx|unix {
+win32-g++|macx|unix {
 	QMAKE_CXXFLAGS_WARN_ON = ""
 	QMAKE_CXXFLAGS += -Wno-all
 	QMAKE_CXXFLAGS += -Wno-endif-labels
@@ -144,7 +204,7 @@ macx|unix {
 	QMAKE_CXXFLAGS += -Wtrigraphs
 	QMAKE_CXXFLAGS += -Wreturn-type
 	#QMAKE_CXXFLAGS += -Wnon-virtual-dtor
-	QMAKE_CXXFLAGS += -Woverloaded-virtual
+    #QMAKE_CXXFLAGS += -Woverloaded-virtual
 	#QMAKE_CXXFLAGS += -Wunused-variable
 	#QMAKE_CXXFLAGS += -Wunused-value
 	QMAKE_CXXFLAGS += -Wunknown-pragmas

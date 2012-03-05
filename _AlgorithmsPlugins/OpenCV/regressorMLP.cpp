@@ -134,7 +134,7 @@ void RegressorMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, 
 }
 
 
-char *RegressorMLP::GetInfoString()
+const char *RegressorMLP::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Multi-Layer Perceptron\n");

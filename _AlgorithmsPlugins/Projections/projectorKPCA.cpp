@@ -23,10 +23,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-ProjectorKPCA::ProjectorKPCA()
-    : pca(0)
+ProjectorKPCA::ProjectorKPCA(int targetDims)
+    : pca(0), targetDims(targetDims)
 {}
 
+ProjectorKPCA::~ProjectorKPCA()
+{
+    DEL(pca);
+}
 
 std::vector<fvec> ProjectorKPCA::Project(std::vector<fvec> samples)
 {
@@ -37,13 +41,13 @@ std::vector<fvec> ProjectorKPCA::Project(std::vector<fvec> samples)
     FOR(i, samples.size()) samples[i] -= mean;
 
     // we dump the data in a matrix
-    MatrixXd data(samples[0].size(), samples.size());
+    MatrixXd data(dim, samples.size());
     FOR(i, samples.size())
     {
         FOR(d, dim) data(d,i) = samples[i][d];
     }
 
-    MatrixXd projections = pca->project(data, dim);
+    MatrixXd projections = pca->project(data, targetDims);
     projected.clear();
     projected.resize(projections.rows());
     fvec sample;
@@ -56,13 +60,17 @@ std::vector<fvec> ProjectorKPCA::Project(std::vector<fvec> samples)
         }
         projected[i] = sample;
     }
-    fvec diffValues = maxValues - minValues;
-    // we renormalize the results in a 0-1 space
-    FOR(i, projected.size())
+
+    if(maxValues.size())
     {
-        FOR(d, projected[0].size())
+        fvec diffValues = maxValues - minValues;
+        // we renormalize the results in a 0-1 space
+        FOR(i, projected.size())
         {
-            projected[i][d] = ((projected[i][d]-minValues[d])/diffValues[d])*0.9f + 0.05f;
+            FOR(d, projected[i].size())
+            {
+                projected[i][d] = ((projected[i][d]-minValues[d])/diffValues[d])*0.9f + 0.05f;
+            }
         }
     }
 
@@ -77,6 +85,7 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     source = samples;
     dim = samples[0].size();
     if(!dim) return;
+    if(targetDims > samples.size()) targetDims = samples.size();
 
     this->labels = labels;
     int count = samples.size();
@@ -99,9 +108,24 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     pca = new PCA();
     pca->kernelType = kernelType;
     pca->degree = kernelDegree;
-    pca->gamma = kernelGamma;
+    pca->gamma = 1.f/kernelGamma;
 
-    pca->kernel_pca(data, dim);
+    pca->kernel_pca(data, targetDims);
+
+    projected = Project(source);
+    minValues.clear();
+    maxValues.clear();
+    minValues.resize(projected.size(), FLT_MAX);
+    maxValues.resize(projected.size(), -FLT_MAX);
+    FOR(i, projected.size())
+    {
+        FOR(j, projected[i].size())
+        {
+            if(projected[i][j] < minValues[j]) minValues[j] = projected[i][j];
+            if(projected[i][j] > maxValues[j]) maxValues[j] = projected[i][j];
+        }
+    }
+    /*
     MatrixXd projections = pca->get();
     projected.resize(projections.rows());
     fvec sample;
@@ -114,13 +138,17 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     {
         FOR(d, projections.cols())
         {
-            sample[d] = projections(i,d) + 0.5; // we recenter the data
+            sample[d] = projections(i,d);
+            //sample[d] = projections(i,d) + 0.5; // we recenter the data
             if(sample[d] < minValues[d]) minValues[d] = sample[d];
             if(sample[d] > maxValues[d]) maxValues[d] = sample[d];
         }
         projected[i] = sample;
     }
+    */
+
     fvec diffValues = maxValues - minValues;
+    FOR(d, diffValues.size()) if(diffValues[d] == 0) diffValues[d] = 1.f;
     // we renormalize the results in a -0.5 - 0.5 space
     FOR(i, projected.size())
     {
@@ -149,7 +177,7 @@ void ProjectorKPCA::SetParams(int kernelType, int kernelDegree, float kernelGamm
     this->kernelGamma = kernelGamma;
 }
 
-char *ProjectorKPCA::GetInfoString()
+const char *ProjectorKPCA::GetInfoString()
 {
     char *text = new char[1024];
 

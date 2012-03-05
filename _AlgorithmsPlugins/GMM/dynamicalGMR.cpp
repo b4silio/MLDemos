@@ -107,7 +107,7 @@ void DynamicalGMR::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 	this->initType = initType;
 }
 
-char *DynamicalGMR::GetInfoString()
+const char *DynamicalGMR::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "GMR\n");

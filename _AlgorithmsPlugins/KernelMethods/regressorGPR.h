@@ -39,14 +39,14 @@ private:
 public:
 	SOGP *sogp;
 	bool bShowBasis;
-	RegressorGPR() : sogp(0), dim(1), capacity(0), kernelType(kerRBF), bTrained(false), param1(1), param2(0.1), bShowBasis(false), degree(1){type = REGR_GPR;};
+    RegressorGPR() : sogp(0), dim(1), capacity(0), kernelType(kerRBF), bTrained(false), param1(1), param2(0.1), bShowBasis(false), degree(1){type = REGR_GPR;}
 	void Train(std::vector<fvec> inputs, ivec labels);
 	fvec Test(const fvec &sample);
 	fVec Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
-	void SetParams(double p1, double p2, int capacity, int kType, int d=1){param1=p1; param2=p2; kernelType=kType; degree = d;this->capacity=capacity;};
-	SOGP *GetModel(){return sogp;};
+    void SetParams(double p1, double p2, int capacity, int kType, int d=1){param1=p1; param2=p2; kernelType=kType; degree = d;this->capacity=capacity;}
+    SOGP *GetModel(){return sogp;}
 	void Clear();
 	fvec GetBasisVector(int index);
 	int GetBasisCount();

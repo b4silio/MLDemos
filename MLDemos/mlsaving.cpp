@@ -65,7 +65,8 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("samplesCheck", displayOptions->samplesCheck->isChecked());
 	settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
 	settings.setValue("spinZoom", displayOptions->spinZoom->value());
-	settings.endGroup();
+    settings.setValue("legendCheck", displayOptions->legendCheck->isChecked());
+    settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
 	settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
@@ -139,6 +140,7 @@ void MLDemos::SaveLayoutOptions()
 
     settings.beginGroup("projectOptions");
     settings.setValue("tab", optionsProject->tabWidget->currentIndex());
+    settings.setValue("fitCheck", optionsProject->fitCheck->isChecked());
     settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -233,7 +235,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("samplesCheck")) displayOptions->samplesCheck->setChecked(settings.value("samplesCheck").toBool());
 	if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
 	if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
-	//if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
+    if(settings.contains("legendCheck")) displayOptions->legendCheck->setChecked(settings.value("legendCheck").toBool());
+    //if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
 	//if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
 	settings.endGroup();
 
@@ -308,6 +311,7 @@ void MLDemos::LoadLayoutOptions()
 
     settings.beginGroup("projectOptions");
     if(settings.contains("tab")) optionsProject->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("fitCheck")) optionsProject->fitCheck->setChecked(settings.value("fitCheck").toBool());
     settings.endGroup();
 
 	settings.beginGroup("statsOptions");
@@ -456,6 +460,7 @@ void MLDemos::SaveParams( QString filename )
         int tab = optionsProject->tabWidget->currentIndex();
         sprintf(groupName,"projectOptions");
         out << groupName << ":" << "tab" << " " << optionsProject->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "fitCheck" << " " << optionsProject->fitCheck->isChecked() << "\n";
         if(tab < projectors.size() && projectors[tab])
         {
             projectors[tab]->SaveParams(out);
@@ -579,6 +584,7 @@ void MLDemos::LoadParams( QString filename )
             bProj = true;
             algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabProj);
             if(line.endsWith("tab")) optionsProject->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("fitCheck")) optionsProject->fitCheck->setChecked((int)value);
             if(tab < projectors.size() && projectors[tab]) projectors[tab]->LoadParams(line,value);
         }
 	}

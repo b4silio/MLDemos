@@ -33,12 +33,12 @@ private:
 	u32 initType;
 	float *data;
 public:
-	DynamicalGMR() : gmm(0), data(0), nbClusters(2), covarianceType(2), initType(1){type = DYN_GMR;};
+    DynamicalGMR() : gmm(0), data(0), nbClusters(2), covarianceType(2), initType(1){type = DYN_GMR;}
 	void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
 	fVec Test( const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
 };

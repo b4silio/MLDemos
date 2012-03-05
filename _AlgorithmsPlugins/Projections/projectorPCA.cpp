@@ -48,10 +48,18 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
     Mat& eigVal = pca.eigenvalues;
     int dim = eigVal.rows;
     float maxEigVal = 0;
+#ifdef OPENCV21 // legacy
+    FOR(i, dim) if(eigVal.at<float>(i,1) == eigVal.at<float>(i,1)) maxEigVal += eigVal.at<float>(i,1);
+#else // OPENCV22+
     FOR(i, dim) if(eigVal.at<float>(i) == eigVal.at<float>(i)) maxEigVal += eigVal.at<float>(i);
+#endif
     maxEigVal = max(1.f,maxEigVal);
     float maxAccumulator = 0;
+#ifdef OPENCV21 // legacy
+    FOR(i, dim) if(eigVal.at<float>(i,1) == eigVal.at<float>(i,1)) maxAccumulator += eigVal.at<float>(i,1) / maxEigVal;
+#else // OPENCV22+
     FOR(i, dim) if(eigVal.at<float>(i) == eigVal.at<float>(i)) maxAccumulator += eigVal.at<float>(i) / maxEigVal;
+#endif
     float accumulator = 0;
 
     painter.setPen(Qt::black);
@@ -62,7 +70,11 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
     painter.setPen(Qt::red);
     FOR(i, dim)
     {
-        float eigval = eigVal.at<float>(i);
+#ifdef OPENCV21 // legacy
+        float eigval = eigVal.at<float>(i,1);
+#else // OPENCV22+
+	float eigval = eigVal.at<float>(i);
+#endif
         if(eigval == eigval)
         {
             accumulator += eigval / maxEigVal;
@@ -115,7 +127,11 @@ void ProjectorPCA::TrainPCA(std::vector<fvec> samples, int pcaCount)
     int nanCnt = 0;
     FOR(d, pcaCount)
     {
-        if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
+#ifdef OPENCV21 // legacy
+      if(bNan[d] = pca.eigenvalues.at<float>(d,1) != pca.eigenvalues.at<float>(d,1)) nanCnt++;
+#else // OPENCV22+
+      if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
+#endif
     }
     FOR(i, count)
     {
@@ -165,8 +181,24 @@ fvec ProjectorPCA::GetEigenValues()
     fvec values(dim);
     FOR(i, dim)
     {
-        float eigval = pca.eigenvalues.at<float>(i);
+      float eigval = pca.eigenvalues.at<float>(i,1);
         values[i] = eigval;
     }
     return values;
+}
+
+vector<fvec> ProjectorPCA::GetEigenVectors()
+{
+    int cols = pca.eigenvectors.cols;
+    int rows = pca.eigenvectors.rows;
+    vector<fvec> eigenVectors(rows);
+    FOR(i, rows)
+    {
+        eigenVectors[i].resize(cols);
+        FOR(j, cols)
+        {
+            eigenVectors[i][j] = pca.eigenvectors.at<float>(i, j);
+        }
+    }
+    return eigenVectors;
 }

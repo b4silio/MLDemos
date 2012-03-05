@@ -29,7 +29,7 @@ ClustererKKM::~ClustererKKM()
     DEL(rbfKmeans);
 }
 
-char *ClustererKKM::GetInfoString()
+const char *ClustererKKM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Kernel K-Means\n");

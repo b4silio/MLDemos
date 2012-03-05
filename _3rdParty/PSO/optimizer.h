@@ -30,6 +30,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <vector>
 
 #include <Eigen/Core>
 
@@ -49,7 +50,7 @@
 using namespace Eigen;
 using namespace std;
 
-static const double hugeCstrVio() {return 1e10; };	//Constraints violation penalty
+static const double hugeCstrVio() {return 1e10; }	//Constraints violation penalty
 
 class Optimizer {
 public:
@@ -89,7 +90,8 @@ public:
 
 	static bool loadFirstGuessSolutionFromFile(int,string,Eigen::MatrixXd&);
 
-	int modelEvaluationsCount;
+    std::vector<std::pair<int,int> > evaluationHistory;
+    int modelEvaluationsCount;
     Eigen::VectorXd (*m_model)(Eigen::VectorXd& x);
 	Eigen::VectorXd EvaluateModel(Eigen::VectorXd& x);
 	void SetData(float *data, int w, int h);

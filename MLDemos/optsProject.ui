@@ -129,6 +129,30 @@
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QCheckBox" name="fitCheck">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>20</y>
+     <width>87</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Fit window to data after Projecting or Reverting the data</string>
+   </property>
+   <property name="text">
+    <string>Auto-Fit</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

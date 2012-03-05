@@ -116,6 +116,7 @@ void DataImporter::Parse(QString filename)
         }
     }
     gui->classColumnSpin->setRange(1,rawData[0].size());
+    gui->classColumnSpin->setValue(rawData[0].size());
 }
 
 void DataImporter::FetchResults(std::vector<fvec> results)

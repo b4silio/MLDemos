@@ -36,7 +36,7 @@ public:
 	~ClassifierMLP();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test( const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 	void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta);
 };
 

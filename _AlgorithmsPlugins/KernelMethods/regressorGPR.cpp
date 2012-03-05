@@ -131,7 +131,7 @@ fvec RegressorGPR::GetBasisVector( int index )
 	return res;
 }
 
-char *RegressorGPR::GetInfoString()
+const char *RegressorGPR::GetInfoString()
 {
 	char *text = new char[2048];
 	sprintf(text, "Sparse Optimized Gaussian Processes\n");

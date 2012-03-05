@@ -66,6 +66,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionExportOutput, SIGNAL(triggered()), this, SLOT(ExportOutput()));
     connect(ui.actionExportAnimation, SIGNAL(triggered()), this, SLOT(ExportAnimation()));
     connect(ui.actionExport_SVG, SIGNAL(triggered()), this, SLOT(ExportSVG()));
+    ui.actionImportData->setShortcut(QKeySequence(tr("Ctrl+I")));
 
     initDialogs();
     initToolBars();
@@ -302,6 +303,7 @@ void MLDemos::initDialogs()
     connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
+    connect(displayOptions->legendCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
 
     algorithmOptions = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
@@ -348,13 +350,11 @@ void MLDemos::initDialogs()
     connect(optionsClassify->classifyButton, SIGNAL(clicked()), this, SLOT(Classify()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), this, SLOT(ShowRoc()));
-    connect(optionsClassify->crossValidButton, SIGNAL(clicked()), this, SLOT(ClassifyCross()));
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsClassify->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
 
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
-    connect(optionsRegress->crossValidButton, SIGNAL(clicked()), this, SLOT(RegressionCross()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     //connect(optionsRegress->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
@@ -819,7 +819,7 @@ void MLDemos::AlgoChanged()
         drawToolbar->trajectoryButton->setChecked(true);
         DrawTrajectory();
     }
-    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible())
+    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible() || algorithmOptions->tabProj->isVisible())
     {
         drawToolbar->sprayButton->setChecked(true);
         DrawSpray();
@@ -997,7 +997,6 @@ void MLDemos::HideStatsDialog()
     actionShowStats->setChecked(false);
 }
 
-
 void MLDemos::Clear()
 {
     drawTimer->Stop();
@@ -1014,6 +1013,7 @@ void MLDemos::Clear()
     canvas->maps.model = QPixmap();
     canvas->maps.info = QPixmap();
     canvas->liveTrajectory.clear();
+    canvas->sampleColors.clear();
     canvas->repaint();
     UpdateInfo();
 }
@@ -1093,6 +1093,19 @@ void MLDemos::ClearData()
     ResetPositiveClass();
     ManualSelectionUpdated();
     UpdateInfo();
+}
+
+
+void MLDemos::DrawNone()
+{
+    drawToolbar->singleButton->setChecked(false);
+    drawToolbar->sprayButton->setChecked(false);
+    drawToolbar->eraseButton->setChecked(false);
+    drawToolbar->ellipseButton->setChecked(false);
+    drawToolbar->lineButton->setChecked(false);
+    drawToolbar->trajectoryButton->setChecked(false);
+    drawToolbar->obstacleButton->setChecked(false);
+    drawToolbar->paintButton->setChecked(false);
 }
 
 void MLDemos::DrawSingle()
@@ -1245,6 +1258,7 @@ void MLDemos::DisplayOptionChanged()
     canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    canvas->bDisplayLegend = displayOptions->legendCheck->isChecked();
     {
         int xIndex = ui.canvasX1Spin->value()-1;
         int yIndex = ui.canvasX2Spin->value()-1;
@@ -1929,32 +1943,35 @@ void MLDemos::CanvasMoveEvent()
     UpdateLearnedModel();
 
     QMutexLocker lock(&mutex);
-    if(classifier)
+    if(canvas->canvasType)
     {
-        classifiers[tabUsedForTraining]->Draw(canvas, classifier);
-        if(classifier->UsesDrawTimer())
+        if(classifier)
         {
+            classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            if(classifier->UsesDrawTimer())
+            {
+                drawTimer->start(QThread::NormalPriority);
+            }
+        }
+        else if(regressor)
+        {
+            regressors[tabUsedForTraining]->Draw(canvas, regressor);
+            //drawTimer->start(QThread::NormalPriority);
+        }
+        else if(clusterer)
+        {
+            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
             drawTimer->start(QThread::NormalPriority);
         }
-    }
-    else if(regressor)
-    {
-        regressors[tabUsedForTraining]->Draw(canvas, regressor);
-        //drawTimer->start(QThread::NormalPriority);
-    }
-    else if(clusterer)
-    {
-        clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-        drawTimer->start(QThread::NormalPriority);
-    }
-    else if(dynamical)
-    {
-        dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
-        if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
-    }
-    else if(projector)
-    {
-        projectors[tabUsedForTraining]->Draw(canvas, projector);
+        else if(dynamical)
+        {
+            dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+            if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+        }
+        else if(projector)
+        {
+            projectors[tabUsedForTraining]->Draw(canvas, projector);
+        }
     }
     canvas->repaint();
 }
@@ -2494,12 +2511,10 @@ void MLDemos::ToClipboard()
         ui.statusBar->showMessage("WARNING: Nothing to copy to clipboard");
         return;
     }
-
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setImage(screenshot.toImage());
     clipboard->setPixmap(screenshot);
     ui.statusBar->showMessage("Image copied successfully to clipboard");
-
 }
 
 /************************************/
@@ -2605,13 +2620,14 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     ResetPositiveClass();
     ManualSelectionUpdated();
     CanvasOptionsChanged();
+    DrawNone();
     canvas->ResetSamples();
     canvas->repaint();
 }
 
 void MLDemos::SetDimensionNames(QStringList headers)
 {
-    qDebug() << "setting dimension names" << headers;
+    //qDebug() << "setting dimension names" << headers;
     canvas->dimNames = headers;
     ResetPositiveClass();
     CanvasOptionsChanged();

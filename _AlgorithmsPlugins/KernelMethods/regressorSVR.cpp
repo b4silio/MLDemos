@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-char *RegressorSVR::GetInfoString()
+const char *RegressorSVR::GetInfoString()
 {
     if(!svm) return NULL;
     char *text = new char[255];

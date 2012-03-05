@@ -145,7 +145,7 @@ float ClassifierLinear::Test(const fvec &sample )
 	return response;
 }
 
-char *ClassifierLinear::GetInfoString()
+const char *ClassifierLinear::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "");

@@ -45,7 +45,7 @@ public:
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 	void SetParams(float epsilon, int kernelType, float kernelParam, int kernelDegree)
         {this->epsilon=epsilon;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;}
 	std::vector<fvec> GetSVs();

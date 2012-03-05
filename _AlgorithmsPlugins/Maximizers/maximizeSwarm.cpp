@@ -76,6 +76,17 @@ void MaximizeSwarm::Draw(QPainter &painter)
         }
     }
 
+    // draw all the particles visited in the past
+    FOR(i, pso->evaluationHistory.size())
+    {
+        pair<int,int> sample = pso->evaluationHistory[i];
+        QPointF point(sample.first, sample.second);
+        int radius = 3;
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(Qt::black);
+        painter.drawEllipse(point, radius, radius);
+    }
+
     painter.setPen(QPen(Qt::black, 1.5));
     FOR(i, history.size()-1 )
     {
@@ -87,17 +98,6 @@ void MaximizeSwarm::Draw(QPainter &painter)
         painter.drawEllipse(point, 4, 4);
     }
 
-    /*
- // draw the current particles
- FOR(i, particles.size())
- {
-  fvec sample = particles[i];
-  QPointF point(sample[0]*w, sample[1]*h);
-  int radius = 2 + weights[i]*5;
-  painter.setBrush(Qt::green);
-  painter.drawEllipse(point, radius, radius);
- }
- */
     // we draw the current maximum
     QPointF point(history[history.size()-1][0]*w, history[history.size()-1][1]*h);
     float val = 255*(1-historyValue[history.size()-1]);
@@ -106,6 +106,7 @@ void MaximizeSwarm::Draw(QPainter &painter)
     painter.drawEllipse(point, 5, 5);
 }
 
+/*
 //SINGLE OBJECTIVE OPTIMIZATION PROBLEMS
 Eigen::VectorXd rastragin(Eigen::VectorXd& x);
 Eigen::VectorXd schwefel(Eigen::VectorXd& x);
@@ -113,6 +114,7 @@ Eigen::VectorXd griewangk(Eigen::VectorXd& x);
 Eigen::VectorXd griewangk_constrained(Eigen::VectorXd& x);
 Eigen::VectorXd f_1disolated(Eigen::VectorXd& x);
 Eigen::VectorXd f_1disolated2(Eigen::VectorXd& x);
+*/
 
 void MaximizeSwarm::Train(float *dataMap, fVec size, fvec startingPoint)
 {
@@ -183,7 +185,7 @@ fvec MaximizeSwarm::Test(const fVec &sample)
     return Test((fvec)sample);
 }
 
-char *MaximizeSwarm::GetInfoString()
+const char *MaximizeSwarm::GetInfoString()
 {
     char *text = new char[1024];
     sprintf(text, "Particles Swarm Optimization\n");

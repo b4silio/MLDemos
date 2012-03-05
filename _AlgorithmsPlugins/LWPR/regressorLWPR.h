@@ -36,10 +36,10 @@ public:
 	RegressorLWPR();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(double initD, double initAlpha, double wGen);
-	LWPR_Object *GetModel(){return model;};
+    LWPR_Object *GetModel(){return model;}
 };
 
 #endif // _REGRESSOR_LWPR_H_

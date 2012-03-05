@@ -36,7 +36,7 @@ public:
 	~ClassifierBoost();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 	void SetParams(u32 weakCount, int weakType);
 };
 

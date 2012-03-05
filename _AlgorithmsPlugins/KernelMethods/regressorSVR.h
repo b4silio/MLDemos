@@ -36,10 +36,10 @@ public:
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
 	fVec Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
-	svm_model *GetModel(){return svm;};
+    svm_model *GetModel(){return svm;}
 };
 
 #endif // _REGRESSOR_SVR_H_

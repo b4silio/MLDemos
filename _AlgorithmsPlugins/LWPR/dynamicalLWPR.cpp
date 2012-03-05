@@ -119,7 +119,7 @@ void DynamicalLWPR::SetParams(double initD, double initAlpha, double wGen)
 	this->wGen = wGen;
 }
 
-char *DynamicalLWPR::GetInfoString()
+const char *DynamicalLWPR::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Locally Weighted Projection Regression\n");

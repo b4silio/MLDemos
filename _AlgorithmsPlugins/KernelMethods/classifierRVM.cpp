@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-char *ClassifierRVM::GetInfoString()
+const char *ClassifierRVM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Relevance Vector Machine\n");

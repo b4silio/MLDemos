@@ -5,7 +5,6 @@
 #include <mymaths.h>
 #include <projector.h>
 #include <QLabel>
-#define OPENCV22
 #include "basicOpenCV.h"
 
 using namespace std;
@@ -20,10 +19,11 @@ public:
     ProjectorPCA();
     void DrawEigenvals(QPainter &painter);
     fvec GetEigenValues();
+    std::vector<fvec> GetEigenVectors();
 
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
-    char *GetInfoString(){return "Principal Component Analysis";}
+    const char *GetInfoString(){return "Principal Component Analysis";}
 
 };
 

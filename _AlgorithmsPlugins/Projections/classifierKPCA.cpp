@@ -161,7 +161,7 @@ void ClassifierKPCA::SetParams(int kernelType, int kernelDegree, float kernelGam
 	this->kernelGamma = kernelGamma;
 }
 
-char *ClassifierKPCA::GetInfoString()
+const char *ClassifierKPCA::GetInfoString()
 {
 	char *text = new char[1024];
 	/*

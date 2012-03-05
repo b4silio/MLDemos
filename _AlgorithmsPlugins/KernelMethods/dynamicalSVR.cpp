@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-char *DynamicalSVR::GetInfoString()
+const char *DynamicalSVR::GetInfoString()
 {
 	if(!svm1 || !svm2) return NULL;
 	char *text = new char[1024];

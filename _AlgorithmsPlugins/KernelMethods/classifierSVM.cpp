@@ -212,7 +212,7 @@ fvec ClassifierSVM::TestMulti(const fvec &sample)
     return resp;
 }
 
-char *ClassifierSVM::GetInfoString()
+const char *ClassifierSVM::GetInfoString()
 {
     if(!svm) return NULL;
     char *text = new char[1024];
