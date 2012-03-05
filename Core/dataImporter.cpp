@@ -188,4 +188,6 @@ void DataImporter::SendData()
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
+    emit(SetClassNames(classNames));
+
 }

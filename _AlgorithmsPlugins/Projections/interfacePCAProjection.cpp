@@ -52,8 +52,7 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
             accumulator += eigval / maxEigVal;
         }
         else eigval = 0;
-        params->eigenList->addItem(QString("%1: %2 %3%%").arg(i).arg(eigval, 0, 'f', 2).arg(eigval/maxEigVal*100, 0, 'f', 1));
-        //params->eigenList->addItem(QString("%1: %2 %3%%").arg(i).arg(eigval, 0, 'f', 2).arg(accumulator*100, 0, 'f', 1));
+        params->eigenList->addItem(QString("%1: %2 %3%%").arg(i+1).arg(eigval, 0, 'f', 2).arg(eigval/maxEigVal*100, 0, 'f', 1));
     }
     vector<fvec> eigenVec = pca->GetEigenVectors();
     int dim = eigenVec.size();
@@ -82,7 +81,10 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
         }
     }
     QStringList labels;
-    FOR(i, dim) labels << QString("e%1").arg(i+1);
+    FOR(i, dim)
+    {
+        labels << QString("e%1: %2").arg(i+1).arg(values[i], 0, 'f', 3);
+    }
     eigenTable->setHorizontalHeaderLabels(labels);
 }
 

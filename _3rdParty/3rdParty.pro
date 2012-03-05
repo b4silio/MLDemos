@@ -8,6 +8,13 @@ CONFIG += mainApp static
 
 include($$MLPATH/MLDemos_variables.pri)
 
+# disable some warnings for 3rd party libraries (not our problem if they do funky stuff in their libraries)
+win32-g++|macx|unix {
+    QMAKE_CXXFLAGS -= -Wnon-virtual-dtor
+    QMAKE_CXXFLAGS -= -Wunused-value
+}
+
+
 win32{
 	DESTDIR = ../_3rdParty
 }

@@ -662,7 +662,8 @@ void Canvas::DrawLegend(QPainter &painter)
             int label = it->first;
             QPointF point(x, y);
             drawSample(painter, point, 10, label);
-            painter.drawText(QRect(x + 4, point.y()-10, 50, 20), Qt::AlignLeft + Qt::AlignCenter, QString("Class %1").arg(label));
+            QString className = GetClassName(label);
+            painter.drawText(QRect(x + 4, point.y()-10, 50, 20), Qt::AlignLeft + Qt::AlignCenter, className);
             y += 20;
         }
     }
@@ -1540,4 +1541,11 @@ void Canvas::PaintGradient(QPointF position)
     painter.setBrush(gradient);
     painter.setPen(Qt::NoPen);
     painter.drawRect(maps.reward.rect());
+}
+
+QString Canvas::GetClassName(int classNumber)
+{
+    QString className = QString("Class %1").arg(classNumber);
+    if(classNames.count(classNumber)) return classNames[classNumber];
+    return className;
 }

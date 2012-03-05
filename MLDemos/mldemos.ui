@@ -448,10 +448,13 @@
   </action>
   <action name="actionExportOutput">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Output Data</string>
+   </property>
+   <property name="toolTip">
+    <string>Export algorithm output for current samples</string>
    </property>
    <property name="statusTip">
     <string>Export algorithm output for current samples</string>

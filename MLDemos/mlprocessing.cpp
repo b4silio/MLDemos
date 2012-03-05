@@ -672,7 +672,8 @@ void MLDemos::ClusterOptimize()
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
 
-    int startCount=1, stopCount=11;
+    int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
+    if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
@@ -1011,12 +1012,6 @@ void MLDemos::ProjectReproject()
     sourceLabels = canvas->data->GetLabels();
     mutex.unlock();
     Project();
-}
-
-void MLDemos::ExportOutput()
-{
-    if(!classifier && !regressor && !clusterer && !dynamical && !maximizer) return;
-    // get a file
 }
 
 void MLDemos::ExportAnimation()
