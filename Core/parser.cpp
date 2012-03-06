@@ -291,7 +291,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     ivec labels(count);
     int dim = data[0].size();
     if(outputLabelColumn != -1) outputLabelColumn = min(dim-1, outputLabelColumn);
-
+    classNames.clear();
     vector< map<string,int> > labelMaps(dim);
     ivec labelCounters(dim,0);
     pair<map<string,int>::iterator,bool> ret;
@@ -328,6 +328,13 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         }
     }
 
+    if(labelMaps[outputLabelColumn].size())
+    {
+        for(map<string,int>::iterator it=labelMaps[outputLabelColumn].begin(); it!=labelMaps[outputLabelColumn].end(); it++)
+        {
+            classNames[it->second] = QString(it->first.c_str());
+        }
+    }
     if(outputLabelColumn == -1)
     {
         FOR(i, data.size())

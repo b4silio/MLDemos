@@ -44,6 +44,7 @@ public:
 	virtual Classifier *GetClassifier() = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
+    virtual ~ClassifierInterface(){}
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -95,6 +96,7 @@ public:
 	virtual Clusterer *GetClusterer() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
+    virtual ~ClustererInterface(){}
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -146,7 +148,7 @@ public:
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
 	virtual void DrawConfidence(Canvas *canvas, Regressor *regressor) = 0;
-
+    virtual ~RegressorInterface(){}
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -201,6 +203,7 @@ public:
 	virtual Dynamical *GetDynamical() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
+    virtual ~DynamicalInterface(){}
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -251,7 +254,8 @@ class AvoidanceInterface
 {
 public:
 	virtual ObstacleAvoidance *GetObstacleAvoidance() = 0;
-	virtual QString GetName() = 0;
+    virtual ~AvoidanceInterface(){}
+    virtual QString GetName() = 0;
 	virtual QString GetAlgoString() = 0;
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
@@ -267,6 +271,7 @@ class MaximizeInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Maximizer *GetMaximizer() = 0;
+    virtual ~MaximizeInterface(){}
 
 	// virtual functions to manage the GUI and I/O
 	virtual QString GetName() = 0;
@@ -287,6 +292,7 @@ public:
     virtual Projector *GetProjector() = 0;
     virtual void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
     virtual void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
+    virtual ~ProjectorInterface(){}
 
     // virtual functions to manage the GUI and I/O
     virtual QString GetName() = 0;
@@ -350,7 +356,7 @@ public:
     std::vector<MaximizeInterface *> GetMaximizers() {return maximizers;}
     std::vector<ProjectorInterface *> GetProjectors() {return projectors;}
 
-	~CollectionInterface()
+    virtual ~CollectionInterface()
 	{
 		FOR(i, classifiers.size()) if(classifiers[i]) delete classifiers[i];
 		FOR(i, clusterers.size()) if(clusterers[i]) delete clusterers[i];
@@ -364,6 +370,7 @@ public:
 class InputOutputInterface
 {
 public:
+    virtual ~InputOutputInterface(){}
 	// signatures for plugin slots and signals (SLOT() and SIGNAL() functions)
 	virtual const char* QueryClassifierSignal() = 0; // void QueryClassifier(std::vector<fvec> samples);
 	virtual const char* QueryRegressorSignal() = 0; // void QueryRegressor(std::vector<fvec> samples);

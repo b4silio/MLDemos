@@ -94,6 +94,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasMoveEvent();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -449,6 +450,7 @@ void MLDemos::initDialogs()
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
+    connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
 }
 
 void MLDemos::initPlugins()
@@ -2629,6 +2631,15 @@ void MLDemos::SetDimensionNames(QStringList headers)
 {
     //qDebug() << "setting dimension names" << headers;
     canvas->dimNames = headers;
+    ResetPositiveClass();
+    CanvasOptionsChanged();
+    canvas->ResetSamples();
+    canvas->repaint();
+}
+
+void MLDemos::SetClassNames(std::map<int,QString> classNames)
+{
+    canvas->classNames = classNames;
     ResetPositiveClass();
     CanvasOptionsChanged();
     canvas->ResetSamples();

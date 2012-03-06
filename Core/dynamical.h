@@ -43,7 +43,7 @@ public:
 	ObstacleAvoidance *avoid;
 
 	Dynamical(): type(DYN_NONE), count(100), dT(0.02f), avoid(0){}
-    ~Dynamical(){if(avoid) delete avoid;}
+    virtual ~Dynamical(){if(avoid) delete avoid;}
     std::vector< std::vector<fvec> > GetTrajectories(){return trajectories;}
     int Dim(){return dim;}
 

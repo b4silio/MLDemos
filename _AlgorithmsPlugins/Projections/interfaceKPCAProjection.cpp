@@ -16,13 +16,15 @@ KPCAProjection::KPCAProjection()
     contours = new Ui::ContourWidget();
     contours->setupUi(contourWidget);
     contourWidget->layout()->setSizeConstraint( QLayout::SetFixedSize );
-    contourWidget->setWindowTitle("Kernel Feature Projections");
+    contourWidget->setWindowTitle("Kernel Eigenvector Projections");
 
     connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
     connect(params->contourButton, SIGNAL(clicked()), this, SLOT(ShowContours()));
     connect(contours->dimSpin, SIGNAL(valueChanged(int)), this, SLOT(DrawContours(int)));
     connect(contours->displayCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ShowContours()));
     connect(contours->clipboardButton, SIGNAL(clicked()), this, SLOT(SaveScreenshot()));
+    connect(contours->spinX1, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
+    connect(contours->spinX2, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
 }
 
 void KPCAProjection::SaveScreenshot()
@@ -33,6 +35,12 @@ void KPCAProjection::SaveScreenshot()
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setImage(screenshot->toImage());
     clipboard->setPixmap(*screenshot);
+}
+
+void KPCAProjection::ContoursChanged()
+{
+    contourPixmaps.clear();
+    ShowContours();
 }
 
 void KPCAProjection::ShowContours()
@@ -88,6 +96,10 @@ void KPCAProjection::GetContoursPixmap(int index)
     float *values = new float[w*h];
     float vmin = FLT_MAX, vmax = -FLT_MAX;
     int dim = pca->sourcePoints.rows();
+
+    int xIndex = contours->spinX1->value()-1;
+    int yIndex = contours->spinX2->value()-1;
+
     VectorXd point(dim);
     FOR(d,dim) point(d) = 0;
     FOR(i, w)
@@ -208,6 +220,11 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     yIndex = canvas->yIndex;
     xmin=ymin=FLT_MAX;
     xmax=ymax=-FLT_MAX;
+    int dim = samples.size() ? samples[0].size() : 2;
+    contours->spinX1->setRange(1, dim);
+    contours->spinX2->setRange(1, dim);
+    if(canvas->xIndex < dim) contours->spinX1->setValue(xIndex+1);
+    if(canvas->yIndex < dim) contours->spinX2->setValue(yIndex+1);
 
     fvec mean;
     FOR(i, samples.size())

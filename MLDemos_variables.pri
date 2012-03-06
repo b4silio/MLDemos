@@ -197,18 +197,18 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 win32-g++|macx|unix {
 	QMAKE_CXXFLAGS_WARN_ON = ""
 	QMAKE_CXXFLAGS += -Wno-all
-	QMAKE_CXXFLAGS += -Wno-endif-labels
+    #QMAKE_CXXFLAGS += -Wno-endif-labels
 	QMAKE_CXXFLAGS += -Wno-unused-variable
 	QMAKE_CXXFLAGS += -Wno-unused-parameter
-	QMAKE_CXXFLAGS += -Wno-switch
+    #QMAKE_CXXFLAGS += -Wno-switch
 	QMAKE_CXXFLAGS += -Wtrigraphs
 	QMAKE_CXXFLAGS += -Wreturn-type
-	#QMAKE_CXXFLAGS += -Wnon-virtual-dtor
+    QMAKE_CXXFLAGS += -Wnon-virtual-dtor
     #QMAKE_CXXFLAGS += -Woverloaded-virtual
 	#QMAKE_CXXFLAGS += -Wunused-variable
-	#QMAKE_CXXFLAGS += -Wunused-value
+    QMAKE_CXXFLAGS += -Wunused-value
 	QMAKE_CXXFLAGS += -Wunknown-pragmas
 	QMAKE_CXXFLAGS += -Wno-shadow
-	QMAKE_CXXFLAGS += -Wno-deprecated-declarations
-	QMAKE_CXXFLAGS += -Wno-missing-braces
+    #QMAKE_CXXFLAGS += -Wno-deprecated-declarations
+    #QMAKE_CXXFLAGS += -Wno-missing-braces
 }

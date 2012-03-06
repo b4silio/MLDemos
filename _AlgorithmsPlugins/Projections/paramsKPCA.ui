@@ -158,6 +158,12 @@ RBF and Polynomial only</string>
      <property name="minimum">
       <number>2</number>
      </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="value">
+      <number>16</number>
+     </property>
     </widget>
    </item>
    <item row="0" column="2" colspan="2">
@@ -209,7 +215,7 @@ RBF and Polynomial only</string>
       </font>
      </property>
      <property name="text">
-      <string>Show Features Contours</string>
+      <string>Show Eigenvector Iso-Lines</string>
      </property>
     </widget>
    </item>

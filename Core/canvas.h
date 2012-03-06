@@ -83,10 +83,10 @@ public:
 
     void PaintGaussian(QPointF position, double variance);
 	void PaintReward(fvec sample, float radius, float shift);
-	void PaintGradient(QPointF position);
-	bool bDrawing;
+    void PaintGradient(QPointF position);
+    bool bDrawing;
 	QPainterPath DrawObstacle(Obstacle o);
-	fvec center;
+    fvec center;
 	float zoom;
 	fvec zooms;
     fvec mins, maxes;
@@ -95,6 +95,8 @@ public:
     int canvasType;
     std::vector<QColor> sampleColors;
     QStringList dimNames;
+    std::map<int,QString> classNames;
+    QString GetClassName(int classNumber);
 
 protected:
 	void paintEvent(QPaintEvent *event);

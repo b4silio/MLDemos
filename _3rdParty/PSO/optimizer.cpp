@@ -52,7 +52,7 @@ Optimizer::Optimizer(int NVAR, int NCONS, Eigen::VectorXd LOWERBOUND, Eigen::Vec
 	multiThreadType = 0;
 	initType = 0;
 	m_indexInit = 0;
-	m_filenameInit = "";
+    m_filenameInit = 0;
 	data = 0;
 }
 

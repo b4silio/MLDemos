@@ -44,7 +44,7 @@ public:
 	double stopValue;
 
     Maximizer() : evaluations(0), stopValue(.99), maxAge(200), age(0), dim(2), bIterative(false) , bConverged(true), data(NULL), w(1), h(1), maximumValue(-FLT_MAX){ maximum.resize(2);}
-    ~Maximizer(){if(data) delete [] data;}
+    virtual ~Maximizer(){if(data) delete [] data;}
     void Maximize(float *dataMap, int w, int h) {Train(dataMap,fVec(w,h));}
     bool hasConverged(){return bConverged;}
     void SetConverged(bool converged){bConverged = converged;}

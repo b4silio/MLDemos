@@ -128,6 +128,8 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("tab", optionsCluster->tabWidget->currentIndex());
     settings.setValue("trainRatio", optionsCluster->trainRatioCombo->currentIndex());
     settings.setValue("optimizeCombo", optionsCluster->optimizeCombo->currentIndex());
+    settings.setValue("rangeStart", optionsCluster->rangeStartSpin->value());
+    settings.setValue("rangeStop", optionsCluster->rangeStopSpin->value());
     settings.endGroup();
 
     settings.beginGroup("maximizeOptions");
@@ -299,6 +301,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("tab")) optionsCluster->tabWidget->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
     if(settings.contains("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(settings.value("optimizeCombo").toInt());
+    if(settings.contains("rangeStart")) optionsCluster->rangeStartSpin->setValue(settings.value("rangeStart").toInt());
+    if(settings.contains("rangeStop")) optionsCluster->rangeStopSpin->setValue(settings.value("rangeStop").toInt());
     settings.endGroup();
 
     settings.beginGroup("maximizeOptions");
@@ -435,6 +439,8 @@ void MLDemos::SaveParams( QString filename )
         out << groupName << ":" << "tab" << " " << optionsCluster->tabWidget->currentIndex() << "\n";
         out << groupName << ":" << "trainRatio" << " " << optionsCluster->trainRatioCombo->currentIndex() << "\n";
         out << groupName << ":" << "optimizeCombo" << " " << optionsCluster->optimizeCombo->currentIndex() << "\n";
+        out << groupName << ":" << "rangeStart" << " " << optionsCluster->rangeStartSpin->value() << "\n";
+        out << groupName << ":" << "rangeStop" << " " << optionsCluster->rangeStopSpin->value() << "\n";
         if(tab < clusterers.size() && clusterers[tab])
 		{
 			clusterers[tab]->SaveParams(out);
@@ -527,7 +533,6 @@ void MLDemos::LoadParams( QString filename )
                 canvas->dimNames << header;
             }
             //qDebug() << "dimensions: " << dimensionNames;
-            canvas->dimNames;
         }
         if(line.startsWith(classGroup))
 		{
@@ -564,8 +569,10 @@ void MLDemos::LoadParams( QString filename )
 			bClust = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClust);
             if(line.endsWith("tab")) optionsCluster->tabWidget->setCurrentIndex(tab = (int)value);
-            if(line.endsWith("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(tab = (int)value);
-            if(line.endsWith("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex((int)value);
+            if(line.endsWith("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex((int)value);
+            if(line.endsWith("rangeStart")) optionsCluster->rangeStartSpin->setValue((int)value);
+            if(line.endsWith("rangeStop")) optionsCluster->rangeStopSpin->setValue((int)value);
             if(tab < clusterers.size() && clusterers[tab]) clusterers[tab]->LoadParams(line,value);
 		}
 		if(line.startsWith(maximGroup))
@@ -576,7 +583,7 @@ void MLDemos::LoadParams( QString filename )
 			if(line.endsWith("gaussVarianceSpin")) optionsMaximize->varianceSpin->setValue((double)value);
 			if(line.endsWith("iterationsSpin")) optionsMaximize->iterationsSpin->setValue((int)value);
 			if(line.endsWith("stoppingSpin")) optionsMaximize->stoppingSpin->setValue((double)value);
-			if(line.endsWith("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex((int)value);
 			if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
 		}
         if(line.startsWith(projGroup))
@@ -598,4 +605,33 @@ void MLDemos::LoadParams( QString filename )
 	if(bMaxim) Maximize();
     if(bProj) Project();
     actionAlgorithms->setChecked(algorithmWidget->isVisible());
+}
+
+void MLDemos::ExportOutput()
+{
+    if(!classifier && !regressor && !clusterer && !dynamical && !maximizer) return;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Output Data"), "", tr("Data (*.txt *.csv)"));
+    if(filename.isEmpty()) return;
+    if(!filename.endsWith(".txt") && !filename.endsWith(".csv")) filename += ".txt";
+
+    QFile file(filename);
+    file.open(QFile::WriteOnly);
+    QTextStream out(&file);
+    if(!file.isOpen()) return;
+
+    if(clusterer)
+    {
+        vector<fvec> samples = canvas->data->GetSamples();
+        FOR(i, samples.size())
+        {
+            fvec sample = samples[i];
+            fvec res = clusterer->Test(sample);
+            FOR(d, res.size())
+            {
+                out << QString("%1\t").arg(res[d], 0, 'f', 3);
+            }
+            out << QString("\n");
+        }
+    }
+    file.close();
 }

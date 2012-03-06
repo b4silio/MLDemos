@@ -31,7 +31,7 @@ protected:
 
 public:
     Clusterer() : dim(2), bIterative(false), nbClusters(1) {}
-    ~Clusterer(){}
+    virtual ~Clusterer(){}
     void Cluster(std::vector< fvec > allsamples) {Train(allsamples);}
     void SetIterative(bool iterative){bIterative = iterative;}
     int NbClusters(){return nbClusters;}

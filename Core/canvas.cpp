@@ -24,6 +24,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPainter>
 #include <QPen>
 #include <QImage>
+#include <QFontMetrics>
 #include <iostream>
 
 #include "expose.h"
@@ -566,6 +567,15 @@ void Canvas::FitToData()
     // we go through all the data and find the boundaries
     std::pair<fvec,fvec> bounds = data->GetBounds();
     fvec mins = bounds.first, maxes = bounds.second;
+    FOR(d, mins.size())
+    {
+        if(maxes[d] - mins[d] > 1e6)
+        {
+            mins[d] = 0;
+            maxes[d] = 1;
+        }
+    }
+
     vector<fvec> samples = data->GetSamples();
 
     vector<TimeSerie>& series = data->GetTimeSeries();
@@ -586,6 +596,10 @@ void Canvas::FitToData()
         }
     }
     fvec diff = maxes - mins;
+    FOR(d, diff.size())
+    {
+        if(diff[d] == 0) diff[d] = 1e-6;
+    }
 
     center = mins + diff/2;
 
@@ -653,16 +667,29 @@ void Canvas::DrawLegend(QPainter &painter)
             labelList[labels[i]] = true;
         }
         painter.setPen(QPen(Qt::black, 1));
-        int x = w - 100, y = 40;
+        // we need to know the size of the legend rectangle
+        int rectWidth = 0;
+        QFontMetrics fm = painter.fontMetrics();
+        for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
+        {
+            QString className = GetClassName(it->first);
+            QRect rect = fm.boundingRect(className);
+            rectWidth = max(rectWidth, rect.width());
+        }
+        rectWidth += 10; // we add the sample size;
+
+        int x = w - rectWidth - 40, y = 40;
         painter.setRenderHint(QPainter::Antialiasing, false);
-        painter.drawRect(x-12,y-10, 70, 20*labelList.size());
+        painter.drawRect(x-10,y-10, rectWidth+12, 20*labelList.size());
         painter.setRenderHint(QPainter::Antialiasing, true);
         for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
         {
             int label = it->first;
             QPointF point(x, y);
             drawSample(painter, point, 10, label);
-            painter.drawText(QRect(x + 4, point.y()-10, 50, 20), Qt::AlignLeft + Qt::AlignCenter, QString("Class %1").arg(label));
+            QString className = GetClassName(label);
+            painter.drawText(x + 8, point.y()+3, className);
+            //painter.drawText(QRect(x + 4, point.y()-10, 70, 20), Qt::AlignLeft + Qt::AlignCenter, className);
             y += 20;
         }
     }
@@ -1540,4 +1567,16 @@ void Canvas::PaintGradient(QPointF position)
     painter.setBrush(gradient);
     painter.setPen(Qt::NoPen);
     painter.drawRect(maps.reward.rect());
+}
+
+QString Canvas::GetClassName(int classNumber)
+{
+    QString className = QString("Class %1").arg(classNumber);
+    if(classNames.count(classNumber))
+    {
+        QString name = classNames[classNumber];
+        if(name.length() < 3) name = "Class " + name;
+        return name;
+    }
+    return className;
 }

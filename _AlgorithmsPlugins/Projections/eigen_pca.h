@@ -26,6 +26,7 @@ class Kernel
 
 public:
     const MatrixXd & get() const { return _kernel; }
+    virtual ~Kernel(){}
 
 	virtual void Compute(MatrixXd &data)
 	{
@@ -61,7 +62,8 @@ protected:
 class LinearKernel : public Kernel
 {
 public:
-	void Compute(MatrixXd &data)
+    virtual ~LinearKernel(){}
+    void Compute(MatrixXd &data)
 	{
 		_kernel = MatrixXd::Zero(data.cols(), data.cols());
 		for (int i=0; i<data.cols();i++)
@@ -90,7 +92,8 @@ class PolyKernel : public Kernel
 	double degree;
 public:
     PolyKernel(int degree) : degree(degree){}
-	void Compute(MatrixXd &data)
+    virtual ~PolyKernel(){}
+    void Compute(MatrixXd &data)
 	{
 		_kernel = MatrixXd::Zero(data.cols(), data.cols());
 		for (int i=0; i<data.cols();i++)
@@ -119,7 +122,8 @@ class RBFKernel : public Kernel
 	double gamma;
 public:
     RBFKernel(float gamma) : gamma(gamma){}
-	void Compute(MatrixXd &data)
+    virtual ~RBFKernel(){}
+    void Compute(MatrixXd &data)
 	{
 		_kernel = MatrixXd::Zero(data.cols(), data.cols());
 		for (int i=0; i<data.cols();i++)

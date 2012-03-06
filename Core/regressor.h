@@ -51,6 +51,7 @@ public:
     Regressor() : posClass(0), bFixedThreshold(true), classThresh(0.5f), classSpan(0.1f), outputDim(-1), type(REGR_NONE){}
     std::vector <fvec> GetSamples(){return samples;}
     void SetOutputDim(int outputDim){this->outputDim = outputDim;}
+    virtual ~Regressor(){};
 
     virtual void Train(std::vector< fvec > samples, ivec labels){}
     virtual fvec Test( const fvec &sample){ return fvec(); }
