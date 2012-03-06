@@ -16,7 +16,7 @@ KPCAProjection::KPCAProjection()
     contours = new Ui::ContourWidget();
     contours->setupUi(contourWidget);
     contourWidget->layout()->setSizeConstraint( QLayout::SetFixedSize );
-    contourWidget->setWindowTitle("Kernel Feature Projections");
+    contourWidget->setWindowTitle("Kernel Eigenvector Projections");
 
     connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
     connect(params->contourButton, SIGNAL(clicked()), this, SLOT(ShowContours()));

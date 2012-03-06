@@ -215,7 +215,7 @@ RBF and Polynomial only</string>
       </font>
      </property>
      <property name="text">
-      <string>Show Features Contours</string>
+      <string>Show Eigenvector Iso-Lines</string>
      </property>
     </widget>
    </item>
