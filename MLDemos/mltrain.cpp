@@ -371,6 +371,8 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
                     testLabels.push_back(labels[i]);
                 }
             }
+            trainCnt = trainSamples.size();
+            testCnt = testSamples.size();
         }
         else
         {
@@ -406,7 +408,7 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
             fvec res = regressor->Test(sample);
             float error = fabs(res[0] - sample.back());
             testErrors.push_back(error);
-            qDebug() << " test error: " << i << error;
+            //qDebug() << " test error: " << i << error;
         }
         regressor->trainErrors = trainErrors;
         regressor->testErrors = testErrors;
@@ -773,7 +775,7 @@ void MLDemos::Compare()
                         fmeasureTrain.push_back(res[0]);
                         precisionTrain.push_back(res[1]);
                         recallTrain.push_back(res[2]);
-                        qDebug() << "training" << res[0] << res[1] << res[2];
+                        //qDebug() << "training" << res[0] << res[1] << res[2];
                     }
                     else
                     {
@@ -781,7 +783,7 @@ void MLDemos::Compare()
                         std::vector<f32pair> rocdata = classifier->rocdata[0];
                         FOR(j, rocdata.size())
                         {
-                            qDebug() << "rocdata: " << j << rocdata[j].first << rocdata[j].second;
+                            //qDebug() << "rocdata: " << j << rocdata[j].first << rocdata[j].second;
                             if(rocdata[j].first != rocdata[j].second)
                             {
                                 if(classes.size() > 2) errors++;
@@ -883,7 +885,7 @@ void MLDemos::Compare()
             {
                 regressor = regressors[tab]->GetRegressor();
                 if(!regressor) continue;
-                qDebug() << " training: " << regressors[tab]->GetName();
+                //qDebug() << " training: " << regressors[tab]->GetName();
                 Train(regressor, outputDim, trainRatio, trainList);
                 if(regressor->trainErrors.size())
                 {

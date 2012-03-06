@@ -82,10 +82,11 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
         mapW = w/gridX - pad*2;
         mapH = h/gridX - pad*2;
         int radiusBase = max(5.f, 5 * sqrtf(mapW / 200.f));
+#ifndef WIN32
         QProgressDialog progress("Generating Scatterplots...", "Abort", 0, dim*dim, NULL);
         progress.setWindowModality(Qt::WindowModal);
         int progressCnt = 0;
-
+#endif
         QList<QPixmap> maps;
         FOR(index0, dim)
         {
@@ -142,6 +143,7 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
                 if(bProjected) text = QString("e%1  e%2").arg(index1+1).arg(index0+1);
                 painter.drawText(pad/2+1, map.height()-pad/2-1,text);
                 maps.push_back(map);
+#ifndef WIN32
                 progress.setValue(progressCnt++);
                 progress.update();
                 if (progress.wasCanceled()) break;
@@ -149,6 +151,10 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
             if (progress.wasCanceled()) break;
         }
         progress.setValue(dim*dim);
+#else
+            }
+        }
+#endif
 
         FOR(i, maps.size())
         {

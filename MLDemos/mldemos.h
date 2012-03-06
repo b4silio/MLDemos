@@ -180,6 +180,7 @@ public slots:
     void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected);
 	void SetTimeseries(std::vector<TimeSerie> timeseries);
     void SetDimensionNames(QStringList headers);
+    void SetClassNames(std::map<int,QString> classNames);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);

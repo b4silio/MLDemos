@@ -186,6 +186,7 @@ void DataImporter::SendData()
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
 	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
+    classNames = inputParser->getClassNames();
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
     emit(SetClassNames(classNames));
