@@ -567,6 +567,15 @@ void Canvas::FitToData()
     // we go through all the data and find the boundaries
     std::pair<fvec,fvec> bounds = data->GetBounds();
     fvec mins = bounds.first, maxes = bounds.second;
+    FOR(d, mins.size())
+    {
+        if(maxes[d] - mins[d] > 1e6)
+        {
+            mins[d] = 0;
+            maxes[d] = 1;
+        }
+    }
+
     vector<fvec> samples = data->GetSamples();
 
     vector<TimeSerie>& series = data->GetTimeSeries();
@@ -587,6 +596,10 @@ void Canvas::FitToData()
         }
     }
     fvec diff = maxes - mins;
+    FOR(d, diff.size())
+    {
+        if(diff[d] == 0) diff[d] = 1e-6;
+    }
 
     center = mins + diff/2;
 
@@ -1559,6 +1572,11 @@ void Canvas::PaintGradient(QPointF position)
 QString Canvas::GetClassName(int classNumber)
 {
     QString className = QString("Class %1").arg(classNumber);
-    if(classNames.count(classNumber)) return classNames[classNumber];
+    if(classNames.count(classNumber))
+    {
+        QString name = classNames[classNumber];
+        if(name.length() < 3) name = "Class " + name;
+        return name;
+    }
     return className;
 }

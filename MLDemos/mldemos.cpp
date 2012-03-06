@@ -94,6 +94,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasMoveEvent();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     drawTime.start();
     if(filename != "") Load(filename);
 }
