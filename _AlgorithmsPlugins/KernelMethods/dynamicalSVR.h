@@ -37,10 +37,10 @@ public:
 	std::vector<fvec> Test( const fvec &sample, const int count);
 	fvec Test( const fvec &sample);
 	fVec Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
-	svm_model *GetModel(){return svm1;};
+    svm_model *GetModel(){return svm1;}
 };
 
 #endif // _DYNAMICAL_SVR_H_

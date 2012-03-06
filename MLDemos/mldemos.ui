@@ -92,7 +92,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Parallel Coordinates</string>
+           <string>Parallel Coords</string>
           </property>
          </item>
          <item>
@@ -176,21 +176,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="5">
-           <widget class="QSpinBox" name="canvasX3Spin">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="canvasX1Label">
             <property name="font">
@@ -233,6 +218,21 @@
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QSpinBox" name="canvasX3Spin">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="value">
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -448,10 +448,13 @@
   </action>
   <action name="actionExportOutput">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Output Data</string>
+   </property>
+   <property name="toolTip">
+    <string>Export algorithm output for current samples</string>
    </property>
    <property name="statusTip">
     <string>Export algorithm output for current samples</string>

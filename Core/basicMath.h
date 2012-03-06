@@ -24,7 +24,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <float.h>
 #include <math.h>
 
+#ifndef PIf
 #define PIf	3.1415926535897932384626433832795f
+#endif
 #ifdef WIN32
 #define drand48() (rand()/(float)RAND_MAX)
 #define srand48(seed) (srand(seed))

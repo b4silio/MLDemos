@@ -223,8 +223,8 @@
   <widget class="QCheckBox" name="gridCheck">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>90</y>
+     <x>100</x>
+     <y>50</y>
      <width>50</width>
      <height>17</height>
     </rect>
@@ -236,6 +236,27 @@
    </property>
    <property name="text">
     <string>Grid</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="legendCheck">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>90</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Lucida Grande</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>Legends</string>
    </property>
    <property name="checked">
     <bool>true</bool>

@@ -43,15 +43,15 @@ public:
 	ObstacleAvoidance *avoid;
 
 	Dynamical(): type(DYN_NONE), count(100), dT(0.02f), avoid(0){}
-	~Dynamical(){if(avoid) delete avoid;};
-	std::vector< std::vector<fvec> > GetTrajectories(){return trajectories;};
-	int Dim(){return dim;};
+    virtual ~Dynamical(){if(avoid) delete avoid;}
+    std::vector< std::vector<fvec> > GetTrajectories(){return trajectories;}
+    int Dim(){return dim;}
 
-	virtual void Train(std::vector< std::vector<fvec> > trajectories, ivec labels){};
-	virtual std::vector<fvec> Test( const fvec &sample, const int count){ return std::vector<fvec>(); };
-	virtual fvec Test( const fvec &sample){ return fvec(); };
-	virtual fVec Test(const fVec &sample){ return fVec(Test((fvec)sample)); };
-	virtual char *GetInfoString(){return NULL;};
+    virtual void Train(std::vector< std::vector<fvec> > trajectories, ivec labels){}
+    virtual std::vector<fvec> Test( const fvec &sample, const int count){ return std::vector<fvec>(); }
+    virtual fvec Test( const fvec &sample){ return fvec(); }
+    virtual fVec Test(const fVec &sample){ return fVec(Test((fvec)sample)); }
+    virtual const char *GetInfoString(){return NULL;}
 };
 
 #endif // _DYNAMICAL_H_

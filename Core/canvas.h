@@ -74,18 +74,19 @@ public:
     void DrawSampleColors(QPainter &painter);
 	void DrawTargets(QPainter &painter);
 	void DrawLiveTrajectory(QPainter &painter);
-	void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
+    void DrawLegend(QPainter &painter);
+    void DrawAxes(QPainter &painter);
+    void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
 	void FitToData();
-	void DrawAxes(QPainter &painter);
 	void RedrawAxes();
     void SetCanvasType(int);
 
     void PaintGaussian(QPointF position, double variance);
 	void PaintReward(fvec sample, float radius, float shift);
-	void PaintGradient(QPointF position);
-	bool bDrawing;
+    void PaintGradient(QPointF position);
+    bool bDrawing;
 	QPainterPath DrawObstacle(Obstacle o);
-	fvec center;
+    fvec center;
 	float zoom;
 	fvec zooms;
     fvec mins, maxes;
@@ -94,6 +95,8 @@ public:
     int canvasType;
     std::vector<QColor> sampleColors;
     QStringList dimNames;
+    std::map<int,QString> classNames;
+    QString GetClassName(int classNumber);
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -121,7 +124,7 @@ public:
 	QImage qimg;
 	QPainterPath crosshair;
 	bool bDisplayMap, bDisplayInfo, bDisplaySingle, bDisplaySamples;
-	bool bDisplayTrajectories, bDisplayLearned, bDisplayGrid, bDisplayTimeSeries;
+    bool bDisplayTrajectories, bDisplayLearned, bDisplayGrid, bDisplayTimeSeries, bDisplayLegend;
 	bool bShowCrosshair, bNewCrosshair;
 	int trajectoryCenterType, trajectoryResampleType, trajectoryResampleCount;
 	QPoint mouse, mouseAnchor;

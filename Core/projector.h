@@ -13,12 +13,12 @@ public:
     u32 startIndex, stopIndex;
 
     Projector() : dim(2), startIndex(0), stopIndex(-1) {}
-    ~Projector(){}
+    virtual ~Projector(){}
 
     virtual void Train(std::vector< fvec > samples, ivec labels){}
     virtual fvec Project(const fvec &sample){ return sample; }
     virtual fvec Project(const fVec &sample){ return Project((fvec)sample); }
-    virtual char *GetInfoString(){return NULL;}
+    virtual const char *GetInfoString(){return NULL;}
     virtual std::vector<fvec> GetProjected(){ return projected; }
 };
 

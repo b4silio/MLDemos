@@ -45,7 +45,7 @@ int lwpr_mem_alloc_rf(LWPR_ReceptiveField *RF, const LWPR_Model *model, int nReg
    storage = RF->fixStorage = (double *) LWPR_CALLOC((size_t) (1 + nInS*(5*nIn + 4)), sizeof(double));
    if (storage==NULL) return 0;
    
-   if (((int)((void *) storage)) & 8) storage++;
+   if (((long int)((void *) storage)) & 8) storage++;
    RF->alpha  = storage; storage+=nInS*nIn;
    RF->D      = storage; storage+=nInS*nIn;
    RF->M      = storage; storage+=nInS*nIn;
@@ -77,7 +77,7 @@ int lwpr_mem_alloc_rf(LWPR_ReceptiveField *RF, const LWPR_Model *model, int nReg
       }
    #endif   
      
-   if (((int)((void *) storage)) & 8) storage++;
+   if (((long int)((void *) storage)) & 8) storage++;
 
    RF->SXresYres = storage; storage+=nInS*nRegStore;
    RF->SSXres    = storage; storage+=nInS*nRegStore;
@@ -113,7 +113,7 @@ int lwpr_mem_realloc_rf(LWPR_ReceptiveField *RF, int nRegStore) {
    storage = newStorage = (double *) LWPR_CALLOC((size_t)(1 + nRegStore*(4*nInS + 11)), sizeof(double));
    if (newStorage==NULL) return 0;
       
-   if (((int)((void *) storage)) & 8) storage++;   
+   if (((long int)((void *) storage)) & 8) storage++;
    
    memcpy(storage, RF->SXresYres, nInS*nReg*sizeof(double)); RF->SXresYres = storage; storage+=nInS*nRegStore;
    memcpy(storage, RF->SSXres,    nInS*nReg*sizeof(double)); RF->SSXres    = storage; storage+=nInS*nRegStore;
@@ -181,7 +181,7 @@ int lwpr_mem_alloc_model(LWPR_Model *model, int nIn, int nOut, int storeRFS) {
       return 0;
    } 
    model->storage = storage;
-   if (((int)((void *) storage)) & 8) storage++;   
+   if (((long int)((void *) storage)) & 8) storage++;
 
    model->mean_x = storage;     storage+=nInS;
    model->var_x = storage;      storage+=nInS;
@@ -277,7 +277,7 @@ int lwpr_mem_alloc_ws(LWPR_Workspace *ws, int nIn) {
       return 0;
    }
    
-   if (((int)((void *) storage)) & 8) storage++;   
+   if (((long int)((void *) storage)) & 8) storage++;
    ws->dwdM     = storage; storage+=nInS*nIn;
    ws->dJ2dM    = storage; storage+=nInS*nIn;
    ws->ddwdMdM  = storage; storage+=nInS*nIn;

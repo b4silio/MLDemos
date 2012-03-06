@@ -66,6 +66,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionExportOutput, SIGNAL(triggered()), this, SLOT(ExportOutput()));
     connect(ui.actionExportAnimation, SIGNAL(triggered()), this, SLOT(ExportAnimation()));
     connect(ui.actionExport_SVG, SIGNAL(triggered()), this, SLOT(ExportSVG()));
+    ui.actionImportData->setShortcut(QKeySequence(tr("Ctrl+I")));
 
     initDialogs();
     initToolBars();
@@ -93,6 +94,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasMoveEvent();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -302,6 +304,7 @@ void MLDemos::initDialogs()
     connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
+    connect(displayOptions->legendCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
 
     algorithmOptions = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
@@ -447,6 +450,7 @@ void MLDemos::initDialogs()
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
+    connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
 }
 
 void MLDemos::initPlugins()
@@ -817,7 +821,7 @@ void MLDemos::AlgoChanged()
         drawToolbar->trajectoryButton->setChecked(true);
         DrawTrajectory();
     }
-    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible())
+    if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible() || algorithmOptions->tabProj->isVisible())
     {
         drawToolbar->sprayButton->setChecked(true);
         DrawSpray();
@@ -995,7 +999,6 @@ void MLDemos::HideStatsDialog()
     actionShowStats->setChecked(false);
 }
 
-
 void MLDemos::Clear()
 {
     drawTimer->Stop();
@@ -1012,6 +1015,7 @@ void MLDemos::Clear()
     canvas->maps.model = QPixmap();
     canvas->maps.info = QPixmap();
     canvas->liveTrajectory.clear();
+    canvas->sampleColors.clear();
     canvas->repaint();
     UpdateInfo();
 }
@@ -1091,6 +1095,19 @@ void MLDemos::ClearData()
     ResetPositiveClass();
     ManualSelectionUpdated();
     UpdateInfo();
+}
+
+
+void MLDemos::DrawNone()
+{
+    drawToolbar->singleButton->setChecked(false);
+    drawToolbar->sprayButton->setChecked(false);
+    drawToolbar->eraseButton->setChecked(false);
+    drawToolbar->ellipseButton->setChecked(false);
+    drawToolbar->lineButton->setChecked(false);
+    drawToolbar->trajectoryButton->setChecked(false);
+    drawToolbar->obstacleButton->setChecked(false);
+    drawToolbar->paintButton->setChecked(false);
 }
 
 void MLDemos::DrawSingle()
@@ -1243,6 +1260,7 @@ void MLDemos::DisplayOptionChanged()
     canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    canvas->bDisplayLegend = displayOptions->legendCheck->isChecked();
     {
         int xIndex = ui.canvasX1Spin->value()-1;
         int yIndex = ui.canvasX2Spin->value()-1;
@@ -2495,12 +2513,10 @@ void MLDemos::ToClipboard()
         ui.statusBar->showMessage("WARNING: Nothing to copy to clipboard");
         return;
     }
-
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setImage(screenshot.toImage());
     clipboard->setPixmap(screenshot);
     ui.statusBar->showMessage("Image copied successfully to clipboard");
-
 }
 
 /************************************/
@@ -2606,14 +2622,24 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     ResetPositiveClass();
     ManualSelectionUpdated();
     CanvasOptionsChanged();
+    DrawNone();
     canvas->ResetSamples();
     canvas->repaint();
 }
 
 void MLDemos::SetDimensionNames(QStringList headers)
 {
-    qDebug() << "setting dimension names" << headers;
+    //qDebug() << "setting dimension names" << headers;
     canvas->dimNames = headers;
+    ResetPositiveClass();
+    CanvasOptionsChanged();
+    canvas->ResetSamples();
+    canvas->repaint();
+}
+
+void MLDemos::SetClassNames(std::map<int,QString> classNames)
+{
+    canvas->classNames = classNames;
     ResetPositiveClass();
     CanvasOptionsChanged();
     canvas->ResetSamples();

@@ -298,7 +298,6 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 			top = sorted[sorted.size()-1];
 
 			median = count%2 ? sorted[half] : (sorted[half] + sorted[half - 1])/2;
-			quartLow, quartHi;
 			if(count < 4)
 			{
 				quartLow = bottom;

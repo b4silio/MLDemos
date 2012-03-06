@@ -36,7 +36,7 @@ public:
 	~RegressorMLP();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta);
 };

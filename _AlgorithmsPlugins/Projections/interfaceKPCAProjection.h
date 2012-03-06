@@ -4,6 +4,9 @@
 #include <vector>
 #include <interfaces.h>
 #include "ui_paramsKPCA.h"
+#include "ui_contourPlots.h"
+#include "eigen_pca.h"
+#include "qcontour.h"
 
 class KPCAProjection : public QObject, public ProjectorInterface
 {
@@ -11,7 +14,18 @@ class KPCAProjection : public QObject, public ProjectorInterface
     Q_INTERFACES(ProjectorInterface)
 private:
     Ui::paramsKPCA *params;
-    QWidget *widget;
+    Ui::ContourWidget *contours;
+    QWidget *widget, *contourWidget;
+    QLabel *contourLabel;
+    std::vector<fvec> contourSamples;
+    ivec contourSampleLabels;
+    std::map<int,QPixmap> contourPixmaps;
+    PCA *pcaPointer;
+    int xIndex, yIndex;
+    float xmin,xmax;
+    float ymin,ymax;
+    void GetContoursPixmap(int index);
+
 public:
     KPCAProjection();
     // virtual functions to manage the algorithm creation
@@ -31,6 +45,10 @@ public:
     bool LoadParams(QString name, float value);
 public slots:
     void ChangeOptions();
+    void ShowContours();
+    void ContoursChanged();
+    void DrawContours(int index);
+    void SaveScreenshot();
 };
 
 #endif // INTERFACEKPCAProjection_H

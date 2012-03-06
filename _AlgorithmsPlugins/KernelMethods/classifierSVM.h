@@ -41,7 +41,7 @@ public:
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
 	fvec TestMulti(const fvec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 	void SetParams(int svmType, float svmC, u32 kernelType, float kernelParam);
     svm_model *GetModel(){return svm;}
 };

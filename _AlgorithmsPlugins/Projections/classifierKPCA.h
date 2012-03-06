@@ -37,15 +37,15 @@ private:
 	float kernelGamma;
 public:
 	std::vector<fvec> Project(std::vector<fvec> samples);
-	std::vector<fvec> GetSamples(){return samples;};
-	std::vector<fvec> GetResults(){return results;};
-	ivec GetLabels(){return labels;};
+    std::vector<fvec> GetSamples(){return samples;}
+    std::vector<fvec> GetResults(){return results;}
+    ivec GetLabels(){return labels;}
 
 	ClassifierKPCA();
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 	void SetParams(int kernelType, int kernelDegree, float kernelGamma);
 };
 

@@ -10,6 +10,23 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
 
     sourcePoints = dataPoints;
 
+    // ugly hack to ensure that we don't have empty polynomial or linear kernels
+    if(n==1 && kernelType<=1)
+    {
+        bool bIsZero = true;
+        for(int i=0; i<m; i++)
+        {
+            if(sourcePoints(i,0) != 0)
+            {
+                bIsZero = false;
+                break;
+            }
+        }
+        if(bIsZero)
+            for(int i=0; i<m; i++)
+                sourcePoints(i,0) = 1.f;
+    }
+
     if(k) delete k;
     switch(kernelType)
     {
@@ -65,16 +82,17 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
     for (unsigned int i = 0; i < dimSpace; i++)
     {
         //sqrtE(i, i) = sqrt(-pi[i].first);
-        sqrtE(i, i) = 0.9;
+        sqrtE(i, i) = 1.0;
     }
 
     // get the final data projection
-    _result = (sqrtE * _result.transpose()).transpose();
+    //_result = (sqrtE * _result.transpose()).transpose();
 }
 
-float PCA::test(VectorXd point)
+float PCA::test(VectorXd point, int dim)
 {
     if(!k) return 0;
+    if(dim >= eigenVectors.cols()) return 0;
 
     int n = 1;
     int dimSpace = 1;
@@ -119,7 +137,7 @@ float PCA::test(VectorXd point)
     for (int w=0; w<eigenVectors.rows(); w++)
     {
         //result += K(0,w) * eigenVectors(w,pi[0].second); // permutation indices
-        result += k->get()(0,w) * eigenVectors(w,pi[0].second); // permutation indices
+        result += k->get()(0,w) * eigenVectors(w,pi[dim].second); // permutation indices
     }
     //result = (result * 0.25f - 1)*2;
     //result *= eigenvalues(pi[0].second);
@@ -189,7 +207,7 @@ MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
     {
         for(int j=0; j < results.cols(); j++)
         {
-            results(i,j) *= 0.9;
+//            results(i,j) *= 1.0;
         }
     }
 

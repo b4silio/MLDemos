@@ -155,7 +155,7 @@ void ClustererSVR::SetParams(int svmType, float svmC, float svmP, u32 kernelType
 	}
 }
 
-char *ClustererSVR::GetInfoString()
+const char *ClustererSVR::GetInfoString()
 {
 	if(!svm) return NULL;
 	char *text = new char[1024];

@@ -35,12 +35,12 @@ private:
 	int metricP;
 	int k;
 public:
-	RegressorKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){type = REGR_KNN;};
+    RegressorKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){type = REGR_KNN;}
 	~RegressorKNN();
 	void Train(std::vector< fvec > samples, ivec labels);
 	fvec Test( const fvec &sample);
 	fVec Test( const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(u32 k, int metricType, u32 metricP);
 };

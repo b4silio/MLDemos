@@ -712,6 +712,7 @@ bool SEDS::Optimize(){
     }
 
     CheckConstraints(A);
+    return true;
 }
 
 /* This function computes the sensitivity of Cost function w.r.t. optimization parameters.

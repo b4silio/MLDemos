@@ -31,7 +31,7 @@ protected:
 
 public:
     Clusterer() : dim(2), bIterative(false), nbClusters(1) {}
-    ~Clusterer(){}
+    virtual ~Clusterer(){}
     void Cluster(std::vector< fvec > allsamples) {Train(allsamples);}
     void SetIterative(bool iterative){bIterative = iterative;}
     int NbClusters(){return nbClusters;}
@@ -39,7 +39,7 @@ public:
     virtual void Train(std::vector< fvec > samples){}
     virtual fvec Test( const fvec &sample){ return fvec(); }
     virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
-    virtual char *GetInfoString(){ return NULL; }
+    virtual const char *GetInfoString(){ return NULL; }
     virtual void SetNbClusters(int count){ nbClusters = count; }
 };
 

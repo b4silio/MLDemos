@@ -36,7 +36,7 @@ public:
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
     svm_model *GetModel(){return svm;}

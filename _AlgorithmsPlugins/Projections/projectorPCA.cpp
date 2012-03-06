@@ -73,7 +73,7 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
 #ifdef OPENCV21 // legacy
         float eigval = eigVal.at<float>(i,1);
 #else // OPENCV22+
-	float eigval = eigVal.at<float>(i);
+        float eigval = eigVal.at<float>(i);
 #endif
         if(eigval == eigval)
         {
@@ -128,9 +128,9 @@ void ProjectorPCA::TrainPCA(std::vector<fvec> samples, int pcaCount)
     FOR(d, pcaCount)
     {
 #ifdef OPENCV21 // legacy
-      if(bNan[d] = pca.eigenvalues.at<float>(d,1) != pca.eigenvalues.at<float>(d,1)) nanCnt++;
+        if(bNan[d] = pca.eigenvalues.at<float>(d,1) != pca.eigenvalues.at<float>(d,1)) nanCnt++;
 #else // OPENCV22+
-      if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
+        if(bNan[d] = pca.eigenvalues.at<float>(d) != pca.eigenvalues.at<float>(d)) nanCnt++;
 #endif
     }
     FOR(i, count)
@@ -174,6 +174,7 @@ void ProjectorPCA::Train(std::vector< fvec > samples, ivec labels)
 
 fvec ProjectorPCA::Project(const fvec &sample)
 {
+    return sample;
 }
 
 fvec ProjectorPCA::GetEigenValues()
@@ -181,7 +182,7 @@ fvec ProjectorPCA::GetEigenValues()
     fvec values(dim);
     FOR(i, dim)
     {
-      float eigval = pca.eigenvalues.at<float>(i,1);
+        float eigval = pca.eigenvalues.at<float>(i,0);
         values[i] = eigval;
     }
     return values;

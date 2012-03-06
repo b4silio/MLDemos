@@ -17,7 +17,7 @@ public:
 
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
-    char *GetInfoString(){return "Independent Component Analysis";}
+    const char *GetInfoString(){return "Independent Component Analysis";}
     double *GetTransf(){return Transf;}
 };
 

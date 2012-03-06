@@ -26,6 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class ObstacleAvoidance
 {
 public:
+    virtual ~ObstacleAvoidance(){};
 	std::vector< Obstacle > obstacles;
 	virtual void SetObstacles(std::vector< Obstacle > obstacles)
 	{

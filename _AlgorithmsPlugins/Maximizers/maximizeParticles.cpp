@@ -210,7 +210,7 @@ fvec MaximizeParticles::Test(const fVec &sample)
     return Test((fvec)sample);
 }
 
-char *MaximizeParticles::GetInfoString()
+const char *MaximizeParticles::GetInfoString()
 {
     char *text = new char[1024];
     sprintf(text, "Genetic Algorithm\n");

@@ -26,23 +26,24 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class ProjectorKPCA : public Projector
 {
 private:
-    fvec mean;
     fvec minValues, maxValues;
     ivec labels;
     int kernelType;
     int kernelDegree;
     float kernelGamma;
-    int targetDims;
 public:
+    int targetDims;
+    fvec mean;
     PCA *pca;
     std::vector<fvec> Project(std::vector<fvec> samples);
     ivec GetLabels(){return labels;}
 
     ProjectorKPCA(int targetDims=-1);
+    ~ProjectorKPCA();
     void Train(std::vector< fvec > samples, ivec labels);
     fvec Project(const fvec &sample);
 
-    char *GetInfoString();
+    const char *GetInfoString();
     void SetParams(int kernelType, int kernelDegree, float kernelGamma);
 };
 

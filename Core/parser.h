@@ -40,6 +40,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <string>
 #include <types.h>
+#include <QString>
 
 using namespace std;
 
@@ -117,12 +118,14 @@ public:
     int getCount(){return data.size();}
     vector< vector<string> > getRawData(){return data;}
     static pair<vector<fvec>, ivec> numericFromRawData(vector< vector<string> > rawData);
+    map<int,QString> getClassNames(){return classNames;}
 
 private:
     bool bFirstRowAsHeader;
     int outputLabelColumn;
     ifstream file;
     map<string,unsigned int> classLabels;
+    map<int, QString> classNames;
     vector<vector<string> > data;
     vector<unsigned int> dataTypes;
 };

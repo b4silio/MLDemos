@@ -40,6 +40,7 @@ private:
 	QDialog *guiDialog;
     CSVParser *inputParser;
     QStringList headers;
+    std::map<int, QString> classNames;
 
     bool saveFile(const QString &filename, QIODevice *data);
 
@@ -48,6 +49,7 @@ signals:
     void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected);
 	void SetTimeseries(std::vector<TimeSerie> series);
     void SetDimensionNames(QStringList headers);
+    void SetClassNames(std::map<int, QString> classNames);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);

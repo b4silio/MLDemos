@@ -184,7 +184,7 @@ fvec MaximizeGradient::Test(const fVec &sample)
 	return Test((fvec)sample);
 }
 
-char *MaximizeGradient::GetInfoString()
+const char *MaximizeGradient::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Gradient Ascent");

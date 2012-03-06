@@ -60,7 +60,7 @@ public:
     virtual fvec TestMulti(const fvec &sample){ return fvec(1,Test(sample));}
     virtual float Test(const fvec &sample){ return 0; }
     virtual float Test(const fVec &sample){ if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
-    virtual char *GetInfoString(){return NULL;}
+    virtual const char *GetInfoString(){return NULL;}
     bool SingleClass(){return bSingleClass;}
     bool UsesDrawTimer(){return bUsesDrawTimer;}
     bool IsMultiClass(){return bMultiClass;}

@@ -43,17 +43,17 @@ public:
 	int age, maxAge;
 	double stopValue;
 
-	Maximizer() : evaluations(0), stopValue(.99), maxAge(200), age(0), dim(2), bIterative(false) , bConverged(true), data(NULL), w(1), h(1), maximumValue(-FLT_MAX){ maximum.resize(2);};
-	~Maximizer(){if(data) delete [] data;};
-	void Maximize(float *dataMap, int w, int h) {Train(dataMap,fVec(w,h));};
-	bool hasConverged(){return bConverged;};
-	void SetConverged(bool converged){bConverged = converged;};
-	std::vector<fvec> &History(){return history;};
-	std::vector<double> &HistoryValue(){return historyValue;};
-	fvec &Maximum(){return maximum;};
-	double MaximumValue(){return GetValue(maximum);};
-	std::vector<fvec> &Visited(){return visited;};
-	int &Evaluations(){return evaluations;};
+    Maximizer() : evaluations(0), stopValue(.99), maxAge(200), age(0), dim(2), bIterative(false) , bConverged(true), data(NULL), w(1), h(1), maximumValue(-FLT_MAX){ maximum.resize(2);}
+    virtual ~Maximizer(){if(data) delete [] data;}
+    void Maximize(float *dataMap, int w, int h) {Train(dataMap,fVec(w,h));}
+    bool hasConverged(){return bConverged;}
+    void SetConverged(bool converged){bConverged = converged;}
+    std::vector<fvec> &History(){return history;}
+    std::vector<double> &HistoryValue(){return historyValue;}
+    fvec &Maximum(){return maximum;}
+    double MaximumValue(){return GetValue(maximum);}
+    std::vector<fvec> &Visited(){return visited;}
+    int &Evaluations(){return evaluations;}
 	float GetValue(fvec sample)
 	{
 		int xIndex = max(0, min(w-1, (int)(sample[0]*w)));
@@ -62,11 +62,11 @@ public:
 		return data[index];
 	}
 
-	virtual void Draw(QPainter &painter){};
-	virtual void Train(float *dataMap, fVec size, fvec startingPoint=fvec()){};
-	virtual fvec Test( const fvec &sample){ return fvec(); };
-	virtual fvec Test(const fVec &sample){ return Test((fvec)sample); };
-	virtual char *GetInfoString(){return NULL;};
+    virtual void Draw(QPainter &painter){}
+    virtual void Train(float *dataMap, fVec size, fvec startingPoint=fvec()){}
+    virtual fvec Test( const fvec &sample){ return fvec(); }
+    virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
+    virtual const char *GetInfoString(){return NULL;}
 };
 
 #endif // _MAXIMIZE_H_

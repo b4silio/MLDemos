@@ -672,7 +672,8 @@ void MLDemos::ClusterOptimize()
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
 
-    int startCount=1, stopCount=11;
+    int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
+    if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
@@ -965,6 +966,7 @@ void MLDemos::Project()
     if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     if(!canvas->canvasType)
     {
         projectors[tab]->Draw(canvas, projector);
@@ -991,9 +993,11 @@ void MLDemos::ProjectRevert()
     canvas->data->bProjected = false;
     canvas->maps.info = QPixmap();
     canvas->maps.model = QPixmap();
+    canvas->maps.confidence = QPixmap();
     if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    ResetPositiveClass();
     canvas->repaint();
     UpdateInfo();
     sourceData.clear();
@@ -1008,12 +1012,6 @@ void MLDemos::ProjectReproject()
     sourceLabels = canvas->data->GetLabels();
     mutex.unlock();
     Project();
-}
-
-void MLDemos::ExportOutput()
-{
-    if(!classifier && !regressor && !clusterer && !dynamical && !maximizer) return;
-    // get a file
 }
 
 void MLDemos::ExportAnimation()

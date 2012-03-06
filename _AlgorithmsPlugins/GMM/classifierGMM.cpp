@@ -135,7 +135,7 @@ void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 	this->initType = initType;
 }
 
-char *ClassifierGMM::GetInfoString()
+const char *ClassifierGMM::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "GMM\n");

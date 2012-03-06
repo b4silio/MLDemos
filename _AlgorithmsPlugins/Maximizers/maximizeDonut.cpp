@@ -331,7 +331,7 @@ fvec MaximizeDonut::Test(const fVec &sample)
 	return Test((fvec)sample);
 }
 
-char *MaximizeDonut::GetInfoString()
+const char *MaximizeDonut::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "POWER\n");

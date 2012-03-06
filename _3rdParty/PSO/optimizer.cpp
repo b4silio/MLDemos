@@ -52,7 +52,7 @@ Optimizer::Optimizer(int NVAR, int NCONS, Eigen::VectorXd LOWERBOUND, Eigen::Vec
 	multiThreadType = 0;
 	initType = 0;
 	m_indexInit = 0;
-	m_filenameInit = "";
+    m_filenameInit = 0;
 	data = 0;
 }
 
@@ -158,6 +158,7 @@ void Optimizer::SetData(float *data, int w, int h)
 	this->data = data;
 	dataW = w;
 	dataH = h;
+    evaluationHistory.clear();
 }
 
 Eigen::VectorXd Optimizer::EvaluateModel(Eigen::VectorXd& x)
@@ -169,7 +170,8 @@ Eigen::VectorXd Optimizer::EvaluateModel(Eigen::VectorXd& x)
 		int j = (x[1] - m_LOWERBOUND(1)) / (m_UPPERBOUND(1) - m_LOWERBOUND(1)) * dataH;
 		i = max(0, min(dataW-1, i));
 		j = max(0, min(dataH-1, j));
-		y(0) = 1.f - data[j*dataW + i];
+        y(0) = 1.f - data[j*dataW + i];
+        evaluationHistory.push_back(make_pair(i,j));
 		return y;
 	}
 	else return m_model(x);

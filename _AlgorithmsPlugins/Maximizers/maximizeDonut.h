@@ -48,7 +48,7 @@ public:
 	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
 	fvec Test( const fvec &sample);
 	fvec Test(const fVec &sample);
-	char *GetInfoString();
+    const char *GetInfoString();
 };
 
 #endif // _MAXIMIZE_DONUT_H_

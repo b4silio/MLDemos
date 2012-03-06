@@ -198,7 +198,7 @@ void RegressorKNN::SetParams( u32 k, int metricType, u32 metricP )
 	}
 }
 
-char *RegressorKNN::GetInfoString()
+const char *RegressorKNN::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "KNN\n");

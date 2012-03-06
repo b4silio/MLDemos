@@ -152,7 +152,7 @@ void DynamicalMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, 
 }
 
 
-char *DynamicalMLP::GetInfoString()
+const char *DynamicalMLP::GetInfoString()
 {
 	char *text = new char[1024];
 	sprintf(text, "Multi-Layer Perceptron\n");

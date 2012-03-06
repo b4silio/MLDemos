@@ -15,7 +15,8 @@ FORMS += \
     paramsICA.ui \
     paramsLDA.ui \
     paramsKPCA.ui \
-    paramsPCA.ui
+    paramsPCA.ui \
+    contourPlots.ui
 HEADERS +=	\
         basicOpenCV.h \
         canvas.h \
@@ -33,7 +34,9 @@ HEADERS +=	\
         projectorPCA.h \
         projectorKPCA.h \
         projectorICA.h \
-        projectorLDA.h
+        projectorLDA.h \
+    contours.h \
+    qcontour.h
 
 SOURCES += 	\
     basicOpenCV.cpp \
@@ -49,7 +52,9 @@ SOURCES += 	\
     projectorPCA.cpp \
     projectorKPCA.cpp \
     projectorICA.cpp \
-    projectorLDA.cpp
+    projectorLDA.cpp \
+    contours.cpp \
+    qcontour.cpp
 
 ###########################
 # Dependencies            #
