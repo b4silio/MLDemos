@@ -1,3 +1,4 @@
+
 ##############################
 #                            #
 #     MLDemos Variables      #
@@ -128,7 +129,7 @@ CONFIG(boost){
     macx{
         INCLUDEPATH += "$$BOOST"
     }else:unix{
-        PKGCONFIG += boost
+        #PKGCONFIG += boost # Boost doesn't provide its own pc file yet...
     }else:win32{
         INCLUDEPATH += "$$BOOST/include"
     }
