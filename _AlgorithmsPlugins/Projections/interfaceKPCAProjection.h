@@ -46,6 +46,7 @@ public:
 public slots:
     void ChangeOptions();
     void ShowContours();
+    void ContoursChanged();
     void DrawContours(int index);
     void SaveScreenshot();
 };
