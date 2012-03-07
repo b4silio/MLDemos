@@ -10,7 +10,7 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-opencv{
+#opencv{
 FORMS += paramsBoost.ui paramsMLP.ui paramsMLPDynamic.ui paramsMLPRegress.ui
 HEADERS +=	\
 			canvas.h \
@@ -38,4 +38,4 @@ SOURCES += 	\
 			interfaceMLPRegress.cpp \
 			interfaceMLPDynamic.cpp \
 			pluginOpenCV.cpp
-}
+#}

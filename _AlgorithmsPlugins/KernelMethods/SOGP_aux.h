@@ -45,6 +45,12 @@ public:
         printf("Kernel Reader %d not written\n",m_type);
     }
     KERNEL m_type;
+    virtual SOGPKernel& operator= (const SOGPKernel &k) {
+        if (this != &k) {
+            m_type = k.m_type;
+        }
+        return *this;
+    }
 };
 
 class RBFKernel: public SOGPKernel{
@@ -70,6 +76,30 @@ public:
     void setA(double nA){
         A=nA;
     }
+    double getA(){return A;}
+    RowVector getWidths(){return widths;}
+    virtual RBFKernel& operator= (const RBFKernel &k) {
+        if (this != &k) {
+            m_type = k.m_type;
+            widths = k.widths;
+            A = k.A;
+        }
+        return *this;
+    }
+    virtual SOGPKernel& operator=(const SOGPKernel& k)
+    {
+        if (this != &k){
+            m_type = k.m_type;
+            const RBFKernel *rbf = dynamic_cast<const RBFKernel*>(&k);
+            if(rbf)
+            {
+                widths = rbf->widths;
+                A = rbf->A;
+            }
+        }
+        return *this;
+    }
+
 private:
     double A;//Should likely never change, but just in case
     RowVector widths;//Stored as 1/w
@@ -102,6 +132,26 @@ public:
     void readFrom(FILE *fp,bool ascii=false){
         readRV(scales,fp,"scales",ascii);
     }
+    POLKernel& operator= (const POLKernel &k) {
+        if (this != &k) {
+            m_type = k.m_type;
+            scales = k.scales;
+        }
+        return *this;
+    }
+    virtual SOGPKernel& operator=(const SOGPKernel& k)
+    {
+        if (this != &k){
+            m_type = k.m_type;
+            const POLKernel *pol = dynamic_cast<const POLKernel*>(&k);
+            if(pol)
+            {
+                scales = pol->scales;
+            }
+        }
+        return *this;
+    }
+    RowVector getScales(){return scales;}
 private:
     RowVector scales;
     void init(double s){
@@ -111,6 +161,7 @@ private:
         m_type=kerPOL;scales=s;
     }
 };
+
 
 //SOGP Parameters
 class SOGPParams{
@@ -149,6 +200,30 @@ public:
         case kerPOL: m_kernel=new POLKernel(*((POLKernel *)kern));break;
         }
     }
+    ~SOGPParams()
+    {
+        //delete m_kernel;
+    }
+    void setKernel(SOGPKernel *kernel){
+        if(m_kernel == kernel) return;
+        delete m_kernel;
+        m_kernel = kernel;
+    }
+    SOGPParams& operator=(const SOGPParams& k)
+    {
+        if (this != &k){
+            capacity=k.capacity;
+            s20 = k.s20;
+            delete m_kernel;
+            switch(k.m_kernel->m_type){
+            //And this
+            case kerRBF: m_kernel=new RBFKernel(*((RBFKernel *)k.m_kernel));break;
+            case kerPOL: m_kernel=new POLKernel(*((POLKernel *)k.m_kernel));break;
+            }
+        }
+        return *this;
+    }
+
 private:
     void setDefs(){
         capacity=0;

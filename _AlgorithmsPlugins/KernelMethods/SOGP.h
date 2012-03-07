@@ -34,7 +34,7 @@ class SOGP{
     params.s20=s20;
     params.capacity=cap;
     setParams(params);
-  };
+  }
 
   //Add data to the SOGP
   void add(const ColumnVector& in,const ColumnVector& out);
@@ -95,6 +95,8 @@ class SOGP{
 
   int dim(){return BV.Nrows();}
 
+  SOGPParams &getParams(){return m_params;}
+
  private: 
   int current_size;  //how many points do I have
   Matrix alpha;      //Alpha and C are the parameters of the GP
@@ -109,11 +111,13 @@ class SOGP{
   //Removal function
   void delete_bv(int loc);
 
+public:
   //Set the parameters.  Maybe public for reset?
   void setParams(SOGPParams params){
     m_params=params;
     current_size=0;
   }
+
 };
 
 

@@ -27,9 +27,11 @@ double RBFKernel::kernel(const ColumnVector &a, const ColumnVector &b){
 	{//Expand if necessary
 		//printf("RBFKernel:  Resizing width to %d\n",(int)d);
 		double wtmp=widths(1);
-		widths.ReSize(d);
-		for(int i=1;i<=d;i++) widths(i)=wtmp;
-	}
+        RowVector newWidths(d);
+        for(int i=1;i<=widths.Ncols();i++) newWidths(i) = widths(i);
+        for(int i=widths.Ncols();i<=d;i++) newWidths(i) = wtmp;
+        widths = newWidths;
+    }
 	//I think this bumps up against numerical stability issues.
 	Matrix c = a-b;
 	Real ss = SumSquare(SP(c,widths.t()));
@@ -41,7 +43,7 @@ double POLKernel::kernel(const ColumnVector &a, const ColumnVector &b){
 	double resp=1;
 	double inner = (a.t()*b).AsScalar();
 	for(int i=1;i<=scales.Ncols();i++)
-		resp += pow((inner/(d*scales(i))),i);
+        resp += pow((inner/(d*scales(i))),i);
 	return resp;
 }
 

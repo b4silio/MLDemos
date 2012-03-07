@@ -29,7 +29,7 @@ class PluginOpenCV : public QObject, public CollectionInterface
 public:
 	PluginOpenCV();
 
-	QString GetName(){return "OpenCV Methods Collection";};
+    QString GetName(){return "OpenCV Methods Collection";}
 };
 
 #endif // _PLUGIN_OPENCV_H_
