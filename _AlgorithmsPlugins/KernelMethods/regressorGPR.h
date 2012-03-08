@@ -35,22 +35,25 @@ private:
 	int kernelType;
 	int degree;
 	int capacity;
+    bool bOptimize;
+    bool bOptimizeLikelihood;
 
 public:
 	SOGP *sogp;
 	bool bShowBasis;
-    RegressorGPR() : sogp(0), dim(1), capacity(0), kernelType(kerRBF), bTrained(false), param1(1), param2(0.1), bShowBasis(false), degree(1){type = REGR_GPR;}
+    RegressorGPR() : sogp(0), dim(1), capacity(0), kernelType(kerRBF), bTrained(false), param1(1), param2(0.1), bShowBasis(false), degree(1), bOptimize(false){type = REGR_GPR;}
 	void Train(std::vector<fvec> inputs, ivec labels);
 	fvec Test(const fvec &sample);
 	fVec Test(const fVec &sample);
     const char *GetInfoString();
 
-    void SetParams(double p1, double p2, int capacity, int kType, int d=1){param1=p1; param2=p2; kernelType=kType; degree = d;this->capacity=capacity;}
+    void SetParams(double p1, double p2, int capacity, int kType, int d=1, bool bOptimize=false, bool bOptimizeLikelihood=true){param1=p1; param2=p2; kernelType=kType; degree = d;this->capacity=capacity;this->bOptimize=bOptimize;this->bOptimizeLikelihood=bOptimizeLikelihood;}
     SOGP *GetModel(){return sogp;}
 	void Clear();
 	fvec GetBasisVector(int index);
 	int GetBasisCount();
 	float GetLikelihood(float mean, float sigma, float point);
+    void Optimize(const Matrix &inputs, const Matrix &outputs);
 };
 
 #endif // _REGRESSOR_SVR_H_
