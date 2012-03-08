@@ -36,7 +36,6 @@ void RegrGPR::ChangeOptions()
     bool bSparse = params->sparseCheck->isChecked();
 
     params->capacitySpin->setEnabled(bSparse);
-    params->noiseSpin->setEnabled(bSparse);
 
     switch(params->kernelTypeCombo->currentIndex())
     {
@@ -69,9 +68,12 @@ void RegrGPR::SetParams(Regressor *regressor)
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
     int capacity = params->capacitySpin->value();
+    if(!params->sparseCheck->isChecked()) capacity = -1;
     double kernelNoise = params->noiseSpin->value();
+    bool bOptimize = params->optimizeCheck->isChecked();
+    bool bUseLikelihood = params->optimizeCombo->currentIndex() == 0;
 
-    gpr->SetParams(kernelGamma, kernelNoise, capacity, kernelType, kernelDegree);
+    gpr->SetParams(kernelGamma, kernelNoise, capacity, kernelType, kernelDegree, bOptimize, bUseLikelihood);
 }
 
 QString RegrGPR::GetAlgoString()
@@ -239,6 +241,9 @@ void RegrGPR::SaveOptions(QSettings &settings)
     settings.setValue("kernelWidth", params->kernelWidthSpin->value());
     settings.setValue("capacitySpin", params->capacitySpin->value());
     settings.setValue("noiseSpin", params->noiseSpin->value());
+    settings.setValue("sparseCheck", params->sparseCheck->isChecked());
+    settings.setValue("optimizeCheck", params->optimizeCheck->isChecked());
+    settings.setValue("optimizeCombo", params->optimizeCombo->currentIndex());
 }
 
 bool RegrGPR::LoadOptions(QSettings &settings)
@@ -248,6 +253,9 @@ bool RegrGPR::LoadOptions(QSettings &settings)
     if(settings.contains("kernelWidth")) params->kernelWidthSpin->setValue(settings.value("kernelWidth").toFloat());
     if(settings.contains("capacity")) params->capacitySpin->setValue(settings.value("capacitySpin").toInt());
     if(settings.contains("noiseSpin")) params->noiseSpin->setValue(settings.value("noiseSpin").toFloat());
+    if(settings.contains("sparseCheck")) params->sparseCheck->setChecked(settings.value("sparseCheck").toBool());
+    if(settings.contains("optimizeCheck")) params->optimizeCheck->setChecked(settings.value("optimizeCheck").toBool());
+    if(settings.contains("optimizeCombo")) params->optimizeCombo->setCurrentIndex(settings.value("optimizeCombo").toInt());
     return true;
 }
 
@@ -258,6 +266,9 @@ void RegrGPR::SaveParams(QTextStream &file)
     file << "regressionOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
     file << "regressionOptions" << ":" << "capacitySpin" << " " << params->capacitySpin->value() << "\n";
     file << "regressionOptions" << ":" << "noiseSpin" << " " << params->noiseSpin->value() << "\n";
+    file << "regressionOptions" << ":" << "sparseCheck" << " " << params->sparseCheck->isChecked() << "\n";
+    file << "regressionOptions" << ":" << "optimizeCheck" << " " << params->optimizeCheck->isChecked() << "\n";
+    file << "regressionOptions" << ":" << "optimizeCombo" << " " << params->optimizeCombo->currentIndex() << "\n";
 }
 
 bool RegrGPR::LoadParams(QString name, float value)
@@ -267,5 +278,8 @@ bool RegrGPR::LoadParams(QString name, float value)
     if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
     if(name.endsWith("capacitySpin")) params->capacitySpin->setValue(value);
     if(name.endsWith("noiseSpin")) params->noiseSpin->setValue(value);
+    if(name.endsWith("sparseCheck")) params->sparseCheck->setChecked((int)value);
+    if(name.endsWith("optimizeCheck")) params->optimizeCheck->setChecked((int)value);
+    if(name.endsWith("optimizeCombo")) params->optimizeCombo->setCurrentIndex((int)value);
     return true;
 }

@@ -12,7 +12,7 @@ include($$MLPATH/MLDemos_variables.pri)
 
 win32-g++|macx|unix {
     QMAKE_CXXFLAGS_WARN_ON = ""
-    QMAKE_CXXFLAGS += -Wno-all
+    QMAKE_CXXFLAGS = -Wno-all
     #QMAKE_CXXFLAGS += -Wno-endif-labels
     QMAKE_CXXFLAGS += -Wno-unused-variable
     QMAKE_CXXFLAGS += -Wno-unused-parameter

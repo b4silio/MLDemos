@@ -829,7 +829,6 @@ IplImage *BasicOpenCV::BoxPlot(std::vector<float> data, float maxVal, float minV
         top = sorted[sorted.size()-1];
 
         median = count%2 ? sorted[half] : (sorted[half] + sorted[half - 1])/2;
-        quartLow, quartHi;
         if(count < 4)
         {
             quartLow = bottom;

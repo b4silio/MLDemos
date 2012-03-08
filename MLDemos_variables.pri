@@ -83,16 +83,21 @@ win32:CONFIG(opencv22){
 		-lopencv_ml$$OPENCV_VER
 }
 
-
 macx{
     CONFIG(opencv22){
         DEFINES += OPENCV22
         message("Using opencv22 or later")
         LIBS += -lopencv_core \
+                -lopencv_calib3d \
+                -lopencv_contrib \
                 -lopencv_features2d \
+                -lopencv_flann \
+                -lopencv_gpu \
                 -lopencv_highgui \
                 -lopencv_imgproc \
                 -lopencv_legacy \
+                -lopencv_objdetect \
+                -lopencv_video \
                 -lopencv_ml
 
     }
