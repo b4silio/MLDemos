@@ -16,21 +16,24 @@ unix:MLBUILD = build
 ######################
 # Optional libraries #
 ######################
-# OpenCV : We currently support 2.1 and upwards. You may select which version
-# you have or let qmake find it out for you.
+# OpenCV : We currently support 2.1 and upwards (on windows 2.2 upwards).
+# You may select which version you have
+# or let qmake find it out for you (linux only).
 
 win32{
-	CONFIG += opencv22
-#	CONFIG += opencv21
-    OPENCV_VER = 230
-}else{
-#	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
     CONFIG += opencv22
-#	CONFIG += opencv21
+    OPENCV_VER = 231
+}else:macx{
+    CONFIG += opencv21
+    CONFIG += opencv22
+}else{
+    CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+#   CONFIG += opencv22
+#   CONFIG += opencv21
 }
 
 # Boost
-	CONFIG += boost
+    CONFIG += boost
 
 ############################################
 # PATHS for the BOOST and OPENCV libraries #
@@ -42,22 +45,12 @@ win32{
 # manager
 
 win32{
-	CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
-	CONFIG(opencv22|opencv21):OPENCV = C:/DEV/OpenCV2.3-GCC
-    BOOST = E:/DEV/boost_1_47_0
-    OPENCV = C:/DEV/OpenCV2.3-GCC
+    CONFIG(boost):BOOST = C:/lib/boost-1.49.0
+    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/lib/opencv
 }else:macx{
     CONFIG(boost):BOOST = /usr/local/boost_1_47_0
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
 }
-
-#	INCLUDEPATH +=	/usr/include/qt4 \
-#			/usr/include/qt4/QtCore \
-#			/usr/include/qt4/QtGui \
-#			/usr/include/qt4/QtSvg \
-#			/usr/include/qt4/QtOpenGL
-#	LIBS += -L/usr/local/lib
-
 
 # PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP
 
@@ -75,8 +68,9 @@ win32{
 
 # OPENCV
 win32:CONFIG(opencv22){
-	INCLUDEPATH += . "$$OPENCV/include/"
-	LIBS += -L"$$OPENCV/lib/"
+	INCLUDEPATH += . "$$OPENCV/build/include"
+	LIBS += -L"$$OPENCV/build/x86/mingw/lib"
+	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
 	LIBS += -lopencv_core$$OPENCV_VER \
 		-lopencv_features2d$$OPENCV_VER \
 		-lopencv_highgui$$OPENCV_VER \
@@ -140,10 +134,7 @@ CONFIG(boost){
 }
 
 # QT
-unix{
-#	PKGCONFIG = QtCore QtGui QtSvg QtOpenGL
-}
-
+QT = core gui svg opengl
 
 ###############
 # Misc. stuff #
@@ -161,7 +152,8 @@ CONFIG(debug, debug|release){
 }else{
 	message("release mode")
 	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-	macx-g++:QMAKE_CXXFLAGS += -02 -march=native
+	macx-g++:QMAKE_CXXFLAGS += -O2 -march=native
+	win32-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
 }
 
 win32{
@@ -204,18 +196,18 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 win32-g++|macx|unix {
 	QMAKE_CXXFLAGS_WARN_ON = ""
 	QMAKE_CXXFLAGS += -Wno-all
-    #QMAKE_CXXFLAGS += -Wno-endif-labels
+	#QMAKE_CXXFLAGS += -Wno-endif-labels
 	QMAKE_CXXFLAGS += -Wno-unused-variable
 	QMAKE_CXXFLAGS += -Wno-unused-parameter
-    #QMAKE_CXXFLAGS += -Wno-switch
+	#QMAKE_CXXFLAGS += -Wno-switch
 	QMAKE_CXXFLAGS += -Wtrigraphs
 	QMAKE_CXXFLAGS += -Wreturn-type
-    QMAKE_CXXFLAGS += -Wnon-virtual-dtor
-    #QMAKE_CXXFLAGS += -Woverloaded-virtual
+	QMAKE_CXXFLAGS += -Wnon-virtual-dtor
+	#QMAKE_CXXFLAGS += -Woverloaded-virtual
 	#QMAKE_CXXFLAGS += -Wunused-variable
-    QMAKE_CXXFLAGS += -Wunused-value
+	QMAKE_CXXFLAGS += -Wunused-value
 	QMAKE_CXXFLAGS += -Wunknown-pragmas
 	QMAKE_CXXFLAGS += -Wno-shadow
-    #QMAKE_CXXFLAGS += -Wno-deprecated-declarations
-    #QMAKE_CXXFLAGS += -Wno-missing-braces
+	#QMAKE_CXXFLAGS += -Wno-deprecated-declarations
+	#QMAKE_CXXFLAGS += -Wno-missing-braces
 }
