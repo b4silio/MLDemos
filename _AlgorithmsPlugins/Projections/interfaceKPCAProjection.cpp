@@ -93,8 +93,8 @@ void KPCAProjection::GetContoursPixmap(int index)
     int hmo = h-1; // we will drop one line at the edges to avoid weird border conditions
     int wmo = w-1;
     QImage image(wmo,hmo,QImage::Format_RGB32);
-    float *values = new float[w*h];
-    float vmin = FLT_MAX, vmax = -FLT_MAX;
+    double *values = new double[w*h];
+    double vmin = DBL_MAX, vmax = -DBL_MAX;
     int dim = pca->sourcePoints.rows();
 
     int xIndex = contours->spinX1->value()-1;
@@ -106,21 +106,22 @@ void KPCAProjection::GetContoursPixmap(int index)
     {
         FOR(j, h)
         {
-            if(xIndex<dim) point(xIndex) = i/(float)w*(xmax-xmin) + xmin;
-            if(yIndex<dim) point(yIndex) = j/(float)h*(ymax-ymin) + ymin;
-            float value = pcaPointer->test(point, index-1); // indices start from 1 in params.dimCountSpin
+            if(xIndex<dim) point(xIndex) = i/(double)w*(xmax-xmin) + xmin;
+            if(yIndex<dim) point(yIndex) = j/(double)h*(ymax-ymin) + ymin;
+            double value = pcaPointer->test(point, index-1); // indices start from 1 in params.dimCountSpin
             vmin = min(value, vmin);
             vmax = max(value, vmax);
             values[j*w + i] = value;
         }
     }
-    float vdiff=vmax-vmin;
+    double vdiff=vmax-vmin;
+    qDebug() << "range" << vmin << vmax << vdiff;
     if(vdiff == 0) vdiff = 1.f;
     FOR(i, wmo)
     {
         FOR(j, hmo)
         {
-            int value = (int)((values[j*w + i]-vmin)/vdiff*255.f);
+            int value = (int)((values[j*w + i]-vmin)/vdiff*255);
             image.setPixel(i,j, qRgb((int)value,value,value));
         }
     }
