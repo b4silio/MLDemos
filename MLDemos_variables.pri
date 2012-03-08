@@ -1,3 +1,4 @@
+
 ##############################
 #                            #
 #     MLDemos Variables      #
@@ -23,8 +24,8 @@ win32{
 #	CONFIG += opencv21
     OPENCV_VER = 230
 }else{
-#	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
-    CONFIG += opencv22
+	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+#	CONFIG += opencv22
 #	CONFIG += opencv21
 }
 
@@ -77,11 +78,11 @@ win32:CONFIG(opencv22){
 	INCLUDEPATH += . "$$OPENCV/include/"
 	LIBS += -L"$$OPENCV/lib/"
 	LIBS += -lopencv_core$$OPENCV_VER \
-            -lopencv_features2d$$OPENCV_VER \
-            -lopencv_highgui$$OPENCV_VER \
-            -lopencv_imgproc$$OPENCV_VER \
-            -lopencv_legacy$$OPENCV_VER \
-            -lopencv_ml$$OPENCV_VER
+		-lopencv_features2d$$OPENCV_VER \
+		-lopencv_highgui$$OPENCV_VER \
+		-lopencv_imgproc$$OPENCV_VER \
+		-lopencv_legacy$$OPENCV_VER \
+		-lopencv_ml$$OPENCV_VER
 }
 
 macx{
@@ -135,7 +136,13 @@ CONFIG(boost){
     macx|win32{
         INCLUDEPATH += "$$BOOST"
     }else:unix{
+<<<<<<< HEAD
         PKGCONFIG += boost
+=======
+        #PKGCONFIG += boost # Boost doesn't provide its own pc file yet...
+    }else:win32{
+        INCLUDEPATH += "$$BOOST/include"
+>>>>>>> 3b9298e9f5569d02c71c4f83c83d7f63595783a9
     }
 }
 
@@ -160,6 +167,8 @@ CONFIG(debug, debug|release){
 	message("debug mode")
 }else{
 	message("release mode")
+	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+	macx-g++:QMAKE_CXXFLAGS += -02 -march=native
 }
 
 win32{
