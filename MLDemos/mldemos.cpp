@@ -1093,6 +1093,7 @@ void MLDemos::ClearData()
     }
     Clear();
     ResetPositiveClass();
+    FitToData();
     ManualSelectionUpdated();
     UpdateInfo();
 }

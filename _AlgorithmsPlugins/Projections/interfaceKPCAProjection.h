@@ -22,8 +22,8 @@ private:
     std::map<int,QPixmap> contourPixmaps;
     PCA *pcaPointer;
     int xIndex, yIndex;
-    float xmin,xmax;
-    float ymin,ymax;
+    double xmin,xmax;
+    double ymin,ymax;
     void GetContoursPixmap(int index);
 
 public:

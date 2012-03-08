@@ -1,19 +1,20 @@
 #include "qcontour.h"
 #include <float.h>
+#include <math.h>
 #include <QDebug>
 
-QContour::QContour(float *values, int w, int h)
+QContour::QContour(double *values, int w, int h)
     : valueMap(ValueMap(values,w,h))
 {
-    vmin = FLT_MAX;
-    vmax = -FLT_MAX;
+    vmin = DBL_MAX;
+    vmax = -DBL_MAX;
     if(values)
     {
         for(int i=0; i<w; i++)
         {
             for(int j=0; j<h; j++)
             {
-                float v = values[j*w+i];
+                double v = values[j*w+i];
                 if(vmin > v) vmin = v;
                 if(vmax < v) vmax = v;
             }
@@ -24,9 +25,17 @@ QContour::QContour(float *values, int w, int h)
         vmax += 0.1f;
         vmin -= 0.1f;
     }
+
+    if(vmax-vmin < 1e-10)
+    {
+        double vdiff = 1e-10;
+        double vcenter = (vmax-vmin)*0.5f;
+        vmax = vcenter + vdiff*0.5f;
+        vmin = vcenter - vdiff*0.5f;
+    }
 }
 
-float QContour::meanValue(int xStart, int xEnd, int yStart, int yEnd)
+double QContour::meanValue(int xStart, int xEnd, int yStart, int yEnd)
 {
     int w = valueMap.w, h = valueMap.h;
 
@@ -53,15 +62,15 @@ float QContour::meanValue(int xStart, int xEnd, int yStart, int yEnd)
     return accumulator;
 }
 
-float QContour::meanValue(QRect rect)
+double QContour::meanValue(QRect rect)
 {
     return meanValue(rect.x(), rect.x()+rect.width(), rect.y(), rect.y()+rect.height());
 }
 
-void QContour::Paint(QPainter &painter, int levels)
+void QContour::Paint(QPainter &painter, int levels, int zoom)
 {
     CContourMap map;
-    map.generate_levels(vmin,vmax,levels);
+    map.generate_levels(vmin,vmax,levels*zoom);
     map.contour(&valueMap);
     //map.dump();
     map.consolidate(); // connect all the lines
@@ -73,7 +82,7 @@ void QContour::Paint(QPainter &painter, int levels)
     int H = painter.viewport().height();
 
     QList<QPainterPath> paths;
-    QList<float> altitudes;
+    QList<double> altitudes;
     for(int i=0; i<levels; i++)
     {
         CContourLevel *level = map.level(i);
@@ -105,7 +114,7 @@ void QContour::Paint(QPainter &painter, int levels)
     painter.setBrush(Qt::NoBrush);
     for(int i=0; i<paths.size(); i++)
     {
-        painter.setPen(QPen(Qt::green, 0.25 + i/(float)paths.size()*3));
+        painter.setPen(QPen(Qt::green, 0.25 + i/(double)paths.size()*3));
         painter.drawPath(paths.at(i));
     }
 
@@ -117,7 +126,7 @@ void QContour::Paint(QPainter &painter, int levels)
     painter.setBrush(Qt::NoBrush);
     for(int i=0; i<rect.height(); i++)
     {
-        float v = (1.f - i/(float)rect.height())*255.f;
+        double v = (1. - i/(double)rect.height())*255.;
         painter.setPen(QColor(v,v,v));
         painter.drawLine(rect.x(), rect.y() + i, rect.x() + rect.width(), rect.y() + i);
     }
@@ -125,28 +134,37 @@ void QContour::Paint(QPainter &painter, int levels)
     // we draw the altitude lines
     for(int i=0; i<altitudes.size(); i++)
     {
-        float v = altitudes[i];
+        double v = altitudes[i];
         v = (v-vmin)/(vmax-vmin);
         int y = (int)(v*rect.height());
-        painter.setPen(QPen(Qt::green, 3.25 - i/(float)altitudes.size()*3));
+        painter.setPen(QPen(Qt::green, 3.25 - i/(double)altitudes.size()*3));
         painter.drawLine(rect.x(), y, rect.x()+rect.width(), y);
     }
 
+    const double multiplier = 1000.; // this is to avoid numerical instabilities
+
     // we draw the values on the colorbar
+    QFontMetrics fm = painter.fontMetrics();
     QFont font = painter.font();
     font.setPointSize(9);
     painter.setFont(font);
     painter.setOpacity(1);
     int steps = 10;
+    bool bShortFormat = true;
+    if(fabs(vmax/multiplier) < 1e-6 && fabs(vmin/multiplier) < 1e-6) bShortFormat = false;
     for(int i=0; i<steps+1; i++)
     {
-        float v = (1.f - i/(float)steps);
-        QString text = QString("%1").arg(v*(vmax-vmin) + vmin, 0, 'f', 2);
+        double v = (1.f - i/(double)steps);
+        double value = (v*(vmax-vmin) + vmin)/multiplier;
+        QString text;
+        if(bShortFormat) text = QString("%1").arg(value, 0, 'g', 4);
+        else text = QString("%1").arg(value, 0, 'f', 4);
         int y = rect.y() + i*rect.height()/steps;
-        QRect textRect = QRect(rect.x()-40, y - 10, 40-6, 20);
+        QRect boundingRect = fm.boundingRect(text);
+        QRect textRect = QRect(rect.x()-boundingRect.width()-6, y - boundingRect.height()/2, boundingRect.width(), boundingRect.height());
         // to decide if we write stuff in white or black
         QRect testRect = QRect(textRect.x()*w/W, textRect.y()*h/H, textRect.width()*w/W, textRect.height()*h/H);
-        float mean = meanValue(testRect);
+        double mean = meanValue(testRect);
         mean = (mean-vmin)/(vmax-vmin);
         painter.setPen((mean>0.5)? Qt::black : Qt::white);
         painter.drawText(textRect, Qt::AlignRight + Qt::AlignVCenter, text);
@@ -154,7 +172,7 @@ void QContour::Paint(QPainter &painter, int levels)
     }
 
     // we decide if we write stuff in white or black
-    float mean = meanValue(QRect((rect.x()-40)*w/W, rect.y()*h/H, (40-6)*w/W, rect.height()*h/H));
+    double mean = meanValue(QRect((rect.x()-40)*w/W, rect.y()*h/H, (40-6)*w/W, rect.height()*h/H));
     painter.setPen(QPen(mean>0.5?Qt::black:Qt::white, 1));
     painter.drawRect(rect);
 

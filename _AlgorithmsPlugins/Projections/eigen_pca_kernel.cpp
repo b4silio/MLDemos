@@ -89,7 +89,7 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
     //_result = (sqrtE * _result.transpose()).transpose();
 }
 
-float PCA::test(VectorXd point, int dim)
+float PCA::test(VectorXd point, int dim, double multiplier)
 {
     if(!k) return 0;
     if(dim >= eigenVectors.cols()) return 0;
@@ -118,29 +118,17 @@ float PCA::test(VectorXd point, int dim)
     k->Compute(onePoint, sourcePoints);
 
     //std::cout << "K:\n" << k->get() << "\n";
-
-    /*
-    // ''centralize''
-    int kRows = k->get().rows();
-    int kCols = k->get().cols();
-    MatrixXd K = k->get()
-        - MatrixXd::Ones(kRows, kRows)*k->get()
-        - k->get()*MatrixXd::Ones(kCols, kCols)
-        + MatrixXd::Ones(kRows, kRows)*k->get()*MatrixXd::Ones(kCols, kCols);
-    */
-
-    //	std::cout << K.row(0) << "\n";
     //	std::cout << eigenvalues << "\n";
-    //	std::cout << k->get().row(0) << "\n";
 
-    float result = 0;
+    double result = 0;
     for (int w=0; w<eigenVectors.rows(); w++)
     {
-        //result += K(0,w) * eigenVectors(w,pi[0].second); // permutation indices
+        //result += K(0,w) * eigenVectors(w,pi[dim].second); // permutation indices
         result += k->get()(0,w) * eigenVectors(w,pi[dim].second); // permutation indices
     }
+    result = result * multiplier;
     //result = (result * 0.25f - 1)*2;
-    //result *= eigenvalues(pi[0].second);
+    //result *= eigenvalues(pi[dim].second);
     //std::cout << result << "\n";
     return result;
 }
@@ -207,7 +195,7 @@ MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
     {
         for(int j=0; j < results.cols(); j++)
         {
-//            results(i,j) *= 1.0;
+            //            results(i,j) *= 1.0;
         }
     }
 
