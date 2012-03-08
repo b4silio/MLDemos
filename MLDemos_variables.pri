@@ -24,8 +24,8 @@ win32{
 #	CONFIG += opencv21
 	OPENCV_VER = 231
 }else{
-#	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
-    CONFIG += opencv22
+	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+#	CONFIG += opencv22
 #	CONFIG += opencv21
 }
 
@@ -76,11 +76,11 @@ win32:CONFIG(opencv22){
 	INCLUDEPATH += . "$$OPENCV/include/"
 	LIBS += -L"$$OPENCV/lib/"
 	LIBS += -lopencv_core$$OPENCV_VER \
-            -lopencv_features2d$$OPENCV_VER \
-            -lopencv_highgui$$OPENCV_VER \
-            -lopencv_imgproc$$OPENCV_VER \
-            -lopencv_legacy$$OPENCV_VER \
-            -lopencv_ml$$OPENCV_VER
+		-lopencv_features2d$$OPENCV_VER \
+		-lopencv_highgui$$OPENCV_VER \
+		-lopencv_imgproc$$OPENCV_VER \
+		-lopencv_legacy$$OPENCV_VER \
+		-lopencv_ml$$OPENCV_VER
 }
 
 
@@ -156,6 +156,8 @@ CONFIG(debug, debug|release){
 	message("debug mode")
 }else{
 	message("release mode")
+	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+	macx-g++:QMAKE_CXXFLAGS += -02 -march=native
 }
 
 win32{
