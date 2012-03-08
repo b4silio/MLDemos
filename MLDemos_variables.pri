@@ -24,7 +24,7 @@ win32{
     CONFIG += opencv22
     OPENCV_VER = 231
 }else:macx{
-    CONFIG += opencv21
+#    CONFIG += opencv21
     CONFIG += opencv22
 }else{
     CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
