@@ -69,8 +69,10 @@ double QContour::meanValue(QRect rect)
 
 void QContour::Paint(QPainter &painter, int levels, int zoom)
 {
+    if(vmin == vmax) return;
     CContourMap map;
-    map.generate_levels(vmin,vmax,levels*zoom);
+    levels = (int)(levels*sqrt(zoom));
+    map.generate_levels(vmin,vmax,levels);
     map.contour(&valueMap);
     //map.dump();
     map.consolidate(); // connect all the lines
@@ -112,7 +114,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::green, 2));
     painter.setBrush(Qt::NoBrush);
-    for(int i=0; i<paths.size(); i++)
+    for(int i=0; i<min(paths.size(),300); i++)
     {
         painter.setPen(QPen(Qt::green, 0.25 + i/(double)paths.size()*3));
         painter.drawPath(paths.at(i));
@@ -136,7 +138,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
     {
         double v = altitudes[i];
         v = (v-vmin)/(vmax-vmin);
-        int y = (int)(v*rect.height());
+        int y = (int)(v*rect.height()) + 16;
         painter.setPen(QPen(Qt::green, 3.25 - i/(double)altitudes.size()*3));
         painter.drawLine(rect.x(), y, rect.x()+rect.width(), y);
     }
