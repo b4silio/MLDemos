@@ -100,15 +100,17 @@ void KPCAProjection::GetContoursPixmap(int index)
     int xIndex = contours->spinX1->value()-1;
     int yIndex = contours->spinX2->value()-1;
 
+    double multiplier = 1000.; // this is used to avoid numerical instabilities when computing the contour lines
     VectorXd point(dim);
     FOR(d,dim) point(d) = 0;
+    qDebug() << "boundaries: " << xmin << ymin << "-->" << xmax << ymax;
     FOR(i, w)
     {
         FOR(j, h)
         {
             if(xIndex<dim) point(xIndex) = i/(double)w*(xmax-xmin) + xmin;
             if(yIndex<dim) point(yIndex) = j/(double)h*(ymax-ymin) + ymin;
-            double value = pcaPointer->test(point, index-1); // indices start from 1 in params.dimCountSpin
+            double value = pcaPointer->test(point, index-1, multiplier); // indices start from 1 in params.dimCountSpin
             vmin = min(value, vmin);
             vmax = max(value, vmax);
             values[j*w + i] = value;
@@ -267,7 +269,7 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         xmax += 3*xdiff;
         ymin -= 3*ydiff;
         ymax += 3*ydiff;
-        cout << pcaPointer->eigenVectors;
+        //cout << pcaPointer->eigenVectors;
     }
 
     contours->dimSpin->setRange(1, kpca->targetDims);

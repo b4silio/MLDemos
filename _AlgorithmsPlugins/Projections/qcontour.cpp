@@ -1,5 +1,6 @@
 #include "qcontour.h"
 #include <float.h>
+#include <math.h>
 #include <QDebug>
 
 QContour::QContour(double *values, int w, int h)
@@ -25,9 +26,9 @@ QContour::QContour(double *values, int w, int h)
         vmin -= 0.1f;
     }
 
-    if(vmax-vmin < 1e-6)
+    if(vmax-vmin < 1e-10)
     {
-        double vdiff = 1e-6;
+        double vdiff = 1e-10;
         double vcenter = (vmax-vmin)*0.5f;
         vmax = vcenter + vdiff*0.5f;
         vmin = vcenter - vdiff*0.5f;
@@ -140,18 +141,27 @@ void QContour::Paint(QPainter &painter, int levels)
         painter.drawLine(rect.x(), y, rect.x()+rect.width(), y);
     }
 
+    const double multiplier = 1000.; // this is to avoid numerical instabilities
+
     // we draw the values on the colorbar
+    QFontMetrics fm = painter.fontMetrics();
     QFont font = painter.font();
     font.setPointSize(9);
     painter.setFont(font);
     painter.setOpacity(1);
     int steps = 10;
+    bool bShortFormat = true;
+    if(fabs(vmax/multiplier) < 1e-6 && fabs(vmin/multiplier) < 1e-6) bShortFormat = false;
     for(int i=0; i<steps+1; i++)
     {
         double v = (1.f - i/(double)steps);
-        QString text = QString("%1").arg(v*(vmax-vmin) + vmin, 0, 'f', 2);
+        double value = (v*(vmax-vmin) + vmin)/multiplier;
+        QString text;
+        if(bShortFormat) text = QString("%1").arg(value, 0, 'g', 4);
+        else text = QString("%1").arg(value, 0, 'f', 4);
         int y = rect.y() + i*rect.height()/steps;
-        QRect textRect = QRect(rect.x()-40, y - 10, 40-6, 20);
+        QRect boundingRect = fm.boundingRect(text);
+        QRect textRect = QRect(rect.x()-boundingRect.width()-6, y - boundingRect.height()/2, boundingRect.width(), boundingRect.height());
         // to decide if we write stuff in white or black
         QRect testRect = QRect(textRect.x()*w/W, textRect.y()*h/H, textRect.width()*w/W, textRect.height()*h/H);
         double mean = meanValue(testRect);
