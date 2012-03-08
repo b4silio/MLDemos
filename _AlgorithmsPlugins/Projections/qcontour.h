@@ -28,7 +28,7 @@ class QContour
     double meanValue(QRect rect);
 public:
     QContour(double *values, int w, int h);
-    void Paint(QPainter &painter, int levels);
+    void Paint(QPainter &painter, int levels, int zoom=1);
 };
 
 #endif // QCONTOUR_H

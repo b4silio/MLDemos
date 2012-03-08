@@ -67,10 +67,10 @@ double QContour::meanValue(QRect rect)
     return meanValue(rect.x(), rect.x()+rect.width(), rect.y(), rect.y()+rect.height());
 }
 
-void QContour::Paint(QPainter &painter, int levels)
+void QContour::Paint(QPainter &painter, int levels, int zoom)
 {
     CContourMap map;
-    map.generate_levels(vmin,vmax,levels);
+    map.generate_levels(vmin,vmax,levels*zoom);
     map.contour(&valueMap);
     //map.dump();
     map.consolidate(); // connect all the lines
