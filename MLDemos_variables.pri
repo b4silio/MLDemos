@@ -142,7 +142,7 @@ CONFIG(boost){
 
 # QT
 unix{
-#	PKGCONFIG = QtCore QtGui QtSvg QtOpenGL
+	QT = core gui svg opengl
 }
 
 
@@ -162,7 +162,8 @@ CONFIG(debug, debug|release){
 }else{
 	message("release mode")
 	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-	macx-g++:QMAKE_CXXFLAGS += -02 -march=native
+	macx-g++:QMAKE_CXXFLAGS += -O2 -march=native
+	win32-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
 }
 
 win32{
