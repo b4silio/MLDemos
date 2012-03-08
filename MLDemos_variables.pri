@@ -45,8 +45,8 @@ win32{
 # manager
 
 win32{
-    CONFIG(boost):BOOST = C:/lib/boost-1.49.0
-    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/lib/opencv
+    CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
+    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
 }else:macx{
     CONFIG(boost):BOOST = /usr/local/boost_1_47_0
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
@@ -61,9 +61,11 @@ win32{
 win32{
 	DEFINES += WIN32
 	CONFIG += WIN32
-}unix{
-	macx:DEFINES += MACX
-	CONFIG += link_pkgconfig
+}else:macx{
+    DEFINES += MACX
+    CONFIG += MACX
+}else:unix{
+    CONFIG += link_pkgconfig
 }
 
 # OPENCV
@@ -152,7 +154,7 @@ CONFIG(debug, debug|release){
 }else{
 	message("release mode")
 	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-	macx-g++:QMAKE_CXXFLAGS += -O2 -march=native
+    macx-g++:QMAKE_CXXFLAGS += -O2
 	win32-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
 }
 

@@ -6,11 +6,9 @@ NAME = 3rdParty
 MLPATH =..
 CONFIG += mainApp static
 
-include($$MLPATH/MLDemos_variables.pri)
-
 # disable some warnings for 3rd party libraries (not our problem if they do funky stuff in their libraries)
 
-win32-g++|macx|unix {
+win32-g++|macx|unix{
     QMAKE_CXXFLAGS_WARN_ON = ""
     QMAKE_CXXFLAGS = -Wno-all
     #QMAKE_CXXFLAGS += -Wno-endif-labels
@@ -28,6 +26,7 @@ win32-g++|macx|unix {
     QMAKE_CXXFLAGS += -Wno-deprecated-declarations
     QMAKE_CXXFLAGS += -Wno-missing-braces
 }
+include($$MLPATH/MLDemos_variables.pri)
 
 
 win32{
