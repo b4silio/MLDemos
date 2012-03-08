@@ -556,12 +556,20 @@ void Canvas::FitToData()
     if(!data->GetCount() && !data->GetTimeSeries().size())
     {
         center = fvec(2,0);
+        zooms = fvec(2, 1.f);
         SetZoom(1);
         //qDebug() << "nothing to fit";
         return;
     }
     int dim = data->GetDimCount();
     center = fvec(dim,0);
+    if(data->GetCount() == 1)
+    {
+        center = data->GetSample(0);
+        zooms = fvec(dim,1.f);
+        SetZoom(1);
+        return;
+    }
     //qDebug() << "fit to data, dim: " << dim;
 
     // we go through all the data and find the boundaries

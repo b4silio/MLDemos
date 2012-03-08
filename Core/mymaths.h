@@ -114,6 +114,8 @@ bool operator == (const fvec a, const fvec b);
 bool operator == (const fvec a, const float b);
 bool operator != (const fvec a, const fvec b);
 bool operator != (const fvec a, const float b);
+//dvec operator = (const fvec a);
+//void operator = (dvec &a, const fvec b);
 
 std::vector<fvec> interpolate(std::vector<fvec> a, int count);
 std::vector<fvec> interpolateSpline(std::vector<fvec> a, int count);

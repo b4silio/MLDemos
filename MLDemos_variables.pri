@@ -22,10 +22,10 @@ unix:MLBUILD = build
 win32{
 	CONFIG += opencv22
 #	CONFIG += opencv21
-	OPENCV_VER = 231
+    OPENCV_VER = 230
 }else{
-	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
-#	CONFIG += opencv22
+#	CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+    CONFIG += opencv22
 #	CONFIG += opencv21
 }
 
@@ -44,6 +44,8 @@ win32{
 win32{
 	CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
 	CONFIG(opencv22|opencv21):OPENCV = C:/DEV/OpenCV2.3-GCC
+    BOOST = E:/DEV/boost_1_47_0
+    OPENCV = C:/DEV/OpenCV2.3-GCC
 }else:macx{
     CONFIG(boost):BOOST = /usr/local/boost_1_47_0
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
@@ -82,7 +84,6 @@ win32:CONFIG(opencv22){
 		-lopencv_legacy$$OPENCV_VER \
 		-lopencv_ml$$OPENCV_VER
 }
-
 macx{
     CONFIG(opencv22){
         DEFINES += OPENCV22
@@ -131,12 +132,10 @@ macx{
 CONFIG(boost){
     DEFINES += WITHBOOST
     message("Using boost libraries")
-    macx{
+    macx|win32{
         INCLUDEPATH += "$$BOOST"
     }else:unix{
         #PKGCONFIG += boost # Boost doesn't provide its own pc file yet...
-    }else:win32{
-        INCLUDEPATH += "$$BOOST/include"
     }
 }
 
