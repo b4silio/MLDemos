@@ -27,7 +27,7 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
                 sourcePoints(i,0) = 1.f;
     }
 
-    if(k) delete k;
+    if(k) delete k; k=0;
     switch(kernelType)
     {
     case 0:
@@ -91,12 +91,12 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
 
 float PCA::test(VectorXd point, int dim, double multiplier)
 {
-    if(!k) return 0;
     if(dim >= eigenVectors.cols()) return 0;
 
     int n = 1;
     int dimSpace = 1;
     int m = point.rows();
+    if(k) delete k; k=0;
 
     switch(kernelType)
     {
@@ -124,7 +124,8 @@ float PCA::test(VectorXd point, int dim, double multiplier)
     for (int w=0; w<eigenVectors.rows(); w++)
     {
         //result += K(0,w) * eigenVectors(w,pi[dim].second); // permutation indices
-        result += k->get()(0,w) * eigenVectors(w,pi[dim].second); // permutation indices
+        double kw = k->get()(0,w);
+        result += kw * eigenVectors(w,pi[dim].second); // permutation indices
     }
     result = result * multiplier;
     //result = (result * 0.25f - 1)*2;
@@ -135,7 +136,6 @@ float PCA::test(VectorXd point, int dim, double multiplier)
 
 VectorXd PCA::project(VectorXd &point)
 {
-    if(!k) return point;
     int n = eigenVectors.cols();
     int m = point.rows();
     MatrixXd onePoint = MatrixXd::Zero(m,1);
@@ -148,11 +148,13 @@ VectorXd PCA::project(VectorXd &point)
 
 MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
 {
-    if(!k) return MatrixXd();
-
     int m = dataPoints.rows();
     int n = dataPoints.cols();
 
+    if(k)
+    {
+        delete k; k=0;
+    }
     switch(kernelType)
     {
     case 0:

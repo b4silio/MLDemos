@@ -29,6 +29,7 @@ class QContour
 public:
     QContour(double *values, int w, int h);
     void Paint(QPainter &painter, int levels, int zoom=1);
+    void SetLimits(double vmin, double vmax){this->vmin=vmin; this->vmax=vmax;}
 };
 
 #endif // QCONTOUR_H

@@ -21,6 +21,7 @@ private:
     ivec contourSampleLabels;
     std::map<int,QPixmap> contourPixmaps;
     PCA *pcaPointer;
+    PCA contourPca;
     int xIndex, yIndex;
     double xmin,xmax;
     double ymin,ymax;

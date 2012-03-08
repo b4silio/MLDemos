@@ -28,8 +28,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "parser.h"
 #include <interfaces.h>
 #include "ui_CSVImport.h"
+#include <algorithm>
 #include <QFileDialog>
 #include <QTableView>
+#include <QMessageBox>
 #include <QDebug>
 
 class CSVImport : public QObject, public InputOutputInterface
@@ -84,6 +86,8 @@ private slots:
     void classColumnChanged(int value);
     void on_dumpButton_clicked();
 //    void on_pcaButton_clicked();
+    void on_importLimitSpin_valueChanged(int arg1);
+    void on_importLimitCombo_currentIndexChanged(int index);
 };
 
 #endif // WEBIMPORT_H_INCLUDED
