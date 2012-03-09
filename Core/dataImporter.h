@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QTableView>
 #include <QDebug>
+#include <QMessageBox>
 
 namespace Ui {
     class DataImporterDialog;
@@ -62,6 +63,8 @@ public slots:
 	void LoadFile();
     void SendData();
 private slots:
+    void on_importLimitSpin_valueChanged(int arg1);
+    void on_importLimitCombo_currentIndexChanged(int index);
     void classIgnoreChanged();
     void headerChanged();
     void classColumnChanged(int value);
