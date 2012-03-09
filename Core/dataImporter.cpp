@@ -45,6 +45,8 @@ void DataImporter::Start()
         connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
         connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(SendData()));
         connect(gui->classIgnoreCheck, SIGNAL(clicked()), this, SLOT(classIgnoreChanged()));
+        connect(gui->importLimitSpin, SIGNAL(valueChanged(int)), this, SLOT(on_importLimitSpin_valueChanged(int)));
+        connect(gui->importLimitCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(on_importLimitCombo_currentIndexChanged(int)));
         guiDialog->show();
     }
     else guiDialog->show();
@@ -117,6 +119,21 @@ void DataImporter::Parse(QString filename)
     }
     gui->classColumnSpin->setRange(1,rawData[0].size());
     gui->classColumnSpin->setValue(rawData[0].size());
+
+    gui->importLimitSpin->setMaximum(inputParser->getCount());
+    gui->importLimitSpin->setValue(inputParser->getCount());
+    gui->importLimitCombo->setEnabled(true);
+
+    if(gui->importLimitCombo->count()==0)
+    {
+        gui->importLimitCombo->addItem(QString("-->"));
+        gui->importLimitCombo->addItem(QString("10%"),QVariant(0.10));
+        gui->importLimitCombo->addItem(QString("25%"),QVariant(0.25));
+        gui->importLimitCombo->addItem(QString("50%"),QVariant(0.50));
+        gui->importLimitCombo->addItem(QString("75%"),QVariant(0.75));
+        gui->importLimitCombo->addItem(QString("100%"),QVariant(1.00));
+    }
+    gui->importLimitCombo->setCurrentIndex(5);
 }
 
 void DataImporter::FetchResults(std::vector<fvec> results)
@@ -174,6 +191,7 @@ void DataImporter::SendData()
 {
     ivec excludeIndices;
     vector<bool> bExcluded(gui->tableWidget->columnCount(), false);
+    int maxSamples = gui->importLimitSpin->value();
     QModelIndexList indexes = gui->tableWidget->selectionModel()->selection().indexes();
     FOR(i, indexes.count())
     {
@@ -185,10 +203,39 @@ void DataImporter::SendData()
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
-	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
+    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, maxSamples);
     classNames = inputParser->getClassNames();
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
     emit(SetClassNames(classNames));
+
+}
+
+void DataImporter::on_importLimitSpin_valueChanged(int arg1)
+{
+    int spinnerValue = gui->importLimitSpin->value();
+    int nbSamples = inputParser->getCount();
+    if (nbSamples <= 0) return;
+    int percentage = floor(100*spinnerValue/nbSamples);
+    // TODO: send that info to status in the plugin
+//    if(spinnerValue >= 5000)
+//    {
+//        QMessageBox limitWarning;
+//        limitWarning.setText("Running some algorithms on large datasets may take quite some time...");
+//        limitWarning.exec();
+//    }
+}
+
+void DataImporter::on_importLimitCombo_currentIndexChanged(int index)
+{
+    if(index == 0)
+        gui->importLimitSpin->setEnabled(true);
+    else
+    {
+        gui->importLimitSpin->setEnabled(false);
+        int nbSamples = inputParser->getCount();
+        float percentage = gui->importLimitCombo->itemData(index).toFloat();
+        gui->importLimitSpin->setValue(floor(nbSamples*percentage));
+    }
 
 }

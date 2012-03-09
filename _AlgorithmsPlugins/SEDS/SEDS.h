@@ -8,6 +8,11 @@
 #include <nlopt/nlopt.hpp>
 using namespace MathLib;
 
+#define USEQT
+#ifdef USEQT
+#include <QtGui>
+#endif
+
 struct options{  //A struct containing all passed options by user
     double tol_mat_bias;// = 10^-18;  //constant added to diagonal of covarince to avoid numerical instability
 	double tol_stopping;//=10^-10; //threshold rate of change for optimum
@@ -32,6 +37,11 @@ public:
     Matrix C_Lyapunov;
 
     std::vector<float> displayData;
+
+#ifdef USEQT
+    QLabel *displayLabel;
+    void PaintData(std::vector<float> data);
+#endif
 
     options Options;
     //constructor

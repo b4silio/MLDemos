@@ -10,7 +10,8 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsMaximizers.ui paramsGA.ui paramsParticles.ui
+FORMS += paramsMaximizers.ui paramsGA.ui paramsParticles.ui \
+    paramsNLopt.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
@@ -30,7 +31,9 @@ HEADERS +=	\
 			gaPeon.h \
 			gaTrainer.h \
 			mvnpdf.h \
-			interfaceBasic.h
+			interfaceBasic.h \
+    maximizeNLopt.h \
+    interfaceNLopt.h
 
 SOURCES += 	\
 			maximizeRandom.cpp \
@@ -46,6 +49,8 @@ SOURCES += 	\
 			gaPeon.cpp \
 			gaTrainer.cpp \
 			interfaceBasic.cpp \
+    maximizeNLopt.cpp \
+    interfaceNLopt.cpp
 
 ###########################
 # Dependencies            #

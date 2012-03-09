@@ -3,8 +3,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#include <QtGui>
-
 double NLOpt_Compute_J(unsigned nPar, const double *x, double *grad, void *f_data)
 {
     SEDS *seds = (SEDS *) f_data;
@@ -22,7 +20,10 @@ double NLOpt_Compute_J(unsigned nPar, const double *x, double *grad, void *f_dat
 
     J_tmp = min(J,J_tmp);
     seds->displayData.push_back(J_tmp);
-	//seds->PaintData(seds->displayData);
+#ifdef USEQT
+    // we paint the data
+    seds->PaintData(seds->displayData);
+#endif
 
     return J;
 }
@@ -58,6 +59,9 @@ SEDS::SEDS()
     Options.SEDS_Ver = 2;
     d = 0;
     nData = 0;
+#ifdef USEQT
+    displayLabel = 0;
+#endif
 }
 
 /* Parsing the input commands to the solver */
@@ -569,18 +573,22 @@ bool SEDS::initialize_value(){
     return true;
 }
 
-/*
-QPixmap pm(320,240);
-QLabel lbl;
+//QPixmap pm(320,240);
+//QLabel lbl;
 void SEDS::PaintData(std::vector<float> data)
 {
+#ifndef USEQT
+    return;
+#else
+    if(!displayLabel) return;
+    QPixmap pm(displayLabel->width(),displayLabel->height());
     QPainter painter(&pm);
     painter.fillRect(pm.rect(), Qt::white);
 
     int w = pm.width();
     int h = pm.height();
     int cnt = data.size();
-    int pad = 10;
+    int pad = 4;
     QPointF oldPoint;
     double minVal = FLT_MAX;
     double maxVal = -FLT_MAX;
@@ -596,7 +604,7 @@ void SEDS::PaintData(std::vector<float> data)
 
     painter.setBrush(Qt::NoBrush);
     painter.setPen(QPen(QColor(200,200,200), 0.5));
-    int steps = 10;
+    int steps = 4;
     for(int i=0; i<=steps; i++)
     {
         painter.drawLine(QPoint(0, i/(float)steps*(h-2*pad) + pad), QPoint(w, i/(float)steps*(h-2*pad) + pad));
@@ -622,11 +630,11 @@ void SEDS::PaintData(std::vector<float> data)
     painter.setPen(QPen(Qt::black, 1));
     painter.drawText(QPointF(200, 20), QString("J_0: %1").arg(data[0]));
     painter.drawText(QPointF(200, 40), QString("J_F: %1").arg(data[data.size()-1]));
-    lbl.setPixmap(pm);
-    lbl.show();
+    displayLabel->setPixmap(pm);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+#endif
 }
-*/
+
 
 /* Running optimization solver to find the optimal values for the model.
  * The result will be saved in the variable p

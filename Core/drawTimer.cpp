@@ -242,11 +242,24 @@ void DrawTimer::Maximization()
     //painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
 	(*maximizer)->Draw(painter);
+    // we draw the current maximum value
+    int barW = 20;
+    QRect legendRect(w - barW - 32, 40, barW, 256);
+    int y = (1.-value) * legendRect.height() + legendRect.y();
 
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawEllipse(QPointF(legendRect.x()-3, y), 2, 2);
+    painter.drawEllipse(QPointF(legendRect.x()+legendRect.width()+3, y), 2, 2);
+    painter.setPen(QPen(Qt::black, 2));
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.drawLine(legendRect.x(), y, legendRect.x()+legendRect.width(), y);
+
+    /*
 	QPointF point(sample[0]*w, sample[1]*h);
 	painter.setPen(QPen(Qt::black, 1.5));
 	painter.setBrush(Qt::NoBrush);
 	painter.drawEllipse(point, 3, 3);
+    */
 }
 
 void DrawTimer::VectorsFast(int count, int steps)
@@ -361,9 +374,9 @@ void DrawTimer::TestFast(int start, int stop)
 		int x = perm[i]%w;
 		int y = perm[i]/w;
 		if(x >= bigMap.width() || y >= bigMap.height()) continue;
-		drawMutex.unlock();
-		sample = canvas->fromCanvas(x,y);
-		fvec val(dim);
+        drawMutex.unlock();
+        sample = canvas->fromCanvas(x,y);
+        fvec val(dim);
 		float v;
 		QMutexLocker lock(mutex);
 		if((*classifier))

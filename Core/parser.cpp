@@ -328,7 +328,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         }
     }
 
-    if(labelMaps[outputLabelColumn].size())
+    if(labelMaps[outputLabelColumn].size() && outputLabelColumn != -1)
     {
         for(map<string,int>::iterator it=labelMaps[outputLabelColumn].begin(); it!=labelMaps[outputLabelColumn].end(); it++)
         {
