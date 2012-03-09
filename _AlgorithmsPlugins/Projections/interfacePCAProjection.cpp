@@ -92,6 +92,7 @@ void PCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
 {
     if(!canvas || !projector) return;
     /*
+    if(canvas->canvasType) return;
     vector<fvec> samples = projector->source;
     vector<fvec> projected = projector->projected;
     if(!projected.size() || !samples.size()) return;

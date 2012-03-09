@@ -92,6 +92,7 @@ void ClassProjections::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *c
 {
     if(!canvas || !classifier) return;
     if(!this->canvas) this->canvas = canvas;
+    if(canvas->canvasType) return;
     painter.setRenderHint(QPainter::Antialiasing);
     ClassifierLinear *linear = (ClassifierLinear*)classifier;
     //int xIndex = canvas->xIndex, yIndex = canvas->yIndex;
@@ -121,6 +122,7 @@ void ClassProjections::DrawModel(Canvas *canvas, QPainter &painter, Classifier *
 {
     if(!classifier || !canvas) return;
     if(!this->canvas) this->canvas = canvas;
+    if(canvas->canvasType) return;
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     int posClass = 1;

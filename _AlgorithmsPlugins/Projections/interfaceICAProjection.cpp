@@ -38,6 +38,7 @@ void ICAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
 void ICAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
+    if(canvas->canvasType) return;
 }
 
 // virtual functions to manage the GUI and I/O

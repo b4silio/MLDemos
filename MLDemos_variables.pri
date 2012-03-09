@@ -22,7 +22,7 @@ unix:MLBUILD = build
 
 win32{
     CONFIG += opencv22
-    OPENCV_VER = 231
+    OPENCV_VER = 230
 }else:macx{
 #    CONFIG += opencv21
     CONFIG += opencv22
@@ -70,11 +70,15 @@ win32{
 
 # OPENCV
 win32:CONFIG(opencv22){
-	INCLUDEPATH += . "$$OPENCV/build/include"
-	LIBS += -L"$$OPENCV/build/x86/mingw/lib"
-	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
-	LIBS += -lopencv_core$$OPENCV_VER \
-		-lopencv_features2d$$OPENCV_VER \
+    DEFINES += OPENCV22
+    INCLUDEPATH += . "$$OPENCV/include"
+    LIBS += -L"$$OPENCV/lib"
+    LIBS += -L"$$OPENCV/bin"
+#    INCLUDEPATH += . "$$OPENCV/build/include"
+#	LIBS += -L"$$OPENCV/build/x86/mingw/lib"
+#	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
+    LIBS += -lopencv_core$$OPENCV_VER \
+        -lopencv_features2d$$OPENCV_VER \
 		-lopencv_highgui$$OPENCV_VER \
 		-lopencv_imgproc$$OPENCV_VER \
 		-lopencv_legacy$$OPENCV_VER \

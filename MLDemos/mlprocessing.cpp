@@ -211,6 +211,11 @@ void MLDemos::Regression()
         outputIndexInList = i;
         break;
     }
+    if(outputDim != -1)
+    {
+        ui.canvasX2Spin->setValue(outputDim+1);
+        DisplayOptionChanged();
+    }
 
     regressor = regressors[tab]->GetRegressor();
     tabUsedForTraining = tab;
@@ -227,11 +232,6 @@ void MLDemos::Regression()
     }
 
     Train(regressor, outputDim, trainRatio, trainList);
-    if(outputDim != -1)
-    {
-        ui.canvasX2Spin->setValue(outputDim+1);
-        DisplayOptionChanged();
-    }
     regressors[tab]->Draw(canvas, regressor);
 
     // here we draw the errors for each sample
@@ -621,7 +621,6 @@ void MLDemos::Cluster()
         optionsCluster->resultList->item(i)->setForeground(i ? SampleColor[i%SampleColorCnt] : Qt::gray);
     }
 
-
     // we fill in the canvas sampleColors for the alternative display types
     canvas->sampleColors.resize(samples.size());
     FOR(i, samples.size())
@@ -967,10 +966,7 @@ void MLDemos::Project()
     CanvasTypeChanged();
     CanvasOptionsChanged();
     ResetPositiveClass();
-    if(!canvas->canvasType)
-    {
-        projectors[tab]->Draw(canvas, projector);
-    }
+    projectors[tab]->Draw(canvas, projector);
     canvas->repaint();
     UpdateInfo();
 }

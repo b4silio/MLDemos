@@ -72,7 +72,7 @@ public:
 			canvas->maps.model.setMask(bitmap);
 			canvas->maps.model.fill(Qt::transparent);
 			QPainter painter(&canvas->maps.model);
-			DrawModel(canvas, painter, classifier);
+            if(!canvas->canvasType) DrawModel(canvas, painter, classifier);
 		}
 
 		{
@@ -82,7 +82,7 @@ public:
 			canvas->maps.info.setMask(bitmap);
 			canvas->maps.info.fill(Qt::transparent);
 			QPainter painter(&canvas->maps.info);
-			DrawInfo(canvas, painter, classifier);
+            if(!canvas->canvasType) DrawInfo(canvas, painter, classifier);
 		}
 		canvas->maps.confidence = QPixmap();
 		canvas->repaint();
@@ -122,7 +122,7 @@ public:
 			modelPixmap.setMask(bitmap);
 			modelPixmap.fill(Qt::transparent);
 			QPainter painter(&modelPixmap);
-			DrawModel(canvas, painter, clusterer);
+            if(!canvas->canvasType) DrawModel(canvas, painter, clusterer);
 			canvas->maps.model = modelPixmap;
 		}
 
@@ -133,7 +133,7 @@ public:
 			infoPixmap.setMask(bitmap);
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
-			DrawInfo(canvas, painter, clusterer);
+            if(!canvas->canvasType) DrawInfo(canvas, painter, clusterer);
 			canvas->maps.info = infoPixmap;
 		}
 		canvas->repaint();
@@ -175,8 +175,8 @@ public:
 			bitmap.clear();
 			canvas->maps.model.setMask(bitmap);
 			canvas->maps.model.fill(Qt::transparent);
-			QPainter painter(&canvas->maps.model);
-			DrawModel(canvas, painter, regressor);
+            QPainter painter(&canvas->maps.model);
+            if(!canvas->canvasType) DrawModel(canvas, painter, regressor);
 		}
 
 		{
@@ -186,7 +186,7 @@ public:
 			infoPixmap.setMask(bitmap);
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
-			DrawInfo(canvas, painter, regressor);
+            if(!canvas->canvasType) DrawInfo(canvas, painter, regressor);
 			canvas->maps.info = infoPixmap;
 		}
 
@@ -225,14 +225,16 @@ public:
 		canvas->maps.confidence = QPixmap(w,h);
 
 		{
-			canvas->maps.model = QPixmap(w,h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			canvas->maps.model.setMask(bitmap);
-			canvas->maps.model.fill(Qt::transparent);
-			QPainter painter(&canvas->maps.model);
-			DrawModel(canvas, painter, dynamical);
-		}
+            QPixmap modelPixmap(w, h);
+            QBitmap bitmap(w,h);
+            bitmap.clear();
+            modelPixmap.setMask(bitmap);
+            modelPixmap.fill(Qt::transparent);
+
+            QPainter painter(&modelPixmap);
+            if(!canvas->canvasType) DrawModel(canvas, painter, dynamical);
+            canvas->maps.model = modelPixmap;
+        }
 
 		{
 			QPixmap infoPixmap(w, h);
@@ -242,7 +244,7 @@ public:
 			infoPixmap.fill(Qt::transparent);
 
 			QPainter painter(&infoPixmap);
-			DrawInfo(canvas, painter, dynamical);
+            if(!canvas->canvasType) DrawInfo(canvas, painter, dynamical);
 			canvas->maps.info = infoPixmap;
 		}
 		canvas->repaint();
