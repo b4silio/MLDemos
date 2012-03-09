@@ -142,7 +142,7 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
     if(!canvas || !clusterer) return;
     painter.setRenderHint(QPainter::Antialiasing);
     ClustererKM * _kmeans = dynamic_cast<ClustererKM*>(clusterer);
-    if(!clusterer) return; // kernel k-means!
+    if(!_kmeans) return; // kernel k-means!
     KMeansCluster *kmeans = _kmeans->kmeans;
     painter.setBrush(Qt::NoBrush);
     FOR(i, kmeans->GetClusters())

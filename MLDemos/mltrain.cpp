@@ -514,6 +514,12 @@ void MLDemos::Train(Maximizer *maximizer)
         startingPoint[0] = starting.x()/w;
         startingPoint[1] = starting.y()/h;
     }
+    else
+    {
+        startingPoint.resize(2);
+        startingPoint[0] = drand48();
+        startingPoint[1] = drand48();
+    }
     maximizer->Train(data, fVec(w,h), startingPoint);
     maximizer->age = 0;
     delete [] data;

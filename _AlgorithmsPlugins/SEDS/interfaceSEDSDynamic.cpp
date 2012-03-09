@@ -49,7 +49,12 @@ void DynamicSEDS::SetParams(Dynamical *dynamical)
 	int maxIteration = params->iterationCount->value();
 	int constraintCriterion = params->sedsConstraintCombo->currentIndex();
 
-	((DynamicalSEDS *)dynamical)->SetParams(clusters, bPrior, bMu, bSigma, objectiveType, maxIteration, constraintCriterion);
+    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS *>(dynamical);
+    if(!seds) return;
+
+    seds->SetParams(clusters, bPrior, bMu, bSigma, objectiveType, maxIteration, constraintCriterion);
+    seds->displayLabel = params->graphLabel;
+
 
 	//float penalty = params->sedsPenaltySpin->value();
 	//int maxMinorIteration = params->minorIterationCount->value();

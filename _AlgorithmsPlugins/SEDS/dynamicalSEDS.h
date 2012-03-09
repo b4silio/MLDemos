@@ -39,6 +39,9 @@ private:
     int constraintCriterion;
     float *data;
 public:
+#ifdef USEQT
+    QLabel *displayLabel;
+#endif
     fvec endpoint;
     fVec endpointFast;
     DynamicalSEDS();

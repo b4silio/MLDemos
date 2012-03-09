@@ -29,7 +29,11 @@ DynamicalSEDS::DynamicalSEDS()
 	: gmm(0),seds(0), data(0), nbClusters(2), penalty(1), bPrior(true), bMu(true), bSigma(true), objectiveType(1),
 	  maxIteration(100), maxMinorIteration(2), constraintCriterion(0), resizeFactor(500.f)
 {
-	type = DYN_SEDS;
+#ifdef USEQT
+    displayLabel = 0;
+#endif
+
+    type = DYN_SEDS;
 	endpoint = fvec();
 	endpoint.resize(4,0.f);
 }
@@ -108,6 +112,10 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	// then optimize with seds
 	DEL(seds);
 	seds = new SEDS();
+
+#ifdef USEQT
+    seds->displayLabel = displayLabel;
+#endif
 
 	// fill in the data
 	//seds->Data.Resize(dim, samples.size());

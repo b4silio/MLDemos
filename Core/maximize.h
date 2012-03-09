@@ -54,7 +54,14 @@ public:
     double MaximumValue(){return GetValue(maximum);}
     std::vector<fvec> &Visited(){return visited;}
     int &Evaluations(){return evaluations;}
-	float GetValue(fvec sample)
+    static float GetValue(fvec sample, float *data, int w, int h)
+    {
+        int xIndex = max(0, min(w-1, (int)(sample[0]*w)));
+        int yIndex = max(0, min(h-1, (int)(sample[1]*h)));
+        int index = yIndex*w + xIndex;
+        return data[index];
+    }
+    float GetValue(fvec sample)
 	{
 		int xIndex = max(0, min(w-1, (int)(sample[0]*w)));
 		int yIndex = max(0, min(h-1, (int)(sample[1]*h)));
