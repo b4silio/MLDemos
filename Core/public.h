@@ -39,6 +39,11 @@
 #include <float.h>
 #include <cmath>
 
+#ifdef WIN32
+#define drand48() (rand()/(float)RAND_MAX) // not as accurate as it could be
+#define srand48(seed) (srand(seed))
+#endif
+
 // types and macros
 #include "types.h"
 

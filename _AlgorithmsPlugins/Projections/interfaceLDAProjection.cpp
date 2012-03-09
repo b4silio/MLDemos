@@ -20,6 +20,7 @@ Projector *LDAProjection::GetProjector()
 void LDAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
+    if(canvas->canvasType) return;
     vector<fvec> samples = projector->source;
     vector<fvec> projected = projector->projected;
     ivec labels = canvas->data->GetLabels();
@@ -44,6 +45,7 @@ void LDAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
 void LDAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
+    if(canvas->canvasType) return;
     vector<fvec> samples = projector->source;
     vector<fvec> projected = projector->projected;
     ivec labels = canvas->data->GetLabels();

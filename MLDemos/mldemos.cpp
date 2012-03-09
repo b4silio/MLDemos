@@ -1276,40 +1276,42 @@ void MLDemos::DisplayOptionChanged()
         drawTimer->Stop();
         drawTimer->Clear();
         canvas->SetZoom(zoom);
-        if(!canvas->canvasType)
+        if(mutex.tryLock())
         {
-            QMutexLocker lock(&mutex);
-            if(classifier)
+            if(!canvas->canvasType)
             {
-                classifiers[tabUsedForTraining]->Draw(canvas, classifier);
-                if(classifier->UsesDrawTimer())
+                if(classifier)
+                {
+                    classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+                    if(classifier->UsesDrawTimer())
+                    {
+                        drawTimer->start(QThread::NormalPriority);
+                    }
+                }
+                else if(regressor)
+                {
+                    regressors[tabUsedForTraining]->Draw(canvas, regressor);
+                    //drawTimer->start(QThread::NormalPriority);
+                }
+                else if(clusterer)
+                {
+                    clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+                }
+                else if(dynamical)
+                {
+                    dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+                    if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
+                }
+                else if(maximizer)
                 {
                     drawTimer->start(QThread::NormalPriority);
                 }
             }
-            else if(regressor)
-            {
-                regressors[tabUsedForTraining]->Draw(canvas, regressor);
-                //drawTimer->start(QThread::NormalPriority);
-            }
-            else if(clusterer)
-            {
-                clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-                drawTimer->start(QThread::NormalPriority);
-            }
-            else if(dynamical)
-            {
-                dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
-                if(dynamicals[tabUsedForTraining]->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
-            }
-            else if(maximizer)
-            {
-                drawTimer->start(QThread::NormalPriority);
-            }
-            else if(projector)
+            if(projector)
             {
                 projectors[tabUsedForTraining]->Draw(canvas, projector);
             }
+            mutex.unlock();
         }
         canvas->repaint();
     }
@@ -2042,6 +2044,8 @@ void MLDemos::CanvasOptionsChanged()
         w = 100*dims;
         bNeedsZoom = true;
     }
+    drawTimer->Stop();
+    drawTimer->Clear();
 
     if(canvas->canvasType != 1 || (!bNeedsZoom && zoom == 1.f))
     {
@@ -2055,6 +2059,20 @@ void MLDemos::CanvasOptionsChanged()
         ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         canvas->SetCanvasType(canvas->canvasType);
         canvas->ResizeEvent();
+
+        if(mutex.tryLock())
+        {
+            if(clusterer)
+            {
+                clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+                drawTimer->start(QThread::NormalPriority);
+            }
+            if(projector)
+            {
+                projectors[tabUsedForTraining]->Draw(canvas, projector);
+            }
+            mutex.unlock();
+        }
         return;
     }
     policy.setHorizontalPolicy(QSizePolicy::Fixed);
@@ -2067,9 +2085,8 @@ void MLDemos::CanvasOptionsChanged()
     ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     canvas->SetCanvasType(canvas->canvasType);
 
-    if(!canvas->canvasType)
+    if(mutex.tryLock())
     {
-        QMutexLocker lock(&mutex);
         if(classifier)
         {
             classifiers[tabUsedForTraining]->Draw(canvas, classifier);
@@ -2078,10 +2095,6 @@ void MLDemos::CanvasOptionsChanged()
         {
             regressors[tabUsedForTraining]->Draw(canvas, regressor);
         }
-        else if(clusterer)
-        {
-            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
-        }
         else if(dynamical)
         {
             dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
@@ -2089,10 +2102,16 @@ void MLDemos::CanvasOptionsChanged()
         else if(maximizer)
         {
         }
-        else if(projector)
+        if(clusterer)
+        {
+            clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+            drawTimer->start(QThread::NormalPriority);
+        }
+        if(projector)
         {
             projectors[tabUsedForTraining]->Draw(canvas, projector);
         }
+        mutex.unlock();
     }
     canvas->ResizeEvent();
 }

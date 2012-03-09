@@ -581,12 +581,14 @@ void SEDS::PaintData(std::vector<float> data)
     return;
 #else
     if(!displayLabel) return;
-    QPixmap pm(displayLabel->width(),displayLabel->height());
+    int w = displayLabel->width();
+    int h = displayLabel->height();
+    QPixmap pm(w,h);
+    QBitmap bitmap(w,h);
+    pm.setMask(bitmap);
+    pm.fill(Qt::transparent);
     QPainter painter(&pm);
-    painter.fillRect(pm.rect(), Qt::white);
 
-    int w = pm.width();
-    int h = pm.height();
     int cnt = data.size();
     int pad = 4;
     QPointF oldPoint;
@@ -604,11 +606,15 @@ void SEDS::PaintData(std::vector<float> data)
 
     painter.setBrush(Qt::NoBrush);
     painter.setPen(QPen(QColor(200,200,200), 0.5));
-    int steps = 4;
+    int steps = 3;
     for(int i=0; i<=steps; i++)
     {
-        painter.drawLine(QPoint(0, i/(float)steps*(h-2*pad) + pad), QPoint(w, i/(float)steps*(h-2*pad) + pad));
-        painter.drawLine(QPoint(i/(float)steps*w, 0), QPoint(i/(float)steps*w, h));
+        painter.drawLine(QPoint(0, i/(float)steps*(h-2*pad) + pad), QPoint(w, i/(float)steps*(h-2*pad) + pad)); // horizontal
+    }
+    steps = steps*w/h;
+    for(int i=0; i<=steps; i++)
+    {
+        painter.drawLine(QPoint(i/(float)steps*w, 0), QPoint(i/(float)steps*w, h)); // vertical
     }
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -628,8 +634,11 @@ void SEDS::PaintData(std::vector<float> data)
     painter.setBrush(QColor(255,255,255,200));
     painter.drawRect(QRect(190,5,100,45));
     painter.setPen(QPen(Qt::black, 1));
-    painter.drawText(QPointF(200, 20), QString("J_0: %1").arg(data[0]));
-    painter.drawText(QPointF(200, 40), QString("J_F: %1").arg(data[data.size()-1]));
+    QFont font = painter.font();
+    font.setPointSize(8);
+    painter.setFont(font);
+    painter.drawText(QPointF(w*2/3, 12), QString("J_0: %1").arg(data[0]));
+    painter.drawText(QPointF(w*2/3, 22), QString("J_F: %1").arg(data[data.size()-1]));
     displayLabel->setPixmap(pm);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 #endif
