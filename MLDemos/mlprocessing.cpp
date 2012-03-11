@@ -714,14 +714,17 @@ void MLDemos::ClusterOptimize()
             fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores, ratio);
             FOR(d, clusterMetrics.size())
             {
-                if(clusterMetrics[d] != clusterMetrics[d]) continue;
+                if(clusterMetrics[d] != clusterMetrics[d]) continue; // not a number
                 metricMeans[d] += clusterMetrics[d];
                 foldCount[d]++;
             }
         }
         FOR(d, metricMeans.size()) metricMeans[d] /= foldCount[d];
         kCounts.push_back(k);
-        FOR(i, metricMeans.size()) results[i].push_back(metricMeans[i]);
+        FOR(i, metricMeans.size())
+        {
+            results[i].push_back(metricMeans[i]);
+        }
     }
 
     int w = optionsCluster->graphLabel->width();
@@ -758,6 +761,7 @@ void MLDemos::ClusterOptimize()
             maxes[i] = max(maxes[i], results[i][j]);
         }
     }
+
     vector< pair<float,int> > bests(results.size());
     FOR(i, results.size())
     {
@@ -772,7 +776,7 @@ void MLDemos::ClusterOptimize()
             }
             float x = k/(float)(kCounts.size()-1);
             float y = (results[i][k] - mins[i])/(maxes[i]-mins[i]);
-            if(i == 3) y = 1.f - y; // fmeasures needs to be maximized
+            //if(i == 3) y = 1.f - y; // fmeasures needs to be maximized
             QPointF point(x*(w-2*pad)+pad, (1.f-y)*(h-2*pad));
             if(k) painter.drawLine(old, point);
             old = point;
@@ -784,7 +788,7 @@ void MLDemos::ClusterOptimize()
     optionsCluster->resultList->addItem(QString("rss: %1 (%2)").arg(bests[0].second).arg(bests[0].first, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("bic: %1 (%2)").arg(bests[1].second).arg(bests[1].first, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("aic: %1 (%2)").arg(bests[2].second).arg(bests[2].first, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("f1: %1 (%2)").arg(bests[3].second).arg(-bests[3].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("f1: %1 (%2)").arg(bests[3].second).arg(bests[3].first, 0, 'f', 2));
     FOR(i, results.size())
     {
         optionsCluster->resultList->item(i)->setForeground(i ? SampleColor[i%SampleColorCnt] : Qt::gray);
