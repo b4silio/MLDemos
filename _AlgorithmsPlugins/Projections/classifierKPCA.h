@@ -35,6 +35,7 @@ private:
 	int kernelType;
 	int kernelDegree;
 	float kernelGamma;
+    float kernelOffset;
 public:
 	std::vector<fvec> Project(std::vector<fvec> samples);
     std::vector<fvec> GetSamples(){return samples;}
@@ -46,7 +47,7 @@ public:
 	float Test(const fvec &sample);
 	float Test(const fVec &sample);
     const char *GetInfoString();
-	void SetParams(int kernelType, int kernelDegree, float kernelGamma);
+    void SetParams(int kernelType, int kernelDegree, float kernelGamma, float kernelOffset);
 };
 
 #endif // _CLASSIFIER_KPCA_H_

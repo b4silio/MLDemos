@@ -59,15 +59,37 @@ void KPCAProjection::ChangeOptions()
     case 0: // poly
         params->kernelDegSpin->setEnabled(true);
         params->kernelDegSpin->setVisible(true);
-        params->kernelWidthSpin->setEnabled(false);
-        params->kernelWidthSpin->setVisible(false);
+        params->kernelWidthSpin->setEnabled(true);
+        params->kernelWidthSpin->setVisible(true);
+        params->kernelDegSpin->setDecimals(0);
+        params->kernelDegSpin->setRange(1,999);
+        params->kernelDegSpin->setSingleStep(1);
+        params->kernelWidthSpin->setRange(-999,999);
+        params->param1Label->setText("Degree");
+        params->param2Label->setText("Offset");
         break;
     case 1: // RBF
         params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
+        params->param1Label->setText("");
+        params->param2Label->setText("Width");
+        params->kernelWidthSpin->setRange(0.001,999);
         params->kernelWidthSpin->setEnabled(true);
         params->kernelWidthSpin->setVisible(true);
         break;
+    case 2: // TANH
+        params->kernelDegSpin->setEnabled(true);
+        params->kernelDegSpin->setVisible(true);
+        params->kernelWidthSpin->setEnabled(true);
+        params->kernelWidthSpin->setVisible(true);
+        params->kernelDegSpin->setDecimals(3);
+        params->kernelDegSpin->setRange(0.01,100);
+        params->kernelDegSpin->setSingleStep(0.1);
+        params->kernelWidthSpin->setRange(-999,999);
+        params->param1Label->setText("Scale");
+        params->param2Label->setText("Offset");
+        break;
+
     }
 }
 
@@ -335,7 +357,7 @@ void KPCAProjection::SaveOptions(QSettings &settings)
 bool KPCAProjection::LoadOptions(QSettings &settings)
 {
     if(settings.contains("kernelTypeCombo")) params->kernelTypeCombo->setCurrentIndex(settings.value("kernelTypeCombo").toInt());
-    if(settings.contains("kernelDegSpin")) params->kernelDegSpin->setValue(settings.value("kernelDegSpin").toInt());
+    if(settings.contains("kernelDegSpin")) params->kernelDegSpin->setValue(settings.value("kernelDegSpin").toFloat());
     if(settings.contains("kernelWidthSpin")) params->kernelWidthSpin->setValue(settings.value("kernelWidthSpin").toFloat());
     if(settings.contains("dimCountSpin")) params->dimCountSpin->setValue(settings.value("dimCountSpin").toInt());
     ChangeOptions();

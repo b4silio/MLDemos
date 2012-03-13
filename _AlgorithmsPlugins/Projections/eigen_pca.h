@@ -97,8 +97,9 @@ public:
 class PolyKernel : public Kernel
 {
     double degree;
+    double offset;
 public:
-    PolyKernel(int degree) : degree(degree){}
+    PolyKernel(int degree, double offset=0.) : degree(degree), offset(offset){}
     virtual ~PolyKernel(){}
     void Compute(MatrixXd &data)
     {
@@ -106,8 +107,8 @@ public:
         for (int i=0; i<data.cols();i++)
             for (int j=i; j <data.cols(); j++)
             {
-                double value = (data.col(i).dot(data.col(j)));
-                _kernel(i,j) = pow(fabs(value), degree);
+                double value = (data.col(i).dot(data.col(j))) + offset;
+                _kernel(i,j) = pow(value, degree);
                 _kernel(j,i) = _kernel(i,j);
             }
     }
@@ -118,8 +119,8 @@ public:
         for (int i=0; i<data.cols();i++)
             for (int j=0; j <source.cols(); j++)
             {
-                double value = (data.col(i).dot(source.col(j)));
-                _kernel(i,j) = pow(fabs(value), degree);
+                double value = (data.col(i).dot(source.col(j))) + offset;
+                _kernel(i,j) = pow(value, degree);
             }
     }
     /*
@@ -171,6 +172,37 @@ public:
     */
 };
 
+class TANHKernel : public Kernel
+{
+    double alpha;
+    double offset;
+public:
+    TANHKernel(double alpha, double offset=0.) : alpha(alpha), offset(offset){}
+    virtual ~TANHKernel(){}
+    void Compute(MatrixXd &data)
+    {
+        _kernel = MatrixXd::Zero(data.cols(), data.cols());
+        for (int i=0; i<data.cols();i++)
+            for (int j=i; j <data.cols(); j++)
+            {
+                double value = alpha * (data.col(i).dot(data.col(j))) + offset;
+                _kernel(i,j) = tanh(value);
+                _kernel(j,i) = _kernel(i,j);
+            }
+    }
+
+    virtual void Compute(MatrixXd &data, MatrixXd &source)
+    {
+        _kernel = MatrixXd::Zero(data.cols(), source.cols());
+        for (int i=0; i<data.cols();i++)
+            for (int j=0; j <source.cols(); j++)
+            {
+                double value = alpha * (data.col(i).dot(source.col(j))) + offset;
+                _kernel(i,j) = tanh(value);
+            }
+    }
+};
+
 class PCA
 {
 public:
@@ -179,10 +211,11 @@ public:
     MatrixXd eigenVectors;
     PermutationIndices pi;
     int kernelType;
-    int degree;
-    float gamma;
+    float degree;
+    double gamma;
+    double offset;
     MatrixXd sourcePoints;
-    PCA() : k(0), kernelType(0), degree(2), gamma(0.01f){}
+    PCA() : k(0), kernelType(0), degree(2), gamma(0.1), offset(0.){}
     ~ PCA(){if(k) delete k;}
     //
     // compute the kernel pca

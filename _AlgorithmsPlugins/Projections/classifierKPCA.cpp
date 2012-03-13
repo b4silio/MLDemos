@@ -99,6 +99,7 @@ void ClassifierKPCA::Train(std::vector< fvec > samples, ivec labels)
 	pca->kernelType = kernelType;
 	pca->degree = kernelDegree;
 	pca->gamma = kernelGamma;
+    pca->offset = kernelOffset;
 
 	pca->kernel_pca(data, dim);
 	MatrixXd projections = pca->get();
@@ -154,11 +155,12 @@ float ClassifierKPCA::Test( const fVec &sample )
 
 	return estimate;
 }
-void ClassifierKPCA::SetParams(int kernelType, int kernelDegree, float kernelGamma)
+void ClassifierKPCA::SetParams(int kernelType, int kernelDegree, float kernelGamma, float kernelOffset)
 {
 	this->kernelType = kernelType;
 	this->kernelDegree = kernelDegree;
 	this->kernelGamma = kernelGamma;
+    this->kernelOffset = kernelOffset;
 }
 
 const char *ClassifierKPCA::GetInfoString()

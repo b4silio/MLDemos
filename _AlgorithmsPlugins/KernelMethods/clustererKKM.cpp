@@ -66,7 +66,7 @@ void ClustererKKM::Train(std::vector< fvec > _samples)
 	maxVectors = 30;
 
 	dlib::kcentroid<lin_kernel>linKc = dlib::kcentroid<lin_kernel>(lin_kernel(),0.001, maxVectors);
-	dlib::kcentroid<pol_kernel>polKc = dlib::kcentroid<pol_kernel>(pol_kernel(1./kernelGamma,0,kernelDegree),0.001, maxVectors);
+    dlib::kcentroid<pol_kernel>polKc = dlib::kcentroid<pol_kernel>(pol_kernel(1,1,kernelDegree),0.001, maxVectors);
 	dlib::kcentroid<rbf_kernel>rbfKc = dlib::kcentroid<rbf_kernel>(rbf_kernel(1./kernelGamma),0.01, maxVectors);
 
 	std::vector<sample_type> initial_centers;
@@ -105,43 +105,195 @@ fvec ClustererKKM::Test( const fvec &_sample )
 	sample(1) = _sample[1];
 	fvec res;
     res.resize(nbClusters, 0);
-	int index;
+    float sum = 0;
+    float vmax = -FLT_MAX;
+    int index=0;
 	switch(kernelType)
 	{
 	case 0:
-		index = (*linKmeans)(sample);
+    {
+        FOR(i, nbClusters)
+        {
+
+            double value = (*linKmeans).getDistance(sample, i);
+            res[i] = exp(-value);
+            if(vmax < res[i])
+            {
+                vmax = res[i];
+                index = i;
+            }
+            sum += res[i];
+        }
+    }
+//		index = (*linKmeans)(sample);
 		break;
 	case 1:
-		index = (*polKmeans)(sample);
+    {
+        FOR(i, nbClusters)
+        {
+            double value = (*polKmeans).getDistance(sample, i);
+            res[i] = exp(-value);
+            if(vmax < res[i])
+            {
+                vmax = res[i];
+                index = i;
+            }
+            sum += res[i];
+        }
+    }
+//		index = (*polKmeans)(sample);
 		break;
 	case 2:
-		index = (*rbfKmeans)(sample);
+    {
+        FOR(i, nbClusters)
+        {
+            double value = (*rbfKmeans).getDistance(sample, i);
+            res[i] = exp(-value);
+            if(vmax < res[i])
+            {
+                vmax = res[i];
+                index = i;
+            }
+            sum += res[i];
+        }
+    }
+//		index = (*rbfKmeans)(sample);
 		break;
 	}
-	res[index] = 1;
+    FOR(i, nbClusters)
+    {
+        res[i] /= sum;
+    }
+//    res[index] *= 1.2f;
+
+//	res[index] = 1;
 	return res;
+}
+
+double ClustererKKM::TestScore(const fvec &_sample, const int index)
+{
+    if(index < 0 || index > nbClusters) return 0;
+    sample_type sample;
+    sample(0) = _sample[0];
+    sample(1) = _sample[1];
+    double value = 0;
+    switch(kernelType)
+    {
+    case 0:
+        value = (*linKmeans).getDistance(sample, index);
+        break;
+    case 1:
+        value = (*polKmeans).getDistance(sample, index);
+        break;
+    case 2:
+        value = (*rbfKmeans).getDistance(sample, index);
+        break;
+    }
+    return exp(-value);
+}
+
+fvec ClustererKKM::TestUnnormalized(const fvec &_sample )
+{
+    sample_type sample;
+    sample(0) = _sample[0];
+    sample(1) = _sample[1];
+    fvec res;
+    res.resize(nbClusters, 0);
+    int index=0;
+    switch(kernelType)
+    {
+    case 0:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*linKmeans).getDistance(sample, i);
+        }
+    }
+        break;
+    case 1:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*polKmeans).getDistance(sample, i);
+        }
+    }
+        break;
+    case 2:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*rbfKmeans).getDistance(sample, i);
+        }
+    }
+        break;
+    }
+    return res;
 }
 
 fvec ClustererKKM::Test( const fVec &_sample )
 {
-	sample_type sample;
-	sample(0) = _sample._[0];
-	sample(1) = _sample._[1];
-	fvec res;
+    sample_type sample;
+    sample(0) = _sample._[0];
+    sample(1) = _sample._[1];
+    fvec res;
     res.resize(nbClusters, 0);
-	int index;
-	switch(kernelType)
-	{
-	case 0:
-		index = (*linKmeans)(sample);
-		break;
-	case 1:
-		index = (*polKmeans)(sample);
-		break;
-	case 2:
-		index = (*rbfKmeans)(sample);
-		break;
-	}
-	res[index] = 1;
-	return res;
+    float sum = 0;
+    float vmax = -FLT_MAX;
+    int index=0;
+    switch(kernelType)
+    {
+    case 0:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*linKmeans).getDistance(sample, i);
+            if(vmax < res[i])
+            {
+                vmax = res[i];
+                index = i;
+            }
+            sum += res[i];
+        }
+    }
+//		index = (*linKmeans)(sample);
+        break;
+    case 1:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*polKmeans).getDistance(sample, i);
+            if(vmax < res[i])
+            {
+                vmax = res[i];
+                index = i;
+            }
+            sum += res[i];
+        }
+    }
+//		index = (*polKmeans)(sample);
+        break;
+    case 2:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*rbfKmeans).getDistance(sample, i);
+            if(vmax < res[i])
+            {
+                vmax = res[i];
+                index = i;
+            }
+            sum += res[i];
+        }
+    }
+//		index = (*rbfKmeans)(sample);
+        break;
+    }
+    FOR(i, nbClusters)
+    {
+        res[i] /= sum;
+    }
+    res[index] *= 1.2f;
+
+//	res[index] = 1;
+    return res;
 }

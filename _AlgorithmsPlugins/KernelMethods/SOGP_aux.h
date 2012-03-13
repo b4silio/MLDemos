@@ -18,6 +18,8 @@
 
 //--------------------------------------------------------
 //These could be in a library?  In newmat?  Reads should autodetect?
+void printScalar(double value, FILE *fp,const char *name,bool ascii);
+void readScalar(double &value,FILE *fp,const char *name,bool ascii);
 void printRV(RowVector rv,FILE *fp,const char *name=NULL,bool ascii=false);
 void readRV(RowVector &rv,FILE *fp,const char *name=NULL,bool ascii=false);
 void printCV(ColumnVector cv,FILE *fp,const char *name=NULL,bool ascii=false);
@@ -28,7 +30,7 @@ void readMatrix(Matrix &m,FILE *fp,const char *name=NULL,bool ascii=false);
 
 //Kernels
 //Known Kernels..This could be done better..Reflection?
-enum KERNEL{kerRBF,kerPOL};
+enum KERNEL{kerRBF,kerPOL, kerPOLY, kerSIG};
 
 //A kernel is the function, and it's parameters
 class SOGPKernel{
@@ -162,6 +164,56 @@ private:
     }
 };
 
+class POLYKernel: public SOGPKernel{
+public:
+    virtual ~POLYKernel(){}
+    double kernel(const ColumnVector &a, const ColumnVector &b);
+    POLYKernel(){
+        init(1);
+    }
+    POLYKernel(int s, double o){
+        init(s);
+    }
+    void printTo(FILE *fp,bool ascii=false){
+        printScalar(degree,fp,"degree",ascii);
+        printScalar(offset,fp,"offset",ascii);
+    }
+    void readFrom(FILE *fp,bool ascii=false){
+        double value;
+        readScalar(value,fp,"scales",ascii); degree = value;
+        readScalar(offset,fp,"scales",ascii);
+    }
+    POLYKernel& operator= (const POLYKernel &k) {
+        if (this != &k) {
+            m_type = k.m_type;
+            degree = k.degree;
+            offset = k.offset;
+        }
+        return *this;
+    }
+    virtual SOGPKernel& operator=(const SOGPKernel& k)
+    {
+        if (this != &k){
+            m_type = k.m_type;
+            const POLYKernel *pol = dynamic_cast<const POLYKernel*>(&k);
+            if(pol)
+            {
+                degree = pol->degree;
+                offset = pol->offset;
+            }
+        }
+        return *this;
+    }
+    int getDegree(){return degree;}
+    double getOffset(){return offset;}
+private:
+    int degree;
+    double offset;
+    void init(int d=1, double o=0.){
+        degree = d;
+        offset = o;
+    }
+};
 
 //SOGP Parameters
 class SOGPParams{

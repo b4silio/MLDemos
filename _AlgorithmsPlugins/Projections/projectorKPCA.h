@@ -29,7 +29,7 @@ private:
     fvec minValues, maxValues;
     ivec labels;
     int kernelType;
-    int kernelDegree;
+    float kernelDegree;
     float kernelGamma;
 public:
     int targetDims;
@@ -44,7 +44,7 @@ public:
     fvec Project(const fvec &sample);
 
     const char *GetInfoString();
-    void SetParams(int kernelType, int kernelDegree, float kernelGamma);
+    void SetParams(int kernelType, float kernelDegree, float kernelGamma);
 };
 
 #endif // _PROJECTOR_KPCA_H_

@@ -591,7 +591,8 @@ void MLDemos::ShowContextMenuSpray(const QPoint &point)
     drawContext1Widget->move(drawToolbar->sprayButton->mapToGlobal(pt));
     drawContext1Widget->show();
     drawContext1Widget->setFocus();
-    drawContext1Widget->repaint();
+    drawContext1Widget->update();
+    update();
 }
 void MLDemos::ShowContextMenuLine(const QPoint &point)
 {
@@ -600,7 +601,8 @@ void MLDemos::ShowContextMenuLine(const QPoint &point)
     drawContext2Widget->move(drawToolbar->lineButton->mapToGlobal(pt));
     drawContext2Widget->show();
     drawContext2Widget->setFocus();
-    drawContext2Widget->repaint();
+    drawContext2Widget->update();
+    update();
 }
 void MLDemos::ShowContextMenuEllipse(const QPoint &point)
 {
@@ -609,7 +611,8 @@ void MLDemos::ShowContextMenuEllipse(const QPoint &point)
     drawContext2Widget->move(drawToolbar->ellipseButton->mapToGlobal(pt));
     drawContext2Widget->show();
     drawContext2Widget->setFocus();
-    drawContext2Widget->repaint();
+    drawContext2Widget->update();
+    update();
 }
 void MLDemos::ShowContextMenuErase(const QPoint &point)
 {
@@ -618,7 +621,8 @@ void MLDemos::ShowContextMenuErase(const QPoint &point)
     drawContext1Widget->move(drawToolbar->eraseButton->mapToGlobal(pt));
     drawContext1Widget->show();
     drawContext1Widget->setFocus();
-    drawContext1Widget->repaint();
+    drawContext1Widget->update();
+    update();
 }
 void MLDemos::ShowContextMenuObstacle(const QPoint &point)
 {
@@ -627,7 +631,8 @@ void MLDemos::ShowContextMenuObstacle(const QPoint &point)
     drawContext3Widget->move(drawToolbar->obstacleButton->mapToGlobal(pt));
     drawContext3Widget->show();
     drawContext3Widget->setFocus();
-    drawContext3Widget->repaint();
+    drawContext3Widget->update();
+    update();
 }
 void MLDemos::ShowContextMenuReward(const QPoint &point)
 {
@@ -636,7 +641,8 @@ void MLDemos::ShowContextMenuReward(const QPoint &point)
     drawContext4Widget->move(drawToolbar->paintButton->mapToGlobal(pt));
     drawContext4Widget->show();
     drawContext4Widget->setFocus();
-    drawContext4Widget->repaint();
+    drawContext4Widget->update();
+    update();
 }
 
 bool IsChildOf(QObject *child, QObject *parent)

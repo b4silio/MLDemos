@@ -48,7 +48,8 @@ void ClassProjections::SetParams(Classifier *classifier)
         int kernelType = params->kernelTypeCombo->currentIndex();
         float kernelWidth = params->kernelWidthSpin->value();
         int kernelDegree = params->kernelDegSpin->value();
-        ((ClassifierKPCA *)classifier)->SetParams(kernelType, kernelDegree, kernelWidth);
+        float kernelOffset = (kernelType == 3) ? params->kernelDegSpin->value() : params->kernelWidthSpin->value();
+        ((ClassifierKPCA *)classifier)->SetParams(kernelType, kernelDegree, kernelWidth, kernelOffset);
     }
 }
 

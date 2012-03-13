@@ -34,10 +34,13 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
         k = new LinearKernel();
         break;
     case 1:
-        k = new PolyKernel(degree);
+        k = new PolyKernel(degree, offset);
         break;
     case 2:
         k = new RBFKernel(gamma);
+        break;
+    case 3:
+        k = new TANHKernel(degree, offset);
         break;
     default:
         k = new Kernel();
@@ -104,10 +107,13 @@ float PCA::test(VectorXd point, int dim, double multiplier)
         k = new LinearKernel();
         break;
     case 1:
-        k = new PolyKernel(degree);
+        k = new PolyKernel(degree, offset);
         break;
     case 2:
         k = new RBFKernel(gamma);
+        break;
+    case 3:
+        k = new TANHKernel(degree, offset);
         break;
     default:
         k = new Kernel();
@@ -161,10 +167,13 @@ MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
         k = new LinearKernel();
         break;
     case 1:
-        k = new PolyKernel(degree);
+        k = new PolyKernel(degree, offset);
         break;
     case 2:
         k = new RBFKernel(gamma);
+        break;
+    case 3:
+        k = new TANHKernel(degree, offset);
         break;
     default:
         k = new Kernel();
