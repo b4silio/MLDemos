@@ -38,9 +38,7 @@ HEADERS +=	\
             interfaceGPRRegress.h \
             interfaceGPRDynamic.h \
             interfaceKMCluster.h \
-            pluginKernel.h \
-            contours.h \
-            qcontour.h
+            pluginKernel.h
 SOURCES += 	\
 			svm.cpp \
 			SOGP.cpp \
@@ -65,9 +63,7 @@ SOURCES += 	\
             interfaceGPRRegress.cpp \
             interfaceGPRDynamic.cpp \
             interfaceKMCluster.cpp \
-            pluginKernel.cpp \
-            contours.cpp \
-            qcontour.cpp
+            pluginKernel.cpp
 
 ###########################
 # Dependencies            #

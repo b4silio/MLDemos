@@ -35,6 +35,7 @@ public:
     int nData,d,K; //nData=number of datapoints, d=dimension ,K=number of Gaussian components
     int nPar, nCtr;
     Matrix C_Lyapunov;
+    std::vector<float> endpoint; // offset to allow non-origin-centered end points
 
     std::vector<float> displayData;
 

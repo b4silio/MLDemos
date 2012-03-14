@@ -21,8 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QDebug>
 #include <QBitmap>
 #include <QPainter>
-#include "contours.h"
-#include "qcontour.h"
+#include <qcontour.h>
 
 using namespace std;
 
@@ -268,7 +267,7 @@ void ClustKM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
             g = (1-res[0])*255;
             b = (1-res[0])*255;
         }
-        painter.setBrush(QColor(min(255.f,r),min(255.f,g),min(255.f,b)));
+        painter.setBrush(QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b))));
         painter.setPen(Qt::black);
         painter.drawEllipse(point,5,5);
     }

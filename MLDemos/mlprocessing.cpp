@@ -32,6 +32,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QSettings>
 #include <QFileDialog>
 #include <QProgressDialog>
+#include <qcontour.h>
 
 using namespace std;
 
@@ -899,6 +900,41 @@ void MLDemos::Maximize()
     maximizer->stopValue = optionsMaximize->stoppingSpin->value();
     tabUsedForTraining = tab;
     Train(maximizer);
+
+    // we draw the contours for the current maximization
+    int w = 65;
+    int h = 65;
+    int W = canvas->width();
+    int H = canvas->height();
+    canvas->maps.info = QPixmap(W, H);
+    QBitmap bitmap(canvas->width(), canvas->height());
+    canvas->maps.info.setMask(bitmap);
+    canvas->maps.info.fill(Qt::transparent);
+    QPainter painter(&canvas->maps.info);
+
+    double *bigData = canvas->data->GetReward()->rewards;
+    double *data = new double[w*h];
+    FOR(i, w)
+    {
+        FOR(j, h)
+        {
+            int I = i*W/(w-1);
+            int J = j*H/(h-1);
+            if(I >= W) I = W-1;
+            if(J >= H) J = H-1;
+            data[j*w + i] = bigData[J*W + I];
+        }
+    }
+
+    QContour contour(data, w, h);
+    contour.bDrawColorbar = false;
+    contour.plotColor = Qt::black;
+    contour.plotThickness = 1.5;
+    contour.style = Qt::DashLine;
+    //contour.style;
+    contour.Paint(painter, 10);
+    delete [] data;
+    canvas->repaint();
 
     UpdateInfo();
     drawTimer->Stop();

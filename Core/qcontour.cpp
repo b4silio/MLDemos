@@ -1,10 +1,11 @@
 #include "qcontour.h"
 #include <float.h>
 #include <math.h>
+#include <QLabel>
 #include <QDebug>
 
 QContour::QContour(double *values, int w, int h)
-    : valueMap(ValueMap(values,w,h)), plotColor(Qt::green), plotThickness(2)
+    : valueMap(ValueMap(values,w,h)), plotColor(Qt::green), plotThickness(2), style(Qt::SolidLine)
 {
     vmin = DBL_MAX;
     vmax = -DBL_MAX;
@@ -67,6 +68,26 @@ double QContour::meanValue(QRect rect)
     return meanValue(rect.x(), rect.x()+rect.width(), rect.y(), rect.y()+rect.height());
 }
 
+void QContour::ShowValueImage()
+{
+    int w = valueMap.w, h = valueMap.h;
+    QImage image(w,h,QImage::Format_RGB32);
+    double vdiff = vmax - vmin;
+    for(int i=0; i<w; i++)
+    {
+        for(int j=0; j<h; j++)
+        {
+            int value = (int)((valueMap.value(i, j)-vmin)/vdiff*255);
+            value = max(0,min(255,value));
+            image.setPixel(i,j, qRgb((int)value,value,value));
+        }
+    }
+    QPixmap contourPixmap = QPixmap::fromImage(image).scaled(512,512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QLabel *lab = new QLabel();
+    lab->setPixmap(contourPixmap);
+    lab->show();
+}
+
 void QContour::Paint(QPainter &painter, int levels, int zoom)
 {
     if(vmin == vmax) return;
@@ -120,7 +141,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
     painter.setBrush(Qt::NoBrush);
     for(int i=0; i<min(paths.size(),300); i++)
     {
-        painter.setPen(QPen(plotColor, 0.25 + i/(double)paths.size()*plotThickness));
+        painter.setPen(QPen(plotColor, 0.25 + i/(double)paths.size()*plotThickness, style));
         painter.drawPath(paths.at(i));
         //qDebug() << "path length:" << paths.at(i).length();
     }
@@ -136,6 +157,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
         for(int i=0; i<rect.height(); i++)
         {
             double v = (1. - i/(double)rect.height())*255.;
+            v = max(0.,min(255.,v));
             painter.setPen(QColor(v,v,v));
             painter.drawLine(rect.x(), rect.y() + i, rect.x() + rect.width(), rect.y() + i);
         }

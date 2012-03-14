@@ -43,7 +43,9 @@ HEADERS += \
 	fileUtils.h \
 	spline.h \
     projector.h \
-    dataImporter.h
+    dataImporter.h \
+    contours.h \
+    qcontour.h
 
 SOURCES += \
 	canvas.cpp \
@@ -57,7 +59,9 @@ SOURCES += \
 	fileUtils.cpp \
     parser.cpp \
     widget.cpp \
-    dataImporter.cpp
+    dataImporter.cpp \
+    contours.cpp \
+    qcontour.cpp
 
 
 

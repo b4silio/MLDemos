@@ -50,9 +50,11 @@ Dynamical *DynamicGMM::GetDynamical()
 void DynamicGMM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical)
 {
 	if(!canvas || !dynamical) return;
+    DynamicalGMR *gmr = dynamic_cast<DynamicalGMR*>(dynamical);
+    if(!gmr) return;
 	painter.setRenderHint(QPainter::Antialiasing);
 
-    Gmm *gmm = ((DynamicalGMR*)dynamical)->gmm;
+    Gmm *gmm = gmr->gmm;
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
     int dim = gmm->dim;

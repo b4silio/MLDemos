@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QImage>
 #include <QClipboard>
-#include "qcontour.h"
+#include <qcontour.h>
 
 using namespace std;
 
@@ -191,7 +191,7 @@ void KPCAProjection::GetContoursPixmap(int index)
     FOR(i, contourSamples.size())
     {
         fvec &sample = contourSamples[i];
-        qDebug() << "drawing sample at " << sample[0] << sample[1];
+        //qDebug() << "drawing sample at " << sample[0] << sample[1];
         float x = (sample[xIndex]-zxmin)/(zxmax-zxmin)*w;
         float y = (sample[yIndex]-zymin)/(zymax-zymin)*h;
         x = (x+1)*W/w;
@@ -203,6 +203,7 @@ void KPCAProjection::GetContoursPixmap(int index)
     if(contourSamples.size())
     {
         QContour contour(values, w, h);
+        contour.bDrawColorbar = true;
         //contour.SetLimits(zvmin, zvmax);
         contour.Paint(painter, 20, zoom);
     }

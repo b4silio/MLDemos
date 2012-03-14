@@ -85,7 +85,7 @@ Canvas::Canvas(QWidget *parent)
 
 Canvas::~Canvas()
 {
-    if(data) DEL(data);
+    DEL(data);
 }
 
 void Canvas::dragEnterEvent(QDragEnterEvent *event)
@@ -604,6 +604,11 @@ void Canvas::FitToData()
         }
     }
     fvec diff = maxes - mins;
+    // we add 10% to the edges
+    mins -= diff*.05f;
+    maxes += diff*.05f;
+    diff = maxes - mins;
+
     FOR(d, diff.size())
     {
         if(diff[d] == 0) diff[d] = 1e-6;
@@ -643,6 +648,7 @@ void Canvas::DrawLegend(QPainter &painter)
         for(int i=0; i<rect.height(); i++)
         {
             float v = (1.f - i/(float)rect.height())*255.f;
+            v = max(0.f, min(255.f, v));
             painter.setPen(QColor(255,255-v,255-v));
             painter.drawLine(rect.x(), rect.y() + i, rect.x() + rect.width(), rect.y() + i);
         }

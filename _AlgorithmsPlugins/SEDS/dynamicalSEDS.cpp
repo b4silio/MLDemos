@@ -141,6 +141,7 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	seds->nData = samples.size();
 	seds->d = dim/2;
 	seds->K = nbClusters;
+    seds->endpoint = endpoint;
 
 	seds->Options.perior_opt = bPrior;
 	seds->Options.mu_opt = bMu;
@@ -149,12 +150,12 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	seds->Options.objective = objectiveType;
 	seds->Options.constraintCriterion = constraintCriterion;
 
-        seds->Optimize();
+    seds->Optimize();
 
-	// and we copy the values back to the source
-	float *mu = new float[dim];
+    // and we copy the values back to the source gmm
+    float *mu = new float[dim];
 	float *sigma = new float[dim*dim];
-	FOR(i, nbClusters)
+    FOR(i, nbClusters)
 	{
 		FOR(d, dim) mu[d] = seds->Mu(d, i);
 		FOR(d1, dim)
@@ -274,4 +275,53 @@ const char *DynamicalSEDS::GetInfoString()
                 break;
         }*/
 	return text;
+}
+
+void DynamicalSEDS::SaveModel(string filename)
+{
+    if(!seds) return;
+    //qDebug() << "saving SEDS model" << filename.c_str();
+    seds->saveModel(filename.c_str());
+}
+
+bool DynamicalSEDS::LoadModel(string filename)
+{
+    //qDebug() << "loading SEDS model" << filename.c_str();
+    if(!seds)
+    {
+        seds = new SEDS();
+    }
+    seds->loadModel(filename.c_str());
+    dim = seds->d*2;
+    nbClusters = seds->K;
+    endpoint = seds->endpoint;
+    endpointFast = dim >= 2 ? fVec(endpoint[0], endpoint[1]) : fVec();
+
+    gmm = new Gmm(nbClusters, dim);
+    // and we copy the values back to the source
+    float *mu = new float[dim];
+    float *sigma = new float[dim*dim];
+    FOR(i, nbClusters)
+    {
+        FOR(d, dim) mu[d] = seds->Mu(d, i);
+        FOR(d1, dim)
+        {
+            FOR(d2, dim)
+            {
+                sigma[d2*dim + d1] = seds->Sigma[i](d1, d2);
+            }
+        }
+        fgmm_set_prior(gmm->c_gmm, i, seds->Priors(i));
+        fgmm_set_mean(gmm->c_gmm, i, mu);
+        fgmm_set_covar(gmm->c_gmm, i, sigma);
+    }
+    delete [] sigma;
+    delete [] mu;
+    gmm->initRegression(dim/2);
+    globalGMM = gmm;
+
+#ifdef USEQT
+    seds->displayLabel = displayLabel;
+#endif
+    return true;
 }

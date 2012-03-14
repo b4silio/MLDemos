@@ -680,17 +680,20 @@ RewardMap& RewardMap::operator= (const RewardMap& r)
   if (this != &r) {
 	  dim = r.dim;
 	  size = r.size;
-	  length = r.length;
 	  lowerBoundary = r.lowerBoundary;
 	  higherBoundary = r.higherBoundary;
-	  if(rewards) delete [] rewards;
-	  rewards = new float[length];
-	  memcpy(rewards, r.rewards, length*sizeof(float));
+      if(length != r.length)
+      {
+          length = r.length;
+          if(rewards) delete [] rewards;
+          rewards = new double[length];
+      }
+      memcpy(rewards, r.rewards, length*sizeof(double));
   }
   return *this;
 }
 
-void RewardMap::SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary)
+void RewardMap::SetReward(double *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary)
 {
 	this->lowerBoundary = lowerBoundary;
 	this->higherBoundary = higherBoundary;
@@ -699,8 +702,32 @@ void RewardMap::SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec hi
 	length = 1;
 	FOR(i, size.size()) length *= size[i];
 	if(this->rewards) delete [] this->rewards;
-	this->rewards = new float[length];
-	memcpy(this->rewards, rewards, length*sizeof(float));
+    this->rewards = new double[length];
+    memcpy(this->rewards, rewards, length*sizeof(double));
+}
+
+void RewardMap::SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary)
+{
+    this->lowerBoundary = lowerBoundary;
+    this->higherBoundary = higherBoundary;
+    this->size = size;
+    dim = size.size();
+    length = 1;
+    FOR(i, size.size()) length *= size[i];
+    if(this->rewards) delete [] this->rewards;
+    this->rewards = new double[length];
+    FOR(i, length)
+    {
+        this->rewards[i] = (double)rewards[i];
+    }
+}
+
+float *RewardMap::GetRewardFloat()
+{
+    if(!length) return 0;
+    float *rewards = new float[length];
+    FOR(i, length) rewards[i] = this->rewards[i];
+    return rewards;
 }
 
 void RewardMap::Clear()
@@ -710,7 +737,7 @@ void RewardMap::Clear()
 	length = 0;
 	lowerBoundary.clear();
 	higherBoundary.clear();
-	if(rewards) delete [] rewards;
+    KILL(rewards);
 }
 
 void RewardMap::Zero()
@@ -745,7 +772,7 @@ float RewardMap::ValueAt(fvec sample)
 	return rewards[rewardIndex];
 }
 
-void RewardMap::SetValueAt(fvec sample, float value)
+void RewardMap::SetValueAt(fvec sample, double value)
 {
 	if(!rewards) return;
 	ivec index;
@@ -768,7 +795,7 @@ void RewardMap::SetValueAt(fvec sample, float value)
 	rewards[rewardIndex] = value;
 }
 
-void RewardMap::ShiftValueAt(fvec sample, float shift)
+void RewardMap::ShiftValueAt(fvec sample, double shift)
 {
 	if(!rewards) return;
 	ivec index;
@@ -791,7 +818,7 @@ void RewardMap::ShiftValueAt(fvec sample, float shift)
 	rewards[rewardIndex] += shift;
 }
 
-void RewardMap::ShiftValueAt(fvec sample, float radius, float shift)
+void RewardMap::ShiftValueAt(fvec sample, double radius, double shift)
 {
 	if(!rewards) return;
 	ivec index;

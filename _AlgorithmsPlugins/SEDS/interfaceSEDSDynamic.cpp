@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
+#include <QDebug>
 
 using namespace std;
 
@@ -75,7 +76,6 @@ void DynamicSEDS::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	float resize = ((DynamicalSEDS*)dynamical)->resizeFactor;
-
     Gmm *gmm = ((DynamicalSEDS*)dynamical)->gmm;
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
@@ -111,6 +111,20 @@ void DynamicSEDS::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
         painter.setPen(QPen(Qt::white, 2));
         painter.drawEllipse(point, 2, 2);
     }
+}
+
+void DynamicSEDS::SaveModel(QString filename, Dynamical *dynamical)
+{
+    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
+    if(!seds) return;
+    seds->SaveModel(filename.toStdString());
+}
+
+bool DynamicSEDS::LoadModel(QString filename, Dynamical *dynamical)
+{
+    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
+    if(!seds) return false;
+    return seds->LoadModel(filename.toStdString());
 }
 
 void DynamicSEDS::SaveOptions(QSettings &settings)
