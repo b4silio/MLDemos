@@ -226,6 +226,8 @@ private slots:
 	void Clear();
 	void ClearData();
 	void SetROCInfo();
+    void LoadDynamical();
+    void SaveDynamical();
 
 	void SaveData();
 	void LoadData();

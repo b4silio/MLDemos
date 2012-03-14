@@ -51,6 +51,8 @@ public:
     fvec Test( const fvec &sample);
     fVec Test( const fVec &sample);
     const char *GetInfoString();
+    void SaveModel(string filename);
+    bool LoadModel(string filename);
 
     void SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, int objectiveType,
                    int maxIteration, int constraintCriterion);

@@ -418,6 +418,13 @@ bool SEDS::loadModel(const char fileName[], char type)
                 for (int j = 0; j < 2*d; j++)
                     file >> Sigma[k](i,j);
         }
+
+        endpoint.resize(2*d);
+        for (unsigned int i = 0; i < 2*d; i++)
+        {
+            file >> endpoint[i];
+        }
+
         file.close();
     }
 
@@ -472,6 +479,12 @@ bool SEDS::saveModel(const char fileName[])
         }
         file << endl;
     }
+
+    for (unsigned int i = 0; i < 2*d; i++)
+    {
+        file << endpoint[i] << " ";
+    }
+    file << endl;
     file.close();
 
     return true;

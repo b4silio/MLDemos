@@ -494,8 +494,8 @@ void MLDemos::Train(Maximizer *maximizer)
     QRgb *pixels = (QRgb*) rewardImage.bits();
     int w = rewardImage.width();
     int h = rewardImage.height();
-    float *data = new float[w*h];
 
+    float *data = new float[w*h];
     float maxData = 0;
     FOR(i, w*h)
     {
@@ -506,6 +506,14 @@ void MLDemos::Train(Maximizer *maximizer)
     {
         FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
     }
+    ivec size;
+    size.push_back(w);
+    size.push_back(h);
+    fvec low(2,0.f);
+    fvec high(2,1.f);
+    canvas->data->GetReward()->SetReward(data, size, low, high);
+//    delete [] data;
+
     fvec startingPoint;
     if(canvas->targets.size())
     {
@@ -520,6 +528,7 @@ void MLDemos::Train(Maximizer *maximizer)
         startingPoint[0] = drand48();
         startingPoint[1] = drand48();
     }
+    //data = canvas->data->GetReward()->GetRewardFloat();
     maximizer->Train(data, fVec(w,h), startingPoint);
     maximizer->age = 0;
     delete [] data;

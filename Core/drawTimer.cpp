@@ -345,7 +345,10 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample)
                 g += SampleColor[index%SampleColorCnt].green()*val[j]*sum;
                 b += SampleColor[index%SampleColorCnt].blue()*val[j]*sum;
             }
-            c = QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b)));
+            r = max(0.f, min(255.f, r));
+            g = max(0.f, min(255.f, g));
+            b = max(0.f, min(255.f, b));
+            c = QColor(r,g,b);
         }
     }
     else
@@ -410,7 +413,10 @@ void DrawTimer::TestFast(int start, int stop)
 				b = (1-res[0])*255;
 			}
 			if( r < 10 && g < 10 && b < 10) r = b = g = 255;
-			QColor c = QColor(r,g,b);
+            r = max(0.f,min(255.f, r));
+            g = max(0.f,min(255.f, g));
+            b = max(0.f,min(255.f, b));
+            QColor c(r,g,b);
 			drawMutex.lock();
 			bigMap.setPixel(x,y,c.rgb());
 			drawMutex.unlock();
@@ -427,6 +433,7 @@ void DrawTimer::TestFast(int start, int stop)
 			float speed = sqrtf(val[0]*val[0] + val[1]*val[1]);
 			speed = min(1.f,speed);
 			int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
+            hue = max(0, min(359,hue));
 			QColor color = QColor::fromHsv(hue, 255, 255);
 			color.setRed(255*(1-speed) + color.red()*speed);
 			color.setGreen(255*(1-speed) + color.green()*speed);

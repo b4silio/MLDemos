@@ -30,6 +30,13 @@ public:
     QContour(double *values, int w, int h);
     void Paint(QPainter &painter, int levels, int zoom=1);
     void SetLimits(double vmin, double vmax){this->vmin=vmin; this->vmax=vmax;}
+    void GetLimits(double &vmin, double &vmax){vmin = this->vmin; vmax = this->vmax;}
+    void ShowValueImage();
+public:
+    bool bDrawColorbar;
+    QColor plotColor;
+    int plotThickness;
+    Qt::PenStyle style;
 };
 
 #endif // QCONTOUR_H

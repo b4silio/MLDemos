@@ -34,9 +34,7 @@ HEADERS +=	\
         projectorPCA.h \
         projectorKPCA.h \
         projectorICA.h \
-        projectorLDA.h \
-    contours.h \
-    qcontour.h
+        projectorLDA.h
 
 SOURCES += 	\
     basicOpenCV.cpp \
@@ -52,9 +50,7 @@ SOURCES += 	\
     projectorPCA.cpp \
     projectorKPCA.cpp \
     projectorICA.cpp \
-    projectorLDA.cpp \
-    contours.cpp \
-    qcontour.cpp
+    projectorLDA.cpp
 
 ###########################
 # Dependencies            #

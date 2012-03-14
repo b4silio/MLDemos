@@ -109,6 +109,7 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     pca->kernelType = kernelType;
     pca->degree = kernelDegree;
     pca->gamma = 1.f/kernelGamma;
+    pca->offset = kernelGamma;
 
     pca->kernel_pca(data, targetDims);
 
@@ -170,7 +171,7 @@ fvec ProjectorKPCA::Project(const fvec &sample)
     return estimate;
 }
 
-void ProjectorKPCA::SetParams(int kernelType, int kernelDegree, float kernelGamma)
+void ProjectorKPCA::SetParams(int kernelType, float kernelDegree, float kernelGamma)
 {
     this->kernelType = kernelType;
     this->kernelDegree = kernelDegree;
@@ -188,10 +189,13 @@ const char *ProjectorKPCA::GetInfoString()
         sprintf(text, "%s linear\n", text);
         break;
     case 1:
-        sprintf(text, "%s polynomial (deg: %f)\n", text, kernelDegree);
+        sprintf(text, "%s polynomial (deg: %f offset: %f)\n", text, kernelDegree, kernelGamma);
         break;
     case 2:
         sprintf(text, "%s rbf (gamma: %f)\n", text, kernelGamma);
+        break;
+    case 3:
+        sprintf(text, "%s sigmoid (scale: %f offset: %f)\n", text, kernelDegree, kernelGamma);
         break;
     }
     return text;

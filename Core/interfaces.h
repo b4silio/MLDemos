@@ -216,6 +216,8 @@ public:
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
 	virtual bool UsesDrawTimer() = 0;
+    virtual void SaveModel(QString filename, Dynamical *dynamical){}
+    virtual bool LoadModel(QString filename, Dynamical *dynamical){return true;}
 
 	void Draw(Canvas *canvas, Dynamical *dynamical)
 	{

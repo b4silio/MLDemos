@@ -128,6 +128,12 @@ namespace dlib
             return label;
         }
 
+        scalar_type getDistance (const sample_type& sample, int centerNumber)
+        {
+            if(centerNumber < 0 || centerNumber > centers.size()) return 0;
+            return (*centers[centerNumber])(sample);
+        }
+
         void set_min_change (
             scalar_type min_change_
         )
@@ -266,8 +272,6 @@ namespace dlib
                 }
 
             }
-
-
         }
 
         typename array<scoped_ptr<kcentroid<kernel_type> > >::expand_1b_c centers;

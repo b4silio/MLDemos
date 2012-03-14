@@ -39,16 +39,41 @@ double RBFKernel::kernel(const ColumnVector &a, const ColumnVector &b){
 }
 //POL
 double POLKernel::kernel(const ColumnVector &a, const ColumnVector &b){
-	double d = a.Nrows();
-	double resp=1;
-	double inner = (a.t()*b).AsScalar();
-	for(int i=1;i<=scales.Ncols();i++)
+    double d = a.Nrows();
+    double resp=1;
+    double inner = (a.t()*b).AsScalar();
+    for(int i=1;i<=scales.Ncols();i++)
         resp += pow((inner/(d*scales(i))),i);
-	return resp;
+    return resp;
+}
+//POLY
+double POLYKernel::kernel(const ColumnVector &a, const ColumnVector &b){
+    double d = a.Nrows();
+    double resp=1;
+    double inner = (a.t()*b).AsScalar() + offset;
+    resp = pow(inner, degree);
+    return resp;
 }
 
 //-------------------------------------------------------------
 //Newmat printers
+void printScalar(double value, FILE *fp,const char *name,bool ascii){
+    if(name) fprintf(fp,"%s ",name);
+    if(ascii) fprintf(fp,"%lf ",value);
+    else fwrite(&value,sizeof(double),1,fp);
+    fprintf(fp,"\n");
+}
+void readScalar(double &value,FILE *fp,const char *name,bool ascii){
+    if(name)
+    {
+        char tn[128];//bad
+        fscanf(fp,"%s ",tn);
+        if(strcmp(tn,name)) printf("readRV: Expected '%s', got '%s'\n",name,tn);
+    }
+    if(ascii) fscanf(fp,"%lf ",&value);
+    else fread(&(value),sizeof(double),1,fp);
+    fscanf(fp,"\n");
+}
 void printRV(RowVector rv,FILE *fp,const char *name,bool ascii){
 	if(name) fprintf(fp,"%s ",name);
 	fprintf(fp,"%d:",rv.Ncols());

@@ -30,7 +30,8 @@ class ClustererKKM : public Clusterer
 private:
 	int kernelType;
 	float kernelGamma;
-	float kernelDegree;
+    float kernelDegree;
+    float kernelOffset;
 
 	int maxVectors;
 
@@ -45,10 +46,12 @@ public:
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
+    double TestScore(const fvec &_sample, const int index);
+    fvec TestUnnormalized( const fvec &sample);
     const char *GetInfoString();
 
-	void SetParams(int clusters, int kernelType, float kernelGamma, int kernelDegree)
-    {this->nbClusters=clusters;this->kernelType=kernelType;this->kernelGamma=kernelGamma;this->kernelDegree=kernelDegree;}
+    void SetParams(int clusters, int kernelType, float kernelGamma, int kernelDegree, float kernelOffset)
+    {this->nbClusters=clusters;this->kernelType=kernelType;this->kernelGamma=kernelGamma;this->kernelDegree=kernelDegree; this->kernelOffset=kernelOffset;}
 };
 
 #endif // _CLUSTERER_KKM_H_

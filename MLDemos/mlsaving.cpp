@@ -512,10 +512,10 @@ void MLDemos::LoadParams( QString filename )
     sprintf(projGroup,"projectOptions");
 
 	// we skip the samples themselves
-	qDebug() << "Skipping "<< sampleCnt <<" samples" << endl;
+    //qDebug() << "Skipping "<< sampleCnt <<" samples" << endl;
 	FOR(i, sampleCnt) line = in.readLine();
     bool bClass = false, bRegr = false, bDyn = false, bClust = false, bMaxim = false, bProj = false;
-	qDebug() << "Loading parameter list" << endl;
+    //qDebug() << "Loading parameter list" << endl;
 	int tab = 0;
 	while(!in.atEnd())
 	{
@@ -634,4 +634,37 @@ void MLDemos::ExportOutput()
         }
     }
     file.close();
+}
+
+void MLDemos::LoadDynamical()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    int tab = optionsDynamic->tabWidget->currentIndex();
+    if(tab >= dynamicals.size() || !dynamicals[tab]) return;
+    Dynamical *dynamical = dynamicals[tab]->GetDynamical();
+    bool ok = dynamicals[tab]->LoadModel(filename, dynamical);
+    if(ok)
+    {
+        DEL(this->dynamical);
+        this->dynamical = dynamical;
+        dynamicals[tab]->Draw(canvas, dynamical);
+        if(dynamicals[tab]->UsesDrawTimer())
+        {
+            if(drawTimer->isRunning()) drawTimer->Stop();
+            drawTimer->Clear();
+            drawTimer->bColorMap = optionsDynamic->colorCheck->isChecked();
+            drawTimer->start(QThread::NormalPriority);
+        }
+    }
+    else DEL(dynamical);
+}
+
+void MLDemos::SaveDynamical()
+{
+    if(!dynamical) return;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    if(!filename.endsWith(".model")) filename += ".model";
+    dynamicals[tabUsedForTraining]->SaveModel(filename, dynamical);
 }

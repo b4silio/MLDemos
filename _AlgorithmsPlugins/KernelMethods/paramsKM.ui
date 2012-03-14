@@ -262,35 +262,10 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
     <string>Clusters</string>
    </property>
   </widget>
-  <widget class="QSpinBox" name="kernelDegSpin">
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>120</y>
-     <width>40</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="toolTip">
-    <string>Degree of the kernel polynomial
-(Polynomial only)</string>
-   </property>
-   <property name="minimum">
-    <number>1</number>
-   </property>
-   <property name="value">
-    <number>2</number>
-   </property>
-  </widget>
   <widget class="QDoubleSpinBox" name="kernelWidthSpin">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>190</x>
      <y>120</y>
      <width>60</width>
      <height>22</height>
@@ -318,10 +293,10 @@ RBF and Polynomial only</string>
     <double>0.100000000000000</double>
    </property>
   </widget>
-  <widget class="QLabel" name="label_21">
+  <widget class="QLabel" name="param1Label">
    <property name="geometry">
     <rect>
-     <x>200</x>
+     <x>130</x>
      <y>100</y>
      <width>40</width>
      <height>16</height>
@@ -372,10 +347,10 @@ RBF and Polynomial only</string>
     </property>
    </item>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="param2Label">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>190</x>
      <y>100</y>
      <width>50</width>
      <height>16</height>
@@ -406,6 +381,37 @@ RBF and Polynomial only</string>
    </property>
    <property name="text">
     <string>Kernel</string>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="kernelDegSpin">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>120</y>
+     <width>50</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Width of the kernel (gamma)
+RBF and Polynomial only</string>
+   </property>
+   <property name="decimals">
+    <number>0</number>
+   </property>
+   <property name="minimum">
+    <double>1.000000000000000</double>
+   </property>
+   <property name="singleStep">
+    <double>1.000000000000000</double>
+   </property>
+   <property name="value">
+    <double>1.000000000000000</double>
    </property>
   </widget>
  </widget>

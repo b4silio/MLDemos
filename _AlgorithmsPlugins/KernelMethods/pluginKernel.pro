@@ -39,7 +39,6 @@ HEADERS +=	\
             interfaceGPRDynamic.h \
             interfaceKMCluster.h \
             pluginKernel.h
-
 SOURCES += 	\
 			svm.cpp \
 			SOGP.cpp \

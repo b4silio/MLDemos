@@ -18,8 +18,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "interfaceKMCluster.h"
 #include <QPixmap>
+#include <QDebug>
 #include <QBitmap>
 #include <QPainter>
+#include <qcontour.h>
 
 using namespace std;
 
@@ -74,20 +76,34 @@ void ClustKM::ChangeOptions()
         switch(params->kernelTypeCombo->currentIndex())
         {
         case 0: // linear
+            params->param1Label->setText("");
+            params->param2Label->setText("");
             params->kernelDegSpin->setEnabled(false);
             params->kernelDegSpin->setVisible(false);
+            params->kernelWidthSpin->setEnabled(false);
+            params->kernelWidthSpin->setVisible(false);
             break;
         case 1: // poly
             params->kernelDegSpin->setEnabled(true);
             params->kernelDegSpin->setVisible(true);
             params->kernelWidthSpin->setEnabled(false);
             params->kernelWidthSpin->setVisible(false);
+//            params->kernelDegSpin->setDecimals(1);
+//            params->kernelDegSpin->setRange(1,100);
+//            params->kernelDegSpin->setSingleStep(1);
+//            params->kernelWidthSpin->setRange(-999,999);
+//            params->kernelWidthSpin->setSingleStep(0.1);
+//            params->param1Label->setText("Degree");
+//            params->param2Label->setText("Offset");
             break;
         case 2: // RBF
             params->kernelDegSpin->setEnabled(false);
             params->kernelDegSpin->setVisible(false);
             params->kernelWidthSpin->setEnabled(true);
             params->kernelWidthSpin->setVisible(true);
+//            params->kernelWidthSpin->setRange(0.001,999);
+//            params->kernelWidthSpin->setSingleStep(0.01);
+//            params->param2Label->setText("Width");
             break;
         }
     }
@@ -105,9 +121,10 @@ void ClustKM::SetParams(Clusterer *clusterer)
         float kernelWidth = params->kernelWidthSpin->value();
         int kernelDegree = params->kernelDegSpin->value();
         int kernelType = params->kernelTypeCombo->currentIndex();
+        float kernelOffset = params->kernelWidthSpin->value();
         ClustererKKM *clust = dynamic_cast<ClustererKKM*>(clusterer);
         if(!clust) return;
-        clust->SetParams(clusters, kernelType, kernelWidth, kernelDegree);
+        clust->SetParams(clusters, kernelType, kernelWidth, kernelDegree, kernelOffset);
     }
     else
     {
@@ -142,20 +159,86 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
     if(!canvas || !clusterer) return;
     painter.setRenderHint(QPainter::Antialiasing);
     ClustererKM * _kmeans = dynamic_cast<ClustererKM*>(clusterer);
-    if(!_kmeans) return; // kernel k-means!
-    KMeansCluster *kmeans = _kmeans->kmeans;
-    painter.setBrush(Qt::NoBrush);
-    FOR(i, kmeans->GetClusters())
+    if(_kmeans) // standardk-means!
     {
-        fvec mean = kmeans->GetMean(i);
-        QPointF point = canvas->toCanvasCoords(mean);
+        KMeansCluster *kmeans = _kmeans->kmeans;
+        painter.setBrush(Qt::NoBrush);
+        FOR(i, kmeans->GetClusters())
+        {
+            fvec mean = kmeans->GetMean(i);
+            QPointF point = canvas->toCanvasCoords(mean);
 
-        QColor color = SampleColor[(i+1)%SampleColorCnt];
-        painter.setPen(QPen(Qt::black, 12));
-        painter.drawEllipse(point, 8, 8);
-        painter.setPen(QPen(color,4));
-        painter.drawEllipse(point, 8, 8);
+            QColor color = SampleColor[(i+1)%SampleColorCnt];
+            painter.setPen(QPen(Qt::black, 12));
+            painter.drawEllipse(point, 8, 8);
+            painter.setPen(QPen(color,4));
+            painter.drawEllipse(point, 8, 8);
+        }
+        return;
     }
+    ClustererKKM * _kkmeans = dynamic_cast<ClustererKKM*>(clusterer);
+    if(!_kkmeans) return;
+    int W = painter.viewport().width();
+    int H = painter.viewport().height();
+    int w = 129;
+    int h = 129;
+    int nbClusters = _kkmeans->NbClusters();
+    double **valueList = new double*[nbClusters];
+    FOR(i, nbClusters)
+    {
+        valueList[i] = new double[w*h];
+    }
+    int dim = canvas->data->GetDimCount();
+    FOR(k, nbClusters)
+    {
+        FOR(i, w)
+        {
+            FOR(j, h)
+            {
+                int x = i*W/w;
+                int y = j*H/h;
+                fvec sample = canvas->fromCanvas(x,y);
+                double value = _kkmeans->TestScore(sample, k);
+                // to avoid some numerical weird stuff
+                value = value*1000.;
+                valueList[k][j*w + i] = value;
+            }
+        }
+    }
+    FOR(k, nbClusters)
+    {
+
+        QContour contour(valueList[k], w, h);
+        contour.plotColor = SampleColor[(k+1)%SampleColorCnt];
+        contour.plotThickness = 2;
+        double vmin, vmax;
+        contour.GetLimits(vmin, vmax);
+        vmin += (vmax - vmin)/4; // we take out the smallest levels to avoid numerical issues
+        contour.SetLimits(vmin, vmax);
+        contour.Paint(painter, 10);
+        /*
+        QImage image(w,h,QImage::Format_RGB32);
+        double vmin, vmax;
+        contour.GetLimits(vmin, vmax);
+        double vdiff = vmax - vmin;
+        FOR(i, w)
+        {
+            FOR(j, h)
+            {
+                int value = (int)((valueList[k][j*w + i]-vmin)/vdiff*255);
+                value = max(0,min(255,value));
+                image.setPixel(i,j, qRgb((int)value,value,value));
+            }
+        }
+        QPixmap contourPixmap = QPixmap::fromImage(image).scaled(512,512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        QLabel *lab = new QLabel();
+        lab->setPixmap(contourPixmap);
+        lab->show();
+        */
+        delete [] valueList[k];
+        valueList[k] = 0;
+    }
+    delete [] valueList;
 }
 
 void ClustKM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
@@ -184,7 +267,7 @@ void ClustKM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
             g = (1-res[0])*255;
             b = (1-res[0])*255;
         }
-        painter.setBrush(QColor(r,g,b));
+        painter.setBrush(QColor(max(0.f,min(255.f,r)),max(0.f,min(255.f,g)),max(0.f,min(255.f,b))));
         painter.setPen(Qt::black);
         painter.drawEllipse(point,5,5);
     }
