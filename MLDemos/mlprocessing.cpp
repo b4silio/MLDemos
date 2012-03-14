@@ -383,6 +383,7 @@ void MLDemos::Dynamize()
 
         if(canvas->canvasType == 0) // standard canvas
         {
+            /*
             QPainter painter(&canvas->maps.model);
             painter.setRenderHint(QPainter::Antialiasing);
             FOR(i, testTrajectories.size())
@@ -403,6 +404,7 @@ void MLDemos::Dynamize()
                 painter.setPen(Qt::red);
                 painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
             }
+            */
         }
         else
         {
@@ -1170,6 +1172,7 @@ void MLDemos::UpdateLearnedModel()
 
             if(canvas->canvasType == 0) // standard canvas
             {
+                /*
                 QPainter painter(&canvas->maps.model);
                 painter.setRenderHint(QPainter::Antialiasing);
                 FOR(i, testTrajectories.size())
@@ -1190,6 +1193,7 @@ void MLDemos::UpdateLearnedModel()
                     painter.setPen(Qt::red);
                     painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
                 }
+                */
             }
             else
             {

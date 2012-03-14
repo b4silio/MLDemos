@@ -343,6 +343,7 @@ void MLDemos::initDialogs()
     optionsProject->setupUi(projectWidget);
     compareWidget = new QWidget();
     optionsCompare->setupUi(compareWidget);
+    optionsDynamic->targetButton->setAcceptDrops(true);
 
     connect(displayDialog, SIGNAL(rejected()), this, SLOT(HideOptionDisplay()));
     connect(statsDialog, SIGNAL(rejected()), this, SLOT(HideStatsDialog()));
@@ -375,12 +376,13 @@ void MLDemos::initDialogs()
     connect(optionsDynamic->resampleSpin, SIGNAL(valueChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->loadButton, SIGNAL(clicked()), this, SLOT(LoadDynamical()));
     connect(optionsDynamic->saveButton, SIGNAL(clicked()), this, SLOT(SaveDynamical()));
-
     connect(optionsDynamic->dtSpin, SIGNAL(valueChanged(double)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
     connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsDynamic->colorCheck, SIGNAL(clicked()), this, SLOT(ColorMapChanged()));
     connect(optionsDynamic->resampleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
+    connect(optionsDynamic->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
+    connect(optionsDynamic->clearTargetButton, SIGNAL(clicked()), this, SLOT(ClearTargets()));
 
     connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
     connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
@@ -446,6 +448,7 @@ void MLDemos::initDialogs()
     connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
     connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
+    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
 
     expose = new Expose(canvas);
     import = new DataImporter();
@@ -1094,6 +1097,7 @@ void MLDemos::ClearData()
         canvas->sampleColors.clear();
         canvas->data->Clear();
         canvas->targets.clear();
+        canvas->targetAge.clear();
         canvas->maps.reward = QPixmap();
         canvas->maps.samples = QPixmap();
         canvas->maps.trajectories = QPixmap();
@@ -2052,8 +2056,8 @@ void MLDemos::CanvasOptionsChanged()
         w = 100*dims;
         bNeedsZoom = true;
     }
-    drawTimer->Stop();
-    drawTimer->Clear();
+    //drawTimer->Stop();
+    //drawTimer->Clear();
 
     if(canvas->canvasType != 1 || (!bNeedsZoom && zoom == 1.f))
     {
@@ -2073,6 +2077,11 @@ void MLDemos::CanvasOptionsChanged()
             if(clusterer)
             {
                 clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+                drawTimer->start(QThread::NormalPriority);
+            }
+            if(dynamical)
+            {
+                dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
                 drawTimer->start(QThread::NormalPriority);
             }
             if(projector)
@@ -2106,6 +2115,7 @@ void MLDemos::CanvasOptionsChanged()
         else if(dynamical)
         {
             dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+            drawTimer->start(QThread::NormalPriority);
         }
         else if(maximizer)
         {
@@ -2219,9 +2229,19 @@ void MLDemos::TargetButton()
     if(algorithmOptions->tabMax->isVisible())
     {
         canvas->targets.clear();
+        canvas->targetAge.clear();
         canvas->repaint();
     }
     Qt::DropAction dropAction = drag->exec();
+}
+
+void MLDemos::ClearTargets()
+{
+    if(!canvas->targets.size()) return;
+    canvas->targets.clear();
+    canvas->targetAge.clear();
+    canvas->maps.animation = QPixmap();
+    canvas->repaint();
 }
 
 void MLDemos::GaussianButton()

@@ -100,6 +100,7 @@ void Canvas::dropEvent(QDropEvent *event)
         QPointF position = event->pos();
         //qDebug() << "Dropping Target at coordinates: " << position;
         targets.push_back(toSampleCoords(position.x(), position.y()));
+        targetAge.push_back(0);
     }
     else if(event->mimeData()->text() == "Gaussian")
     {
@@ -124,6 +125,12 @@ void Canvas::SetConfidenceMap(QImage image)
 void Canvas::SetModelImage(QImage image)
 {
     maps.model = QPixmap::fromImage(image);
+    repaint();
+}
+
+void Canvas::SetAnimationImage(QImage animation)
+{
+    maps.animation = QPixmap::fromImage(animation);
     repaint();
 }
 
@@ -217,6 +224,11 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
         }
         painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.model);
+    }
+    if(!maps.animation.isNull())
+    {
+        painter.setBackgroundMode(Qt::TransparentMode);
+        painter.drawPixmap(geometry(), maps.animation);
     }
     if(!bSvg && bDisplayInfo && !maps.info.isNull())
     {
@@ -1468,6 +1480,20 @@ bool Canvas::DeleteData( QPointF center, float radius )
             anythingDeleted = true;
             data->RemoveObstacle(i);
             i--;
+        }
+    }
+    FOR(i, targets.size())
+    {
+        QPointF targetPoint= toCanvasCoords(targets[i]);
+        QPointF point = this->mapToParent(QPoint(targetPoint.x(), targetPoint.y()));
+        point -= center;
+        if(sqrt(point.x()*point.x() + point.y()*point.y()) < radius)
+        {
+            anythingDeleted = true;
+            targets.erase(targets.begin() + i);
+            targetAge.erase(targetAge.begin() + i);
+            i--;
+            anythingDeleted = true;
         }
     }
     return anythingDeleted;

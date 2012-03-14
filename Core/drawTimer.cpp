@@ -80,7 +80,6 @@ void DrawTimer::run()
         if(!canvas || canvas->canvasType) break;
 		if((!classifier || !(*classifier)) && (!regressor || !(*regressor)) && (!dynamical || !(*dynamical)) && (!clusterer || !(*clusterer)) && (!maximizer || !(*maximizer)))
 		{
-			//if(refineLevel) Clear();
 			Clear();
 			bRunning = false;
 			return;
@@ -88,34 +87,148 @@ void DrawTimer::run()
 
 		// we refine the current map
 		Refine();
-		// and we send the image to the canvas
-		drawMutex.lock();
-		//emit MapReady(bigMap);
-		//if(dynamical && (*dynamical) || maximizer && (*maximizer) ) emit ModelReady(modelMap);
-		if(maximizer && (*maximizer))
-		{            
-			emit ModelReady(modelMap);
-			emit CurveReady();
-			//canvas->SetModelImage(modelMap);
-		}
-		else
-		{
-			if(dynamical && (*dynamical))  emit bColorMap ? MapReady(bigMap) : MapReady(modelMap);
-			else emit MapReady(bigMap);
-		}
-		drawMutex.unlock();
-		//qApp->processEvents();
-		this->msleep(50);
+
+        // we animate
+        Animate();
+
+        if(refineLevel >= 0)
+        {
+            // and we send the image to the canvas
+            drawMutex.lock();
+            if(maximizer && (*maximizer))
+            {
+                emit ModelReady(modelMap);
+                emit CurveReady();
+            }
+            else
+            {
+                if(dynamical && (*dynamical))  emit bColorMap ? MapReady(bigMap) : MapReady(modelMap);
+                else emit MapReady(bigMap);
+            }
+            drawMutex.unlock();
+        }
+        else if (!dynamical || !(*dynamical)) // no animations to be done
+        {
+            break;
+        }
+
+        // wait a while
+        this->msleep(40);
 	}
 	bRunning = false;
 }
 
+void DrawTimer::Animate()
+{
+    mutex->lock();
+    drawMutex.lock();
+    if(dynamical && (*dynamical) && canvas->targets.size()) // we need to animate the targets
+    {
+        float dT = (*dynamical)->dT;// * (dynamical->count/100.f);
+        int w = canvas->width(), h = canvas->height();
+        vector<Obstacle> obstacles = canvas->data->GetObstacles();
+        vector<fvec> targets = canvas->targets;
+        ivec ages = canvas->targetAge;
+        drawMutex.unlock();
+        if((*dynamical)->avoid) (*dynamical)->avoid->SetObstacles(obstacles);
+
+        vector< vector<fvec> > trajectories;
+        // animate each target
+        FOR(i, targets.size())
+        {
+            ages[i]++;
+            if(ages[i] > 400) ages[i] = 0; // we restart
+
+            vector<fvec> targetTrajectory(ages[i]+1);
+            fvec sample = targets[i];
+            targetTrajectory[0] = sample;
+            FOR(j, ages[i])
+            {
+                fvec res = (*dynamical)->Test(sample);
+                if((*dynamical)->avoid)
+                {
+                    fvec newRes = (*dynamical)->avoid->Avoid(sample, res);
+                    sample += newRes*dT;
+                }
+                else sample += res*dT;
+                targetTrajectory[j+1] = sample;
+            }
+            if(ages[i] > 2)
+            {
+                fvec diff = targetTrajectory[ages[i]] - targetTrajectory[ages[i]-1];
+                float speed = 0;
+                FOR(d, diff.size()) speed += diff[d]*diff[d];
+                speed = sqrtf(speed);
+                if(speed <= 1e-5) ages[i] = 0;
+            }
+            trajectories.push_back(targetTrajectory);
+        }
+        mutex->unlock();
+
+        // we update the ages and create the trajectories
+        QList<QPainterPath> paths;
+        QList<QPointF> startPoints;
+        QList<QPointF> endPoints;
+        drawMutex.lock();
+        FOR(i, targets.size())
+        {
+            QPainterPath path;
+            QPointF point;
+            FOR(j, trajectories[i].size())
+            {
+                point = canvas->toCanvasCoords(trajectories[i][j]);
+                if(!j)
+                {
+                    path.moveTo(point);
+                    startPoints.push_back(point);
+                }
+                else path.lineTo(point);
+            }
+            paths.push_back(path);
+            endPoints.push_back(point);
+            canvas->targetAge[i] = ages[i];
+        }
+        drawMutex.unlock();
+
+        // and now we paint
+        if(animationImage.isNull() || animationImage.width() != w || animationImage.height() != h)
+        {
+            animationImage = QImage(w,h,QImage::Format_ARGB32);
+        }
+        animationImage.fill(Qt::transparent);
+        QPainter painter(&animationImage);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(Qt::red, 3, Qt::DashDotDotLine));
+        FOR(i, paths.size())
+        {
+            painter.drawPath(paths[i]);
+        }
+        painter.setPen(QPen(Qt::red, 2));
+        FOR(i, startPoints.size())
+        {
+            painter.drawEllipse(startPoints[i], 8, 8);
+        }
+        FOR(i, endPoints.size())
+        {
+            painter.drawEllipse(endPoints[i], 8, 8);
+        }
+        emit(AnimationReady(animationImage));
+    }
+    else
+    {
+        mutex->unlock();
+        drawMutex.unlock();
+    }
+}
+
 void DrawTimer::Refine()
 {
-	if(refineLevel > refineMax)
+    if(refineLevel < 0) return;
+    if(refineLevel > refineMax)
 	{
-		bRunning = false;
-		return;
+        refineLevel = -1;
+        return;
 	}
 	if(canvas->width() != w || canvas->height() != h)
 	{

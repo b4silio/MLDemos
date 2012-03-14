@@ -648,6 +648,7 @@ void MLDemos::LoadDynamical()
     {
         DEL(this->dynamical);
         this->dynamical = dynamical;
+        tabUsedForTraining = tab;
         dynamicals[tab]->Draw(canvas, dynamical);
         if(dynamicals[tab]->UsesDrawTimer())
         {

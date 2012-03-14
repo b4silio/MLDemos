@@ -517,7 +517,7 @@ void MLDemos::Train(Maximizer *maximizer)
     fvec startingPoint;
     if(canvas->targets.size())
     {
-        startingPoint = canvas->targets[canvas->targets.size()-1];
+        startingPoint = canvas->targets.back();
         QPointF starting = canvas->toCanvasCoords(startingPoint);
         startingPoint[0] = starting.x()/w;
         startingPoint[1] = starting.y()/h;

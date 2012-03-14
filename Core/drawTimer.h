@@ -38,6 +38,7 @@ private:
 	int refineMax;
 	QImage bigMap;
 	QImage modelMap;
+    QImage animationImage;
 	u32 *perm;
 	Canvas *canvas;
 	int w, h, dim;
@@ -47,6 +48,7 @@ public:
 	~DrawTimer();
 	void run();
 	void Refine();
+    void Animate();
 	void Clear();
 	void TestFast(int start, int stop);
 	void Vectors(int count, int steps);
@@ -69,6 +71,7 @@ public:
 	signals:
 	void MapReady(QImage image);
 	void ModelReady(QImage image);
+    void AnimationReady(QImage image);
 	void CurveReady();
 };
 

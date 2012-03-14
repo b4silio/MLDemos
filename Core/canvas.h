@@ -40,7 +40,8 @@ struct Pixmaps
 	QPixmap trajectories;
 	QPixmap obstacles;
 	QPixmap timeseries;
-	void clear() {
+    QPixmap animation;
+    void clear() {
 		confidence = QPixmap();
 		reward = QPixmap();
 		model = QPixmap();
@@ -50,7 +51,8 @@ struct Pixmaps
 		trajectories = QPixmap();
 		obstacles = QPixmap();
 		timeseries = QPixmap();
-	}
+        animation = QPixmap();
+    }
 };
 
 class Canvas : public QWidget
@@ -92,6 +94,7 @@ public:
     fvec mins, maxes;
     int xIndex, yIndex, zIndex;
 	std::vector<fvec> targets;
+    ivec targetAge;
     int canvasType;
     std::vector<QColor> sampleColors;
     QStringList dimNames;
@@ -162,6 +165,7 @@ public slots:
 	void ResizeEvent();
 	void SetConfidenceMap(QImage image);
 	void SetModelImage(QImage image);
+    void SetAnimationImage(QImage animation);
 
 signals:
 	void DrawCrosshair();
