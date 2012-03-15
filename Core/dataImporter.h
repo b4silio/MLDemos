@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#define IMPORT_WARNING_THRESHOLD 5000
+
 namespace Ui {
     class DataImporterDialog;
 }

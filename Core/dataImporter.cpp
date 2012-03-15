@@ -117,12 +117,6 @@ void DataImporter::Parse(QString filename)
             gui->tableWidget->setItem(r-bUseHeader, c, newItem);
         }
     }
-    gui->classColumnSpin->setRange(1,rawData[0].size());
-    gui->classColumnSpin->setValue(rawData[0].size());
-
-    gui->importLimitSpin->setMaximum(inputParser->getCount());
-    gui->importLimitSpin->setValue(inputParser->getCount());
-    gui->importLimitCombo->setEnabled(true);
 
     if(gui->importLimitCombo->count()==0)
     {
@@ -133,7 +127,24 @@ void DataImporter::Parse(QString filename)
         gui->importLimitCombo->addItem(QString("75%"),QVariant(0.75));
         gui->importLimitCombo->addItem(QString("100%"),QVariant(1.00));
     }
-    gui->importLimitCombo->setCurrentIndex(5);
+
+    int nbSamples = inputParser->getCount();
+    gui->importLimitSpin->setMaximum(nbSamples);
+    if (nbSamples > IMPORT_WARNING_THRESHOLD)
+    {
+        gui->importLimitSpin->setValue(IMPORT_WARNING_THRESHOLD);
+        gui->importLimitCombo->setCurrentIndex(0);
+        gui->importLimitSpin->setEnabled(true);
+    } else {
+        gui->importLimitSpin->setValue(nbSamples);
+        gui->importLimitCombo->setCurrentIndex(5);
+    }
+
+    gui->importLimitCombo->setEnabled(true);
+
+    gui->classColumnSpin->setRange(1,rawData[0].size());
+    gui->classColumnSpin->setValue(rawData[0].size());
+    classColumnChanged(rawData[0].size());
 }
 
 void DataImporter::FetchResults(std::vector<fvec> results)
@@ -205,6 +216,7 @@ void DataImporter::SendData()
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
     pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, maxSamples);
     classNames = inputParser->getClassNames();
+    gui->dumpButton->setStyleSheet("color: rgb(0, 0, 0)");
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
     emit(SetClassNames(classNames));
@@ -218,12 +230,7 @@ void DataImporter::on_importLimitSpin_valueChanged(int arg1)
     if (nbSamples <= 0) return;
     int percentage = floor(100*spinnerValue/nbSamples);
     // TODO: send that info to status in the plugin
-//    if(spinnerValue >= 5000)
-//    {
-//        QMessageBox limitWarning;
-//        limitWarning.setText("Running some algorithms on large datasets may take quite some time...");
-//        limitWarning.exec();
-//    }
+    gui->dumpButton->setStyleSheet("color: rgb(255, 0, 0)");
 }
 
 void DataImporter::on_importLimitCombo_currentIndexChanged(int index)
@@ -233,9 +240,16 @@ void DataImporter::on_importLimitCombo_currentIndexChanged(int index)
     else
     {
         gui->importLimitSpin->setEnabled(false);
+        gui->dumpButton->setStyleSheet("color: rgb(255, 0, 0)");
         int nbSamples = inputParser->getCount();
         float percentage = gui->importLimitCombo->itemData(index).toFloat();
-        gui->importLimitSpin->setValue(floor(nbSamples*percentage));
+        int importedSamplesCount = floor(nbSamples*percentage);
+        gui->importLimitSpin->setValue(importedSamplesCount);
+        if(importedSamplesCount > IMPORT_WARNING_THRESHOLD)
+        {
+            QMessageBox limitWarning;
+            limitWarning.setText("Running some algorithms on large datasets may take quite some time...");
+            limitWarning.exec();
+        }
     }
-
 }
