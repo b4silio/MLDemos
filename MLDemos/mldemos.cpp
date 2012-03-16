@@ -1027,6 +1027,7 @@ void MLDemos::Clear()
     canvas->maps.info = QPixmap();
     canvas->liveTrajectory.clear();
     canvas->sampleColors.clear();
+    canvas->maps.animation = QPixmap();
     canvas->repaint();
     UpdateInfo();
 }
@@ -1098,6 +1099,7 @@ void MLDemos::ClearData()
         canvas->data->Clear();
         canvas->targets.clear();
         canvas->targetAge.clear();
+        canvas->maps.animation = QPixmap();
         canvas->maps.reward = QPixmap();
         canvas->maps.samples = QPixmap();
         canvas->maps.trajectories = QPixmap();

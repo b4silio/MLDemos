@@ -160,13 +160,15 @@ fvec ClustererKKM::Test( const fvec &_sample )
 //		index = (*rbfKmeans)(sample);
 		break;
 	}
+    /*
     FOR(i, nbClusters)
     {
         res[i] /= sum;
     }
+    */
 //    res[index] *= 1.2f;
-
-//	res[index] = 1;
+    FOR(i, nbClusters) res[i] = 0;
+    res[index] = 1;
 	return res;
 }
 
@@ -189,7 +191,8 @@ double ClustererKKM::TestScore(const fvec &_sample, const int index)
         value = (*rbfKmeans).getDistance(sample, index);
         break;
     }
-    return exp(-value);
+    return -value;
+//    return exp(-value);
 }
 
 fvec ClustererKKM::TestUnnormalized(const fvec &_sample )
@@ -288,12 +291,14 @@ fvec ClustererKKM::Test( const fVec &_sample )
 //		index = (*rbfKmeans)(sample);
         break;
     }
+    /*
     FOR(i, nbClusters)
     {
         res[i] /= sum;
     }
     res[index] *= 1.2f;
-
-//	res[index] = 1;
+    */
+    FOR(i, nbClusters) res[i] = 0;
+    res[index] = 1;
     return res;
 }
