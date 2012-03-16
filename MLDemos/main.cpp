@@ -19,9 +19,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "mldemos.h"
 #include <QtGui/QApplication>
-#include <QtPlugin>
-
-//Q_IMPORT_PLUGIN(mld_classifySVM)
 
 int main(int argc, char *argv[])
 {

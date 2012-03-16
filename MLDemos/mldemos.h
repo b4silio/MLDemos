@@ -279,6 +279,7 @@ private slots:
     void InputDimensionsInvert();
     void InputDimensionsRandom();
     void TargetButton();
+    void ClearTargets();
 	void GaussianButton();
 	void GradientButton();
 	void BenchmarkButton();

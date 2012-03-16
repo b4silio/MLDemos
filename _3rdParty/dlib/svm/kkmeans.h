@@ -134,6 +134,14 @@ namespace dlib
             return (*centers[centerNumber])(sample);
         }
 
+        /*
+        std::vector<scalar_type> getAlphas(int centerNumber)
+        {
+            if(centerNumber < 0 || centerNumber > centers.size()) return;
+            (*centers[centerNumber]).alpha;
+        }
+        */
+
         void set_min_change (
             scalar_type min_change_
         )

@@ -50,7 +50,7 @@
     <rect>
      <x>340</x>
      <y>10</y>
-     <width>171</width>
+     <width>180</width>
      <height>171</height>
     </rect>
    </property>
@@ -321,7 +321,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>20</x>
       <y>140</y>
       <width>80</width>
       <height>21</height>
@@ -352,7 +352,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_24">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>10</x>
       <y>120</y>
       <width>100</width>
       <height>21</height>
@@ -388,6 +388,62 @@ p, li { white-space: pre-wrap; }
      <string>color</string>
     </property>
     <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="targetButton">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>130</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>30</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:30pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Console'; font-size:10pt;&quot;&gt;Drag&amp;amp;Drop: &lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Starting Position for trajectory testing&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>¤</string>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clearTargetButton">
+    <property name="geometry">
+     <rect>
+      <x>155</x>
+      <y>135</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:30pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Console'; font-size:10pt;&quot;&gt;Drag&amp;amp;Drop: &lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Starting Position for trajectory testing&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>x</string>
+    </property>
+    <property name="checkable">
      <bool>false</bool>
     </property>
    </widget>
