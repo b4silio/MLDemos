@@ -20,7 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interfaceBasic.h"
 #include "interfaceGA.h"
 #include "interfaceParticles.h"
-#include "interfaceNLOpt.h"
+#include "interfaceNLopt.h"
 
 using namespace std;
 

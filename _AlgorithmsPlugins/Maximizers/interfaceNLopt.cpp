@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <datasetManager.h>
 #include <canvas.h>
 #include "interfaceNLopt.h"
-#include "MaximizeNlopt.h"
+#include "maximizeNLopt.h"
 
 using namespace std;
 
