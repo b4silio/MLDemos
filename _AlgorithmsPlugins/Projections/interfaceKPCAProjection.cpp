@@ -268,14 +268,17 @@ void DrawEigenvals(QPainter &painter, fvec eigs, bool bSkipFirstEigenvector)
     int pad = 5;
 
     int dim = eigs.size();
-    float maxEigVal = 0;
+    float maxEigVal = 1.f;
+    if(dim > 2) maxEigVal = bSkipFirstEigenvector ? eigs[1] : eigs[0];
+    else if(dim) maxEigVal = eigs[0];
+
+    /*
     FOR(i, dim)
     {
         if(!i && bSkipFirstEigenvector) continue;
         if(eigs[i] == eigs[i]) maxEigVal += eigs[i];
     }
 
-    /*
     maxEigVal = max(1.f,maxEigVal);
     float maxAccumulator = 0;
     FOR(i, dim) if(eigs[i] == eigs[i]) maxAccumulator += eigs[i];

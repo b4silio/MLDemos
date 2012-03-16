@@ -503,6 +503,7 @@ void DatasetManager::Save(const char *filename)
 {
 	if(!samples.size()) return;
 	u32 sampleCnt = samples.size();
+    if(sampleCnt) size = samples[0].size();
 
 	ofstream file(filename);
 	if(!file.is_open()) return;
