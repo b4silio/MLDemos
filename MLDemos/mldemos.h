@@ -225,6 +225,7 @@ private slots:
 	void CompareScreenshot();
 	void Clear();
 	void ClearData();
+    void ShiftDimensions();
 	void SetROCInfo();
     void LoadDynamical();
     void SaveDynamical();

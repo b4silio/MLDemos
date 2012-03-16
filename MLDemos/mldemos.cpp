@@ -59,6 +59,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
     connect(ui.actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
+    connect(ui.actionShift_Dimensions, SIGNAL(triggered()), this, SLOT(ShiftDimensions()));
     connect(ui.actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
@@ -1110,6 +1111,28 @@ void MLDemos::ClearData()
     FitToData();
     ManualSelectionUpdated();
     UpdateInfo();
+}
+
+void MLDemos::ShiftDimensions()
+{
+    if(canvas)
+    {
+        vector<fvec> samples = canvas->data->GetSamples();
+        if(!samples.size()) return;
+        int dim = samples[0].size();
+        if(dim < 2) return;
+        FOR(i, samples.size())
+        {
+            float tmp = samples[i][0];
+            FOR(d, dim-1)
+            {
+                samples[i][d] = samples[i][d+1];
+            }
+            samples[i][dim-1] = tmp;
+        }
+        canvas->data->SetSamples(samples);
+    }
+    DisplayOptionChanged();
 }
 
 
