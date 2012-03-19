@@ -40,6 +40,7 @@ void RegrSVM::ChangeOptions()
     params->svmCSpin->setEnabled(true);
     params->svmCSpin->setRange(0.1, 9999.9);
     params->svmCSpin->setDecimals(1);
+    params->optimizeCheck->setVisible(true);
     switch(params->svmTypeCombo->currentIndex())
     {
     case 0: // C-SVM
@@ -50,10 +51,12 @@ void RegrSVM::ChangeOptions()
         params->svmEpsLabel->setText("Nu");
         break;
     case 2: // RVM
+        params->optimizeCheck->setVisible(false);
         params->svmCSpin->setEnabled(false);
         params->svmEpsLabel->setText("eps");
         break;
-    case 3:
+    case 3: // KRLR
+        params->optimizeCheck->setVisible(false);
         params->svmEpsLabel->setText("Tolerance");
         params->svmCLabel->setText("Capacity");
         params->svmCSpin->setRange(0, 1000);
@@ -93,6 +96,7 @@ void RegrSVM::SetParams(Regressor *regressor)
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
     float svmP = params->svmPSpin->value();
+    bool bOptimize = params->optimizeCheck->isChecked();
 
     if(kernelMethod == 2) // rvm
     {
@@ -135,6 +139,7 @@ void RegrSVM::SetParams(Regressor *regressor)
         svm->param.p = svmP;
         svm->param.gamma = 1 / kernelGamma;
         svm->param.degree = kernelDegree;
+        svm->bOptimize = bOptimize;
     }
 }
 
@@ -338,6 +343,7 @@ void RegrSVM::SaveOptions(QSettings &settings)
     settings.setValue("svmC", params->svmCSpin->value());
     settings.setValue("svmP", params->svmPSpin->value());
     settings.setValue("svmType", params->svmTypeCombo->currentIndex());
+    settings.setValue("optimizeCheck", params->optimizeCheck->isChecked());
 }
 
 bool RegrSVM::LoadOptions(QSettings &settings)
@@ -348,6 +354,7 @@ bool RegrSVM::LoadOptions(QSettings &settings)
     if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
     if(settings.contains("svmP")) params->svmPSpin->setValue(settings.value("svmP").toFloat());
     if(settings.contains("svmType")) params->svmTypeCombo->setCurrentIndex(settings.value("svmType").toInt());
+    if(settings.contains("optimizeCheck")) params->optimizeCheck->setChecked(settings.value("optimizeCheck").toBool());
     ChangeOptions();
     return true;
 }
@@ -360,6 +367,7 @@ void RegrSVM::SaveParams(QTextStream &file)
     file << "regressionOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
     file << "regressionOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
     file << "regressionOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
+    file << "regressionOptions" << ":" << "optimizeCheck" << " " << params->optimizeCheck->isChecked() << "\n";
 }
 
 bool RegrSVM::LoadParams(QString name, float value)
@@ -370,6 +378,7 @@ bool RegrSVM::LoadParams(QString name, float value)
     if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
     if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
     if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+    if(name.endsWith("optimizeCheck")) params->optimizeCheck->setChecked((int)value);
     ChangeOptions();
     return true;
 }

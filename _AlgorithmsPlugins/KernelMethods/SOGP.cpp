@@ -1,5 +1,6 @@
 #include "SOGP.h"
 #include <string.h>
+#include <QDebug>
 
 
 //Add a chunk of data
@@ -130,18 +131,21 @@ void SOGP::add(const ColumnVector& in,const ColumnVector& out){
         delete_bv(minloc);
     }
 
-    //Delete for geometric reasons - Loop?
-    double minscore=0,score;
-    int minloc=-1;
-    for(int i=1;i<=current_size;i++){
-        score = 1/Q(i,i);
-        if(i==1 || score<minscore){
-            minscore=score;
-            minloc=i;
+    if(m_params.capacity >= 0)
+    {
+        //Delete for geometric reasons - Loop?
+        double minscore=0,score;
+        int minloc=-1;
+        for(int i=1;i<=current_size;i++){
+            score = 1/Q(i,i);
+            if(i==1 || score<minscore){
+                minscore=score;
+                minloc=i;
+            }
         }
-    }
-    if(minscore<1e-9){
-        delete_bv(minloc);
+        if(minscore<1e-9){
+            delete_bv(minloc);
+        }
     }
 }
 
