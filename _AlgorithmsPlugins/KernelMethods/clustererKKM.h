@@ -35,24 +35,22 @@ private:
 
 	int maxVectors;
 
+    int kernelTypeTrained;
     void *decFunction;
-	dlib::kkmeans<lin_kernel> *linKmeans;
-	dlib::kkmeans<pol_kernel> *polKmeans;
-	dlib::kkmeans<rbf_kernel> *rbfKmeans;
 
 public:
 
-    ClustererKKM() : decFunction(NULL), linKmeans(NULL), polKmeans(NULL), rbfKmeans(NULL), kernelType(2), kernelGamma(0.01), kernelDegree(2), maxVectors(8) {}
+    ClustererKKM() : decFunction(NULL), kernelType(2), kernelGamma(0.01), kernelDegree(2), maxVectors(8) {}
     ~ClustererKKM();
 
 	void Train(std::vector< fvec > samples);
 
+    template <int N> void KillDim();
     template <int N> void TrainDim(std::vector< fvec > _samples);
     template <int N> fvec TestDim(const fvec &sample);
     template <int N> double TestScoreDim(const fvec &sample, int index);
     template <int N> fvec TestUnnormalizedDim(const fvec &sample);
     fvec Test( const fvec &sample);
-	fvec Test( const fVec &sample);
     double TestScore(const fvec &_sample, const int index);
     fvec TestUnnormalized( const fvec &sample);
     const char *GetInfoString();
