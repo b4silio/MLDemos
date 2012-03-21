@@ -96,6 +96,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasTypeChanged();
     CanvasOptionsChanged();
     ResetPositiveClass();
+    ClusterChanged();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -369,6 +370,7 @@ void MLDemos::initDialogs()
     connect(optionsCluster->optimizeButton, SIGNAL(clicked()), this, SLOT(ClusterOptimize()));
     connect(optionsCluster->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
+    connect(optionsCluster->optimizeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ClusterChanged()));
 
     connect(optionsDynamic->regressionButton, SIGNAL(clicked()), this, SLOT(Dynamize()));
     connect(optionsDynamic->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
@@ -817,6 +819,20 @@ void MLDemos::resizeEvent( QResizeEvent *event )
     canvas->ResizeEvent();
 
     CanvasMoveEvent();
+}
+
+void MLDemos::ClusterChanged()
+{
+    if(optionsCluster->optimizeCombo->currentIndex() == 3) // F1
+    {
+        optionsCluster->trainRatioCombo->setVisible(true);
+        optionsCluster->f1Label->setVisible(true);
+    }
+    else
+    {
+        optionsCluster->trainRatioCombo->setVisible(false);
+        optionsCluster->f1Label->setVisible(false);
+    }
 }
 
 void MLDemos::AlgoChanged()
