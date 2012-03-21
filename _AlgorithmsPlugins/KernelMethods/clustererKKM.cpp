@@ -100,40 +100,22 @@ void ClustererKKM::Train(std::vector< fvec > _samples)
 
     maxVectors = 30;
 
+#define TRAINCASE(a) case a:{TrainDim<a>(_samples);return;}
     switch(dim)
     {
-    case 2:
-        TrainDim<2>(_samples);
-        return;
-    case 3:
-        TrainDim<3>(_samples);
-        return;
-    case 4:
-        TrainDim<4>(_samples);
-        return;
-    case 5:
-        TrainDim<5>(_samples);
-        return;
-    case 6:
-        TrainDim<6>(_samples);
-        return;
-    case 7:
-        TrainDim<7>(_samples);
-        return;
-    case 8:
-        TrainDim<8>(_samples);
-        return;
-    case 9:
-        TrainDim<9>(_samples);
-        return;
-    case 10:
-        TrainDim<10>(_samples);
-        return;
-    case 11:
-        TrainDim<11>(_samples);
-        return;
+    TRAINCASE(2);
+    TRAINCASE(3);
+    TRAINCASE(4);
+    TRAINCASE(5);
+    TRAINCASE(6);
+    TRAINCASE(7);
+    TRAINCASE(8);
+    TRAINCASE(9);
+    TRAINCASE(10);
+    TRAINCASE(11);
+    TRAINCASE(12);
     default:
-        TrainDim<12>(_samples);
+        TrainDim<2>(_samples);
         return;
     }
 }
@@ -160,6 +142,7 @@ void ClustererKKM::KillDim()
 template <int N>
 void ClustererKKM::TrainDim(std::vector< fvec > _samples)
 {
+//    if(nbClusters < 2) nbClusters = 2; // we can't have less than 2 clusters
     std::vector<sampletype> samples;
     sampletype samp;
     FOR(i, _samples.size()) { FOR(d, dim) samp(d) = _samples[i][d]; samples.push_back(samp); }
@@ -211,6 +194,7 @@ fvec ClustererKKM::TestDim(const fvec &_sample)
     FOR(d,dim) sample(d) = _sample[d];
     fvec res;
     res.resize(nbClusters, 0);
+    if(!decFunction) return res;
     float sum = 0;
     float vmax = -FLT_MAX;
     int index=0;
@@ -335,92 +319,72 @@ fvec ClustererKKM::TestUnnormalizedDim(const fvec &_sample)
 
 fvec ClustererKKM::Test( const fvec &_sample )
 {
+#define TESTCASE(a) case a:{return TestDim<a>(_sample);}
     switch(dim)
     {
-    case 2:
-        return TestDim<2>(_sample);
-    case 3:
-        return TestDim<3>(_sample);
-    case 4:
-        return TestDim<4>(_sample);
-    case 5:
-        return TestDim<5>(_sample);
-    case 6:
-        return TestDim<6>(_sample);
-    case 7:
-        return TestDim<7>(_sample);
-    case 8:
-        return TestDim<8>(_sample);
-    case 9:
-        return TestDim<9>(_sample);
-    case 10:
-        return TestDim<10>(_sample);
-    case 11:
-        return TestDim<11>(_sample);
+    TESTCASE(2);
+    TESTCASE(3);
+    TESTCASE(4);
+    TESTCASE(5);
+    TESTCASE(6);
+    TESTCASE(7);
+    TESTCASE(8);
+    TESTCASE(9);
+    TESTCASE(10);
+    TESTCASE(11);
+    TESTCASE(12);
     default:
-        return TestDim<12>(_sample);
+        return TestDim<2>(_sample);
     }
 }
 
 double ClustererKKM::TestScore(const fvec &_sample, const int index)
 {
+#define SCORECASE(a) case a:{return TestScoreDim<a>(_sample, index);}
     if(index < 0 || index > nbClusters) return 0;
     switch(dim)
     {
-    case 2:
-        return TestScoreDim<2>(_sample, index);
-    case 3:
-        return TestScoreDim<3>(_sample, index);
-    case 4:
-        return TestScoreDim<4>(_sample, index);
-    case 5:
-        return TestScoreDim<5>(_sample, index);
-    case 6:
-        return TestScoreDim<6>(_sample, index);
-    case 7:
-        return TestScoreDim<7>(_sample, index);
-    case 8:
-        return TestScoreDim<8>(_sample, index);
-    case 9:
-        return TestScoreDim<9>(_sample, index);
-    case 10:
-        return TestScoreDim<10>(_sample, index);
-    case 11:
-        return TestScoreDim<11>(_sample, index);
+    SCORECASE(2);
+    SCORECASE(3);
+    SCORECASE(4);
+    SCORECASE(5);
+    SCORECASE(6);
+    SCORECASE(7);
+    SCORECASE(8);
+    SCORECASE(9);
+    SCORECASE(10);
+    SCORECASE(11);
+    SCORECASE(12);
     default:
-        return TestScoreDim<12>(_sample, index);
+        return TestScoreDim<2>(_sample, index);
     }
 }
 
 fvec ClustererKKM::TestUnnormalized(const fvec &_sample )
 {
+#define TESTUNCASE(a) case a:{return TestUnnormalizedDim<a>(_sample);}
     switch(dim)
     {
-    case 2:
-        return TestUnnormalizedDim<2>(_sample);
-    case 3:
-        return TestUnnormalizedDim<3>(_sample);
-    case 4:
-        return TestUnnormalizedDim<4>(_sample);
-    case 5:
-        return TestUnnormalizedDim<5>(_sample);
-    case 6:
-        return TestUnnormalizedDim<6>(_sample);
-    case 7:
-        return TestUnnormalizedDim<7>(_sample);
-    case 8:
-        return TestUnnormalizedDim<8>(_sample);
-    case 9:
-        return TestUnnormalizedDim<9>(_sample);
-    case 10:
-        return TestUnnormalizedDim<10>(_sample);
-    case 11:
-        return TestUnnormalizedDim<11>(_sample);
+    TESTUNCASE(2);
+    TESTUNCASE(3);
+    TESTUNCASE(4);
+    TESTUNCASE(5);
+    TESTUNCASE(6);
+    TESTUNCASE(7);
+    TESTUNCASE(8);
+    TESTUNCASE(9);
+    TESTUNCASE(10);
+    TESTUNCASE(11);
+    TESTUNCASE(12);
     default:
-        return TestUnnormalizedDim<12>(_sample);
+        return TestUnnormalizedDim<2>(_sample);
     }
 }
 
+#undef TRAINCASE
+#undef TESTCASE
+#undef SCORECASE
+#undef TESTUNCASE
 #undef rbfkernel
 #undef linkernel
 #undef polkernel

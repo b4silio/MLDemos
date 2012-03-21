@@ -657,6 +657,11 @@ void MLDemos::Cluster()
     canvas->repaint();
 
     UpdateInfo();
+    QString infoText = showStats->infoText->text();
+    infoText += "\nClustering as Classifier\n";
+    infoText += QString("F-Measure: %1\n").arg(testError);
+    showStats->infoText->setText(infoText);
+
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);
 }
@@ -700,6 +705,7 @@ void MLDemos::ClusterOptimize()
         trainList = GetManualSelection();
     }
 
+    float testError = 0;
     ivec kCounts;
     vector< vector<fvec> > resultList(4);
     int crossValCount = 5;
@@ -709,7 +715,7 @@ void MLDemos::ClusterOptimize()
         clusterer->SetNbClusters(k);
         FOR(j, crossValCount)
         {
-            Train(clusterer, trainRatio, trainList);
+            Train(clusterer, trainRatio, trainList, &testError);
 
             int folds = 10;
             fvec metricMeans(resultList.size());
@@ -830,7 +836,7 @@ void MLDemos::ClusterOptimize()
 
     int bestIndex = optionsCluster->optimizeCombo->currentIndex();
     clusterer->SetNbClusters(bests[bestIndex].second);
-    Train(clusterer);
+    Train(clusterer, trainRatio, trainList, &testError);
 
     // we fill in the canvas sampleColors for the alternative display types
     canvas->sampleColors.resize(samples.size());
@@ -858,8 +864,12 @@ void MLDemos::ClusterOptimize()
     canvas->maps.model = QPixmap();
 
     clusterers[tab]->Draw(canvas, clusterer);
-    drawTimer->Clear();
     UpdateInfo();
+    QString infoText = showStats->infoText->text();
+    infoText += "\nClustering as Classifier\n";
+    infoText += QString("F-Measure: %1\n").arg(testError);
+    showStats->infoText->setText(infoText);
+
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);
     canvas->repaint();

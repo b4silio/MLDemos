@@ -276,7 +276,7 @@ p, li { white-space: pre-wrap; }
     </property>
    </item>
   </widget>
-  <widget class="QLabel" name="f1Label">
+  <widget class="QLabel" name="trainLabel">
    <property name="geometry">
     <rect>
      <x>320</x>
@@ -389,7 +389,7 @@ p, li { white-space: pre-wrap; }
     <string>Percentage of labels that are provided to the system for computing clustering quality. The indicated percentage of labels is provided for each class (this ensures that a minimum amount of samples are provided when classes are very unbalanced)</string>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>5</number>
    </property>
    <item>
     <property name="text">

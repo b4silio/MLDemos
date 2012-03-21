@@ -826,12 +826,10 @@ void MLDemos::ClusterChanged()
     if(optionsCluster->optimizeCombo->currentIndex() == 3) // F1
     {
         optionsCluster->trainRatioCombo->setVisible(true);
-        optionsCluster->f1Label->setVisible(true);
     }
     else
     {
         optionsCluster->trainRatioCombo->setVisible(false);
-        optionsCluster->f1Label->setVisible(false);
     }
 }
 
