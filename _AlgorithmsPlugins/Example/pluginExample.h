@@ -16,32 +16,24 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _REGRESSOR_SVR_H_
-#define _REGRESSOR_SVR_H_
+#ifndef _PLUGINEXAMPLE_H_
+#define _PLUGINEXAMPLE_H_
+
+/**
+  This is a collection of plugins, if you want to have a classifier, regressor, clusterer etc.. all in one single plugin.
+  They will appear as separate interfaces in mldemos, but they're nicely grouped into one single file/project
+  */
 
 #include <vector>
-#include <regressor.h>
-#include "svm.h"
+#include <interfaces.h>
 
-class RegressorSVR : public Regressor
+class PluginExample : public QObject, public CollectionInterface
 {
-private:
-	svm_model *svm;
-	svm_node *node;
+	Q_OBJECT
+	Q_INTERFACES(CollectionInterface)
 public:
-	svm_parameter param;
-    bool bOptimize;
-
-	RegressorSVR();
-	~RegressorSVR();
-	void Train(std::vector< fvec > samples, ivec labels);
-	fvec Test( const fvec &sample);
-	fVec Test(const fVec &sample);
-    void Optimize(svm_problem *problem);
-    const char *GetInfoString();
-
-	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
-    svm_model *GetModel(){return svm;}
+    PluginExample();
+    QString GetName(){return "My Example Algorithm";}
 };
 
-#endif // _REGRESSOR_SVR_H_
+#endif // _PLUGINEXAMPLE_H_

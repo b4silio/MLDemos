@@ -57,7 +57,6 @@ void RegressorGPR::Train( std::vector<fvec> input, ivec labels)
         params.s20=param2;
         params.capacity = capacity;
         sogp = new SOGP(params);
-        sogp->addM(inputs,outputs);
     }
     sogp->addM(inputs,outputs);
     double logLikelihood = 0;
@@ -87,14 +86,18 @@ double GetLikelihood(const double *x, const Matrix &inputs, const Matrix &output
         RBFKernel kern(widths);
         kern.setA(x[dim]);
         params = new SOGPParams(&kern);
+        if(bLikelihood) params->s20 = x[dim+1];
+        else params->s20 = oldParams.s20;
+        if(bLikelihood) qDebug() << "current noise: " << x[dim+1];
     }
     else if(oldParams.m_kernel->m_type == kerPOL)
     {
         POLKernel kern(x[0]);
         params = new SOGPParams(&kern);
+        if(bLikelihood) params->s20 = x[1];
+        else params->s20 = oldParams.s20;
     }
     params->capacity = oldParams.capacity;
-    params->s20 = oldParams.s20;
     sogp->setParams(*params);
     sogp->addM(inputs, outputs);
     delete params;
@@ -111,8 +114,10 @@ double GetLikelihood(const double *x, const Matrix &inputs, const Matrix &output
         if(kernelType == kerRBF)
         {
             FOR(d, dim) list += QString("%1 ").arg(x[d]);
+            list += QString("A: %1").arg(x[dim]);
+            list += QString(" noise: %1 ").arg(x[dim+1]);
         }
-        else list += QString("%1 ").arg(x[0]);
+        else list += QString("%1 noise: %2 ").arg(x[0]).arg(x[1]);
         qDebug() << "loglik" << logLikelihood << list;
         if(logLikelihood != logLikelihood) return 0; // better than NAN!
         return logLikelihood;
@@ -136,6 +141,7 @@ double GetLikelihood(const double *x, const Matrix &inputs, const Matrix &output
         if(kernelType == kerRBF)
         {
             FOR(d, dim) list += QString("%1 ").arg(x[d]);
+            list += QString("A: %1").arg(x[dim]);
         }
         else list += QString("%1 ").arg(x[0]);
         qDebug() << "mse" << mse << list;
@@ -194,6 +200,7 @@ void RegressorGPR::Optimize(const Matrix &inputs, const Matrix &outputs)
         optDim = 1;
         break;
     }
+    if(bOptimizeLikelihood) optDim++;
 
     //nlopt::opt opt(nlopt::LN_AUGLAG, optDim);
     //nlopt::opt opt(nlopt::LN_COBYLA, optDim);
@@ -207,6 +214,7 @@ void RegressorGPR::Optimize(const Matrix &inputs, const Matrix &outputs)
     else opt.set_min_objective(objectiveFunction, (void*)data);
     opt.set_maxeval(200);
     vector<double> lowerBounds(optDim, 0);
+    if(bOptimizeLikelihood) lowerBounds.back() = 1e-4; // s20 noise
     opt.set_lower_bounds(lowerBounds);
     vector<double> steps(optDim,0.1);
     opt.set_initial_step(steps);
@@ -230,9 +238,39 @@ void RegressorGPR::Optimize(const Matrix &inputs, const Matrix &outputs)
     }
         break;
     }
+    if(bOptimizeLikelihood)
+    {
+        x.back() = oldParams.s20;
+    }
     try
     {
+        // do the actual optimization
         xOpt = opt.optimize(x);
+
+        // use the best parameters to retrain
+        int dim = inputs.Nrows();
+        int kernelType = oldParams.m_kernel->m_type;
+        SOGPParams *params=0;
+        if(kernelType == kerRBF)
+        {
+            RowVector widths(dim);
+            FOR(d, dim) widths(d+1) = xOpt[d];
+            RBFKernel kern(widths);
+            kern.setA(xOpt[dim]);
+            params = new SOGPParams(&kern);
+            if(bOptimizeLikelihood) params->s20 = xOpt[dim+1];
+            else params->s20 = oldParams.s20;
+        }
+        else if(oldParams.m_kernel->m_type == kerPOL)
+        {
+            POLKernel kern(xOpt[0]);
+            params = new SOGPParams(&kern);
+            if(bOptimizeLikelihood) params->s20 = xOpt[1];
+            else params->s20 = oldParams.s20;
+        }
+        params->capacity = oldParams.capacity;
+        sogp->setParams(*params);
+        sogp->addM(inputs, outputs);
     }
     catch(std::exception e)
     {

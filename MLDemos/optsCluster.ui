@@ -27,7 +27,7 @@
     <rect>
      <x>490</x>
      <y>10</y>
-     <width>131</width>
+     <width>133</width>
      <height>181</height>
     </rect>
    </property>
@@ -192,7 +192,7 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>20</y>
+     <y>10</y>
      <width>101</width>
      <height>60</height>
     </rect>
@@ -219,7 +219,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>430</x>
-     <y>83</y>
+     <y>50</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -276,12 +276,12 @@ p, li { white-space: pre-wrap; }
     </property>
    </item>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="trainLabel">
    <property name="geometry">
     <rect>
      <x>320</x>
      <y>83</y>
-     <width>110</width>
+     <width>80</width>
      <height>20</height>
     </rect>
    </property>
@@ -291,7 +291,7 @@ p, li { white-space: pre-wrap; }
     </font>
    </property>
    <property name="text">
-    <string>Class labels for training</string>
+    <string>Train/Test</string>
    </property>
   </widget>
   <widget class="QLabel" name="graphLabel">
@@ -316,7 +316,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>430</x>
-     <y>40</y>
+     <y>30</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -357,7 +357,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>430</x>
-     <y>20</y>
+     <y>10</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -370,6 +370,67 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Optimize by</string>
    </property>
+  </widget>
+  <widget class="QComboBox" name="trainTestCombo">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>80</y>
+     <width>60</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Percentage of labels that are provided to the system for computing clustering quality. The indicated percentage of labels is provided for each class (this ensures that a minimum amount of samples are provided when classes are very unbalanced)</string>
+   </property>
+   <property name="currentIndex">
+    <number>5</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>10%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>20%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>33%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>50%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>66%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>75%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>90%</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>100%</string>
+    </property>
+   </item>
   </widget>
  </widget>
  <resources/>

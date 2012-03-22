@@ -21,12 +21,53 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "clustererKKM.h"
 
 using namespace std;
+using namespace dlib;
+#define sampletype matrix<double,N,1>
+#define rbfkernel radial_basis_kernel< sampletype >
+#define linkernel linear_kernel< sampletype >
+#define polkernel polynomial_kernel< sampletype >
 
 ClustererKKM::~ClustererKKM()
 {
-    DEL(linKmeans);
-    DEL(polKmeans);
-    DEL(rbfKmeans);
+    if(decFunction)
+    {
+        switch(dim)
+        {
+        case 2:
+            KillDim<2>();
+            return;
+        case 3:
+            KillDim<3>();
+            return;
+        case 4:
+            KillDim<4>();
+            return;
+        case 5:
+            KillDim<5>();
+            return;
+        case 6:
+            KillDim<6>();
+            return;
+        case 7:
+            KillDim<7>();
+            return;
+        case 8:
+            KillDim<8>();
+            return;
+        case 9:
+            KillDim<9>();
+            return;
+        case 10:
+            KillDim<10>();
+            return;
+        case 11:
+            KillDim<11>();
+            return;
+        default:
+            KillDim<12>();
+            return;
+        }
+    }
 }
 
 const char *ClustererKKM::GetInfoString()
@@ -52,70 +93,118 @@ const char *ClustererKKM::GetInfoString()
 
 void ClustererKKM::Train(std::vector< fvec > _samples)
 {
-	vector<sample_type> samples;
-	vector<double> labels;
+    if(!_samples.size()) return;
+    dim = _samples[0].size();
 
-	FOR(i, _samples.size())
-	{
-		sample_type samp;
-		samp(0) = _samples[i][0];
-		samp(1) = _samples[i][1];
-		samples.push_back(samp);
-	}
+    if(dim > 10) dim = 10;
 
-	maxVectors = 30;
+    maxVectors = 30;
 
-	dlib::kcentroid<lin_kernel>linKc = dlib::kcentroid<lin_kernel>(lin_kernel(),0.001, maxVectors);
-    dlib::kcentroid<pol_kernel>polKc = dlib::kcentroid<pol_kernel>(pol_kernel(1,1,kernelDegree),0.001, maxVectors);
-	dlib::kcentroid<rbf_kernel>rbfKc = dlib::kcentroid<rbf_kernel>(rbf_kernel(1./kernelGamma),0.01, maxVectors);
-
-	std::vector<sample_type> initial_centers;
-
-	switch(kernelType)
-	{
-	case 0:
-		DEL(linKmeans);
-		linKmeans = new dlib::kkmeans<lin_kernel>(linKc);
-        linKmeans->set_number_of_centers(nbClusters);
-        pick_initial_centers(nbClusters, initial_centers, samples, linKmeans->get_kernel());
-		linKmeans->train(samples,initial_centers);
-		break;
-	case 1:
-		DEL(polKmeans);
-		polKmeans = new dlib::kkmeans<pol_kernel>(polKc);
-        polKmeans->set_number_of_centers(nbClusters);
-        pick_initial_centers(nbClusters, initial_centers, samples, polKmeans->get_kernel());
-		polKmeans->train(samples,initial_centers);
-		break;
-	case 2:
-		DEL(rbfKmeans);
-		rbfKmeans = new dlib::kkmeans<rbf_kernel>(rbfKc);
-        rbfKmeans->set_number_of_centers(nbClusters);
-        pick_initial_centers(nbClusters, initial_centers, samples, rbfKmeans->get_kernel());
-		rbfKmeans->train(samples,initial_centers);
-		break;
-	}
-
+#define TRAINCASE(a) case a:{TrainDim<a>(_samples);return;}
+    switch(dim)
+    {
+    TRAINCASE(2);
+    TRAINCASE(3);
+    TRAINCASE(4);
+    TRAINCASE(5);
+    TRAINCASE(6);
+    TRAINCASE(7);
+    TRAINCASE(8);
+    TRAINCASE(9);
+    TRAINCASE(10);
+    TRAINCASE(11);
+    TRAINCASE(12);
+    default:
+        TrainDim<2>(_samples);
+        return;
+    }
 }
 
-fvec ClustererKKM::Test( const fvec &_sample )
+template <int N>
+void ClustererKKM::KillDim()
 {
-	sample_type sample;
-	sample(0) = _sample[0];
-	sample(1) = _sample[1];
-	fvec res;
+    if(!decFunction) return;
+    switch(kernelTypeTrained)
+    {
+    case 0:
+        if(decFunction) delete (kkmeans<linkernel>*)decFunction;
+        break;
+    case 1:
+        if(decFunction) delete (kkmeans<polkernel>*)decFunction;
+        break;
+    case 2:
+        if(decFunction) delete (kkmeans<rbfkernel>*)decFunction;
+        break;
+    }
+    decFunction = 0;
+}
+
+template <int N>
+void ClustererKKM::TrainDim(std::vector< fvec > _samples)
+{
+//    if(nbClusters < 2) nbClusters = 2; // we can't have less than 2 clusters
+    std::vector<sampletype> samples;
+    sampletype samp;
+    FOR(i, _samples.size()) { FOR(d, dim) samp(d) = _samples[i][d]; samples.push_back(samp); }
+    std::vector<sampletype> initial_centers;
+    KillDim<N>();
+
+    switch(kernelType)
+    {
+    case 0:
+    {
+        kcentroid<linkernel> cen = kcentroid<linkernel>(linkernel(),0.001, maxVectors);
+        kkmeans<linkernel> *fun = new kkmeans<linkernel>(cen);
+        fun->set_number_of_centers(nbClusters);
+        pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+        fun->train(samples,initial_centers);
+        decFunction = (void *)fun;
+        kernelTypeTrained = 0;
+    }
+        break;
+    case 1:
+    {
+        kcentroid<polkernel> cen = kcentroid<polkernel>(polkernel(1,1,kernelDegree),0.001, maxVectors);
+        kkmeans<polkernel> *fun = new kkmeans<polkernel>(cen);
+        fun->set_number_of_centers(nbClusters);
+        pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+        fun->train(samples,initial_centers);
+        decFunction = (void *)fun;
+        kernelTypeTrained = 1;
+    }
+        break;
+    case 2:
+    {
+        kcentroid<rbfkernel> cen = kcentroid<rbfkernel>(rbfkernel(1./kernelGamma),0.001, maxVectors);
+        kkmeans<rbfkernel> *fun = new kkmeans<rbfkernel>(cen);
+        fun->set_number_of_centers(nbClusters);
+        pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+        fun->train(samples,initial_centers);
+        decFunction = (void *)fun;
+        kernelTypeTrained = 2;
+    }
+        break;
+    }
+}
+
+template <int N>
+fvec ClustererKKM::TestDim(const fvec &_sample)
+{
+    sampletype sample;
+    FOR(d,dim) sample(d) = _sample[d];
+    fvec res;
     res.resize(nbClusters, 0);
+    if(!decFunction) return res;
     float sum = 0;
     float vmax = -FLT_MAX;
     int index=0;
-	switch(kernelType)
-	{
-	case 0:
+    switch(kernelType)
+    {
+    case 0:
     {
         FOR(i, nbClusters)
         {
-
-            double value = (*linKmeans).getDistance(sample, i);
+            double value = (*((kkmeans<linkernel>*)decFunction)).getDistance(sample, i);
             res[i] = exp(-value);
             if(vmax < res[i])
             {
@@ -125,13 +214,12 @@ fvec ClustererKKM::Test( const fvec &_sample )
             sum += res[i];
         }
     }
-//		index = (*linKmeans)(sample);
-		break;
-	case 1:
+        break;
+    case 1:
     {
         FOR(i, nbClusters)
         {
-            double value = (*polKmeans).getDistance(sample, i);
+            double value = (*((kkmeans<polkernel>*)decFunction)).getDistance(sample, i);
             res[i] = exp(-value);
             if(vmax < res[i])
             {
@@ -141,13 +229,12 @@ fvec ClustererKKM::Test( const fvec &_sample )
             sum += res[i];
         }
     }
-//		index = (*polKmeans)(sample);
-		break;
-	case 2:
+        break;
+    case 2:
     {
         FOR(i, nbClusters)
         {
-            double value = (*rbfKmeans).getDistance(sample, i);
+            double value = (*((kkmeans<rbfkernel>*)decFunction)).getDistance(sample, i);
             res[i] = exp(-value);
             if(vmax < res[i])
             {
@@ -157,9 +244,8 @@ fvec ClustererKKM::Test( const fvec &_sample )
             sum += res[i];
         }
     }
-//		index = (*rbfKmeans)(sample);
-		break;
-	}
+        break;
+    }
     /*
     FOR(i, nbClusters)
     {
@@ -169,136 +255,136 @@ fvec ClustererKKM::Test( const fvec &_sample )
 //    res[index] *= 1.2f;
     FOR(i, nbClusters) res[i] = 0;
     res[index] = 1;
-	return res;
+    return res;
 }
 
-double ClustererKKM::TestScore(const fvec &_sample, const int index)
+template <int N>
+double ClustererKKM::TestScoreDim(const fvec &_sample, const int index)
 {
-    if(index < 0 || index > nbClusters) return 0;
-    sample_type sample;
-    sample(0) = _sample[0];
-    sample(1) = _sample[1];
+    sampletype sample;
+    FOR(d,dim) sample(d) = _sample[d];
+    fvec res;
+    res.resize(nbClusters, 0);
     double value = 0;
     switch(kernelType)
     {
     case 0:
-        value = (*linKmeans).getDistance(sample, index);
+        value = (*((kkmeans<linkernel>*)decFunction)).getDistance(sample, index);
         break;
     case 1:
-        value = (*polKmeans).getDistance(sample, index);
+        value = (*((kkmeans<polkernel>*)decFunction)).getDistance(sample, index);
         break;
     case 2:
-        value = (*rbfKmeans).getDistance(sample, index);
-        break;
+        value = (*((kkmeans<rbfkernel>*)decFunction)).getDistance(sample, index);
     }
     return -value;
-//    return exp(-value);
+}
+
+template <int N>
+fvec ClustererKKM::TestUnnormalizedDim(const fvec &_sample)
+{
+    sampletype sample;
+    FOR(d,dim) sample(d) = _sample[d];
+    fvec res;
+    res.resize(nbClusters, 0);
+    switch(kernelType)
+    {
+    case 0:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*((kkmeans<linkernel>*)decFunction)).getDistance(sample, i);
+        }
+    }
+        break;
+    case 1:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*((kkmeans<polkernel>*)decFunction)).getDistance(sample, i);
+        }
+    }
+        break;
+    case 2:
+    {
+        FOR(i, nbClusters)
+        {
+            res[i] = (*((kkmeans<rbfkernel>*)decFunction)).getDistance(sample, i);
+        }
+    }
+        break;
+    }
+    return res;
+}
+
+fvec ClustererKKM::Test( const fvec &_sample )
+{
+#define TESTCASE(a) case a:{return TestDim<a>(_sample);}
+    switch(dim)
+    {
+    TESTCASE(2);
+    TESTCASE(3);
+    TESTCASE(4);
+    TESTCASE(5);
+    TESTCASE(6);
+    TESTCASE(7);
+    TESTCASE(8);
+    TESTCASE(9);
+    TESTCASE(10);
+    TESTCASE(11);
+    TESTCASE(12);
+    default:
+        return TestDim<2>(_sample);
+    }
+}
+
+double ClustererKKM::TestScore(const fvec &_sample, const int index)
+{
+#define SCORECASE(a) case a:{return TestScoreDim<a>(_sample, index);}
+    if(index < 0 || index > nbClusters) return 0;
+    switch(dim)
+    {
+    SCORECASE(2);
+    SCORECASE(3);
+    SCORECASE(4);
+    SCORECASE(5);
+    SCORECASE(6);
+    SCORECASE(7);
+    SCORECASE(8);
+    SCORECASE(9);
+    SCORECASE(10);
+    SCORECASE(11);
+    SCORECASE(12);
+    default:
+        return TestScoreDim<2>(_sample, index);
+    }
 }
 
 fvec ClustererKKM::TestUnnormalized(const fvec &_sample )
 {
-    sample_type sample;
-    sample(0) = _sample[0];
-    sample(1) = _sample[1];
-    fvec res;
-    res.resize(nbClusters, 0);
-    int index=0;
-    switch(kernelType)
+#define TESTUNCASE(a) case a:{return TestUnnormalizedDim<a>(_sample);}
+    switch(dim)
     {
-    case 0:
-    {
-        FOR(i, nbClusters)
-        {
-            res[i] = (*linKmeans).getDistance(sample, i);
-        }
+    TESTUNCASE(2);
+    TESTUNCASE(3);
+    TESTUNCASE(4);
+    TESTUNCASE(5);
+    TESTUNCASE(6);
+    TESTUNCASE(7);
+    TESTUNCASE(8);
+    TESTUNCASE(9);
+    TESTUNCASE(10);
+    TESTUNCASE(11);
+    TESTUNCASE(12);
+    default:
+        return TestUnnormalizedDim<2>(_sample);
     }
-        break;
-    case 1:
-    {
-        FOR(i, nbClusters)
-        {
-            res[i] = (*polKmeans).getDistance(sample, i);
-        }
-    }
-        break;
-    case 2:
-    {
-        FOR(i, nbClusters)
-        {
-            res[i] = (*rbfKmeans).getDistance(sample, i);
-        }
-    }
-        break;
-    }
-    return res;
 }
 
-fvec ClustererKKM::Test( const fVec &_sample )
-{
-    sample_type sample;
-    sample(0) = _sample._[0];
-    sample(1) = _sample._[1];
-    fvec res;
-    res.resize(nbClusters, 0);
-    float sum = 0;
-    float vmax = -FLT_MAX;
-    int index=0;
-    switch(kernelType)
-    {
-    case 0:
-    {
-        FOR(i, nbClusters)
-        {
-            res[i] = (*linKmeans).getDistance(sample, i);
-            if(vmax < res[i])
-            {
-                vmax = res[i];
-                index = i;
-            }
-            sum += res[i];
-        }
-    }
-//		index = (*linKmeans)(sample);
-        break;
-    case 1:
-    {
-        FOR(i, nbClusters)
-        {
-            res[i] = (*polKmeans).getDistance(sample, i);
-            if(vmax < res[i])
-            {
-                vmax = res[i];
-                index = i;
-            }
-            sum += res[i];
-        }
-    }
-//		index = (*polKmeans)(sample);
-        break;
-    case 2:
-    {
-        FOR(i, nbClusters)
-        {
-            res[i] = (*rbfKmeans).getDistance(sample, i);
-            if(vmax < res[i])
-            {
-                vmax = res[i];
-                index = i;
-            }
-            sum += res[i];
-        }
-    }
-//		index = (*rbfKmeans)(sample);
-        break;
-    }
-    /*
-    FOR(i, nbClusters)
-    {
-        res[i] /= sum;
-    }
-    res[index] *= 1.2f;
-    */
-    FOR(i, nbClusters) res[i] = 0;
-    res[index] = 1;
-    return res;
-}
+#undef TRAINCASE
+#undef TESTCASE
+#undef SCORECASE
+#undef TESTUNCASE
+#undef rbfkernel
+#undef linkernel
+#undef polkernel

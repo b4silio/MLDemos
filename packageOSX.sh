@@ -15,6 +15,9 @@ frameworkQT='.framework/Versions/4/'
 echo 'macdeployqt' $appName'.app'
 eval 'macdeployqt' $appName'.app'
 
+##########################
+#   LINKS IN EXECUTABLE  #
+##########################
 # we start with changing the links in the executable
 for name in ${names[@]}
 do
@@ -25,11 +28,14 @@ do
 done;
 echo '\n'
 
+##########################
+#      OPENCV FILES      #
+##########################
 # then we copy the opencv library files
 for name in ${names[@]}
 do
-	echo 'cp '$opencvLibs$name'.2.3.dylib ' $myPath'/Frameworks/'
-	eval 'cp '$opencvLibs$name'.2.3.dylib ' $myPath'/Frameworks/'
+	echo 'cp '$opencvPath$name'.2.3.dylib ' $myPath'/Frameworks/'
+	eval 'cp '$opencvPath$name'.2.3.dylib ' $myPath'/Frameworks/'
 done;
 echo '\n'
 
@@ -52,6 +58,51 @@ do
 	echo '\n'
 done;
 
+# if highgui uses non-QT stuff
+guiLibs=( libjpeg.8 libz.1 libpng14.14 libtiff.3 libjasper.1 libavcodec libavformat libavutil libswscale libbz2.1.0 libdirac_encoder.0 libdirac_decoder.0 libfaac.0 libfaad.2 libmp3lame.0 libschroedinger-1.0.0 libspeex.1 libtheoraenc.1 libtheoradec.1 libogg.0 libvorbisenc.2 libvorbis.0 libx264.98 liborc-0.4.0)
+for name in ${guiLibs[@]}
+do
+	echo 'cp /opt/local/lib/'$name'.dylib ' $myPath'/Frameworks/'
+	eval 'cp /opt/local/lib/'$name'.dylib ' $myPath'/Frameworks/'
+	echo 'install_name_tool -id '$framework$name'.dylib' $myPath'Frameworks/'$name'.dylib'
+	eval 'install_name_tool -id '$framework$name'.dylib' $myPath'Frameworks/'$name'.dylib'
+	echo 'install_name_tool -change /opt/local/lib/'$name'.dylib ' $framework$name'.dylib' $myPath'Frameworks/libopencv_highgui.2.3.dylib'
+	eval 'install_name_tool -change /opt/local/lib/'$name'.dylib ' $framework$name'.dylib' $myPath'Frameworks/libopencv_highgui.2.3.dylib'
+	for name2 in ${guiLibs[@]}
+	do
+		echo 'install_name_tool -change /opt/local/lib/'$name2'.dylib ' $framework$name2'.dylib' $myPath'Frameworks/'$name'.dylib'
+		eval 'install_name_tool -change /opt/local/lib/'$name2'.dylib ' $framework$name2'.dylib' $myPath'Frameworks/'$name'.dylib'
+	done;
+	echo '\n'
+done;
+
+#	/opt/local/lib/libjpeg.8.dylib (compatibility version 12.0.0, current version 12.0.0)
+#	/opt/local/lib/libpng14.14.dylib (compatibility version 23.0.0, current version 23.0.0)
+#	/opt/local/lib/libtiff.3.dylib (compatibility version 13.0.0, current version 13.5.0)
+#	/opt/local/lib/libjasper.1.dylib (compatibility version 2.0.0, current version 2.0.0)
+#	/opt/local/lib/libavcodec.dylib (compatibility version 52.0.0, current version 52.72.2)
+#	/opt/local/lib/libavformat.dylib (compatibility version 52.0.0, current version 52.64.2)
+#	/opt/local/lib/libavutil.dylib (compatibility version 50.0.0, current version 50.15.1)
+#	/opt/local/lib/libswscale.dylib (compatibility version 1.0.0, current version 1.11.0)
+#	/opt/local/lib/libbz2.1.0.dylib (compatibility version 1.0.0, current version 1.0.6)
+#	/opt/local/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.5)
+#	/opt/local/lib/libdirac_encoder.0.dylib (compatibility version 2.0.0, current version 2.0.0)
+#	/opt/local/lib/libdirac_decoder.0.dylib (compatibility version 2.0.0, current version 2.0.0)
+#	/opt/local/lib/libfaac.0.dylib (compatibility version 1.0.0, current version 1.0.0)
+#	/opt/local/lib/libfaad.2.dylib (compatibility version 3.0.0, current version 3.0.0)
+#	/opt/local/lib/libmp3lame.0.dylib (compatibility version 1.0.0, current version 1.0.0)
+#	/opt/local/lib/libschroedinger-1.0.0.dylib (compatibility version 11.0.0, current version 11.0.0)
+#	/opt/local/lib/libspeex.1.dylib (compatibility version 7.0.0, current version 7.0.0)
+#	/opt/local/lib/libtheoraenc.1.dylib (compatibility version 3.0.0, current version 3.2.0)
+#	/opt/local/lib/libtheoradec.1.dylib (compatibility version 3.0.0, current version 3.4.0)
+#	/opt/local/lib/libogg.0.dylib (compatibility version 8.0.0, current version 8.1.0)
+#	/opt/local/lib/libvorbisenc.2.dylib (compatibility version 3.0.0, current version 3.8.0)
+#	/opt/local/lib/libvorbis.0.dylib (compatibility version 5.0.0, current version 5.5.0)
+#	/opt/local/lib/libx264.98.dylib (compatibility version 0.0.0, current version 0.0.0)
+#	/opt/local/lib/liborc-0.4.0.dylib (compatibility version 12.0.0, current version 12.0.0)
+
+
+# if we built opencv using QT
 for name in ${namesQT[@]}
 do
 	for name2 in ${names[@]}
@@ -62,7 +113,9 @@ do
 	echo '\n'
 done;
 
-
+########################
+#  QT FRAMEWORK FILES  #
+########################
 # copy frameworks from namesQTadd to the package
 # will need to create the folders Resources and Versions/4/ first
 for name in ${namesQTadd[@]}
@@ -90,6 +143,9 @@ do
 done;
 
 
+##########################
+#  LINKS TO THE PLUGINS  #
+##########################
 # last we go through our plugins to change these guys as well
 echo 'mkdir '$myPath'MacOS/plugins'
 eval 'mkdir '$myPath'MacOS/plugins'

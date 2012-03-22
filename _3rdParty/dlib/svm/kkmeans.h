@@ -328,7 +328,7 @@ namespace dlib
 
 
         // make sure requires clause is not broken
-        DLIB_ASSERT(num_centers > 1 && 0 <= percentile && percentile < 1 && samples.size() > 1,
+        DLIB_ASSERT(num_centers >= 1 && 0 <= percentile && percentile < 1 && samples.size() > 1,
             "\tvoid pick_initial_centers()"
             << "\n\tYou passed invalid arguments to this function"
             << "\n\tnum_centers: " << num_centers 

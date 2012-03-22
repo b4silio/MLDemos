@@ -39,6 +39,7 @@ void ClassSVM::ChangeOptions()
     params->svmCSpin->setRange(0.0001, 1.0);
     params->svmCSpin->setSingleStep(0.0001);
     params->svmCSpin->setDecimals(4);
+    params->optimizeCheck->setVisible(true);
     if(C > 1) params->svmCSpin->setValue(0.001);
     switch(params->svmTypeCombo->currentIndex())
     {
@@ -53,9 +54,11 @@ void ClassSVM::ChangeOptions()
         params->svmTypeLabel->setText("Nu");
         break;
     case 2: // RVM
+        params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("eps");
         break;
     case 3: // Pegasos
+        params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("lambda");
         params->maxSVSpin->setEnabled(true);
         break;
@@ -88,6 +91,7 @@ QString ClassSVM::GetAlgoString()
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
+    bool bOptimize = params->optimizeCheck->isChecked();
 
     QString algo;
     switch(params->svmTypeCombo->currentIndex())
@@ -121,6 +125,7 @@ QString ClassSVM::GetAlgoString()
         algo += QString(" RBF %1").arg(kernelGamma);
         break;
     }
+    if(bOptimize) algo += QString(" Opt");
     return algo;
 }
 
@@ -133,6 +138,7 @@ void ClassSVM::SetParams(Classifier *classifier)
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
+    bool bOptimize = params->optimizeCheck->isChecked();
 
 
     ClassifierRVM *rvm = dynamic_cast<ClassifierRVM *>(classifier);
@@ -168,6 +174,7 @@ void ClassSVM::SetParams(Classifier *classifier)
         svm->param.C = svm->param.nu = svmC;
         svm->param.gamma = 1 / kernelGamma;
         svm->param.degree = kernelDegree;
+        svm->bOptimize = bOptimize;
     }
 
 }
@@ -309,6 +316,7 @@ void ClassSVM::SaveOptions(QSettings &settings)
     settings.setValue("kernelWidth", params->kernelWidthSpin->value());
     settings.setValue("svmC", params->svmCSpin->value());
     settings.setValue("svmType", params->svmTypeCombo->currentIndex());
+    settings.setValue("optimizeCheck", params->optimizeCheck->isChecked());
 }
 
 bool ClassSVM::LoadOptions(QSettings &settings)
@@ -318,6 +326,7 @@ bool ClassSVM::LoadOptions(QSettings &settings)
     if(settings.contains("kernelWidth")) params->kernelWidthSpin->setValue(settings.value("kernelWidth").toFloat());
     if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
     if(settings.contains("svmType")) params->svmTypeCombo->setCurrentIndex(settings.value("svmType").toInt());
+    if(settings.contains("optimizeCheck")) params->optimizeCheck->setChecked(settings.value("optimizeCheck").toInt());
     ChangeOptions();
     return true;
 }
@@ -329,6 +338,7 @@ void ClassSVM::SaveParams(QTextStream &file)
     file << "classificationOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
     file << "classificationOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
     file << "classificationOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
+    file << "classificationOptions" << ":" << "optimizeCheck" << " " << params->optimizeCheck->isChecked() << "\n";
 }
 
 bool ClassSVM::LoadParams(QString name, float value)
@@ -338,6 +348,7 @@ bool ClassSVM::LoadParams(QString name, float value)
     if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
     if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
     if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
+    if(name.endsWith("optimizeCheck")) params->optimizeCheck->setChecked((int)value);
     ChangeOptions();
     return true;
 }

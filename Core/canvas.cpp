@@ -441,6 +441,7 @@ fvec Canvas::fromCanvas(QPointF point)
 
 fvec Canvas::fromCanvas(float x, float y)
 {
+    if(!data) return fvec(2,0);
     int dim = data->GetDimCount();
     fvec sample(dim);
     x -= width()/2.f;

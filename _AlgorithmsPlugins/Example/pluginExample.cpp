@@ -16,32 +16,20 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _REGRESSOR_SVR_H_
-#define _REGRESSOR_SVR_H_
+#include "pluginExample.h"
+#include "interfaceExampleClassifier.h"
+#include "interfaceExampleCluster.h"
+#include "interfaceExampleRegress.h"
+#include "interfaceExampleDynamic.h"
 
-#include <vector>
-#include <regressor.h>
-#include "svm.h"
+using namespace std;
 
-class RegressorSVR : public Regressor
+PluginExample::PluginExample()
 {
-private:
-	svm_model *svm;
-	svm_node *node;
-public:
-	svm_parameter param;
-    bool bOptimize;
+    classifiers.push_back(new ClassExample());
+    clusterers.push_back(new ClustExample());
+    regressors.push_back(new RegrExample());
+    dynamicals.push_back(new DynamicExample());
+}
 
-	RegressorSVR();
-	~RegressorSVR();
-	void Train(std::vector< fvec > samples, ivec labels);
-	fvec Test( const fvec &sample);
-	fVec Test(const fVec &sample);
-    void Optimize(svm_problem *problem);
-    const char *GetInfoString();
-
-	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
-    svm_model *GetModel(){return svm;}
-};
-
-#endif // _REGRESSOR_SVR_H_
+Q_EXPORT_PLUGIN2(mld_ZeExample, PluginExample)

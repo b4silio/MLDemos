@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define __TYPES_H__
 
 #include <vector>
+#include <map>
 // type definitions, u <- unsigned, s <- signed, f <- floating point, X: number of bits
 typedef unsigned char u8;
 typedef unsigned short int u16;
@@ -52,6 +53,7 @@ using std::min;
 
 // fancy macros
 #define FOR(i,length) for(u32 i=0; i<(u32)(length); i++) 
+#define FORIT(a,x,y) for(std::map<x,y>::iterator it = a.begin(); it != a.end(); it++)
 #define SWAP(x,y) x^=y^=x^=y // fast swap for pointers or integers
 #define MAX3(a,b,c) max(a,max(b,c))
 #define MIN3(a,b,c) min(a,min(b,c))
