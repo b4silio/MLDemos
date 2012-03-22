@@ -2,6 +2,7 @@
 
 #include "eigen_pca.h"
 #include <algorithm>
+#include <QDebug>
 
 void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
 {
@@ -62,7 +63,36 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
     EigenSolver<MatrixXd> m_solve(K_Centralized);
     //std::cout << "got the eigenvalues, eigenvectors" << "\n";
     eigenvalues = m_solve.eigenvalues().real();
-    eigenVectors = m_solve.eigenvectors().real();
+    // we need to check that the eigenvalues are ok
+    bool bAllNans = true;
+    bool bTooSmall = true;
+    for (int i=0; i<n; i++)
+    {
+        if(eigenvalues(i) == eigenvalues(i))
+        {
+            bAllNans = false;
+        }
+        if(fabs(eigenvalues(i) > 1e-300))
+        {
+            bTooSmall = false;
+        }
+        if(!bAllNans && !bTooSmall) break;
+    }
+    /*
+    for (int i=0; i<n; i++)
+    {
+        qDebug() << "eigenvalues" << i << eigenvalues(i);
+    }
+    */
+    if(bAllNans || bTooSmall)
+    {
+        for (int i=0; i<n; i++) eigenvalues(i) = 1;
+        eigenVectors = MatrixXd::Identity(n,n);
+    }
+    else
+    {
+        eigenVectors = m_solve.eigenvectors().real();
+    }
 
     //std::cout << "eigv:\n" << eigenvalues << "\n";
     //std::cout << "eigs:\n" << eigenVectors << "\n";
@@ -81,12 +111,14 @@ void PCA::kernel_pca(MatrixXd & dataPoints, unsigned int dimSpace)
         _result.col(i) = eigenVectors.col(pi[i].second); // permutation indices
     }
 
+    /*
     MatrixXd sqrtE = MatrixXd::Zero(dimSpace, dimSpace);
     for (unsigned int i = 0; i < dimSpace; i++)
     {
         //sqrtE(i, i) = sqrt(-pi[i].first);
         sqrtE(i, i) = 1.0;
     }
+    */
 
     // get the final data projection
     //_result = (sqrtE * _result.transpose()).transpose();

@@ -448,9 +448,10 @@ fvec MLDemos::Train(Dynamical *dynamical)
     return Test(dynamical, trajectories, labels);
 }
 
-void MLDemos::Train(Clusterer *clusterer, bvec trainList)
+void MLDemos::Train(Clusterer *clusterer, float trainRatio, bvec trainList, float *testFMeasures)
 {
     if(!clusterer) return;
+    vector<fvec> samples = canvas->data->GetSamples();
     if(trainList.size())
     {
         vector<fvec> trainSamples;
@@ -458,12 +459,77 @@ void MLDemos::Train(Clusterer *clusterer, bvec trainList)
         {
             if(trainList[i])
             {
-                trainSamples.push_back(canvas->data->GetSample(i));
+                trainSamples.push_back(samples[i]);
             }
         }
         clusterer->Train(trainSamples);
     }
-    else clusterer->Train(canvas->data->GetSamples());
+    else if(trainRatio < 1)
+    {
+        int trainCnt = samples.size()*trainRatio;
+        vector<fvec> trainSamples(trainCnt);
+        u32 *perm = randPerm(samples.size());
+        FOR(i, trainCnt)
+        {
+            trainSamples[i] = samples[perm[i]];
+        }
+        clusterer->Train(trainSamples);
+        delete [] perm;
+    }
+    else clusterer->Train(samples);
+    // we test the clusters to see how well they classify the samples
+
+    if(!testFMeasures) return;
+    // we compute the f-measures for each class
+    ivec labels = canvas->data->GetLabels();
+    map<int,int> classcounts;
+    int cnt = 0;
+    FOR(i, labels.size()) if(!classcounts.count(labels[i])) classcounts[labels[i]] = cnt++;
+    int classCount = classcounts.size();
+    map<int, fvec> classScores;
+    int nbClusters = clusterer->NbClusters();
+    fvec clusterScores(nbClusters);
+    map<int,float> labelScores;
+
+    vector<fvec> scores(samples.size());
+    FOR(i, canvas->data->GetCount())
+    {
+        fvec result = clusterer->Test(samples[i]);
+        if(clusterer->NbClusters()==1) scores[i] = result;
+        else if(result.size()>1) scores[i] = result;
+    }
+
+    FOR(i, labels.size())
+    {
+        labelScores[labels[i]] += 1.f;
+        if(!classScores.count(labels[i]))classScores[labels[i]].resize(nbClusters);
+        FOR(k, nbClusters)
+        {
+            classScores[labels[i]][k] += scores[i][k];
+            clusterScores[k] += scores[i][k];
+        }
+    }
+
+    float fmeasure = 0;
+    map<int,float>::iterator it2 = labelScores.begin();
+    for(map<int,fvec>::iterator it = classScores.begin(); it != classScores.end(); it++, it2++)
+    {
+        float maxScore = -FLT_MAX;
+        FOR(k, nbClusters)
+        {
+            float precision = it->second[k] / it2->second;
+            float recall = it->second[k] / clusterScores[k];
+            float f1 = 2*precision*recall/(precision+recall);
+            maxScore = max(maxScore,f1);
+        }
+        fmeasure += maxScore;
+    }
+    int classAndClusterCount = classCount;
+    // we penalize empty clusters
+    FOR(k, nbClusters) if(clusterScores[k] == 0) classAndClusterCount++; // we have an empty cluster!
+    fmeasure /= classAndClusterCount;
+
+    *testFMeasures = fmeasure;
 }
 
 void MLDemos::Train(Projector *projector, bvec trainList)

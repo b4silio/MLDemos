@@ -59,6 +59,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
     connect(ui.actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
+    connect(ui.actionShift_Dimensions, SIGNAL(triggered()), this, SLOT(ShiftDimensions()));
     connect(ui.actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
@@ -95,6 +96,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasTypeChanged();
     CanvasOptionsChanged();
     ResetPositiveClass();
+    ClusterChanged();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -366,8 +368,10 @@ void MLDemos::initDialogs()
     connect(optionsCluster->clusterButton, SIGNAL(clicked()), this, SLOT(Cluster()));
     connect(optionsCluster->iterationButton, SIGNAL(clicked()), this, SLOT(ClusterIterate()));
     connect(optionsCluster->optimizeButton, SIGNAL(clicked()), this, SLOT(ClusterOptimize()));
+    connect(optionsCluster->testButton, SIGNAL(clicked()), this, SLOT(ClusterTest()));
     connect(optionsCluster->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
+    connect(optionsCluster->optimizeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ClusterChanged()));
 
     connect(optionsDynamic->regressionButton, SIGNAL(clicked()), this, SLOT(Dynamize()));
     connect(optionsDynamic->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
@@ -818,6 +822,18 @@ void MLDemos::resizeEvent( QResizeEvent *event )
     CanvasMoveEvent();
 }
 
+void MLDemos::ClusterChanged()
+{
+    if(optionsCluster->optimizeCombo->currentIndex() == 3) // F1
+    {
+        optionsCluster->trainRatioCombo->setVisible(true);
+    }
+    else
+    {
+        optionsCluster->trainRatioCombo->setVisible(false);
+    }
+}
+
 void MLDemos::AlgoChanged()
 {
     ChangeInfoFile();
@@ -1027,6 +1043,7 @@ void MLDemos::Clear()
     canvas->maps.info = QPixmap();
     canvas->liveTrajectory.clear();
     canvas->sampleColors.clear();
+    canvas->maps.animation = QPixmap();
     canvas->repaint();
     UpdateInfo();
 }
@@ -1098,6 +1115,7 @@ void MLDemos::ClearData()
         canvas->data->Clear();
         canvas->targets.clear();
         canvas->targetAge.clear();
+        canvas->maps.animation = QPixmap();
         canvas->maps.reward = QPixmap();
         canvas->maps.samples = QPixmap();
         canvas->maps.trajectories = QPixmap();
@@ -1108,6 +1126,28 @@ void MLDemos::ClearData()
     FitToData();
     ManualSelectionUpdated();
     UpdateInfo();
+}
+
+void MLDemos::ShiftDimensions()
+{
+    if(canvas)
+    {
+        vector<fvec> samples = canvas->data->GetSamples();
+        if(!samples.size()) return;
+        int dim = samples[0].size();
+        if(dim < 2) return;
+        FOR(i, samples.size())
+        {
+            float tmp = samples[i][0];
+            FOR(d, dim-1)
+            {
+                samples[i][d] = samples[i][d+1];
+            }
+            samples[i][dim-1] = tmp;
+        }
+        canvas->data->SetSamples(samples);
+    }
+    DisplayOptionChanged();
 }
 
 

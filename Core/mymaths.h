@@ -109,7 +109,7 @@ fvec operator + (const fvec a, const float b);
 fvec operator - (const fvec a, const float b);
 fvec operator * (const fvec a, const float b);
 fvec operator / (const fvec a, const float b);
-float operator * (const fvec a, const fvec b);
+float operator * (const fvec a, const fvec b); // dot product
 bool operator == (const fvec a, const fvec b);
 bool operator == (const fvec a, const float b);
 bool operator != (const fvec a, const fvec b);

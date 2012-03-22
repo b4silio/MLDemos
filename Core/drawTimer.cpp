@@ -199,12 +199,12 @@ void DrawTimer::Animate()
         QPainter painter(&animationImage);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setBrush(Qt::NoBrush);
-        painter.setPen(QPen(Qt::red, 3, Qt::DashDotDotLine));
+        painter.setPen(QPen(Qt::red, 3, Qt::SolidLine));
         FOR(i, paths.size())
         {
             painter.drawPath(paths[i]);
         }
-        painter.setPen(QPen(Qt::red, 2));
+        painter.setPen(QPen(Qt::blue, 2));
         FOR(i, startPoints.size())
         {
             painter.drawEllipse(startPoints[i], 8, 8);

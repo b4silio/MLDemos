@@ -17,15 +17,40 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "mldemos.h"
-#include <QtGui/QApplication>
+#include "public.h"
+#include "clustererExample.h"
 
-int main(int argc, char *argv[])
+using namespace std;
+
+void ClustererExample::Train(std::vector< fvec > samples)
 {
-    QApplication a(argc, argv);
-	QString filename = "";
-	if(argc > 1) filename = QString(argv[1]);
-    MLDemos w(filename);
-    w.show();
-    return a.exec();
+	if(!samples.size()) return;
+    dim = samples[0].size();
+
+    nbClusters = 2; // this is usually initialized from the hyperparameters panel, or might be computed automatically
+}
+
+fvec ClustererExample::Test( const fvec &sample)
+{
+	fvec res;
+	res.resize(nbClusters,0);
+
+    // just for our testing, we do a dumb selection process
+    float dot = sample*sample*50;
+    int index = ((int)dot) % dim;
+    res[index] = 1;
+
+    return res;
+}
+
+const char *ClustererExample::GetInfoString()
+{
+    char *text = new char[1024];
+    sprintf(text, "My Clusterer Example\n");
+    sprintf(text, "\n");
+    sprintf(text, "Training informations:\n");
+
+    // here you can fill in whatever information you want
+
+    return text;
 }

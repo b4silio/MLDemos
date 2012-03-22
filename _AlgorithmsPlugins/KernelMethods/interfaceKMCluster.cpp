@@ -183,14 +183,12 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
     int w = 129;
     int h = 129;
     int nbClusters = _kkmeans->NbClusters();
-    double **valueList = new double*[nbClusters];
-    FOR(i, nbClusters)
-    {
-        valueList[i] = new double[w*h];
-    }
     int dim = canvas->data->GetDimCount();
-    FOR(k, nbClusters)
+
+    int bMethod = 1; // 0: cluster decision function, 1: cluster weight
+    if(bMethod==0)
     {
+        double *values = new double[w*h];
         FOR(i, w)
         {
             FOR(j, h)
@@ -198,47 +196,100 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
                 int x = i*W/w;
                 int y = j*H/h;
                 fvec sample = canvas->fromCanvas(x,y);
-                double value = _kkmeans->TestScore(sample, k);
-                // to avoid some numerical weird stuff
-                value = value*1000.;
-                valueList[k][j*w + i] = value;
+                fvec res = _kkmeans->TestUnnormalized(sample);
+                double value = res[0];
+                FOR(k, res.size())
+                {
+                    if(value < res[k])
+                    {
+                        value = res[k];
+                    }
+                }
+                values[j*w + i] = value;
             }
         }
-    }
-    FOR(k, nbClusters)
-    {
-
-        QContour contour(valueList[k], w, h);
-        contour.plotColor = SampleColor[(k+1)%SampleColorCnt];
-        contour.plotThickness = 2;
+        QContour contour(values, w, h);
+        contour.bDrawColorbar = false;
+        contour.plotColor = Qt::black;
+        contour.plotThickness = 3;
+        contour.style = Qt::DotLine;
         double vmin, vmax;
         contour.GetLimits(vmin, vmax);
-        vmin += (vmax - vmin)/4; // we take out the smallest levels to avoid numerical issues
+        //vmin += (vmax - vmin)/4; // we take out the smallest levels to avoid numerical issues
         contour.SetLimits(vmin, vmax);
         contour.Paint(painter, 10);
-        /*
-        QImage image(w,h,QImage::Format_RGB32);
-        double vmin, vmax;
-        contour.GetLimits(vmin, vmax);
-        double vdiff = vmax - vmin;
-        FOR(i, w)
+        delete [] values;
+    }
+    else if(bMethod==1)
+    {
+        double **valueList = new double*[nbClusters];
+        FOR(i, nbClusters)
         {
-            FOR(j, h)
+            valueList[i] = new double[w*h];
+        }
+
+        FOR(k, nbClusters)
+        {
+            FOR(i, w)
             {
-                int value = (int)((valueList[k][j*w + i]-vmin)/vdiff*255);
-                value = max(0,min(255,value));
-                image.setPixel(i,j, qRgb((int)value,value,value));
+                FOR(j, h)
+                {
+                    int x = i*W/w;
+                    int y = j*H/h;
+                    fvec sample = canvas->fromCanvas(x,y);
+                    double value = _kkmeans->TestScore(sample, k);
+                    // to avoid some numerical weird stuff
+                    value = value*1000.;
+                    valueList[k][j*w + i] = value;
+                }
             }
         }
-        QPixmap contourPixmap = QPixmap::fromImage(image).scaled(512,512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        QLabel *lab = new QLabel();
-        lab->setPixmap(contourPixmap);
-        lab->show();
-        */
-        delete [] valueList[k];
-        valueList[k] = 0;
+        FOR(k, nbClusters)
+        {
+            QContour contour(valueList[k], w, h);
+            if(canvas->bDisplayMap)
+            {
+                contour.bDrawColorbar = false;
+                contour.plotColor = Qt::black;
+                contour.plotThickness = 4;
+                contour.style = Qt::DotLine;
+            }
+            else
+            {
+                contour.bDrawColorbar = false;
+                contour.plotColor = SampleColor[(k+1)%SampleColorCnt];
+                contour.plotThickness = 3;
+                contour.style = Qt::SolidLine;
+            }
+            double vmin, vmax;
+            contour.GetLimits(vmin, vmax);
+            vmin += (vmax - vmin)/5; // we take out the smallest levels to avoid numerical issues
+            contour.SetLimits(vmin, vmax);
+            contour.Paint(painter, 10);
+            /*
+            QImage image(w,h,QImage::Format_RGB32);
+            double vmin, vmax;
+            contour.GetLimits(vmin, vmax);
+            double vdiff = vmax - vmin;
+            FOR(i, w)
+            {
+                FOR(j, h)
+                {
+                    int value = (int)((valueList[k][j*w + i]-vmin)/vdiff*255);
+                    value = max(0,min(255,value));
+                    image.setPixel(i,j, qRgb((int)value,value,value));
+                }
+            }
+            QPixmap contourPixmap = QPixmap::fromImage(image).scaled(512,512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            QLabel *lab = new QLabel();
+            lab->setPixmap(contourPixmap);
+            lab->show();
+            */
+            delete [] valueList[k];
+            valueList[k] = 0;
+        }
+        delete [] valueList;
     }
-    delete [] valueList;
 }
 
 void ClustKM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)

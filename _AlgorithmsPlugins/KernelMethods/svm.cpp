@@ -55,7 +55,7 @@ inline double powi(double base, int times)
 #define INF HUGE_VAL
 #define TAU 1e-12
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
-#if 1
+#if 0
 void info(const char *fmt,...)
 {
 	va_list ap;
@@ -817,7 +817,7 @@ void Solver::Solve(int l, const Q_Matrix& Q, const double *p_, const schar *y_,
 	si->upper_bound_p = Cp;
 	si->upper_bound_n = Cn;
 
-	info("\noptimization finished, #iter = %d\n",iter);
+    info("\noptimization finished, #iter = %d\n",iter);
 
 	delete[] p;
 	delete[] y;
@@ -2799,6 +2799,38 @@ void svm_get_labels(const svm_model *model, int* label)
 	if (model->label != NULL)
 		for(int i=0;i<model->nr_class;i++)
 			label[i] = model->label[i];
+}
+
+double svm_get_dual_objective_function(const struct svm_model *svm)
+{
+    // sum_i(a_i) - 0.5 * sum_i sum_j ( a_i*a_j*y_i*y_j*K(x_i,x_j) )
+    double accumulator = 0;
+    int nsv = svm->l;
+    int nclass = svm->nr_class-1;
+    for(int c=0; c<nclass; c++)
+    {
+        double *sv_coef = svm->sv_coef[c];
+
+        // sum_i(a_i)
+        for(int i=0; i<nsv; i++)
+        {
+            accumulator += sv_coef[i];
+        }
+
+        // sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j))
+        double sum = 0;
+        for(int i=0; i<nsv; i++)
+        {
+            for(int j=0; j<=i; j++)
+            {
+                double value = sv_coef[i] * sv_coef[j] * Kernel::k_function(svm->SV[i],svm->SV[j],svm->param);
+                sum += j==i ? value : 2*value;
+            }
+        }
+        sum *= 0.5;
+        accumulator -= sum;
+    }
+    return accumulator;
 }
 
 double svm_get_svr_probability(const svm_model *model)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>158</height>
+    <height>144</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>20</y>
+     <y>10</y>
      <width>31</width>
      <height>16</height>
     </rect>
@@ -35,7 +35,7 @@
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>80</y>
+     <y>70</y>
      <width>70</width>
      <height>16</height>
     </rect>
@@ -53,7 +53,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>100</y>
+     <y>90</y>
      <width>91</width>
      <height>22</height>
     </rect>
@@ -102,7 +102,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>100</y>
+     <y>90</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -141,7 +141,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>20</y>
+     <y>10</y>
      <width>41</width>
      <height>16</height>
     </rect>
@@ -159,7 +159,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>100</y>
+     <y>90</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -200,7 +200,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
+     <y>10</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -218,7 +218,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>40</y>
+     <y>30</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -247,7 +247,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>80</y>
+     <y>70</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -265,7 +265,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>80</y>
+     <y>70</y>
      <width>60</width>
      <height>16</height>
     </rect>
@@ -283,7 +283,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
+     <y>30</y>
      <width>91</width>
      <height>22</height>
     </rect>
@@ -323,7 +323,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>40</y>
+     <y>30</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -352,6 +352,24 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="value">
     <double>0.100000000000000</double>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="optimizeCheck">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>120</y>
+     <width>100</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Optimize Kernel</string>
    </property>
   </widget>
  </widget>

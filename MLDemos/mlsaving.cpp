@@ -127,6 +127,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.beginGroup("clusterOptions");
     settings.setValue("tab", optionsCluster->tabWidget->currentIndex());
     settings.setValue("trainRatio", optionsCluster->trainRatioCombo->currentIndex());
+    settings.setValue("trainTestCombo", optionsCluster->trainTestCombo->currentIndex());
     settings.setValue("optimizeCombo", optionsCluster->optimizeCombo->currentIndex());
     settings.setValue("rangeStart", optionsCluster->rangeStartSpin->value());
     settings.setValue("rangeStop", optionsCluster->rangeStopSpin->value());
@@ -300,6 +301,7 @@ void MLDemos::LoadLayoutOptions()
 	settings.beginGroup("clusterOptions");
 	if(settings.contains("tab")) optionsCluster->tabWidget->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
+    if(settings.contains("trainTestCombo")) optionsCluster->trainTestCombo->setCurrentIndex(settings.value("trainTestCombo").toInt());
     if(settings.contains("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(settings.value("optimizeCombo").toInt());
     if(settings.contains("rangeStart")) optionsCluster->rangeStartSpin->setValue(settings.value("rangeStart").toInt());
     if(settings.contains("rangeStop")) optionsCluster->rangeStopSpin->setValue(settings.value("rangeStop").toInt());
@@ -438,6 +440,7 @@ void MLDemos::SaveParams( QString filename )
 		sprintf(groupName,"clusterOptions");
         out << groupName << ":" << "tab" << " " << optionsCluster->tabWidget->currentIndex() << "\n";
         out << groupName << ":" << "trainRatio" << " " << optionsCluster->trainRatioCombo->currentIndex() << "\n";
+        out << groupName << ":" << "trainTestCombo" << " " << optionsCluster->trainTestCombo->currentIndex() << "\n";
         out << groupName << ":" << "optimizeCombo" << " " << optionsCluster->optimizeCombo->currentIndex() << "\n";
         out << groupName << ":" << "rangeStart" << " " << optionsCluster->rangeStartSpin->value() << "\n";
         out << groupName << ":" << "rangeStop" << " " << optionsCluster->rangeStopSpin->value() << "\n";
@@ -570,6 +573,7 @@ void MLDemos::LoadParams( QString filename )
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClust);
             if(line.endsWith("tab")) optionsCluster->tabWidget->setCurrentIndex(tab = (int)value);
             if(line.endsWith("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex((int)value);
+            if(line.endsWith("trainTestCombo")) optionsCluster->trainTestCombo->setCurrentIndex((int)value);
             if(line.endsWith("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex((int)value);
             if(line.endsWith("rangeStart")) optionsCluster->rangeStartSpin->setValue((int)value);
             if(line.endsWith("rangeStop")) optionsCluster->rangeStopSpin->setValue((int)value);

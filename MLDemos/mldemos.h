@@ -109,7 +109,7 @@ private:
     bool Train(Classifier *classifier, int positive, float trainRatio=1, bvec trainList = bvec());
     void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
-    void Train(Clusterer *clusterer, bvec trainList = bvec());
+    void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0);
 	void Train(Maximizer *maximizer);
     void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
@@ -217,6 +217,7 @@ private slots:
 	void Cluster();
 	void ClusterIterate();
     void ClusterOptimize();
+    void ClusterTest();
     void Project();
     void ProjectRevert();
     void ProjectReproject();
@@ -225,6 +226,7 @@ private slots:
 	void CompareScreenshot();
 	void Clear();
 	void ClearData();
+    void ShiftDimensions();
 	void SetROCInfo();
     void LoadDynamical();
     void SaveDynamical();
@@ -266,6 +268,7 @@ private slots:
 	void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
 	void AlgoChanged();
+    void ClusterChanged();
 	void ChangeInfoFile();
     void ManualSelectionUpdated();
     void ManualSelectionChanged();

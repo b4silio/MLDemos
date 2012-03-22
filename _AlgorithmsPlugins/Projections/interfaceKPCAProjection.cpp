@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QClipboard>
 #include <qcontour.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -125,7 +126,7 @@ void KPCAProjection::GetContoursPixmap(int index)
     double multiplier = 1000.; // this is used to avoid numerical instabilities when computing the contour lines
     VectorXd point(dim);
     FOR(d,dim) point(d) = 0;
-    qDebug() << "boundaries: " << xmin << ymin << "-->" << xmax << ymax;
+    //qDebug() << "boundaries: " << xmin << ymin << "-->" << xmax << ymax;
     double xdiff = xmax - xmin;
     double ydiff = ymax - ymin;
     double *values = new double[w*h];
@@ -167,7 +168,7 @@ void KPCAProjection::GetContoursPixmap(int index)
         */
     }
     double vdiff=vmax-vmin;
-    qDebug() << "range" << vmin << vmax << vdiff;
+    //qDebug() << "range" << vmin << vmax << vdiff;
     if(vdiff == 0) vdiff = 1.f;
     FOR(i, wmo)
     {
@@ -260,6 +261,64 @@ void KPCAProjection::DrawContours(int index)
     if(contourWidget->isVisible()) contours->plotLabel->repaint();
 }
 
+void DrawEigenvals(QPainter &painter, fvec eigs, bool bSkipFirstEigenvector)
+{
+    int w=painter.window().width();
+    int h=painter.window().height();
+    int pad = 5;
+
+    int dim = eigs.size();
+    float maxEigVal = 1.f;
+    if(dim > 2) maxEigVal = bSkipFirstEigenvector ? eigs[1] : eigs[0];
+    else if(dim) maxEigVal = eigs[0];
+
+    /*
+    FOR(i, dim)
+    {
+        if(!i && bSkipFirstEigenvector) continue;
+        if(eigs[i] == eigs[i]) maxEigVal += eigs[i];
+    }
+
+    maxEigVal = max(1.f,maxEigVal);
+    float maxAccumulator = 0;
+    FOR(i, dim) if(eigs[i] == eigs[i]) maxAccumulator += eigs[i];
+
+    float accumulator = 0;
+    */
+
+    painter.setPen(Qt::gray);
+    painter.drawLine(QPointF(pad, h-2*pad), QPointF(w-pad, h-2*pad));
+    painter.drawLine(QPointF(pad, pad), QPointF(pad, h-2*pad));
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::black);
+    int rectW = (w-2*pad) / (dim-1) - 2;
+    FOR(i, dim)
+    {
+        float eigval = eigs[i];
+
+        int x = dim==1 ? w/2 : i * (w-2*pad) / dim + pad;
+        int y = (int)(eigval/maxEigVal * (h-2*pad));
+        y = min(y, h-2*pad);
+        painter.drawRect(x,h-2*pad,rectW,-y);
+    }
+    painter.setBrush(Qt::NoBrush);
+    //painter.drawLine(point, QPoint(w-2*pad, h-2*pad));
+    QFont font = painter.font();
+    font.setPointSize(8);
+    painter.setFont(font);
+    painter.setPen(Qt::black);
+    painter.drawText(0,0,w,2*pad,Qt::AlignCenter, "eigenvalues");
+    int step = 1;
+    while((dim/step > 8)) step++;
+    for(int i=0; i<dim; i+=step)
+    {
+        int x = dim==1? w/2 : (i+0.5f) * (w-2*pad) / (dim) + pad+(!i?1:0);
+        if(i==dim-1) x -= 4;
+        //        int x = dim==1? w/2 : i*(w-2*pad)/(dim-1);
+        painter.drawText(x - 4, h-1, QString("l%1").arg(i+1));
+    }
+}
 void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     contourPixmaps.clear();
@@ -327,6 +386,42 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         ymax += 3*ydiff;
         //cout << pcaPointer->eigenVectors;
     }
+
+    // we get the eigenvectors
+    fvec eigenvalues;
+    VectorXd eigs = kpca->pca->eigenvalues;
+    FOR(i, eigs.rows())
+    {
+        eigenvalues.push_back(eigs(i));
+    }
+    sort(eigenvalues.begin(), eigenvalues.end(), std::greater<float>());
+    eigenvalues.resize(params->dimCountSpin->value());
+    FOR(i, eigenvalues.size()) qDebug() << "eigs" << i << eigenvalues[i];
+
+
+    float accumulator = 0;
+    float maxEigVal = 0;
+    FOR(i, eigenvalues.size()) if(eigenvalues[i] == eigenvalues[i] && eigenvalues[i] >= 0) maxEigVal += eigenvalues[i];
+
+    params->eigenList->clear();
+    FOR(i, eigenvalues.size())
+    {
+        float eigval = eigenvalues[i];
+        if(eigval == eigval && eigval >= 0)
+        {
+            accumulator += eigval / maxEigVal;
+        }
+        else eigval = 0;
+        params->eigenList->addItem(QString("%1: %2 %3%%").arg(i+1).arg(eigval, 0, 'f', 2).arg(eigval/maxEigVal*100, 0, 'f', 1));
+    }
+
+    QPixmap pixmap(params->eigenGraph->size());
+    QBitmap bitmap(params->eigenGraph->size());
+    pixmap.setMask(bitmap);
+    pixmap.fill(Qt::transparent);
+    QPainter eigenPainter(&pixmap);
+    DrawEigenvals(eigenPainter, eigenvalues, true);
+    params->eigenGraph->setPixmap(pixmap);
 
     contours->dimSpin->setRange(1, kpca->targetDims);
     DrawContours(contours->dimSpin->value());
