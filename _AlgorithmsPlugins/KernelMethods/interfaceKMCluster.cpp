@@ -209,6 +209,7 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
             }
         }
         QContour contour(values, w, h);
+        contour.bDrawColorbar = false;
         contour.plotColor = Qt::black;
         contour.plotThickness = 3;
         contour.style = Qt::DotLine;
@@ -248,12 +249,14 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
             QContour contour(valueList[k], w, h);
             if(canvas->bDisplayMap)
             {
+                contour.bDrawColorbar = false;
                 contour.plotColor = Qt::black;
                 contour.plotThickness = 4;
                 contour.style = Qt::DotLine;
             }
             else
             {
+                contour.bDrawColorbar = false;
                 contour.plotColor = SampleColor[(k+1)%SampleColorCnt];
                 contour.plotThickness = 3;
                 contour.style = Qt::SolidLine;

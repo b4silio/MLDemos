@@ -659,11 +659,107 @@ void MLDemos::Cluster()
     UpdateInfo();
     QString infoText = showStats->infoText->text();
     infoText += "\nClustering as Classifier\n";
-    infoText += QString("F-Measure: %1\n").arg(testError);
+    infoText += QString("F-Measure: %1\n").arg(testError, 0, 'f', 3);
     showStats->infoText->setText(infoText);
 
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);
+}
+
+void MLDemos::ClusterTest()
+{
+    if(!canvas || !canvas->data->GetCount()) return;
+    drawTimer->Stop();
+    drawTimer->Clear();
+    QMutexLocker lock(&mutex);
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    DEL(classifier);
+    DEL(maximizer);
+    DEL(projector);
+    lastTrainingInfo = "";
+
+    int tab = optionsCluster->tabWidget->currentIndex();
+    if(tab >= clusterers.size() || !clusterers[tab]) return;
+    clusterer = clusterers[tab]->GetClusterer();
+    tabUsedForTraining = tab;
+
+    int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
+    if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
+
+    vector<fvec> samples = canvas->data->GetSamples();
+    ivec labels = canvas->data->GetLabels();
+    int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
+    float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
+    float ratio = f1ratios[f1ratioIndex];
+
+    float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
+    int ratioIndex = optionsCluster->trainTestCombo->currentIndex();
+    float trainRatio = ratios[ratioIndex];
+
+    vector<bool> trainList;
+    if(optionsCluster->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
+
+    float testError = 0;
+    int crossValCount = 5;
+    fvec testErrors(crossValCount);
+
+    FOR(j, crossValCount)
+    {
+        Train(clusterer, trainRatio, trainList, &testError);
+        testErrors[j] = testError;
+    }
+
+    // we fill in the canvas sampleColors for the alternative display types
+    canvas->sampleColors.resize(samples.size());
+    FOR(i, samples.size())
+    {
+        fvec res = clusterer->Test(samples[i]);
+        float r=0,g=0,b=0;
+        if(res.size() > 1)
+        {
+            FOR(j, res.size())
+            {
+                r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+                g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+                b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
+            }
+        }
+        else if(res.size())
+        {
+            r = (1-res[0])*255 + res[0]* 255;
+            g = (1-res[0])*255;
+            b = (1-res[0])*255;
+        }
+        canvas->sampleColors[i] = QColor(r,g,b);
+    }
+    canvas->maps.model = QPixmap();
+    clusterers[tab]->Draw(canvas, clusterer);
+
+    UpdateInfo();
+    QString infoText = showStats->infoText->text();
+    infoText += "\nClustering as Classifier\nF-Measures:\n";
+
+    float mean=0, stdev=0;
+    FOR(j, testErrors.size()) mean += testErrors[j];
+    mean /= testErrors.size();
+    FOR(j, testErrors.size()) stdev += (testErrors[j] - mean)*(testErrors[j] - mean);
+    stdev /= testErrors.size();
+    stdev = sqrtf(stdev);
+    infoText += QString("%1 clusters: %2 (+- %3)\n").arg(clusterer->NbClusters()).arg(mean, 0, 'f', 3).arg(stdev, 0, 'f', 3);
+
+    showStats->infoText->setText(infoText);
+    showStats->tabWidget->setCurrentIndex(1); // we show the info panel
+    statsDialog->show();
+
+    drawTimer->clusterer= &this->clusterer;
+    drawTimer->start(QThread::NormalPriority);
+    canvas->repaint();
 }
 
 void MLDemos::ClusterOptimize()
@@ -708,14 +804,17 @@ void MLDemos::ClusterOptimize()
     float testError = 0;
     ivec kCounts;
     vector< vector<fvec> > resultList(4);
+    vector<fvec> testErrors(stopCount-startCount+1);
     int crossValCount = 5;
     FOR(i, resultList.size()) resultList[i].resize(crossValCount);
     for(int k=startCount; k<=stopCount; k++)
     {
         clusterer->SetNbClusters(k);
+        testErrors[k-startCount].resize(crossValCount);
         FOR(j, crossValCount)
         {
             Train(clusterer, trainRatio, trainList, &testError);
+            testErrors[k-startCount][j] = testError;
 
             int folds = 10;
             fvec metricMeans(resultList.size());
@@ -740,6 +839,7 @@ void MLDemos::ClusterOptimize()
                     if(clusterMetrics[d] != clusterMetrics[d]) continue; // not a number
                     metricMeans[d] += clusterMetrics[d];
                     foldCount[d]++;
+                    qDebug() << "clusterMetrics: " << clusterMetrics[d];
                 }
             }
             FOR(d, metricMeans.size()) metricMeans[d] /= foldCount[d];
@@ -866,14 +966,22 @@ void MLDemos::ClusterOptimize()
     clusterers[tab]->Draw(canvas, clusterer);
     UpdateInfo();
     QString infoText = showStats->infoText->text();
-    infoText += "\nClustering as Classifier\n";
-    infoText += QString("F-Measure: %1\n").arg(testError);
+    infoText += "\nClustering as Classifier\nF-Measures:\n";
+    FOR(i, testErrors.size())
+    {
+        float mean=0, stdev=0;
+        FOR(j, testErrors[i].size()) mean += testErrors[i][j];
+        mean /= testErrors[i].size();
+        FOR(j, testErrors[i].size()) stdev += (testErrors[i][j] - mean)*(testErrors[i][j] - mean);
+        stdev /= testErrors[i].size();
+        stdev = sqrtf(stdev);
+        infoText += QString("%1 clusters: %2 (+- %3)\n").arg(i+1).arg(mean, 0, 'f', 3).arg(stdev, 0, 'f', 3);
+    }
     showStats->infoText->setText(infoText);
 
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);
     canvas->repaint();
-
 }
 
 void MLDemos::ClusterIterate()

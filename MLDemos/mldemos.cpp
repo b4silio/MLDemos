@@ -368,6 +368,7 @@ void MLDemos::initDialogs()
     connect(optionsCluster->clusterButton, SIGNAL(clicked()), this, SLOT(Cluster()));
     connect(optionsCluster->iterationButton, SIGNAL(clicked()), this, SLOT(ClusterIterate()));
     connect(optionsCluster->optimizeButton, SIGNAL(clicked()), this, SLOT(ClusterOptimize()));
+    connect(optionsCluster->testButton, SIGNAL(clicked()), this, SLOT(ClusterTest()));
     connect(optionsCluster->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsCluster->optimizeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ClusterChanged()));
