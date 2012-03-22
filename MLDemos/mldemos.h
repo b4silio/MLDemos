@@ -217,6 +217,7 @@ private slots:
 	void Cluster();
 	void ClusterIterate();
     void ClusterOptimize();
+    void ClusterTest();
     void Project();
     void ProjectRevert();
     void ProjectReproject();
