@@ -10,7 +10,7 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsGPR.ui paramsGPRdynamic.ui paramsKM.ui
+FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsGPR.ui paramsGPRdynamic.ui paramsKM.ui paramsMVM.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
@@ -18,8 +18,9 @@ HEADERS +=	\
 			svm.h \
 			SOGP.h \
 			SOGP_aux.h \
-			classifierSVM.h \
-			classifierRVM.h \
+            classifierSVM.h \
+            classifierMVM.h \
+            classifierRVM.h \
 			classifierPegasos.h \
 			clustererKKM.h \
             clustererKM.h \
@@ -31,6 +32,7 @@ HEADERS +=	\
 			regressorKRLS.h \
 			dynamicalSVR.h \
 			dynamicalGPR.h \
+            interfaceMVM.h \
             interfaceSVMClassifier.h \
 			interfaceSVMCluster.h \
 			interfaceSVMRegress.h \
@@ -43,7 +45,8 @@ SOURCES += 	\
 			svm.cpp \
 			SOGP.cpp \
 			SOGP_aux.cpp \
-			classifierSVM.cpp \
+            classifierSVM.cpp \
+            classifierMVM.cpp \
             classifierRVM.cpp \
 			classifierPegasos.cpp \
 			clustererKKM.cpp \
@@ -56,8 +59,9 @@ SOURCES += 	\
 			regressorKRLS.cpp \
 			dynamicalSVR.cpp \
 			dynamicalGPR.cpp \
-			interfaceSVMClassifier.cpp \
-			interfaceSVMCluster.cpp \
+            interfaceMVM.cpp \
+            interfaceSVMClassifier.cpp \
+            interfaceSVMCluster.cpp \
             interfaceSVMRegress.cpp \
             interfaceSVMDynamic.cpp \
             interfaceGPRRegress.cpp \

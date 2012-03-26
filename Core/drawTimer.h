@@ -50,9 +50,9 @@ public:
 	void Refine();
     void Animate();
 	void Clear();
-	void TestFast(int start, int stop);
-	void Vectors(int count, int steps);
-	void VectorsFast(int count, int steps);
+    bool TestFast(int start, int stop);
+    bool Vectors(int count, int steps);
+    bool VectorsFast(int count, int steps);
 	void Maximization();
 	void Stop();
     static QColor GetColor(Classifier *classifier, fvec sample);

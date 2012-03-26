@@ -839,7 +839,6 @@ void MLDemos::ClusterOptimize()
                     if(clusterMetrics[d] != clusterMetrics[d]) continue; // not a number
                     metricMeans[d] += clusterMetrics[d];
                     foldCount[d]++;
-                    qDebug() << "clusterMetrics: " << clusterMetrics[d];
                 }
             }
             FOR(d, metricMeans.size()) metricMeans[d] /= foldCount[d];

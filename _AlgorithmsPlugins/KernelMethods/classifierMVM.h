@@ -16,32 +16,38 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "pluginKernel.h"
-#include "interfaceMVM.h"
-#include "interfaceSVMClassifier.h"
-#include "interfaceSVMCluster.h"
-#include "interfaceSVMRegress.h"
-#include "interfaceSVMDynamic.h"
-#include "interfaceGPRRegress.h"
-#include "interfaceGPRDynamic.h"
-#include "interfaceKMCluster.h"
+#ifndef _CLASSIFIER_MVM_H_
+#define _CLASSIFIER_MVM_H_
 
-using namespace std;
+#include <vector>
+#include <map>
+#include <classifier.h>
+#include "svm.h"
 
-PluginKernel::PluginKernel()
+class ClassifierMVM : public Classifier
 {
-    classifiers.push_back(new ClassSVM());
-    clusterers.push_back(new ClustKM());
-    clusterers.push_back(new ClustSVM());
-    regressors.push_back(new RegrSVM());
-    regressors.push_back(new RegrGPR());
-    dynamicals.push_back(new DynamicSVM());
-    dynamicals.push_back(new DynamicGPR());
-    classifiers.push_back(new ClassMVM());
-}
+private:
+    float **SVs;
+    float *alpha;
+    float b;
+    int svCount;
 
-#ifndef PLUGIN_CLUSTER
-#ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_KernelMethods, PluginKernel)
-#endif
-#endif
+public:
+    std::vector< fvec > manualSamples;
+    ivec manualLabels;
+    int kernel_type;
+    int degree;				/* for poly */
+    double gamma;			/* for poly/rbf/sigmoid */
+    double coef0;			/* for poly/sigmoid */
+    ivec indices;
+    fvec alphas;
+
+    ClassifierMVM();
+    ~ClassifierMVM();
+	void Train(std::vector< fvec > samples, ivec labels);
+    float Test(const fvec &sample);
+    const char *GetInfoString();
+    void SetParams(u32 kernelType, float kernelParam, ivec indices, fvec alphas);
+};
+
+#endif // _CLASSIFIER_SVM_H_
