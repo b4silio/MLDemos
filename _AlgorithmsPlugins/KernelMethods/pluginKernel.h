@@ -29,7 +29,7 @@ class PluginKernel : public QObject, public CollectionInterface
 public:
 	PluginKernel();
 
-	QString GetName(){return "Kernel Methods Collection";};
+    QString GetName(){return "Kernel Methods Collection";}
 };
 
 #endif // _PLUGINKERNEL_H_
