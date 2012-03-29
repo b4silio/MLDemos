@@ -235,6 +235,7 @@ void DrawTimer::Refine()
 		Clear();
 		return;
 	}
+    bool bRefined = true;
 	if(refineLevel == 0)
 	{
 		Clear();
@@ -262,25 +263,26 @@ void DrawTimer::Refine()
 			return;
 		}
 
-		TestFast(start,stop); // we finish the current batch
+        bRefined &= TestFast(start,stop); // we finish the current batch
 		if(dynamical && (*dynamical) && !bColorMap)
 		{
 			int cnt = 10000 / refineMax;
 			int steps = 8;
-			VectorsFast(cnt, steps);
+            bRefined &= VectorsFast(cnt, steps);
 		}
 	}
-	refineLevel++;
+    if(bRefined) refineLevel++;
 }
 
-void DrawTimer::Vectors(int count, int steps)
+bool DrawTimer::Vectors(int count, int steps)
 {
-	if(!bRunning || !mutex) return;
-	mutex->lock();
-	if(!(*dynamical)) return;
-	float dT = (*dynamical)->dT;// * (dynamical->count/100.f);
-	mutex->unlock();
-	//float dT = 0.02f;
+    if(!bRunning || !mutex) return false;
+    float dT=0.001;
+    mutex->lock();
+    if(!(*dynamical)) return false;
+    dT = (*dynamical)->dT;// * (dynamical->count/100.f);
+    mutex->unlock();
+    //float dT = 0.02f;
 	fvec sample;
 	sample.resize(2,0);
 	int w = canvas->width();
@@ -303,26 +305,27 @@ void DrawTimer::Vectors(int count, int steps)
 		QPointF oldPoint = canvas->toCanvasCoords(sample);
 		FOR(j, steps)
 		{
-			if(!(*dynamical)) return;
-			mutex->lock();
-			fvec res = (*dynamical)->Test(sample);
-			if((*dynamical)->avoid)
-			{
-				(*dynamical)->avoid->SetObstacles(obstacles);
-				fvec newRes = (*dynamical)->avoid->Avoid(sample, res);
-				res = newRes;
-			}
-			mutex->unlock();
-			sample += res*dT;
-			float speed = sqrtf(res[0]*res[0] + res[1]*res[1]);
-			QPointF point = canvas->toCanvasCoords(sample);
-			painter.setOpacity(speed);
-			QColor c(color,color,color);
-			painter.setPen(QPen(c, 0.25));
-			painter.drawLine(point, oldPoint);
-			oldPoint = point;
-		}
+            if(!(*dynamical)) return false;
+            mutex->lock();
+            fvec res = (*dynamical)->Test(sample);
+            if((*dynamical)->avoid)
+            {
+                (*dynamical)->avoid->SetObstacles(obstacles);
+                fvec newRes = (*dynamical)->avoid->Avoid(sample, res);
+                res = newRes;
+            }
+            mutex->unlock();
+            sample += res*dT;
+            float speed = sqrtf(res[0]*res[0] + res[1]*res[1]);
+            QPointF point = canvas->toCanvasCoords(sample);
+            painter.setOpacity(speed);
+            QColor c(color,color,color);
+            painter.setPen(QPen(c, 0.25));
+            painter.drawLine(point, oldPoint);
+            oldPoint = point;
+        }
 	}
+    return true;
 }
 
 void DrawTimer::Maximization()
@@ -375,10 +378,10 @@ void DrawTimer::Maximization()
     */
 }
 
-void DrawTimer::VectorsFast(int count, int steps)
+bool DrawTimer::VectorsFast(int count, int steps)
 {
-	if(!(*dynamical)) return;
-	if(!bRunning || !mutex) return;
+    if(!(*dynamical)) return false;
+    if(!bRunning || !mutex) return false;
 	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
 	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
@@ -404,26 +407,27 @@ void DrawTimer::VectorsFast(int count, int steps)
 		QPointF oldPoint = canvas->toCanvasCoords(sample);
 		FOR(j, steps)
 		{
-			if(!(*dynamical)) return;
-			mutex->lock();
-			fvec res = (*dynamical)->Test(sample);
-			if((*dynamical)->avoid)
-			{
-				(*dynamical)->avoid->SetObstacles(obstacles);
-				fvec newRes = (*dynamical)->avoid->Avoid(sample, res);
-				res = newRes;
-			}
-			mutex->unlock();
-			sample += res*dT;
-			float speed = sqrtf(res[0]*res[0] + res[1]*res[1]);
-			QPointF point = canvas->toCanvasCoords(sample);
-			painter.setOpacity(speed);
-			QColor c(color,color,color);
-			painter.setPen(QPen(c, 0.25));
-			painter.drawLine(point, oldPoint);
-			oldPoint = point;
-		}
+            if(!(*dynamical)) return false;
+            mutex->lock();
+            fvec res = (*dynamical)->Test(sample);
+            if((*dynamical)->avoid)
+            {
+                (*dynamical)->avoid->SetObstacles(obstacles);
+                fvec newRes = (*dynamical)->avoid->Avoid(sample, res);
+                res = newRes;
+            }
+            mutex->unlock();
+            sample += res*dT;
+            float speed = sqrtf(res[0]*res[0] + res[1]*res[1]);
+            QPointF point = canvas->toCanvasCoords(sample);
+            painter.setOpacity(speed);
+            QColor c(color,color,color);
+            painter.setPen(QPen(c, 0.25));
+            painter.drawLine(point, oldPoint);
+            oldPoint = point;
+        }
 	}
+    return true;
 }
 
 QColor DrawTimer::GetColor(Classifier *classifier, fvec sample)
@@ -475,14 +479,16 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample)
     return c;
 }
 
-void DrawTimer::TestFast(int start, int stop)
+bool DrawTimer::TestFast(int start, int stop)
 {
 	if(stop < 0 || stop > w*h) stop = w*h;
-	mutex->lock();
-	int dim=canvas->data->GetDimCount();
-	vector<Obstacle> obstacles = canvas->data->GetObstacles();
-	mutex->unlock();
-	if(dim > 2) return; // we dont want to draw multidimensional stuff, it's ... problematic
+    int dim=2;
+    vector<Obstacle> obstacles;
+    mutex->lock();
+    dim=canvas->data->GetDimCount();
+    obstacles = canvas->data->GetObstacles();
+    mutex->unlock();
+    if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
 	fvec sample(dim);
 	for (int i=start; i<stop; i++)
 	{
@@ -494,66 +500,67 @@ void DrawTimer::TestFast(int start, int stop)
         sample = canvas->fromCanvas(x,y);
         fvec val(dim);
 		float v;
-		QMutexLocker lock(mutex);
-		if((*classifier))
-		{
+        QMutexLocker lock(mutex);
+        if((*classifier))
+        {
             QColor c = GetColor(*classifier, sample);
-			drawMutex.lock();
-			bigMap.setPixel(x,y,c.rgb());
-			drawMutex.unlock();
-		}
-		else if(*regressor)
-		{
-			val = (*regressor)->Test(sample);
-		}
-		else if(*clusterer)
-		{
-			fvec res = (*clusterer)->Test(sample);
-			float r=0,g=0,b=0;
-			if(res.size() > 1)
-			{
-				FOR(i, res.size())
-				{
-					r += SampleColor[(i+1)%SampleColorCnt].red()*res[i];
-					g += SampleColor[(i+1)%SampleColorCnt].green()*res[i];
-					b += SampleColor[(i+1)%SampleColorCnt].blue()*res[i];
-				}
-			}
-			else if(res.size())
-			{
-				r = (1-res[0])*255 + res[0]* 255;
-				g = (1-res[0])*255;
-				b = (1-res[0])*255;
-			}
-			if( r < 10 && g < 10 && b < 10) r = b = g = 255;
+            drawMutex.lock();
+            bigMap.setPixel(x,y,c.rgb());
+            drawMutex.unlock();
+        }
+        else if(*regressor)
+        {
+            val = (*regressor)->Test(sample);
+        }
+        else if(*clusterer)
+        {
+            fvec res = (*clusterer)->Test(sample);
+            float r=0,g=0,b=0;
+            if(res.size() > 1)
+            {
+                FOR(i, res.size())
+                {
+                    r += SampleColor[(i+1)%SampleColorCnt].red()*res[i];
+                    g += SampleColor[(i+1)%SampleColorCnt].green()*res[i];
+                    b += SampleColor[(i+1)%SampleColorCnt].blue()*res[i];
+                }
+            }
+            else if(res.size())
+            {
+                r = (1-res[0])*255 + res[0]* 255;
+                g = (1-res[0])*255;
+                b = (1-res[0])*255;
+            }
+            if( r < 10 && g < 10 && b < 10) r = b = g = 255;
             r = max(0.f,min(255.f, r));
             g = max(0.f,min(255.f, g));
             b = max(0.f,min(255.f, b));
             QColor c(r,g,b);
-			drawMutex.lock();
-			bigMap.setPixel(x,y,c.rgb());
-			drawMutex.unlock();
-		}
-		else if(*dynamical && bColorMap)
-		{
-			val = (*dynamical)->Test(sample);
-			if((*dynamical)->avoid)
-			{
-				(*dynamical)->avoid->SetObstacles(obstacles);
-				fVec newRes = (*dynamical)->avoid->Avoid(sample, val);
-				val = newRes;
-			}
-			float speed = sqrtf(val[0]*val[0] + val[1]*val[1]);
-			speed = min(1.f,speed);
-			int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
+            drawMutex.lock();
+            bigMap.setPixel(x,y,c.rgb());
+            drawMutex.unlock();
+        }
+        else if(*dynamical && bColorMap)
+        {
+            val = (*dynamical)->Test(sample);
+            if((*dynamical)->avoid)
+            {
+                (*dynamical)->avoid->SetObstacles(obstacles);
+                fVec newRes = (*dynamical)->avoid->Avoid(sample, val);
+                val = newRes;
+            }
+            float speed = sqrtf(val[0]*val[0] + val[1]*val[1]);
+            speed = min(1.f,speed);
+            int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
             hue = max(0, min(359,hue));
-			QColor color = QColor::fromHsv(hue, 255, 255);
-			color.setRed(255*(1-speed) + color.red()*speed);
-			color.setGreen(255*(1-speed) + color.green()*speed);
-			color.setBlue(255*(1-speed) + color.blue()*speed);
-			drawMutex.lock();
-			bigMap.setPixel(x,y,color.rgb());
-			drawMutex.unlock();
-		}
-	}
+            QColor color = QColor::fromHsv(hue, 255, 255);
+            color.setRed(255*(1-speed) + color.red()*speed);
+            color.setGreen(255*(1-speed) + color.green()*speed);
+            color.setBlue(255*(1-speed) + color.blue()*speed);
+            drawMutex.lock();
+            bigMap.setPixel(x,y,color.rgb());
+            drawMutex.unlock();
+        }
+    }
+    return true;
 }

@@ -47,6 +47,7 @@ void ClassSVM::ChangeOptions()
         params->svmCSpin->setRange(0.1, 9999);
         params->svmCSpin->setSingleStep(1);
         params->svmCSpin->setDecimals(1);
+        params->svmCSpin->setValue(C);
         if(params->svmCSpin->value() < 1) params->svmCSpin->setValue(100);
         params->svmTypeLabel->setText("C");
         break;
