@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>840</width>
+    <width>757</width>
     <height>588</height>
    </rect>
   </property>
@@ -157,15 +157,12 @@
       </item>
       <item row="11" column="0" colspan="2">
        <widget class="QPushButton" name="dumpButton">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
         <property name="text">
          <string>Send Data</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="2">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>Import limits</string>
@@ -192,19 +189,19 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Ctrl + Click to select multiple columns. Selected columns will be excluded from the input</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QTableWidget" name="tableWidget">
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectColumns</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Ctrl + Click to select multiple columns. Selected columns will be excluded from the input</string>
          </property>
         </widget>
        </item>
