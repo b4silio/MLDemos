@@ -45,6 +45,9 @@ void DataImporter::Start()
         connect(gui->loadFile, SIGNAL(clicked()), this, SLOT(LoadFile())); // file loader
         connect(gui->dumpButton, SIGNAL(clicked()),this,SLOT(SendData()));
         connect(gui->classIgnoreCheck, SIGNAL(clicked()), this, SLOT(classIgnoreChanged()));
+        connect(gui->importLimitSpin, SIGNAL(valueChanged(int)), this, SLOT(on_importLimitSpin_valueChanged(int)));
+        connect(gui->importLimitCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(on_importLimitCombo_currentIndexChanged(int)));
+
         guiDialog->show();
     }
     else guiDialog->show();
@@ -96,6 +99,7 @@ void DataImporter::Parse(QString filename)
     gui->tableWidget->clear();
     gui->tableWidget->setRowCount(rawData.size());
     gui->tableWidget->setColumnCount(rawData[0].size());
+
     if(bUseHeader)
     {
         QStringList headerLabels;
@@ -117,6 +121,32 @@ void DataImporter::Parse(QString filename)
     }
     gui->classColumnSpin->setRange(1,rawData[0].size());
     gui->classColumnSpin->setValue(rawData[0].size());
+    classColumnChanged(rawData[0].size());
+
+    // Populate the import limit combobox only once
+    if(gui->importLimitCombo->count()==0)
+    {
+        gui->importLimitCombo->addItem(QString("-->"));
+        gui->importLimitCombo->addItem(QString("10%"),QVariant(0.10));
+        gui->importLimitCombo->addItem(QString("25%"),QVariant(0.25));
+        gui->importLimitCombo->addItem(QString("50%"),QVariant(0.50));
+        gui->importLimitCombo->addItem(QString("75%"),QVariant(0.75));
+        gui->importLimitCombo->addItem(QString("100%"),QVariant(1.00));
+    }
+
+    // By default stay below IMPORT_WARNING_THRESHOLD
+    int nbSamples = inputParser->getCount();
+    gui->importLimitSpin->setMaximum(nbSamples);
+    if (nbSamples > IMPORT_WARNING_THRESHOLD)
+    {
+        gui->importLimitSpin->setValue(IMPORT_WARNING_THRESHOLD);
+        gui->importLimitCombo->setCurrentIndex(0);
+    } else {
+        gui->importLimitSpin->setValue(nbSamples);
+        gui->importLimitCombo->setCurrentIndex(5);
+    }
+
+    gui->importLimitCombo->setEnabled(true);
 }
 
 void DataImporter::FetchResults(std::vector<fvec> results)
@@ -185,10 +215,48 @@ void DataImporter::SendData()
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
-	pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, 1000);
+    int nbSamples = gui->importLimitSpin->value();
+    // @note we have a bootle neck in getData... limit default nbSamples to ~2000
+    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, nbSamples);
     classNames = inputParser->getClassNames();
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
     emit(SetClassNames(classNames));
 
+    // Data in dataset Manager has been updated, update visual reminder
+    gui->dumpButton->setStyleSheet("color: rgb(0, 0, 0)");
 }
+
+void DataImporter::on_importLimitCombo_currentIndexChanged(int index)
+{
+    if(index == 0) // manual limit selection
+    {
+        gui->importLimitSpin->setEnabled(true);
+        gui->importLimitSpin->setFocus();
+    }
+    else // use predefined limits
+    {
+        gui->importLimitSpin->setEnabled(false);
+        int nbSamples = inputParser->getCount();
+        float percentage = gui->importLimitCombo->itemData(index).toFloat();
+        int importedSamplesCount = floor(nbSamples*percentage);
+        gui->importLimitSpin->setValue(importedSamplesCount);
+        if(importedSamplesCount > IMPORT_WARNING_THRESHOLD)
+        {
+            QMessageBox limitWarning;
+            limitWarning.setText("Running some algorithms on large datasets may take quite some time...");
+            limitWarning.exec();
+        }
+
+        // show visually to the user that the dataManager has not been updated yet...
+        gui->dumpButton->setStyleSheet("color: rgb(255, 0, 0)");
+        gui->dumpButton->setFocus();
+    }
+}
+
+void DataImporter::on_importLimitSpin_valueChanged(int arg1)
+{
+    // show visually to the user that the dataManager has not been updated yet...
+    gui->dumpButton->setStyleSheet("color: rgb(255, 0, 0)");
+}
+

@@ -34,7 +34,7 @@ Example.file = $$ALGOPATH/Example/pluginExample.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-SUBDIRS += PCAFaces CSVImport
+SUBDIRS += PCAFaces
 #SUBDIRS += ImportTimeseries
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro

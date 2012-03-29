@@ -6,6 +6,9 @@
 #include <QFileDialog>
 #include <QTableView>
 #include <QDebug>
+#include <QMessageBox>
+
+#define IMPORT_WARNING_THRESHOLD 2000
 
 namespace Ui {
     class DataImporterDialog;
@@ -56,7 +59,7 @@ signals:
 	void QueryClusterer(std::vector<fvec> samples);
 	void QueryMaximizer(std::vector<fvec> samples);
 public slots:
-	void FetchResults(std::vector<fvec> results);
+    void FetchResults(std::vector<fvec> results);
 	void Closing();
     void Parse(QString filename);
 	void LoadFile();
@@ -65,6 +68,8 @@ private slots:
     void classIgnoreChanged();
     void headerChanged();
     void classColumnChanged(int value);
+    void on_importLimitSpin_valueChanged(int arg1);
+    void on_importLimitCombo_currentIndexChanged(int index);
 };
 
 #endif // _DATA_IMPORTER_H_
