@@ -246,6 +246,7 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
     {
         if(bSvg)
         {
+            DrawAxes(painter);
         }
         else
         {
@@ -744,6 +745,7 @@ void Canvas::DrawAxes(QPainter &painter)
 
     // we now have the measure of the ticks, we can draw this
     painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setBrush(Qt::NoBrush);
     painter.setFont(QFont("Lucida Grande", 9));
     for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
     {

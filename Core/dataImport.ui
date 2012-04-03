@@ -47,7 +47,7 @@
       <property name="rightMargin">
        <number>0</number>
       </property>
-      <item row="10" column="0">
+      <item row="11" column="0">
        <widget class="QWidget" name="widget_3" native="true">
         <layout class="QGridLayout" name="gridLayout">
          <property name="horizontalSpacing">
@@ -62,7 +62,7 @@
         </layout>
        </widget>
       </item>
-      <item row="13" column="0" colspan="2">
+      <item row="14" column="0" colspan="2">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -75,7 +75,7 @@
         </property>
        </spacer>
       </item>
-      <item row="14" column="0" colspan="2">
+      <item row="15" column="0" colspan="2">
        <widget class="QPushButton" name="closeButton">
         <property name="font">
          <font>
@@ -155,7 +155,7 @@
         </property>
        </widget>
       </item>
-      <item row="11" column="0" colspan="2">
+      <item row="12" column="0" colspan="2">
        <widget class="QPushButton" name="dumpButton">
         <property name="text">
          <string>Send Data</string>
@@ -164,8 +164,59 @@
       </item>
       <item row="6" column="0">
        <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Import limits</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QComboBox" name="separatorCombo">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <item>
+         <property name="text">
+          <string>Any</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Comma</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SemiColon</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tab</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Space</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Separators</string>
         </property>
        </widget>
       </item>

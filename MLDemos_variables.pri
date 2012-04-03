@@ -181,6 +181,11 @@ win32{
     OBJECTS_DIR = $${MLBUILD}
 }
 
+#QMAKE_CXXFLAGS += -pg
+#QMAKE_CXXFLAGS_DEBUG += -pg
+#QMAKE_LFLAGS += -pg
+#QMAKE_LFLAGS_DEBUG += -pg
+
 DEPENDPATH += . \
 		.. \
 		$${MLPATH}/Core \

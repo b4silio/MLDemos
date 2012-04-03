@@ -106,7 +106,7 @@ class CSVParser
 public:
     CSVParser();
     void clear();
-    void parse(const char* fileName);
+    void parse(const char* fileName, int separatorType=0);
     vector<size_t> getMissingValIndex();
     void cleanData(unsigned int acceptedTypes);
     pair<vector<fvec>,ivec> getData(ivec excludeIndex = ivec(), int maxSamples=-1);

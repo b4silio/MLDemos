@@ -21,7 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_dataImport.h"
 
 DataImporter::DataImporter()
-    : guiDialog(0), gui(0), inputParser(0)
+    : guiDialog(0), gui(0), inputParser(0), filename("")
 {
 }
 
@@ -47,6 +47,7 @@ void DataImporter::Start()
         connect(gui->classIgnoreCheck, SIGNAL(clicked()), this, SLOT(classIgnoreChanged()));
         connect(gui->importLimitSpin, SIGNAL(valueChanged(int)), this, SLOT(on_importLimitSpin_valueChanged(int)));
         connect(gui->importLimitCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(on_importLimitCombo_currentIndexChanged(int)));
+        connect(gui->separatorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(separatorChanged()));
         guiDialog->show();
     }
     else guiDialog->show();
@@ -80,17 +81,26 @@ bool DataImporter::saveFile(const QString &filename, QIODevice *data)
 
 void DataImporter::LoadFile()
 {
-	QString filename = QFileDialog::getOpenFileName(NULL, tr("Load Data"), QDir::currentPath(), tr("dataset files (*.data *.csv);;All files (*.*)"));
+    filename = QFileDialog::getOpenFileName(NULL, tr("Load Data"), QDir::currentPath(), tr("dataset files (*.data *.csv);;All files (*.*)"));
     if(filename.isEmpty()) return;
     Parse(filename);
+}
+
+void DataImporter::separatorChanged()
+{
+    if(filename.isEmpty()) return;
+    Parse(filename);
+    headerChanged();
 }
 
 void DataImporter::Parse(QString filename)
 {
     if(filename.isEmpty()) return;
+    this->filename = filename;
     headers.clear();
     inputParser->clear();
-    inputParser->parse(filename.toStdString().c_str());
+    int separatorType = gui->separatorCombo->currentIndex();
+    inputParser->parse(filename.toStdString().c_str(), separatorType);
     vector<vector<string> > rawData = inputParser->getRawData();
     if(rawData.size() < 2) return;
     bool bUseHeader = gui->headerCheck->isChecked();

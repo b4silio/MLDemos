@@ -32,11 +32,11 @@ public:
 	void Start();
 	void Stop();
     QStringList GetHeaders(){return headers;}
-
     DataImporter();
     ~DataImporter();
 
 private:
+    QString filename;
     Ui::DataImporterDialog *gui;
 	QDialog *guiDialog;
     CSVParser *inputParser;
@@ -68,6 +68,7 @@ private slots:
     void classIgnoreChanged();
     void headerChanged();
     void classColumnChanged(int value);
+    void separatorChanged();
 };
 
 #endif // _DATA_IMPORTER_H_
