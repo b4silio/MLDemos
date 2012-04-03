@@ -63,6 +63,7 @@ void DrawSVG::Write(QString filename)
 	if(canvas->bDisplayLearned)
 	{
 		// learned model
+        painter.setBackgroundMode(Qt::TransparentMode);
 		if(classifier) drawClass->DrawModel(canvas, painter, classifier);
 		if(regressor) drawRegr->DrawModel(canvas, painter, regressor);
 		if(dynamical) drawDyn->DrawModel(canvas, painter, dynamical);
@@ -83,7 +84,8 @@ void DrawSVG::Write(QString filename)
 	if(canvas->bDisplayInfo)
 	{
 		// model info
-		if(classifier) drawClass->DrawInfo(canvas, painter, classifier);
+        painter.setBackgroundMode(Qt::TransparentMode);
+        if(classifier) drawClass->DrawInfo(canvas, painter, classifier);
 		if(regressor) drawRegr->DrawInfo(canvas, painter, regressor);
 		if(dynamical) drawDyn->DrawInfo(canvas, painter, dynamical);
 		if(clusterer) drawClust->DrawInfo(canvas, painter, clusterer);

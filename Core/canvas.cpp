@@ -171,7 +171,11 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
             painter.setBackgroundMode(Qt::TransparentMode);
             painter.drawPixmap(geometry(), maps.reward);
         }
-        if(bSvg) DrawSamples(painter);
+        if(bSvg)
+        {
+            painter.setBackgroundMode(Qt::TransparentMode);
+            DrawSamples(painter);
+        }
         else
         {
             DrawSamples();
@@ -246,6 +250,8 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
     {
         if(bSvg)
         {
+            painter.setBackgroundMode(Qt::TransparentMode);
+            DrawAxes(painter);
         }
         else
         {
@@ -743,7 +749,10 @@ void Canvas::DrawAxes(QPainter &painter)
     if(mult == 0) mult = 1;
 
     // we now have the measure of the ticks, we can draw this
-    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setBackgroundMode(Qt::TransparentMode);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    //painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setBrush(Qt::NoBrush);
     painter.setFont(QFont("Lucida Grande", 9));
     for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
     {
@@ -763,6 +772,25 @@ void Canvas::DrawAxes(QPainter &painter)
         painter.drawLine(0, canvasY, w, canvasY);
         painter.setPen(QPen(Qt::black, 0.5));
         painter.drawText(2, canvasY, QString("%1").arg((int)(y/mult)*mult));
+    }
+
+    // we get the dimension names
+    QFont font = painter.font();
+    font.setPointSize(12);
+    painter.setFont(font);
+    if(xIndex < dimNames.size())
+    {
+        QString xlabel = dimNames[xIndex];
+        painter.setPen(QPen(Qt::black, 0.5));
+        painter.drawText(w/2 - 100, h + 10, 200, 10, Qt::AlignTop | Qt::AlignHCenter, xlabel);
+    }
+    if(yIndex < dimNames.size())
+    {
+        QString ylabel = dimNames[yIndex];
+        painter.setPen(QPen(Qt::black, 0.5));
+        painter.rotate(-90);
+        painter.drawText(-h/2-100, -20, 200, 10, Qt::AlignTop | Qt::AlignHCenter, ylabel);
+        painter.rotate(90);
     }
 }
 

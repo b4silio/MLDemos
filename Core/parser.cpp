@@ -158,7 +158,7 @@ void CSVParser::clear()
     dataTypes.clear();
 }
 
-void CSVParser::parse(const char* fileName)
+void CSVParser::parse(const char* fileName, int separatorType)
 {
     // init
     file.open(fileName);
@@ -169,23 +169,27 @@ void CSVParser::parse(const char* fileName)
     int bestSeparator = 0;
     int dim=0;
 
-    // we test the separators to find which one is best
-    for(int i=0; i<separatorCount; i++)
+    if(!separatorType)
     {
-        file.seekg(0);
-        // Parse CSV input file
-        CSVIterator parser(file, separators[i]);
-        ++parser; // we skip the first line as it might be a header line
-        if(parser.eof() || !parser->size()) continue;
-        vector<string> parsed = parser->getParsedLine();
-        //qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
-        if(parsed.size() > dim)
+        // we test the separators to find which one is best
+        for(int i=0; i<separatorCount; i++)
         {
-            dim = parsed.size();
-            bestSeparator = i;
+            file.seekg(0);
+            // Parse CSV input file
+            CSVIterator parser(file, separators[i]);
+            ++parser; // we skip the first line as it might be a header line
+            if(parser.eof() || !parser->size()) continue;
+            vector<string> parsed = parser->getParsedLine();
+            //qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
+            if(parsed.size() > dim)
+            {
+                dim = parsed.size();
+                bestSeparator = i;
+            }
         }
+        file.seekg(0);
     }
-    file.seekg(0);
+    else bestSeparator = separatorType-1;
 
     data.clear();
     for(CSVIterator parser(file, separators[bestSeparator]);!parser.eof(); ++parser)

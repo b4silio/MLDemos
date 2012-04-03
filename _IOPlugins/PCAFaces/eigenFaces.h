@@ -35,4 +35,4 @@ public:
 	IplImage *mapImage;
 
 };
-#endif _EIGEN_FACES_H_
+#endif // _EIGEN_FACES_H_
