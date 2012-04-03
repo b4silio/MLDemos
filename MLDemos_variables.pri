@@ -155,10 +155,12 @@ mainApp|coreLib{
 CONFIG(debug, debug|release){
 	DEFINES += DEBUG
 	message("debug mode")
+	QMAKE_CXXFLAGS += -pg
+	QMAKE_LFLAGS += -pg
 }else{
 	message("release mode")
-	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-    macx-g++:QMAKE_CXXFLAGS += -O2
+	linux-g++-32|linux-g++-64:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+	macx-g++:QMAKE_CXXFLAGS += -O2
 	win32-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
 }
 

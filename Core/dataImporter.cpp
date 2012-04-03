@@ -108,6 +108,7 @@ void DataImporter::Parse(QString filename)
     gui->tableWidget->clear();
     gui->tableWidget->setRowCount(rawData.size());
     gui->tableWidget->setColumnCount(rawData[0].size());
+
     if(bUseHeader)
     {
         QStringList headerLabels;
@@ -129,11 +130,9 @@ void DataImporter::Parse(QString filename)
     }
     gui->classColumnSpin->setRange(1,rawData[0].size());
     gui->classColumnSpin->setValue(rawData[0].size());
+    classColumnChanged(rawData[0].size());
 
-    gui->importLimitSpin->setMaximum(inputParser->getCount());
-    gui->importLimitSpin->setValue(inputParser->getCount());
-    gui->importLimitCombo->setEnabled(true);
-
+    // Populate the import limit combobox only once
     if(gui->importLimitCombo->count()==0)
     {
         gui->importLimitCombo->addItem(QString("-->"));
@@ -143,7 +142,20 @@ void DataImporter::Parse(QString filename)
         gui->importLimitCombo->addItem(QString("75%"),QVariant(0.75));
         gui->importLimitCombo->addItem(QString("100%"),QVariant(1.00));
     }
-    gui->importLimitCombo->setCurrentIndex(5);
+
+    // By default stay below IMPORT_WARNING_THRESHOLD
+    int nbSamples = inputParser->getCount();
+    gui->importLimitSpin->setMaximum(nbSamples);
+    if (nbSamples > IMPORT_WARNING_THRESHOLD)
+    {
+        gui->importLimitSpin->setValue(IMPORT_WARNING_THRESHOLD);
+        gui->importLimitCombo->setCurrentIndex(0);
+    } else {
+        gui->importLimitSpin->setValue(nbSamples);
+        gui->importLimitCombo->setCurrentIndex(5);
+    }
+
+    gui->importLimitCombo->setEnabled(true);
 }
 
 void DataImporter::FetchResults(std::vector<fvec> results)
@@ -201,7 +213,6 @@ void DataImporter::SendData()
 {
     ivec excludeIndices;
     vector<bool> bExcluded(gui->tableWidget->columnCount(), false);
-    int maxSamples = gui->importLimitSpin->value();
     QModelIndexList indexes = gui->tableWidget->selectionModel()->selection().indexes();
     FOR(i, indexes.count())
     {
@@ -213,39 +224,48 @@ void DataImporter::SendData()
         if(bExcluded[i]) excludeIndices.push_back(i);
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
-    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, maxSamples);
+    int nbSamples = gui->importLimitSpin->value();
+    // @note we have a bootle neck in getData... limit default nbSamples to ~2000
+    pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, nbSamples);
     classNames = inputParser->getClassNames();
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
     emit(SetClassNames(classNames));
 
-}
-
-void DataImporter::on_importLimitSpin_valueChanged(int arg1)
-{
-    int spinnerValue = gui->importLimitSpin->value();
-    int nbSamples = inputParser->getCount();
-    if (nbSamples <= 0) return;
-    int percentage = floor(100*spinnerValue/nbSamples);
-    // TODO: send that info to status in the plugin
-//    if(spinnerValue >= 5000)
-//    {
-//        QMessageBox limitWarning;
-//        limitWarning.setText("Running some algorithms on large datasets may take quite some time...");
-//        limitWarning.exec();
-//    }
+    // Data in dataset Manager has been updated, update visual reminder
+    gui->dumpButton->setStyleSheet("color: rgb(0, 0, 0)");
 }
 
 void DataImporter::on_importLimitCombo_currentIndexChanged(int index)
 {
-    if(index == 0)
+    if(index == 0) // manual limit selection
+    {
         gui->importLimitSpin->setEnabled(true);
-    else
+        gui->importLimitSpin->setFocus();
+    }
+    else // use predefined limits
     {
         gui->importLimitSpin->setEnabled(false);
         int nbSamples = inputParser->getCount();
         float percentage = gui->importLimitCombo->itemData(index).toFloat();
-        gui->importLimitSpin->setValue(floor(nbSamples*percentage));
-    }
+        int importedSamplesCount = floor(nbSamples*percentage);
+        gui->importLimitSpin->setValue(importedSamplesCount);
+        if(importedSamplesCount > IMPORT_WARNING_THRESHOLD)
+        {
+            QMessageBox limitWarning;
+            limitWarning.setText("Running some algorithms on large datasets may take quite some time...");
+            limitWarning.exec();
+        }
 
+        // show visually to the user that the dataManager has not been updated yet...
+        gui->dumpButton->setStyleSheet("color: rgb(255, 0, 0)");
+        gui->dumpButton->setFocus();
+    }
 }
+
+void DataImporter::on_importLimitSpin_valueChanged(int arg1)
+{
+    // show visually to the user that the dataManager has not been updated yet...
+    gui->dumpButton->setStyleSheet("color: rgb(255, 0, 0)");
+}
+
