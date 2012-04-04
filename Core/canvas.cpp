@@ -754,23 +754,33 @@ void Canvas::DrawAxes(QPainter &painter)
     //painter.setRenderHint(QPainter::TextAntialiasing);
     painter.setBrush(Qt::NoBrush);
     painter.setFont(QFont("Lucida Grande", 9));
+    painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
     for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
     {
         float canvasX = toCanvasCoords(x,0).x();
         if(canvasX < 0 || canvasX > w) continue;
-        painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
         painter.drawLine(canvasX, 0, canvasX, h);
-        painter.setPen(QPen(Qt::black, 0.5));
-        painter.drawText(canvasX, h-5, QString("%1").arg((int)(x/mult)*mult));
     }
-    // we now have the measure of the ticks, we can draw this
+    painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
     for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
     {
         float canvasY = toCanvasCoords(0,y).y();
         if(canvasY < 0 || canvasY > w) continue;
-        painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
         painter.drawLine(0, canvasY, w, canvasY);
-        painter.setPen(QPen(Qt::black, 0.5));
+    }
+    painter.setPen(QPen(Qt::black, 0.5));
+    for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+    {
+        float canvasX = toCanvasCoords(x,0).x();
+        if(canvasX < 0 || canvasX > w) continue;
+        painter.drawText(canvasX, h-5, QString("%1").arg((int)(x/mult)*mult));
+    }
+    // we now have the measure of the ticks, we can draw this
+    painter.setPen(QPen(Qt::black, 0.5));
+    for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+    {
+        float canvasY = toCanvasCoords(0,y).y();
+        if(canvasY < 0 || canvasY > w) continue;
         painter.drawText(2, canvasY, QString("%1").arg((int)(y/mult)*mult));
     }
 

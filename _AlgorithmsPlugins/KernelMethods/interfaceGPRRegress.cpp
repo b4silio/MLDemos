@@ -140,18 +140,20 @@ void RegrGPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     int radius = 8;
     int dim = canvas->data->GetDimCount()-1;
     painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::red,3));
     FOR(i, gpr->GetBasisCount())
     {
         fvec basis = gpr->GetBasisVector(i);
         fvec testBasis(dim+1);
         FOR(d, dim) testBasis[d] = basis[d];
         fvec res = gpr->Test(testBasis);
+        // we draw the basis circle
+        float conf = basis[dim + xIndex];
         QPointF pt1 = canvas->toCanvasCoords(basis[xIndex],res[0]);
-        QPointF pt2 = pt1 + QPointF(0,(basis[dim + xIndex]>0 ? 1 : -1)*radius);
-        QPointF pt3 = pt2 + QPointF(0,(basis[dim + xIndex]>0 ? 1 : -1)*50);
-        painter.setPen(QPen(Qt::red,3));
         painter.drawEllipse(pt1, radius, radius);
-        painter.setPen(QPen(Qt::red,min(4.f,max(fabs(basis[dim + xIndex])/5,0.5f))));
+        // and the arrow of the direction
+        QPointF pt2 = pt1 + QPointF(0,(conf>0 ? 1 : -1)*radius);
+        QPointF pt3 = pt2 + QPointF(0,(conf>0 ? 1 : -1)*25*(0.5+min(2.f,fabs(conf)/5.f)));
         DrawArrow(pt2,pt3,10,painter);
     }
 }
@@ -209,6 +211,7 @@ void RegrGPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     if(!gpr) return;
 
     int steps = w;
+    QPainterPath path, pathUp, pathDown;
     QPointF oldPoint(-FLT_MAX,-FLT_MAX);
     QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
     QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
@@ -222,16 +225,27 @@ void RegrGPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
         QPointF pointDown = canvas->toCanvasCoords(sample[xIndex],res[0] - res[1]);
         if(x)
         {
-            painter.setPen(QPen(Qt::black, 1));
-            painter.drawLine(point, oldPoint);
-            painter.setPen(QPen(Qt::black, 0.5));
-            painter.drawLine(pointUp, oldPointUp);
-            painter.drawLine(pointDown, oldPointDown);
+            path.lineTo(point);
+            pathUp.lineTo(pointUp);
+            pathDown.lineTo(pointDown);
+        }
+        else
+        {
+            path.moveTo(point);
+            pathUp.moveTo(pointUp);
+            pathDown.moveTo(pointDown);
         }
         oldPoint = point;
         oldPointUp = pointUp;
         oldPointDown = pointDown;
     }
+    painter.setBackgroundMode(Qt::TransparentMode);
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawPath(path);
+    painter.setPen(QPen(Qt::black, 0.5, Qt::DashLine));
+    painter.drawPath(pathUp);
+    painter.drawPath(pathDown);
 }
 
 void RegrGPR::SaveOptions(QSettings &settings)

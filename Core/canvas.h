@@ -231,8 +231,8 @@ public:
         //	edge = Qt::white;
         //}
 		//		radius = 10;
-		painter.setBrush(color);
-		painter.setPen(edge);
+        if(painter.brush().color() != color) painter.setBrush(color);
+        if(painter.pen().color() != edge) painter.setPen(edge);
 		painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
 
 	}

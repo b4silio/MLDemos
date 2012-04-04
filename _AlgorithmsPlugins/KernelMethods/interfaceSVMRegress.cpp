@@ -235,6 +235,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
         if(svm)
         {
             painter.setBrush(Qt::NoBrush);
+            painter.setPen(QPen(Qt::black, 4));
             std::vector<fvec> samples = canvas->data->GetSamples();
             int dim = canvas->data->GetDimCount();
             fvec sv(2,0);
@@ -249,8 +250,10 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
                         break;
                     }
                 }
-                int radius = 7;
+                int radius = 9;
                 QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
+                painter.drawEllipse(point, radius, radius);
+                /*
                 if(abs((*svm->sv_coef)[i]) == svm->param.C)
                 {
                     painter.setPen(QPen(Qt::black, 4));
@@ -263,6 +266,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
                     painter.setPen(Qt::black);
                     painter.drawEllipse(point, radius, radius);
                 }
+                */
             }
         }
     }
@@ -286,7 +290,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     {
         canvas->maps.confidence = QPixmap();
         int steps = w;
-        QPointF oldPoint(-FLT_MAX,-FLT_MAX);
+        QPainterPath path;
         FOR(x, steps)
         {
             sample = canvas->toSampleCoords(x,0);
@@ -295,14 +299,12 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
             QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
             if(x)
             {
-                painter.setPen(QPen(Qt::black, 1));
-                painter.drawLine(point, oldPoint);
-                painter.setPen(QPen(Qt::black, 0.5));
-                //				painter.drawLine(point+QPointF(0,eps*h), oldPoint+QPointF(0,eps*h));
-                //				painter.drawLine(point-QPointF(0,eps*h), oldPoint-QPointF(0,eps*h));
+                path.lineTo(point);
             }
-            oldPoint = point;
+            else path.moveTo(point);
         }
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawPath(path);
     }
     else if(regressor->type == REGR_SVR)
     {
@@ -314,24 +316,31 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
         eps = fabs((canvas->toCanvasCoords(eps,0) - canvas->toCanvasCoords(0,0)).x());
 
         int steps = w;
-        QPointF oldPoint(-FLT_MAX,-FLT_MAX);
+        QPainterPath path, pathUp, pathDown;
         FOR(x, steps)
         {
             sample = canvas->toSampleCoords(x,0);
-            int dim = sample.size();
             fvec res = regressor->Test(sample);
             if(res[0] != res[0]) continue;
             QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
             if(x)
             {
-                painter.setPen(QPen(Qt::black, 1));
-                painter.drawLine(point, oldPoint);
-                painter.setPen(QPen(Qt::black, 0.5));
-                painter.drawLine(point+QPointF(0,eps), oldPoint+QPointF(0,eps));
-                painter.drawLine(point-QPointF(0,eps), oldPoint-QPointF(0,eps));
+                path.lineTo(point);
+                pathUp.lineTo(point + QPointF(0, eps));
+                pathDown.lineTo(point - QPointF(0, eps));
             }
-            oldPoint = point;
+            else
+            {
+                path.moveTo(point);
+                pathUp.moveTo(point + QPointF(0, eps));
+                pathDown.moveTo(point - QPointF(0, eps));
+            }
         }
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawPath(path);
+        painter.setPen(QPen(Qt::black, 0.5));
+        painter.drawPath(pathUp);
+        painter.drawPath(pathDown);
     }
 }
 
