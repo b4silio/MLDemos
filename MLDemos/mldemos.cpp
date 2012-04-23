@@ -797,7 +797,7 @@ MLDemos::~MLDemos()
     delete drawToolbarContext1;
     delete drawToolbarContext2;
     delete displayOptions;
-
+    delete generator;
     canvas->hide();
     delete canvas;
 }

@@ -71,7 +71,7 @@
     <string># of Samples</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="dimLabel">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -90,6 +90,9 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="dimSpin">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -191,7 +194,7 @@
     <number>3</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="gridCountLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -236,7 +239,7 @@
     <double>1.000000000000000</double>
    </property>
   </widget>
-  <widget class="QLabel" name="label_6">
+  <widget class="QLabel" name="radiusLabel">
    <property name="geometry">
     <rect>
      <x>80</x>
@@ -272,7 +275,7 @@
     <number>2</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_7">
+  <widget class="QLabel" name="classesLabel">
    <property name="geometry">
     <rect>
      <x>190</x>

@@ -46,6 +46,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("displayGeometry", displayDialog->saveGeometry());
 	settings.setValue("statsGeometry", statsDialog->saveGeometry());
 	settings.setValue("compareGeometry", compareWidget->saveGeometry());
+    settings.setValue("generatorGeometry", generator->saveGeometry());
 
 	settings.setValue("algoTab", algorithmOptions->tabWidget->currentIndex());
 	settings.setValue("ShowAlgoOptions", algorithmWidget->isVisible());
@@ -55,6 +56,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("ShowStatsOptions", statsDialog->isVisible());
 	settings.setValue("ShowToolbar", ui.actionShow_Toolbar->isChecked());
 	settings.setValue("SmallIcons", ui.actionSmall_Icons->isChecked());
+    settings.setValue("ShowGenerator", generator->isVisible());
 //    settings.setValue("canvasType", ui.canvasTypeCombo->currentIndex());
     settings.endGroup();
 
@@ -150,6 +152,15 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("tab", showStats->tabWidget->currentIndex());
 	settings.endGroup();
 
+    settings.beginGroup("generatorOptions");
+    settings.setValue("generatorCombo", generator->ui->generatorCombo->currentIndex());
+    settings.setValue("countSpin", generator->ui->countSpin->value());
+    settings.setValue("dimSpin", generator->ui->dimSpin->value());
+    settings.setValue("gridCountSpin", generator->ui->gridCountSpin->value());
+    settings.setValue("classesCount", generator->ui->classesCount->value());
+    settings.setValue("radiusSpin", generator->ui->radiusSpin->value());
+    settings.endGroup();
+
 	FOR(i,classifiers.size())
 	{
 		if(!classifiers[i]) continue;
@@ -208,7 +219,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("drawGeometry")) drawToolbarWidget->restoreGeometry(settings.value("drawGeometry").toByteArray());
 	if(settings.contains("displayGeometry")) displayDialog->restoreGeometry(settings.value("displayGeometry").toByteArray());
 	if(settings.contains("statsGeometry")) statsDialog->restoreGeometry(settings.value("statsGeometry").toByteArray());
-	if(settings.contains("compareGeometry")) compareWidget->restoreGeometry(settings.value("compareGeometry").toByteArray());
+    if(settings.contains("compareGeometry")) compareWidget->restoreGeometry(settings.value("compareGeometry").toByteArray());
+    if(settings.contains("generatorGeometry")) generator->restoreGeometry(settings.value("generatorGeometry").toByteArray());
 #ifdef MACX // ugly hack to avoid resizing problems on the mac
 	if(height() < 400) resize(width(),400);
 	if(algorithmWidget->height() < 220) algorithmWidget->resize(636,220);
@@ -222,6 +234,7 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("ShowStatsOptions")) statsDialog->setVisible(settings.value("ShowStatsOptions").toBool());
 	if(settings.contains("ShowToolbar")) ui.actionShow_Toolbar->setChecked(settings.value("ShowToolbar").toBool());
 	if(settings.contains("SmallIcons")) ui.actionSmall_Icons->setChecked(settings.value("SmallIcons").toBool());
+    if(settings.contains("ShowGenerator")) generator->setVisible(settings.value("ShowGenerator").toBool());
 //    if(settings.contains("canvasType")) ui.canvasTypeCombo->setCurrentIndex(settings.value("canvasType").toInt());
     settings.endGroup();
 
@@ -230,6 +243,7 @@ void MLDemos::LoadLayoutOptions()
 	actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
 	actionDisplayOptions->setChecked(displayDialog->isVisible());
 	actionShowStats->setChecked(statsDialog->isVisible());
+    actionAddData->setChecked(generator->isVisible());
 
 	settings.beginGroup("displayOptions");
 	if(settings.contains("infoCheck")) displayOptions->infoCheck->setChecked(settings.value("infoCheck").toBool());
@@ -323,6 +337,15 @@ void MLDemos::LoadLayoutOptions()
 	settings.beginGroup("statsOptions");
 	if(settings.contains("tab")) showStats->tabWidget->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();
+
+    settings.beginGroup("generatorOptions");
+    if(settings.contains("generatorCombo")) generator->ui->generatorCombo->setCurrentIndex(settings.value("generatorCombo").toInt());
+    if(settings.contains("countSpin")) generator->ui->countSpin->setValue(settings.value("countSpin").toInt());
+    if(settings.contains("dimSpin")) generator->ui->dimSpin->setValue(settings.value("dimSpin").toInt());
+    if(settings.contains("gridCountSpin")) generator->ui->gridCountSpin->setValue(settings.value("gridCountSpin").toInt());
+    if(settings.contains("classesCount")) generator->ui->classesCount->setValue(settings.value("classesCount").toInt());
+    if(settings.contains("radiusSpin")) generator->ui->radiusSpin->setValue(settings.value("radiusSpin").toFloat());
+    settings.endGroup();
 
 	FOR(i,classifiers.size())
 	{

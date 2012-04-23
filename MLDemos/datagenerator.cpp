@@ -13,6 +13,7 @@ DataGenerator::DataGenerator(Canvas *canvas, QMutex *mutex, QWidget *parent) :
     this->mutex = mutex;
     connect(ui->addButton, SIGNAL(clicked()), this, SLOT(Generate()));
     connect(ui->generatorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
+    OptionsChanged();
 }
 
 DataGenerator::~DataGenerator()
@@ -23,19 +24,38 @@ DataGenerator::~DataGenerator()
 void DataGenerator::OptionsChanged()
 {
     int type = ui->generatorCombo->currentIndex();
+    ui->gridCountLabel->setText("Grid Count");
+    ui->radiusLabel->setText("Radius");
+    ui->classesLabel->setText("Class");
+    ui->dimLabel->setText("Dim");
+    ui->classesCount->setEnabled(true);
     switch(type)
     {
     case 0: // checkerboard
+        ui->radiusLabel->setText("Size");
         break;
     case 1: // concentric circles
+        ui->gridCountLabel->setText("Circles");
+        ui->radiusLabel->setText("Radius");
         break;
     case 2: // swiss roll
+        ui->gridCountLabel->setText("Swirls");
+        ui->radiusLabel->setText("Radius");
         break;
     case 3: // sinc
+        ui->gridCountLabel->setText("Noise");
+        ui->radiusLabel->setText("Width");
+        ui->classesCount->setEnabled(false);
         break;
     case 4: // gaussian
+        ui->gridCountLabel->setText("Noise");
+        ui->radiusLabel->setText("Width");
+        ui->classesCount->setEnabled(false);
         break;
     case 5: // cosine
+        ui->gridCountLabel->setText("Noise");
+        ui->radiusLabel->setText("Width");
+        ui->classesCount->setEnabled(false);
         break;
     }
 }
@@ -131,6 +151,7 @@ void DataGenerator::Generate()
         {
             float x = (i/(float)count*2 - 1)*radius*2*M_PI;
             float y = sinf(M_PI*x) / (x*M_PI);
+            if(gridCount > 1) y += drand48()*((gridCount-1)/(float)32);
             sample[0] = x;
             sample[1] = y;
             samples.push_back(sample);
@@ -146,6 +167,7 @@ void DataGenerator::Generate()
         {
             float x = (i/(float)count*2 - 1)*10*radius;
             float y = exp(-0.5f*x*x);
+            if(gridCount > 1) y += drand48()*((gridCount-1)/(float)32);
             sample[0] = x;
             sample[1] = y;
             samples.push_back(sample);
@@ -161,6 +183,7 @@ void DataGenerator::Generate()
         {
             float x = (i/(float)count*2 - 1)*radius*2*M_PI;
             float y = cos(x);
+            if(gridCount > 1) y += drand48()*((gridCount-1)/(float)32);
             sample[0] = x;
             sample[1] = y;
             samples.push_back(sample);
