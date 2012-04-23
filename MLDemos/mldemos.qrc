@@ -22,5 +22,6 @@
         <file>icons/line.png</file>
         <file>icons/compare.png</file>
         <file>icons/algorithms.png</file>
+        <file>icons/adddata.png</file>
     </qresource>
 </RCC>

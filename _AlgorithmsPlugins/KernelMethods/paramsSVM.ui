@@ -268,7 +268,7 @@ RBF and Polynomial only</string>
     <string>kernel function</string>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <item>
     <property name="text">
@@ -283,6 +283,11 @@ RBF and Polynomial only</string>
    <item>
     <property name="text">
      <string>RBF</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Sigmoid</string>
     </property>
    </item>
   </widget>

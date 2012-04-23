@@ -46,14 +46,17 @@ void RegrSVM::ChangeOptions()
     case 0: // C-SVM
         params->svmEpsLabel->setText("eps");
         params->svmPSpin->setRange(0.0001, 100.0);
+        if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
     case 1: // Nu-SVM
         params->svmEpsLabel->setText("Nu");
+        if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
     case 2: // RVM
         params->optimizeCheck->setVisible(false);
         params->svmCSpin->setEnabled(false);
         params->svmEpsLabel->setText("eps");
+        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     case 3: // KRLR
         params->optimizeCheck->setVisible(false);
@@ -64,6 +67,7 @@ void RegrSVM::ChangeOptions()
         params->svmPSpin->setRange(0.0001, 1.0);
         params->svmPSpin->setSingleStep(0.001);
         params->svmPSpin->setDecimals(4);
+        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
     switch(params->kernelTypeCombo->currentIndex())
@@ -79,6 +83,12 @@ void RegrSVM::ChangeOptions()
         params->kernelWidthSpin->setVisible(false);
         break;
     case 2: // RBF
+        params->kernelDegSpin->setEnabled(false);
+        params->kernelDegSpin->setVisible(false);
+        params->kernelWidthSpin->setEnabled(true);
+        params->kernelWidthSpin->setVisible(true);
+        break;
+    case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
@@ -129,16 +139,23 @@ void RegrSVM::SetParams(Regressor *regressor)
             break;
         case 1:
             svm->param.kernel_type = POLY;
+            svm->param.gamma = 1;
             break;
         case 2:
             svm->param.kernel_type = RBF;
+            svm->param.gamma = 1 / kernelGamma;
+            break;
+        case 3:
+            svm->param.kernel_type = SIGMOID;
+            svm->param.gamma = 1 / kernelGamma;
+            svm->param.coef0 = 0;
             break;
         }
         svm->param.C = svmC;
         svm->param.nu = svmP;
         svm->param.p = svmP;
-        svm->param.gamma = 1 / kernelGamma;
         svm->param.degree = kernelDegree;
+        svm->param.coef0 = 0;
         svm->bOptimize = bOptimize;
     }
 }
@@ -182,6 +199,9 @@ QString RegrSVM::GetAlgoString()
         break;
     case 2:
         algo += QString(" R %1").arg(kernelGamma);
+        break;
+    case 3:
+        algo += QString(" Sig %1").arg(kernelGamma);
         break;
     }
     return algo;

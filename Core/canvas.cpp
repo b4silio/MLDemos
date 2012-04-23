@@ -402,7 +402,6 @@ void Canvas::paintEvent(QPaintEvent *event)
         params.push_back(zIndex);
         PaintVariable(painter, canvasType-5, params);
     }
-
     bDrawing = false;
 }
 
@@ -414,6 +413,7 @@ QPointF Canvas::toCanvasCoords(fvec sample)
     sample -= center;
     QPointF point(sample[xIndex]*(zoom*zooms[xIndex]*height()),sample[yIndex]*(zoom*zooms[yIndex]*height()));
     point += QPointF(width()/2, height()/2);
+    point.setY(height()-point.y());
     return point;
 }
 
@@ -422,6 +422,7 @@ QPointF Canvas::toCanvas(fVec sample)
     sample -= center;
     QPointF point(sample[xIndex]*(zoom*zooms[xIndex]*height()),sample[yIndex]*(zoom*zooms[yIndex]*height()));
     point += QPointF(width()/2, height()/2);
+    point.setY(height()-point.y());
     return point;
 }
 
@@ -431,6 +432,7 @@ QPointF Canvas::toCanvasCoords(float x, float y)
     y -= center[yIndex];
     QPointF point(x*(zoom*zooms[xIndex]*height()),y*(zoom*zooms[yIndex]*height()));
     point += QPointF(width()/2, height()/2);
+    point.setY(height() - point.y());
     return point;
 }
 
@@ -438,6 +440,7 @@ fvec Canvas::fromCanvas(QPointF point)
 {
     int dim = data->GetDimCount();
     fvec sample(dim);
+    point.setY(height()-point.y());
     point -= QPointF(width()/2.f,height()/2.f);
     sample[xIndex] = point.x()/(zoom*zooms[xIndex]*height());
     sample[yIndex] = point.y()/(zoom*zooms[yIndex]*height());
@@ -450,6 +453,7 @@ fvec Canvas::fromCanvas(float x, float y)
     if(!data) return fvec(2,0);
     int dim = data->GetDimCount();
     fvec sample(dim);
+    y = height() - y;
     x -= width()/2.f;
     y -= height()/2.f;
     sample[xIndex] = x/(zoom*zooms[xIndex]*height());
@@ -462,6 +466,7 @@ fvec Canvas::toSampleCoords(QPointF point)
 {
     int dim = data->GetDimCount();
     fvec sample(dim);
+    point.setY(height() - point.y());
     point -= QPointF(width()/2.f,height()/2.f);
     sample[xIndex] = point.x()/(zoom*zooms[xIndex]*height());
     sample[yIndex] = point.y()/(zoom*zooms[yIndex]*height());
@@ -473,6 +478,7 @@ fvec Canvas::toSampleCoords(float x, float y)
 {
     int dim = data->GetDimCount();
     fvec sample(dim);
+    y = height() - y;
     x -= width()/2.f;
     y -= height()/2.f;
     sample[xIndex] = x/(zoom*zooms[xIndex]*height());
@@ -483,12 +489,12 @@ fvec Canvas::toSampleCoords(float x, float y)
 
 fvec Canvas::canvasTopLeft()
 {
-    return toSampleCoords(0,0);
+    return toSampleCoords(0,height()-1);
 }
 
 fvec Canvas::canvasBottomRight()
 {
-    return toSampleCoords(width()-1,height()-1);
+    return toSampleCoords(width()-1,0);
 }
 
 QRectF Canvas::canvasRect()
@@ -736,7 +742,7 @@ void Canvas::DrawAxes(QPainter &painter)
     QRectF bounding = canvasRect();
     // we round up the size to the closest decimal
     float scale = bounding.height();
-    if(scale <= 1e-10) return;
+    if(scale <= 1e-5) return;
     float mult = 1;
     if(scale > 10)
     {
@@ -932,6 +938,7 @@ QPainterPath Canvas::DrawObstacle(Obstacle o)
         float RY = + X * sinf(angle) + Y * cosf(angle);
 
         point = QPointF(RX*(zoom*zooms[xIndex]*height()),RY*(zoom*zooms[yIndex]*height()));
+        point.setY(height()-point.y());
         if(theta==-PIf)
         {
             firstPoint = point;
