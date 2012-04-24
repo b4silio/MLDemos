@@ -1111,7 +1111,7 @@ void MLDemos::MaximizeContinue()
 
 void MLDemos::Project()
 {
-    if(!canvas) return;
+    if(!canvas || !canvas->data->GetCount()) return;
     QMutexLocker lock(&mutex);
     drawTimer->Stop();
     drawTimer->Clear();
@@ -1192,7 +1192,7 @@ void MLDemos::ProjectRevert()
 
 void MLDemos::ProjectReproject()
 {
-    if(!canvas) return;
+    if(!canvas || !canvas->data->GetCount()) return;
     mutex.lock();
     sourceData = canvas->data->GetSamples();
     sourceLabels = canvas->data->GetLabels();
