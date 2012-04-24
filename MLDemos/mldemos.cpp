@@ -464,11 +464,12 @@ void MLDemos::initDialogs()
 
     expose = new Expose(canvas);
     import = new DataImporter();
-    generator = new DataGenerator(canvas, &mutex);
+    generator = new DataGenerator(canvas);
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
+    connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
 }
 
 void MLDemos::initPlugins()
@@ -1041,6 +1042,12 @@ void MLDemos::HideOptionDisplay()
     actionDisplayOptions->setChecked(false);
 }
 
+void MLDemos::HideOptionCompare()
+{
+    compareWidget->show();
+    actionCompare->setChecked(false);
+}
+
 void MLDemos::HideToolbar()
 {
     toolBar->hide();
@@ -1051,6 +1058,14 @@ void MLDemos::HideStatsDialog()
 {
     statsDialog->hide();
     actionShowStats->setChecked(false);
+}
+
+void MLDemos::AddData()
+{
+    ClearData();
+    pair<vector<fvec>,ivec> newData = generator->Generate();
+    canvas->data->AddSamples(newData.first, newData.second);
+    FitToData();
 }
 
 void MLDemos::Clear()

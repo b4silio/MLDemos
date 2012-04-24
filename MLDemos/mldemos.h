@@ -200,8 +200,9 @@ private slots:
 	void ShowToolbar();
     void ShowAddData();
 	void HideSampleDrawing();
-	void HideOptionDisplay();
-	void HideStatsDialog();
+    void HideOptionDisplay();
+    void HideOptionCompare();
+    void HideStatsDialog();
 	void HideToolbar();
     void HideAddData();
 	void AvoidOptionChanged();
@@ -211,7 +212,7 @@ private slots:
     void ActivateImport();
     void DisactivateIO(QObject *);
 
-	void Classify();
+    void Classify();
 	void ClassifyCross();
 	void Regression();
 	void RegressionCross();
@@ -228,7 +229,8 @@ private slots:
     void Avoidance();
 	void Compare();
 	void CompareScreenshot();
-	void Clear();
+    void AddData();
+    void Clear();
 	void ClearData();
     void ShiftDimensions();
 	void SetROCInfo();
