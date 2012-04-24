@@ -190,6 +190,37 @@ bool operator != (const fvec a, const float b)
 	return false;
 }
 
+fvec RandCovMatrix(int dim, float minLambda=1.f)
+{
+    fvec C(dim*dim,0.f), CS(dim*dim,0.f);
+    // we generate a random symmetric matrix
+    FOR(d1, dim)
+    {
+        FOR(d2, d1+1)
+        {
+            float value = drand48()*2-1;
+            C[d1*dim+d2] = value;
+            C[d2*dim+d1] = value;
+        }
+    }
+    // we multiply it by its transpose
+    FOR(d1, dim)
+    {
+        FOR(d2, d1+1)
+        {
+            float value = 0;
+            FOR(d3, dim)
+            {
+                value += C[d1*dim + d3]*C[d3*dim + d2];
+            }
+            CS[d1*dim+d2] = value;
+            CS[d2*dim+d1] = value;
+        }
+    }
+    // we ensure that lambdas will be >= minLambda
+    FOR(d, dim) CS[d*dim + d] += minLambda;
+    return CS;
+}
 
 std::vector<fvec> interpolate(std::vector<fvec> a, int count)
 {

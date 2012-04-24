@@ -162,7 +162,7 @@ void MLDemos::initToolBars()
     connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
     connect(actionAddData, SIGNAL(triggered()), this, SLOT(ShowAddData()));
-    connect(generator, SIGNAL(finished()), this, SLOT(HideAddData()));
+    connect(generator, SIGNAL(finished(int)), this, SLOT(HideAddData()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
     connect(actionScreenshot, SIGNAL(triggered()), this, SLOT(Screenshot()));
@@ -2208,6 +2208,7 @@ void MLDemos::Navigation( fvec sample )
         ZoomChanged(sample[1]);
         return;
     }
+    if(!mutex.tryLock(20)) return;
     QString information;
     char string[255];
     int count = canvas->data->GetCount();
@@ -2222,7 +2223,6 @@ void MLDemos::Navigation( fvec sample )
     information += QString(string);
     sprintf(string, " | x%d: %.3f x%d: %.3f", canvas->xIndex+1, sample[canvas->xIndex], canvas->yIndex+1, sample[canvas->yIndex]);
     information += QString(string);
-    mutex.tryLock(500);
     if(classifier)
     {
         float score;
