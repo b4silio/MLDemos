@@ -827,6 +827,7 @@ void MLDemos::Compare()
             {
                 paramStream >> paramName;
                 paramStream >> paramValue;
+                qDebug() << "params:" << paramName << paramValue;
                 classifiers[tab]->LoadParams(paramName, paramValue);
             }
             QString algoName = classifiers[tab]->GetAlgoString();

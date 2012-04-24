@@ -18,6 +18,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "interfaceLWPRRegress.h"
 #include <QPixmap>
+#include <QDebug>
 #include <QBitmap>
 #include <QPainter>
 
@@ -71,7 +72,8 @@ void RegrLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	RegressorLWPR* _lwpr = (RegressorLWPR*)regressor;
 	LWPR_Object *lwpr= _lwpr->GetModel();
 	painter.setBrush(Qt::NoBrush);
-	FOR(i, lwpr->numRFS()[0])
+    painter.setPen(QPen(Qt::black, 1));
+    FOR(i, lwpr->numRFS()[0])
 	{
 		LWPR_ReceptiveFieldObject rf = lwpr->getRF(0,i);
 		double var = sqrt(rf.varX()[0]);
@@ -81,11 +83,7 @@ void RegrLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		double radius = rf.D()[0][0];
 		double slope = rf.slope()[0];
 		QPointF point = canvas->toCanvasCoords(centerX, centerY);
-		painter.setPen(QPen(Qt::black, 4));
-		painter.drawEllipse(point, 2, 2);
-		painter.setPen(QPen(Qt::white, 2));
-		painter.drawEllipse(point, 2, 2);
-		painter.setPen(QPen(Qt::black, 1));
+        painter.drawEllipse(point, 4, 4);
 		painter.drawEllipse(point, var, var);
 		painter.drawLine(point - QPointF(30, slope*var*2),point + QPointF(30, slope*var*2));
 	}
@@ -105,10 +103,8 @@ void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
     if(dim > 2) return;
 	canvas->maps.confidence = QPixmap();
 	int steps = w;
-	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
 	painter.setBrush(Qt::NoBrush);
+    QPainterPath path, pathUp, pathDown;
 	FOR(x, steps)
 	{
 		sample = canvas->toSampleCoords(x,0);
@@ -121,16 +117,22 @@ void RegrLWPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
 		QPointF pointDown = -pointUp;
 		if(x)
 		{
-			painter.setPen(QPen(Qt::black, 1));
-			painter.drawLine(point, oldPoint);
-			painter.setPen(QPen(Qt::black, 0.5));
-			//painter.drawLine(pointUp, oldPointUp);
-			//painter.drawLine(pointDown, oldPointDown);
-		}
-		oldPoint = point;
-		oldPointUp = pointUp;
-		oldPointDown = pointDown;
+            path.lineTo(point);
+            pathUp.lineTo(point+pointUp);
+            pathDown.lineTo(point+pointDown);
+        }
+        else
+        {
+            path.moveTo(point);
+            pathUp.moveTo(point+pointUp);
+            pathDown.moveTo(point+pointDown);
+        }
 	}
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawPath(path);
+    painter.setPen(QPen(Qt::black, 0.5));
+    painter.drawPath(pathUp);
+    painter.drawPath(pathDown);
 }
 
 void RegrLWPR::SaveOptions(QSettings &settings)

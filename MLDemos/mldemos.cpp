@@ -130,6 +130,11 @@ void MLDemos::initToolBars()
     actionDrawSamples->setStatusTip(tr("Show Sample Drawing Options"));
     actionDrawSamples->setCheckable(true);
 
+    actionAddData = new QAction(QIcon(":/MLDemos/icons/adddata.png"), tr("Add Data"), this);
+    actionAddData->setShortcut(QKeySequence(tr("A")));
+    actionAddData->setStatusTip(tr("Add new data"));
+    actionAddData->setCheckable(true);
+
     actionClearModel = new QAction(QIcon(":/MLDemos/icons/clearmodel.png"), tr("Clear Model"), this);
     actionClearModel->setShortcut(QKeySequence(tr("Shift+X")));
     actionClearModel->setStatusTip(tr("Clear current model"));
@@ -156,6 +161,8 @@ void MLDemos::initToolBars()
     connect(actionCompare, SIGNAL(triggered()), this, SLOT(ShowOptionCompare()));
     connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
+    connect(actionAddData, SIGNAL(triggered()), this, SLOT(ShowAddData()));
+    connect(generator, SIGNAL(finished()), this, SLOT(HideAddData()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
     connect(actionScreenshot, SIGNAL(triggered()), this, SLOT(Screenshot()));
@@ -186,6 +193,7 @@ void MLDemos::initToolBars()
     toolBar->addAction(actionAlgorithms);
     toolBar->addAction(actionCompare);
     toolBar->addSeparator();
+    toolBar->addAction(actionAddData);
     toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
     toolBar->addSeparator();
@@ -456,6 +464,7 @@ void MLDemos::initDialogs()
 
     expose = new Expose(canvas);
     import = new DataImporter();
+    generator = new DataGenerator(canvas, &mutex);
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
@@ -788,7 +797,7 @@ MLDemos::~MLDemos()
     delete drawToolbarContext1;
     delete drawToolbarContext2;
     delete displayOptions;
-
+    delete generator;
     canvas->hide();
     delete canvas;
 }
@@ -957,6 +966,24 @@ void MLDemos::ShowSampleDrawing()
     {
         drawToolbarWidget->hide();
     }
+}
+
+void MLDemos::ShowAddData()
+{
+    if(actionAddData->isChecked())
+    {
+        generator->show();
+    }
+    else
+    {
+        generator->hide();
+    }
+}
+
+void MLDemos::HideAddData()
+{
+    generator->hide();
+    actionAddData->setChecked(false);
 }
 
 void MLDemos::ShowOptionDisplay()

@@ -315,6 +315,7 @@
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
+    <addaction name="actionGenerate_Data"/>
     <addaction name="actionClearModel"/>
     <addaction name="actionClearData"/>
     <addaction name="actionShift_Dimensions"/>
@@ -528,6 +529,11 @@
    </property>
    <property name="toolTip">
     <string>Shift dimensions by one dimension to the right</string>
+   </property>
+  </action>
+  <action name="actionGenerate_Data">
+   <property name="text">
+    <string>Generate Data</string>
    </property>
   </action>
  </widget>

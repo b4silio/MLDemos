@@ -60,9 +60,9 @@ fvec RegressorLWPR::Test( const fvec &sample)
 	fvec res;
 	res.resize(2,0);
 	if(!model) return res;
-	float sigma = 0;
     int dim = sample.size();
     dvec x(dim-1);
+    dvec sigma(1);
     FOR(d, dim-1) x[d] = sample[d];
     if(outputDim != -1 && outputDim < dim-1)
     {
@@ -70,7 +70,7 @@ fvec RegressorLWPR::Test( const fvec &sample)
     }
     dvec y = model->predict(x, sigma);
 	res[0] = y[0];
-	res[1] = sigma;
+    res[1] = sqrtf(sigma[0]);
 	return res;
 }
 

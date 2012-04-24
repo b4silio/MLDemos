@@ -46,14 +46,17 @@ void RegrSVM::ChangeOptions()
     case 0: // C-SVM
         params->svmEpsLabel->setText("eps");
         params->svmPSpin->setRange(0.0001, 100.0);
+        if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
     case 1: // Nu-SVM
         params->svmEpsLabel->setText("Nu");
+        if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
     case 2: // RVM
         params->optimizeCheck->setVisible(false);
         params->svmCSpin->setEnabled(false);
         params->svmEpsLabel->setText("eps");
+        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     case 3: // KRLR
         params->optimizeCheck->setVisible(false);
@@ -64,6 +67,7 @@ void RegrSVM::ChangeOptions()
         params->svmPSpin->setRange(0.0001, 1.0);
         params->svmPSpin->setSingleStep(0.001);
         params->svmPSpin->setDecimals(4);
+        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
     switch(params->kernelTypeCombo->currentIndex())
@@ -79,6 +83,12 @@ void RegrSVM::ChangeOptions()
         params->kernelWidthSpin->setVisible(false);
         break;
     case 2: // RBF
+        params->kernelDegSpin->setEnabled(false);
+        params->kernelDegSpin->setVisible(false);
+        params->kernelWidthSpin->setEnabled(true);
+        params->kernelWidthSpin->setVisible(true);
+        break;
+    case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
@@ -129,16 +139,23 @@ void RegrSVM::SetParams(Regressor *regressor)
             break;
         case 1:
             svm->param.kernel_type = POLY;
+            svm->param.gamma = 1;
             break;
         case 2:
             svm->param.kernel_type = RBF;
+            svm->param.gamma = 1 / kernelGamma;
+            break;
+        case 3:
+            svm->param.kernel_type = SIGMOID;
+            svm->param.gamma = 1 / kernelGamma;
+            svm->param.coef0 = 0;
             break;
         }
         svm->param.C = svmC;
         svm->param.nu = svmP;
         svm->param.p = svmP;
-        svm->param.gamma = 1 / kernelGamma;
         svm->param.degree = kernelDegree;
+        svm->param.coef0 = 0;
         svm->bOptimize = bOptimize;
     }
 }
@@ -182,6 +199,9 @@ QString RegrSVM::GetAlgoString()
         break;
     case 2:
         algo += QString(" R %1").arg(kernelGamma);
+        break;
+    case 3:
+        algo += QString(" Sig %1").arg(kernelGamma);
         break;
     }
     return algo;
@@ -235,6 +255,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
         if(svm)
         {
             painter.setBrush(Qt::NoBrush);
+            painter.setPen(QPen(Qt::black, 4));
             std::vector<fvec> samples = canvas->data->GetSamples();
             int dim = canvas->data->GetDimCount();
             fvec sv(2,0);
@@ -249,8 +270,10 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
                         break;
                     }
                 }
-                int radius = 7;
+                int radius = 9;
                 QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
+                painter.drawEllipse(point, radius, radius);
+                /*
                 if(abs((*svm->sv_coef)[i]) == svm->param.C)
                 {
                     painter.setPen(QPen(Qt::black, 4));
@@ -263,6 +286,7 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
                     painter.setPen(Qt::black);
                     painter.drawEllipse(point, radius, radius);
                 }
+                */
             }
         }
     }
@@ -286,7 +310,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     {
         canvas->maps.confidence = QPixmap();
         int steps = w;
-        QPointF oldPoint(-FLT_MAX,-FLT_MAX);
+        QPainterPath path;
         FOR(x, steps)
         {
             sample = canvas->toSampleCoords(x,0);
@@ -295,14 +319,12 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
             QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
             if(x)
             {
-                painter.setPen(QPen(Qt::black, 1));
-                painter.drawLine(point, oldPoint);
-                painter.setPen(QPen(Qt::black, 0.5));
-                //				painter.drawLine(point+QPointF(0,eps*h), oldPoint+QPointF(0,eps*h));
-                //				painter.drawLine(point-QPointF(0,eps*h), oldPoint-QPointF(0,eps*h));
+                path.lineTo(point);
             }
-            oldPoint = point;
+            else path.moveTo(point);
         }
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawPath(path);
     }
     else if(regressor->type == REGR_SVR)
     {
@@ -314,24 +336,31 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
         eps = fabs((canvas->toCanvasCoords(eps,0) - canvas->toCanvasCoords(0,0)).x());
 
         int steps = w;
-        QPointF oldPoint(-FLT_MAX,-FLT_MAX);
+        QPainterPath path, pathUp, pathDown;
         FOR(x, steps)
         {
             sample = canvas->toSampleCoords(x,0);
-            int dim = sample.size();
             fvec res = regressor->Test(sample);
             if(res[0] != res[0]) continue;
             QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
             if(x)
             {
-                painter.setPen(QPen(Qt::black, 1));
-                painter.drawLine(point, oldPoint);
-                painter.setPen(QPen(Qt::black, 0.5));
-                painter.drawLine(point+QPointF(0,eps), oldPoint+QPointF(0,eps));
-                painter.drawLine(point-QPointF(0,eps), oldPoint-QPointF(0,eps));
+                path.lineTo(point);
+                pathUp.lineTo(point + QPointF(0, eps));
+                pathDown.lineTo(point - QPointF(0, eps));
             }
-            oldPoint = point;
+            else
+            {
+                path.moveTo(point);
+                pathUp.moveTo(point + QPointF(0, eps));
+                pathDown.moveTo(point - QPointF(0, eps));
+            }
         }
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawPath(path);
+        painter.setPen(QPen(Qt::black, 0.5));
+        painter.drawPath(pathUp);
+        painter.drawPath(pathDown);
     }
 }
 

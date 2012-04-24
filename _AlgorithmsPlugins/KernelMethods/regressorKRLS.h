@@ -31,7 +31,7 @@ private:
 	dlib::krls<reg_lin_kernel> *linTrainer;
 	dlib::krls<reg_pol_kernel> *polTrainer;
 	dlib::krls<reg_rbf_kernel> *rbfTrainer;
-	reg_lin_func linFunc;
+    reg_lin_func linFunc;
 	reg_pol_func polFunc;
 	reg_rbf_func rbfFunc;
 	std::vector<reg_sample_type> samples;

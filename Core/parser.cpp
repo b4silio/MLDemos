@@ -158,7 +158,7 @@ void CSVParser::clear()
     dataTypes.clear();
 }
 
-void CSVParser::parse(const char* fileName)
+void CSVParser::parse(const char* fileName, int separatorType)
 {
     // init
     file.open(fileName);
@@ -169,23 +169,27 @@ void CSVParser::parse(const char* fileName)
     int bestSeparator = 0;
     int dim=0;
 
-    // we test the separators to find which one is best
-    for(int i=0; i<separatorCount; i++)
+    if(!separatorType)
     {
-        file.seekg(0);
-        // Parse CSV input file
-        CSVIterator parser(file, separators[i]);
-        ++parser; // we skip the first line as it might be a header line
-        if(parser.eof() || !parser->size()) continue;
-        vector<string> parsed = parser->getParsedLine();
-        //qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
-        if(parsed.size() > dim)
+        // we test the separators to find which one is best
+        for(int i=0; i<separatorCount; i++)
         {
-            dim = parsed.size();
-            bestSeparator = i;
+            file.seekg(0);
+            // Parse CSV input file
+            CSVIterator parser(file, separators[i]);
+            ++parser; // we skip the first line as it might be a header line
+            if(parser.eof() || !parser->size()) continue;
+            vector<string> parsed = parser->getParsedLine();
+            //qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
+            if(parsed.size() > dim)
+            {
+                dim = parsed.size();
+                bestSeparator = i;
+            }
         }
+        file.seekg(0);
     }
-    file.seekg(0);
+    else bestSeparator = separatorType-1;
 
     data.clear();
     for(CSVIterator parser(file, separators[bestSeparator]);!parser.eof(); ++parser)
@@ -196,6 +200,7 @@ void CSVParser::parse(const char* fileName)
         // Fill dataset
         data.push_back(parsed);
     }
+
     cout << "Parsing done, read " << data.size() << " entries" << endl;
     cout << "Found " << data.at(0).size()-1 << " input labels" << endl;
 
@@ -205,18 +210,21 @@ void CSVParser::parse(const char* fileName)
         // Look for a non-empty cell
         // start with 2nd row as first might be input labels
         size_t testRow = 1;
-        while(data.at(testRow).at(i) == "?") testRow++;
+        while(data.at(testRow++).at(i) == "?" && testRow != data.size());
 
-        // The whole column is missing data...
+
         if (testRow == data.size())
         {
-            cout << "WebImport: Warning: Found empty column" << endl;
-            // TODO delete it
-        }
+            // if the whole column is missing data... delete it
+            cout << "Warning: Found empty column, deleting..." << endl;
+            for (size_t j = 0; j < data.size(); j++)
+                data.at(j).erase(data.at(j).begin()+i);
 
-        // save input types
-        dataTypes.push_back(getType(data.at(testRow).at(i)));
+        } else // save input type
+            dataTypes.push_back(getType(data.at(testRow).at(i)));
     }
+
+    cout << data.at(0).size()-1 << " input labels remaining" << endl;
 
     // Read output (class) labels
     getOutputLabelTypes(true);

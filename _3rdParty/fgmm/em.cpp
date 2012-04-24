@@ -269,6 +269,7 @@ _fgmm_real fgmm_kmeans_e_step(struct gmm * GMM,
             }
         }
         pdata += GMM->dim;
+        if(cstate == -1) cstate = 0;
         assert(cstate != -1);
         // fucking unreadable but this sets pix[.. , state_i] to
         // 0 unless state_i is cstate

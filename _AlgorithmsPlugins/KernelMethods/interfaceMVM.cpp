@@ -289,7 +289,7 @@ void ClassMVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
         }
         else
         {
-            if(label) Canvas::drawSample(painter, point, 9, 0);
+            if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
             else Canvas::drawCross(painter, point, 6, 0);
         }
     }
