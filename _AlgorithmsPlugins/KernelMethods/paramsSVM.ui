@@ -194,6 +194,9 @@ RBF and Polynomial only</string>
    <property name="minimum">
     <double>0.001000000000000</double>
    </property>
+   <property name="maximum">
+    <double>9999.000000000000000</double>
+   </property>
    <property name="singleStep">
     <double>0.010000000000000</double>
    </property>
@@ -283,6 +286,11 @@ RBF and Polynomial only</string>
    <item>
     <property name="text">
      <string>RBF</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Sigmoid</string>
     </property>
    </item>
   </widget>

@@ -55,6 +55,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "drawTimer.h"
 #include "expose.h"
 #include "dataImporter.h"
+#include "datagenerator.h"
 
 class MLDemos : public QMainWindow
 {
@@ -62,7 +63,7 @@ class MLDemos : public QMainWindow
 
 private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
-	*actionDisplayOptions, *actionShowStats,
+    *actionDisplayOptions, *actionShowStats, *actionAddData,
 	*actionClearData, *actionClearModel, *actionScreenshot,
 	*actionNew, *actionSave, *actionLoad;
 
@@ -100,6 +101,7 @@ private:
 	Canvas *canvas;
     Expose *expose;
     DataImporter *import;
+    DataGenerator *generator;
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
@@ -196,10 +198,13 @@ private slots:
 	void ShowOptionDisplay();
 	void ShowStatsDialog();
 	void ShowToolbar();
+    void ShowAddData();
 	void HideSampleDrawing();
-	void HideOptionDisplay();
-	void HideStatsDialog();
+    void HideOptionDisplay();
+    void HideOptionCompare();
+    void HideStatsDialog();
 	void HideToolbar();
+    void HideAddData();
 	void AvoidOptionChanged();
 	void DisplayOptionChanged();
 	void ColorMapChanged();
@@ -207,7 +212,7 @@ private slots:
     void ActivateImport();
     void DisactivateIO(QObject *);
 
-	void Classify();
+    void Classify();
 	void ClassifyCross();
 	void Regression();
 	void RegressionCross();
@@ -224,7 +229,8 @@ private slots:
     void Avoidance();
 	void Compare();
 	void CompareScreenshot();
-	void Clear();
+    void AddData();
+    void Clear();
 	void ClearData();
     void ShiftDimensions();
 	void SetROCInfo();

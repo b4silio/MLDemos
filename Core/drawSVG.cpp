@@ -59,8 +59,7 @@ void DrawSVG::Write(QString filename)
 	// confidence map
 	// samples + trajectories + reward
 	canvas->PaintStandard(painter, true);
-
-	if(canvas->bDisplayLearned)
+    if(canvas->bDisplayLearned)
 	{
 		// learned model
         painter.setBackgroundMode(Qt::TransparentMode);

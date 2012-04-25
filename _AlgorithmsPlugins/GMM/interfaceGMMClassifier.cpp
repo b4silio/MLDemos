@@ -36,7 +36,7 @@ void ClassGMM::SetParams(Classifier *classifier)
 {
 	if(!classifier) return;
 	int clusters = params->gmmCount->value();
-	int covType = params->gmmCovarianceCombo->currentIndex();
+    int covType = params->gmmCovarianceCombo->currentIndex();
 	int initType = params->gmmInitCombo->currentIndex();
 
 	((ClassifierGMM *)classifier)->SetParams(clusters, covType, initType);

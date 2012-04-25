@@ -50,18 +50,22 @@ void ClassSVM::ChangeOptions()
         params->svmCSpin->setValue(C);
         if(params->svmCSpin->value() < 1) params->svmCSpin->setValue(100);
         params->svmTypeLabel->setText("C");
+        if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
     case 1: // Nu-SVM
         params->svmTypeLabel->setText("Nu");
+        if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
     case 2: // RVM
         params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("eps");
+        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     case 3: // Pegasos
         params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("lambda");
         params->maxSVSpin->setEnabled(true);
+        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
     switch(params->kernelTypeCombo->currentIndex())
@@ -77,6 +81,12 @@ void ClassSVM::ChangeOptions()
         params->kernelWidthSpin->setVisible(false);
         break;
     case 2: // RBF
+        params->kernelDegSpin->setEnabled(false);
+        params->kernelDegSpin->setVisible(false);
+        params->kernelWidthSpin->setEnabled(true);
+        params->kernelWidthSpin->setVisible(true);
+        break;
+    case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
@@ -125,6 +135,9 @@ QString ClassSVM::GetAlgoString()
     case 2:
         algo += QString(" RBF %1").arg(kernelGamma);
         break;
+    case 3:
+        algo += QString(" Sig %1").arg(kernelGamma);
+        break;
     }
     if(bOptimize) algo += QString(" Opt");
     return algo;
@@ -171,9 +184,13 @@ void ClassSVM::SetParams(Classifier *classifier)
         case 2:
             svm->param.kernel_type = RBF;
             break;
+        case 3:
+            svm->param.kernel_type = SIGMOID;
+            break;
         }
         svm->param.C = svm->param.nu = svmC;
         svm->param.gamma = 1 / kernelGamma;
+        svm->param.coef0 = 0;
         svm->param.degree = kernelDegree;
         svm->bOptimize = bOptimize;
     }

@@ -179,11 +179,9 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     int outputDim = regressor->outputDim;
 
 	int steps = w;
-	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
 	fvec sample;sample.resize(2, 0);
 	painter.setBrush(Qt::NoBrush);
+    QPainterPath path, pathUp, pathDown, pathUpUp, pathDownDown;
 	FOR(x, steps)
 	{
         sample = canvas->toSampleCoords(x, 0);
@@ -205,21 +203,29 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
         pointDown.setY(pointDown.y() - point.y());
 		if(x)
 		{
-			painter.setPen(QPen(Qt::black, 1));
-			painter.drawLine(point, oldPoint);
-			painter.setPen(QPen(Qt::black, 0.5));
-			painter.drawLine(point + pointUp, oldPoint + oldPointUp);
-			painter.drawLine(point + pointDown, oldPoint + oldPointDown);
-
-			painter.setPen(QPen(Qt::black, 0.25));
-			painter.drawLine(point + 2*pointUp, oldPoint + 2*oldPointUp);
-			painter.drawLine(point + 2*pointDown, oldPoint + 2*oldPointDown);
-
-		}
-		oldPoint = point;
-		oldPointUp = pointUp;
-		oldPointDown = pointDown;
+            path.lineTo(point);
+            pathUp.lineTo(pointUp);
+            pathUpUp.lineTo(point + 2*pointUp);
+            pathDown.lineTo(point + pointDown);
+            pathDownDown.lineTo(point + 2*pointDown);
+        }
+        else
+        {
+            path.moveTo(point);
+            pathUp.moveTo(point + pointUp);
+            pathUpUp.moveTo(point + 2*pointUp);
+            pathDown.moveTo(point + pointDown);
+            pathDownDown.moveTo(point + 2*pointDown);
+        }
 	}
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawPath(path);
+    painter.setPen(QPen(Qt::black, 0.5));
+    painter.drawPath(pathUp);
+    painter.drawPath(pathDown);
+    painter.setPen(QPen(Qt::black, 0.25));
+    painter.drawPath(pathUpUp);
+    painter.drawPath(pathDownDown);
 }
 
 void RegrGMM::SaveOptions(QSettings &settings)

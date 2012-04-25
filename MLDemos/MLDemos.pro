@@ -44,7 +44,8 @@ FORMS += aboutDialog.ui \
     compare.ui \
     expose.ui \
     manualSelection.ui \
-    inputDimensions.ui
+    inputDimensions.ui \
+    datagenerator.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -68,7 +69,8 @@ HEADERS += basicMath.h \
 	dynamical.h \
     clusterer.h \
     compare.h \
-    spline.h
+    spline.h \
+    datagenerator.h
 
 SOURCES += \
 	main.cpp \
@@ -77,7 +79,8 @@ SOURCES += \
     mlstats.cpp \
 	mlsaving.cpp \
         compare.cpp \
-    mltrain.cpp
+    mltrain.cpp \
+    datagenerator.cpp
 
 
 
