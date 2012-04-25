@@ -2513,6 +2513,7 @@ void MLDemos::Load(QString filename)
     ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
     ManualSelectionUpdated();
+    optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
     UpdateInfo();
     canvas->repaint();
 }
@@ -2751,6 +2752,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     FitToData();
     ResetPositiveClass();
     ManualSelectionUpdated();
+    optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
     CanvasOptionsChanged();
     DrawNone();
     canvas->ResetSamples();
