@@ -46,15 +46,16 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
     srand(1); // so we always generate the same weak learner
     switch(weakType)
     {
-    case 0: // projections
+    case 0: // stumps
+        learnerCount = dim;
+        break;
+    case 1: // projections
         learnerCount = dim>2?1000:360;
         break;
-    case 1: // rectangles
-    case 2: // circles
-        learnerCount = 1000;
-        break;
-    case 3: // gmm
-    case 4: // svm
+    case 2: // rectangles
+    case 3: // circles
+    case 4: // gmm
+    case 5: // svm
         learnerCount = 3000;
         break;
     }
@@ -66,7 +67,16 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
 //	srand(1);
     switch(weakType)
     {
-    case 0:// random projection
+    case 0:// stumps
+    {
+        FOR(i, learnerCount)
+        {
+            learners[i].resize(1);
+            learners[i][0] = i % dim; // we choose a single dimension
+        }
+    }
+        break;
+    case 1:// random projection
     {
         if(dim==2)
         {
@@ -95,7 +105,25 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
         }
     }
         break;
-    case 2: // random circle
+    case 2: // random rectangle
+    {
+        FOR(i, learnerCount)
+        {
+            learners[i].resize(dim*2);
+            FOR(d, dim)
+            {
+                float x = drand48()*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
+                //float x = (drand48()*2-0.5)*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
+                float l = drand48()*(xMax[d] - xMin[d]); // width
+                //float x = drand48()*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
+                //float l = drand48()*(xMax[d] - xMin[d]); // width
+                learners[i][2*d] = x;
+                learners[i][2*d+1] = l;
+            }
+        }
+    }
+        break;
+    case 3: // random circle
     {
         if(dim==2)
         {
@@ -116,23 +144,7 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
         }
     }
         break;
-    case 1: // random rectangle
-    {
-        FOR(i, learnerCount)
-        {
-            learners[i].resize(dim*2);
-            FOR(d, dim)
-            {
-                float x = drand48()*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
-                float l = drand48()*(xMax[d] - xMin[d]); // width
-                //float l = ((rand()+1) / (float)RAND_MAX); // width ratio
-                learners[i][2*d] = x;
-                learners[i][2*d+1] = l;
-            }
-        }
-    }
-        break;
-    case 3: // random GMM
+    case 4: // random GMM
     {
         FOR(i, learnerCount)
         {
@@ -156,7 +168,7 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
         }
     }
         break;
-    case 4: // random SVM
+    case 5: // random SVM
     {
         FOR(i, learnerCount)
         {
@@ -212,7 +224,23 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 
     switch(weakType)
     {
-    case 0:// random projection
+    case 0:// stumps
+    {
+        FOR(i, sampleCnt)
+        {
+            fvec sample = samples[perm[i]];
+            FOR(j, learnerCount)
+            {
+                int index = learners[j][0];
+                float val = index < dim ? sample[index] : 0;
+                cvSetReal2D(trainSamples, i, j, val);
+            }
+            cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
+            cvSet1D(sampleWeights, i, cvScalar(1));
+        }
+    }
+        break;
+    case 1:// random projection
     {
         if(dim == 2)
         {
@@ -247,50 +275,12 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
         }
     }
         break;
-    case 2: // random circle
-	{
-		if(dim == 2)
-		{
-			FOR(i, sampleCnt)
-			{
-                fvec sample = samples[perm[i]];
-                FOR(j, learnerCount)
-				{
-                    float val = 0;
-                    val = sqrtf((sample[0] - learners[j][0])*(sample[0] - learners[j][0])+
-                        (sample[1] - learners[j][1])*(sample[1] - learners[j][1]));
-					cvSetReal2D(trainSamples, i, j, val);
-				}
-				cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
-				cvSet1D(sampleWeights, i, cvScalar(1));
-			}
-
-		}
-		else
-		{
-			FOR(i, sampleCnt)
-			{
-				// project the sample in the direction of the learner 
-				fvec sample = samples[perm[i]];
-				FOR(j, learnerCount)
-				{
-					float val = 0;
-                    FOR(d,dim) val += (sample[d] - learners[j][d])*(sample[d] - learners[j][d]);
-                    val = sqrtf(val);
-					cvSetReal2D(trainSamples, i, j, val);
-				}
-				cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
-				cvSet1D(sampleWeights, i, cvScalar(1));
-			}
-		}
-	}
-        break;
-    case 1:// random rectangles
+    case 2:// random rectangles
 	{
 		FOR(i, sampleCnt)
 		{
 			// check if the sample is inside the recangle generated by the classifier
-			const fvec sample = samples[perm[i]];
+            const fvec sample = samples[perm[i]];
 			FOR(j, learnerCount)
 			{
                 float val = 1;
@@ -302,14 +292,53 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
                         break;
                     }
                 }
-                cvSetReal2D(trainSamples, i, j, val + drand48()*0.1); // we add a small noise to the value just to not have only 0s and 1s
-			}
+                cvSetReal2D(trainSamples, i, j, val); // we add a small noise to the value just to not have only 0s and 1s
+                //cvSetReal2D(trainSamples, i, j, val + drand48()*0.01); // we add a small noise to the value just to not have only 0s and 1s
+            }
 			cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
 			cvSet1D(sampleWeights, i, cvScalar(1));
 		}
 	}
         break;
-    case 3: // random GMM
+    case 3: // random circle
+    {
+        if(dim == 2)
+        {
+            FOR(i, sampleCnt)
+            {
+                fvec sample = samples[perm[i]];
+                FOR(j, learnerCount)
+                {
+                    float val = 0;
+                    val = sqrtf((sample[0] - learners[j][0])*(sample[0] - learners[j][0])+
+                        (sample[1] - learners[j][1])*(sample[1] - learners[j][1]));
+                    cvSetReal2D(trainSamples, i, j, val);
+                }
+                cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
+                cvSet1D(sampleWeights, i, cvScalar(1));
+            }
+
+        }
+        else
+        {
+            FOR(i, sampleCnt)
+            {
+                // project the sample in the direction of the learner
+                fvec sample = samples[perm[i]];
+                FOR(j, learnerCount)
+                {
+                    float val = 0;
+                    FOR(d,dim) val += (sample[d] - learners[j][d])*(sample[d] - learners[j][d]);
+                    val = sqrtf(val);
+                    cvSetReal2D(trainSamples, i, j, val);
+                }
+                cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
+                cvSet1D(sampleWeights, i, cvScalar(1));
+            }
+        }
+    }
+        break;
+    case 4: // random GMM
     {
         FOR(i, sampleCnt)
         {
@@ -337,7 +366,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
         }
     }
         break;
-    case 4: // random SVM
+    case 5: // random SVM
     {
         FOR(i, sampleCnt)
         {
@@ -479,6 +508,16 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses)
     {
     case 0:
     {
+        FOR(i, features.size())
+        {
+            int index = learners[features[i]][0];
+            float val = index < dim ? sample[index] : 0;
+            cvSetReal2D(x, 0, features[i], val);
+        }
+    }
+        break;
+    case 1:
+    {
         if(dim == 2)
         {
             FOR(i, features.size())
@@ -498,6 +537,25 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses)
     }
         break;
     case 2:
+    {
+        FOR(i, features.size())
+        {
+            int val = 1;
+            FOR(d, dim)
+            {
+                if(sample[d] < learners[features[i]][2*d] ||
+                    sample[d] > learners[features[i]][2*d]+learners[features[i]][2*d+1])
+                {
+                    val = 0;
+                    break;
+                }
+            }
+            cvSetReal2D(x, 0, features[i], val);
+            //cvSetReal2D(x, 0, features[i], val + drand48()*0.1);
+        }
+    }
+        break;
+    case 3:
     {
         if(dim == 2)
         {
@@ -520,25 +578,7 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses)
         }
     }
         break;
-    case 1:
-    {
-        FOR(i, features.size())
-        {
-            int val = 1;
-            FOR(d, dim)
-            {
-                if(sample[d] < learners[features[i]][2*d] ||
-                    sample[d] > learners[features[i]][2*d]+learners[features[i]][2*d+1])
-                {
-                    val = 0;
-                    break;
-                }
-            }
-            cvSetReal2D(x, 0, features[i], val + drand48()*0.1);
-        }
-    }
-        break;
-    case 3:
+    case 4:
     {
         FOR(i, features.size())
         {
@@ -560,7 +600,7 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses)
         }
     }
         break;
-    case 4:
+    case 5:
     {
         FOR(i, features.size())
         {
@@ -613,7 +653,7 @@ void ClassifierBoost::SetParams( u32 weakCount, int weakType, int boostType, int
     {
         // if we changed the number of svms we need to regenerate the learners
         this->svmCount = svmCount;
-        if(weakType == 4) currentLearnerType = -1;
+        if(weakType == 5) currentLearnerType = -1;
     }
 }
 
@@ -625,19 +665,22 @@ const char *ClassifierBoost::GetInfoString()
 	sprintf(text, "%sLearners Type: ", text);
 	switch(weakType)
 	{
-	case 0:
-		sprintf(text, "%sRandom Projections\n", text);
-		break;
-	case 1:
+    case 0:
+        sprintf(text, "%sDecision Stumps\n", text);
+        break;
+    case 1:
+        sprintf(text, "%sRandom Projections\n", text);
+        break;
+    case 2:
 		sprintf(text, "%sRandom Rectangles\n", text);
 		break;
-    case 2:
+    case 3:
         sprintf(text, "%sRandom Circles\n", text);
         break;
-    case 3:
+    case 4:
         sprintf(text, "%sRandom GMM\n", text);
         break;
-    case 4:
+    case 5:
         sprintf(text, "%sRandom SVM %d\n", text, svmCount);
         break;
     }

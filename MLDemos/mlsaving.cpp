@@ -696,3 +696,52 @@ void MLDemos::SaveDynamical()
     if(!filename.endsWith(".model")) filename += ".model";
     dynamicals[tabUsedForTraining]->SaveModel(filename, dynamical);
 }
+
+
+void MLDemos::MapFromReward()
+{
+    RewardMap *reward = canvas->data->GetReward();
+    if(!reward || reward->Empty() || reward->dim < 2) return;
+    int w = reward->size[0];
+    int h = reward->size[1];
+    QImage image(w,h,QImage::Format_RGB32);
+    FOR(y, h)
+    {
+        FOR(x, w)
+        {
+            double value = reward->rewards[y*w + x];
+            value = min(max(value*255.,0.),255.);
+            image.setPixel(x,y,qRgb(255,255-value,255-value));
+        }
+    }
+    int W = canvas->width();
+    int H = canvas->height();
+    canvas->maps.reward = QPixmap::fromImage(image).scaled(W, H, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    canvas->repaint();
+}
+
+void MLDemos::RewardFromMap(QImage rewardMap)
+{
+    QRgb *pixels = (QRgb*) rewardMap.bits();
+    int w = rewardMap.width();
+    int h = rewardMap.height();
+
+    double *data = new double[w*h];
+    double maxData = 0;
+    FOR(i, w*h)
+    {
+        data[i] = 1. - qBlue(pixels[i])/255.; // all data is in a 0-1 range
+        maxData = max(maxData, data[i]);
+    }
+    if(maxData > 0)
+    {
+        FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
+    }
+    ivec size;
+    size.push_back(w);
+    size.push_back(h);
+    fvec low(2,0.f);
+    fvec high(2,1.f);
+    canvas->data->GetReward()->SetReward(data, size, low, high);
+    delete [] data;
+}

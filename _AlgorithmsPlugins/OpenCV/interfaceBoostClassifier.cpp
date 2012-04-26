@@ -175,8 +175,8 @@ void ClassBoost::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classif
 void ClassBoost::SaveOptions(QSettings &settings)
 {
 	settings.setValue("boostCount", params->boostCountSpin->value());
-    settings.setValue("boostLearnerType", params->boostLearnerType->currentIndex());
     settings.setValue("boostType", params->boostType->currentIndex());
+    settings.setValue("boostLearnerType", params->boostLearnerType->currentIndex());
     settings.setValue("svmCount", params->svmCountSpin->value());
 }
 
@@ -184,7 +184,7 @@ bool ClassBoost::LoadOptions(QSettings &settings)
 {
     if(settings.contains("boostCount")) params->boostCountSpin->setValue(settings.value("boostCount").toFloat());
     if(settings.contains("boostType")) params->boostType->setCurrentIndex(settings.value("boostType").toInt());
-    if(settings.contains("boostLearnerType")) params->boostLearnerType->setCurrentIndex(settings.value("boostType").toInt());
+    if(settings.contains("boostLearnerType")) params->boostLearnerType->setCurrentIndex(settings.value("boostLearnerType").toInt());
     if(settings.contains("svmCount")) params->svmCountSpin->setValue(settings.value("svmCount").toFloat());
     return true;
 }
@@ -192,8 +192,8 @@ bool ClassBoost::LoadOptions(QSettings &settings)
 void ClassBoost::SaveParams(QTextStream &file)
 {
 	file << "classificationOptions" << ":" << "boostCount" << " " << params->boostCountSpin->value() << "\n";
-    file << "classificationOptions" << ":" << "boostLearnerType" << " " << params->boostLearnerType->currentIndex() << "\n";
     file << "classificationOptions" << ":" << "boostType" << " " << params->boostType->currentIndex() << "\n";
+    file << "classificationOptions" << ":" << "boostLearnerType" << " " << params->boostLearnerType->currentIndex() << "\n";
     file << "classificationOptions" << ":" << "svmCount" << " " << params->svmCountSpin->value() << "\n";
 }
 

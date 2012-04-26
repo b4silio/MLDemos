@@ -116,6 +116,8 @@ private:
     void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
     void Test(Maximizer *maximizer);
+    void RewardFromMap(QImage rewardMap);
+    void MapFromReward();
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
