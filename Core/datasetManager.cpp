@@ -501,7 +501,7 @@ std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(int resample
 
 void DatasetManager::Save(const char *filename)
 {
-	if(!samples.size()) return;
+    if(!samples.size() && rewards.Empty()) return;
 	u32 sampleCnt = samples.size();
     if(sampleCnt) size = samples[0].size();
 
@@ -544,6 +544,18 @@ void DatasetManager::Save(const char *filename)
 			file << obstacles[i].repulsion[1] << "\n";
 		}
 	}
+    if(!rewards.Empty())
+    {
+        file << "r " << rewards.dim << " " << rewards.length << "\n";
+        FOR(i, rewards.dim)
+        {
+            file << rewards.size[i] << " " << rewards.lowerBoundary[i] << " " << rewards.higherBoundary[i] << "\n";
+        }
+        FOR(i, rewards.length)
+        {
+            file << rewards.rewards[i] << " ";
+        }
+    }
 
 	file.close();
 }
@@ -617,6 +629,39 @@ bool DatasetManager::Load(const char *filename)
 			obstacles.push_back(obstacle);
 		}
 	}
+    // we load the reward
+    if(nextChar == 'r')
+    {
+        char dump;
+        file >> dump;
+        int dims, length;
+        file >> dims >> length;
+        ivec size(dims);
+        fvec lowerBoundary(dims), higherBoundary(dims);
+        int testLength = 1;
+        FOR(i, dims)
+        {
+            file >> size[i] >> lowerBoundary[i] >> higherBoundary[i];
+            testLength *= size[i];
+        }
+        if(testLength == length)
+        {
+            double *rewardData = new double[length];
+            FOR(i, length)
+            {
+                double value;
+                file >> value;
+                rewardData[i] = value;
+            }
+            rewards.lowerBoundary = lowerBoundary;
+            rewards.higherBoundary = higherBoundary;
+            rewards.size = size;
+            rewards.dim = dims;
+            rewards.length = length;
+            if(rewards.rewards) delete [] rewards.rewards;
+            rewards.rewards = rewardData;
+        }
+    }
 
 	file.close();
 	KILL(perm);

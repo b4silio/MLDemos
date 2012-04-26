@@ -587,20 +587,36 @@ void MLDemos::initPlugins()
     }
 }
 
+// this function is to set the font size of gui elements in the interface for non-osx systems
+// this is necessary because the different OS interpret in different ways the default styles
+// which tends to mess up the layout of labels and texts
 void MLDemos::SetTextFontSize()
 {
 #if defined(Q_OS_MAC)
     return; // default fontsizes are for mac already ;)
 #endif
+    QList<QWidget*> children;
+    // we will make this tiny so that we don't risk cropping the texts
     QFont font("Lucida Sans Unicode", 7);
-    QList<QWidget*> children = algorithmWidget->findChildren<QWidget*>();
-    FOR(i, children.size())
-    {
-        if(children[i]) children[i]->setFont(font);
-    }
+    children = algorithmWidget->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     optionsMaximize->gaussianButton->setFont(QFont("Lucida Sans Unicode", 18));
     optionsMaximize->gradientButton->setFont(QFont("Lucida Sans Unicode", 18));
     optionsMaximize->targetButton->setFont(QFont("Lucida Sans Unicode", 18));
+    children = compareWidget->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = displayDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = statsDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = about->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = manualSelectDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = inputDimensionsDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = generator->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
 }
 
 void MLDemos::ShowContextMenuSpray(const QPoint &point)
@@ -2481,8 +2497,8 @@ void MLDemos::Save(QString filename)
         return;
     }
     file.close();
+    if(!canvas->maps.reward.isNull()) RewardFromMap(canvas->maps.reward.toImage());
     canvas->data->Save(filename.toAscii());
-    if(!canvas->maps.reward.isNull()) canvas->maps.reward.toImage().save(filename + "-reward.png");
     SaveParams(filename);
     ui.statusBar->showMessage("Data saved successfully");
 }
@@ -2507,12 +2523,12 @@ void MLDemos::Load(QString filename)
     file.close();
     ClearData();
     canvas->data->Load(filename.toAscii());
+    MapFromReward();
     LoadParams(filename);
-    QImage reward(filename + "-reward.png");
-    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
+//    QImage reward(filename + "-reward.png");
+//    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
     ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
-    ManualSelectionUpdated();
     optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
     UpdateInfo();
     canvas->repaint();
@@ -2575,6 +2591,7 @@ void MLDemos::dropEvent(QDropEvent *event)
         {
             ClearData();
             canvas->data->Load(filename.toAscii());
+            MapFromReward();
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");
             ResetPositiveClass();

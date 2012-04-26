@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Standard Dataset Generator</string>
   </property>
   <widget class="QPushButton" name="addButton">
    <property name="geometry">
@@ -272,7 +272,7 @@
     </font>
    </property>
    <property name="minimum">
-    <number>2</number>
+    <number>1</number>
    </property>
   </widget>
   <widget class="QLabel" name="classesLabel">
