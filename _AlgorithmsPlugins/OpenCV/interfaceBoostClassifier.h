@@ -35,20 +35,23 @@ public:
 	ClassBoost();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier){};
+    void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("Boost");};
+    QString GetName(){return QString("Boost");}
 	QString GetAlgoString();
-	QString GetInfoFile(){return "boost.html";};
-	bool UsesDrawTimer(){return true;};
-	QWidget *GetParameterWidget(){return widget;};
+    QString GetInfoFile(){return "boost.html";}
+    bool UsesDrawTimer(){return true;}
+    QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Classifier *classifier);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+
+public slots:
+    void OptionsChanged();
 };
 
 #endif // _INTERFACEBOOSTCLASSIFIER_H_

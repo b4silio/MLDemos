@@ -194,6 +194,9 @@ RBF and Polynomial only</string>
    <property name="minimum">
     <double>0.001000000000000</double>
    </property>
+   <property name="maximum">
+    <double>9999.000000000000000</double>
+   </property>
    <property name="singleStep">
     <double>0.010000000000000</double>
    </property>
@@ -268,7 +271,7 @@ RBF and Polynomial only</string>
     <string>kernel function</string>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <item>
     <property name="text">

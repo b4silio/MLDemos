@@ -116,6 +116,8 @@ private:
     void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
     void Test(Maximizer *maximizer);
+    void RewardFromMap(QImage rewardMap);
+    void MapFromReward();
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
@@ -200,8 +202,9 @@ private slots:
 	void ShowToolbar();
     void ShowAddData();
 	void HideSampleDrawing();
-	void HideOptionDisplay();
-	void HideStatsDialog();
+    void HideOptionDisplay();
+    void HideOptionCompare();
+    void HideStatsDialog();
 	void HideToolbar();
     void HideAddData();
 	void AvoidOptionChanged();
@@ -211,7 +214,7 @@ private slots:
     void ActivateImport();
     void DisactivateIO(QObject *);
 
-	void Classify();
+    void Classify();
 	void ClassifyCross();
 	void Regression();
 	void RegressionCross();
@@ -228,7 +231,8 @@ private slots:
     void Avoidance();
 	void Compare();
 	void CompareScreenshot();
-	void Clear();
+    void AddData();
+    void Clear();
 	void ClearData();
     void ShiftDimensions();
 	void SetROCInfo();

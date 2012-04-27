@@ -67,6 +67,8 @@ struct RewardMap
     ~RewardMap(){if(rewards) delete [] rewards; rewards=0;}
 	RewardMap& operator= (const RewardMap& r);
 
+    bool Empty(){return length==0;}
+
     void SetReward(double *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary);
 
     void SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary);
@@ -85,7 +87,6 @@ struct RewardMap
     void ShiftValueAt(fvec sample, double shift);
 
     void ShiftValueAt(fvec sample, double radius, double shift);
-
 };
 
 struct TimeSerie
@@ -231,7 +232,6 @@ public:
 
 	void Save(const char *filename);
 	bool Load(const char *filename);
-
 };
 
 #endif // _DATASET_MANAGER_H_

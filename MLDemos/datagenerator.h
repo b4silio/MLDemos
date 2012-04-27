@@ -15,14 +15,14 @@ class DataGenerator : public QDialog
     Q_OBJECT
 private:
     Canvas *canvas;
-    QMutex *mutex;
 public:
     Ui::DataGenerator *ui;
-    explicit DataGenerator(Canvas *canvas, QMutex *mutex, QWidget *parent = 0);
+    explicit DataGenerator(Canvas *canvas, QWidget *parent = 0);
     ~DataGenerator();
-    
+
+    std::pair<std::vector<fvec>,ivec> Generate();
+
 public slots:
-    void Generate();
     void OptionsChanged();
 };
 

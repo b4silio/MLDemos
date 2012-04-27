@@ -4,14 +4,13 @@
 
 using namespace std;
 
-DataGenerator::DataGenerator(Canvas *canvas, QMutex *mutex, QWidget *parent) :
+DataGenerator::DataGenerator(Canvas *canvas, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DataGenerator)
 {
     ui->setupUi(this);
     this->canvas = canvas;
-    this->mutex = mutex;
-    connect(ui->addButton, SIGNAL(clicked()), this, SLOT(Generate()));
+    //connect(ui->addButton, SIGNAL(clicked()), this, SLOT(Generate()));
     connect(ui->generatorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
     OptionsChanged();
 }
@@ -60,7 +59,7 @@ void DataGenerator::OptionsChanged()
     }
 }
 
-void DataGenerator::Generate()
+pair<vector<fvec>, ivec> DataGenerator::Generate()
 {
     int count = ui->countSpin->value();
     int dim = ui->dimSpin->value();
@@ -192,11 +191,5 @@ void DataGenerator::Generate()
     }
         break;
     }
-    mutex->lock();
-    canvas->data->Clear();
-    canvas->ResetSamples();
-    canvas->data->AddSamples(samples, labels);
-    canvas->FitToData();
-    canvas->repaint();
-    mutex->unlock();
+    return make_pair(samples, labels);
 }

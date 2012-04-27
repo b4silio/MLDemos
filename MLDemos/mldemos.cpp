@@ -162,7 +162,7 @@ void MLDemos::initToolBars()
     connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
     connect(actionAddData, SIGNAL(triggered()), this, SLOT(ShowAddData()));
-    connect(generator, SIGNAL(finished()), this, SLOT(HideAddData()));
+    connect(generator, SIGNAL(finished(int)), this, SLOT(HideAddData()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
     connect(actionScreenshot, SIGNAL(triggered()), this, SLOT(Screenshot()));
@@ -464,11 +464,12 @@ void MLDemos::initDialogs()
 
     expose = new Expose(canvas);
     import = new DataImporter();
-    generator = new DataGenerator(canvas, &mutex);
+    generator = new DataGenerator(canvas);
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
+    connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
 }
 
 void MLDemos::initPlugins()
@@ -586,20 +587,36 @@ void MLDemos::initPlugins()
     }
 }
 
+// this function is to set the font size of gui elements in the interface for non-osx systems
+// this is necessary because the different OS interpret in different ways the default styles
+// which tends to mess up the layout of labels and texts
 void MLDemos::SetTextFontSize()
 {
 #if defined(Q_OS_MAC)
     return; // default fontsizes are for mac already ;)
 #endif
+    QList<QWidget*> children;
+    // we will make this tiny so that we don't risk cropping the texts
     QFont font("Lucida Sans Unicode", 7);
-    QList<QWidget*> children = algorithmWidget->findChildren<QWidget*>();
-    FOR(i, children.size())
-    {
-        if(children[i]) children[i]->setFont(font);
-    }
+    children = algorithmWidget->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     optionsMaximize->gaussianButton->setFont(QFont("Lucida Sans Unicode", 18));
     optionsMaximize->gradientButton->setFont(QFont("Lucida Sans Unicode", 18));
     optionsMaximize->targetButton->setFont(QFont("Lucida Sans Unicode", 18));
+    children = compareWidget->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = displayDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = statsDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = about->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = manualSelectDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = inputDimensionsDialog->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
+    children = generator->findChildren<QWidget*>();
+    FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
 }
 
 void MLDemos::ShowContextMenuSpray(const QPoint &point)
@@ -1041,6 +1058,12 @@ void MLDemos::HideOptionDisplay()
     actionDisplayOptions->setChecked(false);
 }
 
+void MLDemos::HideOptionCompare()
+{
+    compareWidget->show();
+    actionCompare->setChecked(false);
+}
+
 void MLDemos::HideToolbar()
 {
     toolBar->hide();
@@ -1051,6 +1074,14 @@ void MLDemos::HideStatsDialog()
 {
     statsDialog->hide();
     actionShowStats->setChecked(false);
+}
+
+void MLDemos::AddData()
+{
+    ClearData();
+    pair<vector<fvec>,ivec> newData = generator->Generate();
+    canvas->data->AddSamples(newData.first, newData.second);
+    FitToData();
 }
 
 void MLDemos::Clear()
@@ -2208,6 +2239,7 @@ void MLDemos::Navigation( fvec sample )
         ZoomChanged(sample[1]);
         return;
     }
+    if(!mutex.tryLock(20)) return;
     QString information;
     char string[255];
     int count = canvas->data->GetCount();
@@ -2222,7 +2254,6 @@ void MLDemos::Navigation( fvec sample )
     information += QString(string);
     sprintf(string, " | x%d: %.3f x%d: %.3f", canvas->xIndex+1, sample[canvas->xIndex], canvas->yIndex+1, sample[canvas->yIndex]);
     information += QString(string);
-    mutex.tryLock(500);
     if(classifier)
     {
         float score;
@@ -2466,8 +2497,8 @@ void MLDemos::Save(QString filename)
         return;
     }
     file.close();
+    if(!canvas->maps.reward.isNull()) RewardFromMap(canvas->maps.reward.toImage());
     canvas->data->Save(filename.toAscii());
-    if(!canvas->maps.reward.isNull()) canvas->maps.reward.toImage().save(filename + "-reward.png");
     SaveParams(filename);
     ui.statusBar->showMessage("Data saved successfully");
 }
@@ -2492,12 +2523,13 @@ void MLDemos::Load(QString filename)
     file.close();
     ClearData();
     canvas->data->Load(filename.toAscii());
+    MapFromReward();
     LoadParams(filename);
-    QImage reward(filename + "-reward.png");
-    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
+//    QImage reward(filename + "-reward.png");
+//    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
     ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
-    ManualSelectionUpdated();
+    optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
     UpdateInfo();
     canvas->repaint();
 }
@@ -2559,6 +2591,7 @@ void MLDemos::dropEvent(QDropEvent *event)
         {
             ClearData();
             canvas->data->Load(filename.toAscii());
+            MapFromReward();
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");
             ResetPositiveClass();
@@ -2736,6 +2769,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     FitToData();
     ResetPositiveClass();
     ManualSelectionUpdated();
+    optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
     CanvasOptionsChanged();
     DrawNone();
     canvas->ResetSamples();

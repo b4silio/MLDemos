@@ -28,16 +28,29 @@ class ClassifierBoost : public Classifier
 private:
 	CvBoost *model;
 	u32 weakCount;
-	int weakType; // 0: random projection, 1: random rectangle
+    int weakType; // 0: random projection, 1: random rectangle, 2: random circle, 3: random GMM, 4: random SVM
 	float scoreMultiplier;
 	ivec features;
+    fvec errorWeights;
+    int boostType;
+public:
+    std::vector<fvec> samples;
+    ivec labels;
+    static int learnerCount;
+    static std::vector<fvec> learners;
+    static int currentLearnerType;
+    static int svmCount; // number of 'support vectors' for the random SVM
+
 public:
 	ClassifierBoost();
 	~ClassifierBoost();
 	void Train(std::vector< fvec > samples, ivec labels);
-	float Test(const fvec &sample);
+    float Test(const fvec &sample);
+    float Test(const fvec &sample, fvec *responses);
+    fvec GetErrorWeights(){return errorWeights;}
     const char *GetInfoString();
-	void SetParams(u32 weakCount, int weakType);
+    void SetParams(u32 weakCount, int weakType, int boostType, int svmCount);
+    void InitLearners(fvec xMin, fvec xMax);
 };
 
 #endif // _CLASSIFIER_BOOST_H_

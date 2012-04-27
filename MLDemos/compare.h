@@ -14,12 +14,13 @@ class CompareAlgorithms : public QObject
 	std::map< QString, std::vector< fvec > > results;
 	std::map< QString, QStringList > algorithms;
 	Ui::CompareDisplay *compareDisplay;
-	QWidget *compareWidget;
 	QLabel *display;
 	QPixmap pixmap;
+public:
+    QWidget *compareWidget;
 
 public:
-	CompareAlgorithms(QWidget *parent=0);
+    CompareAlgorithms(QWidget *parent=0);
 	~CompareAlgorithms();
 	void AddResults(fvec results, QString name, QString algorithm);
 	void Show();
