@@ -16,38 +16,36 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACE_MAXIMIZERS_H_
-#define _INTERFACE_MAXIMIZERS_H_
+#ifndef _INTERFACE_MAXIMIZER_PARTICLE_FILTERS_H_
+#define _INTERFACE_MAXIMIZER_PARTICLE_FILTERS_H_
 
 #include <vector>
 #include <interfaces.h>
-#include "ui_paramsMaximizers.h"
+#include "ui_paramsParticleFilters.h"
 #include <QDir>
 
-class MaximizeBasic : public QObject, public MaximizeInterface
+class MaximizeInterfaceParticleFilters : public QObject, public MaximizeInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MaximizeInterface)
 private:
 	QWidget *widget;
-	Ui::ParametersMaximizers *params;
+    Ui::ParametersParticleFilters *params;
 public:
-	MaximizeBasic();
+    MaximizeInterfaceParticleFilters();
 	// virtual functions to manage the algorithm creation
 	Maximizer *GetMaximizer();
 
 	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("Gradient Methods");}
+    QString GetName(){return QString("Particle Filters");}
 	QString GetAlgoString();
-    QString GetInfoFile(){return "maximizeStochastic.html";}
+    QString GetInfoFile(){return "particlefilters.html";}
     QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Maximizer *maximizer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
-public slots:
-	void ChangeOptions();
 };
 
-#endif // _INTERFACE_MAXIMIZERS_H_
+#endif // _INTERFACE_MAXIMIZER_PARTICLE_FILTERS_H_

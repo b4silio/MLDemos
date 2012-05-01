@@ -175,15 +175,16 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
         {
             painter.setBackgroundMode(Qt::TransparentMode);
             DrawSamples(painter);
+            DrawObstacles(painter);
         }
         else
         {
             DrawSamples();
             painter.setBackgroundMode(Qt::TransparentMode);
             painter.drawPixmap(geometry(), maps.samples);
+            DrawObstacles();
+            painter.drawPixmap(geometry(), maps.obstacles);
         }
-        DrawObstacles(painter);
-        //painter.drawPixmap(geometry(), maps.obstacles);
     }
     if(bDisplayTrajectories)
     {
@@ -931,14 +932,12 @@ QPainterPath Canvas::DrawObstacle(Obstacle o)
     {
         float X, Y;
         X = aX * cosf(theta);
-        //Y = aY * sinf(theta);
         Y = aY * (theta>=0?1.f:-1.f) * powf((1-powf(cosf(theta),2.f*pX)),1./(2*pY));
 
         float RX = + X * cosf(angle) - Y * sinf(angle);
         float RY = + X * sinf(angle) + Y * cosf(angle);
 
         point = QPointF(RX*(zoom*zooms[xIndex]*height()),RY*(zoom*zooms[yIndex]*height()));
-        point.setY(height()-point.y());
         if(theta==-PIf)
         {
             firstPoint = point;

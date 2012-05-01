@@ -67,6 +67,7 @@ public:
 	bool bPaused;
 	bool bRunning;
 	bool bColorMap;
+    int maximumVisitedCount;
 
 	signals:
 	void MapReady(QImage image);

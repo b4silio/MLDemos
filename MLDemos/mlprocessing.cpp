@@ -1063,6 +1063,9 @@ void MLDemos::Maximize()
     QPainter painter(&canvas->maps.info);
 
     double *bigData = canvas->data->GetReward()->rewards;
+    double maxVal = -DBL_MAX;
+    FOR(i, W*H) maxVal = max(bigData[i], maxVal);
+    maxVal *= maximizer->stopValue; // used to ensure we have a maximum somewhere
     double *data = new double[w*h];
     FOR(i, w)
     {
@@ -1083,6 +1086,19 @@ void MLDemos::Maximize()
     contour.style = Qt::DashLine;
     //contour.style;
     contour.Paint(painter, 10);
+    // we want to find all the samples that are at maximum value
+    painter.setPen(QColor(255,255,0));
+    FOR(i,W)
+    {
+        FOR(j,H)
+        {
+            if(bigData[j*W + i] >= maxVal)
+            {
+                painter.drawPoint(i,j);
+            }
+        }
+    }
+
     delete [] data;
     canvas->repaint();
 

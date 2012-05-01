@@ -42,7 +42,7 @@ DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
 	  bPaused(false),
 	  bColorMap(true),
 	  mutex(mutex),
-	  perm(0), w(0), h(0), dim(2)
+      perm(0), w(0), h(0), dim(2), maximumVisitedCount(0)
 {
 
 }
@@ -60,6 +60,7 @@ void DrawTimer::Stop()
 void DrawTimer::Clear()
 {
 	refineLevel = 0;
+    maximumVisitedCount = 0;
 	w = canvas->width();
 	h = canvas->height();
 	drawMutex.lock();
@@ -78,7 +79,11 @@ void DrawTimer::run()
 	while(bRunning)
 	{
         if(!canvas || canvas->canvasType) break;
-		if((!classifier || !(*classifier)) && (!regressor || !(*regressor)) && (!dynamical || !(*dynamical)) && (!clusterer || !(*clusterer)) && (!maximizer || !(*maximizer)))
+        if((!classifier || !(*classifier)) &&
+                (!regressor || !(*regressor)) &&
+                (!dynamical || !(*dynamical)) &&
+                (!clusterer || !(*clusterer)) &&
+                (!maximizer || !(*maximizer)))
 		{
 			Clear();
 			bRunning = false;
@@ -98,6 +103,7 @@ void DrawTimer::run()
             if(maximizer && (*maximizer))
             {
                 emit ModelReady(modelMap);
+                emit MapReady(bigMap);
                 emit CurveReady();
             }
             else
@@ -346,6 +352,7 @@ void DrawTimer::Maximization()
 		(*maximizer)->SetConverged(true);
 	}
 	else (*maximizer)->age++;
+    if((*maximizer)->age == 1) maximumVisitedCount = 0;
 
 	QMutexLocker drawLock(&drawMutex);
 	int w = modelMap.width();
@@ -356,9 +363,9 @@ void DrawTimer::Maximization()
 	QPainter painter(&modelMap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
     //painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-
 	(*maximizer)->Draw(painter);
-    // we draw the current maximum value
+
+    // we draw the current maximum value on the legend
     int barW = 20;
     QRect legendRect(w - barW - 32, 40, barW, 256);
     int y = (1.-value) * legendRect.height() + legendRect.y();
@@ -369,6 +376,24 @@ void DrawTimer::Maximization()
     painter.setPen(QPen(Qt::black, 2));
     painter.setRenderHint(QPainter::Antialiasing, false);
     painter.drawLine(legendRect.x(), y, legendRect.x()+legendRect.width(), y);
+
+    QPainter painter2(&bigMap);
+    w = bigMap.width(), h = bigMap.height();
+    painter2.setRenderHint(QPainter::Antialiasing, true);
+    painter2.setPen(Qt::NoPen);
+    vector<fvec> visited = (*maximizer)->Visited();
+    for(int i=maximumVisitedCount; i<visited.size(); i++)
+    {
+        fvec &sample = visited[i];
+        //fvec maximum = (*maximizer)->Maximum();
+        // we want to paint the last visited points
+        double value = (*maximizer)->GetValue(sample);
+        value = 255*max(0.,min(1.,value));
+        QPointF point(sample[0]*w, sample[1]*h);
+        painter2.setBrush(QColor(255,255-value, 255-value));
+        painter2.drawEllipse(point, 8, 8);
+    }
+    maximumVisitedCount = visited.size();
 
     /*
 	QPointF point(sample[0]*w, sample[1]*h);

@@ -28,13 +28,15 @@ private:
 	std::vector<fvec> particles;
 	fvec weights;
 	int particleCount;
-	bool bAdaptive;
 	float variance;
+    float keepers;
+    float randoms;
+    bool bAdaptive;
 public:
 	MaximizeParticles();
 	~MaximizeParticles();
 
-	void SetParams(int particleCount, float variance, bool bAdaptive);
+    void SetParams(int particleCount, float variance, float keeperCount, float newCount, bool bAdaptive);
 
 	void Draw(QPainter &painter);
 	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());

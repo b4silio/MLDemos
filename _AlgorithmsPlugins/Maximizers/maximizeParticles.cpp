@@ -25,7 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 MaximizeParticles::MaximizeParticles()
-    : particleCount(20)
+    : particleCount(20), keepers(0.1), randoms(0.1)
 {
     dim = 2;
     maximum.resize(dim);
@@ -37,12 +37,13 @@ MaximizeParticles::~MaximizeParticles()
     KILL(data);
 }
 
-void MaximizeParticles::SetParams(int particleCount, float variance, bool bAdaptive)
+void MaximizeParticles::SetParams(int particleCount, float variance, float keeperCount, float newCount, bool bAdaptive)
 {
     this->particleCount = particleCount;
     this->variance = variance;
+    this->keepers = keeperCount;
+    this->randoms = newCount;
     this->bAdaptive = bAdaptive;
-    this->particleCount = particleCount;
 }
 
 void MaximizeParticles::Draw(QPainter &painter)
@@ -132,14 +133,49 @@ fvec MaximizeParticles::Test( const fvec &sample)
 
     // we sort the particles by weight
     vector< pair<double, u32> > fits;
-    FOR(i, weights.size()) fits.push_back(pair<double, u32>(weights[i], i));
+    float fullWeights = 0;
+    FOR(i, weights.size())
+    {
+        fits.push_back(pair<double, u32>(weights[i], i));
+        fullWeights += weights[i];
+    }
     sort(fits.begin(), fits.end(), greater< pair<double,u32> >());
+
+    // generate new particles
     vector<fvec> newParticles;
     fvec newWeights;
+    fvec newSample(dim);
     FOR(i, fits.size())
     {
-        newParticles.push_back(particles[fits[i].second]);
-        newWeights.push_back(weights[fits[i].second]);
+        if(i < keepers*fits.size())
+        {
+            newParticles.push_back(particles[fits[i].second]);
+            newWeights.push_back(weights[fits[i].second]);
+        }
+        else if( i < (1. - randoms)*fits.size())
+        {
+            FOR(d, dim) newSample[d] = drand48();
+            newParticles.push_back(newSample);
+            newWeights.push_back(1.f/particleCount);
+        }
+        else
+        {
+            // we generate by sampling
+            float r = drand48()*fullWeights;
+            float accumulator = 0;
+            for(int j=0; j<fits.size(); j++)
+            {
+                int index = fits[j].second;
+                accumulator += weights[index];
+                if(r < accumulator)
+                {
+                    newParticles.push_back(particles[index]);
+                    newWeights.push_back(1.f/particleCount);
+                    //newWeights.push_back(weights[index]);
+                    break;
+                }
+            }
+        }
     }
     particles = newParticles;
     weights = newWeights;
@@ -153,15 +189,6 @@ fvec MaximizeParticles::Test( const fvec &sample)
         float decay = 0.1;
         variance = variance*(1-decay) + (1 - maximumValue*maximumValue)*0.1*decay;
     }
-
-    /*
- maximum.clear();
- maximum.resize(dim,0);
- FOR(i, particleCount)
- {
-  FOR(d, dim) maximum[d] = weights[i] * particles[i][d];
- }
-*/
 
     history.push_back(maximum);
     historyValue.push_back(maximumValue);
