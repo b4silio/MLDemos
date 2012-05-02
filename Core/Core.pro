@@ -37,8 +37,9 @@ HEADERS += \
 	classifier.h \
 	obstacles.h \
 	regressor.h \
-	maximize.h \
-	dynamical.h \
+    maximize.h \
+    reinforcement.h \
+    dynamical.h \
 	clusterer.h \
 	fileUtils.h \
 	spline.h \

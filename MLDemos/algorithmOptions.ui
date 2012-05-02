@@ -50,7 +50,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideRight</enum>
@@ -144,6 +144,11 @@
         <number>0</number>
        </property>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tabReinf">
+      <attribute name="title">
+       <string>Reinforcement Learning</string>
+      </attribute>
      </widget>
     </widget>
    </item>

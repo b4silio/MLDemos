@@ -27,6 +27,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dynamical.h"
 #include "clusterer.h"
 #include "maximize.h"
+#include "reinforcement.h"
 #include <QMutex>
 #include <QMutexLocker>
 
@@ -54,6 +55,7 @@ public:
     bool Vectors(int count, int steps);
     bool VectorsFast(int count, int steps);
 	void Maximization();
+    void Reinforce();
 	void Stop();
     static QColor GetColor(Classifier *classifier, fvec sample);
 
@@ -61,7 +63,8 @@ public:
 	Regressor **regressor;
 	Dynamical **dynamical;
 	Clusterer **clusterer;
-	Maximizer **maximizer;
+    Maximizer **maximizer;
+    Reinforcement **reinforcement;
 
 	QMutex *mutex, drawMutex;
 	bool bPaused;
