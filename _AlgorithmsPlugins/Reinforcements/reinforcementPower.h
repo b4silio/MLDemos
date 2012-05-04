@@ -20,7 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _REINFORCEMENT_POWER_H_
 
 #include <vector>
-#include "Reinforcement.h"
+#include "reinforcement.h"
 
 class ReinforcementPower: public Reinforcement
 {
