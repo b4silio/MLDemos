@@ -30,6 +30,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPixmap>
 #include <QBitmap>
 #include <QSettings>
+#include <QMutexLocker>
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <qcontour.h>
@@ -1161,10 +1162,17 @@ void MLDemos::Reinforce()
     int tab = optionsReinforcement->tabWidget->currentIndex();
     if(tab >= reinforcements.size() || !reinforcements[tab]) return;
     reinforcement = reinforcements[tab]->GetReinforcement();
+
+    reinforcementProblem.problemType = optionsReinforcement->problemCombo->currentIndex();
+    reinforcementProblem.rewardType = optionsReinforcement->rewardCombo->currentIndex();
+    reinforcementProblem.policyType = optionsReinforcement->policyCombo->currentIndex();
+    reinforcementProblem.quantizeType = optionsReinforcement->quantizeCombo->currentIndex();
+    reinforcementProblem.gridSize = optionsReinforcement->resolutionSpin->value();
+
+    reinforcementProblem.simulationSteps = optionsReinforcement->iterationsSpin->value();
+    reinforcementProblem.displayIterationsCount = optionsReinforcement->displayIterationSpin->value();
+
     reinforcement->maxAge = optionsReinforcement->iterationsSpin->value();
-    reinforcement->simulationSteps = optionsReinforcement->iterationsSpin->value();
-    reinforcement->problemType = optionsReinforcement->problemCombo->currentIndex();
-    reinforcement->displayIterationsCount = optionsReinforcement->displayIterationSpin->value();
 
     tabUsedForTraining = tab;
     Train(reinforcement);

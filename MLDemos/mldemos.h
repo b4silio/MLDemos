@@ -52,6 +52,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "clusterer.h"
 #include "maximize.h"
 #include "reinforcement.h"
+#include "reinforcementProblem.h"
 #include "interfaces.h"
 #include "compare.h"
 #include "widget.h"
@@ -106,6 +107,7 @@ private:
     Expose *expose;
     DataImporter *import;
     DataGenerator *generator;
+    ReinforcementProblem reinforcementProblem;
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
@@ -121,7 +123,6 @@ private:
     void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
     void Test(Maximizer *maximizer);
-    void Test(Reinforcement *reinforcement);
     void RewardFromMap(QImage rewardMap);
     void MapFromReward();
 

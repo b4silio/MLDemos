@@ -149,8 +149,12 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("iterationsSpin", optionsReinforcement->iterationsSpin->value());
     settings.setValue("displayIterationSpin", optionsReinforcement->displayIterationSpin->value());
     settings.setValue("problemCombo", optionsReinforcement->problemCombo->currentIndex());
+    settings.setValue("rewardCombo", optionsReinforcement->rewardCombo->currentIndex());
+    settings.setValue("policyCombo", optionsReinforcement->policyCombo->currentIndex());
+    settings.setValue("quantizeCombo", optionsReinforcement->quantizeCombo->currentIndex());
+    settings.setValue("resolutionSpin", optionsReinforcement->resolutionSpin->value());
     settings.setValue("benchmarkCombo", optionsReinforcement->benchmarkCombo->currentIndex());
-    settings.endGroup();
+    settings.endGroup();    
 
     settings.beginGroup("projectOptions");
     settings.setValue("tab", optionsProject->tabWidget->currentIndex());
@@ -351,6 +355,10 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("iterationsSpin")) optionsReinforcement->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
     if(settings.contains("displayIterationSpin")) optionsReinforcement->displayIterationSpin->setValue(settings.value("displayIterationSpin").toInt());
     if(settings.contains("problemCombo")) optionsReinforcement->problemCombo->setCurrentIndex(settings.value("problemCombo").toInt());
+    if(settings.contains("rewardCombo")) optionsReinforcement->rewardCombo->setCurrentIndex(settings.value("rewardCombo").toInt());
+    if(settings.contains("policyCombo")) optionsReinforcement->policyCombo->setCurrentIndex(settings.value("policyCombo").toInt());
+    if(settings.contains("quantizeCombo")) optionsReinforcement->quantizeCombo->setCurrentIndex(settings.value("quantizeCombo").toInt());
+    if(settings.contains("resolutionSpin")) optionsReinforcement->resolutionSpin->setValue(settings.value("resolutionSpin").toInt());
     if(settings.contains("benchmarkCombo")) optionsReinforcement->benchmarkCombo->setCurrentIndex(settings.value("benchmarkCombo").toInt());
     settings.endGroup();
 
@@ -529,7 +537,12 @@ void MLDemos::SaveParams( QString filename )
         out << groupName << ":" << "iterationsSpin" << " " << optionsReinforcement->iterationsSpin->value() << "\n";
         out << groupName << ":" << "displayIterationSpin" << " " << optionsReinforcement->displayIterationSpin->value() << "\n";
         out << groupName << ":" << "problemCombo" << " " << optionsReinforcement->problemCombo->currentIndex() << "\n";
+        out << groupName << ":" << "rewardCombo" << " " << optionsReinforcement->rewardCombo->currentIndex() << "\n";
+        out << groupName << ":" << "policyCombo" << " " << optionsReinforcement->policyCombo->currentIndex() << "\n";
+        out << groupName << ":" << "quantizeCombo" << " " << optionsReinforcement->quantizeCombo->currentIndex() << "\n";
+        out << groupName << ":" << "resolutionSpin" << " " << optionsReinforcement->resolutionSpin->value() << "\n";
         out << groupName << ":" << "benchmarkCombo" << " " << optionsReinforcement->benchmarkCombo->currentIndex() << "\n";
+
         if(tab < reinforcements.size() && reinforcements[tab])
         {
             reinforcements[tab]->SaveParams(out);
@@ -672,8 +685,13 @@ void MLDemos::LoadParams( QString filename )
             if(line.endsWith("iterationsSpin")) optionsReinforcement->iterationsSpin->setValue((int)value);
             if(line.endsWith("displayIterationSpin")) optionsReinforcement->displayIterationSpin->setValue((int)value);
             if(line.endsWith("problemCombo")) optionsReinforcement->problemCombo->setCurrentIndex((int)value);
+            if(line.endsWith("rewardCombo")) optionsReinforcement->rewardCombo->setCurrentIndex((int)value);
+            if(line.endsWith("policyCombo")) optionsReinforcement->policyCombo->setCurrentIndex((int)value);
+            if(line.endsWith("quantizeCombo")) optionsReinforcement->quantizeCombo->setCurrentIndex((int)value);
+            if(line.endsWith("resolutionSpin")) optionsReinforcement->resolutionSpin->setValue((int)value);
             if(line.endsWith("benchmarkCombo")) optionsReinforcement->benchmarkCombo->setCurrentIndex((int)value);
             if(tab < reinforcements.size() && reinforcements[tab]) reinforcements[tab]->LoadParams(line,value);
+
         }
         if(line.startsWith(projGroup))
         {

@@ -65,6 +65,7 @@ public:
 	Clusterer **clusterer;
     Maximizer **maximizer;
     Reinforcement **reinforcement;
+    ReinforcementProblem *reinforcementProblem;
 
 	QMutex *mutex, drawMutex;
 	bool bPaused;
@@ -77,6 +78,7 @@ public:
 	void ModelReady(QImage image);
     void AnimationReady(QImage image);
 	void CurveReady();
+    void ReinforceUpdate();
 };
 
 #endif // _DRAWTIMER_H_

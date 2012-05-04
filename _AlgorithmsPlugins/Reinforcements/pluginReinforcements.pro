@@ -10,7 +10,7 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsRandom.ui
+FORMS += paramsRandom.ui paramsGA.ui paramsPower.ui
 # paramsGA.ui paramsParticles.ui \
 # paramsNLopt.ui paramsParticleFilters.ui
 HEADERS +=	\
@@ -19,41 +19,44 @@ HEADERS +=	\
             mymaths.h \
             drawUtils.h \
             optimization_test_functions.h \
-            pluginReinforcements.h \
 #			maximizePower.h \
-#			maximizeGA.h \
 #			maximizeParticles.h \
 #			maximizeSwarm.h \
 #			maximizeGradient.h \
 #			maximizeDonut.h \
 #           interfaceParticles.h \
 #           interfaceParticleFilters.h \
-#           interfaceGA.h \
-#			gaPeon.h \
-#			gaTrainer.h \
+            gaPeon.h \
+            gaTrainer.h \
 #			mvnpdf.h \
 #           maximizeNLopt.h \
 #           interfaceNLopt.h \
+            reinforcementPower.h \
             reinforcementRandom.h \
-            interfaceBasic.h
+            interfaceRandom.h \
+            interfacePower.h \
+            reinforcementGA.h \
+            interfaceGA.h \
+            pluginReinforcements.h
 
 SOURCES += 	\
-#			maximizePower.cpp \
-#			maximizeGA.cpp \
 #			maximizeParticles.cpp \
 #			maximizeSwarm.cpp \
 #			maximizeGradient.cpp \
 #			maximizeDonut.cpp \
-#			interfaceGA.cpp \
 #			interfaceParticles.cpp \
 #           interfaceParticleFilters.cpp \
-#           gaPeon.cpp \
-#			gaTrainer.cpp \
+            gaPeon.cpp \
+            gaTrainer.cpp \
 #           maximizeNLopt.cpp \
 #           interfaceNLopt.cpp \
-            pluginReinforcements.cpp \
+            reinforcementPower.cpp \
             reinforcementRandom.cpp \
-            interfaceBasic.cpp
+            interfaceRandom.cpp \
+            interfacePower.cpp \
+            reinforcementGA.cpp \
+            interfaceGA.cpp \
+            pluginReinforcements.cpp \
 
 ###########################
 # Dependencies            #

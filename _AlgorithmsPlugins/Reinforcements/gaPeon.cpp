@@ -9,8 +9,8 @@ using namespace std;
 /*                     Genetic Algorithm Individual                     */
 /************************************************************************/
 
-GAPeon::GAPeon(u32 dim)
-: dim(dim), dna(0)
+GAPeon::GAPeon(u32 dim, int type)
+    : dim(dim), type(type)
 {
 	dna = new float[dim];
 	FOR(d, dim) dna[d] = 0.;
@@ -28,16 +28,38 @@ GAPeon::~GAPeon()
 	KILL(dna);
 }
 
-GAPeon GAPeon::Random(u32 dim)
+GAPeon GAPeon::Random(u32 dim, int type)
 {
 	GAPeon peon(dim);
-	FOR(d, dim) peon.Dna()[d] = drand48();
+    switch(type==0)
+    {
+    case 0:
+        FOR(d, dim) peon.Dna()[d] = drand48()*M_PI*2;
+        break;
+    case 1:
+        FOR(d, dim) peon.Dna()[d] = rand()%9;
+        break;
+    case 2:
+        FOR(d, dim) peon.Dna()[d] = rand()%5;
+        break;
+    }
 	return peon;
 }
 
 void GAPeon::Randomize()
 {
-	FOR(d, dim) dna[d] = drand48();
+    switch(type==0)
+    {
+    case 0:
+        FOR(d, dim) dna[d] = drand48()*M_PI*2;
+        break;
+    case 1:
+        FOR(d, dim) dna[d] = rand()%9;
+        break;
+    case 2:
+        FOR(d, dim) dna[d] = rand()%5;
+        break;
+    }
 }
 
 void GAPeon::Mutate(f32 alpha)
@@ -63,33 +85,71 @@ void GAPeon::Mutate(f32 alpha)
 	{
 		FOR(d, dim)
 		{
-			dna[d] += (drand48()*2.f-1.f)*alpha;
-			dna[d] = max(0.f, min(1.f, dna[d]));
+            switch(type)
+            {
+            case 0:
+                dna[d] += (drand48()*2.f-1.f)*alpha;
+                dna[d] = max(0.f, min(1.f, dna[d]));
+                break;
+            case 1:
+                dna[d] = (drand48()<alpha)? dna[d] + rand()%2 : 0;
+                dna[d] = (int)(dna[d])%9;
+                break;
+            case 2:
+                dna[d] = (drand48()<alpha)? dna[d] + rand()%2 : 0;
+                dna[d] = (int)(dna[d])%5;
+                break;
+            }
 		}
 	}
 }
 
-pair<GAPeon,GAPeon> GAPeon::Cross(GAPeon peon)
+pair<GAPeon,GAPeon> GAPeon::Cross(GAPeon peon, float alpha)
 {
-	u32 crossPoint = rand()%(dim*sizeof(u32)-2)+1;
-	u32 crossIndex = crossPoint % sizeof(u32);
-	u32 crossDim = crossPoint / sizeof(u32);
-	GAPeon baby1(*this);
-	GAPeon baby2(peon);
+    GAPeon baby1(*this);
+    GAPeon baby2(peon);
 
-	u32 *dna1 = reinterpret_cast<u32*>(dna);
-	u32 *dna2 = reinterpret_cast<u32*>(peon.Dna());
-	u32 *newDna1 = reinterpret_cast<u32*>(baby1.Dna());
-	u32 *newDna2 = reinterpret_cast<u32*>(baby2.Dna());
+    bool bBitWise = false;
 
-	u32 mask = (0x1<<crossIndex+1)-1;
-	newDna1[crossDim] = dna1[crossDim] & ~mask | dna2[crossDim] & mask;
-	newDna2[crossDim] = dna2[crossDim] & ~mask | dna1[crossDim] & mask;
-	for(int i=crossDim+1; i<dim; i++)
-	{
-		newDna1[i] = dna2[i];
-		newDna2[i] = dna1[i];
-	}
+    if(bBitWise)
+    {
+        u32 crossPoint = rand()%(dim*sizeof(u32)-2)+1;
+        u32 crossIndex = crossPoint % sizeof(u32);
+        u32 crossDim = crossPoint / sizeof(u32);
+
+        u32 *dna1 = reinterpret_cast<u32*>(dna);
+        u32 *dna2 = reinterpret_cast<u32*>(peon.Dna());
+        u32 *newDna1 = reinterpret_cast<u32*>(baby1.Dna());
+        u32 *newDna2 = reinterpret_cast<u32*>(baby2.Dna());
+
+        u32 mask = (0x1<<crossIndex+1)-1;
+        newDna1[crossDim] = dna1[crossDim] & ~mask | dna2[crossDim] & mask;
+        newDna2[crossDim] = dna2[crossDim] & ~mask | dna1[crossDim] & mask;
+        for(int i=crossDim+1; i<dim; i++)
+        {
+            newDna1[i] = dna2[i];
+            newDna2[i] = dna1[i];
+        }
+    }
+    else
+    {
+        FOR(i, dim)
+        {
+            if(drand48()<alpha)
+            {
+                baby1.Dna()[i] = peon.Dna()[i];
+                baby2.Dna()[i] = dna[i];
+            }
+        }
+        /*
+        int crossPoint = rand()%dim;
+        for(int i=crossPoint; i<dim; i++)
+        {
+            baby1.Dna()[i] = peon.Dna()[i];
+            baby2.Dna()[i] = dna[i];
+        }
+        */
+    }
 	return pair<GAPeon,GAPeon>(baby1,baby2);
 }
 

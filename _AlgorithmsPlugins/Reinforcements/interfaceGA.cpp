@@ -17,7 +17,7 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "interfaceGA.h"
-#include "maximizeGA.h"
+#include "reinforcementGA.h"
 #include <QPixmap>
 #include <QDebug>
 #include <QBitmap>
@@ -27,23 +27,23 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-MaximizeInterfaceGA::MaximizeInterfaceGA()
+ReinforcementInterfaceGA::ReinforcementInterfaceGA()
 {
 	params = new Ui::ParametersGA();
 	params->setupUi(widget = new QWidget());
 }
 
-void MaximizeInterfaceGA::SetParams(Maximizer *maximizer)
+void ReinforcementInterfaceGA::SetParams(Reinforcement *reinforcement)
 {
-	if(!maximizer) return;
+    if(!reinforcement) return;
 	double mutation = params->mutationSpin->value();
 	double cross = params->crossSpin->value();
 	double survival = params->survivalSpin->value();
 	int population = params->populationSpin->value();
-	((MaximizeGA *)maximizer)->SetParams(mutation, cross, survival, population);
+    ((ReinforcementGA *)reinforcement)->SetParams(mutation, cross, survival, population);
 }
 
-QString MaximizeInterfaceGA::GetAlgoString()
+QString ReinforcementInterfaceGA::GetAlgoString()
 {
 	double mutation = params->mutationSpin->value();
 	double cross = params->crossSpin->value();
@@ -53,14 +53,14 @@ QString MaximizeInterfaceGA::GetAlgoString()
 	return algo;
 }
 
-Maximizer *MaximizeInterfaceGA::GetMaximizer()
+Reinforcement *ReinforcementInterfaceGA::GetReinforcement()
 {
-	Maximizer *maximizer = new MaximizeGA();
-	SetParams(maximizer);
-	return maximizer;
+    Reinforcement *reinforcement = new ReinforcementGA();
+    SetParams(reinforcement);
+    return reinforcement;
 }
 
-void MaximizeInterfaceGA::SaveOptions(QSettings &settings)
+void ReinforcementInterfaceGA::SaveOptions(QSettings &settings)
 {
 	settings.setValue("populationSpin", params->populationSpin->value());
 	settings.setValue("mutationSpin", params->mutationSpin->value());
@@ -68,7 +68,7 @@ void MaximizeInterfaceGA::SaveOptions(QSettings &settings)
 	settings.setValue("survivalSpin", params->survivalSpin->value());
 }
 
-bool MaximizeInterfaceGA::LoadOptions(QSettings &settings)
+bool ReinforcementInterfaceGA::LoadOptions(QSettings &settings)
 {
 	if(settings.contains("populationSpin")) params->populationSpin->setValue(settings.value("populationSpin").toFloat());
 	if(settings.contains("mutationSpin")) params->mutationSpin->setValue(settings.value("mutationSpin").toFloat());
@@ -77,7 +77,7 @@ bool MaximizeInterfaceGA::LoadOptions(QSettings &settings)
 	return true;
 }
 
-void MaximizeInterfaceGA::SaveParams(QTextStream &file)
+void ReinforcementInterfaceGA::SaveParams(QTextStream &file)
 {
 	file << "maximizationOptions" << ":" << "populationSpin" << " " << params->populationSpin->value() << "\n";
 	file << "maximizationOptions" << ":" << "mutationSpin" << " " << params->mutationSpin->value() << "\n";
@@ -85,7 +85,7 @@ void MaximizeInterfaceGA::SaveParams(QTextStream &file)
 	file << "maximizationOptions" << ":" << "survivalSpin" << " " << params->survivalSpin->value() << "\n";
 }
 
-bool MaximizeInterfaceGA::LoadParams(QString name, float value)
+bool ReinforcementInterfaceGA::LoadParams(QString name, float value)
 {
 	if(name.endsWith("populationSpin")) params->populationSpin->setValue((int)value);
 	if(name.endsWith("mutationSpin")) params->mutationSpin->setValue((float)value);

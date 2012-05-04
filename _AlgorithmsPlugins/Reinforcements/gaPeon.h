@@ -15,8 +15,9 @@ class GAPeon
 private:
 	u32 dim;
 	float *dna;
+    int type; // 0: continuous, 1: discrete 8-way, 2: discrete 4-way
 public:
-	GAPeon(u32 dim=2);
+    GAPeon(u32 dim=2, int type=0);
 	GAPeon( const GAPeon &peon );
 	~GAPeon();
 
@@ -24,7 +25,8 @@ public:
 	{
 		if(this == &peon) return *this;
 		dim = peon.dim;
-		KILL(dna);
+        type = peon.type;
+        KILL(dna);
 		dna = new float[dim];
 		std::copy(peon.dna, peon.dna+dim, dna);
 		return *this;
@@ -37,13 +39,13 @@ public:
 		return true;
 	}
 
-	static GAPeon Random(u32 dim);
-	void Randomize();
+    static GAPeon Random(u32 dim, int type=0);
+    void Randomize();
 	void Mutate(f32 alpha = 0.01f);
-	std::pair<GAPeon,GAPeon> Cross(GAPeon peon);
+    std::pair<GAPeon,GAPeon> Cross(GAPeon peon, float alpha=0.1f);
 
-	float *Dna(){return dna;};
-	u32 Count(){return dim;};
+    float *Dna(){return dna;}
+    u32 Count(){return dim;}
 
 	double Fitness(float *data, int w, int h);
 	fvec ToSample();

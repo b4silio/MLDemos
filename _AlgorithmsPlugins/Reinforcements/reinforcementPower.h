@@ -16,30 +16,32 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _MAXIMIZE_GA_H_
-#define _MAXIMIZE_GA_H_
+#ifndef _REINFORCEMENT_POWER_H_
+#define _REINFORCEMENT_POWER_H_
 
 #include <vector>
-#include "maximize.h"
-#include "gaTrainer.h"
+#include "Reinforcement.h"
 
-class MaximizeGA : public Maximizer
+class ReinforcementPower: public Reinforcement
 {
 private:
-	double mutation, cross, survival;
-	int population;
-	GATrain *trainer;
+	int age;
+	int maxAge;
+	float variance;
+	int k;
+	std::vector< std::pair<double, std::pair<fvec, fvec> > > best;
+	fvec lastSigma;
+	bool bAdaptive;
 public:
-	MaximizeGA();
-	~MaximizeGA();
+    ReinforcementPower();
+    ~ReinforcementPower();
 
-	void SetParams(double mutation, double cross, double survival, int population);
+	void SetParams(int k, float variance=0.2, bool bAdaptive=false);
 
 	void Draw(QPainter &painter);
-	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
-	fvec Test( const fvec &sample);
-	fvec Test(const fVec &sample);
+    void Initialize(ReinforcementProblem *problem);
+    fvec Update();
     const char *GetInfoString();
 };
 
-#endif // _MAXIMIZE_GA_H_
+#endif // _REINFORCEMENT_POWER_H_

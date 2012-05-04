@@ -413,6 +413,7 @@ void MLDemos::initDialogs()
     connect(optionsReinforcement->pauseButton, SIGNAL(clicked()), this, SLOT(ReinforceContinue()));
     connect(optionsReinforcement->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsReinforcement->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
+    connect(optionsReinforcement->clearTargetButton, SIGNAL(clicked()), this, SLOT(ClearTargets()));
     connect(optionsReinforcement->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
     connect(optionsReinforcement->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
     connect(optionsReinforcement->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
@@ -473,6 +474,7 @@ void MLDemos::initDialogs()
     drawTimer->clusterer = &clusterer;
     drawTimer->maximizer = &maximizer;
     drawTimer->reinforcement = &reinforcement;
+    drawTimer->reinforcementProblem = &reinforcementProblem;
     connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
     connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));

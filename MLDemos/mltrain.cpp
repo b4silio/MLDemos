@@ -639,35 +639,11 @@ void MLDemos::Train(Reinforcement *reinforcement)
     canvas->data->GetReward()->SetReward(data, size, low, high);
 //    delete [] data;
 
-    fvec startingPoint;
-    if(canvas->targets.size())
-    {
-        startingPoint = canvas->targets.back();
-        QPointF starting = canvas->toCanvasCoords(startingPoint);
-        startingPoint[0] = starting.x()/w;
-        startingPoint[1] = starting.y()/h;
-    }
-    else
-    {
-        startingPoint.resize(2);
-        startingPoint[0] = drand48();
-        startingPoint[1] = drand48();
-    }
     //data = canvas->data->GetReward()->GetRewardFloat();
-    reinforcement->Train(data, fVec(w,h), startingPoint);
+    reinforcementProblem.Initialize(data, fVec(w,h));
+    reinforcement->Initialize(&reinforcementProblem);
     reinforcement->age = 0;
     delete [] data;
-}
-
-void MLDemos::Test(Reinforcement *reinforcement)
-{
-    if(!reinforcement) return;
-    do
-    {
-        fvec sample = reinforcement->Test(reinforcement->Maximum());
-        reinforcement->age++;
-    }
-    while(reinforcement->age < reinforcement->maxAge && reinforcement->MaximumValue() < reinforcement->stopValue);
 }
 
 // returns respectively the reconstruction error for the training points individually, per trajectory, and the error to target

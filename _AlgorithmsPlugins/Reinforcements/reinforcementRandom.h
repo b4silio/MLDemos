@@ -26,27 +26,16 @@ class ReinforcementRandom : public Reinforcement
 {
 private:
 public:
-    float variance;
-    int policyType;
-    fvec directions;
-    int gridSize;
     bool bSingleDim;
-    int quantizeType;
+    float variance;
 public:
     ReinforcementRandom();
     ~ReinforcementRandom();
 
-    void SetParams(float variance=0.1f, int policyType=0, int gridSize=4, bool bSingleDim=false, int quantizeType=2);
+    void SetParams(float variance=0.1f, bool bSingleDim=false);
 
-    fvec NextStep(fvec sample, fvec directions);
-    fvec PerformAction(fvec sample);
-    float GetReward(fvec directions);
-    float GetReward();
-
-    void Draw(QPainter &painter);
-	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
-	fvec Test( const fvec &sample);
-	fvec Test(const fVec &sample);
+    void Initialize(ReinforcementProblem *problem);
+    fvec Update();
     const char *GetInfoString();
 };
 

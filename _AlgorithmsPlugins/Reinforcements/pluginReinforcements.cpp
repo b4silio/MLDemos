@@ -17,13 +17,17 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "pluginReinforcements.h"
-#include "interfaceBasic.h"
+#include "interfaceRandom.h"
+#include "interfacePower.h"
+#include "interfaceGA.h"
 
 using namespace std;
 
 PluginReinforcement::PluginReinforcement()
 {
-    reinforcements.push_back(new ReinforceRandom());
+    reinforcements.push_back(new ReinforcementInterfaceRandom());
+    reinforcements.push_back(new ReinforcementInterfacePower());
+    reinforcements.push_back(new ReinforcementInterfaceGA());
 }
 
 #ifndef PLUGIN_MAXIMIZE

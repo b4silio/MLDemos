@@ -24,7 +24,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_paramsRandom.h"
 #include <QDir>
 
-class ReinforceRandom : public QObject, public ReinforcementInterface
+class ReinforcementInterfaceRandom : public QObject, public ReinforcementInterface
 {
 	Q_OBJECT
     Q_INTERFACES(ReinforcementInterface)
@@ -32,13 +32,13 @@ private:
 	QWidget *widget;
     Ui::ParametersRandom *params;
 public:
-    ReinforceRandom();
+    ReinforcementInterfaceRandom();
 	// virtual functions to manage the algorithm creation
     Reinforcement *GetReinforcement();
 
 	// virtual functions to manage the GUI and I/O
-    void DrawInfo(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement);
-    void DrawModel(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement);
+    void DrawInfo(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement){}
+    void DrawModel(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement){}
     QString GetName(){return QString("Random Walk");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "RL.html";}

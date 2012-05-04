@@ -253,7 +253,7 @@ void DrawTimer::Animate()
             targetTrajectory[0][1] *= h;
             FOR(j, ages[i])
             {
-                sample = (*reinforcement)->PerformAction(sample);
+                sample = reinforcementProblem->PerformAction(sample);
                 targetTrajectory[j+1] = sample;
                 targetTrajectory[j+1][0] *= w;
                 targetTrajectory[j+1][1] *= h;
@@ -509,8 +509,12 @@ void DrawTimer::Reinforce()
     if(!bRunning) return;
 
     // we do ten new iterations
-    int displayIterations = (*reinforcement)->displayIterationsCount;
-    FOR(i, displayIterations) (*reinforcement)->Test((*reinforcement)->Maximum());
+    int displayIterations = reinforcementProblem->displayIterationsCount;
+    FOR(i, displayIterations)
+    {
+        reinforcementProblem->tempDirections = (*reinforcement)->Update();
+        reinforcementProblem->directions = (*reinforcement)->Maximum();
+    }
 
     // we draw the current model
     QMutexLocker drawLock(&drawMutex);
@@ -522,6 +526,7 @@ void DrawTimer::Reinforce()
     QPainter painter(&modelMap);
     painter.setRenderHint(QPainter::Antialiasing, true);
     //painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+    reinforcementProblem->Draw(painter);
     (*reinforcement)->Draw(painter);
 }
 

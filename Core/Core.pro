@@ -46,7 +46,8 @@ HEADERS += \
     projector.h \
     dataImporter.h \
     contours.h \
-    qcontour.h
+    qcontour.h \
+    reinforcementProblem.h
 
 SOURCES += \
 	canvas.cpp \
@@ -62,7 +63,8 @@ SOURCES += \
     widget.cpp \
     dataImporter.cpp \
     contours.cpp \
-    qcontour.cpp
+    qcontour.cpp \
+    reinforcementProblem.cpp
 
 
 
