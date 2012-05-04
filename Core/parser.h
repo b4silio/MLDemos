@@ -41,6 +41,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string>
 #include <types.h>
 #include <QString>
+#include <stdint.h>
 
 using namespace std;
 
@@ -128,6 +129,7 @@ private:
     map<int, QString> classNames;
     vector<vector<string> > data;
     vector<unsigned int> dataTypes;
+    uint8_t getBOMsize(const char* fileName);
 };
 
 #endif // PARSER_H

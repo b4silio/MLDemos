@@ -24,7 +24,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <canvas.h>
 #include "maximizeRandom.h"
 #include "maximizePower.h"
-#include "maximizeParticles.h"
 #include "maximizeGradient.h"
 #include "maximizeDonut.h"
 
@@ -59,18 +58,12 @@ void MaximizeBasic::ChangeOptions()
 		params->kSpin->setEnabled(true);
 		params->adaptiveCheck->setEnabled(true);
 		break;
-	case 3: // Particle Filters
-		params->varianceSpin->setEnabled(true);
-		params->kSpin->setEnabled(true);
-		params->adaptiveCheck->setEnabled(true);
-		params->countLabel->setText("Particles");
-		break;
-	case 4: // Gradient Descent
+    case 3: // Gradient Descent
 		params->adaptiveCheck->setEnabled(true);
 		params->varianceSpin->setEnabled(true);
 		params->varianceLabel->setText("Speed");
 		break;
-	case 5: // Donut
+    case 4: // Donut
 		params->adaptiveCheck->setEnabled(true);
 		params->varianceSpin->setEnabled(true);
 		params->varianceLabel->setText("Fingerprint");
@@ -99,13 +92,10 @@ void MaximizeBasic::SetParams(Maximizer *maximizer)
 	case 2: // power
 		((MaximizePower *)maximizer)->SetParams(k, variance*variance, bAdaptive);
 		break;
-	case 3: // particle filters
-		((MaximizeParticles *)maximizer)->SetParams(k, variance*variance, bAdaptive);
-		break;
-	case 4: // particle filters
+    case 3: // Gradient
 		((MaximizeGradient *)maximizer)->SetParams(variance, bAdaptive);
 		break;
-	case 5: // particle filters
+    case 4: // Donut
 		((MaximizeDonut *)maximizer)->SetParams(k, variance*variance, bAdaptive);
 		break;
 	}
@@ -125,13 +115,10 @@ Maximizer *MaximizeBasic::GetMaximizer()
 	case 2:
 		maximizer = new MaximizePower();
 		break;
-	case 3:
-		maximizer = new MaximizeParticles();
-		break;
-	case 4:
+    case 3:
 		maximizer = new MaximizeGradient();
 		break;
-	case 5:
+    case 4:
 		maximizer = new MaximizeDonut();
 		break;
 	}
@@ -153,11 +140,9 @@ QString MaximizeBasic::GetAlgoString()
 		return QString("Random Walk: %1").arg(variance);
 	case 2:
 		return QString("PoWER: %1 %2 %3").arg(k).arg(variance).arg(bAdaptive);
-	case 3:
-		return QString("Particles: %1 %2 %3").arg(k).arg(variance).arg(bAdaptive);
-	case 4:
+    case 3:
 		return QString("Gradient Descent: %1 %2").arg(variance).arg(bAdaptive);
-	case 5:
+    case 4:
 		return QString("Donut: %1 %2 %3").arg(k).arg(variance).arg(bAdaptive);
 	default:
 		return GetName();

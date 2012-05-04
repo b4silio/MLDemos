@@ -22,7 +22,7 @@ unix:MLBUILD = build
 
 win32{
     CONFIG += opencv22
-    OPENCV_VER = 230
+    OPENCV_VER = 231
 }else:macx{
 #    CONFIG += opencv21
     CONFIG += opencv22
@@ -42,11 +42,11 @@ win32{
 # (like /usr/local/[lib|include] for instance).
 # For windows, please specifiy it. For linux (macosx?) the libraries
 # are autodetected provided you have installed using your package
-# manager
+# manager     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/build/x86/mingw
 
 win32{
-    CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
-    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
+    CONFIG(boost):BOOST = E:/Dvt/boost/boost_1_49_0
+    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/install
 }else:macx{
     CONFIG(boost):BOOST = /usr/local/boost_1_47_0
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
@@ -82,7 +82,7 @@ win32:CONFIG(opencv22){
 		-lopencv_highgui$$OPENCV_VER \
 		-lopencv_imgproc$$OPENCV_VER \
 		-lopencv_legacy$$OPENCV_VER \
-		-lopencv_ml$$OPENCV_VER
+                -lopencv_ml$$OPENCV_VER
 }
 macx{
     CONFIG(opencv22){
@@ -159,9 +159,9 @@ CONFIG(debug, debug|release){
 	QMAKE_LFLAGS += -pg
 }else{
 	message("release mode")
-	linux-g++-32|linux-g++-64:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-	macx-g++:QMAKE_CXXFLAGS += -O2
-	win32-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+        macx-g++:QMAKE_CXXFLAGS += -O2
+        win32-g++:QMAKE_CXXFLAGS += -O2
 }
 
 win32{

@@ -143,6 +143,19 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("benchmarkCombo", optionsMaximize->benchmarkCombo->currentIndex());
     settings.endGroup();
 
+    settings.beginGroup("reinforceOptions");
+    settings.setValue("tab", optionsReinforcement->tabWidget->currentIndex());
+    settings.setValue("varianceSpin", optionsReinforcement->varianceSpin->value());
+    settings.setValue("iterationsSpin", optionsReinforcement->iterationsSpin->value());
+    settings.setValue("displayIterationSpin", optionsReinforcement->displayIterationSpin->value());
+    settings.setValue("problemCombo", optionsReinforcement->problemCombo->currentIndex());
+    settings.setValue("rewardCombo", optionsReinforcement->rewardCombo->currentIndex());
+    settings.setValue("policyCombo", optionsReinforcement->policyCombo->currentIndex());
+    settings.setValue("quantizeCombo", optionsReinforcement->quantizeCombo->currentIndex());
+    settings.setValue("resolutionSpin", optionsReinforcement->resolutionSpin->value());
+    settings.setValue("benchmarkCombo", optionsReinforcement->benchmarkCombo->currentIndex());
+    settings.endGroup();    
+
     settings.beginGroup("projectOptions");
     settings.setValue("tab", optionsProject->tabWidget->currentIndex());
     settings.setValue("fitCheck", optionsProject->fitCheck->isChecked());
@@ -194,6 +207,13 @@ void MLDemos::SaveLayoutOptions()
         if(!maximizers[i]) continue;
         settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
         maximizers[i]->SaveOptions(settings);
+        settings.endGroup();
+    }
+    FOR(i,reinforcements.size())
+    {
+        if(!reinforcements[i]) continue;
+        settings.beginGroup(QString("plugins::reinforcements::") + reinforcements[i]->GetName());
+        reinforcements[i]->SaveOptions(settings);
         settings.endGroup();
     }
     FOR(i,projectors.size())
@@ -329,6 +349,19 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex(settings.value("benchmarkCombo").toInt());
     settings.endGroup();
 
+    settings.beginGroup("reinforceOptions");
+    if(settings.contains("tab")) optionsReinforcement->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("varianceSpin")) optionsReinforcement->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
+    if(settings.contains("iterationsSpin")) optionsReinforcement->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
+    if(settings.contains("displayIterationSpin")) optionsReinforcement->displayIterationSpin->setValue(settings.value("displayIterationSpin").toInt());
+    if(settings.contains("problemCombo")) optionsReinforcement->problemCombo->setCurrentIndex(settings.value("problemCombo").toInt());
+    if(settings.contains("rewardCombo")) optionsReinforcement->rewardCombo->setCurrentIndex(settings.value("rewardCombo").toInt());
+    if(settings.contains("policyCombo")) optionsReinforcement->policyCombo->setCurrentIndex(settings.value("policyCombo").toInt());
+    if(settings.contains("quantizeCombo")) optionsReinforcement->quantizeCombo->setCurrentIndex(settings.value("quantizeCombo").toInt());
+    if(settings.contains("resolutionSpin")) optionsReinforcement->resolutionSpin->setValue(settings.value("resolutionSpin").toInt());
+    if(settings.contains("benchmarkCombo")) optionsReinforcement->benchmarkCombo->setCurrentIndex(settings.value("benchmarkCombo").toInt());
+    settings.endGroup();
+
     settings.beginGroup("projectOptions");
     if(settings.contains("tab")) optionsProject->tabWidget->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("fitCheck")) optionsProject->fitCheck->setChecked(settings.value("fitCheck").toBool());
@@ -380,6 +413,13 @@ void MLDemos::LoadLayoutOptions()
         if(!maximizers[i]) continue;
         settings.beginGroup(QString("plugins::maximizers::") + maximizers[i]->GetName());
         maximizers[i]->LoadOptions(settings);
+        settings.endGroup();
+    }
+    FOR(i,reinforcements.size())
+    {
+        if(!reinforcements[i]) continue;
+        settings.beginGroup(QString("plugins::reinforcements::") + reinforcements[i]->GetName());
+        reinforcements[i]->LoadOptions(settings);
         settings.endGroup();
     }
     FOR(i,projectors.size())
@@ -472,21 +512,42 @@ void MLDemos::SaveParams( QString filename )
 			clusterers[tab]->SaveParams(out);
 		}
 	}
-	if(maximizer)
-	{
-		int tab = optionsMaximize->tabWidget->currentIndex();
-		double variance = optionsMaximize->varianceSpin->value();
-		sprintf(groupName,"maximizationOptions");
-		out << groupName << ":" << "tab" << " " << optionsMaximize->tabWidget->currentIndex() << "\n";
-		out << groupName << ":" << "gaussVarianceSpin" << " " << optionsMaximize->varianceSpin->value() << "\n";
-		out << groupName << ":" << "iterationsSpin" << " " << optionsMaximize->iterationsSpin->value() << "\n";
-		out << groupName << ":" << "stoppingSpin" << " " << optionsMaximize->stoppingSpin->value() << "\n";
-		out << groupName << ":" << "benchmarkCombo" << " " << optionsMaximize->benchmarkCombo->currentIndex() << "\n";
-		if(tab < maximizers.size() && maximizers[tab])
-		{
-			maximizers[tab]->SaveParams(out);
-		}
-	}
+    if(maximizer)
+    {
+        int tab = optionsMaximize->tabWidget->currentIndex();
+        double variance = optionsMaximize->varianceSpin->value();
+        sprintf(groupName,"maximizationOptions");
+        out << groupName << ":" << "tab" << " " << optionsMaximize->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "gaussVarianceSpin" << " " << optionsMaximize->varianceSpin->value() << "\n";
+        out << groupName << ":" << "iterationsSpin" << " " << optionsMaximize->iterationsSpin->value() << "\n";
+        out << groupName << ":" << "stoppingSpin" << " " << optionsMaximize->stoppingSpin->value() << "\n";
+        out << groupName << ":" << "benchmarkCombo" << " " << optionsMaximize->benchmarkCombo->currentIndex() << "\n";
+        if(tab < maximizers.size() && maximizers[tab])
+        {
+            maximizers[tab]->SaveParams(out);
+        }
+    }
+    if(reinforcement)
+    {
+        int tab = optionsReinforcement->tabWidget->currentIndex();
+        double variance = optionsReinforcement->varianceSpin->value();
+        sprintf(groupName,"reinforcementOptions");
+        out << groupName << ":" << "tab" << " " << optionsReinforcement->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "gaussVarianceSpin" << " " << optionsReinforcement->varianceSpin->value() << "\n";
+        out << groupName << ":" << "iterationsSpin" << " " << optionsReinforcement->iterationsSpin->value() << "\n";
+        out << groupName << ":" << "displayIterationSpin" << " " << optionsReinforcement->displayIterationSpin->value() << "\n";
+        out << groupName << ":" << "problemCombo" << " " << optionsReinforcement->problemCombo->currentIndex() << "\n";
+        out << groupName << ":" << "rewardCombo" << " " << optionsReinforcement->rewardCombo->currentIndex() << "\n";
+        out << groupName << ":" << "policyCombo" << " " << optionsReinforcement->policyCombo->currentIndex() << "\n";
+        out << groupName << ":" << "quantizeCombo" << " " << optionsReinforcement->quantizeCombo->currentIndex() << "\n";
+        out << groupName << ":" << "resolutionSpin" << " " << optionsReinforcement->resolutionSpin->value() << "\n";
+        out << groupName << ":" << "benchmarkCombo" << " " << optionsReinforcement->benchmarkCombo->currentIndex() << "\n";
+
+        if(tab < reinforcements.size() && reinforcements[tab])
+        {
+            reinforcements[tab]->SaveParams(out);
+        }
+    }
     if(projector)
     {
         int tab = optionsProject->tabWidget->currentIndex();
@@ -529,18 +590,20 @@ void MLDemos::LoadParams( QString filename )
 	char dynGroup[255];
 	char clustGroup[255];
     char maximGroup[255];
+    char reinfGroup[255];
     char projGroup[255];
     sprintf(classGroup,"classificationOptions");
 	sprintf(regrGroup,"regressionOptions");
 	sprintf(dynGroup,"dynamicalOptions");
 	sprintf(clustGroup,"clusteringOptions");
     sprintf(maximGroup,"maximizationOptions");
+    sprintf(reinfGroup,"reinforcementOptions");
     sprintf(projGroup,"projectOptions");
 
 	// we skip the samples themselves
     //qDebug() << "Skipping "<< sampleCnt <<" samples" << endl;
 	FOR(i, sampleCnt) line = in.readLine();
-    bool bClass = false, bRegr = false, bDyn = false, bClust = false, bMaxim = false, bProj = false;
+    bool bClass = false, bRegr = false, bDyn = false, bClust = false, bMaxim = false, bReinf = false, bProj = false;
     //qDebug() << "Loading parameter list" << endl;
 	int tab = 0;
 	while(!in.atEnd())
@@ -602,17 +665,34 @@ void MLDemos::LoadParams( QString filename )
             if(line.endsWith("rangeStop")) optionsCluster->rangeStopSpin->setValue((int)value);
             if(tab < clusterers.size() && clusterers[tab]) clusterers[tab]->LoadParams(line,value);
 		}
-		if(line.startsWith(maximGroup))
-		{
-			bMaxim = true;
-			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
-			if(line.endsWith("tab")) optionsMaximize->tabWidget->setCurrentIndex(tab = (int)value);
-			if(line.endsWith("gaussVarianceSpin")) optionsMaximize->varianceSpin->setValue((double)value);
-			if(line.endsWith("iterationsSpin")) optionsMaximize->iterationsSpin->setValue((int)value);
-			if(line.endsWith("stoppingSpin")) optionsMaximize->stoppingSpin->setValue((double)value);
+        if(line.startsWith(maximGroup))
+        {
+            bMaxim = true;
+            algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
+            if(line.endsWith("tab")) optionsMaximize->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("gaussVarianceSpin")) optionsMaximize->varianceSpin->setValue((double)value);
+            if(line.endsWith("iterationsSpin")) optionsMaximize->iterationsSpin->setValue((int)value);
+            if(line.endsWith("stoppingSpin")) optionsMaximize->stoppingSpin->setValue((double)value);
             if(line.endsWith("benchmarkCombo")) optionsMaximize->benchmarkCombo->setCurrentIndex((int)value);
-			if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
-		}
+            if(tab < maximizers.size() && maximizers[tab]) maximizers[tab]->LoadParams(line,value);
+        }
+        if(line.startsWith(reinfGroup))
+        {
+            bReinf = true;
+            algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabReinf);
+            if(line.endsWith("tab")) optionsReinforcement->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("gaussVarianceSpin")) optionsReinforcement->varianceSpin->setValue((double)value);
+            if(line.endsWith("iterationsSpin")) optionsReinforcement->iterationsSpin->setValue((int)value);
+            if(line.endsWith("displayIterationSpin")) optionsReinforcement->displayIterationSpin->setValue((int)value);
+            if(line.endsWith("problemCombo")) optionsReinforcement->problemCombo->setCurrentIndex((int)value);
+            if(line.endsWith("rewardCombo")) optionsReinforcement->rewardCombo->setCurrentIndex((int)value);
+            if(line.endsWith("policyCombo")) optionsReinforcement->policyCombo->setCurrentIndex((int)value);
+            if(line.endsWith("quantizeCombo")) optionsReinforcement->quantizeCombo->setCurrentIndex((int)value);
+            if(line.endsWith("resolutionSpin")) optionsReinforcement->resolutionSpin->setValue((int)value);
+            if(line.endsWith("benchmarkCombo")) optionsReinforcement->benchmarkCombo->setCurrentIndex((int)value);
+            if(tab < reinforcements.size() && reinforcements[tab]) reinforcements[tab]->LoadParams(line,value);
+
+        }
         if(line.startsWith(projGroup))
         {
             bProj = true;
@@ -629,7 +709,6 @@ void MLDemos::LoadParams( QString filename )
 	if(bRegr) Regression();
 	if(bDyn) Dynamize();
 	if(bClust) Cluster();
-	if(bMaxim) Maximize();
     if(bProj) Project();
     actionAlgorithms->setChecked(algorithmWidget->isVisible());
 }

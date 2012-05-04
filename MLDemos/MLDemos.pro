@@ -29,8 +29,9 @@ FORMS += aboutDialog.ui \
 	optsClassify.ui \
 	optsCluster.ui \
 	optsRegress.ui \
-	optsMaximize.ui \
-	optsDynamic.ui \
+    optsMaximize.ui \
+    optsReinforcement.ui \
+    optsDynamic.ui \
     optsProject.ui \
     optsCompare.ui \
 	mldemos.ui \
@@ -65,8 +66,9 @@ HEADERS += basicMath.h \
 	classifier.h \
 	obstacles.h \
 	regressor.h \
-	maximize.h \
-	dynamical.h \
+    maximize.h \
+    reinforcement.h \
+    dynamical.h \
     clusterer.h \
     compare.h \
     spline.h \
@@ -78,7 +80,7 @@ SOURCES += \
     mlprocessing.cpp \
     mlstats.cpp \
 	mlsaving.cpp \
-        compare.cpp \
+    compare.cpp \
     mltrain.cpp \
     datagenerator.cpp
 

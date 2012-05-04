@@ -42,6 +42,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
       dynamical(0),
       clusterer(0),
       maximizer(0),
+      reinforcement(0),
       projector(0),
       bIsRocNew(true),
       bIsCrossNew(true),
@@ -322,6 +323,7 @@ void MLDemos::initDialogs()
     optionsRegress = new Ui::optionsRegressWidget();
     optionsDynamic = new Ui::optionsDynamicWidget();
     optionsMaximize = new Ui::optionsMaximizeWidget();
+    optionsReinforcement = new Ui::optionsReinforcementWidget();
     optionsProject = new Ui::optionsProjectWidget();
     optionsCompare = new Ui::optionsCompare();
 
@@ -344,12 +346,14 @@ void MLDemos::initDialogs()
     regressWidget = new QWidget(algorithmOptions->tabRegr);
     dynamicWidget = new QWidget(algorithmOptions->tabDyn);
     maximizeWidget = new QWidget(algorithmOptions->tabMax);
+    reinforcementWidget = new QWidget(algorithmOptions->tabReinf);
     projectWidget = new QWidget(algorithmOptions->tabProj);
     optionsClassify->setupUi(classifyWidget);
     optionsCluster->setupUi(clusterWidget);
     optionsRegress->setupUi(regressWidget);
     optionsDynamic->setupUi(dynamicWidget);
     optionsMaximize->setupUi(maximizeWidget);
+    optionsReinforcement->setupUi(reinforcementWidget);
     optionsProject->setupUi(projectWidget);
     compareWidget = new QWidget();
     optionsCompare->setupUi(compareWidget);
@@ -405,6 +409,15 @@ void MLDemos::initDialogs()
     connect(optionsMaximize->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
     connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
 
+    connect(optionsReinforcement->maximizeButton, SIGNAL(clicked()), this, SLOT(Reinforce()));
+    connect(optionsReinforcement->pauseButton, SIGNAL(clicked()), this, SLOT(ReinforceContinue()));
+    connect(optionsReinforcement->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
+    connect(optionsReinforcement->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
+    connect(optionsReinforcement->clearTargetButton, SIGNAL(clicked()), this, SLOT(ClearTargets()));
+    connect(optionsReinforcement->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
+    connect(optionsReinforcement->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
+    connect(optionsReinforcement->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
+
     connect(optionsProject->projectButton, SIGNAL(clicked()), this, SLOT(Project()));
     connect(optionsProject->revertButton, SIGNAL(clicked()), this, SLOT(ProjectRevert()));
     connect(optionsProject->reprojectButton, SIGNAL(clicked()), this, SLOT(ProjectReproject()));
@@ -424,12 +437,14 @@ void MLDemos::initDialogs()
     optionsRegress->tabWidget->clear();
     optionsDynamic->tabWidget->clear();
     optionsMaximize->tabWidget->clear();
+    optionsReinforcement->tabWidget->clear();
     optionsProject->tabWidget->clear();
     optionsClassify->tabWidget->setUsesScrollButtons(true);
     optionsCluster->tabWidget->setUsesScrollButtons(true);
     optionsRegress->tabWidget->setUsesScrollButtons(true);
     optionsDynamic->tabWidget->setUsesScrollButtons(true);
     optionsMaximize->tabWidget->setUsesScrollButtons(true);
+    optionsReinforcement->tabWidget->setUsesScrollButtons(true);
     optionsProject->tabWidget->setUsesScrollButtons(true);
 
     QHBoxLayout *layout = new QHBoxLayout(optionsCompare->resultWidget);
@@ -441,6 +456,7 @@ void MLDemos::initDialogs()
     connect(optionsRegress->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
     connect(optionsDynamic->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
     connect(optionsMaximize->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
+    connect(optionsReinforcement->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
     connect(optionsProject->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
 
     //canvas = new Canvas(ui.centralWidget);
@@ -457,6 +473,8 @@ void MLDemos::initDialogs()
     drawTimer->dynamical = &dynamical;
     drawTimer->clusterer = &clusterer;
     drawTimer->maximizer = &maximizer;
+    drawTimer->reinforcement = &reinforcement;
+    drawTimer->reinforcementProblem = &reinforcementProblem;
     connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
     connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
@@ -524,12 +542,14 @@ void MLDemos::initPlugins()
                 std::vector<RegressorInterface*> regressorList = iCollection->GetRegressors();
                 std::vector<DynamicalInterface*> dynamicalList = iCollection->GetDynamicals();
                 std::vector<MaximizeInterface*> maximizerList = iCollection->GetMaximizers();
+                std::vector<ReinforcementInterface*> reinforcementList = iCollection->GetReinforcements();
                 std::vector<ProjectorInterface*> projectorList = iCollection->GetProjectors();
                 FOR(i, classifierList.size()) AddPlugin(classifierList[i], SLOT(ChangeActiveOptions));
                 FOR(i, clustererList.size()) AddPlugin(clustererList[i], SLOT(ChangeActiveOptions));
                 FOR(i, regressorList.size()) AddPlugin(regressorList[i], SLOT(ChangeActiveOptions));
                 FOR(i, dynamicalList.size()) AddPlugin(dynamicalList[i], SLOT(ChangeActiveOptions));
                 FOR(i, maximizerList.size()) AddPlugin(maximizerList[i], SLOT(ChangeActiveOptions));
+                FOR(i, reinforcementList.size()) AddPlugin(reinforcementList[i], SLOT(ChangeActiveOptions));
                 FOR(i, projectorList.size()) AddPlugin(projectorList[i], SLOT(ChangeActiveOptions));
                 continue;
             }
@@ -561,6 +581,12 @@ void MLDemos::initPlugins()
             if (iMaximize)
             {
                 AddPlugin(iMaximize, SLOT(ChangeActiveOptions()));
+                continue;
+            }
+            ReinforcementInterface *iReinforcement = qobject_cast<ReinforcementInterface *>(plugin);
+            if (iReinforcement)
+            {
+                AddPlugin(iReinforcement, SLOT(ChangeActiveOptions()));
                 continue;
             }
             ProjectorInterface *iProject = qobject_cast<ProjectorInterface *>(plugin);
@@ -603,6 +629,9 @@ void MLDemos::SetTextFontSize()
     optionsMaximize->gaussianButton->setFont(QFont("Lucida Sans Unicode", 18));
     optionsMaximize->gradientButton->setFont(QFont("Lucida Sans Unicode", 18));
     optionsMaximize->targetButton->setFont(QFont("Lucida Sans Unicode", 18));
+    optionsReinforcement->gaussianButton->setFont(QFont("Lucida Sans Unicode", 18));
+    optionsReinforcement->gradientButton->setFont(QFont("Lucida Sans Unicode", 18));
+    optionsReinforcement->targetButton->setFont(QFont("Lucida Sans Unicode", 18));
     children = compareWidget->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     children = displayDialog->findChildren<QWidget*>();
@@ -629,6 +658,7 @@ void MLDemos::ShowContextMenuSpray(const QPoint &point)
     drawContext1Widget->update();
     update();
 }
+
 void MLDemos::ShowContextMenuLine(const QPoint &point)
 {
     HideContextMenus();
@@ -790,6 +820,13 @@ void MLDemos::AddPlugin(MaximizeInterface *iMaximizer, const char *method)
     optionsMaximize->tabWidget->addTab(iMaximizer->GetParameterWidget(), iMaximizer->GetName());
 }
 
+void MLDemos::AddPlugin(ReinforcementInterface *iReinforcement, const char *method)
+{
+    if(!iReinforcement) return;
+    reinforcements.push_back(iReinforcement);
+    optionsReinforcement->tabWidget->addTab(iReinforcement->GetParameterWidget(), iReinforcement->GetName());
+}
+
 void MLDemos::AddPlugin(ProjectorInterface *iProject, const char *method)
 {
     if(!iProject) return;
@@ -810,6 +847,7 @@ MLDemos::~MLDemos()
     delete optionsCluster;
     delete optionsDynamic;
     delete optionsMaximize;
+    delete optionsReinforcement;
     delete drawToolbar;
     delete drawToolbarContext1;
     delete drawToolbarContext2;
@@ -824,8 +862,13 @@ void MLDemos::closeEvent(QCloseEvent *event)
     if (true)
     {
         mutex.lock();
+        DEL(clusterer);
         DEL(regressor);
+        DEL(dynamical);
         DEL(classifier);
+        DEL(maximizer);
+        DEL(reinforcement);
+        DEL(projector);
         mutex.unlock();
         qApp->quit();
     } else {
@@ -1095,6 +1138,7 @@ void MLDemos::Clear()
     DEL(dynamical);
     DEL(clusterer);
     DEL(maximizer);
+    DEL(reinforcement);
     DEL(projector);
     canvas->maps.confidence = QPixmap();
     canvas->maps.model = QPixmap();

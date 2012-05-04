@@ -37,15 +37,17 @@ HEADERS += \
 	classifier.h \
 	obstacles.h \
 	regressor.h \
-	maximize.h \
-	dynamical.h \
+    maximize.h \
+    reinforcement.h \
+    dynamical.h \
 	clusterer.h \
 	fileUtils.h \
 	spline.h \
     projector.h \
     dataImporter.h \
     contours.h \
-    qcontour.h
+    qcontour.h \
+    reinforcementProblem.h
 
 SOURCES += \
 	canvas.cpp \
@@ -61,7 +63,8 @@ SOURCES += \
     widget.cpp \
     dataImporter.cpp \
     contours.cpp \
-    qcontour.cpp
+    qcontour.cpp \
+    reinforcementProblem.cpp
 
 
 

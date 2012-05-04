@@ -118,37 +118,42 @@ void KPCAProjection::GetContoursPixmap(int index)
     int wmo = w-1;
     QImage image(wmo,hmo,QImage::Format_RGB32);
     int dim = pca->sourcePoints.rows();
-
-    int xIndex = contours->spinX1->value()-1;
-    int yIndex = contours->spinX2->value()-1;
-    int zoom = contours->spinZoom->value();
-
+    int zoom = 1;
+    // use [xy]Index given in the constuctor if spinX1 [ov]
+    if (contours->spinX1->isVisible()) {
+        xIndex = contours->spinX1->value()-1;
+        yIndex = contours->spinX2->value()-1;
+        zoom = contours->spinZoom->value();
+    }
+    //qDebug() << "KPCAProjection::GetContoursPixmap - xIndex:" << xIndex << ", yIndex:" << yIndex << ", zoom:" << zoom << ".";
     double multiplier = 1000.; // this is used to avoid numerical instabilities when computing the contour lines
     VectorXd point(dim);
-    FOR(d,dim) point(d) = 0;
-    //qDebug() << "boundaries: " << xmin << ymin << "-->" << xmax << ymax;
+    FOR(d,dim) point(d) = 0.0;
     double xdiff = xmax - xmin;
     double ydiff = ymax - ymin;
+    //qDebug() << "KPCAProjection::GetContoursPixmap - xmin:" << xmin << ", ymin:" << ymin << ", xman:" << xmax << ", ymax:" << ymax << ".";
     double *values = new double[w*h];
     double vmin = DBL_MAX, vmax = -DBL_MAX;
 
     double zxmin = xmin - xdiff*0.5*(zoom-1);
     double zxmax = xmax + xdiff*0.5*(zoom-1);
+    double zxdiff = zxmax - zxmin;
     double zymin = ymin - ydiff*0.5*(zoom-1);
     double zymax = ymax + ydiff*0.5*(zoom-1);
+    double zydiff = zymax - zymin;
     FOR(i, w)
     {
         FOR(j, h)
         {
-            if(xIndex<dim) point(xIndex) = i/(double)w*(zxmax-zxmin) + zxmin;
-            if(yIndex<dim) point(yIndex) = j/(double)h*(zymax-zymin) + zymin;
-            double value = pcaPointer->test(point, index-1, multiplier); // indices start from 1 in params.dimCountSpin
+            if ( xIndex < dim ) point( xIndex ) = ( (double)i / ( (double)w * zxdiff ) ) + zxmin;
+            if ( yIndex < dim ) point( yIndex ) = ( (double)j / ( (double)h * zydiff ) ) + zymin;
+            double value = pcaPointer->test( point, index-1, multiplier ); // indices start from 1 in params.dimCountSpin
             vmin = min(value, vmin);
             vmax = max(value, vmax);
             values[j*w + i] = value;
         }
     }
-    double zvmin=vmin, zvmax=vmax;
+    //double zvmin=vmin, zvmax=vmax;
     if(zoom != 1)
     {
         /*
@@ -168,7 +173,7 @@ void KPCAProjection::GetContoursPixmap(int index)
         */
     }
     double vdiff=vmax-vmin;
-    //qDebug() << "range" << vmin << vmax << vdiff;
+    //qDebug() << "KPCAProjection::GetContoursPixmap - vmin:" << vmin << ", vmax:" << vmax << " - vdiff: " << vdiff << ".";
     if(vdiff == 0) vdiff = 1.f;
     FOR(i, wmo)
     {
@@ -218,6 +223,10 @@ void KPCAProjection::DrawContours(int index)
     PCA *pca = dynamic_cast<PCA*>(pcaPointer);
     if(!pca) return;
     int displayType = contours->displayCombo->currentIndex();
+    if ( ( displayType < 0 ) or ( displayType > 1 ) ) {
+        qDebug() << "KPCAProjection::DrawContours - displayType out of range :" << displayType;
+        displayType = 0;
+    }
 
     switch(displayType)
     {
@@ -332,16 +341,19 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     contourSampleLabels = canvas->data->GetLabels();
     if(contourSampleLabels.size() != contourSamples.size()) contourSampleLabels = ivec(contourSamples.size(), 0);
 
-    xIndex = contours->spinX1->value();
-    yIndex = contours->spinX2->value();
-    xmin=ymin=FLT_MAX;
-    xmax=ymax=-FLT_MAX;
+    // use [xy]Index given in the constuctor [ov]
+    //xIndex = contours->spinX1->value();
+    //yIndex = contours->spinX2->value();
+
+    // changed FLT_MAX -> DBL_MAX [ov]
+    xmin=ymin=DBL_MAX;
+    xmax=ymax=-DBL_MAX;
     int dim = samples.size() ? samples[0].size() : 2;
     contours->spinX1->setRange(1, dim);
     contours->spinX2->setRange(1, dim);
     //if(canvas->xIndex < dim) contours->spinX1->setValue(xIndex+1);
     //if(canvas->yIndex < dim) contours->spinX2->setValue(yIndex+1);
-
+    qDebug() << "xIndex:"<< xIndex << ", yIndex:" << yIndex;
     FOR(i, samples.size())
     {
         contourSamples[i] -= kpca->mean;
@@ -356,21 +368,23 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         ymax=max((double)samples[i][yIndex], ymax);
         */
     }
-    float xdiff = (xmax - xmin);
-    float ydiff = (ymax - ymin);
-    if(xdiff < ydiff)
+    //qDebug() << "KPCAProjection::DrawModel - xmin:" << xmin << ", ymin:" << ymin << ", xman:" << xmax << ", ymax:" << ymax << ".";
+
+    double xdiff = (xmax - xmin);
+    double ydiff = (ymax - ymin);
+    if(xdiff <= ydiff)
     {
         xdiff = ydiff;
-        float xmid = (xmax - xmin)/2 + xmin;
-        xmin = xmid - xdiff/2;
-        xmax = xmid + xdiff/2;
+        double xmid = ((xmax - xmin)/2.0) + xmin;
+        xmin = xmid - xdiff/2.0;
+        xmax = xmid + xdiff/2.0;
     }
     else if(ydiff < xdiff)
     {
         ydiff = xdiff;
-        float ymid = (ymax - ymin)/2 + ymin;
-        ymin = ymid - ydiff/2;
-        ymax = ymid + ydiff/2;
+        double ymid = ((ymax - ymin)/2.0) + ymin;
+        ymin = ymid - (ydiff/2.0);
+        ymax = ymid + (ydiff/2.0);
     }
     if(xdiff == 0) xdiff = .5f;
     if(ydiff == 0) ydiff = .5f;

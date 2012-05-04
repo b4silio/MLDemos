@@ -85,19 +85,19 @@ void ProjectorKPCA::Train(std::vector< fvec > samples, ivec labels)
     source = samples;
     dim = samples[0].size();
     if(!dim) return;
-    if(targetDims > samples.size()) targetDims = samples.size();
+    int count = samples.size();
+    if(targetDims > count) targetDims = count;
 
     this->labels = labels;
-    int count = samples.size();
 
     // we center the data
     mean = samples[0];
     FOR(i, count-1) mean += samples[i+1];
-    mean /= count;
+    mean /= (float)count;
     FOR(i, count) samples[i] -= mean;
 
     // we dump the data in a matrix
-    MatrixXd data(samples[0].size(), samples.size());
+    MatrixXd data(dim, count);
     FOR(i, count)
     {
         FOR(d, dim) data(d,i) = samples[i][d];

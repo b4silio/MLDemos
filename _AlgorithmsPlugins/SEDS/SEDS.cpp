@@ -11,8 +11,11 @@ double NLOpt_Compute_J(unsigned nPar, const double *x, double *grad, void *f_dat
     p.Set(x,nPar);
 
     double J = seds->Compute_J(p, dJ);
-    for (int i=0; i<nPar; i++)
-        grad[i] = dJ[i];
+    if(grad)
+    {
+        for (int i=0; i<nPar; i++)
+            grad[i] = dJ[i];
+    }
 
     double J_tmp = 1e20;
     if (seds->displayData.size()>0)
@@ -38,8 +41,11 @@ void NLOpt_Constraint(unsigned nCtr, double *result, unsigned nPar, const double
 
     for (int i=0; i<nCtr; i++){
         result[i] = c[i];
-        for (int j=0; j<nPar; j++)
-            grad[i*nPar+j] = dc(i,j);
+        if(grad)
+        {
+            for (int j=0; j<nPar; j++)
+                grad[i*nPar+j] = dc(i,j);
+        }
     }
 }
 
@@ -399,7 +405,7 @@ bool SEDS::loadModel(const char fileName[], char type)
 
         file >> d >> K;
 
-//        d /= 2; // correction by Manuel Muehlig
+        //        d /= 2; // correction by Manuel Muehlig
 
         Priors.Resize(K);
         for (int k = 0; k < K; k++)
@@ -686,7 +692,7 @@ bool SEDS::Optimize(){
 
     //-running NLOpt--------------------------------------------------------------------------------------
     //double lb[2] = { -HUGE_VAL, 0 }; // lower bounds
-    nlopt::opt opt(nlopt::LD_MMA, nPar); // algorithm and dimensionality
+    nlopt::opt opt(Options.optimizationType, nPar); // algorithm and dimensionality
     //nlopt_set_lower_bounds(opt, lb);
     opt.set_min_objective(NLOpt_Compute_J, this);
 
@@ -803,7 +809,7 @@ double SEDS::Compute_J(Vector pp, Vector& dJ) //compute the objective function a
             }
             if (Options.perior_opt)
                 dJ[k] = exp(-pp[k])*Priors[k]*sum;
-                /*
+            /*
                 h_tmp[k] = h[k]^(((A[k]*X-Xd_hat)^(Xd_hat-Xd)).SumRow()); //This vector is common in all dJ computation.
                 Thus, I defined it as a variable to save some computation power
                 dJ(k)= h_tmp[k].Sum();	//derivative of priors(k) w.r.t. p(k)
@@ -902,7 +908,7 @@ double SEDS::Compute_J(Vector pp, Vector& dJ) //compute the objective function a
                             REALTYPE *p_h_tmp = h_tmp[k].Array();
                             for (int jj=0; jj<nData; jj++){
                                 sum +=  (*p_h_tmp++) * ((*p_tmp_mat++) * (*p_tmpData++) //derivative w.r.t. Sigma in exponential
-                                                              + (ii == 0)*tmp_dbl); //derivative with respect to det Sigma which is in the numenator
+                                                        + (ii == 0)*tmp_dbl); //derivative with respect to det Sigma which is in the numenator
 
                                 //the above term (i==0) is just to sum temp_dbl once
                             }

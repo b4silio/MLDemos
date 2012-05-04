@@ -15,7 +15,8 @@ MLDemos.depends = Core
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers OpenCV SEDS Example
+#SUBDIRS += Reinforcements
+SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
 Kernel.file = $$ALGOPATH/KernelMethods/pluginKernel.pro
@@ -25,6 +26,7 @@ LWPR.file = $$ALGOPATH/LWPR/pluginLWPR.pro
 Obstacle.file = $$ALGOPATH/Obstacle/pluginAvoidance.pro
 SEDS.file = $$ALGOPATH/SEDS/pluginSEDS.pro
 Maximizers.file = $$ALGOPATH/Maximizers/pluginMaximizers.pro
+Reinforcements.file = $$ALGOPATH/Reinforcements/pluginReinforcements.pro
 OpenCV.file = $$ALGOPATH/OpenCV/pluginOpenCV.pro
 # still too experimental
 MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
@@ -34,7 +36,7 @@ Example.file = $$ALGOPATH/Example/pluginExample.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-SUBDIRS += PCAFaces
+#SUBDIRS += PCAFaces
 #SUBDIRS += ImportTimeseries
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro
