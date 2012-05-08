@@ -35,9 +35,6 @@ ReinforcementInterfacePower::ReinforcementInterfacePower()
 
 void ReinforcementInterfacePower::ChangeOptions()
 {
-	params->varianceSpin->setDecimals(2);
-	params->varianceSpin->setRange(0.01,1);
-	params->varianceSpin->setSingleStep(0.01);
 }
 
 void ReinforcementInterfacePower::SetParams(Reinforcement *reinforcement)

@@ -35,10 +35,6 @@ ReinforcementInterfaceRandom::ReinforcementInterfaceRandom()
 
 void ReinforcementInterfaceRandom::ChangeOptions()
 {
-	params->varianceLabel->setText("Search Variance");
-	params->varianceSpin->setDecimals(2);
-	params->varianceSpin->setRange(0.01,1);
-	params->varianceSpin->setSingleStep(0.01);
 }
 
 void ReinforcementInterfaceRandom::SetParams(Reinforcement *reinforcement)
