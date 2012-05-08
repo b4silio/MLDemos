@@ -22,7 +22,7 @@ unix:MLBUILD = build
 
 win32{
     CONFIG += opencv22
-    OPENCV_VER = 231
+    OPENCV_VER = 230
 }else:macx{
 #    CONFIG += opencv21
     CONFIG += opencv22
@@ -45,8 +45,8 @@ win32{
 # manager     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/build/x86/mingw
 
 win32{
-    CONFIG(boost):BOOST = E:/Dvt/boost/boost_1_49_0
-    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/install
+    CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
+    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
 }else:macx{
     CONFIG(boost):BOOST = /usr/local/boost_1_47_0
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv

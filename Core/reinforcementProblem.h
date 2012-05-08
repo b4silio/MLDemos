@@ -33,6 +33,7 @@ public:
     float GetSimulationValue(fvec sample);
 
     // use the policy to decide which action to take, and perform the action
+    inline fvec GetDeltaAt(int x, int y, fvec &directions);
     fvec NextStep(fvec sample, fvec directions);
     fvec PerformAction(fvec sample);
     float GetReward();

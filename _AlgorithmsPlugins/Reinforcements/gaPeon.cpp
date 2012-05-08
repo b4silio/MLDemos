@@ -18,7 +18,7 @@ GAPeon::GAPeon(u32 dim, int type)
 
 GAPeon::GAPeon( const GAPeon &peon )
 {
-	dim = peon.dim;
+    dim = peon.dim;
 	dna = new float[dim];
 	memcpy(dna, peon.dna, dim*sizeof(float));
 }

@@ -165,84 +165,119 @@ float ReinforcementProblem::GetSimulationValue(fvec sample)
     return reward;
 }
 
+inline fvec ReinforcementProblem::GetDeltaAt(int x, int y, fvec &directions)
+{
+    fvec delta(2, 0.f);
+    int index = y*gridSize + x;
+    if(index >= directions.size()) return delta;
+    // the policy direction at state (x,y)
+    float direction = directions[index];
+    float tileSize = 0.5f/gridSize;
+    switch(quantizeType)
+    {
+        case 0: // direction in radians
+        {
+            if(direction != -1)
+            {
+                delta[0] = cosf(direction)*tileSize;
+                delta[1] = sinf(direction)*tileSize;
+            }
+        }
+            break;
+        case 1: // 8-way direction
+        {
+            switch((int)direction)
+            {
+            case 0:{delta[0] = tileSize;}break;
+            case 1:{delta[0] = tileSize;delta[1] = tileSize;}break;
+            case 2:{delta[1] = tileSize;}break;
+            case 3:{delta[0] = -tileSize;delta[1] = tileSize;}break;
+            case 4:{delta[0] = -tileSize;}break;
+            case 5:{delta[0] = -tileSize;delta[1] = -tileSize;}break;
+            case 6:{delta[1] = -tileSize;}break;
+            case 7:{delta[0] = tileSize;delta[1] = -tileSize;}break;
+            }
+        }
+            break;
+        case 2: // 4-way direction
+        {
+            switch((int)direction)
+            {
+            case 0: {delta[0] = tileSize;} break;
+            case 1: {delta[1] = tileSize;} break;
+            case 2: {delta[0] = -tileSize;} break;
+            case 3: {delta[1] = -tileSize;} break;
+            }
+        }
+            break;
+    }
+    return delta;
+}
+
 fvec ReinforcementProblem::NextStep(fvec sample, fvec directions)
 {
     int index = 0;
     int mult = 0;
-    int xIndex = sample[0]*gridSize;
-    int yIndex = sample[1]*gridSize;
-    // the policy direction at state (xIndex,yIndex)
-    float direction = directions[yIndex*gridSize + xIndex]; // direction, in radians
+    int x = sample[0]*gridSize;
+    int y = sample[1]*gridSize;
+    float tileSize = 1.f/gridSize;
+    float speed = quantizeType ? 0.5f : 1.f;
     // we move one case in the direction determined by the policy
-    switch(quantizeType)
+    if(!policyType) // discrete grid
     {
-        case 0:
+        sample += GetDeltaAt(x, y, directions);
+    }
+    else // continuous grid, gaussians
+    {
+        // we blend the 4 closest neighbors with respect to their distance
+        float xDist = sample[0]-(((int)(sample[0]*gridSize)+0.5f)/(float)gridSize);
+        float yDist = sample[1]-(((int)(sample[1]*gridSize)+0.5f)/(float)gridSize);
+        int x1, y1;
+        if(xDist > 0) x1 = x+1;
+        else if(xDist < 0) x1 = x-1;
+        else x1 = x;
+        if(yDist > 0) y1 = y+1;
+        else if(yDist < 0) y1 = y-1;
+        else y1 = y;
+        // we're on the corners, we only use the center direction
+        if(x1 == x && y1 == y || x1 < 0 && y1 < 0 || x1 >= gridSize && y1 >= gridSize)
         {
-            if(direction != -1)
-            {
-                sample[0] += cosf(direction)*(0.5f/gridSize);
-                sample[1] += sinf(direction)*(0.5f/gridSize);
-            }
+            sample += GetDeltaAt(x, y, directions)*speed;
         }
-            break;
-        case 1:
+        else
         {
-            switch((int)direction)
+            // we compute the contributions
+            float contributions[4];
+            contributions[0] = xDist*xDist + yDist*yDist; // x,y
+            contributions[1] = (tileSize-xDist)*(tileSize-xDist) + yDist*yDist; // x1, y
+            contributions[2] = (tileSize-xDist)*(tileSize-xDist) + (tileSize-yDist)*(tileSize-yDist); // x1, y1
+            contributions[3] = xDist*xDist + (tileSize-yDist)*(tileSize-yDist); // x, y1
+            if(policyType == 1) // cont. grid
             {
-            case 0:
-                sample[0] += 1./gridSize;
-            break;
-            case 1:
-                sample[0] += 1./gridSize;
-                sample[1] += 1./gridSize;
-            break;
-            case 2:
-                sample[1] += 1./gridSize;
-            break;
-            case 3:
-                sample[0] -= 1./gridSize;
-                sample[1] += 1./gridSize;
-            break;
-            case 4:
-                sample[0] -= 1./gridSize;
-            break;
-            case 5:
-                sample[0] -= 1./gridSize;
-                sample[1] -= 1./gridSize;
-            break;
-            case 6:
-                sample[1] -= 1./gridSize;
-            break;
-            case 7:
-                sample[0] += 1./gridSize;
-                sample[1] -= 1./gridSize;
-            break;
-            case 8:
-                break;
+                FOR(i, 4) contributions[i] = 1.f/contributions[i];
             }
-        }
-            break;
-        case 2:
-        {
-            switch((int)direction)
+            else // gaussian
             {
-            case 0:
-                sample[0] += 1./gridSize;
-            break;
-            case 1:
-                sample[1] += 1./gridSize;
-            break;
-            case 2:
-                sample[0] -= 1./gridSize;
-            break;
-            case 3:
-                sample[1] -= 1./gridSize;
-            break;
-            case 4:
-                break;
+                FOR(i, 4) contributions[i] = expf(-0.5f*contributions[i]/(tileSize*tileSize/4));
+                speed *= 2.f;
             }
+            if(x1 < 0 || x1 >= gridSize)
+            {
+                contributions[1] = 0;
+                contributions[2] = 0;
+            }
+            if(y1 < 0 || y1 >= gridSize)
+            {
+                contributions[2] = 0;
+                contributions[3] = 0;
+            }
+            float sum = 0;
+            FOR(i, 4) sum += contributions[i];
+            sample += GetDeltaAt(x,y, directions)*(contributions[0]/sum)*speed;
+            if(contributions[1] > 0) sample += GetDeltaAt(x1, y, directions)*(contributions[1]/sum)*speed;
+            if(contributions[2] > 0) sample += GetDeltaAt(x1, y1, directions)*(contributions[2]/sum)*speed;
+            if(contributions[3] > 0) sample += GetDeltaAt(x, y1, directions)*(contributions[3]/sum)*speed;
         }
-            break;
     }
 
     // we bound the space to a 0-1 range
@@ -284,50 +319,79 @@ void ReinforcementProblem::Draw(QPainter &painter)
     int xSize = w / gridSize, ySize = h / gridSize;
     painter.setPen(QPen(Qt::black, 1));
     painter.setBrush(Qt::NoBrush);
+    // we draw a grid of the different 'cases'
+    FOR(i, gridSize*gridSize)
+    {
+        int xIndex = i%gridSize;
+        int yIndex = i/gridSize;
+        int x = xIndex*w/gridSize, y = yIndex*h/gridSize;
+        painter.setPen(QPen(Qt::black, 0.5));
+        QPointF point1, point2;
+        float len1 = 1.f, len2 = 1.f;
+        if(quantizeType)
+        {
+            fvec s(2,0);
+            s[0] = xIndex/(float)gridSize;
+            s[1] = yIndex/(float)gridSize;
+            fvec s2 = s + GetDeltaAt(xIndex, yIndex, directions);
+            point1 = QPointF(s2[0]-s[0], s2[1]-s[1]);
+            len1 = sqrtf(point1.x()*point1.x()+point1.y()*point1.y());
+            point1 = QPointF(point1.x()/len1, point1.y()/len1);
+            s2 = s + GetDeltaAt(xIndex, yIndex, tempDirections);
+            point2 = QPointF(s2[0]-s[0], s2[1]-s[1]);
+            len2 = sqrtf(point2.x()*point2.x()+point2.y()*point2.y());
+            point2 = QPointF(point2.x()/len2, point2.y()/len2);
+        }
+        else
+        {
+            point1 = QPointF(cosf(directions[i]), sinf(directions[i]));
+            point2 = QPointF(cosf(tempDirections[i]), sinf(tempDirections[i]));
+        }
+        painter.setPen(QPen(Qt::gray, 1));
+        int radius = min(xSize, ySize)/6;
+        if(len1 == 0) painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), radius, radius);
+        else DrawArrow(QPointF(x+xSize/2 - point1.x()*xSize/5, y+ySize/2 - point1.y()*ySize/5),
+                      QPointF(x+xSize/2 + point1.x()*xSize/5, y+ySize/2 + point1.y()*ySize/5), xSize/10., painter);
+        painter.setPen(QPen(Qt::black, 1));
+        if(len2 == 0) painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), radius, radius);
+        else DrawArrow(QPointF(x+xSize/2 - point2.x()*xSize/5, y+ySize/2 - point2.y()*ySize/5),
+                  QPointF(x+xSize/2 + point2.x()*xSize/5, y+ySize/2 + point2.y()*ySize/5), xSize/10., painter);
+    }
     switch(policyType)
     {
-    case 0:
+    case 0: // discrete grid
     {
-        // we draw a grid of the different 'cases'
+        painter.setPen(QPen(Qt::black, 1, Qt::DotLine));
+        FOR(i, gridSize)
+        {
+            painter.drawLine(i*w/gridSize, 0, i*w/gridSize, h);
+            painter.drawLine(0, i*h/gridSize, w, i*h/gridSize);
+        }
+    }
+        break;
+    case 1: // continuous grid
+    {
+        painter.setPen(QPen(Qt::black, 1, Qt::DotLine));
         FOR(i, gridSize*gridSize)
         {
             int xIndex = i%gridSize;
             int yIndex = i/gridSize;
             int x = xIndex*w/gridSize, y = yIndex*h/gridSize;
-            painter.setPen(QPen(Qt::black, 0.5));
-            painter.drawRect(x+xSize*0.05, y+ySize*0.05, xSize*.9, ySize*.9);
-            QPointF point1, point2;
-            float len1 = 1.f, len2 = 1.f;
-            if(quantizeType)
-            {
-                fvec s(2,0);
-                s[0] = xIndex/(float)gridSize;
-                s[1] = yIndex/(float)gridSize;
-                fvec s2 = NextStep(s, directions);
-                point1 = QPointF(s2[0]-s[0], s2[1]-s[1]);
-                len1 = sqrtf(point1.x()*point1.x()+point1.y()*point1.y());
-                point1 = QPointF(point1.x()/len1, point1.y()/len1);
-                s2 = NextStep(s, tempDirections);
-                point2 = QPointF(s2[0]-s[0], s2[1]-s[1]);
-                len2 = sqrtf(point2.x()*point2.x()+point2.y()*point2.y());
-                point2 = QPointF(point2.x()/len2, point2.y()/len2);
-            }
-            else
-            {
-                point1 = QPointF(cosf(directions[i]), sinf(directions[i]));
-                point2 = QPointF(cosf(tempDirections[i]), sinf(tempDirections[i]));
-            }
-            painter.setPen(QPen(Qt::gray, 1));
-            int radius = min(xSize, ySize)/6;
-            if(len1 == 0) painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), radius, radius);
-            else DrawArrow(QPointF(x+xSize/2 - point1.x()*xSize/5, y+ySize/2 - point1.y()*ySize/5),
-                          QPointF(x+xSize/2 + point1.x()*xSize/5, y+ySize/2 + point1.y()*ySize/5), xSize/10., painter);
-            painter.setPen(QPen(Qt::black, 1));
-            if(len2 == 0) painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), radius, radius);
-            else DrawArrow(QPointF(x+xSize/2 - point2.x()*xSize/5, y+ySize/2 - point2.y()*ySize/5),
-                      QPointF(x+xSize/2 + point2.x()*xSize/5, y+ySize/2 + point2.y()*ySize/5), xSize/10., painter);
+            painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), xSize/3, ySize/3);
         }
     }
+        break;
+    case 2: // gaussian
+        FOR(i, gridSize*gridSize)
+        {
+            int xIndex = i%gridSize;
+            int yIndex = i/gridSize;
+            int x = xIndex*w/gridSize, y = yIndex*h/gridSize;
+            painter.setPen(QPen(Qt::black, 1, Qt::DotLine));
+            painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), xSize/2.5, ySize/2.5);
+            painter.setPen(QPen(Qt::black, 1, Qt::DashLine));
+            painter.drawEllipse(QPointF(x+xSize/2, y+ySize/2), xSize/5, ySize/5);
+        }
         break;
     }
 }

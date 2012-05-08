@@ -35,6 +35,7 @@ public:
     void SetParams(float variance=0.1f, bool bSingleDim=false);
 
     void Initialize(ReinforcementProblem *problem);
+    void Draw(QPainter &painter);
     fvec Update();
     const char *GetInfoString();
 };

@@ -136,12 +136,68 @@ fvec ReinforcementRandom::Update()
 	{
         maximum = newSample;
 		maximumValue = value;
-        qDebug() << "new maximum found at " << maximum[0] << " \tvalue: " << value;
+        //qDebug() << "new maximum found at " << maximum[0] << " \tvalue: " << value;
 	}
     directions = maximum;
 	history.push_back(maximum);
     historyValue.push_back(maximumValue);
 	return newSample;
+}
+
+void ReinforcementRandom::Draw(QPainter &painter)
+{
+    int w = painter.viewport().width(), h = painter.viewport().height();
+    int graphW = 200, graphH = 100, graphPad = 10;
+    int top = h - 10 - (graphH + 2*graphPad);
+    int left = 10;
+    QPainter::RenderHints hints = painter.renderHints();
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    QFont font = painter.font();
+    font.setPointSize(9);
+    painter.setFont(font);
+
+    // we draw the rectangle behind
+    painter.setOpacity(1);
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawRect(left, top, graphW + 2*graphPad, graphH + 2*graphPad);
+    painter.setOpacity(0.6);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::white);
+    painter.drawRect(left, top, graphW + 2*graphPad, graphH + 2*graphPad);
+    painter.setOpacity(1);
+    painter.setBrush(Qt::black);
+    painter.setPen(Qt::black);
+
+    // we draw the values
+    double maxValue = -DBL_MAX;
+    FOR(i, historyValue.size()) maxValue = max(maxValue, historyValue[i]);
+    int valueLimit = 4;
+    double upperBound = ((int)ceil(maxValue)/valueLimit + 1)*valueLimit;
+    painter.setPen(QPen(Qt::black, 2));
+    QPointF oldPoint;
+    FOR(i, graphW)
+    {
+        int index = i*historyValue.size()/graphW;
+        QPointF point(i, graphH*(1.f - (historyValue[index]/upperBound)));
+        point += QPointF(left + graphPad, top + graphPad);
+        if(i) painter.drawLine(point, oldPoint);
+        if(i==graphW-1)
+        {
+            painter.drawText(point + QPointF(-20,0), QString("%1").arg(historyValue.back(), 0, 'f', 2));
+        }
+        oldPoint = point;
+    }
+    // we draw the axes
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawLine(left + graphPad, top+graphPad, left + graphPad, top+graphPad + graphH);
+    painter.drawLine(left + graphPad, top+graphPad+graphH, left + graphPad + graphW, top+graphPad + graphH);
+    painter.drawText(left + graphPad, top + graphPad, QString("%1").arg(upperBound, 0, 'f', 1));
+    painter.drawText(left + graphPad, top + graphPad*2 + graphH, QString("0"));
+    font.setPointSize(9);
+    painter.setFont(font);
+    painter.drawText(left, top, graphPad*2 + graphW, graphPad, Qt::AlignCenter, "Maximum Reward");
+    painter.setRenderHints(hints);
 }
 
 const char *ReinforcementRandom::GetInfoString()
