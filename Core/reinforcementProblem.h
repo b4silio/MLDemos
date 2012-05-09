@@ -17,6 +17,7 @@ public:
     int gridSize;
     int quantizeType;
     fvec directions, tempDirections;
+    fvec stateValues;
     int simulationSteps, problemType, displayIterationsCount, rewardType;
 
     ReinforcementProblem();

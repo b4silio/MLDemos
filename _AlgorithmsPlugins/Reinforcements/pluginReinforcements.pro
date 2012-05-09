@@ -10,7 +10,7 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsRandom.ui paramsGA.ui paramsPower.ui
+FORMS += paramsRandom.ui paramsGA.ui paramsPower.ui paramsDP.ui
 # paramsGA.ui paramsParticles.ui \
 # paramsNLopt.ui paramsParticleFilters.ui
 HEADERS +=	\
@@ -33,9 +33,11 @@ HEADERS +=	\
 #           interfaceNLopt.h \
             reinforcementPower.h \
             reinforcementRandom.h \
+            reinforcementGA.h \
+            reinforcementDP.h \
             interfaceRandom.h \
             interfacePower.h \
-            reinforcementGA.h \
+            interfaceDP.h \
             interfaceGA.h \
             pluginReinforcements.h
 
@@ -52,11 +54,13 @@ SOURCES += 	\
 #           interfaceNLopt.cpp \
             reinforcementPower.cpp \
             reinforcementRandom.cpp \
+            reinforcementGA.cpp \
+            reinforcementDP.cpp \
             interfaceRandom.cpp \
             interfacePower.cpp \
-            reinforcementGA.cpp \
+            interfaceDP.cpp \
             interfaceGA.cpp \
-            pluginReinforcements.cpp \
+            pluginReinforcements.cpp
 
 ###########################
 # Dependencies            #

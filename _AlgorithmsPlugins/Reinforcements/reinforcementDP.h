@@ -16,22 +16,28 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include "pluginReinforcements.h"
-#include "interfaceRandom.h"
-#include "interfacePower.h"
-#include "interfaceGA.h"
-#include "interfaceDP.h"
+#ifndef _REINFORCEMENT_DP_H_
+#define _REINFORCEMENT_DP_H_
 
-using namespace std;
+#include <vector>
+#include "reinforcement.h"
 
-PluginReinforcement::PluginReinforcement()
+class ReinforcementDP : public Reinforcement
 {
-    reinforcements.push_back(new ReinforcementInterfaceRandom());
-    reinforcements.push_back(new ReinforcementInterfacePower());
-    reinforcements.push_back(new ReinforcementInterfaceGA());
-    reinforcements.push_back(new ReinforcementInterfaceDP());
-}
+private:
+public:
+    bool bBatchUpdate;
+    float variance;
+public:
+    ReinforcementDP();
+    ~ReinforcementDP();
 
-#ifndef PLUGIN_MAXIMIZE
-Q_EXPORT_PLUGIN2(mld_Reinforcement, PluginReinforcement)
-#endif
+    void SetParams(float variance=0.1f, bool bBatchUpdate=false);
+
+    void Initialize(ReinforcementProblem *problem);
+    void Draw(QPainter &painter);
+    fvec Update();
+    const char *GetInfoString();
+};
+
+#endif // _REINFORCEMENT_DP_H_

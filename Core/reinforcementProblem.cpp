@@ -302,11 +302,14 @@ float ReinforcementProblem::GetReward(fvec directions)
     this->directions = directions;
     fvec sample(dim);
     float fullReward = 0;
+    stateValues = fvec(gridSize*gridSize,0);
     FOR(i, gridSize*gridSize)
     {
         sample[0] = (i%gridSize + 0.5f)/(float)gridSize;
         sample[1] = (i/gridSize + 0.5f)/(float)gridSize;
-        fullReward += GetSimulationValue(sample);
+        float value = GetSimulationValue(sample);
+        stateValues[i] = value;
+        fullReward += value;
     }
     fullReward /= (gridSize*gridSize);
     this->directions = backup;
