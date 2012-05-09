@@ -31,6 +31,8 @@ ReinforcementPower::ReinforcementPower()
 	lastSigma.resize(dim,0);
     FOR(d,dim) maximum[d] = drand48();
     maximumValue = -FLT_MAX;
+    bSingleDim = true;
+    bAdaptive = true;
 	variance = 0;
 	k = 10;
 }
@@ -128,6 +130,7 @@ fvec ReinforcementPower::Update()
 {
 	if(bConverged) return maximum;
 
+    int d = rand()%dim;
     if(maximum.size() < dim)
     {
         maximum.resize(dim);
@@ -143,23 +146,41 @@ fvec ReinforcementPower::Update()
             {
             case 0:
             {
-                fvec randSample = newSample + RandN(dim, 0, variance);
-                FOR(d, dim)
+                fvec randSample = newSample;
+                if(bSingleDim)
                 {
+                    randSample[d] + RandN(0.f, variance);
                     while(randSample[d] < 0) randSample[d] += 2*M_PI;
                     while(randSample[d] > 2*M_PI) randSample[d] -= 2*M_PI;
+                }
+                else
+                {
+                    randSample += RandN(dim, 0, variance);
+                    FOR(d, dim)
+                    {
+                        while(randSample[d] < 0) randSample[d] += 2*M_PI;
+                        while(randSample[d] > 2*M_PI) randSample[d] -= 2*M_PI;
+                    }
                 }
                 newSample = randSample;
             }
                 break;
             case 1:
             {
-                FOR(d, dim) newSample[d] = (int)(newSample[d] + rand()%8) % 9;
+                if(bSingleDim)
+                {
+                    newSample[d] = (int)(newSample[d] + rand()%8) % 9;
+                }
+                else FOR(d, dim) newSample[d] = (int)(newSample[d] + rand()%8) % 9;
             }
                 break;
             case 2:
             {
-                FOR(d, dim) newSample[d] = (int)(newSample[d] + rand()%4) % 5;
+                if(bSingleDim)
+                {
+                    newSample[d] = (int)(newSample[d] + rand()%4) % 5;
+                }
+                else FOR(d, dim) newSample[d] = (int)(newSample[d] + rand()%4) % 5;
             }
                 break;
             }
@@ -171,39 +192,64 @@ fvec ReinforcementPower::Update()
 		std::sort(best.begin(), best.end());
 	}
 
-    qDebug() << "dim" << dim << "lastSigma" << lastSigma.size() << "maximum" << maximum.size() << "newsample" << newSample.size();
     switch(quantizeType)
     {
     case 0:
     {
-        fvec randSample; randSample.resize(dim);
-        if(bAdaptive) FOR(d, dim) randSample[d] = newSample[d] + RandN(0.f, sqrtf(lastSigma[d]));
-        else randSample = newSample + RandN(dim, 0, variance);
-        FOR(d, dim)
+        fvec randSample = newSample;
+        if(bSingleDim)
         {
+            if(bAdaptive) randSample[d] = newSample[d] + RandN(0.f, sqrtf(lastSigma[d]));
+            else randSample[d] = newSample[d] + RandN(0.f, variance);
             while(randSample[d] < 0) randSample[d] += 2*M_PI;
             while(randSample[d] > 2*M_PI) randSample[d] -= 2*M_PI;
+        }
+        else
+        {
+            if(bAdaptive) FOR(d, dim) randSample[d] = newSample[d] + RandN(0.f, sqrtf(lastSigma[d]));
+            else randSample = newSample + RandN(dim, 0, variance);
+            FOR(d, dim)
+            {
+                while(randSample[d] < 0) randSample[d] += 2*M_PI;
+                while(randSample[d] > 2*M_PI) randSample[d] -= 2*M_PI;
+            }
         }
         newSample = randSample;
     }
         break;
     case 1:
     {
-        FOR(d, dim)
+        if(bSingleDim)
         {
             int noise = bAdaptive ? (int)(8*lastSigma[d]) : 8;
-            if(!noise) continue;
-            newSample[d] = (int)(newSample[d] + rand()%noise) % 9;
+            if(noise) newSample[d] = (int)(newSample[d] + rand()%noise) % 9;
+        }
+        else
+        {
+            FOR(d, dim)
+            {
+                int noise = bAdaptive ? (int)(8*lastSigma[d]) : 8;
+                if(!noise) continue;
+                newSample[d] = (int)(newSample[d] + rand()%noise) % 9;
+            }
         }
     }
         break;
     case 2:
     {
-        FOR(d, dim)
+        if(bSingleDim)
         {
-            int noise = bAdaptive ? (int)(4*lastSigma[d]) : 4;
-            if(!noise) continue;
-            newSample[d] = (int)(newSample[d] + rand()%noise) % 5;
+            int noise = bAdaptive ? (int)(8*lastSigma[d]) : 4;
+            if(noise) newSample[d] = (int)(newSample[d] + rand()%noise) % 5;
+        }
+        else
+        {
+            FOR(d, dim)
+            {
+                int noise = bAdaptive ? (int)(4*lastSigma[d]) : 4;
+                if(!noise) continue;
+                newSample[d] = (int)(newSample[d] + rand()%noise) % 5;
+            }
         }
     }
         break;
@@ -247,16 +293,24 @@ fvec ReinforcementPower::Update()
         switch(quantizeType)
         {
         case 0:
-            FOR(d, dim) newMaximum[d] = max(0.f, min((float)M_PI,newMaximum[d]));
+            if(bSingleDim) newMaximum[d] = max(0.f, min((float)M_PI,newMaximum[d]));
+            else FOR(d, dim) newMaximum[d] = max(0.f, min((float)M_PI,newMaximum[d]));
             break;
         case 1:
-            FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%9;
+            if(bSingleDim) newMaximum[d] = (int)(newMaximum[d])%9;
+            else FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%9;
             break;
         case 2:
-            FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%5;
+            if(bSingleDim) newMaximum[d] = (int)(newMaximum[d])%5;
+            else FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%5;
             break;
         }
         float value = problem->GetReward(newMaximum);
+        maximum = best.back().second.first;
+        maximumValue = best.back().first;
+        history.push_back(maximum);
+        historyValue.push_back(maximumValue);
+        /*
         if(value > maximumValue)
         {
             maximum = newMaximum;
@@ -265,45 +319,67 @@ fvec ReinforcementPower::Update()
             history.push_back(newMaximum);
             historyValue.push_back(value);
         }
+        */
         newSample = newMaximum;
     }
-	else
+    else // bAdaptive==true
 	{
 		fvec current = newSample;
-        fvec newMaximum = fvec(); newMaximum.resize(dim,0);
-		fvec totalMaximum; totalMaximum.resize(dim,0);
-		fvec delta;delta.resize(dim,0);
-		fvec varianceSum;varianceSum.resize(dim,0);
-		fvec totalVarianceSum;totalVarianceSum.resize(dim,0);
+        fvec newMaximum(dim,0.f);
+        fvec totalMaximum(dim,0.f);
+        fvec varianceSum(dim,0);
+        fvec totalVarianceSum(dim,0);
 		FOR(i, best.size())
 		{
-			FOR(d, dim)
-			{
-				float delta = best[i].second.first[d] - current[d];
-				float var = best[i].second.second[d];
-				float reward = best[i].first;
+            if(bSingleDim)
+            {
+                float delta = best[i].second.first[d] - current[d];
+                float var = best[i].second.second[d];
+                float reward = best[i].first;
                 newMaximum[d] += delta*reward / var;
-				totalMaximum[d] +=  reward / var;
+                totalMaximum[d] +=  reward / var;
 
-				varianceSum[d] += delta*delta*reward;
-				totalVarianceSum[d] += reward;
-			}
-		}
-        FOR(d, dim) newMaximum[d] = current[d] + newMaximum[d]/totalMaximum[d];
+                varianceSum[d] += delta*delta*reward;
+                totalVarianceSum[d] += reward;
+            }
+            else
+            {
+                FOR(d, dim)
+                {
+                    float delta = best[i].second.first[d] - current[d];
+                    float var = best[i].second.second[d];
+                    float reward = best[i].first;
+                    newMaximum[d] += delta*reward / var;
+                    totalMaximum[d] +=  reward / var;
+
+                    varianceSum[d] += delta*delta*reward;
+                    totalVarianceSum[d] += reward;
+                }
+            }
+        }
+
+        if(bSingleDim) newMaximum[d] = current[d] + newMaximum[d]/totalMaximum[d];
+        else FOR(d, dim) newMaximum[d] = current[d] + newMaximum[d]/totalMaximum[d];
+
+        // sanity check!
         switch(quantizeType)
         {
         case 0:
-            FOR(d, dim) newMaximum[d] = max(0.f, min((float)M_PI,newMaximum[d]));
+            if(bSingleDim) newMaximum[d] = max(0.f, min((float)M_PI,newMaximum[d]));
+            else FOR(d, dim) newMaximum[d] = max(0.f, min((float)M_PI,newMaximum[d]));
             break;
         case 1:
-            FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%9;
+            if(bSingleDim) newMaximum[d] = (int)(newMaximum[d])%9;
+            else FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%9;
             break;
         case 2:
-            FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%5;
+            if(bSingleDim) newMaximum[d] = (int)(newMaximum[d])%5;
+            else FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%5;
             break;
         }
-        float value = problem->GetReward(newMaximum);
-        if(value > maximumValue)
+        /*
+        float valueMax = problem->GetReward(newMaximum);
+        if(valueMax > maximumValue)
         {
             maximum = newMaximum;
             maximumValue = value;
@@ -311,20 +387,32 @@ fvec ReinforcementPower::Update()
             history.push_back(newMaximum);
             historyValue.push_back(value);
         }
-        newSample = newMaximum;
-
-        fvec sigma; sigma.resize(dim, variance);
-        FOR(d, dim)
+        */
+        fvec sigma = lastSigma;
+        //fvec sigma; sigma.resize(dim, variance);
+        if(bSingleDim)
         {
-            if(totalVarianceSum[d] == 0) continue;
-            sigma[d] = varianceSum[d] / totalVarianceSum[d];
+            if(totalVarianceSum[d] != 0) sigma[d] = varianceSum[d] / totalVarianceSum[d];
         }
-		if(value > best[0].first)
-		{
-			best[0] = make_pair(value, make_pair(newSample, sigma));
-			std::sort(best.begin(), best.end());
-		}
+        else
+        {
+            FOR(d, dim)
+            {
+                if(totalVarianceSum[d] == 0) continue;
+                sigma[d] = varianceSum[d] / totalVarianceSum[d];
+            }
+        }
 		lastSigma = sigma;
+        if(value > best[0].first)
+        {
+            best[0] = make_pair(value, make_pair(newSample, sigma));
+            std::sort(best.begin(), best.end());
+        }
+        maximum = best.back().second.first;
+        maximumValue = best.back().first;
+        history.push_back(maximum);
+        historyValue.push_back(maximumValue);
+        //newSample = newMaximum;
 	}
 	return newSample;
 }

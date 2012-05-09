@@ -32,6 +32,7 @@ private:
 	std::vector< std::pair<double, std::pair<fvec, fvec> > > best;
 	fvec lastSigma;
 	bool bAdaptive;
+    bool bSingleDim;
 public:
     ReinforcementPower();
     ~ReinforcementPower();

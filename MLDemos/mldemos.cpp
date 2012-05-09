@@ -1484,44 +1484,57 @@ void MLDemos::DisplayOptionChanged()
 
 void MLDemos::ChangeInfoFile()
 {
-    QString infoFile;
+    QString infoFile, mainFile;
     if(algorithmOptions->tabClass->isVisible())
     {
+        mainFile = "classification.html";
         int tab = optionsClassify->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)classifiers.size() || !classifiers[tab]) return;
         infoFile = classifiers[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabClust->isVisible())
     {
+        mainFile = "clustering.html";
         int tab = optionsCluster->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)clusterers.size() || !clusterers[tab]) return;
         infoFile = clusterers[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabRegr->isVisible())
     {
+        mainFile = "regression.html";
         int tab = optionsRegress->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)regressors.size() || !regressors[tab]) return;
         infoFile = regressors[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabDyn->isVisible())
     {
+        mainFile = "dynamical.html";
         int tab = optionsDynamic->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)dynamicals.size() || !dynamicals[tab]) return;
         infoFile = dynamicals[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabMax->isVisible())
     {
+        mainFile = "maximization.html";
         int tab = optionsMaximize->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)maximizers.size() || !maximizers[tab]) return;
         infoFile = maximizers[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabProj->isVisible())
     {
+        mainFile = "projection.html";
         int tab = optionsProject->tabWidget->currentIndex();
         if(tab < 0 || tab >= (int)projectors.size() || !projectors[tab]) return;
         infoFile = projectors[tab]->GetInfoFile();
     }
-    if(infoFile == "") infoFile = "mldemos.html"; // we want the main information page
+    if(algorithmOptions->tabReinf->isVisible())
+    {
+        mainFile = "reinforcement.html";
+        int tab = optionsReinforcement->tabWidget->currentIndex();
+        if(tab < 0 || tab >= (int)reinforcements.size() || !reinforcements[tab]) return;
+        infoFile = reinforcements[tab]->GetInfoFile();
+    }
+    if(mainFile == "") mainFile = "mldemos.html"; // we want the main information page
 
     QDir helpDir = QDir(qApp->applicationDirPath());
     QDir alternativeDir = helpDir;
@@ -1547,10 +1560,16 @@ void MLDemos::ChangeInfoFile()
     }
     //qDebug() << "using help directory: " << helpDir.absolutePath();
 
-    QString filePath(helpDir.absolutePath() + "/" + infoFile);
-    //qDebug() << "loading info from: " << filePath;
-    showStats->algoText->clear();
-    showStats->algoText->setSource(QUrl::fromLocalFile(filePath));
+    showStats->helpAlgoText->clear();
+    if(!infoFile.isEmpty())
+    {
+        QString filePath(helpDir.absolutePath() + "/" + infoFile);
+        showStats->helpAlgoText->setSource(QUrl::fromLocalFile(filePath));
+    }
+
+    showStats->helpMainText->clear();
+    QString filePath2(helpDir.absolutePath() + "/" + mainFile);
+    showStats->helpMainText->setSource(QUrl::fromLocalFile(filePath2));
 }
 
 void MLDemos::ManualSelectionUpdated()
