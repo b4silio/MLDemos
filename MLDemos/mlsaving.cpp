@@ -99,13 +99,11 @@ void MLDemos::SaveLayoutOptions()
 
 	settings.beginGroup("classificationOptions");
 	settings.setValue("positiveClass", optionsClassify->positiveSpin->value());
-	settings.setValue("foldCount", optionsClassify->foldCountSpin->value());
 	settings.setValue("trainRatio", optionsClassify->traintestRatioCombo->currentIndex());
 	settings.setValue("tab", optionsClassify->tabWidget->currentIndex());
 	settings.endGroup();
 
 	settings.beginGroup("regressionOptions");
-	settings.setValue("foldCount", optionsRegress->foldCountSpin->value());
 	settings.setValue("trainRatio", optionsRegress->traintestRatioCombo->currentIndex());
 	settings.setValue("tab", optionsRegress->tabWidget->currentIndex());
 	settings.endGroup();
@@ -305,13 +303,11 @@ void MLDemos::LoadLayoutOptions()
 
 	settings.beginGroup("classificationOptions");
 	if(settings.contains("positiveClass")) optionsClassify->positiveSpin->setValue(settings.value("positiveClass").toFloat());
-	if(settings.contains("foldCount")) optionsClassify->foldCountSpin->setValue(settings.value("foldCount").toFloat());
 	if(settings.contains("trainRatio")) optionsClassify->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
 	if(settings.contains("tab")) optionsClassify->tabWidget->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("regressionOptions");
-	if(settings.contains("foldCount")) optionsRegress->foldCountSpin->setValue(settings.value("foldCount").toFloat());
     if(settings.contains("trainRatio")) optionsRegress->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
     if(settings.contains("tab")) optionsRegress->tabWidget->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();

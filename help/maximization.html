@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title></title>
+  </head>
+  <body>
+    <h2>Optimization</h2>
+    The Optimization panel allows to test, tweak and observe how
+    different algorithms perform a function optimization in a
+    2-dimensional parameter space: "the canvas". The value (or reward)
+    of the function at a specific position in parameter space is
+    displayed by the amount of red, which can be painted on using the
+    Paint Reward tool in the drawing options.<br>
+    <br>
+    The canvas will display the process of optimization from a given
+    starting position (provided by the "Drag me" drag-and-drop button.
+    If no starting position is provided, a random position in parameter
+    space will be selected. <br>
+    <br>
+    The canvas displays different information in multiple layers, which
+    can be toggled using the display options. These are:
+    <ul>
+      <li>Samples: the original function value (reward), high colors
+        correspond to high reward value</li>
+      <li>Learned Model: the optimization history (lined path), current
+        best parameters (green circles), visited parameter instances
+        (black circles), and (optionally) additional model information
+        (e.g. set of active particles)</li>
+      <li>Model Info: representation of the reward function as elevation
+        contour lines</li>
+      <li>Legend: the current maximum value found (the maximum is always
+        normalized to 1) </li>
+    </ul>
+    A yellow zone indicates the region of parameter space in which the
+    function value is maximum or higher than a given Stop Criterion. The
+    optimization process will stop after a set number of iterations has
+    been performed, or when a sufficient function value is reached.<br>
+    <br>
+    <span style="font-weight: bold;">In Practice</span><br>
+    The easiest way to test optimization is to:
+    <ol>
+      <li>Paint some reward (left-click) in the canvas </li>
+      <li>Click on "Optimize"</li>
+    </ol>
+    This should initialize the algorithm and start animating the
+    exploration of the parameter space.<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br>
+    The interface for optimization (the right-hand side of the Algorithm
+    Options dialog) provides the following commands:<br>
+    <ul>
+      <li>Optimize: Initialize and start the optimization using the
+        currently selected algorithm and options</li>
+      <li>Stop/Start: pause or restart the optimization process (will
+        not reset the iteration count)<br>
+      </li>
+      <li>Clear: clear the current regression model (does NOT clear the
+        data)</li>
+    </ul>
+    and the following options:
+    <ul>
+      <li>Starting Position: (draggable) defines the starting position
+        for the optimization process. Re-drag to remove</li>
+      <li>Max Iterations: Maximum number of iterations to compute </li>
+      <li>Stop Criterion: Target minimal value to be attained before
+        stopping (range: [0, 1]). </li>
+    </ul>
+    All other options are algorithm-dependent and should be described in
+    the help menu of the algorithm itself.<br>
+    <br>
+    <span style="font-weight: bold;">Generate Rewards</span><br
+      style="font-weight: bold;">
+    It is possible to generate a set of pre-constructed rewards by
+    dragging and dropping a gaussian of fixed size (Var option) or a
+    gradient from the center of the canvas to the dropped position.
+    Alternatively a number of standard benchmark functions is proposed.
+    Use the Set button to draw the benchmark function onto the canvas.<br>
+    <br>
+  </body>
+</html>

@@ -103,61 +103,6 @@ void MLDemos::Classify()
     mutex.unlock();
 }
 
-void MLDemos::ClassifyCross()
-{
-    if(!canvas || !canvas->data->GetCount()) return;
-    drawTimer->Stop();
-    QMutexLocker lock(&mutex);
-    DEL(clusterer);
-    DEL(regressor);
-    DEL(dynamical);
-    DEL(classifier);
-    DEL(maximizer);
-    DEL(reinforcement);
-    DEL(projector);
-    lastTrainingInfo = "";
-    if(!optionsClassify->tabWidget->count()) return;
-    int tab = optionsClassify->tabWidget->currentIndex();
-    if(tab >= classifiers.size() || !classifiers[tab]) return;
-    tabUsedForTraining = tab;
-
-    float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
-    int ratioIndex = optionsClassify->traintestRatioCombo->currentIndex();
-    float trainRatio = ratios[ratioIndex];
-    int positive = optionsClassify->positiveSpin->value();
-    int foldCount = optionsClassify->foldCountSpin->value();
-    vector<bool> trainList;
-    if(optionsClassify->manualTrainButton->isChecked())
-    {
-        // we get the list of samples that are checked
-        trainList = GetManualSelection();
-    }
-
-    vector<fvec> fmeasures;
-    fmeasures.resize(2);
-    bool trained = false;
-    FOR(f,foldCount)
-    {
-        DEL(classifier);
-        classifier = classifiers[tab]->GetClassifier();
-        trained = Train(classifier, positive, trainRatio, trainList);
-        if(!trained) break;
-        if(classifier->rocdata.size()>0)
-        {
-            fmeasures[0].push_back(GetBestFMeasure(classifier->rocdata[0])[0]);
-        }
-        if(classifier->rocdata.size()>1)
-        {
-            fmeasures[1].push_back(GetBestFMeasure(classifier->rocdata[1])[0]);
-        }
-    }
-    classifier->crossval = fmeasures;
-    //ShowCross();
-    //if(trained) classifiers[tab]->Draw(canvas, classifier);
-    DEL(classifier);
-    UpdateInfo();
-}
-
 vector<bool> MLDemos::GetManualSelection()
 {
     vector<bool> trainList;
@@ -286,56 +231,6 @@ void MLDemos::Regression()
             painter.drawLine(point, point2);
         }
     }
-    UpdateInfo();
-}
-
-void MLDemos::RegressionCross()
-{
-    if(!canvas || !canvas->data->GetCount()) return;
-    drawTimer->Stop();
-    drawTimer->Clear();
-    QMutexLocker lock(&mutex);
-    DEL(clusterer);
-    DEL(regressor);
-    DEL(dynamical);
-    DEL(classifier);
-    DEL(maximizer);
-    DEL(reinforcement);
-    DEL(projector);
-    lastTrainingInfo = "";
-    if(!optionsRegress->tabWidget->count()) return;
-    int tab = optionsRegress->tabWidget->currentIndex();
-    if(tab >= regressors.size() || !regressors[tab]) return;
-    int outputDim = optionsRegress->outputDimCombo->currentIndex();
-    regressor = regressors[tab]->GetRegressor();
-    tabUsedForTraining = tab;
-
-    float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
-    int ratioIndex = optionsRegress->traintestRatioCombo->currentIndex();
-    float trainRatio = ratios[ratioIndex];
-    int foldCount = optionsRegress->foldCountSpin->value();
-
-    vector<fvec> errors;
-    errors.resize(2);
-    FOR(f,foldCount)
-    {
-        DEL(regressor);
-        regressor = regressors[tab]->GetRegressor();
-        Train(regressor, trainRatio);
-        if(regressor->trainErrors.size())
-        {
-            errors[0] = regressor->trainErrors;
-        }
-        if(regressor->testErrors.size())
-        {
-            errors[1] = regressor->testErrors;
-        }
-    }
-    regressor->crossval = errors;
-    //ShowCross();
-
-    Train(regressor, outputDim, trainRatio);
-    regressors[tab]->Draw(canvas, regressor);
     UpdateInfo();
 }
 

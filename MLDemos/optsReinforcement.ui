@@ -433,9 +433,17 @@ p, li { white-space: pre-wrap; }
       <pointsize>9</pointsize>
      </font>
     </property>
+    <property name="toolTip">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Type of problem:&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Food Gathering: the goal is to roam the state-space to collect as much food (red color) as possible in a finite number of evaluation steps.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <item>
      <property name="text">
-      <string>Path Following</string>
+      <string>Food Gathering</string>
      </property>
     </item>
    </widget>
@@ -554,7 +562,7 @@ p, li { white-space: pre-wrap; }
      <number>9999</number>
     </property>
     <property name="value">
-     <number>32</number>
+     <number>1</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_8">
@@ -572,7 +580,7 @@ p, li { white-space: pre-wrap; }
      </font>
     </property>
     <property name="text">
-     <string>Reward Function</string>
+     <string>State-Value Function</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>

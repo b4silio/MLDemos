@@ -225,9 +225,7 @@ private slots:
     void DisactivateIO(QObject *);
 
     void Classify();
-	void ClassifyCross();
 	void Regression();
-	void RegressionCross();
     void Maximize();
     void MaximizeContinue();
     void Reinforce();
