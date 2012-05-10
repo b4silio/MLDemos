@@ -164,8 +164,8 @@ void MLDemos::SetCrossValidationInfo()
 	float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
 	int ratioIndex = classifier ? optionsClassify->traintestRatioCombo->currentIndex() : optionsRegress->traintestRatioCombo->currentIndex();
 	float trainRatio = ratios[ratioIndex];
-	if(classifier) sprintf(txt, "%d folds\n", optionsClassify->foldCountSpin->value());
-	else sprintf(txt, "%d folds\n", optionsRegress->foldCountSpin->value());
+//	if(classifier) sprintf(txt, "%d folds\n", optionsClassify->foldCountSpin->value());
+//	else sprintf(txt, "%d folds\n", optionsRegress->foldCountSpin->value());
 	text += txt;
 	sprintf(txt,"%d train, %d test samples", (int)(canvas->data->GetCount()*trainRatio), canvas->data->GetCount() - (int)(canvas->data->GetCount()*trainRatio));
 	text += txt + QString("\n\n");

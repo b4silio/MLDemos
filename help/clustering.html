@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title></title>
+  </head>
+  <body>
+    <h2>Clustering</h2>
+    The Clustering panel allows to test, tweak and observe how different
+    algorithms perform clustering on samples living in a N-dimensional
+    space: "the canvas".<br>
+    Clustering can assign a cluster value to each sample, or a
+    contribution of each cluster, or a non-cluster value (for outliers),
+    depending on the algorithm used.<br>
+    <br>
+    The canvas will display the results of the clustering in multiple
+    layers, which can be toggled using the display options. These are:<br>
+    <ul>
+      <li>Samples: the original sample data, if the samples have class
+        information, these will be displayed using different colors </li>
+      <li>Learned Model: the cluster labels obtained by the algorithm </li>
+      <li>Model Info: additional information from the algorithm
+        (gaussian position and shape, support vectors, etc.)</li>
+      <li>Density Map: (for 2D canvas only) clustering result for each
+        coordinate in space</li>
+    </ul>
+    In the standard case, a different color is assigned to each cluster.
+    For algorithms providing a contribution from the cluster, a mixing
+    of colors means multiple contributions from different clusters. Be
+    advised that these colors do not correspond to class labels (indeed
+    the data could have no class information whatsoever) but rather they
+    indicate the cluster(s) they have been assigned to.<br>
+    <br>
+    <span style="font-weight: bold;">In Practice</span><br>
+    The easiest way to perform clustering is to:
+    <ol>
+      <li>Draw some samples (left-click)</li>
+      <li>Click on "Cluster" </li>
+    </ol>
+    This should train the algorithm and start painting the canvas with
+    the results of the clustering<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br>
+    The interface for clustering (the right-hand side of the Algorithm
+    Options dialog) provides the following commands:
+    <ul>
+      <li>Cluster: perform the clustering using the currently selected
+        algorithm and options</li>
+      <li>One Iteration: (for iterative algorithms only) perform a
+        single iteration of the clustering algorithm</li>
+      <li>Clear: clear the current classifier model (does NOT clear the
+        data)</li>
+      <li>Manual Selection: manually select the samples used to train
+        the clusterer </li>
+      <li>Optimize Clusters: perform multiple clustering with different
+        counts of starting clusters (when applies), compute the
+        clustering quality for each cluster count and pick the optimum
+        within the set range</li>
+      <li>Test: compute the clustering quality for a single instance of
+        the clusterer, using the current options </li>
+    </ul>
+    and the following options:
+    <ul>
+      <li>Optimize by: determine the clustering quality function to be
+        used for the Optimize Clusters command, currently include:</li>
+      <ul>
+        <li>RSS (Residual Sum of Squares): the squared distance between
+          each sample and the center of its associated cluster</li>
+        <li>BIC: Bayesian Information Criterion</li>
+        <li>AIC: Akaike Information Criterion</li>
+        <li>F1: F-Measure score (requires class-labeled data), compute
+          the F-Measure for each class and each cluster (picks the
+          maximum cluster for each class) </li>
+      </ul>
+      <li>Train Ratio: amount of data used to compute the curent
+        clustering quality using the Test button</li>
+    </ul>
+    All other options are algorithm-dependent and should be described in
+    the help menu of the algorithm itself.<br>
+    <br>
+  </body>
+</html>

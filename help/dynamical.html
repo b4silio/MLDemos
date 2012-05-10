@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title></title>
+  </head>
+  <body>
+    <h2>Dynamical System</h2>
+    The Dynamical System panel allows to test, tweak and observe how
+    different algorithms model a dynamical system in a N-dimensional
+    space: "the canvas".<br>
+    The DS implemented in MLDemos are time-independent and provide, for
+    each position in space, a desired velocity.<br>
+    <br>
+    Trajectories are drawn by hand (or imported) as positions in space.
+    A velocity for each step will be computed uniformly using the
+    user-defined dT temporal step.<br>
+    <br>
+    The canvas will display the results of the dynamical system in
+    multiple layers, which can be toggled using the display options.
+    These are:
+    <ul>
+      <li>Samples: the original trajectory data, colors indicate class
+        labels, which will be ignored by (most) DS algorithm </li>
+      <li>Model Info: additional information from the algorithm
+        (gaussian position and shape, support vectors, etc.)</li>
+      <li>Density Map: (for 2D canvas only) a colored map or line sketch
+        displaying the flow of the dynamical system in different regions
+        of canvas space </li>
+    </ul>
+    For multi-dimensional data, it is not possible to display the
+    dynamical system flow in space, therefore only the reconstruction of
+    the known trajectories is provided.<br>
+    <br>
+    Moving the mouse on the canvas will display the computed trajectory
+    from the starting position until the dynamical system stops or
+    deviates to infinity.<br>
+    The canvas can also animate learned trajectories from given
+    positions defined by the Drag Me target button.<br>
+    <br>
+    <span style="font-weight: bold;">Obstacle Avoidance</span><br>
+    The Dynamical System can be coupled to an obstacle avoidance method,
+    which will adapt the dynamical system so as not to penetrate
+    obstacles put in the canvas. New obstacles can be added to the
+    canvas using the Obstacle tool in the drawing options.<br>
+    <br>
+    <span style="font-weight: bold;">In Practice</span><br>
+    The easiest way to test the dynamical system is to:
+    <ol>
+      <li>Draw some trajectories (left-click and drag around) in the
+        canvas </li>
+      <li>Click on "Train" </li>
+    </ol>
+    This should train the dynamical system and draw the result.<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br>
+    The interface for dynamical system (the right-hand side of the
+    Algorithm Options dialog) provides the following commands:
+    <ul>
+      <li>Train: train the dynamical system using the currently selected
+        algorithm and options</li>
+      <li>Clear: clear the current dynamical system model (does NOT
+        clear the data)</li>
+      <li>Load/Save: Load and save the current DS model (e.g. for usage
+        in another software) </li>
+      <li>Compare: adds the current algorithm and options to the Compare
+        dialog for batch comparisons</li>
+      <li>Drag Me: (for display purposes only) generate and animate
+        trajectories from a specific starting positions (drag and drop
+        onto the canvas)</li>
+      <li>X: erase all displayed trajectories </li>
+    </ul>
+    The comparison is performed by computing the step-by-step error for
+    the known trajectories, or the error between ending points, <br>
+    to evaluate the DS stability at target.<br>
+    <br>
+    The following options are available:
+    <ul>
+      <li>Centering: align all trajectories so that they share the same
+        Starting/Ending point, or do not align</li>
+      <li>Zero: ensure zero velocity at the ending point in each
+        trajectory<br>
+      </li>
+      <li>Samples: number of samples per trajectory; each trajectory
+        will be resampled, or truncated depending on the provided method
+        (by default: uniform resampling) </li>
+      <li>dT: temporal step, used to determine the velocity of each
+        trajectory, and for the generation of new trajectory by the
+        Dynamica System</li>
+      <li>color: display the DS flow as flow-lines or as a color map
+        (luminosity: speed, hue: direction) </li>
+      <li>Manual Selection: manually select the training samples
+        (overrides the Train/Test ratio option)</li>
+      <li>Obstacle Avoidance: determine the method for obstacle
+        avoidance (or disable it) </li>
+    </ul>
+    All other options are algorithm-dependent and should be described in
+    the help menu of the algorithm itself.<br>
+  </body>
+</html>

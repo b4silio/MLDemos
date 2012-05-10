@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta content="text/html; charset=ISO-8859-1"
+      http-equiv="Content-Type">
+    <title>Reinforcement Learning</title>
+  </head>
+  <body>
+    <h2>Reinforcement Learning</h2>
+    The RL problem presented in MLDemos is a Food Gathering problem, in
+    which the goal is to provide a policy for navigating a continuous
+    2-Dimensional space and pick up food. The states, actions and
+    rewards are defined next.<br>
+    <br>
+    <span style="font-weight: bold;">States</span> <br>
+    States are defined as 2-dimensional (x,y) &#8712; R2 positions in the
+    canvas space. The space is<br>
+    continuous, and bound between [0., 1.] for practical purposes.<br>
+    <br>
+    <span style="font-weight: bold;">Actions</span><br
+      style="font-weight: bold;">
+    Actions are defined as movement from one state to another, following
+    a set of possible direction (defined by the user). The sets of
+    possible actions from each states are:<br>
+    <ul>
+      <li><span style="font-weight: bold;">4-way</span>: movement along
+        either the horizontal or the vertical axis</li>
+      <li><span style="font-weight: bold;">8-way</span>: movement along
+        the horizontal or vertical axes or diagonally at a 45&deg; angle</li>
+      <li><span style="font-weight: bold;">Full</span>: movement along
+        an arbitrary direction &#952; (&#952; &#8712; [02&#960;])</li>
+    </ul>
+    In all cases, an additional action &#8221;wait&#8221; allows to not move.<br>
+    <br>
+    <span style="font-weight: bold;">Rewards</span><br>
+    The State-Value function is computed in a cumulative way by
+    considering how much food is collected throughout a trajectory from
+    any given initial state, for a number of Evaluation Steps (defined
+    by the user).<br>
+    <ul>
+      <li> <span style="font-weight: bold;">Sum of Rewards</span>: Sum
+        of all the food present in the current state at each step of the
+        trajectory. food can be collected multiple times from the same
+        state.</li>
+      <li><span style="font-weight: bold;">Sum (Non Repeatable)</span>:
+        Same as Sum of Rewards, but when food is collected at a specific
+        step, the food at that location is erased and cannot be
+        collected again.</li>
+      <li><span style="font-weight: bold;">Sum - Harsh Turns</span>:
+        Same as above, but a penalty is given if the latest action taken
+        was at more than 90&#9702; from the previous one (harsh turn), in
+        which case, no food is provided for that step.</li>
+      <li><span style="font-weight: bold;">Average of Rewards</span>:
+        The amount of food collected is averaged by the number of steps
+        taken over the whole trajectory.</li>
+    </ul>
+    The state-value function is evaluated at each policy-optimization
+    iteration for a number of states corresponding to the number of
+    basis functions, initialized at the state corresponding to the
+    center of the basis function (grid).<br>
+    <br>
+    <span style="font-weight: bold;">Policies</span><br>
+    Three policies have been implemented in MLDemos. In all cases, the
+    policy determines what action will be taken from each state using a
+    grid-like distribution of basis functions. The action taken from a
+    specific state will be &#8221;influenced&#8221; by the policy using 3 different
+    paradigms:<br>
+    <ul>
+      <li><span style="font-weight: bold;">Nearest Neighbors</span>: the
+        action taken from each state depends entirely on the direction
+        suggested by the nearest basis function.</li>
+      <li><span style="font-weight: bold;">Linear combination</span>:
+        the action taken from each state is computed as a linear
+        combination of the closest basis functions, each weighed as a
+        function of their proximity (inverse euclidian distance).</li>
+      <li><span style="font-weight: bold;">Gaussians:</span> the action
+        taken from each state is computed as a linear combination of the
+        closest basis functions, each weighed as a function of their
+        proximity (gaussian function, with sigma equal to the distance
+        between basis functions).</li>
+    </ul>
+    The first case is a peculiar case in that, while the states space is
+    continuous, the policy provides the exact same action for a set of
+    states, which makes it a somewhat discretized problem. The other two
+    policies provide a continuous set of actions for a continuous states
+    space and therefore pose no problems of a somewhat ontological
+    nature.<br>
+    <span style="font-weight: bold;"></span><br>
+    <span style="font-weight: bold;">In Practice</span><br
+      style="font-weight: bold;">
+    The easiest way to test the reinforcement learning process is to:<br>
+    <ol>
+      <li>Use the Reward Painter button in the drawing tools to paint
+        food (red) onto the canvas</li>
+      <li>Click the Initialize button to start the learning process</li>
+    </ol>
+    This will start the RL process, display the policy basis functions
+    and update them every Display Steps iterations.<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br
+      style="font-weight: bold;">
+    The interface for Reinforcement Learning (the right-hand side of the
+    Algorithm Options dialog) provides the following commands:<br>
+    <ul>
+      <li>Initialize: Initialize the RL problem and start the learning</li>
+      <li>Pause / Continue: pause the learning process (stops animation
+        as well)</li>
+      <li>Clear: clear the current classifier model (does NOT clear the
+        data)</li>
+      <li>Drag Me: (for display purposes only) display the evaluation
+        steps for an agent at a specific position (drag and drop onto
+        the canvas)</li>
+      <li>X: erase all displayed agents</li>
+    </ul>
+    The options regarding the policy type, reward and evaluation have
+    been described above.<br>
+    <br>
+    <span style="font-weight: bold;">Generate Rewards</span><br
+      style="font-weight: bold;">
+    It is possible to generate a set of pre-constructed rewards by
+    dragging and dropping a gaussian of fixed size (Var option) or a
+    gradient from the center of the canvas to the dropped position.
+    Alternatively a number of standard benchmark functions is proposed.
+    Use the Set button to draw the benchmark function onto the canvas.<br>
+    <br>
+  </body>
+</html>

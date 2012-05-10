@@ -98,6 +98,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasOptionsChanged();
     ResetPositiveClass();
     ClusterChanged();
+    ChangeInfoFile();
     drawTime.start();
     if(filename != "") Load(filename);
 }
@@ -655,7 +656,7 @@ void MLDemos::ShowContextMenuSpray(const QPoint &point)
     drawContext1Widget->move(drawToolbar->sprayButton->mapToGlobal(pt));
     drawContext1Widget->show();
     drawContext1Widget->setFocus();
-    drawContext1Widget->update();
+    drawContext1Widget->repaint();
     update();
 }
 
@@ -666,7 +667,7 @@ void MLDemos::ShowContextMenuLine(const QPoint &point)
     drawContext2Widget->move(drawToolbar->lineButton->mapToGlobal(pt));
     drawContext2Widget->show();
     drawContext2Widget->setFocus();
-    drawContext2Widget->update();
+    drawContext2Widget->repaint();
     update();
 }
 void MLDemos::ShowContextMenuEllipse(const QPoint &point)
@@ -676,7 +677,7 @@ void MLDemos::ShowContextMenuEllipse(const QPoint &point)
     drawContext2Widget->move(drawToolbar->ellipseButton->mapToGlobal(pt));
     drawContext2Widget->show();
     drawContext2Widget->setFocus();
-    drawContext2Widget->update();
+    drawContext2Widget->repaint();
     update();
 }
 void MLDemos::ShowContextMenuErase(const QPoint &point)
@@ -686,7 +687,7 @@ void MLDemos::ShowContextMenuErase(const QPoint &point)
     drawContext1Widget->move(drawToolbar->eraseButton->mapToGlobal(pt));
     drawContext1Widget->show();
     drawContext1Widget->setFocus();
-    drawContext1Widget->update();
+    drawContext1Widget->repaint();
     update();
 }
 void MLDemos::ShowContextMenuObstacle(const QPoint &point)
@@ -696,7 +697,7 @@ void MLDemos::ShowContextMenuObstacle(const QPoint &point)
     drawContext3Widget->move(drawToolbar->obstacleButton->mapToGlobal(pt));
     drawContext3Widget->show();
     drawContext3Widget->setFocus();
-    drawContext3Widget->update();
+    drawContext3Widget->repaint();
     update();
 }
 void MLDemos::ShowContextMenuReward(const QPoint &point)
@@ -706,7 +707,7 @@ void MLDemos::ShowContextMenuReward(const QPoint &point)
     drawContext4Widget->move(drawToolbar->paintButton->mapToGlobal(pt));
     drawContext4Widget->show();
     drawContext4Widget->setFocus();
-    drawContext4Widget->update();
+    drawContext4Widget->repaint();
     update();
 }
 
@@ -907,7 +908,7 @@ void MLDemos::AlgoChanged()
 {
     ChangeInfoFile();
     actionAlgorithms->setChecked(algorithmWidget->isVisible());
-    if(algorithmOptions->tabMax->isVisible())
+    if(algorithmOptions->tabMax->isVisible() || algorithmOptions->tabReinf->isVisible())
     {
         drawToolbar->paintButton->setChecked(true);
         DrawPaint();
@@ -1564,12 +1565,26 @@ void MLDemos::ChangeInfoFile()
     if(!infoFile.isEmpty())
     {
         QString filePath(helpDir.absolutePath() + "/" + infoFile);
-        showStats->helpAlgoText->setSource(QUrl::fromLocalFile(filePath));
+        if(QFile::exists(filePath))
+        {
+            showStats->helpAlgoText->setSource(QUrl::fromLocalFile(filePath));
+        }
+        else
+        {
+            showStats->helpAlgoText->setText("No information available.");
+        }
     }
 
     showStats->helpMainText->clear();
     QString filePath2(helpDir.absolutePath() + "/" + mainFile);
-    showStats->helpMainText->setSource(QUrl::fromLocalFile(filePath2));
+    if(QFile::exists(filePath2))
+    {
+        showStats->helpMainText->setSource(QUrl::fromLocalFile(filePath2));
+    }
+    else
+    {
+        showStats->helpMainText->setText("No information available.");
+    }
 }
 
 void MLDemos::ManualSelectionUpdated()

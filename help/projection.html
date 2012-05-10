@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title></title>
+  </head>
+  <body>
+    <h2>Projection</h2>
+    The Projection panel allows to test, tweak and observe how different
+    algorithms perform projection or data dimensionality reduction on
+    samples living in a N-dimensional space: "the canvas".<br>
+    Projection is usually performed in one of two ways:
+    <ul>
+      <li>N-dimensions to 1-dimension (e.g. LDA) </li>
+      <li>N-dimensions to M-dimensions (e.g. PCA) </li>
+    </ul>
+    where M is usually lower than N (a counter-example: Kernel PCA).<br>
+    <br>
+    The projection is the only type of algorithm that affects the
+    current data within the canvas (all other methods only do
+    computation on the basis of the canvas data). It however stores a
+    copy of the original data that is used by all projection methods
+    (useful e.g. for comparison). To revert to the original unprojected
+    data, it suffices to use the Revert button.<br>
+    <br>
+    However, if multiple projections need to be applied (e.g. to combine
+    PCA + LDA in successive iterations), the user needs to use the
+    Project button for the first method, and the Re-Project button for
+    the second one. Re-Project will replace the current stored data with
+    the first projection, and perform the second projection on it. The
+    projected (or re-projected) data can then be used for
+    classification, clustering or other problems.<br>
+    <br>
+    The canvas will display the results of the projection in multiple
+    layers, which can be changed using the display options. These are:
+    <ul>
+      <li>Samples: the projected samples, these replace the original
+        data (which can be re-obtained using the Revert button) </li>
+      <li>Learned Model: Additional information about the projection
+        (e.g. projection lines) </li>
+    </ul>
+    The other display layers (e.g. Density Map) are not used in
+    projection.<br>
+    <br>
+    <span style="font-weight: bold;">In Practice</span><br>
+    The easiest way to perform projection is to:
+    <ol>
+      <li>Draw some samples (left-click) somewhere in the canvas </li>
+      <li>Click on "Project"</li>
+    </ol>
+    This should compute the projection according to the algorithm
+    selected, and replace the current samples with the projected ones.<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br>
+    The interface for projection (the right-hand side of the Algorithm
+    Options dialog) provides the following commands:
+    <ul>
+      <li>Project: perform the projection using the currently selected
+        algorithm and options, pressing this button multiple times will
+        always perform the projection from the same original data</li>
+      <li>Revert: return the original data into the canvas (erase the
+        projected data) </li>
+      <li>ReProject: perform a new projection on top of the current
+        projected data (instead of the stored original data)</li>
+    </ul>
+    and the following options:
+    <ul>
+      <li>Auto-Fit: adjust the canvas to fit the projected data after
+        the projection (useful for widespread data that will be
+        normalized by the projection) </li>
+      <li>Manual Selection: manually select the training samples (if the
+        algorithm requires training data) </li>
+    </ul>
+    All other options are algorithm-dependent and should be described in
+    the help menu of the algorithm itself.<br>
+    <br>
+  </body>
+</html>

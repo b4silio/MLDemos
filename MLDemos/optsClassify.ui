@@ -25,7 +25,7 @@
   <widget class="QWidget" name="optionWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>340</x>
      <y>10</y>
      <width>171</width>
      <height>171</height>
@@ -125,57 +125,6 @@
      </property>
     </item>
    </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>80</y>
-      <width>31</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>folds</string>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="foldCountSpin">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>80</y>
-      <width>41</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>Number of cross-validation folds</string>
-    </property>
-    <property name="minimum">
-     <number>1</number>
-    </property>
-    <property name="maximum">
-     <number>20</number>
-    </property>
-    <property name="value">
-     <number>5</number>
-    </property>
-   </widget>
    <widget class="QSpinBox" name="positiveSpin">
     <property name="geometry">
      <rect>
@@ -225,7 +174,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>140</y>
+      <y>120</y>
       <width>110</width>
       <height>32</height>
      </rect>
@@ -246,7 +195,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>110</y>
+      <y>90</y>
       <width>110</width>
       <height>32</height>
      </rect>
@@ -269,7 +218,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>311</width>
+     <width>320</width>
      <height>171</height>
     </rect>
    </property>
@@ -286,30 +235,6 @@
      <string>Algorithm</string>
     </attribute>
    </widget>
-  </widget>
-  <widget class="QLabel" name="label_9">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>330</x>
-     <y>90</y>
-     <width>80</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Cross Validation</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
   </widget>
   <widget class="QPushButton" name="compareButton">
    <property name="geometry">

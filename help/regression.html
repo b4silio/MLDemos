@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title></title>
+  </head>
+  <body>
+    <h2>Regression</h2>
+    The Regression panel allows to test, tweak and observe how different
+    algorithms perform regression on samples living in a N-dimensional
+    space: "the canvas".<br>
+    Regression is usually performed from N-1 dimensions to a single
+    Output dimension (usually the last dimension of the data).<br>
+    <br>
+    The canvas will display the results of the regression in multiple
+    layers, which can be changed using the display options. These are:
+    <ul>
+      <li>Samples: the original sample data, colors indicate class
+        labels, which will be ignored by the regressor </li>
+      <li>Learned Model: the regression model obtained by the algorithm</li>
+      <ul>
+        <li>2D data: a continuous curve displaying the learned function</li>
+        <li>nD data: only the deviation for the known samples (error) is
+          shown in the vertical dimension (output dimension) </li>
+      </ul>
+      <li>Model Info: additional information from the algorithm
+        (gaussian position and shape, support vectors, etc.)</li>
+      <li>Density Map: (for 2D canvas only) confidence of the algorithm
+        at each position in space (for algorithms that support it)<br>
+      </li>
+    </ul>
+    For multi-dimensional data, it is not possible to display the actual
+    learned function, therefore only the errors for the known samples is
+    provided. To get an idea of the quality of the regression it is
+    necessary to use the Compare button and do cross-validation
+    analysis.<br>
+    <br>
+    <span style="font-weight: bold;">In Practice</span><br>
+    The easiest way to perform regression is to:
+    <ol>
+      <li>Draw some samples (left-click) in a curve from left to right </li>
+      <li>Click on "Regress"</li>
+    </ol>
+    This should train the algorithm and draw the regression curve that
+    has been learned.<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br>
+    The interface for regression (the right-hand side of the Algorithm
+    Options dialog) provides the following commands:<br>
+    <ul>
+      <li>Regress: perform the regression using the currently selected
+        algorithm and options</li>
+      <li>Clear: clear the current regression model (does NOT clear the
+        data)</li>
+      <li>Compare: adds the current algorithm and options to the Compare
+        dialog for batch comparisons</li>
+    </ul>
+    and the following options:<br>
+    <ul>
+      <li>Regression Dimension: defines the dimension to be used as
+        output for the regression (by default the last dimension)</li>
+      <li>Train / Test ratio: the ratio of samples in the canvas to be
+        used for training</li>
+      <li>Input Dimensions: determines the dimensions that should be
+        used for regression (unselected dimensions, as well as the
+        output dimension, will be ignored)</li>
+      <li>Manual Selection: manually select the training samples
+        (overrides the Train/Test ratio option)<br>
+      </li>
+    </ul>
+    All other options are algorithm-dependent and should be described in
+    the help menu of the algorithm itself.<br>
+    <br>
+  </body>
+</html>
