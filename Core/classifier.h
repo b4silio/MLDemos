@@ -44,6 +44,7 @@ public:
 	fvec fmeasures;
 	std::vector< std::vector<f32pair> > rocdata;
 	std::vector<const char *> roclabels;
+    std::map<int, std::map<int, int> > confusionMatrix[2];
 
     Classifier(): posClass(0), bSingleClass(true), bUsesDrawTimer(true), bMultiClass(false)
 	{

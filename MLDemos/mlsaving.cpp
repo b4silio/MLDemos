@@ -711,7 +711,7 @@ void MLDemos::LoadParams( QString filename )
 
 void MLDemos::ExportOutput()
 {
-    if(!classifier && !regressor && !clusterer && !dynamical && !maximizer) return;
+    if(!classifier && !regressor && !clusterer && !projector) return;
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Output Data"), "", tr("Data (*.txt *.csv)"));
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".txt") && !filename.endsWith(".csv")) filename += ".txt";
@@ -721,18 +721,38 @@ void MLDemos::ExportOutput()
     QTextStream out(&file);
     if(!file.isOpen()) return;
 
-    if(clusterer)
+    if(classifier || clusterer || regressor)
     {
+        out << "#Sample(n-dims) TrueClass ComputedValue(s)\n";
         vector<fvec> samples = canvas->data->GetSamples();
+        ivec labels = canvas->data->GetLabels();
         FOR(i, samples.size())
         {
-            fvec sample = samples[i];
-            fvec res = clusterer->Test(sample);
-            FOR(d, res.size())
-            {
-                out << QString("%1\t").arg(res[d], 0, 'f', 3);
-            }
-            out << QString("\n");
+            fvec &sample = samples[i];
+            fvec res;
+            if(classifier) res = classifier->TestMulti(sample);
+            else if (clusterer) res = clusterer->Test(sample);
+            else if (regressor) res = regressor->Test(sample);
+            FOR(d, sample.size()) out << QString("%1\t").arg(sample[d]);
+            out << QString("%1\t").arg(labels[i]);
+            FOR(d, res.size()) out << QString("%1\t").arg(res[d], 0, 'f', 3);
+            out << "\n";
+        }
+    }
+    else if(projector)
+    {
+        out << "#Sample(n-dims) TrueClass Projected(m-dims)\n";
+        vector<fvec> samples = canvas->data->GetSamples();
+        ivec labels = canvas->data->GetLabels();
+        FOR(i, samples.size())
+        {
+            fvec &sample = samples[i];
+            fvec projected;
+            projected = projector->Project(sample);
+            FOR(d, sample.size()) out << QString("%1\t").arg(sample[d]);
+            out << QString("%1\t").arg(labels[i]);
+            FOR(d, projected.size()) out << QString("%1\t").arg(projected[d], 0, 'f', 3);
+            out << "\n";
         }
     }
     file.close();

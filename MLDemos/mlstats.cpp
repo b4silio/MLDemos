@@ -26,6 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <fstream>
 #include <QPixmap>
 #include <QBitmap>
+#include <QBoxLayout>
 #include <QSettings>
 #include <QFileDialog>
 #include <vector>
@@ -246,6 +247,88 @@ void MLDemos::UpdateInfo()
     {
         information += "Classification Performance:\n" + lastTrainingInfo;
         information += "\nClassifier: " + QString(classifier->GetInfoString());
+        // we also want to generate the confusion matrix
+        if(classifier->IsMultiClass())
+        {
+            QObjectList children = showStats->informationWidget->children();
+            FOR(i, children.size()) delete children[i];
+            if(!showStats->informationWidget->layout())
+            {
+                QBoxLayout *layout = new QBoxLayout(QBoxLayout::TopToBottom, showStats->informationWidget);
+                layout->setContentsMargins(0,0,0,0);
+            }
+            QPixmap confusionPixmap(150,150);
+            QPainter painter(&confusionPixmap);
+            QLabel *labelTrain = new QLabel();
+            QLabel *labelTest = new QLabel();
+            if(classifier->confusionMatrix[0].size())
+            {
+                confusionPixmap.fill(Qt::white);
+                map< int,map<int,int> > confusion = classifier->confusionMatrix[0];
+                int classCount = 0;
+                map<int,int> maxCount;
+                for(map<int,map<int,int> >::iterator it = confusion.begin();it != confusion.end();it++)
+                {
+                    classCount = max(classCount, it->first);
+                    for(map<int,int>::iterator it2=it->second.begin(); it2 != it->second.end(); it2++)
+                    {
+                        maxCount[it->first] = max(maxCount[it->first], it2->second);
+                    }
+                }
+                classCount++;
+                int w = max(1,confusionPixmap.width()/classCount);
+                int h = max(1,confusionPixmap.height()/classCount);
+                FOR(c, classCount)
+                {
+                    int maxCnt = maxCount[c];
+                    int y = c *confusionPixmap.height() / classCount;
+                    FOR(c2, classCount)
+                    {
+                        int x = c2 * confusionPixmap.width() / classCount;
+                        float value = confusion[c][c2] / (float)maxCnt;
+                        painter.fillRect(x, y, w, h, QColor(255, (1.f-value)*255, (1.f-value)*255));
+                    }
+                }
+                //showStats->informationWidget->layout()->addWidget(new QLabel("Confusion Matrix"));
+                showStats->informationWidget->layout()->addWidget(labelTrain);
+                labelTrain->setPixmap(confusionPixmap);
+            }
+            if(classifier->confusionMatrix[1].size())
+            {
+                confusionPixmap.fill(Qt::white);
+                map< int,map<int,int> > confusion = classifier->confusionMatrix[1];
+                int classCount = 0;
+                map<int,int> maxCount;
+                for(map<int,map<int,int> >::iterator it = confusion.begin();it != confusion.end();it++)
+                {
+                    classCount = max(classCount, it->first);
+                    for(map<int,int>::iterator it2=it->second.begin(); it2 != it->second.end(); it2++)
+                    {
+                        maxCount[it->first] = max(maxCount[it->first], it2->second);
+                    }
+                }
+                classCount++;
+                int w = max(1,confusionPixmap.width()/classCount);
+                int h = max(1,confusionPixmap.height()/classCount);
+                FOR(c, classCount)
+                {
+                    int maxCnt = maxCount[c];
+                    int y = c *confusionPixmap.height() / classCount;
+                    FOR(c2, classCount)
+                    {
+                        int x = c2 * confusionPixmap.width() / classCount;
+                        float value = confusion[c][c2] / (float)maxCnt;
+                        painter.fillRect(x, y, w, h, QColor(255, (1.f-value)*255, (1.f-value)*255));
+                    }
+                }
+                //showStats->informationWidget->layout()->addWidget(new QLabel("Confusion (Test)"));
+                showStats->informationWidget->layout()->addWidget(labelTest);
+                labelTest->setPixmap(confusionPixmap);
+            }
+            labelTrain->show();
+            labelTest->show();
+            showStats->informationWidget->repaint();
+        }
     }
 	if(regressor)  information += "\nRegressor: "  + QString(regressor->GetInfoString());
 	if(clusterer)  information += "\nClusterer: "  + QString(clusterer->GetInfoString());

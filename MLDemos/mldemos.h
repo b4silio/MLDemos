@@ -75,7 +75,7 @@ private:
 
     QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *compareWidget, *projectWidget;
 
-	QNamedWindow *rocWidget, *crossvalidWidget, *infoWidget;
+    QNamedWindow *rocWidget, *crossvalidWidget;
 
 	Ui::MLDemosClass ui;
 	Ui::viewOptionDialog *displayOptions;

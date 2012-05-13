@@ -283,12 +283,10 @@ void MLDemos::initDialogs()
     manualSelection->setupUi(manualSelectDialog = new QDialog());
     inputDimensions->setupUi(inputDimensionsDialog = new QDialog());
     rocWidget = new QNamedWindow("ROC Curve", false, showStats->rocWidget);
-    infoWidget = new QNamedWindow("Info", false, showStats->informationWidget);
 
 
     connect(showStats->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(StatsChanged()));
     connect(rocWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
-    connect(infoWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
     connect(manualSelection->sampleList, SIGNAL(itemSelectionChanged()), this, SLOT(ManualSelectionChanged()));
     connect(manualSelection->clearSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionClear()));
     connect(manualSelection->invertSelectionButton, SIGNAL(clicked()), this, SLOT(ManualSelectionInvert()));

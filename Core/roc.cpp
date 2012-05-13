@@ -243,6 +243,40 @@ fvec GetBestFMeasure( std::vector<f32pair> data )
     return res;
 }
 
+std::pair<float,float> GetMicroMacroFMeasure(std::vector<f32pair> data)
+{
+    if(!data.size()) return std::make_pair(0.f,0.f);
+    std::map<int,ivec> perClass; // count, tp, fp
+    FOR(i, data.size())
+    {
+        int trueClass = data[i].second;
+        int predicted = data[i].first;
+        if(!perClass.count(trueClass)) perClass[trueClass] = ivec(3,0);
+        perClass[trueClass][0]++;
+        if(predicted == trueClass) perClass[trueClass][1]++; // tp
+        else perClass[trueClass][2]++; // fp
+    }
+    int microTP = 0, microFP = 0, microCount=0;
+    float macroFMeasure = 0.f;
+    for(std::map<int,ivec>::iterator it = perClass.begin(); it != perClass.end(); it++)
+    {
+        int c = it->first;
+        int count = it->second[0];
+        int tp = it->second[1];
+        int fp = it->second[2];
+        float precision = tp/float(tp+fp);
+        float recall = tp/float(count);
+        macroFMeasure += 2*precision*recall/(precision+recall);
+        microTP += tp;
+        microFP += fp;
+        microCount += count;
+    }
+    macroFMeasure /= perClass.size();
+    float precision = microTP/float(microTP+microFP);
+    float recall = microTP/float(microCount);
+    float microFMeasure = 2*precision*recall/(precision+recall);
+    return std::make_pair(microFMeasure, macroFMeasure);
+}
 
 float GetAveragePrecision( std::vector<f32pair> data )
 {
