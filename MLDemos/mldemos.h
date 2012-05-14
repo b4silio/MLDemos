@@ -139,7 +139,8 @@ private:
 	QList<QString> compareOptions;
 	QLabel *compareDisplay;
 	CompareAlgorithms *compare;
-	void AddPlugin(ClassifierInterface *iClassifier, const char *method);
+    std::map< QString , std::vector<QWidget*> > algoWidgets;
+    void AddPlugin(ClassifierInterface *iClassifier, const char *method);
 	void AddPlugin(ClustererInterface *iCluster, const char *method);
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
 	void AddPlugin(DynamicalInterface *iDynamical, const char *method);

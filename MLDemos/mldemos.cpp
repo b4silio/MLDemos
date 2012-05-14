@@ -368,6 +368,13 @@ void MLDemos::initDialogs()
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsClassify->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
+    connect(optionsClassify->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsClassify->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsClassify->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
@@ -375,6 +382,13 @@ void MLDemos::initDialogs()
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsRegress->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
+    connect(optionsRegress->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsRegress->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsRegress->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsCluster->clusterButton, SIGNAL(clicked()), this, SLOT(Cluster()));
     connect(optionsCluster->iterationButton, SIGNAL(clicked()), this, SLOT(ClusterIterate()));
@@ -383,6 +397,13 @@ void MLDemos::initDialogs()
     connect(optionsCluster->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
     connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsCluster->optimizeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ClusterChanged()));
+    connect(optionsCluster->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsCluster->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsCluster->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsDynamic->regressionButton, SIGNAL(clicked()), this, SLOT(Dynamize()));
     connect(optionsDynamic->clearButton, SIGNAL(clicked()), this, SLOT(Clear()));
@@ -398,6 +419,13 @@ void MLDemos::initDialogs()
     connect(optionsDynamic->resampleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeActiveOptions()));
     connect(optionsDynamic->targetButton, SIGNAL(pressed()), this, SLOT(TargetButton()));
     connect(optionsDynamic->clearTargetButton, SIGNAL(clicked()), this, SLOT(ClearTargets()));
+    connect(optionsDynamic->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsDynamic->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsDynamic->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
     connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
@@ -407,6 +435,13 @@ void MLDemos::initDialogs()
     connect(optionsMaximize->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
     connect(optionsMaximize->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
     connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
+    connect(optionsMaximize->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsMaximize->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsMaximize->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsReinforcement->maximizeButton, SIGNAL(clicked()), this, SLOT(Reinforce()));
     connect(optionsReinforcement->pauseButton, SIGNAL(clicked()), this, SLOT(ReinforceContinue()));
@@ -416,11 +451,25 @@ void MLDemos::initDialogs()
     connect(optionsReinforcement->gaussianButton, SIGNAL(pressed()), this, SLOT(GaussianButton()));
     connect(optionsReinforcement->gradientButton, SIGNAL(pressed()), this, SLOT(GradientButton()));
     connect(optionsReinforcement->benchmarkButton, SIGNAL(clicked()), this, SLOT(BenchmarkButton()));
+    connect(optionsReinforcement->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsReinforcement->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsReinforcement->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsProject->projectButton, SIGNAL(clicked()), this, SLOT(Project()));
     connect(optionsProject->revertButton, SIGNAL(clicked()), this, SLOT(ProjectRevert()));
     connect(optionsProject->reprojectButton, SIGNAL(clicked()), this, SLOT(ProjectReproject()));
     connect(optionsProject->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
+    connect(optionsProject->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
+    if(!optionsProject->algoWidget->layout())
+    {
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsProject->algoWidget);
+        horizontalLayout->setSpacing(0);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    }
 
     connect(optionsCompare->compareButton, SIGNAL(clicked()), this, SLOT(Compare()));
     connect(optionsCompare->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
@@ -431,32 +480,18 @@ void MLDemos::initDialogs()
     connect(optionsRegress->outputDimCombo, SIGNAL(currentIndexChanged(int)), optionsCompare->outputDimCombo, SLOT(setCurrentIndex(int)));
     connect(optionsCompare->outputDimCombo, SIGNAL(currentIndexChanged(int)), optionsRegress->outputDimCombo, SLOT(setCurrentIndex(int)));
 
-    optionsClassify->tabWidget->clear();
-    optionsCluster->tabWidget->clear();
-    optionsRegress->tabWidget->clear();
-    optionsDynamic->tabWidget->clear();
-    optionsMaximize->tabWidget->clear();
-    optionsReinforcement->tabWidget->clear();
-    optionsProject->tabWidget->clear();
-    optionsClassify->tabWidget->setUsesScrollButtons(true);
-    optionsCluster->tabWidget->setUsesScrollButtons(true);
-    optionsRegress->tabWidget->setUsesScrollButtons(true);
-    optionsDynamic->tabWidget->setUsesScrollButtons(true);
-    optionsMaximize->tabWidget->setUsesScrollButtons(true);
-    optionsReinforcement->tabWidget->setUsesScrollButtons(true);
-    optionsProject->tabWidget->setUsesScrollButtons(true);
+    optionsClassify->algoList->clear();
+    optionsCluster->algoList->clear();
+    optionsRegress->algoList->clear();
+    optionsDynamic->algoList->clear();
+    optionsMaximize->algoList->clear();
+    optionsReinforcement->algoList->clear();
+    optionsProject->algoList->clear();
 
     QHBoxLayout *layout = new QHBoxLayout(optionsCompare->resultWidget);
     compare = new CompareAlgorithms(optionsCompare->resultWidget);
 
     connect(algorithmOptions->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsClassify->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsCluster->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsRegress->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsDynamic->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsMaximize->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsReinforcement->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
-    connect(optionsProject->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(AlgoChanged()));
 
     //canvas = new Canvas(ui.centralWidget);
     canvas = new Canvas(ui.canvasWidget);
@@ -781,28 +816,48 @@ void MLDemos::AddPlugin(ClassifierInterface *iClassifier, const char *method)
     // we add the interface so we can use it to produce classifiers
     classifiers.push_back(iClassifier);
     // we add the classifier parameters to the gui
-    optionsClassify->tabWidget->addTab(iClassifier->GetParameterWidget(), iClassifier->GetName());
+    optionsClassify->algoList->addItem(iClassifier->GetName());
+    QWidget *widget = iClassifier->GetParameterWidget();
+    widget->setParent(optionsClassify->algoWidget);
+    optionsClassify->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["classifiers"].push_back(widget);
 }
 
 void MLDemos::AddPlugin(ClustererInterface *iCluster, const char *method)
 {
     if(!iCluster) return;
     clusterers.push_back(iCluster);
-    optionsCluster->tabWidget->addTab(iCluster->GetParameterWidget(), iCluster->GetName());
+    optionsCluster->algoList->addItem(iCluster->GetName());
+    QWidget *widget = iCluster->GetParameterWidget();
+    widget->setParent(optionsCluster->algoWidget);
+    optionsCluster->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["clusterers"].push_back(widget);
 }
 
 void MLDemos::AddPlugin(RegressorInterface *iRegress, const char *method)
 {
     if(!iRegress) return;
     regressors.push_back(iRegress);
-    optionsRegress->tabWidget->addTab(iRegress->GetParameterWidget(), iRegress->GetName());
+    optionsRegress->algoList->addItem(iRegress->GetName());
+    QWidget *widget = iRegress->GetParameterWidget();
+    widget->setParent(optionsRegress->algoWidget);
+    optionsRegress->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["regressors"].push_back(widget);
 }
 
 void MLDemos::AddPlugin(DynamicalInterface *iDynamical, const char *method)
 {
     if(!iDynamical) return;
     dynamicals.push_back(iDynamical);
-    optionsDynamic->tabWidget->addTab(iDynamical->GetParameterWidget(), iDynamical->GetName());
+    optionsDynamic->algoList->addItem(iDynamical->GetName());
+    QWidget *widget = iDynamical->GetParameterWidget();
+    widget->setParent(optionsDynamic->algoWidget);
+    optionsDynamic->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["dynamicals"].push_back(widget);
 }
 
 void MLDemos::AddPlugin(AvoidanceInterface *iAvoid, const char *method)
@@ -816,21 +871,36 @@ void MLDemos::AddPlugin(MaximizeInterface *iMaximizer, const char *method)
 {
     if(!iMaximizer) return;
     maximizers.push_back(iMaximizer);
-    optionsMaximize->tabWidget->addTab(iMaximizer->GetParameterWidget(), iMaximizer->GetName());
+    optionsMaximize->algoList->addItem(iMaximizer->GetName());
+    QWidget *widget = iMaximizer->GetParameterWidget();
+    widget->setParent(optionsMaximize->algoWidget);
+    optionsMaximize->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["maximizers"].push_back(widget);
 }
 
 void MLDemos::AddPlugin(ReinforcementInterface *iReinforcement, const char *method)
 {
     if(!iReinforcement) return;
     reinforcements.push_back(iReinforcement);
-    optionsReinforcement->tabWidget->addTab(iReinforcement->GetParameterWidget(), iReinforcement->GetName());
+    optionsReinforcement->algoList->addItem(iReinforcement->GetName());
+    QWidget *widget = iReinforcement->GetParameterWidget();
+    widget->setParent(optionsReinforcement->algoWidget);
+    optionsReinforcement->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["reinforcements"].push_back(widget);
 }
 
 void MLDemos::AddPlugin(ProjectorInterface *iProject, const char *method)
 {
     if(!iProject) return;
     projectors.push_back(iProject);
-    optionsProject->tabWidget->addTab(iProject->GetParameterWidget(), iProject->GetName());
+    optionsProject->algoList->addItem(iProject->GetName());
+    QWidget *widget = iProject->GetParameterWidget();
+    widget->setParent(optionsProject->algoWidget);
+    optionsProject->algoWidget->layout()->addWidget(widget);
+    widget->hide();
+    algoWidgets["projectors"].push_back(widget);
 }
 
 MLDemos::~MLDemos()
@@ -904,6 +974,70 @@ void MLDemos::ClusterChanged()
 
 void MLDemos::AlgoChanged()
 {
+    if(algorithmOptions->tabClass->isVisible())
+    {
+        int index = optionsClassify->algoList->currentIndex();
+        FOR(i, algoWidgets["classifiers"].size())
+        {
+            if(i==index) algoWidgets["classifiers"][i]->show();
+            else algoWidgets["classifiers"][i]->hide();
+        }
+    }
+    if(algorithmOptions->tabClust->isVisible())
+    {
+        int index = optionsCluster->algoList->currentIndex();
+        FOR(i, algoWidgets["clusterers"].size())
+        {
+            if(i==index) algoWidgets["clusterers"][i]->show();
+            else algoWidgets["clusterers"][i]->hide();
+        }
+    }
+    if(algorithmOptions->tabDyn->isVisible())
+    {
+        int index = optionsDynamic->algoList->currentIndex();
+        FOR(i, algoWidgets["dynamicals"].size())
+        {
+            if(i==index) algoWidgets["dynamicals"][i]->show();
+            else algoWidgets["dynamicals"][i]->hide();
+        }
+    }
+    if(algorithmOptions->tabMax->isVisible())
+    {
+        int index = optionsMaximize->algoList->currentIndex();
+        FOR(i, algoWidgets["maximizers"].size())
+        {
+            if(i==index) algoWidgets["maximizers"][i]->show();
+            else algoWidgets["maximizers"][i]->hide();
+        }
+    }
+    if(algorithmOptions->tabProj->isVisible())
+    {
+        int index = optionsProject->algoList->currentIndex();
+        FOR(i, algoWidgets["projectors"].size())
+        {
+            if(i==index) algoWidgets["projectors"][i]->show();
+            else algoWidgets["projectors"][i]->hide();
+        }
+    }
+    if(algorithmOptions->tabRegr->isVisible())
+    {
+        int index = optionsRegress->algoList->currentIndex();
+        FOR(i, algoWidgets["regressors"].size())
+        {
+            if(i==index) algoWidgets["regressors"][i]->show();
+            else algoWidgets["regressors"][i]->hide();
+        }
+    }
+    if(algorithmOptions->tabReinf->isVisible())
+    {
+        int index = optionsReinforcement->algoList->currentIndex();
+        FOR(i, algoWidgets["reinforcements"].size())
+        {
+            if(i==index) algoWidgets["reinforcements"][i]->show();
+            else algoWidgets["reinforcements"][i]->hide();
+        }
+    }
+
     ChangeInfoFile();
     actionAlgorithms->setChecked(algorithmWidget->isVisible());
     if(algorithmOptions->tabMax->isVisible() || algorithmOptions->tabReinf->isVisible())
@@ -927,7 +1061,7 @@ void MLDemos::CompareAdd()
 {
     if(algorithmOptions->tabClass->isVisible())
     {
-        int tab = optionsClassify->tabWidget->currentIndex();
+        int tab = optionsClassify->algoList->currentIndex();
         QString name = classifiers[tab]->GetAlgoString();
         QString parameterData;
         QTextStream stream(&parameterData, QIODevice::WriteOnly);
@@ -938,7 +1072,7 @@ void MLDemos::CompareAdd()
     }
     if(algorithmOptions->tabRegr->isVisible())
     {
-        int tab = optionsRegress->tabWidget->currentIndex();
+        int tab = optionsRegress->algoList->currentIndex();
         QString name = regressors[tab]->GetAlgoString();
         QString parameterData;
         QTextStream stream(&parameterData, QIODevice::WriteOnly);
@@ -949,7 +1083,7 @@ void MLDemos::CompareAdd()
     }
     if(algorithmOptions->tabDyn->isVisible())
     {
-        int tab = optionsDynamic->tabWidget->currentIndex();
+        int tab = optionsDynamic->algoList->currentIndex();
         QString name = dynamicals[tab]->GetAlgoString();
         QString parameterData;
         QTextStream stream(&parameterData, QIODevice::WriteOnly);
@@ -960,7 +1094,7 @@ void MLDemos::CompareAdd()
     }
     if(algorithmOptions->tabMax->isVisible())
     {
-        int tab = optionsMaximize->tabWidget->currentIndex();
+        int tab = optionsMaximize->algoList->currentIndex();
         QString name = maximizers[tab]->GetAlgoString();
         QString parameterData;
         QTextStream stream(&parameterData, QIODevice::WriteOnly);
@@ -1487,49 +1621,49 @@ void MLDemos::ChangeInfoFile()
     if(algorithmOptions->tabClass->isVisible())
     {
         mainFile = "classification.html";
-        int tab = optionsClassify->tabWidget->currentIndex();
+        int tab = optionsClassify->algoList->currentIndex();
         if(tab < 0 || tab >= (int)classifiers.size() || !classifiers[tab]) return;
         infoFile = classifiers[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabClust->isVisible())
     {
         mainFile = "clustering.html";
-        int tab = optionsCluster->tabWidget->currentIndex();
+        int tab = optionsCluster->algoList->currentIndex();
         if(tab < 0 || tab >= (int)clusterers.size() || !clusterers[tab]) return;
         infoFile = clusterers[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabRegr->isVisible())
     {
         mainFile = "regression.html";
-        int tab = optionsRegress->tabWidget->currentIndex();
+        int tab = optionsRegress->algoList->currentIndex();
         if(tab < 0 || tab >= (int)regressors.size() || !regressors[tab]) return;
         infoFile = regressors[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabDyn->isVisible())
     {
         mainFile = "dynamical.html";
-        int tab = optionsDynamic->tabWidget->currentIndex();
+        int tab = optionsDynamic->algoList->currentIndex();
         if(tab < 0 || tab >= (int)dynamicals.size() || !dynamicals[tab]) return;
         infoFile = dynamicals[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabMax->isVisible())
     {
         mainFile = "maximization.html";
-        int tab = optionsMaximize->tabWidget->currentIndex();
+        int tab = optionsMaximize->algoList->currentIndex();
         if(tab < 0 || tab >= (int)maximizers.size() || !maximizers[tab]) return;
         infoFile = maximizers[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabProj->isVisible())
     {
         mainFile = "projection.html";
-        int tab = optionsProject->tabWidget->currentIndex();
+        int tab = optionsProject->algoList->currentIndex();
         if(tab < 0 || tab >= (int)projectors.size() || !projectors[tab]) return;
         infoFile = projectors[tab]->GetInfoFile();
     }
     if(algorithmOptions->tabReinf->isVisible())
     {
         mainFile = "reinforcement.html";
-        int tab = optionsReinforcement->tabWidget->currentIndex();
+        int tab = optionsReinforcement->algoList->currentIndex();
         if(tab < 0 || tab >= (int)reinforcements.size() || !reinforcements[tab]) return;
         infoFile = reinforcements[tab]->GetInfoFile();
     }

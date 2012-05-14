@@ -22,29 +22,6 @@
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <widget class="QTabWidget" name="tabWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>381</width>
-     <height>171</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="currentIndex">
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="tab">
-    <attribute name="title">
-     <string>Algorithm</string>
-    </attribute>
-   </widget>
-  </widget>
   <widget class="QPushButton" name="projectButton">
    <property name="geometry">
     <rect>
@@ -152,6 +129,44 @@
    <property name="checked">
     <bool>true</bool>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>-4</y>
+     <width>390</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Algorithm</string>
+   </property>
+   <widget class="QComboBox" name="algoList">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>190</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QWidget" name="algoWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>4</x>
+      <y>47</y>
+      <width>380</width>
+      <height>141</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

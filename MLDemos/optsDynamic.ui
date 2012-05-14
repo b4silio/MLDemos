@@ -22,29 +22,6 @@
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <widget class="QTabWidget" name="tabWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>331</width>
-     <height>171</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="currentIndex">
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="tab">
-    <attribute name="title">
-     <string>Kernels</string>
-    </attribute>
-   </widget>
-  </widget>
   <widget class="QWidget" name="optionWidget" native="true">
    <property name="geometry">
     <rect>
@@ -594,6 +571,44 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Compare</string>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>-4</y>
+     <width>330</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Algorithm</string>
+   </property>
+   <widget class="QComboBox" name="algoList">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>190</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QWidget" name="algoWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>4</x>
+      <y>47</y>
+      <width>321</width>
+      <height>141</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>
