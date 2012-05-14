@@ -35,7 +35,7 @@ public:
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
 
     // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("KPCA");}
+    QString GetName(){return QString("Kernel PCA");}
     QString GetAlgoString();
     QString GetInfoFile(){return "KPCA.html";}
     QWidget *GetParameterWidget(){return widget;}

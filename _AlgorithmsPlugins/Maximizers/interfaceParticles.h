@@ -37,7 +37,7 @@ public:
 	Maximizer *GetMaximizer();
 
 	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("PSO");}
+    QString GetName(){return QString("Particle Swarm Optimization");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "particles.html";}
     QWidget *GetParameterWidget(){return widget;}

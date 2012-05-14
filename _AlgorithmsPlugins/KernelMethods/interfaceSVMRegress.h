@@ -42,7 +42,7 @@ public:
 	void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVR");}
+        QString GetName(){return QString("Support Vector Regression");}
         QString GetAlgoString();
         QString GetInfoFile(){return "kernelRegression.html";}
         QWidget *GetParameterWidget(){return widget;}

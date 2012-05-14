@@ -35,15 +35,15 @@ public:
 	ClassKNN();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier){};
+    void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier){}
 	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("KNN");};
+    QString GetName(){return QString("K-Nearest Neighbours");}
 	QString GetAlgoString();
-	QString GetInfoFile(){return "knn.html";};
-	bool UsesDrawTimer(){return true;};
-	QWidget *GetParameterWidget(){return widget;};
+    QString GetInfoFile(){return "knn.html";}
+    bool UsesDrawTimer(){return true;}
+    QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Classifier *classifier);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);

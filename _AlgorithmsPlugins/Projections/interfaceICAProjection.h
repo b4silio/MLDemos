@@ -20,7 +20,7 @@ public:
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
 
     // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("ICA");}
+    QString GetName(){return QString("Independent Component Analysis");}
     QString GetAlgoString();
     QString GetInfoFile(){return "ICA.html";}
     QWidget *GetParameterWidget(){return widget;}

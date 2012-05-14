@@ -39,11 +39,11 @@ public:
 	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("GMM");};
+    QString GetName(){return QString("Gaussian Mixture Model");}
 	QString GetAlgoString();
-	QString GetInfoFile(){return "gmm.html";};
-	bool UsesDrawTimer(){return true;};
-	QWidget *GetParameterWidget(){return widget;};
+    QString GetInfoFile(){return "gmm.html";}
+    bool UsesDrawTimer(){return true;}
+    QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Classifier *classifier);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);

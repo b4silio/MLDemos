@@ -40,7 +40,7 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("KMeans");}
+        QString GetName(){return QString("K-Means");}
         QString GetAlgoString(){return GetName();}
         QString GetInfoFile(){return "kmeans.html";}
         QWidget *GetParameterWidget(){return widget;}

@@ -40,7 +40,7 @@ public:
 	void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("GMM");}
+    QString GetName(){return QString("Gaussian Mixture Regression");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "gmm.html";}
     QWidget *GetParameterWidget(){return widget;}
