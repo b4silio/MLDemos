@@ -56,12 +56,7 @@ void ClassSVM::ChangeOptions()
         params->svmTypeLabel->setText("Nu");
         if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
-    case 2: // RVM
-        params->optimizeCheck->setVisible(false);
-        params->svmTypeLabel->setText("eps");
-        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
-        break;
-    case 3: // Pegasos
+    case 2: // Pegasos
         params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("lambda");
         params->maxSVSpin->setEnabled(true);
@@ -115,11 +110,7 @@ QString ClassSVM::GetAlgoString()
         algo += "Nu-SVM";
         algo += QString(" %1").arg(C);
         break;
-    case 2: // RVM
-        algo += "RVM";
-        algo += QString(" %1").arg(C);
-        break;
-    case 3: // Pegasos
+    case 2: // Pegasos
         algo += "Pegasos";
         algo += QString(" %1 %2").arg(C).arg(sv);
         break;
@@ -153,10 +144,6 @@ void ClassSVM::SetParams(Classifier *classifier)
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
     bool bOptimize = params->optimizeCheck->isChecked();
-
-
-    ClassifierRVM *rvm = dynamic_cast<ClassifierRVM *>(classifier);
-    if(rvm) rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
 
     ClassifierPegasos *pegasos = dynamic_cast<ClassifierPegasos *>(classifier);
     if(pegasos) pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
@@ -204,9 +191,6 @@ Classifier *ClassSVM::GetClassifier()
     switch(svmType)
     {
     case 2:
-        classifier = new ClassifierRVM();
-        break;
-    case 3:
         classifier = new ClassifierPegasos();
         break;
     default:
@@ -221,12 +205,10 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 {
     painter.setRenderHint(QPainter::Antialiasing);
 
-    if(dynamic_cast<ClassifierRVM*>(classifier) || dynamic_cast<ClassifierPegasos*>(classifier))
+    if(dynamic_cast<ClassifierPegasos*>(classifier))
     {
         // we want to draw the support vectors
-        vector<fvec> sv;
-        if(dynamic_cast<ClassifierRVM*>(classifier)) sv = dynamic_cast<ClassifierRVM*>(classifier)->GetSVs();
-        else sv = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
+        vector<fvec> sv = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
         int radius = 9;
         FOR(i, sv.size())
         {
@@ -293,7 +275,7 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
         if(resMin == resMax) resMin -= 3;
     }
 
-    bool bNegatives = dynamic_cast<ClassifierRVM*>(classifier) || dynamic_cast<ClassifierPegasos*>(classifier);
+    bool bNegatives = dynamic_cast<ClassifierPegasos*>(classifier);
 
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);
