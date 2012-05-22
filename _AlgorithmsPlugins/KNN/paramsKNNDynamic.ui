@@ -40,6 +40,11 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>Power for the Lp norm</string>
    </property>
@@ -98,6 +103,11 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>Number of Nearest Neighbors to be evaluated
 As this is Approximate Nearest Neighbor,
@@ -122,6 +132,11 @@ might be lower than K</string>
      <width>81</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="toolTip">
     <string>Distance metric for the evaluation of NN</string>

@@ -39,10 +39,10 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("GMM");};
-	QString GetAlgoString(){ return GetName();};
-	QString GetInfoFile(){return "gmm.html";};
-	QWidget *GetParameterWidget(){return widget;};
+    QString GetName(){return QString("Gaussian Mixture Model");}
+    QString GetAlgoString(){ return GetName();}
+    QString GetInfoFile(){return "gmm.html";}
+    QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Clusterer *clusterer);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);

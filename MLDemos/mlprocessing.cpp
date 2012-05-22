@@ -51,8 +51,8 @@ void MLDemos::Classify()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsClassify->tabWidget->count()) return;
-    int tab = optionsClassify->tabWidget->currentIndex();
+    if(!optionsClassify->algoList->count()) return;
+    int tab = optionsClassify->algoList->currentIndex();
     if(tab >= classifiers.size() || !classifiers[tab]) return;
 
     classifier = classifiers[tab]->GetClassifier();
@@ -150,8 +150,8 @@ void MLDemos::Regression()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsRegress->tabWidget->count()) return;
-    int tab = optionsRegress->tabWidget->currentIndex();
+    if(!optionsRegress->algoList->count()) return;
+    int tab = optionsRegress->algoList->currentIndex();
     if(tab >= regressors.size() || !regressors[tab]) return;
     int outputDim = optionsRegress->outputDimCombo->currentIndex();
     ivec inputDims = GetInputDimensions();
@@ -248,8 +248,8 @@ void MLDemos::Dynamize()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsDynamic->tabWidget->count()) return;
-    int tab = optionsDynamic->tabWidget->currentIndex();
+    if(!optionsDynamic->algoList->count()) return;
+    int tab = optionsDynamic->algoList->currentIndex();
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     dynamical = dynamicals[tab]->GetDynamical();
     tabUsedForTraining = tab;
@@ -484,8 +484,8 @@ void MLDemos::Cluster()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsCluster->tabWidget->count()) return;
-    int tab = optionsCluster->tabWidget->currentIndex();
+    if(!optionsCluster->algoList->count()) return;
+    int tab = optionsCluster->algoList->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
@@ -589,9 +589,8 @@ void MLDemos::ClusterTest()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsCluster->tabWidget->count()) return;
-
-    int tab = optionsCluster->tabWidget->currentIndex();
+    if(!optionsCluster->algoList->count()) return;
+    int tab = optionsCluster->algoList->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
@@ -687,8 +686,8 @@ void MLDemos::ClusterOptimize()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsCluster->tabWidget->count()) return;
-    int tab = optionsCluster->tabWidget->currentIndex();
+    if(!optionsCluster->algoList->count()) return;
+    int tab = optionsCluster->algoList->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
@@ -899,7 +898,7 @@ void MLDemos::ClusterIterate()
 {
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
-    int tab = optionsCluster->tabWidget->currentIndex();
+    int tab = optionsCluster->algoList->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     QMutexLocker lock(&mutex);
     if(!clusterer)
@@ -956,8 +955,8 @@ void MLDemos::Maximize()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsMaximize->tabWidget->count()) return;
-    int tab = optionsMaximize->tabWidget->currentIndex();
+    if(!optionsMaximize->algoList->count()) return;
+    int tab = optionsMaximize->algoList->currentIndex();
     if(tab >= maximizers.size() || !maximizers[tab]) return;
     maximizer = maximizers[tab]->GetMaximizer();
     maximizer->maxAge = optionsMaximize->iterationsSpin->value();
@@ -1053,8 +1052,8 @@ void MLDemos::Reinforce()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsReinforcement->tabWidget->count()) return;
-    int tab = optionsReinforcement->tabWidget->currentIndex();
+    if(!optionsReinforcement->algoList->count()) return;
+    int tab = optionsReinforcement->algoList->currentIndex();
     if(tab >= reinforcements.size() || !reinforcements[tab]) return;
     reinforcement = reinforcements[tab]->GetReinforcement();
 
@@ -1145,8 +1144,8 @@ void MLDemos::Project()
     DEL(reinforcement);
     DEL(projector);
     lastTrainingInfo = "";
-    if(!optionsProject->tabWidget->count()) return;
-    int tab = optionsProject->tabWidget->currentIndex();
+    if(!optionsProject->algoList->count()) return;
+    int tab = optionsProject->algoList->currentIndex();
     if(tab >= projectors.size() || !projectors[tab]) return;
     projector = projectors[tab]->GetProjector();
     projectors[tab]->SetParams(projector);

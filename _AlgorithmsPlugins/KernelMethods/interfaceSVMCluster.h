@@ -39,7 +39,7 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVM");}
+        QString GetName(){return QString("Support Vector Machine");}
         QString GetAlgoString(){return GetName();}
         QString GetInfoFile(){return "kernelClust.html";}
         QWidget *GetParameterWidget(){return widget;}

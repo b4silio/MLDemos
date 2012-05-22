@@ -132,7 +132,7 @@ void DynamicSEDS::SaveOptions(QSettings &settings)
 {
 	settings.setValue("sedsCount", params->sedsCount->value());
 	//settings.setValue("sedsPenalty", params->sedsPenaltySpin->value());
-	settings.setValue("sedsObjective", params->sedsObjectiveCombo->currentIndex());
+    //settings.setValue("sedsObjective", params->sedsObjectiveCombo->currentIndex());
 	settings.setValue("sedsPrior", params->sedsCheckPrior->isChecked());
 	settings.setValue("sedsMu", params->sedsCheckMu->isChecked());
     settings.setValue("sedsSigma", params->sedsCheckSigma->isChecked());
@@ -147,7 +147,7 @@ bool DynamicSEDS::LoadOptions(QSettings &settings)
 {
 	if(settings.contains("sedsCount")) params->sedsCount->setValue(settings.value("sedsCount").toInt());
 	//if(settings.contains("sedsPenalty")) params->sedsPenaltySpin->setValue(settings.value("sedsPenalty").toFloat());
-	if(settings.contains("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex(settings.value("sedsObjective").toInt());
+    //if(settings.contains("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex(settings.value("sedsObjective").toInt());
 	if(settings.contains("sedsPrior")) params->sedsCheckPrior->setChecked(settings.value("sedsPrior").toBool());
 	if(settings.contains("sedsMu")) params->sedsCheckMu->setChecked(settings.value("sedsMu").toBool());
 	if(settings.contains("sedsSigma")) params->sedsCheckSigma->setChecked(settings.value("sedsSigma").toBool());
@@ -163,7 +163,7 @@ void DynamicSEDS::SaveParams(QTextStream &file)
 {
 	file << "dynamicalOptions" << ":" << "sedsCount" << " " << params->sedsCount->value() << "\n";
 	//file << "dynamicalOptions" << ":" << "sedsPenalty" << " " << params->sedsPenaltySpin->value() << "\n";
-	file << "dynamicalOptions" << ":" << "sedsObjective" << " " << params->sedsObjectiveCombo->currentIndex() << "\n";
+    //file << "dynamicalOptions" << ":" << "sedsObjective" << " " << params->sedsObjectiveCombo->currentIndex() << "\n";
 	file << "dynamicalOptions" << ":" << "sedsPrior" << " " << params->sedsCheckPrior->isChecked() << "\n";
 	file << "dynamicalOptions" << ":" << "sedsMu" << " " << params->sedsCheckMu->isChecked() << "\n";
 	file << "dynamicalOptions" << ":" << "sedsSigma" << " " << params->sedsCheckSigma->isChecked() << "\n";
@@ -178,7 +178,7 @@ bool DynamicSEDS::LoadParams(QString name, float value)
 {
 	if(name.endsWith("sedsCount")) params->sedsCount->setValue((int)value);
 	//if(name.endsWith("sedsPenalty")) params->sedsPenaltySpin->setValue(value);
-	if(name.endsWith("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex((int)value);
+    //if(name.endsWith("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex((int)value);
     if(name.endsWith("sedsPrior")) params->sedsCheckPrior->setChecked((int)value);
     if(name.endsWith("sedsMu")) params->sedsCheckMu->setChecked((int)value);
 	if(name.endsWith("sedsSigma")) params->sedsCheckSigma->setChecked((int)value);

@@ -36,7 +36,7 @@ void ClassBoost::OptionsChanged()
 {
     params->svmCountLabel->setVisible(false);
     params->svmCountSpin->setVisible(false);
-    if(params->boostLearnerType->currentIndex() == 4)
+    if(params->boostLearnerType->currentIndex() == 5) // svm
     {
         params->svmCountLabel->setVisible(true);
         params->svmCountSpin->setVisible(true);
@@ -63,19 +63,22 @@ QString ClassBoost::GetAlgoString()
 	QString algo = QString("Boost %1").arg(weakCount);
 	switch(weakType)
 	{
-	case 0:
-		algo += " Proj";
-		break;
-	case 1:
+    case 0:
+        algo += " Stump";
+        break;
+    case 1:
+        algo += " Proj";
+        break;
+    case 2:
 		algo += " Rect";
 		break;
-    case 2:
+    case 3:
         algo += " Circ";
         break;
-    case 3:
+    case 4:
         algo += " GMM";
         break;
-    case 4:
+    case 5:
         algo += QString(" SVM %1").arg(svmCount);
         break;
     }

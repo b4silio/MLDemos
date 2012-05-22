@@ -100,12 +100,12 @@ void MLDemos::SaveLayoutOptions()
 	settings.beginGroup("classificationOptions");
 	settings.setValue("positiveClass", optionsClassify->positiveSpin->value());
 	settings.setValue("trainRatio", optionsClassify->traintestRatioCombo->currentIndex());
-	settings.setValue("tab", optionsClassify->tabWidget->currentIndex());
+    settings.setValue("tab", optionsClassify->algoList->currentIndex());
 	settings.endGroup();
 
 	settings.beginGroup("regressionOptions");
 	settings.setValue("trainRatio", optionsRegress->traintestRatioCombo->currentIndex());
-	settings.setValue("tab", optionsRegress->tabWidget->currentIndex());
+    settings.setValue("tab", optionsRegress->algoList->currentIndex());
 	settings.endGroup();
 
 	settings.beginGroup("dynamicalOptions");
@@ -115,7 +115,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("resampleCount", optionsDynamic->resampleSpin->value());
 	settings.setValue("obstacleType", optionsDynamic->obstacleCombo->currentIndex());
 	settings.setValue("dT", optionsDynamic->dtSpin->value());
-	settings.setValue("tab", optionsDynamic->tabWidget->currentIndex());
+    settings.setValue("tab", optionsDynamic->algoList->currentIndex());
 	settings.setValue("colorCheck", optionsDynamic->colorCheck->isChecked());
 	settings.endGroup();
 
@@ -125,7 +125,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.endGroup();
 
 	settings.beginGroup("clusterOptions");
-    settings.setValue("tab", optionsCluster->tabWidget->currentIndex());
+    settings.setValue("tab", optionsCluster->algoList->currentIndex());
     settings.setValue("trainRatio", optionsCluster->trainRatioCombo->currentIndex());
     settings.setValue("trainTestCombo", optionsCluster->trainTestCombo->currentIndex());
     settings.setValue("optimizeCombo", optionsCluster->optimizeCombo->currentIndex());
@@ -134,7 +134,7 @@ void MLDemos::SaveLayoutOptions()
     settings.endGroup();
 
     settings.beginGroup("maximizeOptions");
-    settings.setValue("tab", optionsMaximize->tabWidget->currentIndex());
+    settings.setValue("tab", optionsMaximize->algoList->currentIndex());
     settings.setValue("varianceSpin", optionsMaximize->varianceSpin->value());
     settings.setValue("iterationsSpin", optionsMaximize->iterationsSpin->value());
     settings.setValue("stoppingSpin", optionsMaximize->stoppingSpin->value());
@@ -142,7 +142,7 @@ void MLDemos::SaveLayoutOptions()
     settings.endGroup();
 
     settings.beginGroup("reinforceOptions");
-    settings.setValue("tab", optionsReinforcement->tabWidget->currentIndex());
+    settings.setValue("tab", optionsReinforcement->algoList->currentIndex());
     settings.setValue("varianceSpin", optionsReinforcement->varianceSpin->value());
     settings.setValue("iterationsSpin", optionsReinforcement->iterationsSpin->value());
     settings.setValue("displayIterationSpin", optionsReinforcement->displayIterationSpin->value());
@@ -155,7 +155,7 @@ void MLDemos::SaveLayoutOptions()
     settings.endGroup();    
 
     settings.beginGroup("projectOptions");
-    settings.setValue("tab", optionsProject->tabWidget->currentIndex());
+    settings.setValue("tab", optionsProject->algoList->currentIndex());
     settings.setValue("fitCheck", optionsProject->fitCheck->isChecked());
     settings.endGroup();
 
@@ -304,12 +304,12 @@ void MLDemos::LoadLayoutOptions()
 	settings.beginGroup("classificationOptions");
 	if(settings.contains("positiveClass")) optionsClassify->positiveSpin->setValue(settings.value("positiveClass").toFloat());
 	if(settings.contains("trainRatio")) optionsClassify->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
-	if(settings.contains("tab")) optionsClassify->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsClassify->algoList->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("regressionOptions");
     if(settings.contains("trainRatio")) optionsRegress->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
-    if(settings.contains("tab")) optionsRegress->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsRegress->algoList->setCurrentIndex(settings.value("tab").toInt());
 	settings.endGroup();
 
 	settings.beginGroup("dynamicalOptions");
@@ -319,7 +319,7 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("resampleCount")) optionsDynamic->resampleSpin->setValue(settings.value("resampleCount").toFloat());
 	if(settings.contains("obstacleType")) optionsDynamic->obstacleCombo->setCurrentIndex(settings.value("obstacleType").toInt());
 	if(settings.contains("dT")) optionsDynamic->dtSpin->setValue(settings.value("dT").toFloat());
-	if(settings.contains("tab")) optionsDynamic->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsDynamic->algoList->setCurrentIndex(settings.value("tab").toInt());
 	if(settings.contains("colorCheck")) optionsDynamic->colorCheck->setChecked(settings.value("colorCheck").toBool());
 	settings.endGroup();
 
@@ -329,7 +329,7 @@ void MLDemos::LoadLayoutOptions()
 	settings.endGroup();
 
 	settings.beginGroup("clusterOptions");
-	if(settings.contains("tab")) optionsCluster->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsCluster->algoList->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
     if(settings.contains("trainTestCombo")) optionsCluster->trainTestCombo->setCurrentIndex(settings.value("trainTestCombo").toInt());
     if(settings.contains("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex(settings.value("optimizeCombo").toInt());
@@ -338,7 +338,7 @@ void MLDemos::LoadLayoutOptions()
     settings.endGroup();
 
     settings.beginGroup("maximizeOptions");
-    if(settings.contains("tab")) optionsMaximize->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsMaximize->algoList->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("varianceSpin")) optionsMaximize->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
     if(settings.contains("iterationsSpin")) optionsMaximize->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
     if(settings.contains("stoppingSpin")) optionsMaximize->stoppingSpin->setValue(settings.value("stoppingSpin").toDouble());
@@ -346,7 +346,7 @@ void MLDemos::LoadLayoutOptions()
     settings.endGroup();
 
     settings.beginGroup("reinforceOptions");
-    if(settings.contains("tab")) optionsReinforcement->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsReinforcement->algoList->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("varianceSpin")) optionsReinforcement->varianceSpin->setValue(settings.value("varianceSpin").toDouble());
     if(settings.contains("iterationsSpin")) optionsReinforcement->iterationsSpin->setValue(settings.value("iterationsSpin").toInt());
     if(settings.contains("displayIterationSpin")) optionsReinforcement->displayIterationSpin->setValue(settings.value("displayIterationSpin").toInt());
@@ -359,7 +359,7 @@ void MLDemos::LoadLayoutOptions()
     settings.endGroup();
 
     settings.beginGroup("projectOptions");
-    if(settings.contains("tab")) optionsProject->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    if(settings.contains("tab")) optionsProject->algoList->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("fitCheck")) optionsProject->fitCheck->setChecked(settings.value("fitCheck").toBool());
     settings.endGroup();
 
@@ -456,9 +456,9 @@ void MLDemos::SaveParams( QString filename )
     }
 	if(classifier)
 	{
-		int tab = optionsClassify->tabWidget->currentIndex();
+        int tab = optionsClassify->algoList->currentIndex();
 		sprintf(groupName,"classificationOptions");
-		out << groupName << ":" << "tab" << " " << optionsClassify->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsClassify->algoList->currentIndex() << "\n";
 		out << groupName << ":" << "positiveClass" << " " << optionsClassify->positiveSpin->value() << "\n";
 		if(tab < classifiers.size() && classifiers[tab])
 		{
@@ -467,9 +467,9 @@ void MLDemos::SaveParams( QString filename )
 	}
 	if(regressor)
 	{
-		int tab = optionsRegress->tabWidget->currentIndex();
+        int tab = optionsRegress->algoList->currentIndex();
 		sprintf(groupName,"regressionOptions");
-        out << groupName << ":" << "tab" << " " << optionsRegress->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsRegress->algoList->currentIndex() << "\n";
         out << groupName << ":" << "outputDimCombo" << " " << optionsRegress->outputDimCombo->currentIndex() << "\n";
         if(tab < regressors.size() && regressors[tab])
 		{
@@ -478,7 +478,7 @@ void MLDemos::SaveParams( QString filename )
 	}
 	if(dynamical)
 	{
-		int tab = optionsDynamic->tabWidget->currentIndex();
+        int tab = optionsDynamic->algoList->currentIndex();
 		sprintf(groupName,"dynamicalOptions");
 		out << groupName << ":" << "centerType" << " " << optionsDynamic->centerCombo->currentIndex() << "\n";
 		out << groupName << ":" << "zeroCheck" << " " << optionsDynamic->zeroCheck->isChecked() << "\n";
@@ -487,7 +487,7 @@ void MLDemos::SaveParams( QString filename )
 		out << groupName << ":" << "obstacleType" << " " << optionsDynamic->obstacleCombo->currentIndex() << "\n";
 		out << groupName << ":" << "dT" << " " << optionsDynamic->dtSpin->value() << "\n";
 		out << groupName << ":" << "colorCheck" << " " << optionsDynamic->colorCheck->isChecked() << "\n";
-		out << groupName << ":" << "tab" << " " << optionsDynamic->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsDynamic->algoList->currentIndex() << "\n";
 		if(tab < dynamicals.size() && dynamicals[tab])
 		{
 			dynamicals[tab]->SaveParams(out);
@@ -495,9 +495,9 @@ void MLDemos::SaveParams( QString filename )
 	}
 	if(clusterer)
 	{
-		int tab = optionsCluster->tabWidget->currentIndex();
+        int tab = optionsCluster->algoList->currentIndex();
 		sprintf(groupName,"clusterOptions");
-        out << groupName << ":" << "tab" << " " << optionsCluster->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsCluster->algoList->currentIndex() << "\n";
         out << groupName << ":" << "trainRatio" << " " << optionsCluster->trainRatioCombo->currentIndex() << "\n";
         out << groupName << ":" << "trainTestCombo" << " " << optionsCluster->trainTestCombo->currentIndex() << "\n";
         out << groupName << ":" << "optimizeCombo" << " " << optionsCluster->optimizeCombo->currentIndex() << "\n";
@@ -510,10 +510,10 @@ void MLDemos::SaveParams( QString filename )
 	}
     if(maximizer)
     {
-        int tab = optionsMaximize->tabWidget->currentIndex();
+        int tab = optionsMaximize->algoList->currentIndex();
         double variance = optionsMaximize->varianceSpin->value();
         sprintf(groupName,"maximizationOptions");
-        out << groupName << ":" << "tab" << " " << optionsMaximize->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsMaximize->algoList->currentIndex() << "\n";
         out << groupName << ":" << "gaussVarianceSpin" << " " << optionsMaximize->varianceSpin->value() << "\n";
         out << groupName << ":" << "iterationsSpin" << " " << optionsMaximize->iterationsSpin->value() << "\n";
         out << groupName << ":" << "stoppingSpin" << " " << optionsMaximize->stoppingSpin->value() << "\n";
@@ -525,10 +525,10 @@ void MLDemos::SaveParams( QString filename )
     }
     if(reinforcement)
     {
-        int tab = optionsReinforcement->tabWidget->currentIndex();
+        int tab = optionsReinforcement->algoList->currentIndex();
         double variance = optionsReinforcement->varianceSpin->value();
         sprintf(groupName,"reinforcementOptions");
-        out << groupName << ":" << "tab" << " " << optionsReinforcement->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsReinforcement->algoList->currentIndex() << "\n";
         out << groupName << ":" << "gaussVarianceSpin" << " " << optionsReinforcement->varianceSpin->value() << "\n";
         out << groupName << ":" << "iterationsSpin" << " " << optionsReinforcement->iterationsSpin->value() << "\n";
         out << groupName << ":" << "displayIterationSpin" << " " << optionsReinforcement->displayIterationSpin->value() << "\n";
@@ -546,9 +546,9 @@ void MLDemos::SaveParams( QString filename )
     }
     if(projector)
     {
-        int tab = optionsProject->tabWidget->currentIndex();
+        int tab = optionsProject->algoList->currentIndex();
         sprintf(groupName,"projectOptions");
-        out << groupName << ":" << "tab" << " " << optionsProject->tabWidget->currentIndex() << "\n";
+        out << groupName << ":" << "tab" << " " << optionsProject->algoList->currentIndex() << "\n";
         out << groupName << ":" << "fitCheck" << " " << optionsProject->fitCheck->isChecked() << "\n";
         if(tab < projectors.size() && projectors[tab])
         {
@@ -623,7 +623,7 @@ void MLDemos::LoadParams( QString filename )
 		{
 			bClass = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClass);
-			if(line.endsWith("tab")) optionsClassify->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsClassify->algoList->setCurrentIndex(tab = (int)value);
 			if(line.endsWith("positiveClass")) optionsClassify->positiveSpin->setValue((int)value);
 			if(tab < classifiers.size() && classifiers[tab]) classifiers[tab]->LoadParams(line,value);
 		}
@@ -631,7 +631,7 @@ void MLDemos::LoadParams( QString filename )
 		{
 			bRegr = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabRegr);
-            if(line.endsWith("tab")) optionsRegress->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsRegress->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("outputDimCombo")) optionsRegress->outputDimCombo->setCurrentIndex((int)value);
             if(tab < regressors.size() && regressors[tab]) regressors[tab]->LoadParams(line,value);
 		}
@@ -646,14 +646,14 @@ void MLDemos::LoadParams( QString filename )
 			if(line.endsWith("obstacleType")) optionsDynamic->obstacleCombo->setCurrentIndex((int)value);
 			if(line.endsWith("dT")) optionsDynamic->dtSpin->setValue((float)value);
 			if(line.endsWith("colorCheck")) optionsDynamic->colorCheck->setChecked((int)value);
-			if(line.endsWith("tab")) optionsDynamic->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsDynamic->algoList->setCurrentIndex(tab = (int)value);
 			if(tab < dynamicals.size() && dynamicals[tab]) dynamicals[tab]->LoadParams(line,value);
 		}
 		if(line.startsWith(clustGroup))
 		{
 			bClust = true;
 			algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClust);
-            if(line.endsWith("tab")) optionsCluster->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsCluster->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex((int)value);
             if(line.endsWith("trainTestCombo")) optionsCluster->trainTestCombo->setCurrentIndex((int)value);
             if(line.endsWith("optimizeCombo")) optionsCluster->optimizeCombo->setCurrentIndex((int)value);
@@ -665,7 +665,7 @@ void MLDemos::LoadParams( QString filename )
         {
             bMaxim = true;
             algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabMax);
-            if(line.endsWith("tab")) optionsMaximize->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsMaximize->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("gaussVarianceSpin")) optionsMaximize->varianceSpin->setValue((double)value);
             if(line.endsWith("iterationsSpin")) optionsMaximize->iterationsSpin->setValue((int)value);
             if(line.endsWith("stoppingSpin")) optionsMaximize->stoppingSpin->setValue((double)value);
@@ -676,7 +676,7 @@ void MLDemos::LoadParams( QString filename )
         {
             bReinf = true;
             algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabReinf);
-            if(line.endsWith("tab")) optionsReinforcement->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsReinforcement->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("gaussVarianceSpin")) optionsReinforcement->varianceSpin->setValue((double)value);
             if(line.endsWith("iterationsSpin")) optionsReinforcement->iterationsSpin->setValue((int)value);
             if(line.endsWith("displayIterationSpin")) optionsReinforcement->displayIterationSpin->setValue((int)value);
@@ -693,7 +693,7 @@ void MLDemos::LoadParams( QString filename )
         {
             bProj = true;
             algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabProj);
-            if(line.endsWith("tab")) optionsProject->tabWidget->setCurrentIndex(tab = (int)value);
+            if(line.endsWith("tab")) optionsProject->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("fitCheck")) optionsProject->fitCheck->setChecked((int)value);
             if(tab < projectors.size() && projectors[tab]) projectors[tab]->LoadParams(line,value);
         }
@@ -711,7 +711,7 @@ void MLDemos::LoadParams( QString filename )
 
 void MLDemos::ExportOutput()
 {
-    if(!classifier && !regressor && !clusterer && !dynamical && !maximizer) return;
+    if(!classifier && !regressor && !clusterer && !projector) return;
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Output Data"), "", tr("Data (*.txt *.csv)"));
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".txt") && !filename.endsWith(".csv")) filename += ".txt";
@@ -721,18 +721,38 @@ void MLDemos::ExportOutput()
     QTextStream out(&file);
     if(!file.isOpen()) return;
 
-    if(clusterer)
+    if(classifier || clusterer || regressor)
     {
+        out << "#Sample(n-dims) TrueClass ComputedValue(s)\n";
         vector<fvec> samples = canvas->data->GetSamples();
+        ivec labels = canvas->data->GetLabels();
         FOR(i, samples.size())
         {
-            fvec sample = samples[i];
-            fvec res = clusterer->Test(sample);
-            FOR(d, res.size())
-            {
-                out << QString("%1\t").arg(res[d], 0, 'f', 3);
-            }
-            out << QString("\n");
+            fvec &sample = samples[i];
+            fvec res;
+            if(classifier) res = classifier->TestMulti(sample);
+            else if (clusterer) res = clusterer->Test(sample);
+            else if (regressor) res = regressor->Test(sample);
+            FOR(d, sample.size()) out << QString("%1\t").arg(sample[d]);
+            out << QString("%1\t").arg(labels[i]);
+            FOR(d, res.size()) out << QString("%1\t").arg(res[d], 0, 'f', 3);
+            out << "\n";
+        }
+    }
+    else if(projector)
+    {
+        out << "#Sample(n-dims) TrueClass Projected(m-dims)\n";
+        vector<fvec> samples = canvas->data->GetSamples();
+        ivec labels = canvas->data->GetLabels();
+        FOR(i, samples.size())
+        {
+            fvec &sample = samples[i];
+            fvec projected;
+            projected = projector->Project(sample);
+            FOR(d, sample.size()) out << QString("%1\t").arg(sample[d]);
+            out << QString("%1\t").arg(labels[i]);
+            FOR(d, projected.size()) out << QString("%1\t").arg(projected[d], 0, 'f', 3);
+            out << "\n";
         }
     }
     file.close();
@@ -742,7 +762,7 @@ void MLDemos::LoadDynamical()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
     if(filename.isEmpty()) return;
-    int tab = optionsDynamic->tabWidget->currentIndex();
+    int tab = optionsDynamic->algoList->currentIndex();
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     Dynamical *dynamical = dynamicals[tab]->GetDynamical();
     bool ok = dynamicals[tab]->LoadModel(filename, dynamical);

@@ -40,6 +40,11 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>sigmoid: beta*(1-exp(-alpha*x)) / (1 + exp(-alpha*x))
 gaussian: beta*exp(-alpha*x*x)</string>
@@ -81,6 +86,11 @@ gaussian: beta*exp(-alpha*x*x)</string>
      <height>22</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>Activation function for all network units</string>
    </property>
@@ -103,6 +113,11 @@ gaussian: beta*exp(-alpha*x*x)</string>
      <width>41</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="toolTip">
     <string>Number of hidden layers</string>
@@ -162,6 +177,11 @@ gaussian: beta*exp(-alpha*x*x)</string>
      <height>22</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>sigmoid: beta*(1-exp(-alpha*x)) / (1 + exp(-alpha*x))
 gaussian: beta*exp(-alpha*x*x)</string>
@@ -202,6 +222,11 @@ gaussian: beta*exp(-alpha*x*x)</string>
      <width>51</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="toolTip">
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;

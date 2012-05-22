@@ -39,7 +39,7 @@ public:
 	// virtual functions to manage the GUI and I/O
     void DrawInfo(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement){}
     void DrawModel(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement){}
-    QString GetName(){return QString("DP Walk");}
+    QString GetName(){return QString("DP");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "RL-algos.html";}
     QWidget *GetParameterWidget(){return widget;}
