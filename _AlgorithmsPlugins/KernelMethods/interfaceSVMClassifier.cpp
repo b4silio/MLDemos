@@ -293,6 +293,8 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
         if(resMin == resMax) resMin -= 3;
     }
 
+    bool bNegatives = dynamic_cast<ClassifierRVM*>(classifier) || dynamic_cast<ClassifierPegasos*>(classifier);
+
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);
     map<int,int>& classes = classifier->classes;
@@ -307,12 +309,12 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
             float response = res[0];
             if(response > 0)
             {
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
+                if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
                 else Canvas::drawCross(painter, point, 6, 2);
             }
             else
             {
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
+                if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
                 else Canvas::drawCross(painter, point, 6, 0);
             }
         }
@@ -335,6 +337,7 @@ void ClassSVM::SaveOptions(QSettings &settings)
     settings.setValue("svmC", params->svmCSpin->value());
     settings.setValue("svmType", params->svmTypeCombo->currentIndex());
     settings.setValue("optimizeCheck", params->optimizeCheck->isChecked());
+    settings.setValue("maxSVSpin", params->maxSVSpin->value());
 }
 
 bool ClassSVM::LoadOptions(QSettings &settings)
@@ -345,6 +348,7 @@ bool ClassSVM::LoadOptions(QSettings &settings)
     if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
     if(settings.contains("svmType")) params->svmTypeCombo->setCurrentIndex(settings.value("svmType").toInt());
     if(settings.contains("optimizeCheck")) params->optimizeCheck->setChecked(settings.value("optimizeCheck").toInt());
+    if(settings.contains("maxSVSpin")) params->maxSVSpin->setValue(settings.value("maxSVSpin").toInt());
     ChangeOptions();
     return true;
 }
@@ -357,6 +361,7 @@ void ClassSVM::SaveParams(QTextStream &file)
     file << "classificationOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
     file << "classificationOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
     file << "classificationOptions" << ":" << "optimizeCheck" << " " << params->optimizeCheck->isChecked() << "\n";
+    file << "classificationOptions" << ":" << "maxSVSpin" << " " << params->maxSVSpin->value() << "\n";
 }
 
 bool ClassSVM::LoadParams(QString name, float value)
@@ -367,6 +372,7 @@ bool ClassSVM::LoadParams(QString name, float value)
     if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
     if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
     if(name.endsWith("optimizeCheck")) params->optimizeCheck->setChecked((int)value);
+    if(name.endsWith("maxSVSpin")) params->maxSVSpin->setValue((int)value);
     ChangeOptions();
     return true;
 }

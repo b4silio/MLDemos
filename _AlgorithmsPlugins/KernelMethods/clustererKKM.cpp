@@ -22,49 +22,27 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 using namespace dlib;
-#define sampletype matrix<double,N,1>
-#define rbfkernel radial_basis_kernel< sampletype >
-#define linkernel linear_kernel< sampletype >
-#define polkernel polynomial_kernel< sampletype >
 
 ClustererKKM::~ClustererKKM()
 {
     if(decFunction)
     {
+#define KILLCASE(a) case a:{KillDim<a>();return;}
         switch(dim)
         {
-        case 2:
-            KillDim<2>();
-            return;
-        case 3:
-            KillDim<3>();
-            return;
-        case 4:
-            KillDim<4>();
-            return;
-        case 5:
-            KillDim<5>();
-            return;
-        case 6:
-            KillDim<6>();
-            return;
-        case 7:
-            KillDim<7>();
-            return;
-        case 8:
-            KillDim<8>();
-            return;
-        case 9:
-            KillDim<9>();
-            return;
-        case 10:
-            KillDim<10>();
-            return;
-        case 11:
-            KillDim<11>();
-            return;
+        KILLCASE(2);
+        KILLCASE(3);
+        KILLCASE(4);
+        KILLCASE(5);
+        KILLCASE(6);
+        KILLCASE(7);
+        KILLCASE(8);
+        KILLCASE(9);
+        KILLCASE(10);
+        KILLCASE(11);
+        KILLCASE(12);
         default:
-            KillDim<12>();
+            KillDim<2>();
             return;
         }
     }
@@ -96,7 +74,7 @@ void ClustererKKM::Train(std::vector< fvec > _samples)
     if(!_samples.size()) return;
     dim = _samples[0].size();
 
-    if(dim > 10) dim = 10;
+    if(dim > 12) dim = 12;
 
     maxVectors = 30;
 
