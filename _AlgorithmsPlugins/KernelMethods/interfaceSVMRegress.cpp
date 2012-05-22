@@ -52,13 +52,7 @@ void RegrSVM::ChangeOptions()
         params->svmEpsLabel->setText("Nu");
         if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
-    case 2: // RVM
-        params->optimizeCheck->setVisible(false);
-        params->svmCSpin->setEnabled(false);
-        params->svmEpsLabel->setText("eps");
-        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
-        break;
-    case 3: // KRLR
+    case 2: // KRLS
         params->optimizeCheck->setVisible(false);
         params->svmEpsLabel->setText("Tolerance");
         params->svmCLabel->setText("Capacity");
@@ -108,12 +102,7 @@ void RegrSVM::SetParams(Regressor *regressor)
     float svmP = params->svmPSpin->value();
     bool bOptimize = params->optimizeCheck->isChecked();
 
-    if(kernelMethod == 2) // rvm
-    {
-        RegressorRVM *rvm = (RegressorRVM*)regressor;
-        rvm->SetParams(svmP, kernelType, kernelGamma, kernelDegree);
-    }
-    else if(kernelMethod == 3 ) // KRLS
+    if(kernelMethod == 2) // KRLS
     {
         RegressorKRLS *krls = (RegressorKRLS*)regressor;
         int capacity = svmC;
@@ -181,10 +170,6 @@ QString RegrSVM::GetAlgoString()
         algo += QString(" %1 %2").arg(svmC).arg(svmP);
         break;
     case 2:
-        algo += "RVM";
-        algo += QString(" %1").arg(svmP);
-        break;
-    case 3:
         algo += "KRLS";
         algo += QString(" %1 %2").arg(svmC).arg(svmP);
         break;
@@ -214,9 +199,6 @@ Regressor *RegrSVM::GetRegressor()
     switch(svmType)
     {
     case 2:
-        regressor = new RegressorRVM();
-        break;
-    case 3:
         regressor = new RegressorKRLS();
         break;
     default:
@@ -232,11 +214,9 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     painter.setRenderHint(QPainter::Antialiasing);
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
-    if(regressor->type == REGR_RVM || regressor->type == REGR_KRLS)
+    if(regressor->type == REGR_KRLS)
     {
-        vector<fvec> sv = (regressor->type == REGR_KRLS) ?
-                    ((RegressorKRLS*)regressor)->GetSVs() :
-                    ((RegressorRVM*)regressor)->GetSVs();
+        vector<fvec> sv = ((RegressorKRLS*)regressor)->GetSVs();
         int radius = 9;
         painter.setBrush(Qt::NoBrush);
         FOR(i, sv.size())
@@ -273,20 +253,6 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
                 int radius = 9;
                 QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
                 painter.drawEllipse(point, radius, radius);
-                /*
-                if(abs((*svm->sv_coef)[i]) == svm->param.C)
-                {
-                    painter.setPen(QPen(Qt::black, 4));
-                    painter.drawEllipse(point, radius, radius);
-                    painter.setPen(Qt::white);
-                    painter.drawEllipse(point, radius, radius);
-                }
-                else
-                {
-                    painter.setPen(Qt::black);
-                    painter.drawEllipse(point, radius, radius);
-                }
-                */
             }
         }
     }
@@ -306,7 +272,7 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     fvec sample = canvas->toSampleCoords(0,0);
     int dim = sample.size();
     if(dim > 2) return;
-    if(regressor->type == REGR_KRLS || regressor->type == REGR_RVM)
+    if(regressor->type == REGR_KRLS)
     {
         canvas->maps.confidence = QPixmap();
         int steps = w;

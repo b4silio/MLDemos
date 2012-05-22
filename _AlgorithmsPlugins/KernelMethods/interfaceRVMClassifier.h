@@ -16,33 +16,32 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACESVMCLASSIFIER_H_
-#define _INTERFACESVMCLASSIFIER_H_
+#ifndef _INTERFACERVMCLASSIFIER_H_
+#define _INTERFACERVMCLASSIFIER_H_
 
 #include <vector>
 #include <interfaces.h>
-#include "classifierSVM.h"
-#include "classifierPegasos.h"
-#include "ui_paramsSVM.h"
+#include "classifierRVM.h"
+#include "ui_paramsRVM.h"
 
-class ClassSVM : public QObject, public ClassifierInterface
+class ClassRVM : public QObject, public ClassifierInterface
 {
     Q_OBJECT
     Q_INTERFACES(ClassifierInterface)
 private:
     QWidget *widget;
-    Ui::Parameters *params;
+    Ui::ParametersRVM *params;
 public:
-    ClassSVM();
+    ClassRVM();
     // virtual functions to manage the algorithm creation
     Classifier *GetClassifier();
     void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
     // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("Support Vector Machine");}
+    QString GetName(){return QString("Relevance Vector Machine");}
     QString GetAlgoString();
-    QString GetInfoFile(){return "kernelClass.html";}
+    QString GetInfoFile(){return "rvm.html";}
     bool UsesDrawTimer(){return true;}
     QWidget *GetParameterWidget(){return widget;}
     void SetParams(Classifier *classifier);
@@ -54,4 +53,4 @@ public slots:
     void ChangeOptions();
 };
 
-#endif // _INTERFACESVMCLASSIFIER_H_
+#endif // _INTERFACERVMCLASSIFIER_H_
