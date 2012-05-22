@@ -259,10 +259,12 @@ void MLDemos::UpdateInfo()
             }
             QPixmap confusionPixmap(150,150);
             QPainter painter(&confusionPixmap);
-            QLabel *labelTrain = new QLabel();
-            QLabel *labelTest = new QLabel();
+
+            QLabel *labelTrain = 0;
+            QLabel *labelTest = 0;
             if(classifier->confusionMatrix[0].size())
             {
+                labelTrain = new QLabel();
                 confusionPixmap.fill(Qt::white);
                 map< int,map<int,int> > confusion = classifier->confusionMatrix[0];
                 int classCount = 0;
@@ -295,6 +297,7 @@ void MLDemos::UpdateInfo()
             }
             if(classifier->confusionMatrix[1].size())
             {
+                labelTest = new QLabel();
                 confusionPixmap.fill(Qt::white);
                 map< int,map<int,int> > confusion = classifier->confusionMatrix[1];
                 int classCount = 0;
@@ -325,8 +328,8 @@ void MLDemos::UpdateInfo()
                 showStats->informationWidget->layout()->addWidget(labelTest);
                 labelTest->setPixmap(confusionPixmap);
             }
-            labelTrain->show();
-            labelTest->show();
+            if(labelTrain) labelTrain->show();
+            if(labelTest) labelTest->show();
             showStats->informationWidget->repaint();
         }
     }

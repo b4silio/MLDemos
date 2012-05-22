@@ -148,7 +148,8 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	seds->Options.sigma_x_opt = bSigma;
 	seds->Options.max_iter = maxIteration;
 	seds->Options.objective = objectiveType;
-	seds->Options.constraintCriterion = constraintCriterion;
+    //seds->Options.constraintCriterion = constraintCriterion;
+    seds->Options.constraintCriterion = 0; // set to 0 until we actually fix this (broken otherwise)
 
     // MMA, ISRES, ORIG_DIRECT, AUGLAG, COBYLA
     switch(optimizationType)
