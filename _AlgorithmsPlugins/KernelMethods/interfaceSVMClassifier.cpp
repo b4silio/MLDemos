@@ -309,13 +309,29 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
             float response = res[0];
             if(response > 0)
             {
-                if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
+                if(bNegatives)
+                {
+                    if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
             }
             else
             {
-                if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
+                if(bNegatives)
+                {
+                    if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
+                else
+                {
+                    if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
             }
         }
         else
