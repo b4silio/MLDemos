@@ -270,6 +270,7 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
     KILL(x_space);
     x_space = new svm_node[(data_dimension+1)*problem.l];
 
+    classMap.clear();
     int cnt=0;
     FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
     for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;

@@ -27,28 +27,30 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class ClassifierRVM : public Classifier
 {
 private:
-	dlib::rvm_trainer<lin_kernel> linTrainer;
-	dlib::rvm_trainer<pol_kernel> polTrainer;
-	dlib::rvm_trainer<rbf_kernel> rbfTrainer;
-	lin_func linFunc;
-	pol_func polFunc;
-	rbf_func rbfFunc;
-
 	float epsilon;
 	int kernelType; // 0: linear, 1: poly, 2: rbf
 	float kernelParam;
 	int kernelDegree;
 
+    int kernelTypeTrained;
+    void *decFunction;
+
 public:
 
-    ClassifierRVM():epsilon(0.001), kernelType(2){}
+    ClassifierRVM():epsilon(0.001), kernelType(2), decFunction(0){}
+    ~ClassifierRVM();
+
 	void Train(std::vector< fvec > samples, ivec labels);
 	float Test(const fvec &sample);
-	float Test(const fVec &sample);
     const char *GetInfoString();
 	void SetParams(float epsilon, int kernelType, float kernelParam, int kernelDegree)
         {this->epsilon=epsilon;this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;}
 	std::vector<fvec> GetSVs();
+
+    template <int N> void KillDim();
+    template <int N> void TrainDim(std::vector< fvec > _samples, ivec _labels);
+    template <int N> float TestDim(const fvec &sample);
+    template <int N> std::vector<fvec> GetSVsDim();
 };
 
 #endif // _CLASSIFIER_RVM_H_
