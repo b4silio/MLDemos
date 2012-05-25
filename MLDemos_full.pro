@@ -16,7 +16,8 @@ MLDemos.depends = Core
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
 #SUBDIRS += Reinforcements
-SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS Example
+SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME
+#SUBDIRS += Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
 Kernel.file = $$ALGOPATH/KernelMethods/pluginKernel.pro
@@ -33,6 +34,7 @@ MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
 QTMeans.file = $$ALGOPATH/QTMeans/pluginQTMeans.pro
 HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 Example.file = $$ALGOPATH/Example/pluginExample.pro
+FLAME.file = $$ALGOPATH/FLAME/pluginFlame.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
