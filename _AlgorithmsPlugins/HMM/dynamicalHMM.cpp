@@ -26,23 +26,34 @@ using namespace std;
 
 DynamicalHMM::~DynamicalHMM()
 {
-	DEL(learnedHMM);
-	DEL(pi);
-	DEL(b);
-	DEL(a);
+    int N = learnedHMM.size();
+    FOR(i, N)
+    {
+        DEL(learnedHMM[i]);
+        DEL(pi[i]);
+        DEL(b[i]);
+        DEL(a[i]);
+    }
 }
 
-void DynamicalHMM::Train(std::vector< std::vector<fvec> > trajectories, ivec labels)
+void DynamicalHMM::Train(std::vector< std::vector<fvec> > trajectories, ivec trajLabels)
 {
 	if(!trajectories.size()) return;
 	int count = trajectories[0].size();
 	if(!count) return;
 	dim = trajectories[0][0].size();
 
-	DEL(learnedHMM);
-	DEL(pi);
-	DEL(b);
-	DEL(a);
+    if(!learnedHMM.size())
+    {
+        int N = learnedHMM.size();
+        FOR(i, N)
+        {
+            DEL(learnedHMM[i]);
+            DEL(pi[i]);
+            DEL(b[i]);
+            DEL(a[i]);
+        }
+    }
 
 	int nbDimensions = dim/2;
 	int nbSymbols = 1000;
@@ -50,6 +61,8 @@ void DynamicalHMM::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	int seed = QTime::currentTime().msec();
 	bool isGaussian = obsType == 0;
 	int whichEMMethod = trainType;
+    int whichInitialVector = initType;
+    int whichTransitionMatrix = transType;
 
 	FOR(i, trajectories.size())
 	{
@@ -66,51 +79,95 @@ void DynamicalHMM::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 
 	this->trajectories = trajectories;
 
-	CObs *obsType;
+    // Find number of different trajectory classes
+    int NClass = *(std::max_element(trajLabels.begin(),trajLabels.end()));
 
-	a = new CPlainStateTrans(nbStates, seed);
-	obsType = new CVectorObs(nbDimensions);
-	b = new CVectorObsProb(nbSymbols, nbStates, nbDimensions, isGaussian);
+    // Split overall trajectories into "per class" trajectories
+    FOR(i, NClass)
+    {
+        data.push_back(vector< vector<fvec> >());
+    }
 
-	pi = new CInitStateProb(nbStates);
+    FOR(i, trajectories.size())
+    {
+        data[(int)(trajLabels[i]-1)].push_back(trajectories[i]);
+    }
 
-	learnedHMM = new CHMM(a, b, pi);
+    FOR(i, NClass)
+    {
+        CObs *obsType;
 
-	CObsSeq *obsSeq;
-	obsSeq = new CObsSeq(obsType, trajectories);
+        switch(whichTransitionMatrix)
+        {
+            case 0:
+                a.push_back(new CPlainStateTrans(nbStates, seed));
+                break;
+            case 1:
+                a.push_back(new CPlainStateTrans(nbStates, seed, 0));
+                break;
+            case 2:
+                a.push_back(new CPlainStateTrans(nbStates, seed, 1));
+                break;
+            case 3:
+                a.push_back(new CPlainStateTrans(nbStates, seed, 2));
+                break;
+        }
 
-	switch (whichEMMethod){
-	case 0:
-		learnedHMM->LearnBaumWelch(obsSeq);
-		break;
-	case 1:
-		learnedHMM->LearnSegmentalKMeans(obsSeq);
-		break;
-	case 2:
-		learnedHMM->LearnHybridSKM_BW(obsSeq);
-		break;
-	}
+        obsType = new CVectorObs(nbDimensions);
+        b.push_back(new CVectorObsProb(nbSymbols, nbStates, nbDimensions, isGaussian));
 
-	cout << "Learned Model\n";
-	learnedHMM->Print(cout);
+        switch(whichInitialVector)
+        {
+            case 0:
+                pi.push_back(new CInitStateProb(nbStates));
+                break;
+            case 1:
+                pi.push_back(new CInitStateProb(nbStates, 0));
+                break;
+            case 2:
+                pi.push_back(new CInitStateProb(nbStates, 1));
+                break;
+        }
 
-	//cout << "States and Expected Observations\n";
-	//learnedHMM->PrintStatesAndExpectedObs(obsSeq, cout, cout);
+        learnedHMM.push_back(new CHMM(a[i], b[i], pi[i]));
+        cout << "Initial Model\n";
+        learnedHMM[i]->Print(cout);
 
-	// Distances to each sequence in obsSeq and total distance are stored in distanceOutput file
-	//cout << "Viterbi Distances to each sequence\n";
-	double normalizedLogProb = learnedHMM->FindViterbiDistance(obsSeq, cout);
+        CObsSeq *obsSeq;
+        obsSeq = new CObsSeq(obsType, data[i]);
 
-	//delete obsSeq;// check with purify
+        switch (whichEMMethod){
+            case 0:
+                learnedHMM[i]->LearnBaumWelch(obsSeq);
+                break;
+            case 1:
+                learnedHMM[i]->LearnSegmentalKMeans(obsSeq);
+                break;
+            case 2:
+                learnedHMM[i]->LearnHybridSKM_BW(obsSeq);
+                break;
+        }
 
+        cout << "Learned Model\n";
+        learnedHMM[i]->Print(cout);
+
+        //cout << "States and Expected Observations\n";
+        //learnedHMM->PrintStatesAndExpectedObs(obsSeq, cout, cout);
+
+        // Distances to each sequence in obsSeq and total distance are stored in distanceOutput file
+        //cout << "Viterbi Distances to each sequence\n";
+        double normalizedLogProb = learnedHMM[i]->FindViterbiDistance(obsSeq, cout);
+
+        delete obsSeq;// check with purify
+    }
 }
 
-bool DynamicalHMM::IsOrphanedState(int state)
+bool DynamicalHMM::IsOrphanedState(int HMMClass, int state)
 {
 	if(state > states) return true;
-	FOR(i, a->GetN())
+    FOR(i, a[HMMClass]->GetN())
 	{
-		if(a->at(state+1, i+1) != 1. / a->GetN()) return false;
+        if(a[HMMClass]->at(state+1, i+1) != 1. / a[HMMClass]->GetN()) return false;
 	}
 	return true;
 }
@@ -138,12 +195,14 @@ fVec DynamicalHMM::Test( const fVec &sample)
 	return res;
 }
 
-void DynamicalHMM::SetParams(int mixtures, int states, int trainType, int obsType)
+void DynamicalHMM::SetParams(int mixtures, int states, int trainType, int obsType, int initType, int transType)
 {
 	this->mixtures = mixtures;
 	this->states = states;
 	this->trainType = trainType;
 	this->obsType = obsType;
+    this->initType = initType;
+    this->transType = transType;
 }
 
 char *DynamicalHMM::GetInfoString()

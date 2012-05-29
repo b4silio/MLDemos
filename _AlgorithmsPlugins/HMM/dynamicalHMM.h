@@ -36,23 +36,24 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class DynamicalHMM : public Dynamical
 {
 public:
-	int mixtures, states, trainType, obsType;
-	CStateTrans *a;
-	CObsProb *b;
-	CInitStateProb *pi;
-	CHMM *learnedHMM;
+    int mixtures, states, trainType, obsType, initType, transType;
+    std::vector<CStateTrans*> a;
+    std::vector<CObsProb*> b;
+    std::vector<CInitStateProb*> pi;
+    std::vector<CHMM*> learnedHMM;
 	std::vector< std::vector<fvec> > trajectories;
+    std::vector< std::vector<std::vector<fvec> > > data;
 public:
-	DynamicalHMM() : mixtures(1), states(1), trainType(1), obsType(0), a(0), b(0), pi(0), learnedHMM(0){};
+    DynamicalHMM() : mixtures(1), states(1), trainType(1), obsType(0), initType(0), transType(0), a(0), b(0), pi(0), learnedHMM(0){};
 	~DynamicalHMM();
     void Train(std::vector< std::vector<fvec> > trajectories, ivec labels);
     std::vector<fvec> Test( const fvec &sample, const int count);
     fvec Test( const fvec &sample);
     fVec Test( const fVec &sample);
     char *GetInfoString();
-	bool IsOrphanedState(int state);
+    bool IsOrphanedState(int HMMClass, int state);
 
-	void SetParams(int mixtures, int states, int trainType, int obsType);
+    void SetParams(int mixtures, int states, int trainType, int obsType, int initType, int transType);
 };
 
 #endif // _DYNAMICAL_HMM_H_

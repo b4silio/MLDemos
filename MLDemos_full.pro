@@ -16,11 +16,12 @@ MLDemos.depends = Core
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
 #SUBDIRS += Reinforcements
-SUBDIRS += Obstacle GMM Kernel KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME
+SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME Lowess HMM DBSCAN CCA
 #SUBDIRS += Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
 Kernel.file = $$ALGOPATH/KernelMethods/pluginKernel.pro
+GP.file = $$ALGOPATH/GP/pluginGP.pro
 KNN.file = $$ALGOPATH/KNN/pluginKNN.pro
 Projections.file = $$ALGOPATH/Projections/pluginProjections.pro
 LWPR.file = $$ALGOPATH/LWPR/pluginLWPR.pro
@@ -29,12 +30,16 @@ SEDS.file = $$ALGOPATH/SEDS/pluginSEDS.pro
 Maximizers.file = $$ALGOPATH/Maximizers/pluginMaximizers.pro
 Reinforcements.file = $$ALGOPATH/Reinforcements/pluginReinforcements.pro
 OpenCV.file = $$ALGOPATH/OpenCV/pluginOpenCV.pro
+Lowess.file = $$ALGOPATH/Lowess/pluginLowess.pro
+FLAME.file = $$ALGOPATH/FLAME/pluginFlame.pro
+DBSCAN.file = $$ALGOPATH/DBSCAN/pluginDBSCAN.pro
+HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
+CCA.file = $$ALGOPATH/CCA/pluginCCA.pro
 # still too experimental
 MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
 QTMeans.file = $$ALGOPATH/QTMeans/pluginQTMeans.pro
-HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
+# example template
 Example.file = $$ALGOPATH/Example/pluginExample.pro
-FLAME.file = $$ALGOPATH/FLAME/pluginFlame.pro
 
 # input plugins
 INPUTPATH = _IOPlugins

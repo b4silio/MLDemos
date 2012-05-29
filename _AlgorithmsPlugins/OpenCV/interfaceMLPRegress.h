@@ -40,7 +40,7 @@ public:
 	void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("Multi-Layer Perceptronx");}
+    QString GetName(){return QString("Multi-Layer Perceptron");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "mlp.html";}
     QWidget *GetParameterWidget(){return widget;}

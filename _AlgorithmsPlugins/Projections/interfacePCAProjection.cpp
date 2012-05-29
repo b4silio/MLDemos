@@ -8,8 +8,18 @@ PCAProjection::PCAProjection()
     params = new Ui::paramsPCA();
     params->setupUi(widget);
     connect(params->showEigenvectorButton, SIGNAL(clicked()), this, SLOT(ShowEigenVectors()));
+    connect(params->useRangeCheck, SIGNAL(clicked()), this, SLOT(ChangeOptions()));
+    ChangeOptions();
 }
 
+void PCAProjection::ChangeOptions()
+{
+    bool bRange = params->useRangeCheck->isChecked();
+    params->startRangeSpin->setVisible(bRange);
+    params->stopRangeSpin->setVisible(bRange);
+    params->labelStart->setVisible(bRange);
+    params->labelStop->setVisible(bRange);
+}
 
 // virtual functions to manage the algorithm creation
 Projector *PCAProjection::GetProjector()

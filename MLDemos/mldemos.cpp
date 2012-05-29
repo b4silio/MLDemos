@@ -2310,6 +2310,16 @@ void MLDemos::CanvasTypeChanged()
 {
     bool bProjected = canvas->data->bProjected;
     int type = ui.canvasTypeCombo->currentIndex();
+
+    if(!canvas->data->GetCount())
+    {
+        if(type != 0 && !canvas->rewardPixmap().isNull()) // we only have rewards
+        {
+            ui.canvasTypeCombo->setCurrentIndex(0);
+            return;
+        }
+    }
+
     ui.canvasZoomSlider->setEnabled(false);
     ui.canvasZoomSlider->hide();
     ui.canvasAxesWidget->hide();

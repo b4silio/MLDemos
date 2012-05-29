@@ -30,12 +30,14 @@ ClassSVM::ClassSVM()
     params->setupUi(widget = new QWidget());
     connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
     connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    ChangeOptions();
 }
 
 void ClassSVM::ChangeOptions()
 {
     int C = params->svmCSpin->value();
-    params->maxSVSpin->setEnabled(false);
+    params->maxSVSpin->setVisible(false);
+    params->labelMaxSV->setVisible(false);
     params->svmCSpin->setRange(0.0001, 1.0);
     params->svmCSpin->setSingleStep(0.0001);
     params->svmCSpin->setDecimals(4);
@@ -59,33 +61,36 @@ void ClassSVM::ChangeOptions()
     case 2: // Pegasos
         params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("lambda");
-        params->maxSVSpin->setEnabled(true);
+        params->maxSVSpin->setVisible(true);
+        params->labelMaxSV->setVisible(true);
         if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
     switch(params->kernelTypeCombo->currentIndex())
     {
     case 0: // linear
-        params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
+        params->labelDegree->setVisible(false);
+        params->kernelWidthSpin->setVisible(false);
+        params->labelWidth->setVisible(false);
         break;
     case 1: // poly
-        params->kernelDegSpin->setEnabled(true);
         params->kernelDegSpin->setVisible(true);
-        params->kernelWidthSpin->setEnabled(false);
+        params->labelDegree->setVisible(true);
         params->kernelWidthSpin->setVisible(false);
+        params->labelWidth->setVisible(false);
         break;
     case 2: // RBF
-        params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
-        params->kernelWidthSpin->setEnabled(true);
+        params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
         break;
     case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
-        params->kernelDegSpin->setVisible(false);
+        params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
-        params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
         break;
     }
 }

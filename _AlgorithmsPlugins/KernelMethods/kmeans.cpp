@@ -24,14 +24,15 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <mymaths.h>
 #include "kmeans.h"
 #include <QTime>
+#include <QDebug>
 
 using namespace std;
 
 
 KMeansCluster::KMeansCluster(u32 cnt)
-    : clusters(cnt), sigma(NULL), pi(NULL), bGMM(false), bSoft(false), beta(1), dim(2), power(2)
+    : clusters(cnt), sigma(NULL), pi(NULL), bGMM(false), bSoft(false), beta(1), dim(2), power(2), plusPlus(true)
 {
-    ResetClusters();
+    InitClusters();
 }
 
 KMeansCluster::~KMeansCluster()
@@ -117,7 +118,7 @@ void KMeansCluster::Update(bool bEStep)
             }
         }
     }
-    if(bSuperposed) ResetClusters();
+    if(bSuperposed) InitClusters();
 
     if(bGMM)
     {
@@ -166,10 +167,10 @@ void KMeansCluster::Clear()
 void KMeansCluster::SetClusters(u32 clusters)
 {
     this->clusters = max((u32)0,clusters);
-    ResetClusters();
+    InitClusters();
 }
 
-void KMeansCluster::ResetClusters()
+void KMeansCluster::InitClusters()
 {
     srand(QTime::currentTime().msec());
 
@@ -183,7 +184,14 @@ void KMeansCluster::ResetClusters()
     closestIndices.resize(clusters);
     FOR(i,clusters){
         means[i].resize(dim);
-        if(!points.size())
+        pi[i] = 1.f/clusters;
+        sigma[i] = new double[4];
+        sigma[i][0] = sigma[i][3] = 0.1;
+        sigma[i][1] = sigma[i][2] = 0.05;
+    }
+    if(!points.size()){
+        // no points, just choose random centers
+        FOR(i,clusters)
         {
             FOR(d,dim)
             {
@@ -191,18 +199,127 @@ void KMeansCluster::ResetClusters()
             }
             closestIndices[i] = 0;
         }
-        else
+    }
+    else if (plusPlus){
+        InitClustersPlusPlus();
+    }
+    else // choose a point at random
+    {
+        FOR(i,clusters)
         {
             int index = rand()%points.size();
             means[i] = points[index].point;
             closestIndices[i] = index;
         }
-        pi[i] = 1.f/clusters;
-        sigma[i] = new double[4];
-        sigma[i][0] = sigma[i][3] = 0.1;
-        sigma[i][1] = sigma[i][2] = 0.05;
     }
 }
+
+/** Use K-means++ to set the initial cluster centers, see
+* <a href="http://en.wikipedia.org/wiki/K-means%2B%2B">K-means++ (wikipedia)</a>
+* This code is based on Apache Commons Maths' KMeansPlusPlusClusterer.java
+*/
+void KMeansCluster::InitClustersPlusPlus()
+{
+    // Set the corresponding element in this array to indicate when points are no longer available.
+    bvec pointTaken(points.size(),false);
+
+    // Choose first cluster center uniformly at random from among the data points.
+    int firstPointIndex = rand() % points.size(); // not uniform, but fair?
+    means[0] = points[firstPointIndex].point;
+    closestIndices[0] = firstPointIndex;
+    pointTaken[firstPointIndex] = true; // must mark it as taken
+    qDebug("first point at rand = %d[%f;%f]", firstPointIndex, points[firstPointIndex].point[0], points[firstPointIndex].point[1]);
+
+    // Stores the squared minimum distance of each point to its nearest cluster center
+    fvec minDistSquared(points.size(), 0.0f);
+
+    // Initialize the distances. Easy, since the only cluster is the first point
+    FOR(i, points.size())
+    {
+        if (i != firstPointIndex) // first point isn't considered
+        {
+            float d = Distance(points[firstPointIndex].point, points[i].point);
+            qDebug("initial minDistSquared to %i[%f;%f] = %f", i, points[i].point[0], points[i].point[1], d);
+            minDistSquared[i] = d * d;
+        }
+    }
+
+    for(u32 centerCount = 1; centerCount < clusters; ++centerCount) // start at 1!
+    {
+        qDebug("picking cluster center %i----------------------------", centerCount);
+
+        // Sum up the squared distances for the points not already taken.
+        float distSqSum = 0.0f;
+        FOR(j,points.size())
+        {
+            if (!pointTaken[j]) {
+                distSqSum += minDistSquared[j];
+            }
+        }
+        qDebug(" distSqSum=%f",distSqSum);
+
+        // Choose one new point at random as a new center, using a weighted
+        // probability distribution where a point x is chosen with probability proportional to D(x)^2
+        float r = (rand() / float(RAND_MAX)) * distSqSum;
+        qDebug(" random index %f",r);
+        // The index of the next point to be added to the resultSet.
+        bool nextPointFound= false;
+        u32 nextPointIndex = 0;
+
+        // Sum through the squared min distances again, stopping when sum >= r.
+        float sum = 0.0f;
+        for(size_t j=0; j < points.size() && !nextPointFound; ++j)
+        {
+            if (!pointTaken[j])
+            {
+                sum += minDistSquared[j];
+                if (sum >= r)
+                {
+                    nextPointIndex = (u32) j;
+                    nextPointFound = true;
+                }
+            }
+        }
+
+        // If no point was found in the previous for loop, probably because distances are extremely small.
+        // Just pick the last available point.
+        if (!nextPointFound)
+        {
+            qDebug("loop empty, pick one at rand");
+            for(size_t j=0; j < points.size() && !nextPointFound; ++j)
+            {
+                if (!pointTaken[j])
+                {
+                    nextPointIndex = j;
+                    nextPointFound = true;
+                }
+            }
+        }
+
+        // assert(nextPointFound); // if wanted
+
+        // Set the new cluster point
+        means[centerCount] = points[nextPointIndex].point;
+        closestIndices[centerCount] = nextPointIndex;
+        pointTaken[nextPointIndex] = true;
+        qDebug(" new point %d[%f;%f]", nextPointIndex, points[nextPointIndex].point[0], points[nextPointIndex].point[1]);
+
+        // Update minDistSquared. We only have to compute the distance to the new center, and update it if it is shorter
+        for(size_t j=0; j < points.size(); ++j)
+        {
+            if (!pointTaken[j])
+            {
+                float d = Distance(points[nextPointIndex].point, points[j].point);
+                float dSqr = d * d;
+                if (dSqr < minDistSquared[j]) {
+                    minDistSquared[j] = dSqr;
+                }
+            }
+        }
+    }
+}
+
+
 
 ivec KMeansCluster::GetClosestPoints()
 {

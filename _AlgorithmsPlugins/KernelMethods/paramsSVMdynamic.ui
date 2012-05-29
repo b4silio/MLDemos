@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="label_21">
+  <widget class="QLabel" name="labelDegree">
    <property name="geometry">
     <rect>
      <x>220</x>
@@ -123,7 +123,7 @@ p, li { white-space: pre-wrap; }
     <double>1.000000000000000</double>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="labelWidth">
    <property name="geometry">
     <rect>
      <x>130</x>

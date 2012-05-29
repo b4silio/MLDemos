@@ -30,18 +30,19 @@ private:
 	bool bSoft;
 	bool bGmm;
 	int power;
+	bool kmeansPlusPlus;
 
 public:
 	KMeansCluster *kmeans;
 
-    ClustererKM() : beta(1), bSoft(false), bGmm(false), kmeans(0) {}
+    ClustererKM() : beta(1), bSoft(false), bGmm(false), kmeans(0), kmeansPlusPlus(true) {}
     ~ClustererKM();
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
     const char *GetInfoString();
 
-    void SetParams(u32 nbClusters, int method, float beta, int power);
+    void SetParams(u32 nbClusters, int method, float beta, int power, bool kmeansPlusPlus);
 };
 
 #endif // _CLUSTERER_KM_H_
