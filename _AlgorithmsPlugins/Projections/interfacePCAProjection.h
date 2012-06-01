@@ -35,6 +35,7 @@ public:
 
 public slots:
     void ShowEigenVectors();
+    void ChangeOptions();
 };
 
 #endif // INTERFACEPCAPROJECTION_H

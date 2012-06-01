@@ -19,8 +19,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>10</y>
+     <x>0</x>
+     <y>9</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -31,17 +31,17 @@
     </font>
    </property>
    <property name="text">
-    <string>Mixture Components</string>
+    <string>Symbol Number</string>
    </property>
   </widget>
-  <widget class="QSpinBox" name="hmmMixtureCount">
+  <widget class="QSpinBox" name="hmmSymbolNumber">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>34</y>
+     <x>30</x>
+     <y>33</y>
      <width>39</width>
      <height>21</height>
     </rect>
@@ -52,13 +52,13 @@
     </font>
    </property>
    <property name="toolTip">
-    <string>Number of mixture elements</string>
+    <string>Number of symbols</string>
    </property>
    <property name="minimum">
     <number>1</number>
    </property>
    <property name="maximum">
-    <number>200</number>
+    <number>1000</number>
    </property>
    <property name="value">
     <number>1</number>
@@ -67,9 +67,9 @@
   <widget class="QComboBox" name="hmmTrainCombo">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>90</y>
-     <width>130</width>
+     <x>0</x>
+     <y>80</y>
+     <width>111</width>
      <height>26</height>
     </rect>
    </property>
@@ -100,8 +100,8 @@
   <widget class="QLabel" name="label_20">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>10</y>
+     <x>240</x>
+     <y>9</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -118,8 +118,8 @@
   <widget class="QLabel" name="label_21">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>70</y>
+     <x>30</x>
+     <y>60</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -136,8 +136,8 @@
   <widget class="QSpinBox" name="hmmStatesCount">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>31</y>
+     <x>240</x>
+     <y>30</y>
      <width>39</width>
      <height>21</height>
     </rect>
@@ -164,8 +164,8 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>30</y>
-     <width>80</width>
+     <y>29</y>
+     <width>91</width>
      <height>26</height>
     </rect>
    </property>
@@ -191,8 +191,8 @@
   <widget class="QLabel" name="label_22">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>10</y>
+     <x>130</x>
+     <y>9</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -205,6 +205,119 @@
    <property name="text">
     <string>Mixture Type</string>
    </property>
+  </widget>
+  <widget class="QLabel" name="label_23">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>60</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Initial State</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="hmmInitialCombo">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>80</y>
+     <width>81</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Initial State vector options</string>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Uniform</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Random</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>First</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_24">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>60</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Transition</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="hmmTransCombo">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>80</y>
+     <width>101</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Initial State vector options</string>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Ergodic-Random</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Ergodic-Uniform</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>LeftRight-Random</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>LeftRight-Uniform</string>
+    </property>
+   </item>
   </widget>
  </widget>
  <resources/>

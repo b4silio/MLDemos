@@ -1,3 +1,5 @@
+#ifndef INITSTATEPROB_H
+#define INITSTATEPROB_H
 /* ************************************************************************ *
  * ************************************************************************ *
 
@@ -31,6 +33,8 @@ class CInitStateProb{
 
 public:
   CInitStateProb(int nbStates);
+  //Addition of Simis for random and "first" initial state vectors
+  CInitStateProb(int nbStates, int mode);
   CInitStateProb(std::ifstream &hmmFile, int nbStates);
   ~CInitStateProb(void);
   void Start(void);
@@ -59,3 +63,4 @@ private:
 //===============================================================================
 
 //===============================================================================
+#endif

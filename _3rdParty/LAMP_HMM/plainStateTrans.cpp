@@ -58,20 +58,73 @@ CPlainStateTrans::CPlainStateTrans(int nbStates, int seed)
 
 //===============================================================================
 
+CPlainStateTrans::CPlainStateTrans(int nbStates, int seed, int mode)
+{
+    mN = nbStates;
+
+    mThisA = SetMatrix(mN, mN);
+    mNextA = SetMatrix(mN, mN);
+    mLogA = SetMatrix(mN, mN);
+
+    //Set everything to 0 at first
+    for(int i=1;i<=mN;i++){
+        for(int j=1;j<=mN;j++){
+            mThisA[i][j]=0;
+        }
+    }
+
+    MyInitRand(seed);
+    switch(mode)
+    {
+        case 0:
+            for(int i=1;i<=mN;i++)
+            {
+                for(int j=1;j<=mN;j++)
+                {
+                    mThisA[i][j] = 1;
+                }
+            }
+            break;
+        case 1:
+        for(int i=1;i<=mN;i++)
+        {
+            for(int j=i;j<=mN;j++)
+            {
+                mThisA[i][j] = CenteredRand();
+            }
+        }
+            break;
+        case 2:
+            for(int i=1;i<mN;i++)
+            {
+                double c = 1.0/(double)(mN-i+1);
+                for(int j=i;j<=mN;j++)
+                {
+                    mThisA[i][j] = c;
+                }
+            }
+            mThisA[mN][mN] = 1.0;
+            break;
+    }
+    NormalizeAllRows(mThisA,mN,mN);
+    LogMat(mThisA, mLogA, mN, mN);
+}
+
+//===============================================================================
+
 CPlainStateTrans::CPlainStateTrans(ifstream &hmmFile, int nbStates)
 // Constructor used to read an hmm from a file
 {
         int i, j;
-	char magicID[32];
+    char magicID[32];
 
-        mN = nbStates;
-
+    mN = nbStates;
 	mThisA = SetMatrix(mN, mN);
 	mNextA = SetMatrix(mN, mN);
 	mLogA = SetMatrix(mN, mN);
 
 	hmmFile >> magicID;
-	assert(strcmp(magicID, "A:")==0);
+    assert(strcmp(magicID, "A:")==0);
 
 	for (i = 1; i <=mN; i++) { 
 		for (j = 1; j <= mN; j++) {

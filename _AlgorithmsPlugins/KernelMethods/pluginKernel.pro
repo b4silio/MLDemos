@@ -10,14 +10,12 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsGPR.ui paramsGPRdynamic.ui paramsKM.ui paramsMVM.ui paramsRVM.ui paramsRVMregr.ui
+FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsKM.ui paramsMVM.ui paramsRVM.ui paramsRVMregr.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
 			mymaths.h \
 			svm.h \
-			SOGP.h \
-			SOGP_aux.h \
             classifierSVM.h \
             classifierMVM.h \
             classifierRVM.h \
@@ -27,11 +25,9 @@ HEADERS +=	\
             kmeans.h \
             clustererSVR.h \
 			regressorSVR.h \
-			regressorGPR.h \
 			regressorRVM.h \
 			regressorKRLS.h \
 			dynamicalSVR.h \
-			dynamicalGPR.h \
             interfaceMVM.h \
             interfaceSVMClassifier.h \
             interfaceSVMCluster.h \
@@ -39,14 +35,10 @@ HEADERS +=	\
 			interfaceSVMDynamic.h \
             interfaceRVMClassifier.h \
             interfaceRVMRegress.h \
-            interfaceGPRRegress.h \
-            interfaceGPRDynamic.h \
             interfaceKMCluster.h \
             pluginKernel.h
 SOURCES += 	\
 			svm.cpp \
-			SOGP.cpp \
-			SOGP_aux.cpp \
             classifierSVM.cpp \
             classifierMVM.cpp \
             classifierRVM.cpp \
@@ -56,11 +48,9 @@ SOURCES += 	\
             kmeans.cpp \
             clustererSVR.cpp \
 			regressorSVR.cpp \
-			regressorGPR.cpp \
 			regressorRVM.cpp \
 			regressorKRLS.cpp \
 			dynamicalSVR.cpp \
-			dynamicalGPR.cpp \
             interfaceMVM.cpp \
             interfaceSVMClassifier.cpp \
             interfaceSVMCluster.cpp \
@@ -68,8 +58,6 @@ SOURCES += 	\
             interfaceSVMDynamic.cpp \
             interfaceRVMClassifier.cpp \
             interfaceRVMRegress.cpp \
-            interfaceGPRRegress.cpp \
-            interfaceGPRDynamic.cpp \
             interfaceKMCluster.cpp \
             pluginKernel.cpp
 

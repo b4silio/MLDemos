@@ -27,6 +27,14 @@ ClassKNN::ClassKNN()
 {
 	params = new Ui::ParametersKNN();
 	params->setupUi(widget = new QWidget());
+    connect(params->knnNormCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    ChangeOptions();
+}
+
+void ClassKNN::ChangeOptions()
+{
+    params->knnNormSpin->setVisible(params->knnNormCombo->currentIndex() == 2);
+    params->labelPower->setVisible(params->knnNormCombo->currentIndex() == 2);
 }
 
 void ClassKNN::SetParams(Classifier *classifier)

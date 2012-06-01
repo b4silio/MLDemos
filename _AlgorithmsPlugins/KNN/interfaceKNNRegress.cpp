@@ -29,6 +29,14 @@ RegrKNN::RegrKNN()
 {
 	params = new Ui::ParametersKNNRegress();
 	params->setupUi(widget = new QWidget());
+    connect(params->knnNormCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    ChangeOptions();
+}
+
+void RegrKNN::ChangeOptions()
+{
+    params->knnNormSpin->setVisible(params->knnNormCombo->currentIndex() == 2);
+    params->labelPower->setVisible(params->knnNormCombo->currentIndex() == 2);
 }
 
 void RegrKNN::SetParams(Regressor *regressor)

@@ -29,6 +29,7 @@ ClassRVM::ClassRVM()
     params = new Ui::ParametersRVM();
     params->setupUi(widget = new QWidget());
     connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    ChangeOptions();
 }
 
 void ClassRVM::ChangeOptions()
@@ -38,26 +39,28 @@ void ClassRVM::ChangeOptions()
     switch(params->kernelTypeCombo->currentIndex())
     {
     case 0: // linear
-        params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
+        params->labelDegree->setVisible(false);
+        params->kernelWidthSpin->setVisible(false);
+        params->labelWidth->setVisible(false);
         break;
     case 1: // poly
-        params->kernelDegSpin->setEnabled(true);
         params->kernelDegSpin->setVisible(true);
-        params->kernelWidthSpin->setEnabled(false);
+        params->labelDegree->setVisible(true);
         params->kernelWidthSpin->setVisible(false);
+        params->labelWidth->setVisible(false);
         break;
     case 2: // RBF
-        params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
-        params->kernelWidthSpin->setEnabled(true);
+        params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
         break;
     case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
-        params->kernelDegSpin->setVisible(false);
+        params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
-        params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
         break;
     }
 }

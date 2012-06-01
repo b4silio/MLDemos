@@ -108,7 +108,8 @@ CObsSeq::CObsSeq(CObs *obsType, std::vector< std::vector< std::vector<float> > >
 	mNbSequences = nbSequences;
 	mNbObs = new long[mNbSequences+1];
 	mObs = new CObs**[mNbSequences+1];
-	int dim = sequences[0][0].size()/2;
+    int dim = sequences[0][0].size();
+
 
 	T = nbObs;
 

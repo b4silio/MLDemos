@@ -16,12 +16,22 @@ HEADERS +=	\
 	datasetManager.h \
 	mymaths.h \
 	drawUtils.h \
+    dynamicalHMM.h \
+    classifierHMM.h \
+    interfaceHMMClassifier.h \
+    interfaceHMMDynamic.h \
     pluginHMM.h \
-    dynamicalHMM.h
+    detectorHMM.h \
+    interfaceHMMDetect.h
 
 SOURCES += 	\
     pluginHMM.cpp \
-    dynamicalHMM.cpp
+    dynamicalHMM.cpp \
+    classifierHMM.cpp \
+    detectorHMM.cpp \
+    interfaceHMMClassifier.cpp \
+    interfaceHMMDetect.cpp \
+    interfaceHMMDynamic.cpp
 
 ###########################
 # Dependencies            #
