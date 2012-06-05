@@ -277,7 +277,7 @@ void lwpr_xml_error(LWPR_ParserData *ud, const char *msg) {
             break;
       }
       if (msg!=NULL) {
-         fprintf(ud->errFile,msg);
+         fprintf(ud->errFile,"%s",msg);
       }
    }
 }

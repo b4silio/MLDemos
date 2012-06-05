@@ -67,7 +67,7 @@ void Message0(int level, char *mess) {
   int count ;
   if (level < VERBOSITY) {
     for (count=0; count<level*SPACE_PER_LEVEL; count++) fprintf(stderr," ");
-    fprintf(stderr, mess);
+    fprintf(stderr, "%s", mess);
   }
 }
 void MessageF(int level, char *mess, double value) {
