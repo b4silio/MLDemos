@@ -23,5 +23,6 @@
         <file>icons/compare.png</file>
         <file>icons/algorithms.png</file>
         <file>icons/adddata.png</file>
+        <file>icons/spinner-24x24.gif</file>
     </qresource>
 </RCC>

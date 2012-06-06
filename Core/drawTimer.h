@@ -68,11 +68,13 @@ public:
 	bool bRunning;
 	bool bColorMap;
 
-	signals:
+signals:
 	void MapReady(QImage image);
 	void ModelReady(QImage image);
     void AnimationReady(QImage image);
 	void CurveReady();
+    void ThreadIsRunning();
+    void ThreadIsStopped();
 };
 
 #endif // _DRAWTIMER_H_

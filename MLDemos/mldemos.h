@@ -56,6 +56,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "expose.h"
 #include "dataImporter.h"
 #include "datagenerator.h"
+#include "animationlabel.h"
 
 class MLDemos : public QMainWindow
 {
@@ -65,7 +66,7 @@ private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
 	*actionClearData, *actionClearModel, *actionScreenshot,
-	*actionNew, *actionSave, *actionLoad;
+    *actionNew, *actionSave, *actionLoad;
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
@@ -95,6 +96,7 @@ private:
     QWidget *drawToolbarWidget;
 	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget, *drawContext4Widget;
 	QToolBar *toolBar;
+    QPointer<AnimationLabel> spinner;
 
 	DrawTimer *drawTimer;
 	QTime drawTime;

@@ -213,6 +213,15 @@ void MLDemos::initToolBars()
     connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
     connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
 
+
+    // Create and add the spinner widget to the ControlsWidget layout
+    spinner = new AnimationLabel( ":/MLDemos/icons/spinner-24x24.gif", this );
+    ui.canvasControlsWidget->layout()->addWidget( spinner );
+    connect( drawTimer, SIGNAL( ThreadIsRunning() ), spinner, SLOT( Start() ) );
+    connect( drawTimer, SIGNAL( ThreadIsStopped() ), spinner, SLOT( Stop() ) );
+
+    spinner->Stop();
+
     QSize iconSize(24,24);
     drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
     drawToolbar->singleButton->setIconSize(iconSize);
@@ -850,14 +859,7 @@ void MLDemos::resizeEvent( QResizeEvent *event )
 
 void MLDemos::ClusterChanged()
 {
-    if(optionsCluster->optimizeCombo->currentIndex() == 3) // F1
-    {
-        optionsCluster->trainRatioCombo->setVisible(true);
-    }
-    else
-    {
-        optionsCluster->trainRatioCombo->setVisible(false);
-    }
+    optionsCluster->trainRatioCombo->setVisible( optionsCluster->optimizeCombo->currentIndex() == 3 ); //F1
 }
 
 void MLDemos::AlgoChanged()
@@ -957,44 +959,22 @@ void MLDemos::CompareRemove()
 
 void MLDemos::ShowAlgorithmOptions()
 {
-    if(actionAlgorithms->isChecked()) algorithmWidget->show();
-    else algorithmWidget->hide();
+    algorithmWidget->setVisible( actionAlgorithms->isChecked() );
 }
 
 void MLDemos::ShowOptionCompare()
 {
-    if(actionCompare->isChecked())
-    {
-        compareWidget->show();
-    }
-    else
-    {
-        compareWidget->hide();
-    }
+    compareWidget->setVisible( actionCompare->isChecked() );
 }
 
 void MLDemos::ShowSampleDrawing()
 {
-    if(actionDrawSamples->isChecked())
-    {
-        drawToolbarWidget->show();
-    }
-    else
-    {
-        drawToolbarWidget->hide();
-    }
+    drawToolbarWidget->setVisible( actionDrawSamples->isChecked() );
 }
 
 void MLDemos::ShowAddData()
 {
-    if(actionAddData->isChecked())
-    {
-        generator->show();
-    }
-    else
-    {
-        generator->hide();
-    }
+    generator->setVisible( actionAddData->isChecked() );
 }
 
 void MLDemos::HideAddData()
@@ -1005,8 +985,7 @@ void MLDemos::HideAddData()
 
 void MLDemos::ShowOptionDisplay()
 {
-    if(actionDisplayOptions->isChecked()) displayDialog->show();
-    else displayDialog->hide();
+    displayDialog->setVisible( actionDisplayOptions->isChecked() );
 }
 
 void MLDemos::ShowToolbar()
@@ -1021,14 +1000,12 @@ void MLDemos::ShowToolbar()
         toolBar->setIconSize(QSize(64,64));
         toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     }
-    if(ui.actionShow_Toolbar->isChecked()) toolBar->show();
-    else toolBar->hide();
+    toolBar->setVisible( ui.actionShow_Toolbar->isChecked() );
 }
 
 void MLDemos::ShowStatsDialog()
 {
-    if(actionShowStats->isChecked()) statsDialog->show();
-    else statsDialog->hide();
+    statsDialog->setVisible( actionShowStats->isChecked() );
 }
 
 void MLDemos::ShowAbout()
@@ -1102,6 +1079,7 @@ void MLDemos::Clear()
     canvas->liveTrajectory.clear();
     canvas->sampleColors.clear();
     canvas->maps.animation = QPixmap();
+    spinner->Stop();
     canvas->repaint();
     UpdateInfo();
 }

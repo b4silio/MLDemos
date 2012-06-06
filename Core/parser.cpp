@@ -170,6 +170,7 @@ void CSVParser::parse(const char* fileName, int separatorType)
     int bestSeparator = 0;
     int dim=0;
 
+    int mydatasize = 0;
     if(!separatorType)
     {
         // we test the separators to find which one is best
@@ -181,7 +182,7 @@ void CSVParser::parse(const char* fileName, int separatorType)
             ++parser; // we skip the first line as it might be a header line
             if(parser.eof() || !parser->size()) continue;
             vector<string> parsed = parser->getParsedLine();
-            //qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
+            qDebug() << "separator: " << separators[i].c_str() << ":" << parsed.size();
             if(parsed.size() > dim)
             {
                 dim = parsed.size();
@@ -220,9 +221,10 @@ void CSVParser::parse(const char* fileName, int separatorType)
         // Fill dataset
         data.push_back(parsed);
     }
-
-    cout << "Parsing done, read " << data.size() << " entries" << endl;
-    cout << "Found " << data.at(0).size() << " input labels / columns" << endl;
+    mydatasize = data.at(data.size() / 2).size();
+    qDebug() << "my estimated labels/columns:" << mydatasize;
+    qDebug() << "Parsing done, read " << data.size() << " entries";
+    qDebug() << "Found " << data.at(0).size() << " input labels / columns";
 
     // look for data types
     for(size_t i = 0; i < data.at(1).size(); i++)
@@ -244,13 +246,13 @@ void CSVParser::parse(const char* fileName, int separatorType)
             dataTypes.push_back(getType(data.at(testRow).at(i)));
     }
 
-    cout << data.at(0).size() << " input labels / columns remaining after cleanup" << endl;
+    qDebug() << data.at(0).size() << " input labels / columns remaining after cleanup" << endl;
 
 //    cout << "Contents: " << endl;
 //    for (size_t j=0; j<data.size(); j++)
 //    {
 //        cout << "|";
-//        for (size_t i=0; i<data.at(1).size(); i++)
+//        for (size_t i=0; i<data.at(j).size(); i++)
 //            cout << data.at(j).at(i) << "|";
 //        cout << endl;
 //    }
@@ -337,9 +339,10 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         if(!i && bFirstRowAsHeader) continue;
         // check if it's always a number
         fvec& sample = samples[i-headerSkip];
-        sample.resize((outputLabelColumn==-1) ? dim : dim-1);
+        sample.resize((outputLabelColumn==-1) ? dim : dim-1, 0);
         FOR(j, dim)
         {
+            if ( data.at(i).size() < dim ) continue;
             QString s(data[i][j].c_str());
             bool ok;
             float val = s.toFloat(&ok);
@@ -390,22 +393,27 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         }
         */
         bool numerical = true;
+//        FOR(i, data.size())
+//        {
+//            if(!i && bFirstRowAsHeader) continue;
+//            bool ok;
+//            float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
+//            if(!ok)
+//            {
+//                numerical = false;
+//                break;
+//            }
+//        }
+        float val = 0.0;
         FOR(i, data.size())
         {
             if(!i && bFirstRowAsHeader) continue;
-            bool ok;
-            float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
-            if(!ok)
-            {
-                numerical = false;
-                break;
+            if ( data.at(i).size() <= outputLabelColumn ) {
+                val = 0.0;
+                numerical = true;
+            } else {
+                val = QString(data[i][outputLabelColumn].c_str()).toFloat(&numerical);
             }
-        }
-        FOR(i, data.size())
-        {
-            if(!i && bFirstRowAsHeader) continue;
-            bool ok;
-            float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
             if(numerical)
             {
                 labels[i-headerSkip] = val;
@@ -419,6 +427,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     }
     if(maxSamples != -1 && maxSamples < samples.size())
     {
+        qDebug() << "Cutting down the number of samples from:" << samples.size() << "to:" << maxSamples;
         vector<fvec> newSamples(maxSamples);
         ivec newLabels(maxSamples);
         u32 *perm = randPerm(maxSamples);
@@ -432,8 +441,11 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         count = samples.size();
         delete [] perm;
     }
-    if(!excludeIndex.size()) return pair<vector<fvec>,ivec>(samples,labels);
-    vector<fvec> newSamples(count);
+    if(!excludeIndex.size()) {
+        qDebug() << "Imported samples: " << samples.size() << " labels: " << labels.size();
+        return pair<vector<fvec>,ivec>(samples,labels);
+    }
+     vector<fvec> newSamples(count);
     int newDim = dim - excludeIndex.size();
     if(outputLabelColumn != -1) newDim--;
     //qDebug() << "Indices to be excluded: " << excludeIndex.size() << "(newDim: " << newDim << ")";

@@ -55,6 +55,7 @@ DrawTimer::~DrawTimer()
 void DrawTimer::Stop()
 {
 	bRunning = false;
+    emit ThreadIsStopped();
 }
 
 void DrawTimer::Clear()
@@ -74,14 +75,17 @@ void DrawTimer::Clear()
 
 void DrawTimer::run()
 {
-	bRunning = true;
-	while(bRunning)
+    bRunning = true;
+    emit ThreadIsRunning();
+
+    while(bRunning)
 	{
         if(!canvas || canvas->canvasType) break;
 		if((!classifier || !(*classifier)) && (!regressor || !(*regressor)) && (!dynamical || !(*dynamical)) && (!clusterer || !(*clusterer)) && (!maximizer || !(*maximizer)))
 		{
 			Clear();
 			bRunning = false;
+            emit ThreadIsStopped();
 			return;
 		}
 
@@ -109,13 +113,14 @@ void DrawTimer::run()
         }
         else if (!dynamical || !(*dynamical)) // no animations to be done
         {
-            break;
+             break;
         }
 
         // wait a while
         this->msleep(40);
 	}
 	bRunning = false;
+    emit ThreadIsStopped();
 }
 
 void DrawTimer::Animate()

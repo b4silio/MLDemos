@@ -64,8 +64,10 @@ void MLDemos::Classify()
         // we get the list of samples that are checked
         trainList = GetManualSelection();
     }
-
     bool trained = Train(classifier, positive, trainRatio, trainList);
+
+    spinner->Start();
+    canvas->repaint();
     if(trained)
     {
         classifiers[tab]->Draw(canvas, classifier);
@@ -88,7 +90,6 @@ void MLDemos::Classify()
             canvas->maps.model = QPixmap();
             CanvasOptionsChanged();
         }
-        canvas->repaint();
     }
     else
     {
@@ -97,6 +98,9 @@ void MLDemos::Classify()
         mutex.lock();
         UpdateInfo();
     }
+
+    spinner->Stop();
+    canvas->repaint();
     mutex.unlock();
 }
 
@@ -128,6 +132,8 @@ void MLDemos::ClassifyCross()
         trainList = GetManualSelection();
     }
 
+    spinner->Start();
+    canvas->repaint();
     vector<fvec> fmeasures;
     fmeasures.resize(2);
     bool trained = false;
@@ -150,6 +156,9 @@ void MLDemos::ClassifyCross()
     //ShowCross();
     //if(trained) classifiers[tab]->Draw(canvas, classifier);
     DEL(classifier);
+
+    spinner->Stop();
+    canvas->repaint();
     UpdateInfo();
 }
 
@@ -232,6 +241,8 @@ void MLDemos::Regression()
         trainList = GetManualSelection();
     }
 
+    spinner->Start();
+    canvas->repaint();
     Train(regressor, outputDim, trainRatio, trainList);
     regressors[tab]->Draw(canvas, regressor);
 
@@ -280,6 +291,9 @@ void MLDemos::Regression()
         }
     }
     UpdateInfo();
+
+    spinner->Stop();
+    canvas->repaint();
 }
 
 void MLDemos::RegressionCross()
@@ -306,6 +320,9 @@ void MLDemos::RegressionCross()
     float trainRatio = ratios[ratioIndex];
     int foldCount = optionsRegress->foldCountSpin->value();
 
+    spinner->Start();
+    canvas->repaint();
+
     vector<fvec> errors;
     errors.resize(2);
     FOR(f,foldCount)
@@ -328,6 +345,9 @@ void MLDemos::RegressionCross()
     Train(regressor, outputDim, trainRatio);
     regressors[tab]->Draw(canvas, regressor);
     UpdateInfo();
+
+    spinner->Stop();
+    canvas->repaint();
 }
 
 void MLDemos::Dynamize()
@@ -347,6 +367,8 @@ void MLDemos::Dynamize()
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     dynamical = dynamicals[tab]->GetDynamical();
     tabUsedForTraining = tab;
+    spinner->Start();
+    canvas->repaint();
 
     Train(dynamical);
     dynamicals[tab]->Draw(canvas,dynamical);
@@ -421,6 +443,9 @@ void MLDemos::Dynamize()
         dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
     }
     UpdateInfo();
+
+    spinner->Stop();
+    canvas->repaint();
     if(dynamicals[tab]->UsesDrawTimer())
     {
         drawTimer->bColorMap = bColorMap;
@@ -592,6 +617,9 @@ void MLDemos::Cluster()
     }
 
     float testError;
+
+    spinner->Start();
+    canvas->repaint();
     Train(clusterer, trainRatio, trainList, &testError);
     drawTimer->Stop();
     drawTimer->Clear();
@@ -663,7 +691,12 @@ void MLDemos::Cluster()
     showStats->infoText->setText(infoText);
 
     drawTimer->clusterer= &this->clusterer;
+    spinner->Stop();
+    canvas->repaint();
+
     drawTimer->start(QThread::NormalPriority);
+
+    canvas->repaint();
 }
 
 void MLDemos::ClusterTest()
@@ -704,6 +737,9 @@ void MLDemos::ClusterTest()
         // we get the list of samples that are checked
         trainList = GetManualSelection();
     }
+
+    spinner->Start();
+    canvas->repaint();
 
     float testError = 0;
     int crossValCount = 5;
@@ -759,6 +795,7 @@ void MLDemos::ClusterTest()
 
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);
+    spinner->Stop();
     canvas->repaint();
 }
 
@@ -767,6 +804,7 @@ void MLDemos::ClusterOptimize()
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
     drawTimer->Clear();
+
     QMutexLocker lock(&mutex);
     DEL(clusterer);
     DEL(regressor);
@@ -801,6 +839,8 @@ void MLDemos::ClusterOptimize()
         trainList = GetManualSelection();
     }
 
+    spinner->Start();
+    canvas->repaint();
     float testError = 0;
     ivec kCounts;
     vector< vector<fvec> > resultList(4);
@@ -980,6 +1020,8 @@ void MLDemos::ClusterOptimize()
 
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);
+
+    spinner->Stop();
     canvas->repaint();
 }
 
@@ -987,6 +1029,9 @@ void MLDemos::ClusterIterate()
 {
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
+
+    spinner->Start();
+    canvas->repaint();
     int tab = optionsCluster->tabWidget->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
     QMutexLocker lock(&mutex);
@@ -1025,6 +1070,8 @@ void MLDemos::ClusterIterate()
         canvas->sampleColors[i] = QColor(r,g,b);
     }
     canvas->maps.model = QPixmap();
+
+    spinner->Stop();
     canvas->repaint();
 
     UpdateInfo();
@@ -1036,6 +1083,9 @@ void MLDemos::Maximize()
     if(canvas->maps.reward.isNull()) return;
     QMutexLocker lock(&mutex);
     drawTimer->Stop();
+
+    spinner->Start();
+    canvas->repaint();
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
@@ -1084,6 +1134,8 @@ void MLDemos::Maximize()
     //contour.style;
     contour.Paint(painter, 10);
     delete [] data;
+
+    spinner->Stop();
     canvas->repaint();
 
     UpdateInfo();
@@ -1140,6 +1192,9 @@ void MLDemos::Project()
         // we get the list of samples that are checked
         trainList = GetManualSelection();
     }
+
+    spinner->Start();
+    canvas->repaint();
     Train(projector, trainList);
     if(!bHasSource)
     {
@@ -1157,6 +1212,9 @@ void MLDemos::Project()
     CanvasOptionsChanged();
     ResetPositiveClass();
     projectors[tab]->Draw(canvas, projector);
+    canvas->repaint();
+
+    spinner->Stop();
     canvas->repaint();
     UpdateInfo();
 }

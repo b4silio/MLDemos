@@ -19,6 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "dataImporter.h"
 #include "ui_dataImport.h"
+#include <QMessageBox>
 
 DataImporter::DataImporter()
     : guiDialog(0), gui(0), inputParser(0), filename("")
@@ -102,7 +103,38 @@ void DataImporter::Parse(QString filename)
     int separatorType = gui->separatorCombo->currentIndex();
     inputParser->parse(filename.toStdString().c_str(), separatorType);
     vector<vector<string> > rawData = inputParser->getRawData();
-    if(rawData.size() < 2) return;
+
+    if ( rawData.size() < 2 )
+    {
+        qDebug() << "The rawData.size() is less then 2:" << rawData.size();
+        QMessageBox msgBox;
+        msgBox.setText( tr( "The input cannot be scanned.\n" )              +
+                        tr( "Less then 2 data lines has been found!" ) );
+        msgBox.setIcon( QMessageBox::Warning );
+        msgBox.exec();
+        return;
+    }
+
+    FOR ( i, rawData.size() )
+    {
+        if ( rawData[i].size() < 2 )
+        {
+            qDebug() << "The " << i << "th of line of rawData is less then 2 :"
+                     << rawData[i].size() << "column only.";
+            QMessageBox msgBox;
+            msgBox.setText( tr( "The input cannot be scanned.\n" )                          +
+                            tr( "A line has been detected with a single element only!\n" )  +
+                            tr( "Please check your data it may have: \n" )                  +
+                            tr( "\t- A header with more then one line.\n" )                 +
+                            tr( "\t- An incompete last line.\n" )                           +
+                            tr( "\t- Any cther corrupted line.\n" )
+                            );
+            msgBox.setIcon( QMessageBox::Warning );
+            msgBox.exec();
+            return;
+        }
+    }
+
     bool bUseHeader = gui->headerCheck->isChecked();
 
     gui->tableWidget->clear();
