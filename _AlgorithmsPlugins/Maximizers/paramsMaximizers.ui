@@ -68,11 +68,6 @@
    </item>
    <item>
     <property name="text">
-     <string>Particle Filters</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
      <string>Gradient Descent</string>
     </property>
    </item>

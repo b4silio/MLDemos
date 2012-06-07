@@ -79,11 +79,6 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     classifier->rocdata.clear();
     classifier->roclabels.clear();
 
-    lastTrainingInfo = "";
-    map<int, int> truePerClass;
-    map<int, int> falsePerClass;
-    map<int, int> countPerClass;
-
     ivec inputDims = GetInputDimensions();
     vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
 
@@ -155,7 +150,16 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             }
         }
     }
+
+    // do the actual training
     classifier->Train(trainSamples, trainLabels);
+
+    // compute test results
+    lastTrainingInfo = "";
+    map<int, int> truePerClass;
+    map<int, int> falsePerClass;
+    map<int, int> countPerClass;
+    map<int, map<int, int> > confusionMatrix[2];
 
     // we generate the roc curve for this guy
     bool bTrueMulti = bMulticlass;
@@ -181,8 +185,9 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             {
                 int maxClass = 0;
                 for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
-                rocData.push_back(f32pair(classifier->inverseMap[maxClass], label));
                 int c = classifier->inverseMap[maxClass];
+                rocData.push_back(f32pair(c, label));
+                confusionMatrix[0][label][c]++;
                 if(label != c) falsePerClass[c]++;
                 else truePerClass[c]++;
             }
@@ -206,14 +211,30 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     int posClass = 1;
     if(bTrueMulti)
     {
+        float macroFMeasure = 0.f, microFMeasure = 0.f;
+        int microTP = 0, microFP = 0, microCount = 0;
+        float microPrecision = 0.f;
+        float microRecall = 0.f;
         for(map<int,int>::iterator it = countPerClass.begin(); it != countPerClass.end(); it++)
         {
             int c = it->first;
             int tp = truePerClass[c];
             int fp = falsePerClass[c];
+            int count = it->second;
+            microTP += tp;
+            microFP += fp;
+            microCount += count;
+            float precision = tp / float(tp + fp);
+            float recall = tp / float(count);
+            macroFMeasure += 2*precision*recall/(precision+recall);
             float ratio = it->second != 0 ? tp / (float)it->second : 0;
             lastTrainingInfo += QString("Class %1 (%5 samples): %2 correct (%4%)\n%3 incorrect\n").arg(c).arg(tp).arg(fp).arg((int)(ratio*100)).arg(it->second);
         }
+        macroFMeasure /= countPerClass.size();
+        microPrecision = microTP / float(microTP + microFP);
+        microRecall = microTP / float(microCount);
+        microFMeasure = 2*microPrecision*microRecall/(microPrecision + microRecall);
+        lastTrainingInfo += QString("F-Measure: %1 (micro) \t %2 (macro)\n").arg(microFMeasure, 0, 'f', 3).arg(macroFMeasure, 0, 'f', 3);
     }
     else
     {
@@ -258,10 +279,11 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             {
                 int maxClass = 0;
                 for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
-                rocData.push_back(f32pair(classifier->inverseMap[maxClass], label));
                 int c = classifier->inverseMap[maxClass];
+                rocData.push_back(f32pair(c, label));
                 if(label != c) falsePerClass[c]++;
                 else truePerClass[c]++;
+                confusionMatrix[1][label][c]++;
             }
         }
         else
@@ -279,17 +301,35 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     if(!bTrueMulti) rocData = FixRocData(rocData);
     classifier->rocdata.push_back(rocData);
     classifier->roclabels.push_back("test");
+    classifier->confusionMatrix[0] = confusionMatrix[0];
+    classifier->confusionMatrix[1] = confusionMatrix[1];
     lastTrainingInfo += QString("\nTesting Set (%1 samples):\n").arg(testSamples.size());
     if(bTrueMulti)
     {
+        float macroFMeasure = 0.f, microFMeasure = 0.f;
+        int microTP = 0, microFP = 0, microCount = 0;
+        float microPrecision = 0.f;
+        float microRecall = 0.f;
         for(map<int,int>::iterator it = countPerClass.begin(); it != countPerClass.end(); it++)
         {
             int c = it->first;
             int tp = truePerClass[c];
             int fp = falsePerClass[c];
+            int count = it->second;
+            microTP += tp;
+            microFP += fp;
+            microCount += count;
+            float precision = tp / float(tp + fp);
+            float recall = tp / float(count);
+            macroFMeasure += 2*precision*recall/(precision+recall);
             float ratio = it->second != 0 ? tp / (float)it->second : 0;
             lastTrainingInfo += QString("Class %1 (%5 samples): %2 correct (%4%)\n%3 incorrect\n").arg(c).arg(tp).arg(fp).arg((int)(ratio*100)).arg(it->second);
         }
+        macroFMeasure /= countPerClass.size();
+        microPrecision = microTP / float(microTP + microFP);
+        microRecall = microTP / float(microCount);
+        microFMeasure = 2*microPrecision*microRecall/(microPrecision + microRecall);
+        lastTrainingInfo += QString("F-Measure: %1 (micro) \t %2 (macro)\n").arg(microFMeasure, 0, 'f', 3).arg(macroFMeasure, 0, 'f', 3);
     }
     else
     {
@@ -611,6 +651,41 @@ void MLDemos::Test(Maximizer *maximizer)
     while(maximizer->age < maximizer->maxAge && maximizer->MaximumValue() < maximizer->stopValue);
 }
 
+void MLDemos::Train(Reinforcement *reinforcement)
+{
+    if(!reinforcement) return;
+    if(canvas->maps.reward.isNull()) return;
+    QImage rewardImage = canvas->maps.reward.toImage();
+    QRgb *pixels = (QRgb*) rewardImage.bits();
+    int w = rewardImage.width();
+    int h = rewardImage.height();
+
+    float *data = new float[w*h];
+    float maxData = 0;
+    FOR(i, w*h)
+    {
+        data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+        maxData = max(maxData, data[i]);
+    }
+    if(maxData > 0)
+    {
+        FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
+    }
+    ivec size;
+    size.push_back(w);
+    size.push_back(h);
+    fvec low(2,0.f);
+    fvec high(2,1.f);
+    canvas->data->GetReward()->SetReward(data, size, low, high);
+//    delete [] data;
+
+    //data = canvas->data->GetReward()->GetRewardFloat();
+    reinforcementProblem.Initialize(data, fVec(w,h));
+    reinforcement->Initialize(&reinforcementProblem);
+    reinforcement->age = 0;
+    delete [] data;
+}
+
 // returns respectively the reconstruction error for the training points individually, per trajectory, and the error to target
 fvec MLDemos::Test(Dynamical *dynamical, vector< vector<fvec> > trajectories, ivec labels)
 {
@@ -876,12 +951,13 @@ void MLDemos::Compare()
                         {
                             float e = min(errors,(int)rocdata.size()-errors)/(float)rocdata.size();
                             fmeasureTrain.push_back(1-e);
-                            fmeasureTrain.push_back(1-e);
                         }
                         else
                         {
+                            // compute the micro and macro f-measure
+                            fpair fmeasure = GetMicroMacroFMeasure(rocdata);
+                            fmeasureTrain.push_back(fmeasure.first);
                             errorTrain.push_back(errors/(float)rocdata.size());
-                            errorTest.push_back(errors/(float)rocdata.size());
                         }
                     }
                 }
@@ -906,8 +982,14 @@ void MLDemos::Compare()
                                 else if((rocdata[j].first < 0) != rocdata[j].second) errors++;
                             }
                         }
-                        if(classes.size() <= 2) errorTest.push_back(min(errors,(int)rocdata.size()-errors)/(float)rocdata.size());
-                        else errorTest.push_back(errors/(float)rocdata.size());
+                        if(classes.size() <= 2) fmeasureTest.push_back(min(errors,(int)rocdata.size()-errors)/(float)rocdata.size());
+                        else
+                        {
+                            // compute the micro and macro f-measure
+                            fpair fmeasure = GetMicroMacroFMeasure(rocdata);
+                            fmeasureTest.push_back(fmeasure.first);
+                            errorTest.push_back(errors/(float)rocdata.size());
+                        }
                     }
                 }
                 DEL(classifier);

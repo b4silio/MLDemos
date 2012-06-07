@@ -22,7 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <interfaces.h>
 #include "classifierSVM.h"
-#include "classifierRVM.h"
 #include "classifierPegasos.h"
 #include "ui_paramsSVM.h"
 
@@ -41,7 +40,7 @@ public:
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
     // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("SVM");}
+    QString GetName(){return QString("Support Vector Machine");}
     QString GetAlgoString();
     QString GetInfoFile(){return "kernelClass.html";}
     bool UsesDrawTimer(){return true;}

@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interfaceMLPClassifier.h"
 #include "interfaceMLPRegress.h"
 #include "interfaceMLPDynamic.h"
+#include "interfaceGBRegress.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ PluginOpenCV::PluginOpenCV()
 	classifiers.push_back(new ClassBoost());
 	classifiers.push_back(new ClassMLP());
 	regressors.push_back(new RegrMLP());
+    regressors.push_back(new RegrGB());
 	dynamicals.push_back(new DynamicMLP());
 }
 

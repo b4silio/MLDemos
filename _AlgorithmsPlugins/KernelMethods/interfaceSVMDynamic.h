@@ -39,7 +39,7 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVR");}
+        QString GetName(){return QString("Support Vector Regression");}
         QString GetAlgoString(){return GetName();}
         QString GetInfoFile(){return "kernelDynamic.html";}
         bool UsesDrawTimer(){return true;}

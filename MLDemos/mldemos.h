@@ -32,6 +32,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_optsCluster.h"
 #include "ui_optsRegress.h"
 #include "ui_optsMaximize.h"
+#include "ui_optsReinforcement.h"
 #include "ui_optsDynamic.h"
 #include "ui_optsProject.h"
 #include "ui_optsCompare.h"
@@ -49,6 +50,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "regressor.h"
 #include "dynamical.h"
 #include "clusterer.h"
+#include "maximize.h"
+#include "reinforcement.h"
+#include "reinforcementProblem.h"
 #include "interfaces.h"
 #include "compare.h"
 #include "widget.h"
@@ -70,9 +74,9 @@ private:
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
-    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *compareWidget, *projectWidget;
+    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *compareWidget, *projectWidget;
 
-	QNamedWindow *rocWidget, *crossvalidWidget, *infoWidget;
+    QNamedWindow *rocWidget, *crossvalidWidget;
 
 	Ui::MLDemosClass ui;
 	Ui::viewOptionDialog *displayOptions;
@@ -85,6 +89,7 @@ private:
 	Ui::optionsMaximizeWidget *optionsMaximize;
 	Ui::optionsDynamicWidget *optionsDynamic;
     Ui::optionsProjectWidget *optionsProject;
+    Ui::optionsReinforcementWidget *optionsReinforcement;
 	Ui::optionsCompare *optionsCompare;
 	Ui::DrawingToolbar *drawToolbar;
 	Ui::DrawingToolbarContext1 *drawToolbarContext1;
@@ -104,6 +109,7 @@ private:
     Expose *expose;
     DataImporter *import;
     DataGenerator *generator;
+    ReinforcementProblem reinforcementProblem;
 	ipair trajectory;
 	Obstacle obstacle;
 	bool bNewObstacle;
@@ -114,7 +120,8 @@ private:
     void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
     void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0);
-	void Train(Maximizer *maximizer);
+    void Train(Maximizer *maximizer);
+    void Train(Reinforcement *reinforcement);
     void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
     void Test(Maximizer *maximizer);
@@ -127,18 +134,21 @@ private:
 	QList<DynamicalInterface *> dynamicals;
 	QList<AvoidanceInterface *> avoiders;
     QList<MaximizeInterface*> maximizers;
+    QList<ReinforcementInterface*> reinforcements;
     QList<ProjectorInterface*> projectors;
     QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
 	QList<QString> compareOptions;
 	QLabel *compareDisplay;
 	CompareAlgorithms *compare;
-	void AddPlugin(ClassifierInterface *iClassifier, const char *method);
+    std::map< QString , std::vector<QWidget*> > algoWidgets;
+    void AddPlugin(ClassifierInterface *iClassifier, const char *method);
 	void AddPlugin(ClustererInterface *iCluster, const char *method);
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
 	void AddPlugin(DynamicalInterface *iDynamical, const char *method);
 	void AddPlugin(AvoidanceInterface *iAvoid, const char *method);
     void AddPlugin(MaximizeInterface *iMaximize, const char *method);
+    void AddPlugin(ReinforcementInterface *iReinforcement, const char *method);
     void AddPlugin(ProjectorInterface *iProject, const char *method);
     void AddPlugin(InputOutputInterface *iIO);
 
@@ -170,6 +180,7 @@ public:
 	Dynamical *dynamical;
 	Clusterer *clusterer;
     Maximizer *maximizer;
+    Reinforcement *reinforcement;
     Projector *projector;
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
@@ -217,12 +228,12 @@ private slots:
     void DisactivateIO(QObject *);
 
     void Classify();
-	void ClassifyCross();
 	void Regression();
-	void RegressionCross();
-	void Maximize();
-	void MaximizeContinue();
-	void Dynamize();
+    void Maximize();
+    void MaximizeContinue();
+    void Reinforce();
+    void ReinforceContinue();
+    void Dynamize();
 	void Cluster();
 	void ClusterIterate();
     void ClusterOptimize();
@@ -275,7 +286,9 @@ private slots:
 	void ChangeActiveOptions();
 	void ShowRoc();
 //	void ShowCross();
-	void MouseOnRoc(QMouseEvent *event);
+    void ClassifyCross();
+    void RegressionCross();
+    void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
 	void AlgoChanged();
     void ClusterChanged();
@@ -301,9 +314,7 @@ private slots:
 	void CompareRemove();
     void CanvasTypeChanged();
     void CanvasOptionsChanged();
-
-
-	void ShowContextMenuSpray(const QPoint &point);
+    void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);
 	void ShowContextMenuEllipse(const QPoint &point);
 	void ShowContextMenuErase(const QPoint &point);

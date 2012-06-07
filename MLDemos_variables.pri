@@ -59,8 +59,8 @@ win32{
 ##########################
 
 win32{
-	DEFINES += WIN32
-	CONFIG += WIN32
+        DEFINES += WIN32
+        CONFIG += WIN32
 }else:macx{
     DEFINES += MACX
     CONFIG += MACX
@@ -79,9 +79,9 @@ win32:CONFIG(opencv22){
 #	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
     LIBS += -lopencv_core$$OPENCV_VER \
         -lopencv_features2d$$OPENCV_VER \
-		-lopencv_highgui$$OPENCV_VER \
-		-lopencv_imgproc$$OPENCV_VER \
-		-lopencv_legacy$$OPENCV_VER \
+                -lopencv_highgui$$OPENCV_VER \
+                -lopencv_imgproc$$OPENCV_VER \
+                -lopencv_legacy$$OPENCV_VER \
                 -lopencv_ml$$OPENCV_VER
 }
 macx{
@@ -121,8 +121,8 @@ macx{
         LIBS += $$system(pkg-config --libs opencv)
     }
     CONFIG(opencv21) {
-	PKGCONFIG += opencv
-	DEFINES += OPENCV21
+        PKGCONFIG += opencv
+        DEFINES += OPENCV21
         message("Using opencv21")
         LIBS += $$system(pkg-config --libs opencv)
     }
@@ -148,34 +148,34 @@ QT = core gui svg opengl
 
 mainApp|coreLib{
 }else{
-	TARGET = $$qtLibraryTarget($$NAME)
+        TARGET = $$qtLibraryTarget($$NAME)
         CONFIG(debug, debug|release):DESTDIR = "$$MLPATH/pluginsDebug"
         CONFIG(release, debug|release):DESTDIR = "$$MLPATH/plugins"
 }
 CONFIG(debug, debug|release){
-	DEFINES += DEBUG
-	message("debug mode")
-	QMAKE_CXXFLAGS += -pg
-	QMAKE_LFLAGS += -pg
+        DEFINES += DEBUG
+        message("debug mode")
+        QMAKE_CXXFLAGS += -pg
+        QMAKE_LFLAGS += -pg
 }else{
-	message("release mode")
-	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+        message("release mode")
+        linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
         macx-g++:QMAKE_CXXFLAGS += -O2
         win32-g++:QMAKE_CXXFLAGS += -O2
 }
 
 win32{
-	CONFIG(Debug, Debug|Release){
+        CONFIG(Debug, Debug|Release){
         MOC_DIR = $${MLBUILD}/Debug
         UI_DIR = $${MLBUILD}/Debug
         RCC_DIR = $${MLBUILD}/Debug
         OBJECTS_DIR = $${MLBUILD}/Debug
-	}else{
+        }else{
         MOC_DIR = $${MLBUILD}/Release
         UI_DIR = $${MLBUILD}/Release
         RCC_DIR = $${MLBUILD}/Release
         OBJECTS_DIR = $${MLBUILD}/Release
-	}
+        }
 }else{
     MOC_DIR = $${MLBUILD}
     UI_DIR = $${MLBUILD}
@@ -189,17 +189,17 @@ win32{
 #QMAKE_LFLAGS_DEBUG += -pg
 
 DEPENDPATH += . \
-		.. \
-		$${MLPATH}/Core \
-		$${MLPATH}/_3rdParty
+                .. \
+                $${MLPATH}/Core \
+                $${MLPATH}/_3rdParty
 INCLUDEPATH += . \
-		$${MLPATH}/Core \
-		$${MLPATH}/MLDemos \
-		$${MLPATH}/_3rdParty
+                $${MLPATH}/Core \
+                $${MLPATH}/MLDemos \
+                $${MLPATH}/_3rdParty
 
 CONFIG(coreLib){
 }else{
-	LIBS += -L$$MLPATH/Core -lCore
+        LIBS += -L$$MLPATH/Core -lCore
 }
 LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 
@@ -207,20 +207,20 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 # Turn the bloody warnings off #
 ################################
 win32-g++|macx|unix {
-	QMAKE_CXXFLAGS_WARN_ON = ""
-	QMAKE_CXXFLAGS += -Wno-all
-	#QMAKE_CXXFLAGS += -Wno-endif-labels
-	QMAKE_CXXFLAGS += -Wno-unused-variable
-	QMAKE_CXXFLAGS += -Wno-unused-parameter
-	#QMAKE_CXXFLAGS += -Wno-switch
-	QMAKE_CXXFLAGS += -Wtrigraphs
-	QMAKE_CXXFLAGS += -Wreturn-type
-	QMAKE_CXXFLAGS += -Wnon-virtual-dtor
-	#QMAKE_CXXFLAGS += -Woverloaded-virtual
-	#QMAKE_CXXFLAGS += -Wunused-variable
-	QMAKE_CXXFLAGS += -Wunused-value
-	QMAKE_CXXFLAGS += -Wunknown-pragmas
-	QMAKE_CXXFLAGS += -Wno-shadow
-	#QMAKE_CXXFLAGS += -Wno-deprecated-declarations
-	#QMAKE_CXXFLAGS += -Wno-missing-braces
+        QMAKE_CXXFLAGS_WARN_ON = ""
+        QMAKE_CXXFLAGS += -Wno-all
+        #QMAKE_CXXFLAGS += -Wno-endif-labels
+        QMAKE_CXXFLAGS += -Wno-unused-variable
+        QMAKE_CXXFLAGS += -Wno-unused-parameter
+        #QMAKE_CXXFLAGS += -Wno-switch
+        QMAKE_CXXFLAGS += -Wtrigraphs
+        QMAKE_CXXFLAGS += -Wreturn-type
+        QMAKE_CXXFLAGS += -Wnon-virtual-dtor
+        #QMAKE_CXXFLAGS += -Woverloaded-virtual
+        #QMAKE_CXXFLAGS += -Wunused-variable
+        QMAKE_CXXFLAGS += -Wunused-value
+        QMAKE_CXXFLAGS += -Wunknown-pragmas
+        QMAKE_CXXFLAGS += -Wno-shadow
+        #QMAKE_CXXFLAGS += -Wno-deprecated-declarations
+        #QMAKE_CXXFLAGS += -Wno-missing-braces
 }

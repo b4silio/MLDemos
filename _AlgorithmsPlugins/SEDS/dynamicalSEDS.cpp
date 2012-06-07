@@ -148,7 +148,28 @@ void DynamicalSEDS::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 	seds->Options.sigma_x_opt = bSigma;
 	seds->Options.max_iter = maxIteration;
 	seds->Options.objective = objectiveType;
-	seds->Options.constraintCriterion = constraintCriterion;
+    //seds->Options.constraintCriterion = constraintCriterion;
+    seds->Options.constraintCriterion = 0; // set to 0 until we actually fix this (broken otherwise)
+
+    // MMA, ISRES, ORIG_DIRECT, AUGLAG, COBYLA
+    switch(optimizationType)
+    {
+    case 0:
+        seds->Options.optimizationType = nlopt::LD_MMA;
+    break;
+    case 1:
+        seds->Options.optimizationType = nlopt::GN_ISRES;
+    break;
+    case 2:
+        seds->Options.optimizationType = nlopt::GN_ORIG_DIRECT;
+    break;
+    case 3:
+        seds->Options.optimizationType = nlopt::LN_AUGLAG;
+    break;
+    case 4:
+        seds->Options.optimizationType = nlopt::LN_COBYLA;
+    break;
+    }
 
     seds->Optimize();
 
@@ -237,7 +258,7 @@ fVec DynamicalSEDS::Test( const fVec &sample)
 }
 
 void DynamicalSEDS::SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, int objectiveType,
-                              int maxIteration, int constraintCriterion)
+                              int maxIteration, int constraintCriterion, int optimizationType)
 {
 	this->nbClusters = clusters;
 	this->bPrior = bPrior;
@@ -246,6 +267,7 @@ void DynamicalSEDS::SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, 
 	this->objectiveType = objectiveType;
 	this->maxIteration = maxIteration;
 	this->constraintCriterion = constraintCriterion;
+    this->optimizationType = optimizationType;
 }
 
 const char *DynamicalSEDS::GetInfoString()

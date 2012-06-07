@@ -10,14 +10,12 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsGPR.ui paramsGPRdynamic.ui paramsKM.ui paramsMVM.ui
+FORMS += paramsSVM.ui paramsSVMcluster.ui paramsSVMregr.ui paramsSVMdynamic.ui paramsKM.ui paramsMVM.ui paramsRVM.ui paramsRVMregr.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
 			mymaths.h \
 			svm.h \
-			SOGP.h \
-			SOGP_aux.h \
             classifierSVM.h \
             classifierMVM.h \
             classifierRVM.h \
@@ -27,24 +25,20 @@ HEADERS +=	\
             kmeans.h \
             clustererSVR.h \
 			regressorSVR.h \
-			regressorGPR.h \
 			regressorRVM.h \
 			regressorKRLS.h \
 			dynamicalSVR.h \
-			dynamicalGPR.h \
             interfaceMVM.h \
             interfaceSVMClassifier.h \
-			interfaceSVMCluster.h \
+            interfaceSVMCluster.h \
 			interfaceSVMRegress.h \
 			interfaceSVMDynamic.h \
-            interfaceGPRRegress.h \
-            interfaceGPRDynamic.h \
+            interfaceRVMClassifier.h \
+            interfaceRVMRegress.h \
             interfaceKMCluster.h \
             pluginKernel.h
 SOURCES += 	\
 			svm.cpp \
-			SOGP.cpp \
-			SOGP_aux.cpp \
             classifierSVM.cpp \
             classifierMVM.cpp \
             classifierRVM.cpp \
@@ -54,18 +48,16 @@ SOURCES += 	\
             kmeans.cpp \
             clustererSVR.cpp \
 			regressorSVR.cpp \
-			regressorGPR.cpp \
 			regressorRVM.cpp \
 			regressorKRLS.cpp \
 			dynamicalSVR.cpp \
-			dynamicalGPR.cpp \
             interfaceMVM.cpp \
             interfaceSVMClassifier.cpp \
             interfaceSVMCluster.cpp \
             interfaceSVMRegress.cpp \
             interfaceSVMDynamic.cpp \
-            interfaceGPRRegress.cpp \
-            interfaceGPRDynamic.cpp \
+            interfaceRVMClassifier.cpp \
+            interfaceRVMRegress.cpp \
             interfaceKMCluster.cpp \
             pluginKernel.cpp
 

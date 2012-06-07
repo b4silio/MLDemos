@@ -30,12 +30,14 @@ ClassSVM::ClassSVM()
     params->setupUi(widget = new QWidget());
     connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
     connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    ChangeOptions();
 }
 
 void ClassSVM::ChangeOptions()
 {
     int C = params->svmCSpin->value();
-    params->maxSVSpin->setEnabled(false);
+    params->maxSVSpin->setVisible(false);
+    params->labelMaxSV->setVisible(false);
     params->svmCSpin->setRange(0.0001, 1.0);
     params->svmCSpin->setSingleStep(0.0001);
     params->svmCSpin->setDecimals(4);
@@ -56,41 +58,39 @@ void ClassSVM::ChangeOptions()
         params->svmTypeLabel->setText("Nu");
         if(params->kernelTypeCombo->count() < 4) params->kernelTypeCombo->addItem("Sigmoid");
         break;
-    case 2: // RVM
-        params->optimizeCheck->setVisible(false);
-        params->svmTypeLabel->setText("eps");
-        if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
-        break;
-    case 3: // Pegasos
+    case 2: // Pegasos
         params->optimizeCheck->setVisible(false);
         params->svmTypeLabel->setText("lambda");
-        params->maxSVSpin->setEnabled(true);
+        params->maxSVSpin->setVisible(true);
+        params->labelMaxSV->setVisible(true);
         if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
     switch(params->kernelTypeCombo->currentIndex())
     {
     case 0: // linear
-        params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
+        params->labelDegree->setVisible(false);
+        params->kernelWidthSpin->setVisible(false);
+        params->labelWidth->setVisible(false);
         break;
     case 1: // poly
-        params->kernelDegSpin->setEnabled(true);
         params->kernelDegSpin->setVisible(true);
-        params->kernelWidthSpin->setEnabled(false);
+        params->labelDegree->setVisible(true);
         params->kernelWidthSpin->setVisible(false);
+        params->labelWidth->setVisible(false);
         break;
     case 2: // RBF
-        params->kernelDegSpin->setEnabled(false);
         params->kernelDegSpin->setVisible(false);
-        params->kernelWidthSpin->setEnabled(true);
+        params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
         break;
     case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
-        params->kernelDegSpin->setVisible(false);
+        params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
-        params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
         break;
     }
 }
@@ -115,11 +115,7 @@ QString ClassSVM::GetAlgoString()
         algo += "Nu-SVM";
         algo += QString(" %1").arg(C);
         break;
-    case 2: // RVM
-        algo += "RVM";
-        algo += QString(" %1").arg(C);
-        break;
-    case 3: // Pegasos
+    case 2: // Pegasos
         algo += "Pegasos";
         algo += QString(" %1 %2").arg(C).arg(sv);
         break;
@@ -153,10 +149,6 @@ void ClassSVM::SetParams(Classifier *classifier)
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
     bool bOptimize = params->optimizeCheck->isChecked();
-
-
-    ClassifierRVM *rvm = dynamic_cast<ClassifierRVM *>(classifier);
-    if(rvm) rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
 
     ClassifierPegasos *pegasos = dynamic_cast<ClassifierPegasos *>(classifier);
     if(pegasos) pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
@@ -204,9 +196,6 @@ Classifier *ClassSVM::GetClassifier()
     switch(svmType)
     {
     case 2:
-        classifier = new ClassifierRVM();
-        break;
-    case 3:
         classifier = new ClassifierPegasos();
         break;
     default:
@@ -221,12 +210,10 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 {
     painter.setRenderHint(QPainter::Antialiasing);
 
-    if(dynamic_cast<ClassifierRVM*>(classifier) || dynamic_cast<ClassifierPegasos*>(classifier))
+    if(dynamic_cast<ClassifierPegasos*>(classifier))
     {
         // we want to draw the support vectors
-        vector<fvec> sv;
-        if(dynamic_cast<ClassifierRVM*>(classifier)) sv = dynamic_cast<ClassifierRVM*>(classifier)->GetSVs();
-        else sv = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
+        vector<fvec> sv = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
         int radius = 9;
         FOR(i, sv.size())
         {
@@ -293,6 +280,8 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
         if(resMin == resMax) resMin -= 3;
     }
 
+    bool bNegatives = dynamic_cast<ClassifierPegasos*>(classifier);
+
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);
     map<int,int>& classes = classifier->classes;
@@ -307,13 +296,29 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
             float response = res[0];
             if(response > 0)
             {
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
+                if(bNegatives)
+                {
+                    if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
             }
             else
             {
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
+                if(bNegatives)
+                {
+                    if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
+                else
+                {
+                    if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
             }
         }
         else
@@ -335,6 +340,7 @@ void ClassSVM::SaveOptions(QSettings &settings)
     settings.setValue("svmC", params->svmCSpin->value());
     settings.setValue("svmType", params->svmTypeCombo->currentIndex());
     settings.setValue("optimizeCheck", params->optimizeCheck->isChecked());
+    settings.setValue("maxSVSpin", params->maxSVSpin->value());
 }
 
 bool ClassSVM::LoadOptions(QSettings &settings)
@@ -345,6 +351,7 @@ bool ClassSVM::LoadOptions(QSettings &settings)
     if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
     if(settings.contains("svmType")) params->svmTypeCombo->setCurrentIndex(settings.value("svmType").toInt());
     if(settings.contains("optimizeCheck")) params->optimizeCheck->setChecked(settings.value("optimizeCheck").toInt());
+    if(settings.contains("maxSVSpin")) params->maxSVSpin->setValue(settings.value("maxSVSpin").toInt());
     ChangeOptions();
     return true;
 }
@@ -357,6 +364,7 @@ void ClassSVM::SaveParams(QTextStream &file)
     file << "classificationOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
     file << "classificationOptions" << ":" << "svmType" << " " << params->svmTypeCombo->currentIndex() << "\n";
     file << "classificationOptions" << ":" << "optimizeCheck" << " " << params->optimizeCheck->isChecked() << "\n";
+    file << "classificationOptions" << ":" << "maxSVSpin" << " " << params->maxSVSpin->value() << "\n";
 }
 
 bool ClassSVM::LoadParams(QString name, float value)
@@ -367,6 +375,7 @@ bool ClassSVM::LoadParams(QString name, float value)
     if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
     if(name.endsWith("svmType")) params->svmTypeCombo->setCurrentIndex((int)value);
     if(name.endsWith("optimizeCheck")) params->optimizeCheck->setChecked((int)value);
+    if(name.endsWith("maxSVSpin")) params->maxSVSpin->setValue((int)value);
     ChangeOptions();
     return true;
 }

@@ -19,6 +19,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef _DLIB_TYPES_H_
 #define _DLIB_TYPES_H_
 
+#define sampletype dlib::matrix<double,N,1>
+#define rbfkernel dlib::radial_basis_kernel< sampletype >
+#define linkernel dlib::linear_kernel< sampletype >
+#define polkernel dlib::polynomial_kernel< sampletype >
+#define rbffunc dlib::decision_function< rbfkernel >
+#define linfunc dlib::decision_function< linkernel >
+#define polfunc dlib::decision_function< polkernel >
+
 typedef dlib::matrix<double, 2, 1> sample_type;
 typedef dlib::radial_basis_kernel<sample_type> rbf_kernel;
 typedef dlib::polynomial_kernel<sample_type> pol_kernel;

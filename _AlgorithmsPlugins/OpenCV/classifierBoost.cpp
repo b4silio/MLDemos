@@ -292,8 +292,8 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
                         break;
                     }
                 }
-                cvSetReal2D(trainSamples, i, j, val); // we add a small noise to the value just to not have only 0s and 1s
-                //cvSetReal2D(trainSamples, i, j, val + drand48()*0.01); // we add a small noise to the value just to not have only 0s and 1s
+                //cvSetReal2D(trainSamples, i, j, val); // we add a small noise to the value just to not have only 0s and 1s
+                cvSetReal2D(trainSamples, i, j, val + drand48()*0.01); // we add a small noise to the value just to not have only 0s and 1s
             }
 			cvSet1D(trainLabels, i, cvScalar((float)labels[perm[i]]));
 			cvSet1D(sampleWeights, i, cvScalar(1));
@@ -550,8 +550,8 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses)
                     break;
                 }
             }
-            cvSetReal2D(x, 0, features[i], val);
-            //cvSetReal2D(x, 0, features[i], val + drand48()*0.1);
+            //cvSetReal2D(x, 0, features[i], val);
+            cvSetReal2D(x, 0, features[i], val + drand48()*0.1);
         }
     }
         break;

@@ -56,6 +56,28 @@ CInitStateProb::CInitStateProb(int nbStates)
 
 //===============================================================================
 
+CInitStateProb::CInitStateProb(int nbStates, int mode)
+{
+    mN = nbStates;
+
+    mThisPi = SetVector(mN);
+    mNextPi = SetVector(mN);
+    mLogPi = SetVector(mN);
+
+    switch(mode)
+    {
+        case 0:
+            SetToRandom(mThisPi, mN);// Normalized vector with random terms
+            break;
+        case 1:
+            SetToZero(mThisPi, mN);// Normalized vector where the first term-state is 1 and all the rest are 0
+            mThisPi[1] = 1.0;
+            break;
+    }
+    LogVect(mThisPi, mLogPi, mN);
+}
+
+//===============================================================================
 CInitStateProb::CInitStateProb(ifstream &hmmFile, int nbStates)
 // Constructor using data from file; A, B and Pi can be read from same file
 {

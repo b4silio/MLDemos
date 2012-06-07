@@ -23,6 +23,7 @@ struct options{  //A struct containing all passed options by user
     bool sigma_x_opt;// = 1; //estimate Sigma:1 do not estimate Sigma:0
     bool objective; //determines if MSE or likelihood is to be used =false for mean square error and =true for likelihood
     bool constraintCriterion; //determines if eigenvalue or principal minor is to be used =false for eigenvalue and =true for principal minor
+    nlopt::algorithm optimizationType; // determines the algorithm used for objective minimization under constraints (NLopt algorithm)
     bool display; //print output?
     double eps_margin; //the safety margin in which the criterion should be satisfied
     int SEDS_Ver; //the SEDS version to use

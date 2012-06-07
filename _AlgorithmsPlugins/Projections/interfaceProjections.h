@@ -46,7 +46,7 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("Projections");}
+    QString GetName(){return QString("Linear Projections");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "projections.html";}
     QWidget *GetParameterWidget(){return widget;}

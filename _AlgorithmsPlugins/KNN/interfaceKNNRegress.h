@@ -35,20 +35,22 @@ public:
 	RegrKNN();
 	// virtual functions to manage the algorithm creation
 	Regressor *GetRegressor();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor){};
+    void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor){}
 	void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor);
 	void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
-	QString GetName(){return QString("KNN");};
+    QString GetName(){return QString("K-Nearest Neighbours");}
 	QString GetAlgoString();
-	QString GetInfoFile(){return "knn.html";};
-	QWidget *GetParameterWidget(){return widget;};
+    QString GetInfoFile(){return "knn.html";}
+    QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Regressor *regressor);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+public slots:
+        void ChangeOptions();
 };
 
 #endif // _INTERFACEKNNREGRESS_H_

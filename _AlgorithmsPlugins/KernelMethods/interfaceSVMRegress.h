@@ -22,7 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <interfaces.h>
 #include "regressorSVR.h"
-#include "regressorRVM.h"
 #include "regressorKRLS.h"
 #include "ui_paramsSVMregr.h"
 
@@ -42,7 +41,7 @@ public:
 	void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("SVR");}
+        QString GetName(){return QString("Support Vector Regression");}
         QString GetAlgoString();
         QString GetInfoFile(){return "kernelRegression.html";}
         QWidget *GetParameterWidget(){return widget;}

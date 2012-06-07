@@ -13,11 +13,11 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="label_12">
+  <widget class="QLabel" name="labelPower">
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>50</y>
+     <y>44</y>
      <width>31</width>
      <height>21</height>
     </rect>
@@ -31,11 +31,11 @@
     <string>power</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_13">
+  <widget class="QLabel" name="labelBeta">
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>50</y>
+     <y>44</y>
      <width>31</width>
      <height>21</height>
     </rect>
@@ -52,7 +52,7 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>100</x>
      <y>0</y>
      <width>46</width>
      <height>21</height>
@@ -70,7 +70,7 @@
   <widget class="QSpinBox" name="kmeansClusterSpin">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>40</x>
      <y>20</y>
      <width>51</width>
      <height>21</height>
@@ -94,11 +94,11 @@
     <number>2</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_10">
+  <widget class="QLabel" name="labelMetric">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>50</y>
+     <y>44</y>
      <width>46</width>
      <height>21</height>
     </rect>
@@ -116,7 +116,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>70</y>
+     <y>64</y>
      <width>41</width>
      <height>21</height>
     </rect>
@@ -143,7 +143,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>70</y>
+     <y>64</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -184,7 +184,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>70</y>
+     <y>64</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -210,7 +210,7 @@
   <widget class="QComboBox" name="kmeansMethodCombo">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>100</x>
      <y>20</y>
      <width>91</width>
      <height>22</height>
@@ -247,7 +247,7 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
   <widget class="QLabel" name="label_11">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>40</x>
      <y>0</y>
      <width>60</width>
      <height>21</height>
@@ -266,7 +266,7 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>120</y>
+     <y>114</y>
      <width>60</width>
      <height>22</height>
     </rect>
@@ -297,7 +297,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>100</y>
+     <y>94</y>
      <width>40</width>
      <height>16</height>
     </rect>
@@ -315,7 +315,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>120</y>
+     <y>114</y>
      <width>80</width>
      <height>22</height>
     </rect>
@@ -351,7 +351,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>100</y>
+     <y>94</y>
      <width>50</width>
      <height>16</height>
     </rect>
@@ -365,11 +365,11 @@ RBF and Polynomial only</string>
     <string>Width</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="labelKernel">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>100</y>
+     <y>94</y>
      <width>70</width>
      <height>16</height>
     </rect>
@@ -387,7 +387,7 @@ RBF and Polynomial only</string>
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>120</y>
+     <y>114</y>
      <width>50</width>
      <height>22</height>
     </rect>
@@ -412,6 +412,48 @@ RBF and Polynomial only</string>
    </property>
    <property name="value">
     <double>1.000000000000000</double>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>0</y>
+     <width>80</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Initialization</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="KMeansPlusPlusCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>20</y>
+     <width>87</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>K-Means++</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

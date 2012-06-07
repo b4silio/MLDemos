@@ -50,6 +50,7 @@ private:
 	ivec closestIndices;
 	int dim;
 	int power;
+        bool plusPlus;
 
 	bool bGMM;
 	double **sigma;
@@ -75,7 +76,8 @@ public:
 
 	void SetClusters(u32 clusters);
     u32 GetClusters(){return clusters;}
-	void ResetClusters();
+        void InitClusters();
+        void InitClustersPlusPlus();
 
 	inline float Distance(fvec a, fvec b);
 	inline float Distance2(fvec a, fvec b);
@@ -84,6 +86,7 @@ public:
     void SetBeta(float b){beta = b > 0 ? b : 0.01f;}
     void SetGMM(bool gmm){bGMM = gmm;}
     void SetPower(int p){power = p;}
+    void SetPlusPlus(bool p){plusPlus = p;}
     float GetBeta(){return beta;}
 
 private:

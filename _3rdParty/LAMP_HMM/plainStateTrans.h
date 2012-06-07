@@ -1,3 +1,5 @@
+#ifndef PLAINSTATETRANS_H
+#define PLAINSTATETRANS_H
 /* ************************************************************************ *
  * ************************************************************************ *
 
@@ -32,6 +34,7 @@ class CPlainStateTrans: public CStateTrans{
 public:
 
   CPlainStateTrans(int nbStates, int seed);
+  CPlainStateTrans(int nbStates, int seed, int mode);
   CPlainStateTrans(std::ifstream &hmmFile, int nbStates);
   ~CPlainStateTrans(void);
   void Start(void);
@@ -63,3 +66,4 @@ private:
 //===============================================================================
 
 //===============================================================================
+#endif

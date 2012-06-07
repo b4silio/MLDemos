@@ -47,13 +47,14 @@ void DynamicSEDS::SetParams(Dynamical *dynamical)
 	bool bMu = params->sedsCheckMu->isChecked();
 	bool bSigma = params->sedsCheckSigma->isChecked();
 	int objectiveType = params->sedsObjectiveCombo->currentIndex();
+    int optimizationType = params->sedsOptimizationCombo->currentIndex();
 	int maxIteration = params->iterationCount->value();
 	int constraintCriterion = params->sedsConstraintCombo->currentIndex();
 
     DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS *>(dynamical);
     if(!seds) return;
 
-    seds->SetParams(clusters, bPrior, bMu, bSigma, objectiveType, maxIteration, constraintCriterion);
+    seds->SetParams(clusters, bPrior, bMu, bSigma, objectiveType, maxIteration, constraintCriterion, optimizationType);
     seds->displayLabel = params->graphLabel;
 
 
@@ -131,12 +132,14 @@ void DynamicSEDS::SaveOptions(QSettings &settings)
 {
 	settings.setValue("sedsCount", params->sedsCount->value());
 	//settings.setValue("sedsPenalty", params->sedsPenaltySpin->value());
-	settings.setValue("sedsObjective", params->sedsObjectiveCombo->currentIndex());
+    //settings.setValue("sedsObjective", params->sedsObjectiveCombo->currentIndex());
 	settings.setValue("sedsPrior", params->sedsCheckPrior->isChecked());
 	settings.setValue("sedsMu", params->sedsCheckMu->isChecked());
-	settings.setValue("sedsSigma", params->sedsCheckSigma->isChecked());
-	settings.setValue("sedsConstraintCombo", params->sedsConstraintCombo->currentIndex());
-	settings.setValue("iterationCount", params->iterationCount->value());
+    settings.setValue("sedsSigma", params->sedsCheckSigma->isChecked());
+    settings.setValue("sedsUniform", params->sedsCheckUniform->isChecked());
+    settings.setValue("sedsConstraintCombo", params->sedsConstraintCombo->currentIndex());
+    settings.setValue("sedsOptimizationCombo", params->sedsOptimizationCombo->currentIndex());
+    settings.setValue("iterationCount", params->iterationCount->value());
 	//settings.setValue("minorIterationCount", params->minorIterationCount->value());
 }
 
@@ -144,12 +147,14 @@ bool DynamicSEDS::LoadOptions(QSettings &settings)
 {
 	if(settings.contains("sedsCount")) params->sedsCount->setValue(settings.value("sedsCount").toInt());
 	//if(settings.contains("sedsPenalty")) params->sedsPenaltySpin->setValue(settings.value("sedsPenalty").toFloat());
-	if(settings.contains("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex(settings.value("sedsObjective").toInt());
+    //if(settings.contains("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex(settings.value("sedsObjective").toInt());
 	if(settings.contains("sedsPrior")) params->sedsCheckPrior->setChecked(settings.value("sedsPrior").toBool());
 	if(settings.contains("sedsMu")) params->sedsCheckMu->setChecked(settings.value("sedsMu").toBool());
 	if(settings.contains("sedsSigma")) params->sedsCheckSigma->setChecked(settings.value("sedsSigma").toBool());
-	if(settings.contains("sedsConstraintCombo")) params->sedsConstraintCombo->setCurrentIndex(settings.value("sedsConstraintCombo").toInt());
-	if(settings.contains("iterationCount")) params->iterationCount->setValue(settings.value("iterationCount").toInt());
+    if(settings.contains("sedsUniform")) params->sedsCheckUniform->setChecked(settings.value("sedsUniform").toBool());
+    if(settings.contains("sedsConstraintCombo")) params->sedsConstraintCombo->setCurrentIndex(settings.value("sedsConstraintCombo").toInt());
+    if(settings.contains("sedsOptimizationCombo")) params->sedsOptimizationCombo->setCurrentIndex(settings.value("sedsOptimizationCombo").toInt());
+    if(settings.contains("iterationCount")) params->iterationCount->setValue(settings.value("iterationCount").toInt());
 	//if(settings.contains("minorIterationCount")) params->minorIterationCount->setValue(settings.value("minorIterationCount").toInt());
 	return true;
 }
@@ -158,12 +163,14 @@ void DynamicSEDS::SaveParams(QTextStream &file)
 {
 	file << "dynamicalOptions" << ":" << "sedsCount" << " " << params->sedsCount->value() << "\n";
 	//file << "dynamicalOptions" << ":" << "sedsPenalty" << " " << params->sedsPenaltySpin->value() << "\n";
-	file << "dynamicalOptions" << ":" << "sedsObjective" << " " << params->sedsObjectiveCombo->currentIndex() << "\n";
+    //file << "dynamicalOptions" << ":" << "sedsObjective" << " " << params->sedsObjectiveCombo->currentIndex() << "\n";
 	file << "dynamicalOptions" << ":" << "sedsPrior" << " " << params->sedsCheckPrior->isChecked() << "\n";
 	file << "dynamicalOptions" << ":" << "sedsMu" << " " << params->sedsCheckMu->isChecked() << "\n";
 	file << "dynamicalOptions" << ":" << "sedsSigma" << " " << params->sedsCheckSigma->isChecked() << "\n";
-	file << "dynamicalOptions" << ":" << "sedsConstraintCombo" << " " << params->sedsConstraintCombo->currentIndex() << "\n";
-	file << "dynamicalOptions" << ":" << "iterationCount" << " " << params->iterationCount->value() << "\n";
+    file << "dynamicalOptions" << ":" << "sedsUniform" << " " << params->sedsCheckUniform->isChecked() << "\n";
+    file << "dynamicalOptions" << ":" << "sedsConstraintCombo" << " " << params->sedsConstraintCombo->currentIndex() << "\n";
+    file << "dynamicalOptions" << ":" << "sedsOptimizationCombo" << " " << params->sedsOptimizationCombo->currentIndex() << "\n";
+    file << "dynamicalOptions" << ":" << "iterationCount" << " " << params->iterationCount->value() << "\n";
 	//file << "dynamicalOptions" << ":" << "minorIterationCount" << " " << params->minorIterationCount->value() << "\n";
 }
 
@@ -171,12 +178,14 @@ bool DynamicSEDS::LoadParams(QString name, float value)
 {
 	if(name.endsWith("sedsCount")) params->sedsCount->setValue((int)value);
 	//if(name.endsWith("sedsPenalty")) params->sedsPenaltySpin->setValue(value);
-	if(name.endsWith("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex((int)value);
-	if(name.endsWith("sedsPrior")) params->sedsCheckPrior->setChecked((int)value);
-	if(name.endsWith("sedsMu")) params->sedsCheckMu->setChecked((int)value);
+    //if(name.endsWith("sedsObjective")) params->sedsObjectiveCombo->setCurrentIndex((int)value);
+    if(name.endsWith("sedsPrior")) params->sedsCheckPrior->setChecked((int)value);
+    if(name.endsWith("sedsMu")) params->sedsCheckMu->setChecked((int)value);
 	if(name.endsWith("sedsSigma")) params->sedsCheckSigma->setChecked((int)value);
-	if(name.endsWith("sedsConstraintCombo")) params->sedsConstraintCombo->setCurrentIndex((int)value);
-	if(name.endsWith("iterationCount")) params->iterationCount->setValue((int)value);
+    if(name.endsWith("sedsUniform")) params->sedsCheckUniform->setChecked((int)value);
+    if(name.endsWith("sedsConstraintCombo")) params->sedsConstraintCombo->setCurrentIndex((int)value);
+    if(name.endsWith("sedsOptimizationCombo")) params->sedsOptimizationCombo->setCurrentIndex((int)value);
+    if(name.endsWith("iterationCount")) params->iterationCount->setValue((int)value);
 	//if(name.endsWith("minorIterationCount")) params->minorIterationCount->setValue((int)value);
 	return true;
 }

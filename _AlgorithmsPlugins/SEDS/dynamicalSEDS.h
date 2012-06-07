@@ -37,6 +37,7 @@ private:
     int maxIteration;
     int maxMinorIteration;
     int constraintCriterion;
+    int optimizationType;
     float *data;
 public:
 #ifdef USEQT
@@ -55,7 +56,7 @@ public:
     bool LoadModel(string filename);
 
     void SetParams(int clusters, bool bPrior, bool bMu, bool bSigma, int objectiveType,
-                   int maxIteration, int constraintCriterion);
+                   int maxIteration, int constraintCriterion, int optimizationType=0);
 };
 
 #endif // _DYNAMICAL_SEDS_H_

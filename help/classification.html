@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title></title>
+  </head>
+  <body>
+    <h2>Classification</h2>
+    The Classification panel allows to test, tweak and observe how
+    different algorithms perform classification on samples living in a
+    N-dimensional space: "the canvas".<br>
+    Classification can be Binary or Multi-Class, depending on whether
+    there are presently more than 2 classes of samples (different
+    colors) and whether the algorithm allows it.<br>
+    <br>
+    The canvas will display the results of the classification in
+    multiple layers, which can be changed using the display options.
+    These are:<br>
+    <ul>
+      <li>Samples: the original sample data, colors indicate class
+        labels</li>
+      <li>Learned Model: the classified labels obtained by the algorithm</li>
+      <li>Model Info: additional information from the algorithm
+        (gaussian position and shape, support vectors, etc.)</li>
+      <li>Density Map: (for 2D canvas only) classification result for
+        each coordinate in space</li>
+    </ul>
+    In the case of binary classification, the red color is used to
+    indicate the positive class (by default class #1) while white color
+    indicates the negative class. Varying degrees of blackness indicate
+    uncertainty (for algorithms that do not have harsh class
+    transitions)<br>
+    <br>
+    <span style="font-weight: bold;">In Practice</span><br>
+    The easiest way to perform classification is to:<br>
+    <ol>
+      <li>Draw some samples (left-click: class 1, right-click: class 0)</li>
+      <li>Click on "Classify"</li>
+    </ol>
+    This should train the algorithm and start painting the canvas with
+    the results of the classification.<br>
+    <br>
+    <span style="font-weight: bold;">Options and Commands</span><br>
+    The interface for classification (the right-hand side of the
+    Algorithm Options dialog) provides the following commands:<br>
+    <ul>
+      <li>Classify: perform the classification using the currently
+        selected algorithm and options</li>
+      <li>Clear: clear the current classifier model (does NOT clear the
+        data)</li>
+      <li>Show ROC: display the Reciever Operator Characteristic curve
+        for the current binary classification</li>
+      <li>Compare: adds the current algorithm and options to the Compare
+        dialog for batch comparisons</li>
+    </ul>
+    and the following options:<br>
+    <ul>
+      <li>Positive Class: (currently unused) defines the class to be
+        used as positive class (by default class #1)</li>
+      <li>Train / Test ratio: the ratio of samples in the canvas to be
+        used for training</li>
+      <li>Input Dimensions: determines the dimensions that should be
+        used for classification (unselected dimensions will be ignored)</li>
+      <li>Manual Selection: manually select the training samples
+        (overrides the Train/Test ratio option)<br>
+      </li>
+    </ul>
+    All other options are algorithm-dependent and should be described in
+    the help menu of the algorithm itself.<br>
+    <br>
+  </body>
+</html>

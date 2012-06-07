@@ -23,7 +23,7 @@ public:
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
 
     // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("PCA");}
+    QString GetName(){return QString("Principal Component Analysis");}
     QString GetAlgoString();
     QString GetInfoFile(){return "PCA.html";}
     QWidget *GetParameterWidget(){return widget;}
@@ -35,6 +35,7 @@ public:
 
 public slots:
     void ShowEigenVectors();
+    void ChangeOptions();
 };
 
 #endif // INTERFACEPCAPROJECTION_H

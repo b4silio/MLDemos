@@ -34,7 +34,8 @@ public:
 	const char* QueryRegressorSignal() {return SIGNAL(QueryRegressor(std::vector<fvec>));}
 	const char* QueryDynamicalSignal() {return SIGNAL(QueryDynamical(std::vector<fvec>));}
 	const char* QueryClustererSignal() {return SIGNAL(QueryClusterer(std::vector<fvec>));}
-	const char* QueryMaximizerSignal() {return SIGNAL(QueryMaximizer(std::vector<fvec>));}
+    const char* QueryMaximizerSignal() {return SIGNAL(QueryMaximizer(std::vector<fvec>));}
+    const char* QueryReinforcementSignal() {return SIGNAL(QueryReinforcement(std::vector<fvec>));}
     const char* SetDataSignal() {return SIGNAL(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool));}
 	const char* SetTimeseriesSignal() {return SIGNAL(SetTimeseries(std::vector<TimeSerie>));}
 	const char* FetchResultsSlot() {return SLOT(FetchResults(std::vector<fvec>));}
@@ -58,7 +59,8 @@ signals:
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);
 	void QueryClusterer(std::vector<fvec> samples);
-	void QueryMaximizer(std::vector<fvec> samples);
+    void QueryMaximizer(std::vector<fvec> samples);
+    void QueryReinforcement(std::vector<fvec> samples);
 public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();

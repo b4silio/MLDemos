@@ -39,7 +39,7 @@ public:
 	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
 	// virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("Boost");}
+    QString GetName(){return QString("Boosting");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "boost.html";}
     bool UsesDrawTimer(){return true;}

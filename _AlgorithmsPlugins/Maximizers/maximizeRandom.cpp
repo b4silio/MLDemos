@@ -65,8 +65,8 @@ void MaximizeRandom::Draw(QPainter &painter)
 		painter.drawEllipse(point, 5, 5);
 	}
 	// we draw the current maximum
-	QPointF point(history[history.size()-1][0]*w, history[history.size()-1][1]*h);
-	painter.setBrush(QColor(255*(1-historyValue[history.size()-1]), 255, 255*(1-historyValue[history.size()-1])));
+    QPointF point(history.back()[0]*w, history.back()[1]*h);
+    painter.setBrush(QColor(255*(1.-historyValue.back()), 255, 255*(1.-historyValue.back())));
 	painter.drawEllipse(point, 5, 5);
 
 	if(variance > 0)
