@@ -6,7 +6,6 @@ NAME = 3rdParty
 MLPATH =..
 CONFIG += mainApp static
 
-
 include($$MLPATH/MLDemos_variables.pri)
 
 # disable some warnings for 3rd party libraries (not our problem if they do funky stuff in their libraries)
