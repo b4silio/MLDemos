@@ -47,6 +47,7 @@ HEADERS += \
     dataImporter.h \
     contours.h \
     qcontour.h \
+    animationlabel.h \
     reinforcementProblem.h
 
 SOURCES += \
@@ -64,13 +65,5 @@ SOURCES += \
     dataImporter.cpp \
     contours.cpp \
     qcontour.cpp \
+    animationlabel.cpp \
     reinforcementProblem.cpp
-
-
-
-
-
-
-
-
-
