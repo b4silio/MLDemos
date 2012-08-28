@@ -16,7 +16,7 @@ MLDemos.depends = Core
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
 #SUBDIRS += Reinforcements
-SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME Lowess HMM DBSCAN CCA
+SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME Lowess DBSCAN CCA
 #SUBDIRS += Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro

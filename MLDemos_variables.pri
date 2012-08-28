@@ -48,7 +48,7 @@ win32{
     CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
 }else:macx{
-    CONFIG(boost):BOOST = /usr/local/boost_1_47_0
+    CONFIG(boost):BOOST = /usr/local/boost
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
 }
 
@@ -155,8 +155,8 @@ mainApp|coreLib{
 CONFIG(debug, debug|release){
 	DEFINES += DEBUG
 	message("debug mode")
-	QMAKE_CXXFLAGS += -pg
-	QMAKE_LFLAGS += -pg
+#	QMAKE_CXXFLAGS += -pg
+#	QMAKE_LFLAGS += -pg
 }else{
 	message("release mode")
 	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe

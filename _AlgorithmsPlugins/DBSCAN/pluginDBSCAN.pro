@@ -8,6 +8,8 @@ NAME = mld_DBSCAN
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
+
+DEFINES += BOOST_TT_HAS_OPERATOR_HPP_INCLUDED
 ###########################
 # Source Files            #
 ###########################
