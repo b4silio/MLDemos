@@ -37,7 +37,7 @@ struct transform_traits
     Dim = Transform::Dim,
     HDim = Transform::HDim,
     Mode = Transform::Mode,
-    IsProjective = (Mode==Projective)
+    IsProjective = (int(Mode)==int(Projective))
   };
 };
 
@@ -61,7 +61,7 @@ template< typename Lhs,
           typename Rhs,
           bool AnyProjective = 
             transform_traits<Lhs>::IsProjective ||
-            transform_traits<Lhs>::IsProjective>
+            transform_traits<Rhs>::IsProjective>
 struct transform_transform_product_impl;
 
 template< typename Other,
@@ -86,11 +86,11 @@ template<typename TransformType> struct transform_take_affine_part;
   * \tparam _Scalar the scalar type, i.e., the type of the coefficients
   * \tparam _Dim the dimension of the space
   * \tparam _Mode the type of the transformation. Can be:
-  *              - Affine: the transformation is stored as a (Dim+1)^2 matrix,
-  *                        where the last row is assumed to be [0 ... 0 1].
-  *              - AffineCompact: the transformation is stored as a (Dim)x(Dim+1) matrix.
-  *              - Projective: the transformation is stored as a (Dim+1)^2 matrix
-  *                            without any assumption.
+  *              - #Affine: the transformation is stored as a (Dim+1)^2 matrix,
+  *                         where the last row is assumed to be [0 ... 0 1].
+  *              - #AffineCompact: the transformation is stored as a (Dim)x(Dim+1) matrix.
+  *              - #Projective: the transformation is stored as a (Dim+1)^2 matrix
+  *                             without any assumption.
   * \tparam _Options has the same meaning as in class Matrix. It allows to specify DontAlign and/or RowMajor.
   *                  These Options are passed directly to the underlying matrix type.
   *
@@ -571,7 +571,7 @@ public:
     if(int(Mode)!=int(AffineCompact))
     {
       matrix().template block<1,Dim>(Dim,0).setZero();
-      matrix().coeffRef(Dim,Dim) = 1;
+      matrix().coeffRef(Dim,Dim) = Scalar(1);
     }
   }
 
@@ -672,7 +672,7 @@ Transform<Scalar,Dim,Mode,Options>::Transform(const QMatrix& other)
   *
   * This function is available only if the token EIGEN_QT_SUPPORT is defined.
   */
-template<typename Scalar, int Dim, int Mode,int Otpions>
+template<typename Scalar, int Dim, int Mode,int Options>
 Transform<Scalar,Dim,Mode,Options>& Transform<Scalar,Dim,Mode,Options>::operator=(const QMatrix& other)
 {
   EIGEN_STATIC_ASSERT(Dim==2, YOU_MADE_A_PROGRAMMING_MISTAKE)
@@ -718,9 +718,13 @@ Transform<Scalar,Dim,Mode,Options>& Transform<Scalar,Dim,Mode,Options>::operator
 {
   check_template_params();
   EIGEN_STATIC_ASSERT(Dim==2, YOU_MADE_A_PROGRAMMING_MISTAKE)
-  m_matrix << other.m11(), other.m21(), other.dx(),
-              other.m12(), other.m22(), other.dy(),
-              other.m13(), other.m23(), other.m33();
+  if (Mode == int(AffineCompact))
+    m_matrix << other.m11(), other.m21(), other.dx(),
+                other.m12(), other.m22(), other.dy();
+  else
+    m_matrix << other.m11(), other.m21(), other.dx(),
+                other.m12(), other.m22(), other.dy(),
+                other.m13(), other.m23(), other.m33();
   return *this;
 }
 
@@ -732,9 +736,14 @@ template<typename Scalar, int Dim, int Mode, int Options>
 QTransform Transform<Scalar,Dim,Mode,Options>::toQTransform(void) const
 {
   EIGEN_STATIC_ASSERT(Dim==2, YOU_MADE_A_PROGRAMMING_MISTAKE)
-  return QTransform(matrix.coeff(0,0), matrix.coeff(1,0), matrix.coeff(2,0)
-                    matrix.coeff(0,1), matrix.coeff(1,1), matrix.coeff(2,1)
-                    matrix.coeff(0,2), matrix.coeff(1,2), matrix.coeff(2,2));
+  if (Mode == int(AffineCompact))
+    return QTransform(m_matrix.coeff(0,0), m_matrix.coeff(1,0),
+                      m_matrix.coeff(0,1), m_matrix.coeff(1,1),
+                      m_matrix.coeff(0,2), m_matrix.coeff(1,2));
+  else
+    return QTransform(m_matrix.coeff(0,0), m_matrix.coeff(1,0), m_matrix.coeff(2,0),
+                      m_matrix.coeff(0,1), m_matrix.coeff(1,1), m_matrix.coeff(2,1),
+                      m_matrix.coeff(0,2), m_matrix.coeff(1,2), m_matrix.coeff(2,2));
 }
 #endif
 
@@ -1082,10 +1091,10 @@ struct projective_transform_inverse<TransformType, Projective>
   *
   * \param hint allows to optimize the inversion process when the transformation
   * is known to be not a general transformation (optional). The possible values are:
-  *  - Projective if the transformation is not necessarily affine, i.e., if the
+  *  - #Projective if the transformation is not necessarily affine, i.e., if the
   *    last row is not guaranteed to be [0 ... 0 1]
-  *  - Affine if the last row can be assumed to be [0 ... 0 1]
-  *  - Isometry if the transformation is only a concatenations of translations
+  *  - #Affine if the last row can be assumed to be [0 ... 0 1]
+  *  - #Isometry if the transformation is only a concatenations of translations
   *    and rotations.
   *  The default is the template class parameter \c Mode.
   *
@@ -1379,6 +1388,35 @@ struct transform_transform_product_impl<Transform<Scalar,Dim,LhsMode,LhsOptions>
   static ResultType run(const Lhs& lhs, const Rhs& rhs)
   {
     return ResultType( lhs.matrix() * rhs.matrix() );
+  }
+};
+
+template<typename Scalar, int Dim, int LhsOptions, int RhsOptions>
+struct transform_transform_product_impl<Transform<Scalar,Dim,AffineCompact,LhsOptions>,Transform<Scalar,Dim,Projective,RhsOptions>,true >
+{
+  typedef Transform<Scalar,Dim,AffineCompact,LhsOptions> Lhs;
+  typedef Transform<Scalar,Dim,Projective,RhsOptions> Rhs;
+  typedef Transform<Scalar,Dim,Projective> ResultType;
+  static ResultType run(const Lhs& lhs, const Rhs& rhs)
+  {
+    ResultType res;
+    res.matrix().template topRows<Dim>() = lhs.matrix() * rhs.matrix();
+    res.matrix().row(Dim) = rhs.matrix().row(Dim);
+    return res;
+  }
+};
+
+template<typename Scalar, int Dim, int LhsOptions, int RhsOptions>
+struct transform_transform_product_impl<Transform<Scalar,Dim,Projective,LhsOptions>,Transform<Scalar,Dim,AffineCompact,RhsOptions>,true >
+{
+  typedef Transform<Scalar,Dim,Projective,LhsOptions> Lhs;
+  typedef Transform<Scalar,Dim,AffineCompact,RhsOptions> Rhs;
+  typedef Transform<Scalar,Dim,Projective> ResultType;
+  static ResultType run(const Lhs& lhs, const Rhs& rhs)
+  {
+    ResultType res(lhs.matrix().template leftCols<Dim>() * rhs.matrix());
+    res.matrix().col(Dim) += lhs.matrix().col(Dim);
+    return res;
   }
 };
 

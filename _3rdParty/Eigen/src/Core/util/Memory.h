@@ -82,6 +82,16 @@
 
 namespace internal {
 
+inline void throw_std_bad_alloc()
+{
+  #ifdef EIGEN_EXCEPTIONS
+    throw std::bad_alloc();
+  #else
+    std::size_t huge = -1;
+    new int[huge];
+  #endif
+}
+
 /*****************************************************************************
 *** Implementation of handmade aligned functions                           ***
 *****************************************************************************/
@@ -156,7 +166,7 @@ inline void* generic_aligned_realloc(void* ptr, size_t size, size_t old_size)
 
   if (ptr != 0)
   {
-    std::memcpy(newptr, ptr, std::min(size,old_size));
+    std::memcpy(newptr, ptr, (std::min)(size,old_size));
     aligned_free(ptr);
   }
 
@@ -192,7 +202,7 @@ inline void check_that_malloc_is_allowed()
 #endif
 
 /** \internal Allocates \a size bytes. The returned pointer is guaranteed to have 16 bytes alignment.
-  * On allocation error, the returned pointer is null, and if exceptions are enabled then a std::bad_alloc is thrown.
+  * On allocation error, the returned pointer is null, and std::bad_alloc is thrown.
   */
 inline void* aligned_malloc(size_t size)
 {
@@ -213,10 +223,9 @@ inline void* aligned_malloc(size_t size)
     result = handmade_aligned_malloc(size);
   #endif
 
-  #ifdef EIGEN_EXCEPTIONS
-    if(result == 0)
-      throw std::bad_alloc();
-  #endif
+  if(!result && size)
+    throw_std_bad_alloc();
+
   return result;
 }
 
@@ -241,7 +250,7 @@ inline void aligned_free(void *ptr)
 /**
 * \internal
 * \brief Reallocates an aligned block of memory.
-* \throws std::bad_alloc if EIGEN_EXCEPTIONS are defined.
+* \throws std::bad_alloc on allocation failure
 **/
 inline void* aligned_realloc(void *ptr, size_t new_size, size_t old_size)
 {
@@ -269,10 +278,9 @@ inline void* aligned_realloc(void *ptr, size_t new_size, size_t old_size)
   result = handmade_aligned_realloc(ptr,new_size,old_size);
 #endif
 
-#ifdef EIGEN_EXCEPTIONS
-  if (result==0 && new_size!=0)
-    throw std::bad_alloc();
-#endif
+  if (!result && new_size)
+    throw_std_bad_alloc();
+
   return result;
 }
 
@@ -281,7 +289,7 @@ inline void* aligned_realloc(void *ptr, size_t new_size, size_t old_size)
 *****************************************************************************/
 
 /** \internal Allocates \a size bytes. If Align is true, then the returned ptr is 16-byte-aligned.
-  * On allocation error, the returned pointer is null, and if exceptions are enabled then a std::bad_alloc is thrown.
+  * On allocation error, the returned pointer is null, and a std::bad_alloc is thrown.
   */
 template<bool Align> inline void* conditional_aligned_malloc(size_t size)
 {
@@ -293,9 +301,8 @@ template<> inline void* conditional_aligned_malloc<false>(size_t size)
   check_that_malloc_is_allowed();
 
   void *result = std::malloc(size);
-  #ifdef EIGEN_EXCEPTIONS
-    if(!result) throw std::bad_alloc();
-  #endif
+  if(!result && size)
+    throw_std_bad_alloc();
   return result;
 }
 
@@ -347,18 +354,27 @@ template<typename T> inline void destruct_elements_of_array(T *ptr, size_t size)
 *** Implementation of aligned new/delete-like functions                    ***
 *****************************************************************************/
 
+template<typename T>
+EIGEN_ALWAYS_INLINE void check_size_for_overflow(size_t size)
+{
+  if(size > size_t(-1) / sizeof(T))
+    throw_std_bad_alloc();
+}
+
 /** \internal Allocates \a size objects of type T. The returned pointer is guaranteed to have 16 bytes alignment.
-  * On allocation error, the returned pointer is undefined, but if exceptions are enabled then a std::bad_alloc is thrown.
+  * On allocation error, the returned pointer is undefined, but a std::bad_alloc is thrown.
   * The default constructor of T is called.
   */
 template<typename T> inline T* aligned_new(size_t size)
 {
+  check_size_for_overflow<T>(size);
   T *result = reinterpret_cast<T*>(aligned_malloc(sizeof(T)*size));
   return construct_elements_of_array(result, size);
 }
 
 template<typename T, bool Align> inline T* conditional_aligned_new(size_t size)
 {
+  check_size_for_overflow<T>(size);
   T *result = reinterpret_cast<T*>(conditional_aligned_malloc<Align>(sizeof(T)*size));
   return construct_elements_of_array(result, size);
 }
@@ -383,6 +399,8 @@ template<typename T, bool Align> inline void conditional_aligned_delete(T *ptr, 
 
 template<typename T, bool Align> inline T* conditional_aligned_realloc_new(T* pts, size_t new_size, size_t old_size)
 {
+  check_size_for_overflow<T>(new_size);
+  check_size_for_overflow<T>(old_size);
   if(new_size < old_size)
     destruct_elements_of_array(pts+new_size, old_size-new_size);
   T *result = reinterpret_cast<T*>(conditional_aligned_realloc<Align>(reinterpret_cast<void*>(pts), sizeof(T)*new_size, sizeof(T)*old_size));
@@ -394,6 +412,7 @@ template<typename T, bool Align> inline T* conditional_aligned_realloc_new(T* pt
 
 template<typename T, bool Align> inline T* conditional_aligned_new_auto(size_t size)
 {
+  check_size_for_overflow<T>(size);
   T *result = reinterpret_cast<T*>(conditional_aligned_malloc<Align>(sizeof(T)*size));
   if(NumTraits<T>::RequireInitialization)
     construct_elements_of_array(result, size);
@@ -402,6 +421,8 @@ template<typename T, bool Align> inline T* conditional_aligned_new_auto(size_t s
 
 template<typename T, bool Align> inline T* conditional_aligned_realloc_new_auto(T* pts, size_t new_size, size_t old_size)
 {
+  check_size_for_overflow<T>(new_size);
+  check_size_for_overflow<T>(old_size);
   if(NumTraits<T>::RequireInitialization && (new_size < old_size))
     destruct_elements_of_array(pts+new_size, old_size-new_size);
   T *result = reinterpret_cast<T*>(conditional_aligned_realloc<Align>(reinterpret_cast<void*>(pts), sizeof(T)*new_size, sizeof(T)*old_size));
@@ -468,36 +489,89 @@ inline static Index first_aligned(const Scalar* array, Index size)
 *** Implementation of runtime stack allocation (falling back to malloc)    ***
 *****************************************************************************/
 
-/** \internal
-  * Allocates an aligned buffer of SIZE bytes on the stack if SIZE is smaller than
-  * EIGEN_STACK_ALLOCATION_LIMIT, and if stack allocation is supported by the platform
-  * (currently, this is Linux only). Otherwise the memory is allocated on the heap.
-  * Data allocated with ei_aligned_stack_alloc \b must be freed by calling
-  * ei_aligned_stack_free(PTR,SIZE).
-  * \code
-  * float * data = ei_aligned_stack_alloc(float,array.size());
-  * // ...
-  * ei_aligned_stack_free(data,float,array.size());
-  * \endcode
-  */
-#if (defined __linux__)
-  #define ei_aligned_stack_alloc(SIZE) (SIZE<=EIGEN_STACK_ALLOCATION_LIMIT) \
-                                    ? alloca(SIZE) \
-                                    : Eigen::internal::aligned_malloc(SIZE)
-  #define ei_aligned_stack_free(PTR,SIZE) if(SIZE>EIGEN_STACK_ALLOCATION_LIMIT) Eigen::internal::aligned_free(PTR)
-#elif defined(_MSC_VER)
-  #define ei_aligned_stack_alloc(SIZE) (SIZE<=EIGEN_STACK_ALLOCATION_LIMIT) \
-                                    ? _alloca(SIZE) \
-                                    : Eigen::internal::aligned_malloc(SIZE)
-  #define ei_aligned_stack_free(PTR,SIZE) if(SIZE>EIGEN_STACK_ALLOCATION_LIMIT) Eigen::internal::aligned_free(PTR)
-#else
-  #define ei_aligned_stack_alloc(SIZE) Eigen::internal::aligned_malloc(SIZE)
-  #define ei_aligned_stack_free(PTR,SIZE) Eigen::internal::aligned_free(PTR)
+// you can overwrite Eigen's default behavior regarding alloca by defining EIGEN_ALLOCA
+// to the appropriate stack allocation function
+#ifndef EIGEN_ALLOCA
+  #if (defined __linux__)
+    #define EIGEN_ALLOCA alloca
+  #elif defined(_MSC_VER)
+    #define EIGEN_ALLOCA _alloca
+  #endif
 #endif
 
-#define ei_aligned_stack_new(TYPE,SIZE) Eigen::internal::construct_elements_of_array(reinterpret_cast<TYPE*>(ei_aligned_stack_alloc(sizeof(TYPE)*SIZE)), SIZE)
-#define ei_aligned_stack_delete(TYPE,PTR,SIZE) do {Eigen::internal::destruct_elements_of_array<TYPE>(PTR, SIZE); \
-                                                   ei_aligned_stack_free(PTR,sizeof(TYPE)*SIZE);} while(0)
+namespace internal {
+
+// This helper class construct the allocated memory, and takes care of destructing and freeing the handled data
+// at destruction time. In practice this helper class is mainly useful to avoid memory leak in case of exceptions.
+template<typename T> class aligned_stack_memory_handler
+{
+  public:
+    /* Creates a stack_memory_handler responsible for the buffer \a ptr of size \a size.
+     * Note that \a ptr can be 0 regardless of the other parameters.
+     * This constructor takes care of constructing/initializing the elements of the buffer if required by the scalar type T (see NumTraits<T>::RequireInitialization).
+     * In this case, the buffer elements will also be destructed when this handler will be destructed.
+     * Finally, if \a dealloc is true, then the pointer \a ptr is freed.
+     **/
+    aligned_stack_memory_handler(T* ptr, size_t size, bool dealloc)
+      : m_ptr(ptr), m_size(size), m_deallocate(dealloc)
+    {
+      if(NumTraits<T>::RequireInitialization && m_ptr)
+        Eigen::internal::construct_elements_of_array(m_ptr, size);
+    }
+    ~aligned_stack_memory_handler()
+    {
+      if(NumTraits<T>::RequireInitialization && m_ptr)
+        Eigen::internal::destruct_elements_of_array<T>(m_ptr, m_size);
+      if(m_deallocate)
+        Eigen::internal::aligned_free(m_ptr);
+    }
+  protected:
+    T* m_ptr;
+    size_t m_size;
+    bool m_deallocate;
+};
+
+}
+
+/** \internal
+  * Declares, allocates and construct an aligned buffer named NAME of SIZE elements of type TYPE on the stack
+  * if SIZE is smaller than EIGEN_STACK_ALLOCATION_LIMIT, and if stack allocation is supported by the platform
+  * (currently, this is Linux and Visual Studio only). Otherwise the memory is allocated on the heap.
+  * The allocated buffer is automatically deleted when exiting the scope of this declaration.
+  * If BUFFER is non nul, then the declared variable is simply an alias for BUFFER, and no allocation/deletion occurs.
+  * Here is an example:
+  * \code
+  * {
+  *   ei_declare_aligned_stack_constructed_variable(float,data,size,0);
+  *   // use data[0] to data[size-1]
+  * }
+  * \endcode
+  * The underlying stack allocation function can controlled with the EIGEN_ALLOCA preprocessor token.
+  */
+#ifdef EIGEN_ALLOCA
+
+  #ifdef __arm__
+    #define EIGEN_ALIGNED_ALLOCA(SIZE) reinterpret_cast<void*>((reinterpret_cast<size_t>(EIGEN_ALLOCA(SIZE+16)) & ~(size_t(15))) + 16)
+  #else
+    #define EIGEN_ALIGNED_ALLOCA EIGEN_ALLOCA
+  #endif
+
+  #define ei_declare_aligned_stack_constructed_variable(TYPE,NAME,SIZE,BUFFER) \
+    Eigen::internal::check_size_for_overflow<TYPE>(SIZE); \
+    TYPE* NAME = (BUFFER)!=0 ? (BUFFER) \
+               : reinterpret_cast<TYPE*>( \
+                      (sizeof(TYPE)*SIZE<=EIGEN_STACK_ALLOCATION_LIMIT) ? EIGEN_ALIGNED_ALLOCA(sizeof(TYPE)*SIZE) \
+                    : Eigen::internal::aligned_malloc(sizeof(TYPE)*SIZE) );  \
+    Eigen::internal::aligned_stack_memory_handler<TYPE> EIGEN_CAT(NAME,_stack_memory_destructor)((BUFFER)==0 ? NAME : 0,SIZE,sizeof(TYPE)*SIZE>EIGEN_STACK_ALLOCATION_LIMIT)
+
+#else
+
+  #define ei_declare_aligned_stack_constructed_variable(TYPE,NAME,SIZE,BUFFER) \
+    Eigen::internal::check_size_for_overflow<TYPE>(SIZE); \
+    TYPE* NAME = (BUFFER)!=0 ? BUFFER : reinterpret_cast<TYPE*>(Eigen::internal::aligned_malloc(sizeof(TYPE)*SIZE));    \
+    Eigen::internal::aligned_stack_memory_handler<TYPE> EIGEN_CAT(NAME,_stack_memory_destructor)((BUFFER)==0 ? NAME : 0,SIZE,true)
+    
+#endif
 
 
 /*****************************************************************************
@@ -612,12 +686,13 @@ public:
 
     size_type max_size() const throw()
     {
-        return std::numeric_limits<size_type>::max();
+        return (std::numeric_limits<size_type>::max)();
     }
 
-    pointer allocate( size_type num, const_pointer* hint = 0 )
+    pointer allocate( size_type num, const void* hint = 0 )
     {
-        static_cast<void>( hint ); // suppress unused variable warning
+        EIGEN_UNUSED_VARIABLE(hint);
+        internal::check_size_for_overflow<T>(num);
         return static_cast<pointer>( internal::aligned_malloc( num * sizeof(T) ) );
     }
 
@@ -852,7 +927,7 @@ inline int queryTopLevelCacheSize()
 {
   int l1, l2(-1), l3(-1);
   queryCacheSizes(l1,l2,l3);
-  return std::max(l2,l3);
+  return (std::max)(l2,l3);
 }
 
 } // end namespace internal

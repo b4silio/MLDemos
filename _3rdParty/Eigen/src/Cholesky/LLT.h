@@ -233,7 +233,7 @@ template<> struct llt_inplace<Lower>
 
     Index blockSize = size/8;
     blockSize = (blockSize/16)*16;
-    blockSize = std::min(std::max(blockSize,Index(8)), Index(128));
+    blockSize = (std::min)((std::max)(blockSize,Index(8)), Index(128));
 
     for (Index k=0; k<size; k+=blockSize)
     {
@@ -241,7 +241,7 @@ template<> struct llt_inplace<Lower>
       //       A00 |  -  |  -
       // lu  = A10 | A11 |  -
       //       A20 | A21 | A22
-      Index bs = std::min(blockSize, size-k);
+      Index bs = (std::min)(blockSize, size-k);
       Index rs = size - k - bs;
       Block<MatrixType,Dynamic,Dynamic> A11(m,k,   k,   bs,bs);
       Block<MatrixType,Dynamic,Dynamic> A21(m,k+bs,k,   rs,bs);
@@ -274,8 +274,8 @@ template<> struct llt_inplace<Upper>
 
 template<typename MatrixType> struct LLT_Traits<MatrixType,Lower>
 {
-  typedef TriangularView<MatrixType, Lower> MatrixL;
-  typedef TriangularView<typename MatrixType::AdjointReturnType, Upper> MatrixU;
+  typedef const TriangularView<const MatrixType, Lower> MatrixL;
+  typedef const TriangularView<const typename MatrixType::AdjointReturnType, Upper> MatrixU;
   inline static MatrixL getL(const MatrixType& m) { return m; }
   inline static MatrixU getU(const MatrixType& m) { return m.adjoint(); }
   static bool inplace_decomposition(MatrixType& m)
@@ -284,8 +284,8 @@ template<typename MatrixType> struct LLT_Traits<MatrixType,Lower>
 
 template<typename MatrixType> struct LLT_Traits<MatrixType,Upper>
 {
-  typedef TriangularView<typename MatrixType::AdjointReturnType, Lower> MatrixL;
-  typedef TriangularView<MatrixType, Upper> MatrixU;
+  typedef const TriangularView<const typename MatrixType::AdjointReturnType, Lower> MatrixL;
+  typedef const TriangularView<const MatrixType, Upper> MatrixU;
   inline static MatrixL getL(const MatrixType& m) { return m.adjoint(); }
   inline static MatrixU getU(const MatrixType& m) { return m; }
   static bool inplace_decomposition(MatrixType& m)
