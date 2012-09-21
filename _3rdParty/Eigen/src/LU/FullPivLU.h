@@ -443,7 +443,6 @@ FullPivLU<MatrixType>& FullPivLU<MatrixType>::compute(const MatrixType& matrix)
 
   m_nonzero_pivots = size; // the generic case is that in which all pivots are nonzero (invertible case)
   m_maxpivot = RealScalar(0);
-  RealScalar cutoff(0);
 
   for(Index k = 0; k < size; ++k)
   {
@@ -458,14 +457,7 @@ FullPivLU<MatrixType>& FullPivLU<MatrixType>::compute(const MatrixType& matrix)
     row_of_biggest_in_corner += k; // correct the values! since they were computed in the corner,
     col_of_biggest_in_corner += k; // need to add k to them.
 
-    // when k==0, biggest_in_corner is the biggest coeff absolute value in the original matrix
-    if(k == 0) cutoff = biggest_in_corner * NumTraits<Scalar>::epsilon();
-
-    // if the pivot (hence the corner) is "zero", terminate to avoid generating nan/inf values.
-    // Notice that using an exact comparison (biggest_in_corner==0) here, as Golub-van Loan do in
-    // their pseudo-code, results in numerical instability! The cutoff here has been validated
-    // by running the unit test 'lu' with many repetitions.
-    if(biggest_in_corner < cutoff)
+    if(biggest_in_corner==RealScalar(0))
     {
       // before exiting, make sure to initialize the still uninitialized transpositions
       // in a sane state without destroying what we already have.
@@ -533,7 +525,7 @@ template<typename MatrixType>
 MatrixType FullPivLU<MatrixType>::reconstructedMatrix() const
 {
   eigen_assert(m_isInitialized && "LU is not initialized.");
-  const Index smalldim = std::min(m_lu.rows(), m_lu.cols());
+  const Index smalldim = (std::min)(m_lu.rows(), m_lu.cols());
   // LU
   MatrixType res(m_lu.rows(),m_lu.cols());
   // FIXME the .toDenseMatrix() should not be needed...
@@ -695,7 +687,7 @@ struct solve_retval<FullPivLU<_MatrixType>, Rhs>
     const Index rows = dec().rows(), cols = dec().cols(),
               nonzero_pivots = dec().nonzeroPivots();
     eigen_assert(rhs().rows() == rows);
-    const Index smalldim = std::min(rows, cols);
+    const Index smalldim = (std::min)(rows, cols);
 
     if(nonzero_pivots == 0)
     {

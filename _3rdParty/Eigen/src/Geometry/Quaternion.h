@@ -49,6 +49,9 @@ public:
   typedef typename internal::traits<Derived>::Scalar Scalar;
   typedef typename NumTraits<Scalar>::Real RealScalar;
   typedef typename internal::traits<Derived>::Coefficients Coefficients;
+  enum {
+    Flags = Eigen::internal::traits<Derived>::Flags
+  };
 
  // typedef typename Matrix<Scalar,4,1> Coefficients;
   /** the type of a 3D vector */
@@ -179,10 +182,9 @@ public:
   template<typename NewScalarType>
   inline typename internal::cast_return_type<Derived,Quaternion<NewScalarType> >::type cast() const
   {
-    return typename internal::cast_return_type<Derived,Quaternion<NewScalarType> >::type(
-      coeffs().template cast<NewScalarType>());
+    return typename internal::cast_return_type<Derived,Quaternion<NewScalarType> >::type(derived());
   }
-  
+
 #ifdef EIGEN_QUATERNIONBASE_PLUGIN
 # include EIGEN_QUATERNIONBASE_PLUGIN
 #endif
@@ -222,21 +224,25 @@ struct traits<Quaternion<_Scalar,_Options> >
   typedef _Scalar Scalar;
   typedef Matrix<_Scalar,4,1,_Options> Coefficients;
   enum{
-    PacketAccess = _Options & DontAlign ? Unaligned : Aligned
+    IsAligned = internal::traits<Coefficients>::Flags & AlignedBit,
+    Flags = IsAligned ? (AlignedBit | LvalueBit) : LvalueBit
   };
 };
 }
 
 template<typename _Scalar, int _Options>
-class Quaternion : public QuaternionBase<Quaternion<_Scalar,_Options> >{
+class Quaternion : public QuaternionBase<Quaternion<_Scalar,_Options> >
+{
   typedef QuaternionBase<Quaternion<_Scalar,_Options> > Base;
+  enum { IsAligned = internal::traits<Quaternion>::IsAligned };
+
 public:
   typedef _Scalar Scalar;
 
   EIGEN_INHERIT_ASSIGNMENT_EQUAL_OPERATOR(Quaternion)
   using Base::operator*=;
 
-  typedef typename internal::traits<Quaternion<Scalar,_Options> >::Coefficients Coefficients;
+  typedef typename internal::traits<Quaternion>::Coefficients Coefficients;
   typedef typename Base::AngleAxisType AngleAxisType;
 
   /** Default constructor leaving the quaternion uninitialized. */
@@ -267,8 +273,15 @@ public:
   template<typename Derived>
   explicit inline Quaternion(const MatrixBase<Derived>& other) { *this = other; }
 
+  /** Explicit copy constructor with scalar conversion */
+  template<typename OtherScalar, int OtherOptions>
+  explicit inline Quaternion(const Quaternion<OtherScalar, OtherOptions>& other)
+  { m_coeffs = other.coeffs().template cast<Scalar>(); }
+
   inline Coefficients& coeffs() { return m_coeffs;}
   inline const Coefficients& coeffs() const { return m_coeffs;}
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(IsAligned)
 
 protected:
   Coefficients m_coeffs;
@@ -294,33 +307,53 @@ typedef Quaternion<double> Quaterniond;
 ***************************************************************************/
 
 namespace internal {
-template<typename _Scalar, int _PacketAccess>
-struct traits<Map<Quaternion<_Scalar>, _PacketAccess> >:
-traits<Quaternion<_Scalar> >
-{
-  typedef _Scalar Scalar;
-  typedef Map<Matrix<_Scalar,4,1>, _PacketAccess> Coefficients;
-  enum {
-    PacketAccess = _PacketAccess
+  template<typename _Scalar, int _Options>
+  struct traits<Map<Quaternion<_Scalar>, _Options> >:
+  traits<Quaternion<_Scalar, _Options> >
+  {
+    typedef _Scalar Scalar;
+    typedef Map<Matrix<_Scalar,4,1>, _Options> Coefficients;
+
+    typedef traits<Quaternion<_Scalar, _Options> > TraitsBase;
+    enum {
+      IsAligned = TraitsBase::IsAligned,
+
+      Flags = TraitsBase::Flags
+    };
   };
-};
+}
+
+namespace internal {
+  template<typename _Scalar, int _Options>
+  struct traits<Map<const Quaternion<_Scalar>, _Options> >:
+  traits<Quaternion<_Scalar> >
+  {
+    typedef _Scalar Scalar;
+    typedef Map<const Matrix<_Scalar,4,1>, _Options> Coefficients;
+
+    typedef traits<Quaternion<_Scalar, _Options> > TraitsBase;
+    enum {
+      IsAligned = TraitsBase::IsAligned,
+      Flags = TraitsBase::Flags & ~LvalueBit
+    };
+  };
 }
 
 /** \brief Quaternion expression mapping a constant memory buffer
   *
   * \param _Scalar the type of the Quaternion coefficients
-  * \param PacketAccess see class Map
+  * \param _Options see class Map
   *
   * This is a specialization of class Map for Quaternion. This class allows to view
   * a 4 scalar memory buffer as an Eigen's Quaternion object.
   *
   * \sa class Map, class Quaternion, class QuaternionBase
   */
-template<typename _Scalar, int PacketAccess>
-class Map<const Quaternion<_Scalar>, PacketAccess >
-  : public QuaternionBase<Map<const Quaternion<_Scalar>, PacketAccess> >
+template<typename _Scalar, int _Options>
+class Map<const Quaternion<_Scalar>, _Options >
+  : public QuaternionBase<Map<const Quaternion<_Scalar>, _Options> >
 {
-    typedef QuaternionBase<Map<Quaternion<_Scalar>, PacketAccess> > Base;
+    typedef QuaternionBase<Map<const Quaternion<_Scalar>, _Options> > Base;
 
   public:
     typedef _Scalar Scalar;
@@ -333,7 +366,7 @@ class Map<const Quaternion<_Scalar>, PacketAccess >
       * The pointer \a coeffs must reference the four coeffecients of Quaternion in the following order:
       * \code *coeffs == {x, y, z, w} \endcode
       *
-      * If the template parameter PacketAccess is set to Aligned, then the pointer coeffs must be aligned. */
+      * If the template parameter _Options is set to #Aligned, then the pointer coeffs must be aligned. */
     EIGEN_STRONG_INLINE Map(const Scalar* coeffs) : m_coeffs(coeffs) {}
 
     inline const Coefficients& coeffs() const { return m_coeffs;}
@@ -345,18 +378,18 @@ class Map<const Quaternion<_Scalar>, PacketAccess >
 /** \brief Expression of a quaternion from a memory buffer
   *
   * \param _Scalar the type of the Quaternion coefficients
-  * \param PacketAccess see class Map
+  * \param _Options see class Map
   *
   * This is a specialization of class Map for Quaternion. This class allows to view
   * a 4 scalar memory buffer as an Eigen's  Quaternion object.
   *
   * \sa class Map, class Quaternion, class QuaternionBase
   */
-template<typename _Scalar, int PacketAccess>
-class Map<Quaternion<_Scalar>, PacketAccess >
-  : public QuaternionBase<Map<Quaternion<_Scalar>, PacketAccess> >
+template<typename _Scalar, int _Options>
+class Map<Quaternion<_Scalar>, _Options >
+  : public QuaternionBase<Map<Quaternion<_Scalar>, _Options> >
 {
-    typedef QuaternionBase<Map<Quaternion<_Scalar>, PacketAccess> > Base;
+    typedef QuaternionBase<Map<Quaternion<_Scalar>, _Options> > Base;
 
   public:
     typedef _Scalar Scalar;
@@ -369,7 +402,7 @@ class Map<Quaternion<_Scalar>, PacketAccess >
       * The pointer \a coeffs must reference the four coeffecients of Quaternion in the following order:
       * \code *coeffs == {x, y, z, w} \endcode
       *
-      * If the template parameter PacketAccess is set to Aligned, then the pointer coeffs must be aligned. */
+      * If the template parameter _Options is set to #Aligned, then the pointer coeffs must be aligned. */
     EIGEN_STRONG_INLINE Map(Scalar* coeffs) : m_coeffs(coeffs) {}
 
     inline Coefficients& coeffs() { return m_coeffs; }
@@ -399,7 +432,7 @@ typedef Map<Quaternion<double>, Aligned>  QuaternionMapAlignedd;
 // Generic Quaternion * Quaternion product
 // This product can be specialized for a given architecture via the Arch template argument.
 namespace internal {
-template<int Arch, class Derived1, class Derived2, typename Scalar, int PacketAccess> struct quat_product
+template<int Arch, class Derived1, class Derived2, typename Scalar, int _Options> struct quat_product
 {
   EIGEN_STRONG_INLINE static Quaternion<Scalar> run(const QuaternionBase<Derived1>& a, const QuaternionBase<Derived2>& b){
     return Quaternion<Scalar>
@@ -423,7 +456,7 @@ QuaternionBase<Derived>::operator* (const QuaternionBase<OtherDerived>& other) c
    YOU_MIXED_DIFFERENT_NUMERIC_TYPES__YOU_NEED_TO_USE_THE_CAST_METHOD_OF_MATRIXBASE_TO_CAST_NUMERIC_TYPES_EXPLICITLY)
   return internal::quat_product<Architecture::Target, Derived, OtherDerived,
                          typename internal::traits<Derived>::Scalar,
-                         internal::traits<Derived>::PacketAccess && internal::traits<OtherDerived>::PacketAccess>::run(*this, other);
+                         internal::traits<Derived>::IsAligned && internal::traits<OtherDerived>::IsAligned>::run(*this, other);
 }
 
 /** \sa operator*(Quaternion) */
@@ -551,6 +584,7 @@ template<class Derived>
 template<typename Derived1, typename Derived2>
 inline Derived& QuaternionBase<Derived>::setFromTwoVectors(const MatrixBase<Derived1>& a, const MatrixBase<Derived2>& b)
 {
+  using std::max;
   Vector3 v0 = a.normalized();
   Vector3 v1 = b.normalized();
   Scalar c = v1.dot(v0);
@@ -565,7 +599,7 @@ inline Derived& QuaternionBase<Derived>::setFromTwoVectors(const MatrixBase<Deri
   //    which yields a singular value problem
   if (c < Scalar(-1)+NumTraits<Scalar>::dummy_precision())
   {
-    c = std::max<Scalar>(c,-1);
+    c = max<Scalar>(c,-1);
     Matrix<Scalar,2,3> m; m << v0.transpose(), v1.transpose();
     JacobiSVD<Matrix<Scalar,2,3> > svd(m, ComputeFullV);
     Vector3 axis = svd.matrixV().col(2);
@@ -625,10 +659,11 @@ template <class OtherDerived>
 inline typename internal::traits<Derived>::Scalar
 QuaternionBase<Derived>::angularDistance(const QuaternionBase<OtherDerived>& other) const
 {
+  using std::acos;
   double d = internal::abs(this->dot(other));
   if (d>=1.0)
     return Scalar(0);
-  return static_cast<Scalar>(2 * std::acos(d));
+  return static_cast<Scalar>(2 * acos(d));
 }
 
 /** \returns the spherical linear interpolation between the two quaternions
@@ -639,6 +674,7 @@ template <class OtherDerived>
 Quaternion<typename internal::traits<Derived>::Scalar>
 QuaternionBase<Derived>::slerp(Scalar t, const QuaternionBase<OtherDerived>& other) const
 {
+  using std::acos;
   static const Scalar one = Scalar(1) - NumTraits<Scalar>::epsilon();
   Scalar d = this->dot(other);
   Scalar absD = internal::abs(d);
@@ -646,7 +682,7 @@ QuaternionBase<Derived>::slerp(Scalar t, const QuaternionBase<OtherDerived>& oth
   Scalar scale0;
   Scalar scale1;
 
-  if (absD>=one)
+  if(absD>=one)
   {
     scale0 = Scalar(1) - t;
     scale1 = t;
@@ -654,14 +690,13 @@ QuaternionBase<Derived>::slerp(Scalar t, const QuaternionBase<OtherDerived>& oth
   else
   {
     // theta is the angle between the 2 quaternions
-    Scalar theta = std::acos(absD);
+    Scalar theta = acos(absD);
     Scalar sinTheta = internal::sin(theta);
 
     scale0 = internal::sin( ( Scalar(1) - t ) * theta) / sinTheta;
     scale1 = internal::sin( ( t * theta) ) / sinTheta;
-    if (d<0)
-      scale1 = -scale1;
   }
+  if(d<0) scale1 = -scale1;
 
   return Quaternion<Scalar>(scale0 * coeffs() + scale1 * other.coeffs());
 }
