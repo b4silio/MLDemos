@@ -2364,15 +2364,18 @@ void MLDemos::CanvasOptionsChanged()
     int w = ui.canvasArea->width();
     int h = ui.canvasArea->height();
     bool bNeedsZoom = false;
-    if(h/dims < 100)
+    if(canvas->canvasType == 1)
     {
-        h = 100*dims;
-        bNeedsZoom = true;
-    }
-    if(w/dims < 100)
-    {
-        w = 100*dims;
-        bNeedsZoom = true;
+        if(h/dims < 100)
+        {
+            h = 100*dims;
+            bNeedsZoom = true;
+        }
+        if(w/dims < 100)
+        {
+            w = 100*dims;
+            bNeedsZoom = true;
+        }
     }
     //drawTimer->Stop();
     //drawTimer->Clear();

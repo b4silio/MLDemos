@@ -743,6 +743,8 @@ void Canvas::DrawAxes(QPainter &painter)
     QRectF bounding = canvasRect();
     // we round up the size to the closest decimal
     float scale = bounding.height();
+    float scaleRatio = scale / bounding.width();
+    if(scaleRatio > 1000 || 1.f/scaleRatio > 1000) scale = (bounding.height() + bounding.width()) / 2;
     if(scale <= 1e-5) return;
     float mult = 1;
     if(scale > 10)
