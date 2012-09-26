@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Projections</string>
+   <string>PCA Faces</string>
   </property>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
