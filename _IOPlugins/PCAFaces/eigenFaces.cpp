@@ -335,8 +335,8 @@ IplImage *EigenFaces::DrawEigenVals()
 	cvPutText(display, text, point, &font, CV_RGB(128,128,128));
 
 	IplImage *tmp = CV::Rotate90(display, 0);
-	point = cvPoint(tmp->width - 110, font.line_type);
-	sprintf(text,"data percent");
+    point = cvPoint(100, font.line_type);
+    sprintf(text,"reconstruction error (normalized)");
 	cvPutText(tmp, text, point, &font, CV_RGB(128,128,128));
 	IMKILL(display);
 	display = CV::Rotate90(tmp, 1);
@@ -344,16 +344,25 @@ IplImage *EigenFaces::DrawEigenVals()
 
     IMKILL(eigImage);
     accumulator = 0;
+    sprintf(text,"Comp#: EigenValue Cumulative");
+    cvPutText(display, text, cvPoint(display->width/2, font.line_type), &font, CV_RGB(128,128,128));
     FOR(i, dim-2)
     {
-        int y = font.line_type*(i+1);
+        int y = font.line_type*(i+2);
         if(y > display->height) continue;
         if(eigVal[i] == eigVal[i])
         {
             accumulator += eigVal[i] / maxEigVal;
-            sprintf(text,"e%d: %.1f%%", i, accumulator*100);
-            cvPutText(display, text, cvPoint(display->width - 110, y), &font, CV_RGB(128,128,128));
+            sprintf(text,"e%d: %.2f %.1f%%", i+1, eigVal[i], accumulator*100);
         }
+        else if(i > 0 && i < dim-3 && eigVal[i-1] == eigVal[i-1] && eigVal[i+1] == eigVal[i+1])
+        {
+            float middleEigVal = (eigVal[i-1] + eigVal[i+1])/2;
+            float newAccumulator = accumulator + eigVal[i+1]/maxEigVal;
+            sprintf(text,"e%d: %.2f %.1f%%", i+1, middleEigVal, newAccumulator*100);
+        }
+        else sprintf(text, "e%d: Numeric Error, %.1f%%", i+1, accumulator);
+        cvPutText(display, text, cvPoint(display->width/2, y), &font, CV_RGB(128,128,128));
     }
     return display;
 }
