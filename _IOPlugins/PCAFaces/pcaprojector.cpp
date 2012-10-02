@@ -103,11 +103,13 @@ void PCAProjector::DrawEigen()
 	eigVecs.AddSamples(eig.GetEigenVectorsImages());
 	IplImage *image = eigVecs.GetSampleImage();
     if(!eigenVectorLabel) eigenVectorLabel = new QLabel();
+    eigenVectorLabel->setScaledContents(true);
     eigenVectorLabel->setPixmap(QNamedWindow::toPixmap(image));
     eigenVectorLabel->show();
 
     IplImage *eigValsImg = eig.DrawEigenVals();
     if(!eigenValueLabel) eigenValueLabel = new QLabel();
+    eigenValueLabel->setScaledContents(true);
     eigenValueLabel->setPixmap(QNamedWindow::toPixmap(eigValsImg));
     eigenValueLabel->show();
 
