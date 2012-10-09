@@ -102,7 +102,7 @@ float KMeansCluster::Distance2( fvec a, fvec b )
     return d;
 }
 
-void KMeansCluster::Update(bool bEStep)
+void KMeansCluster::Update(bool bFirstIteration)
 {
     bool bSuperposed = false;
     FOR(i, clusters)
@@ -120,15 +120,9 @@ void KMeansCluster::Update(bool bEStep)
     }
     if(bSuperposed) InitClusters();
 
-    if(bGMM)
-    {
-        GMMClustering(points, means, sigma, pi, clusters, bEStep);
-    }
-    else
-    {
-        if(!bSoft) KmeansClustering(points, means, clusters);
-        else SoftKmeansClustering(points, means, clusters, beta, bEStep);
-    }
+    if(bGMM) GMMClustering(points, means, sigma, pi, clusters, bFirstIteration);
+    else if (bSoft) SoftKmeansClustering(points, means, clusters, beta, bFirstIteration);
+    else if(!bFirstIteration) KmeansClustering(points, means, clusters);
     FOR(i, clusters)
     {
         float mindist = 1;
@@ -434,7 +428,7 @@ void KMeansCluster::KmeansClustering(std::vector<ClusterPoint> &points, vector<f
     bool bSomethingChanged = true;
 
     // the kmeans loop
-    while(bSomethingChanged){
+    //while(bSomethingChanged){
         bSomethingChanged = false;
 
         //classify the points into clusters
@@ -453,7 +447,7 @@ void KMeansCluster::KmeansClustering(std::vector<ClusterPoint> &points, vector<f
 
         //compute the new means for each cluster
         Mean(points, means, nbClusters);
-    }
+    //}
 
     oldMeans = means;
 }

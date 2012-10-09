@@ -50,11 +50,7 @@ void ClustererKM::Train(std::vector< fvec > samples)
     kmeans->SetBeta(beta);
     kmeans->SetPower(power);
 
-    if(!bGmm && !bSoft) kmeans->Update();
-    else
-    {
-        kmeans->Update(bInit);
-    }
+    kmeans->Update(bInit);
 
     if(!bIterative)
     {

@@ -60,7 +60,7 @@ public:
 	KMeansCluster(u32 cnt=1);
 	~KMeansCluster();
 
-	void Update(bool bEStep=false);
+    void Update(bool bFirstIteration=false);
 
 	void Clear();
 	void Test(fvec sample, fvec &res);
@@ -92,7 +92,7 @@ public:
 private:
 	void Mean(std::vector<ClusterPoint> &points, std::vector<fvec> &means, int nbClusters);
 	void SoftMean(std::vector<ClusterPoint> &points, std::vector<fvec> &means, int nbClusters);
-	void KmeansClustering(std::vector<ClusterPoint> &points, std::vector<fvec> &oldMeans, int nbClusters);
+    void KmeansClustering(std::vector<ClusterPoint> &points, std::vector<fvec> &oldMeans, int nbClusters);
 	void SoftKmeansClustering(std::vector<ClusterPoint> &points, std::vector<fvec> &oldMeans, int nbClusters, float beta, bool bEStep);
 	void GMMClustering(std::vector<ClusterPoint> &points, std::vector<fvec> &oldMeans, double **oldSigma, double*oldPi, int nbClusters, bool bEStep);
 
