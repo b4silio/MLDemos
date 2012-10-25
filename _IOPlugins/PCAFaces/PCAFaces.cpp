@@ -45,6 +45,8 @@ void PCAFaces::Start()
 		connect(projector, SIGNAL(Update()), this, SLOT(Updating()));
 		connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
 		connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
+        connect(gui->eigenCountSpin, SIGNAL(valueChanged(int)), this, SLOT(Updating()));
+        Updating();
 	}
 	guiDialog->show();
 }
@@ -67,7 +69,11 @@ void PCAFaces::Closing()
 void PCAFaces::Updating()
 {
 	if(!projector) return;
-	pair<vector<fvec>,ivec> data = projector->GetData();
+    gui->spinE1->setVisible(gui->eigenCountSpin->value()==2);
+    gui->spinE2->setVisible(gui->eigenCountSpin->value()==2);
+    gui->spinE1label->setVisible(gui->eigenCountSpin->value()==2);
+    gui->spinE2label->setVisible(gui->eigenCountSpin->value()==2);
+    pair<vector<fvec>,ivec> data = projector->GetData();
 	if(data.first.size() < 2) return;
     emit(SetData(data.first, data.second, vector<ipair>(), true));
 }

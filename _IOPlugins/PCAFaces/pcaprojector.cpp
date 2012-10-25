@@ -127,6 +127,7 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
 
 	int e1 = options->spinE1->value()-1;
 	int e2 = options->spinE2->value()-1;
+    int count = options->eigenCountSpin->value();
 
     vector<IplImage*>sourceSamples;
     ivec sourceLabels;
@@ -137,30 +138,38 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
         sourceLabels.push_back(sm.GetLabel(i));
     }
     if(sourceSamples.size() < 3) return data;
+    count = min(count, (int)sourceSamples.size()-1);
 
     // we want at least one class to be 0, to avoid problems afterwards
 	//FixLabels(sm);
 	// we do the data projection here
 	EigenFaces eig;
     eig.Learn(sourceSamples, sourceLabels);
-	vector<float *> projections = eig.GetProjections(max(e1,e2)+1, true);
+    vector<float *> projections = eig.GetProjections(max(count,max(e1,e2)+1), true);
 	if(!projections.size()) return data;
 	// the projections are normalized on a space 0-1, we want to add a bit of edges
 	vector<fvec> samples;
 	samples.resize(projections.size());
-	fvec sample; sample.resize(2);
-	FOR(i, projections.size())
-	{
-		sample[0] = projections[i][e1]*0.9 + 0.05;
-		sample[1] = projections[i][e2]*0.9 + 0.05;
-		samples[i] = sample;
-		delete [] projections[i];
-	}
-	projections.clear();
+    fvec sample(count);
+    FOR(i, projections.size())
+    {
+        if(count == 2)
+        {
+            sample[0] = projections[i][e1]*0.9f + 0.05f;
+            sample[1] = projections[i][e2]*0.9f + 0.05f;
+        }
+        else
+            FOR(d, count) sample[d] = projections[i][d]*0.9f + 0.05f;
+        samples[i] = sample;
+        delete [] projections[i];
+    }
+    projections.clear();
 
-	data.first = samples;
-	data.second = sm.GetLabels();
-	return data;
+    data.first = samples;
+    data.second = sourceLabels;
+//    data.first = samples;
+//	data.second = sm.GetLabels();
+    return data;
 }
 
 void PCAProjector::FromWebcam()
@@ -224,8 +233,7 @@ void PCAProjector::RefreshDataset()
 		else negCount++;
 	}
 	options->samplesLabel->setText(QString("Samples: %1").arg(sm.GetCount()));
-	options->positiveLabel->setText(QString("Positives: %1").arg(posCount));
-	options->negativeLabel->setText(QString("Negatives: %1").arg(negCount));
+    options->eigenCountSpin->setRange(2, max(2,sm.GetCount()-1));
 	samplesWindow->repaint();
 	emit(Update());
 }
