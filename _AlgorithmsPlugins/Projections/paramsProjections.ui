@@ -41,17 +41,17 @@ Fisher: Fisher Linear Discriminant</string>
    </item>
    <item>
     <property name="text">
+     <string>Means Only (fake LDA)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>LDA</string>
     </property>
    </item>
    <item>
     <property name="text">
      <string>Fisher LDA</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>ICA</string>
     </property>
    </item>
    <item>
@@ -89,7 +89,7 @@ Fisher: Fisher Linear Discriminant</string>
   <widget class="QPushButton" name="projectionButton">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>110</x>
      <y>100</y>
      <width>91</width>
      <height>41</height>
@@ -102,24 +102,6 @@ Fisher: Fisher Linear Discriminant</string>
    </property>
    <property name="text">
     <string>Show Projection</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="toCanvasButton">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>100</y>
-     <width>91</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>8</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Set Projection</string>
    </property>
   </widget>
   <widget class="QSpinBox" name="kernelDegSpin">

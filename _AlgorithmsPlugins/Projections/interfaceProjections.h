@@ -33,17 +33,17 @@ private:
 	QWidget *widget;
 	Ui::ParametersProjections *params;
 	QLabel *projectionWindow;
-	Canvas *canvas;
-	Classifier *classifier;
+    Canvas *canvas;
+    Classifier *classifier;
 	int classifierType;
 	std::vector<fvec> data;
-	bool bDataIsFromCanvas;
 public:
 	ClassProjections();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
+    bool UsesDrawTimer(){return classifier->UsesDrawTimer();}
 
 	// virtual functions to manage the GUI and I/O
     QString GetName(){return QString("Linear Projections");}
@@ -57,8 +57,8 @@ public:
 	bool LoadParams(QString name, float value);
 
 private slots:
-	void ShowProjection();
-	void SendToCanvas();
+    void OptionsChanged();
+    void ShowProjection();
 };
 
 #endif // _INTERFACEPROJECTIONS_H_

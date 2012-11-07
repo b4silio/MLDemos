@@ -1290,6 +1290,7 @@ void MLDemos::ResetPositiveClass()
     {
         labMin = 0;
         labMax = 1;
+        optionsClassify->positiveSpin->setValue(1);
     }
     else
     {
@@ -1300,6 +1301,7 @@ void MLDemos::ResetPositiveClass()
             if(labels[i] < labMin) labMin = labels[i];
         }
     }
+    if(labMin == labMax) labMax = labMin+1;
     int dimCount = max(2,canvas->data->GetDimCount());
     int currentOutputDim = optionsCompare->outputDimCombo->currentIndex();
 
@@ -1320,10 +1322,11 @@ void MLDemos::ResetPositiveClass()
     }
     if(currentOutputDim < dimCount) optionsCompare->outputDimCombo->setCurrentIndex(currentOutputDim);
 
+    int currentPositive = optionsClassify->positiveSpin->value();
     optionsClassify->positiveSpin->setRange(labMin,labMax);
-    if(optionsClassify->positiveSpin->value() < labMin)
+    if(currentPositive < labMin)
         optionsClassify->positiveSpin->setValue(labMin);
-    else if(optionsClassify->positiveSpin->value() > labMax)
+    else if(currentPositive > labMax)
         optionsClassify->positiveSpin->setValue(labMax);
     ui.canvasX1Spin->setRange(1,dimCount);
     ui.canvasX2Spin->setRange(1,dimCount);
