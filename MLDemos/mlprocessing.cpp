@@ -73,6 +73,7 @@ void MLDemos::Classify()
     {
         classifiers[tab]->Draw(canvas, classifier);
         UpdateInfo();
+        qDebug() << "using draw timer" << classifier->UsesDrawTimer();
         if(drawTimer && classifier->UsesDrawTimer())
         {
             drawTimer->classifier = &this->classifier;

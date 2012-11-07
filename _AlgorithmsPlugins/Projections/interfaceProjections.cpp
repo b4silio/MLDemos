@@ -32,9 +32,20 @@ ClassProjections::ClassProjections()
     canvas = NULL;
     classifier = NULL;
     classifierType = 0;
-    bDataIsFromCanvas = false;
     connect(params->projectionButton, SIGNAL(clicked()), this, SLOT(ShowProjection()));
-    connect(params->toCanvasButton, SIGNAL(clicked()), this, SLOT(SendToCanvas()));
+    connect(params->linearTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
+    OptionsChanged();
+}
+
+void ClassProjections::OptionsChanged()
+{
+    bool bKernelVisible = params->linearTypeCombo->currentIndex() == 4; // kernel pca
+    params->kernelDegSpin->setVisible(bKernelVisible);
+    params->kernelTypeCombo->setVisible(bKernelVisible);
+    params->kernelWidthSpin->setVisible(bKernelVisible);
+    params->labelDegree->setVisible(bKernelVisible);
+    params->labelWidth->setVisible(bKernelVisible);
+    params->labelkernel->setVisible(bKernelVisible);
 }
 
 void ClassProjections::SetParams(Classifier *classifier)
@@ -61,11 +72,11 @@ QString ClassProjections::GetAlgoString()
     case 0:
         return "PCA";
     case 1:
-        return "LDA";
+        return "Means-Only";
     case 2:
-        return "Fisher-LDA";
+        return "LDA";
     case 3:
-        return "ICA";
+        return "Fisher-LDA";
     case 4:
         return "Kernel PCA";
     case 5:
@@ -96,13 +107,8 @@ void ClassProjections::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *c
     if(canvas->canvasType) return;
     painter.setRenderHint(QPainter::Antialiasing);
     ClassifierLinear *linear = (ClassifierLinear*)classifier;
-    //int xIndex = canvas->xIndex, yIndex = canvas->yIndex;
-    //fvec mean = linear->GetMean();
-    //fVec m(mean[xIndex],mean[yIndex]);
-    if(linear->GetType()==3) // ICA
-    {
-    }
-    else if(linear->GetType() < 3) // PCA, LDA, Fisher
+
+    if(linear->GetType() < 4) // PCA, LDA, Fisher
     {
         fvec pt[5];
         QPointF point[4];
@@ -172,7 +178,7 @@ void ClassProjections::ShowProjection()
     if(!classifier || !canvas) return;
     // we project all the data into a new image
     int w = canvas->width()/2;
-    if(classifierType == 3 || classifierType == 4) w = canvas->width();
+    if(classifierType == 4) w = canvas->width();
     int h = canvas->height()/2;
     QPixmap projectionPixmap(w, h);
     projectionPixmap.fill();
@@ -183,7 +189,7 @@ void ClassProjections::ShowProjection()
     QPainter painter(&projectionPixmap);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    if(classifierType < 3) // PCA, LDA, Fisher
+    if(classifierType < 4) // PCA, LDA, Fisher
     {
         fvec pt[5];
         QPointF point[4];
@@ -228,7 +234,7 @@ void ClassProjections::ShowProjection()
             Canvas::drawSample(painter, original, 6, label);
         }
     }
-    if(classifierType == 3) // ICA
+    if(classifierType == 6) // ICA
     {
         int dim = samples[0].size();
         fvec meanAll; meanAll.resize(dim, 0);
@@ -346,51 +352,6 @@ void ClassProjections::ShowProjection()
     projectionWindow->resize(projectionPixmap.size());
     projectionWindow->setPixmap(projectionPixmap);
     projectionWindow->show();
-}
-
-void ClassProjections::SendToCanvas()
-{
-    if(!canvas) return;
-
-    if(bDataIsFromCanvas)
-    {
-        FOR(i, data.size()) canvas->data->SetSample(i, data[i]);
-        params->toCanvasButton->setText("Set Projection");
-        bDataIsFromCanvas = false;
-    }
-    else
-    {
-        if(!classifier) return;
-        if(!dynamic_cast<ClassifierLinear*>(classifier) && !dynamic_cast<ClassifierKPCA*>(classifier))
-        {
-            data.clear();
-            return;
-        }
-        data = canvas->data->GetSamples();
-        if(classifierType == 4)
-        {
-            vector<fvec> projected = ((ClassifierKPCA *)classifier)->GetResults();
-            FOR(i, projected.size())
-            {
-                canvas->data->SetSample(i, projected[i]);
-            }
-        }
-        else
-        {
-            FOR(i, data.size())
-            {
-                fvec projected = ((ClassifierLinear *)classifier)->Project(data[i]);
-                canvas->data->SetSample(i, projected);
-            }
-        }
-        bDataIsFromCanvas = true;
-        params->toCanvasButton->setText("Set Original");
-    }
-    canvas->maps.model = QPixmap();
-    canvas->maps.confidence = QPixmap();
-    canvas->maps.info = QPixmap();
-    canvas->ResetSamples();
-    canvas->repaint();
 }
 
 void ClassProjections::SaveOptions(QSettings &settings)

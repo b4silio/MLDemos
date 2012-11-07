@@ -61,7 +61,7 @@ private:
 	 * @param labels
 	 * @param bFisher Use Fisher-LDA instead of standard LDA
 	 */
-	void TrainLDA(std::vector< fvec > samples, const ivec &labels, bool bFisher=true);
+    void TrainLDA(std::vector< fvec > samples, const ivec &labels, int LDAType=0);
 	/**
 	 * @brief Perform Independent Component Analysis on the input samples, and store the obtained components in Transf
 	 *
@@ -101,12 +101,6 @@ public:
 	 * @param sample
 	 */
 	fvec Project(const fvec &sample);
-	/**
-	 * @brief Project the input sample from local space back to world space
-	 *
-	 * @param sample
-	 */
-	fvec InvProject(const fvec &sample);
 	/**
 	 * @brief Set the algorithm parameters from the ui
 	 *

@@ -36,14 +36,14 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 	case 0:
 		TrainPCA(samples, labels);
 		break;
-	case 1:
-		TrainLDA(samples, labels, false);
-		break;
-	case 2:
-		TrainLDA(samples, labels);
-		break;
-	case 3:
-		TrainICA(samples, labels);
+    case 1:
+        TrainLDA(samples, labels, -1);
+        break;
+    case 2:
+        TrainLDA(samples, labels, 1);
+        break;
+    case 3:
+        TrainLDA(samples, labels, 0);
 		break;
 	}
 
@@ -75,7 +75,7 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 		if(cntPos) meanPos[d] /= cntPos;
 		if(cntNeg) meanNeg[d] /= cntNeg;
 	}
-	bUsesDrawTimer = false;
+    bUsesDrawTimer = true;
 	minResponse = FLT_MAX;
 	maxResponse = -FLT_MAX;
     midResponse = 0.5;
@@ -116,7 +116,7 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
 float ClassifierLinear::Test(const fvec &sample )
 {
 	float response = 0;
-	if(linearType < 3) // pca, lda, fisher
+    if(linearType < 4) // pca, lda, fisher
 	{
 		fVec point(sample[0] - meanAll[0], sample[1] - meanAll[1]);
 		float estimate = W*point;
@@ -142,7 +142,7 @@ float ClassifierLinear::Test(const fvec &sample )
 		response = (response-minResponse)/fabs(maxResponse-minResponse); // 0-1 range
         response = (response-midResponse)*6.f;
 	}
-	return response;
+    return response;
 }
 
 const char *ClassifierLinear::GetInfoString()
@@ -154,24 +154,20 @@ const char *ClassifierLinear::GetInfoString()
 	case 0:
 		sprintf(text, "%sPCA\n", text);
 		break;
-	case 1:
-		sprintf(text, "%sLDA\n", text);
-		break;
-	case 2:
+    case 1:
+        sprintf(text, "%sMeansOnly\n", text);
+        break;
+    case 2:
+        sprintf(text, "%sLDA\n", text);
+        break;
+    case 3:
 		sprintf(text, "%sFisher LDA\n", text);
-		break;
-	case 3:
-		sprintf(text, "%sICA\n", text);
 		break;
 	default:
 		sprintf(text, "%sNaive Bayes\n", text);
 		break;
 	}
-	if(linearType == 3) // ica
-	{
-		sprintf(text, "%sUnmixing matrix:\n\t%.3f %.3f\n\t%.3f %.3f", text, Transf[0], Transf[1], Transf[2], Transf[3]);
-	}
-	else if(linearType < 3)
+    if(linearType < 4)
 	{
 		sprintf(text, "%sProjection Direction:\n\t%.3f %.3f\n", text, W.x, W.y);
 	}
@@ -188,42 +184,10 @@ void Invert(double *sigma, double *invSigma)
 	invSigma[3] = sigma[0] / det;
 }
 
-fvec ClassifierLinear::InvProject(const fvec &sample)
-{
-	fvec newSample = sample;
-	if(linearType == 3) // ica
-	{
-		if(!Transf) return newSample;
-		double iTransf[4];
-		Invert(Transf, iTransf);
-		double *Data = new double[2];
-		Data[0] = sample[0];
-		Data[1] = sample[1];
-		//                Data[0] = sample[0]-meanPos[0];
-		//                Data[1] = sample[1]-meanPos[1];
-		Transform (Data, iTransf, 2, 1);
-		newSample[0] = Data[0]+meanPos[0];
-		newSample[1] = Data[1]+meanPos[1];
-	}
-	return newSample;
-}
-
 fvec ClassifierLinear::Project(const fvec &sample)
 {
 	fvec newSample = sample;
-	if(linearType == 3) // ica
-	{
-		if(!Transf) return newSample;
-		double *Data = new double[2];
-		Data[0] = sample[0]-meanAll[0];
-		Data[1] = sample[1]-meanAll[1];
-		Transform (Data, Transf, 2, 1);
-		newSample[0] = Data[0];
-		newSample[1] = Data[1];
-		//		newSample[0] = Data[0]+meanPos[0];
-		//		newSample[1] = Data[1]+meanPos[1];
-	}
-	else if(linearType < 3) // pca, lda, fisher
+    if(linearType < 4) // pca, lda, fisher
 	{
 		fVec mean(meanAll[0], meanAll[1]);
 		fVec point(sample[0], sample[1]);
@@ -352,7 +316,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 	float error = minError / (f32)samples.size();
 }
 
-void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels, bool bFisher)
+void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels, int LDAType)
 {
 	// we reduce the problem to a one vs many classification
 	u32 dim = 2;
@@ -393,12 +357,18 @@ void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels,
 	}
 	mean2 /= (float)negatives.size();
 
-	if(bFisher)
+    if(LDAType==-1) // means only
+    {
+        W = fVec(mean2[0] - mean1[0],mean2[1] - mean1[1]);
+        W = W.normalize();
+        return;
+    }
+    else if(LDAType==0) // fisher LDA
 	{
 		GetCovariance(positives, mean1, &sigma1);
 		GetCovariance(negatives, mean2, &sigma2);
 	}
-	else
+    else // standard LDA
 	{
 		vector<fvec> posnegs;
 		FOR(i, positives.size()) posnegs.push_back(positives[i] - mean1);
@@ -425,7 +395,7 @@ void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels,
 	float n = sqrtf(w[0]*w[0] + w[1]*w[1]);
 	w[0] /= n; w[1] /= n;
 
-	float c = w[0]*(mean1[0]+mean2[0])/2 + w[0]*(mean1[1]+mean2[1])/2;
+//	float c = w[0]*(mean1[0]+mean2[0])/2 + w[0]*(mean1[1]+mean2[1])/2;
 	W = fVec(w[0], w[1]);
 	W = W.normalize();
 

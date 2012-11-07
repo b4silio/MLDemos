@@ -27,7 +27,7 @@ using namespace std;
 
 PluginProjections::PluginProjections()
 {
-    //classifiers.push_back(new ClassProjections());
+    classifiers.push_back(new ClassProjections());
     projectors.push_back(new ICAProjection());
     projectors.push_back(new PCAProjection());
     projectors.push_back(new LDAProjection());
