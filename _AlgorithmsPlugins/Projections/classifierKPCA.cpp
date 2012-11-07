@@ -26,7 +26,7 @@ using namespace std;
 ClassifierKPCA::ClassifierKPCA()
 	: pca(0)
 {
-    bUsesDrawTimer = false;
+    bUsesDrawTimer = true;
 }
 
 
