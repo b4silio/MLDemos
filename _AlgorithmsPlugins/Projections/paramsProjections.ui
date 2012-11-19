@@ -16,9 +16,9 @@
   <widget class="QComboBox" name="linearTypeCombo">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>20</x>
      <y>40</y>
-     <width>101</width>
+     <width>130</width>
      <height>22</height>
     </rect>
    </property>
@@ -41,6 +41,11 @@ Fisher: Fisher Linear Discriminant</string>
    </item>
    <item>
     <property name="text">
+     <string>Means Only (fake LDA)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>LDA</string>
     </property>
    </item>
@@ -49,26 +54,11 @@ Fisher: Fisher Linear Discriminant</string>
      <string>Fisher LDA</string>
     </property>
    </item>
-   <item>
-    <property name="text">
-     <string>ICA</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Kernel PCA</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>None (Naive Bayes)</string>
-    </property>
-   </item>
   </widget>
   <widget class="QLabel" name="label_19">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>30</x>
      <y>20</y>
      <width>101</width>
      <height>21</height>
@@ -89,7 +79,7 @@ Fisher: Fisher Linear Discriminant</string>
   <widget class="QPushButton" name="projectionButton">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>110</x>
      <y>100</y>
      <width>91</width>
      <height>41</height>
@@ -102,24 +92,6 @@ Fisher: Fisher Linear Discriminant</string>
    </property>
    <property name="text">
     <string>Show Projection</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="toCanvasButton">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>100</y>
-     <width>91</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>8</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Set Projection</string>
    </property>
   </widget>
   <widget class="QSpinBox" name="kernelDegSpin">
