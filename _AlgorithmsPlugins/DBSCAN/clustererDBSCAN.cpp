@@ -138,15 +138,15 @@ const char *ClustererDBSCAN::GetInfoString()
     char *text = new char[1024];
     if (_type==0)
     {
-        sprintf(text, "DBSCAN\n\nTraining informations: minPts : %d, eps: %f, metric: %d\n",_minPts,_eps,_metric);
+        sprintf(text, "DBSCAN\n\nTraining information: minPts : %d, eps: %f, metric: %d\n",_minPts,_eps,_metric);
     }
     else if (_type==1)
     {
-        sprintf(text, "OPTICS\n\nTraining informations: minPts : %d, eps: %f, depth: %f, metric: %d\n",_minPts,_eps,_depth,_metric);
+        sprintf(text, "OPTICS\n\nTraining information: minPts : %d, eps: %f, depth: %f, metric: %d\n",_minPts,_eps,_depth,_metric);
     }
     else
     {
-        sprintf(text, "OPTICS WP\n\nTraining informations: minPts : %d, eps: %f, depth: %f, metric: %d\n",_minPts,_eps,_depth,_metric);
+        sprintf(text, "OPTICS WP\n\nTraining information: minPts : %d, eps: %f, depth: %f, metric: %d\n",_minPts,_eps,_depth,_metric);
     }
 
     sprintf(text, "%sNumber of clusters: %d\n",text,_clusters.size());

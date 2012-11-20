@@ -77,7 +77,7 @@ public:
     QString GetInfoFile(){return "GP.html";}
 
     /*!
-      Determines whether the plugin requires a timer to query informations from it
+      Determines whether the plugin requires a timer to query information from it
       */
     bool UsesDrawTimer(){return true;}
 

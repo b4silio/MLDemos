@@ -56,7 +56,7 @@ const char *RegressorExample::GetInfoString()
     char *text = new char[1024];
     sprintf(text, "My Regressor Example\n");
     sprintf(text, "\n");
-    sprintf(text, "Training informations:\n");
+    sprintf(text, "Training information:\n");
 
     // here you can fill in whatever information you want
 
