@@ -197,7 +197,18 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 {
 	if(model)model->clear();
 	u32 sampleCnt = samples.size();
-	if(!sampleCnt) return;
+    if(!sampleCnt) return;
+    if(sampleCnt < 16)
+    {
+        vector<fvec> copy = samples;
+        ivec lcopy = labels;
+        while(sampleCnt < 16)
+        {
+            samples.insert(samples.end(), copy.begin(), copy.end());
+            labels.insert(labels.end(), lcopy.begin(), lcopy.end());
+            sampleCnt = samples.size();
+        }
+    }
 	DEL(model);
 	dim = samples[0].size();
 	u32 *perm = randPerm(sampleCnt);
@@ -218,7 +229,8 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     // we need to regenerate the learners
     if(currentLearnerType != weakType || learners.size() != learnerCount) InitLearners(xMin, xMax);
 
-	CvMat *trainSamples = cvCreateMat(sampleCnt, learnerCount, CV_32FC1);
+    qDebug() << "generating learners";
+    CvMat *trainSamples = cvCreateMat(sampleCnt, learnerCount, CV_32FC1);
 	CvMat *trainLabels = cvCreateMat(labels.size(), 1, CV_32FC1);
 	CvMat *sampleWeights = cvCreateMat(samples.size(), 1, CV_32FC1);
 
@@ -399,6 +411,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     }
         break;
     }
+    qDebug() << "creating data";
 
 	CvMat *varType = cvCreateMat(trainSamples->width+1, 1, CV_8UC1);
 	FOR(i, trainSamples->width)
@@ -411,7 +424,11 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     CvBoostParams params(boostType, weakCount, 0.95, maxSplit, false, NULL);
 	params.split_criteria = CvBoost::DEFAULT;
 	model = new CvBoost();
+    qDebug() << "training with " << samples.size() << "samples";
+    qDebug() << "trainSamples" << trainSamples->rows << trainSamples->cols;
+    qDebug() << "trainLabels" << trainLabels->rows << trainLabels->cols;
 	model->train(trainSamples, CV_ROW_SAMPLE, trainLabels, NULL, NULL, varType, NULL, params);
+    qDebug() << "done";
 
 	CvSeq *predictors = model->get_weak_predictors();
 	int length = cvSliceLength(CV_WHOLE_SEQ, predictors);

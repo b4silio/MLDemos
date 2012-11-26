@@ -29,7 +29,7 @@ DynamicSEDS::DynamicSEDS()
 {
 	params = new Ui::ParametersSEDS();
 	params->setupUi(widget = new QWidget());
-	connect(params->sedsConstraintCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
+    connect(params->sedsConstraintCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
 }
 
 void DynamicSEDS::OptionsChanged()
@@ -44,7 +44,7 @@ void DynamicSEDS::SetParams(Dynamical *dynamical)
 
 	int clusters = params->sedsCount->value();
 	bool bPrior = params->sedsCheckPrior->isChecked();
-	bool bMu = params->sedsCheckMu->isChecked();
+    bool bMu = params->sedsCheckMu->isChecked();
 	bool bSigma = params->sedsCheckSigma->isChecked();
 	int objectiveType = params->sedsObjectiveCombo->currentIndex();
     int optimizationType = params->sedsOptimizationCombo->currentIndex();

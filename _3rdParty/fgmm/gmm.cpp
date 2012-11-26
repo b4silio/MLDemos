@@ -53,6 +53,19 @@ void fgmm_free(struct gmm ** gmm)
   free(gm->gauss);
   free(gm);
 }
+
+void fgmm_copy(struct gmm ** gmm, struct gmm *src)
+{
+    struct gmm *gm = *gmm;
+    int i=0;
+    for(i=0;i<src->nstates;i++)
+    {
+        fgmm_set_covar_smat(gm, i, fgmm_get_covar_smat(src,i));
+        fgmm_set_mean(gm, i, fgmm_get_mean(src, i));
+        fgmm_set_prior(gm, i, fgmm_get_prior(src,i));
+    }
+}
+
   
 /* associate one random data point to 
    a gaussian */

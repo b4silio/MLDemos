@@ -118,12 +118,12 @@ void KPCAProjection::GetContoursPixmap(int index)
     int wmo = w-1;
     QImage image(wmo,hmo,QImage::Format_RGB32);
     int dim = pca->sourcePoints.rows();
-    int zoom = 1;
+    float zoom = 1;
     // use [xy]Index given in the constuctor if spinX1 [ov]
     if (contours->spinX1->isVisible()) {
         xIndex = contours->spinX1->value()-1;
         yIndex = contours->spinX2->value()-1;
-        zoom = contours->spinZoom->value();
+        zoom = (contours->spinZoom->value()-1)*0.25 + 1;
     }
     //qDebug() << "KPCAProjection::GetContoursPixmap - xIndex:" << xIndex << ", yIndex:" << yIndex << ", zoom:" << zoom << ".";
     double multiplier = 1000.; // this is used to avoid numerical instabilities when computing the contour lines
@@ -145,32 +145,13 @@ void KPCAProjection::GetContoursPixmap(int index)
     {
         FOR(j, h)
         {
-            if ( xIndex < dim ) point( xIndex ) = ( (double)i / ( (double)w * zxdiff ) ) + zxmin;
-            if ( yIndex < dim ) point( yIndex ) = ( (double)j / ( (double)h * zydiff ) ) + zymin;
+            if ( xIndex < dim ) point( xIndex ) = i * zxdiff / (double)w + zxmin;
+            if ( yIndex < dim ) point( yIndex ) = j * zydiff / (double)h + zymin;
             double value = pcaPointer->test( point, index-1, multiplier ); // indices start from 1 in params.dimCountSpin
             vmin = min(value, vmin);
             vmax = max(value, vmax);
             values[j*w + i] = value;
         }
-    }
-    //double zvmin=vmin, zvmax=vmax;
-    if(zoom != 1)
-    {
-        /*
-        zvmin = DBL_MAX;
-        zvmax = -DBL_MAX;
-        FOR(i, w)
-        {
-            FOR(j, h)
-            {
-                if(xIndex<dim) point(xIndex) = i/(double)w*(xmax-xmin) + xmin;
-                if(yIndex<dim) point(yIndex) = j/(double)h*(ymax-ymin) + ymin;
-                double value = pcaPointer->test(point, index-1, multiplier); // indices start from 1 in params.dimCountSpin
-                zvmin = min(value, zvmin);
-                zvmax = max(value, zvmax);
-            }
-        }
-        */
     }
     double vdiff=vmax-vmin;
     //qDebug() << "KPCAProjection::GetContoursPixmap - vmin:" << vmin << ", vmax:" << vmax << " - vdiff: " << vdiff << ".";
@@ -198,10 +179,10 @@ void KPCAProjection::GetContoursPixmap(int index)
     {
         fvec &sample = contourSamples[i];
         //qDebug() << "drawing sample at " << sample[0] << sample[1];
-        float x = (sample[xIndex]-zxmin)/(zxmax-zxmin)*w;
-        float y = (sample[yIndex]-zymin)/(zymax-zymin)*h;
-        x = (x+1)*W/w;
-        y = (y+1)*H/h;
+        float x = (sample[xIndex]-zxmin)/(zxmax-zxmin)*wmo;
+        float y = (sample[yIndex]-zymin)/(zymax-zymin)*hmo;
+        x = (x)*W/wmo;
+        y = (y)*H/hmo;
         Canvas::drawSample(painter, QPointF(x,y), 10, contourSampleLabels[i]);
     }
 
@@ -281,20 +262,6 @@ void DrawEigenvals(QPainter &painter, fvec eigs, bool bSkipFirstEigenvector)
     if(dim > 2) maxEigVal = bSkipFirstEigenvector ? eigs[1] : eigs[0];
     else if(dim) maxEigVal = eigs[0];
 
-    /*
-    FOR(i, dim)
-    {
-        if(!i && bSkipFirstEigenvector) continue;
-        if(eigs[i] == eigs[i]) maxEigVal += eigs[i];
-    }
-
-    maxEigVal = max(1.f,maxEigVal);
-    float maxAccumulator = 0;
-    FOR(i, dim) if(eigs[i] == eigs[i]) maxAccumulator += eigs[i];
-
-    float accumulator = 0;
-    */
-
     painter.setPen(Qt::gray);
     painter.drawLine(QPointF(pad, h-2*pad), QPointF(w-pad, h-2*pad));
     painter.drawLine(QPointF(pad, pad), QPointF(pad, h-2*pad));
@@ -341,19 +308,12 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     contourSampleLabels = canvas->data->GetLabels();
     if(contourSampleLabels.size() != contourSamples.size()) contourSampleLabels = ivec(contourSamples.size(), 0);
 
-    // use [xy]Index given in the constuctor [ov]
-    //xIndex = contours->spinX1->value();
-    //yIndex = contours->spinX2->value();
-
     // changed FLT_MAX -> DBL_MAX [ov]
     xmin=ymin=DBL_MAX;
     xmax=ymax=-DBL_MAX;
     int dim = samples.size() ? samples[0].size() : 2;
     contours->spinX1->setRange(1, dim);
     contours->spinX2->setRange(1, dim);
-    //if(canvas->xIndex < dim) contours->spinX1->setValue(xIndex+1);
-    //if(canvas->yIndex < dim) contours->spinX2->setValue(yIndex+1);
-    qDebug() << "xIndex:"<< xIndex << ", yIndex:" << yIndex;
     FOR(i, samples.size())
     {
         contourSamples[i] -= kpca->mean;
@@ -372,6 +332,15 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
 
     double xdiff = (xmax - xmin);
     double ydiff = (ymax - ymin);
+
+    double diff = max(xdiff, ydiff);
+    double xmid = (xmax-xmin)/2 + xmin;
+    double ymid = (ymax-ymin)/2 + ymin;
+    xmin = xmid - diff;
+    xmax = xmid + diff;
+    ymin = ymid - diff;
+    ymax = ymid + diff;
+    /*
     if(xdiff <= ydiff)
     {
         xdiff = ydiff;
@@ -388,17 +357,20 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     }
     if(xdiff == 0) xdiff = .5f;
     if(ydiff == 0) ydiff = .5f;
+    */
+
+    /*
     xmin -= xdiff;
     xmax += xdiff;
     ymin -= ydiff;
     ymax += ydiff;
+    */
     if(samples.size() < 3)
     {
-        xmin -= 3*xdiff;
-        xmax += 3*xdiff;
-        ymin -= 3*ydiff;
-        ymax += 3*ydiff;
-        //cout << pcaPointer->eigenVectors;
+        xmin -= diff;
+        xmax += diff;
+        ymin -= diff;
+        ymax += diff;
     }
 
     // we get the eigenvectors
@@ -411,7 +383,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     sort(eigenvalues.begin(), eigenvalues.end(), std::greater<float>());
     eigenvalues.resize(params->dimCountSpin->value());
     FOR(i, eigenvalues.size()) qDebug() << "eigs" << i << eigenvalues[i];
-
 
     float accumulator = 0;
     float maxEigVal = 0;
