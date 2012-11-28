@@ -66,6 +66,8 @@ void DynamicASVM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
     DynamicalASVM *asvm = dynamic_cast<DynamicalASVM*>(dynamical);
     if(!asvm) return;
 
+    /*
+    // we display the gmms
     vector<Gmm*> gmms = asvm->gmms;
     FOR(c, gmms.size())
     {
@@ -102,7 +104,36 @@ void DynamicASVM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
             painter.drawEllipse(point, 2, 2);
         }
     }
+    */
 
+    // we display the support vectors
+    painter.setPen(QPen(Qt::black, 1.5));
+    FOR(i, asvm->asvms.size())
+    {
+        FOR(j, asvm->asvms[i].numAlpha)
+        {
+            double *sv = asvm->asvms[i].svalpha[j];
+            fvec sample(asvm->asvms[i].dim);
+            FOR(d,asvm->asvms[i].dim) sample[d] = sv[d];
+            QPointF point = canvas->toCanvasCoords(sample);
+            painter.drawLine(point-QPointF(-5,-5),point-QPointF(5,-5));
+            painter.drawLine(point-QPointF(5,-5),point-QPointF(5,5));
+            painter.drawLine(point-QPointF(5,5),point-QPointF(-5,5));
+            painter.drawLine(point-QPointF(-5,5),point-QPointF(-5,-5));
+        }
+        FOR(j, asvm->asvms[i].numBeta)
+        {
+            double *sv = asvm->asvms[i].svbeta[j];
+            fvec sample(asvm->asvms[i].dim);
+            FOR(d,asvm->asvms[i].dim) sample[d] = sv[d];
+            QPointF point = canvas->toCanvasCoords(sample);
+            painter.drawLine(point-QPointF(-5,-5),point-QPointF(5,-5));
+            painter.drawLine(point-QPointF(5,-5),point-QPointF(0,5));
+            painter.drawLine(point-QPointF(-5,-5),point-QPointF(0,5));
+        }
+    }
+
+    // we display the contour lines of the svm classifier
     int W = painter.viewport().width();
     int H = painter.viewport().height();
     int w = 129;
@@ -146,8 +177,8 @@ void DynamicASVM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
     {
         QContour contour(valueList[k], w, h);
         contour.bDrawColorbar = false;
-        contour.plotColor = SampleColor[(k+1)%SampleColorCnt];
-//            contour.plotColor = Qt::black;
+        int classColor = asvm->inverseMap.count(k) ? asvm->inverseMap[k] : k;
+        contour.plotColor = classColor ? SampleColor[(classColor)%SampleColorCnt] : Qt::black;
         contour.plotThickness = 4;
         contour.style = Qt::DotLine;
 
