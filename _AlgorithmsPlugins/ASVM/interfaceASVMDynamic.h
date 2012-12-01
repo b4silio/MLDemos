@@ -16,23 +16,23 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACESEDSRDYNAMIC_H_
-#define _INTERFACESEDSRDYNAMIC_H_
+#ifndef _INTERFACEASVMDYNAMIC_H_
+#define _INTERFACEASVMDYNAMIC_H_
 
 #include <vector>
 #include <interfaces.h>
-#include "dynamicalSEDS.h"
-#include "ui_paramsSEDS.h"
+#include "dynamicalASVM.h"
+#include "ui_paramsASVM.h"
 
-class DynamicSEDS : public QObject, public DynamicalInterface
+class DynamicASVM : public QObject, public DynamicalInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(DynamicalInterface)
 private:
 	QWidget *widget;
-	Ui::ParametersSEDS *params;
+    Ui::ParametersASVM *params;
 public:
-    DynamicSEDS();
+    DynamicASVM();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
@@ -41,9 +41,9 @@ public:
     bool LoadModel(QString filename, Dynamical *dynamical);
 
     // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("SEDS");}
+    QString GetName(){return QString("ASVM");}
     QString GetAlgoString(){return GetName();}
-    QString GetInfoFile(){return "seds.html";}
+    QString GetInfoFile(){return "asvm.html";}
     bool UsesDrawTimer(){return true;}
     QWidget *GetParameterWidget(){return widget;}
 	void SetParams(Dynamical *dynamical);
@@ -51,8 +51,6 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
-public slots:
-	void OptionsChanged();
 };
 
-#endif // _INTERFACESEDSRDYNAMIC_H_
+#endif // _INTERFACEASVMDYNAMIC_H_

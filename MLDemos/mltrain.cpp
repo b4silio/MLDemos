@@ -484,8 +484,8 @@ fvec MLDemos::Train(Dynamical *dynamical)
     vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, count, centerType, dT, zeroEnding);
     interpolate(trajectories[0],count);
 
-    dynamical->Train(trajectories, labels);
-    return Test(dynamical, trajectories, labels);
+    dynamical->Train(trajectories, trajLabels);
+    return Test(dynamical, trajectories, trajLabels);
 }
 
 void MLDemos::Train(Clusterer *clusterer, float trainRatio, bvec trainList, float *testFMeasures)

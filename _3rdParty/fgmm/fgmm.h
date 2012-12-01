@@ -122,6 +122,11 @@ void fgmm_alloc(struct gmm ** gmm, int nstates, int dim);
 void fgmm_free(struct gmm ** gmm);
 
 /**
+ * create an identical copy of the provided model
+ */
+void fgmm_copy(struct gmm ** gmm, struct gmm *src);
+
+/**
  * initialize the model from the data by :
  *  for each gaussian :
  *     - pick one random data point from data 

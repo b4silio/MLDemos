@@ -55,7 +55,42 @@ public :
 	int dim;
 	int ninput;
 	int nstates;
-	struct gmm * c_gmm;
+    struct gmm *c_gmm;
+
+    Gmm() : c_gmm(0), c_reg(0), dim(0), ninput(0), nstates(0), likelihood(0){}
+
+    Gmm(const Gmm& o)
+    {
+        dim = o.dim;
+        ninput = o.ninput;
+        nstates = o.nstates;
+        likelihood = o.likelihood;
+        c_reg = NULL;
+        fgmm_alloc(&c_gmm, nstates, dim);
+        fgmm_copy(&c_gmm, o.c_gmm);
+        if(o.c_reg)
+        {
+            initRegression(ninput); // we don't really copy the data but redo the thing ourselves
+        }
+    }
+
+    Gmm& operator=(const Gmm& o)
+    {
+        if(&o == this) return *this;
+        if(c_gmm) fgmm_free(&c_gmm);
+        dim = o.dim;
+        ninput = o.ninput;
+        nstates = o.nstates;
+        likelihood = o.likelihood;
+        c_reg = NULL;
+        fgmm_alloc(&c_gmm, nstates, dim);
+        fgmm_copy(&c_gmm, o.c_gmm);
+        if(o.c_reg)
+        {
+            initRegression(ninput); // we don't really copy the data but redo the thing ourselves
+        }
+        return *this;
+    }
 
 	Gmm(int states, int dim)
 	{
@@ -65,14 +100,13 @@ public :
 		this->dim = dim;
 		this->ninput = 0;
 		this->nstates = states;
-	};
+    }
 
 	~Gmm()
 	{
-		if(c_reg != NULL)
-			fgmm_regression_free(&c_reg);
-		fgmm_free(&c_gmm);
-	};
+        if(c_reg != NULL) fgmm_regression_free(&c_reg);
+        if(c_gmm != NULL )fgmm_free(&c_gmm);
+    }
 
 	/**
    * call this before any kind of learning .. 
