@@ -758,6 +758,66 @@ void MLDemos::ExportOutput()
     file.close();
 }
 
+void MLDemos::LoadClassifier()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    int tab = optionsClassify->algoList->currentIndex();
+    if(tab >= classifiers.size() || !classifiers[tab]) return;
+    Classifier *classifier = classifiers[tab]->GetClassifier();
+    bool ok = classifier->LoadModel(filename.toStdString());
+    if(ok)
+    {
+        DEL(this->classifier);
+        this->classifier = classifier;
+        tabUsedForTraining = tab;
+        classifiers[tab]->Draw(canvas, classifier);
+        if(drawTimer->isRunning()) drawTimer->Stop();
+        drawTimer->Clear();
+        drawTimer->start(QThread::NormalPriority);
+    }
+    else DEL(classifier);
+}
+
+void MLDemos::SaveClassifier()
+{
+    if(!classifier) return;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    if(!filename.endsWith(".model")) filename += ".model";
+    classifier->SaveModel(filename.toStdString());
+}
+
+void MLDemos::LoadRegressor()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    int tab = optionsRegress->algoList->currentIndex();
+    if(tab >= regressors.size() || !regressors[tab]) return;
+    Regressor *regressor = regressors[tab]->GetRegressor();
+    bool ok = regressor->LoadModel(filename.toStdString());
+    if(ok)
+    {
+        DEL(this->regressor);
+        this->regressor = regressor;
+        tabUsedForTraining = tab;
+        regressors[tab]->Draw(canvas, regressor);
+        if(drawTimer->isRunning()) drawTimer->Stop();
+        drawTimer->Clear();
+        drawTimer->start(QThread::NormalPriority);
+    }
+    else DEL(regressor);
+}
+
+void MLDemos::SaveRegressor()
+{
+    if(!regressor) return;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    if(!filename.endsWith(".model")) filename += ".model";
+    regressor->SaveModel(filename.toStdString());
+}
+
 void MLDemos::LoadDynamical()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
@@ -765,7 +825,7 @@ void MLDemos::LoadDynamical()
     int tab = optionsDynamic->algoList->currentIndex();
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     Dynamical *dynamical = dynamicals[tab]->GetDynamical();
-    bool ok = dynamicals[tab]->LoadModel(filename, dynamical);
+    bool ok = dynamical->LoadModel(filename.toStdString());
     if(ok)
     {
         DEL(this->dynamical);
@@ -789,9 +849,8 @@ void MLDemos::SaveDynamical()
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".model")) filename += ".model";
-    dynamicals[tabUsedForTraining]->SaveModel(filename, dynamical);
+    dynamical->SaveModel(filename.toStdString());
 }
-
 
 void MLDemos::MapFromReward()
 {

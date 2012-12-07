@@ -39,6 +39,8 @@ public:
 	fvec Test( const fvec &sample);
 	fVec Test( const fVec &sample);
     const char *GetInfoString();
+    void SaveModel(std::string filename);
+    bool LoadModel(std::string filename);
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
 };

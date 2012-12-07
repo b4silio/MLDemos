@@ -247,6 +247,10 @@ private slots:
 	void ClearData();
     void ShiftDimensions();
 	void SetROCInfo();
+    void LoadClassifier();
+    void SaveClassifier();
+    void LoadRegressor();
+    void SaveRegressor();
     void LoadDynamical();
     void SaveDynamical();
 

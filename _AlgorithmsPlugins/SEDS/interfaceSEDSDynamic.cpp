@@ -114,20 +114,6 @@ void DynamicSEDS::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
     }
 }
 
-void DynamicSEDS::SaveModel(QString filename, Dynamical *dynamical)
-{
-    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
-    if(!seds) return;
-    seds->SaveModel(filename.toStdString());
-}
-
-bool DynamicSEDS::LoadModel(QString filename, Dynamical *dynamical)
-{
-    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
-    if(!seds) return false;
-    return seds->LoadModel(filename.toStdString());
-}
-
 void DynamicSEDS::SaveOptions(QSettings &settings)
 {
 	settings.setValue("sedsCount", params->sedsCount->value());
