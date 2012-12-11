@@ -62,20 +62,6 @@ void ClassifierTrees::Train( std::vector< fvec > samples, ivec labels )
 	u32 sampleCnt = samples.size();
     if(!sampleCnt) return;
 
-    /*
-    if(sampleCnt < 16)
-    {
-        vector<fvec> copy = samples;
-        ivec lcopy = labels;
-        while(sampleCnt < 16)
-        {
-            samples.insert(samples.end(), copy.begin(), copy.end());
-            labels.insert(labels.end(), lcopy.begin(), lcopy.end());
-            sampleCnt = samples.size();
-        }
-    }
-    */
-
     classes.clear();
     classMap.clear();
     inverseMap.clear();
@@ -239,7 +225,7 @@ void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft)
     }
     else
     {
-        treePainter->drawText(x-2, y+16, QString("%1").arg(node->class_idx));
+        treePainter->drawText(x-2, y+16, QString("%1").arg(classId));
     }
     PrintNode(nodeL, x-shift, true);
     PrintNode(nodeR, x+shift, false);
