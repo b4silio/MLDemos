@@ -62,6 +62,8 @@ public:
     virtual float Test(const fvec &sample){ return 0; }
     virtual float Test(const fVec &sample){ if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
     virtual const char *GetInfoString(){return NULL;}
+    virtual void SaveModel(std::string filename){}
+    virtual bool LoadModel(std::string filename){return false;}
     bool SingleClass(){return bSingleClass;}
     bool UsesDrawTimer(){return bUsesDrawTimer;}
     bool IsMultiClass(){return bMultiClass;}

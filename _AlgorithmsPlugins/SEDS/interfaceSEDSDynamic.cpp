@@ -29,7 +29,7 @@ DynamicSEDS::DynamicSEDS()
 {
 	params = new Ui::ParametersSEDS();
 	params->setupUi(widget = new QWidget());
-	connect(params->sedsConstraintCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
+    connect(params->sedsConstraintCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
 }
 
 void DynamicSEDS::OptionsChanged()
@@ -44,7 +44,7 @@ void DynamicSEDS::SetParams(Dynamical *dynamical)
 
 	int clusters = params->sedsCount->value();
 	bool bPrior = params->sedsCheckPrior->isChecked();
-	bool bMu = params->sedsCheckMu->isChecked();
+    bool bMu = params->sedsCheckMu->isChecked();
 	bool bSigma = params->sedsCheckSigma->isChecked();
 	int objectiveType = params->sedsObjectiveCombo->currentIndex();
     int optimizationType = params->sedsOptimizationCombo->currentIndex();
@@ -112,20 +112,6 @@ void DynamicSEDS::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
         painter.setPen(QPen(Qt::white, 2));
         painter.drawEllipse(point, 2, 2);
     }
-}
-
-void DynamicSEDS::SaveModel(QString filename, Dynamical *dynamical)
-{
-    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
-    if(!seds) return;
-    seds->SaveModel(filename.toStdString());
-}
-
-bool DynamicSEDS::LoadModel(QString filename, Dynamical *dynamical)
-{
-    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
-    if(!seds) return false;
-    return seds->LoadModel(filename.toStdString());
 }
 
 void DynamicSEDS::SaveOptions(QSettings &settings)

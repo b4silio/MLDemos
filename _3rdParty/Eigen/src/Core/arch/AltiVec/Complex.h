@@ -25,6 +25,9 @@
 #ifndef EIGEN_COMPLEX_ALTIVEC_H
 #define EIGEN_COMPLEX_ALTIVEC_H
 
+// for ptrdiff_t of GCC 4.6
+#include <cstddef>
+
 namespace internal {
 
 static Packet4ui  p4ui_CONJ_XOR = vec_mergeh((Packet4ui)p4i_ZERO, (Packet4ui)p4f_ZERO_);//{ 0x00000000, 0x80000000, 0x00000000, 0x80000000 };

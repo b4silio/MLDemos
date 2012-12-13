@@ -53,7 +53,7 @@ public:
     virtual fVec Test(const fVec &sample){ return fVec(Test((fvec)sample)); }
     virtual const char *GetInfoString(){return NULL;}
     virtual void SaveModel(std::string filename){}
-    virtual bool LoadModel(std::string filename){return true;}
+    virtual bool LoadModel(std::string filename){return false;}
 };
 
 #endif // _DYNAMICAL_H_

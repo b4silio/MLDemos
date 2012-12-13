@@ -124,13 +124,6 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		painter.drawEllipse(point, 2, 2);
 		painter.setPen(QPen(Qt::white, 2));
 		painter.drawEllipse(point, 2, 2);
-		/*
-		QColor color = CVColor[(i+1)%CVColorCnt];
-		painter.setPen(QPen(Qt::black, 12));
-		painter.drawEllipse(point, 8, 8);
-		painter.setPen(QPen(color,4));
-		painter.drawEllipse(point, 8, 8);
-		*/
 	}
 }
 

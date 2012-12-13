@@ -368,6 +368,8 @@ void MLDemos::initDialogs()
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsClassify->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
+    connect(optionsClassify->loadButton, SIGNAL(clicked()), this, SLOT(LoadClassifier()));
+    connect(optionsClassify->saveButton, SIGNAL(clicked()), this, SLOT(SaveClassifier()));
     connect(optionsClassify->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
     if(!optionsClassify->algoWidget->layout())
     {
@@ -382,6 +384,8 @@ void MLDemos::initDialogs()
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), this, SLOT(ManualSelection()));
     connect(optionsRegress->inputDimButton, SIGNAL(clicked()), this, SLOT(InputDimensions()));
+    connect(optionsRegress->loadButton, SIGNAL(clicked()), this, SLOT(LoadRegressor()));
+    connect(optionsRegress->saveButton, SIGNAL(clicked()), this, SLOT(SaveRegressor()));
     connect(optionsRegress->algoList, SIGNAL(currentIndexChanged(int)), this, SLOT(AlgoChanged()));
     if(!optionsRegress->algoWidget->layout())
     {

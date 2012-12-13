@@ -16,36 +16,53 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _CLASSIFIER_GMM_H_
-#define _CLASSIFIER_GMM_H_
+#ifndef _CLASSIFIER_TREES_H_
+#define _CLASSIFIER_TREES_H_
 
 #include <vector>
-#include <map>
 #include "classifier.h"
-#include <fgmm/fgmm++.hpp>
+#include "basicOpenCV.h"
+#include <QPixmap>
+#include <QPainter>
 
-class ClassifierGMM : public Classifier
+class ClassifierTrees : public Classifier
 {
-public:
-	std::vector<Gmm*> gmms;
-	std::vector<float*> data;
 private:
-	u32 nbClusters;
-	u32 covarianceType;
-	u32 initType;
-public:
-	ClassifierGMM();
-	~ClassifierGMM();
-	void Train(std::vector< fvec > samples, ivec labels);
-	float Test(const fvec &sample);
-	float Test(const fVec &sample);
-	fvec TestMulti(const fvec &sample);
-    const char *GetInfoString();
-    void SaveModel(std::string filename);
-    bool LoadModel(std::string filename);
+    bool bBalanceClasses;
+    int minSampleCount;
+    bool bComputeImportance;
+    int maxDepth;
+    int maxTrees;
+    float accuracyTolerance;
 
-	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
-	void Update();
+    CvRTrees *tree;
+
+    int negativeClass;
+    int maxClass;
+
+public:
+    std::vector<fvec> samples;
+    ivec labels;
+
+    QPixmap treePixmap;
+    QPainter *treePainter;
+    int treeDepth;
+    int treeCount;
+
+public:
+    ClassifierTrees();
+    ~ClassifierTrees();
+	void Train(std::vector< fvec > samples, ivec labels);
+    float Test(const fvec &sample);
+    fvec TestMulti(const fvec &sample);
+    const char *GetInfoString();
+    fvec GetImportance();
+    void PrintTree(CvForestTree *tree, int count);
+    void PrintNode(const CvDTreeNode *node, int rootX=0, bool bLeft=true);
+    int GetTreeDepth(const CvDTreeNode *node);
+    void SetParams(bool bBalanceClasses,
+                   int minSampleCount, int maxDepth, int maxTrees,
+                   float accuracyTolerance);
 };
 
-#endif // _CLASSIFIER_GMM_H_
+#endif // _CLASSIFIER_BOOST_H_

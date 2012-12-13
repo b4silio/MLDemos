@@ -28,7 +28,7 @@ class PluginGMM : public QObject, public CollectionInterface
 	Q_INTERFACES(CollectionInterface)
 public:
 	PluginGMM();
-	QString GetName(){return "GMM collection";};
+    QString GetName(){return "GMM collection";}
 };
 
 #endif // _PLUGINGMM_H_

@@ -19,6 +19,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "dynamicalGMR.h"
+#include <iostream>
+#include <fstream>
+#include <QDebug>
 
 using namespace std;
 
@@ -139,4 +142,103 @@ const char *DynamicalGMR::GetInfoString()
 		break;
 	}
 	return text;
+}
+
+
+void DynamicalGMR::SaveModel(std::string filename)
+{
+    std::cout << "saving GMM model";
+    if(!gmm)
+    {
+        std::cout << "Error: Nothing to save!" << std::endl;
+        return; // nothing to save!
+    }
+
+    // Save the dataset to a file
+    std::ofstream file(filename.c_str());
+
+    if(!file){
+        std::cout << "Error: Could not open the file!" << std::endl;
+        return;
+    }
+
+    int dim = gmm->dim;
+    file << gmm->dim << endl; //dimension
+    file << gmm->nstates << endl; //number of Gaussian
+    file << gmm->ninput << endl; //number of regression inputs (usually dim-1)
+
+    file.precision(10); //setting the precision of writing
+
+
+    FOR(i, gmm->nstates)
+    {
+        float prior = fgmm_get_prior(gmm->c_gmm, i);
+        file << prior << " ";
+    }
+    file << endl;
+    FOR(i, gmm->nstates)
+    {
+        float *mu = fgmm_get_mean(gmm->c_gmm, i);
+        FOR(d, dim)
+        {
+            file << mu[d] << " ";
+        }
+        file << endl;
+    }
+    float *sigma = new float[dim*dim];
+    FOR(i, gmm->nstates)
+    {
+        fgmm_get_covar(gmm->c_gmm, i, sigma);
+        FOR(d, dim*dim)
+        {
+            file << sigma[d] << " ";
+        }
+        file << endl;
+    }
+    KILL(sigma);
+
+    file.close();
+}
+
+bool DynamicalGMR::LoadModel(std::string filename)
+{
+    std::cout << "loading GMM model: " << filename;
+
+    std::ifstream file(filename.c_str());
+
+    if(!file.is_open()){
+        std::cout << "Error: Could not open the file!" << std::endl;
+        return false;
+    }
+
+    int dim, nstates, ninput;
+    file >> dim >> nstates >> ninput;
+    nbClusters = nstates;
+    if(gmm) DEL(gmm);
+    gmm = new Gmm(nstates, dim);
+    FOR(i, nstates)
+    {
+        float prior;
+        file >> prior;
+        gmm->setPrior(i, prior);
+    }
+
+    float *mu = new float[dim];
+    FOR(i, nstates)
+    {
+        FOR(d, dim) file >> mu[d];
+        gmm->setMean(i, mu);
+    }
+    KILL(mu);
+
+    float *sigma = new float[dim*dim];
+    FOR(i, nstates)
+    {
+        FOR(d, dim*dim) file >> sigma[d];
+        gmm->setCovariance(i, sigma, false);
+    }
+    KILL(sigma);
+    gmm->initRegression(ninput);
+    file.close();
+    return true;
 }

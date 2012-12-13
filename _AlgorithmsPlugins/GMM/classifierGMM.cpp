@@ -21,6 +21,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "classifierGMM.h"
 #include <map>
 #include <QDebug>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -172,4 +174,143 @@ const char *ClassifierGMM::GetInfoString()
 void ClassifierGMM::Update()
 {
 
+}
+
+void ClassifierGMM::SaveModel(std::string filename)
+{
+    std::cout << "saving GMM model";
+    if(!gmms.size())
+    {
+        std::cout << "Error: Nothing to save!" << std::endl;
+        return; // nothing to save!
+    }
+
+    // Save the dataset to a file
+    std::ofstream file(filename.c_str());
+
+    if(!file){
+        std::cout << "Error: Could not open the file!" << std::endl;
+        return;
+    }
+
+    int dim = gmms[0]->dim;
+    int classCount = gmms.size();
+    file << dim << " " << classCount << endl;
+
+    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
+    {
+        file << it->first << " " << it->second << " ";
+    }
+    file << endl;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++)
+    {
+        file << it->first << " " << it->second << " ";
+    }
+    file << endl;
+
+    file.precision(10); //setting the precision of writing
+    FOR(g, gmms.size())
+    {
+        Gmm* gmm = gmms[g];
+        file << gmm->dim << endl;
+        file << gmm->nstates << endl;
+        FOR(i, gmm->nstates)
+        {
+            float prior = gmm->getPrior(i);
+            file << prior << " ";
+        }
+        file << endl;
+        float *mu = new float[dim];
+        FOR(i, gmm->nstates)
+        {
+            gmm->getMean(i, mu);
+            FOR(d, dim)
+            {
+                file << mu[d] << " ";
+            }
+            file << endl;
+        }
+        KILL(mu);
+        float *sigma = new float[dim*dim];
+        FOR(i, gmm->nstates)
+        {
+            gmm->getCovariance(i, sigma, false);
+            FOR(d, dim*dim)
+            {
+                file << sigma[d] << " ";
+            }
+            file << endl;
+        }
+        KILL(sigma);
+    }
+
+    file.close();
+}
+
+bool ClassifierGMM::LoadModel(std::string filename)
+{
+    std::cout << "loading GMM model: " << filename;
+
+    std::ifstream file(filename.c_str());
+
+    if(!file.is_open()){
+        std::cout << "Error: Could not open the file!" << std::endl;
+        return false;
+    }
+
+    FOR(i, gmms.size()) DEL(gmms[i]);
+    gmms.clear();
+
+    int dim, classCount;
+    file >> dim >> classCount;
+    inverseMap.clear();
+    classMap.clear();
+
+    FOR(i, classCount)
+    {
+        int first, second;
+        file >> first >> second;
+        inverseMap[first] = second;
+    }
+
+    FOR(i, classCount)
+    {
+        int first, second;
+        file >> first >> second;
+        classMap[first] = second;
+    }
+
+    FOR(g, classCount)
+    {
+        int dim, nstates;
+        file >> dim >> nstates;
+        Gmm *gmm = new Gmm(nstates, dim);
+        if(!g) nbClusters = gmm->nstates;
+        FOR(i, nstates)
+        {
+            float prior;
+            file >> prior;
+            gmm->setPrior(i, prior);
+        }
+
+        float *mu = new float[dim];
+        FOR(i, nstates)
+        {
+            FOR(d, dim) file >> mu[d];
+            gmm->setMean(i, mu);
+        }
+        KILL(mu);
+
+        float *sigma = new float[dim*dim];
+        FOR(i, nstates)
+        {
+            FOR(d, dim*dim) file >> sigma[d];
+            gmm->setCovariance(i, sigma, false);
+        }
+        KILL(sigma);
+        gmms.push_back(gmm);
+    }
+
+    file.close();
+    return true;
 }

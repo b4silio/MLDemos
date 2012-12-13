@@ -16,41 +16,45 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#ifndef _INTERFACESEDSRDYNAMIC_H_
-#define _INTERFACESEDSRDYNAMIC_H_
+#ifndef _INTERFACETREESCLASSIFIER_H_
+#define _INTERFACETREESCLASSIFIER_H_
 
 #include <vector>
 #include <interfaces.h>
-#include "dynamicalSEDS.h"
-#include "ui_paramsSEDS.h"
+#include "classifierTrees.h"
+#include "ui_paramsTrees.h"
 
-class DynamicSEDS : public QObject, public DynamicalInterface
+class ClassTrees : public QObject, public ClassifierInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(DynamicalInterface)
+	Q_INTERFACES(ClassifierInterface)
 private:
 	QWidget *widget;
-	Ui::ParametersSEDS *params;
+    Ui::ParametersTrees *params;
+    QLabel *displayLabel;
+    QPixmap treePixmap;
 public:
-    DynamicSEDS();
+    ClassTrees();
+    ~ClassTrees();
 	// virtual functions to manage the algorithm creation
-	Dynamical *GetDynamical();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
-    void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}
+	Classifier *GetClassifier();
+    void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
+	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
-    // virtual functions to manage the GUI and I/O
-    QString GetName(){return QString("SEDS");}
-    QString GetAlgoString(){return GetName();}
-    QString GetInfoFile(){return "seds.html";}
+	// virtual functions to manage the GUI and I/O
+    QString GetName(){return QString("Random Forests");}
+	QString GetAlgoString();
+    QString GetInfoFile(){return "trees.html";}
     bool UsesDrawTimer(){return true;}
     QWidget *GetParameterWidget(){return widget;}
-	void SetParams(Dynamical *dynamical);
+	void SetParams(Classifier *classifier);
 	void SaveOptions(QSettings &settings);
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+
 public slots:
-	void OptionsChanged();
+    void DisplayTrees();
 };
 
-#endif // _INTERFACESEDSRDYNAMIC_H_
+#endif // _INTERFACETREESCLASSIFIER_H_
