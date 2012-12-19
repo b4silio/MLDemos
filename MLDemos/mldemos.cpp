@@ -31,6 +31,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "drawSVG.h"
 #include <iostream>
 #include <sstream>
+#include <matio/matio.h>
 #include "optimization_test_functions.h"
 
 MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
@@ -2053,6 +2054,7 @@ void MLDemos::Drawing( fvec sample, int label)
     if(!drawType) return;
 
     int speed = 6;
+    bool bEmpty = canvas->data->GetCount() == 0;
 
     if(label) label = drawToolbar->classSpin->value();
 
@@ -2252,6 +2254,11 @@ void MLDemos::Drawing( fvec sample, int label)
     canvas->repaint();
     drawTime.restart();
     ResetPositiveClass();
+    if(bEmpty)
+    {
+        optionsCompare->outputDimCombo->setCurrentIndex(canvas->data->GetDimCount()-1);
+        optionsRegress->outputDimCombo->setCurrentIndex(canvas->data->GetDimCount()-1);
+    }
     ManualSelectionUpdated();
     UpdateInfo();
 }
@@ -2408,13 +2415,21 @@ void MLDemos::CanvasTypeChanged()
         ui.canvasX2Label->setText(bProjected ? "e2" : "x2");
         break;
     case 1: // 3D viewport
+    {
         ui.canvasAxesWidget->show();
         ui.canvasX3Spin->setEnabled(true);
         ui.canvasX1Label->setText(bProjected ? "e1" : "x1");
         ui.canvasX2Label->setText(bProjected ? "e2" : "x2");
         ui.canvasX3Label->setText(bProjected ? "e3" : "x3");
         if(canvas->data->GetDimCount() > 2 && ui.canvasX3Spin->value() < 3) ui.canvasX3Spin->setValue(3);
+        if(regressor && canvas->data->GetDimCount() > 2 &&
+                ui.canvasX2Spin->value() == optionsRegress->outputDimCombo->currentIndex()+1)
+        {
+            ui.canvasX2Spin->setValue(ui.canvasX1Spin->value()+1);
+            ui.canvasX3Spin->setValue(optionsRegress->outputDimCombo->currentIndex()+1);
+        }
         if(canvas->data->GetDimCount() <= 2) ui.canvasX3Spin->setValue(0);
+    }
         break;
     case 2: // scatterplot
         ui.canvasZoomSlider->show();

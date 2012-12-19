@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <vector>
+
 //#include <GL/gl.h>
 
 #define rat_octahedron_solid_base	1
@@ -35,5 +37,8 @@ extern void draw_recursive_tri(float *a,float *b,float *c,unsigned int div,float
 extern void DrawTessellatedSphere(float radius=1.f, unsigned int detail=3,int solid_base=1);
 extern void DrawStandardSphere(double r=1.f, int lats=32, int longs=32);
 extern void DrawSphereIsolines(double r=1.f, int segments=64);
+extern GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior=1.f, bool wireframe=true,
+                                        float colorRed=0.5f, float colorGreen=0.5f, float colorBlue=0.5f);
+
 
 #endif // GLUTILS_H

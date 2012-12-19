@@ -81,24 +81,24 @@ void DrawTessellatedSphere(float radius, unsigned int detail,int solid_base)
         glBegin(GL_TRIANGLES);
         for (i=0; i<8; i++)
             draw_recursive_tri
-            (
-                octa_verts[octa_indices[i][0]],
-                octa_verts[octa_indices[i][1]],
-                octa_verts[octa_indices[i][2]],
-                detail,radius
-            );
+                    (
+                        octa_verts[octa_indices[i][0]],
+                        octa_verts[octa_indices[i][1]],
+                        octa_verts[octa_indices[i][2]],
+                        detail,radius
+                        );
         glEnd();
         break;
     case rat_icosahedron_solid_base:
         glBegin(GL_TRIANGLES);
         for (i=0; i<20; i++)
             draw_recursive_tri
-            (
-                icosa_verts[icosa_indices[i][0]],
-                icosa_verts[icosa_indices[i][1]],
-                icosa_verts[icosa_indices[i][2]],
-                detail,radius
-            );
+                    (
+                        icosa_verts[icosa_indices[i][0]],
+                        icosa_verts[icosa_indices[i][1]],
+                        icosa_verts[icosa_indices[i][2]],
+                        detail,radius
+                        );
         glEnd();
         break;
     default:
@@ -158,3 +158,72 @@ void DrawSphereIsolines(double r, int segments)
     }
     glEnd();
 }
+
+GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior,
+                    bool wireframe, float colorRed, float colorGreen, float colorBlue)
+{
+    // we copy the eigenvectors to a 4x4 rotation matrix
+    float rotation[4*4];
+    rotation[0]  = eigVec[0]; rotation[0 + 1] = eigVec[1]; rotation[0 + 2] = eigVec[2]; rotation[0 + 3] = 0;
+    rotation[4]  = eigVec[3]; rotation[4 + 1] = eigVec[4]; rotation[4 + 2] = eigVec[5]; rotation[4 + 3] = 0;
+    rotation[8]  = eigVec[6]; rotation[8 + 1] = eigVec[7]; rotation[8 + 2] = eigVec[8]; rotation[8 + 3] = 0;
+    rotation[12] = 0;  rotation[12 + 1] = 0 ; rotation[12 + 2] = 0 ; rotation[12 + 3] = 1;
+
+    GLuint list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    glDisable( GL_TEXTURE_2D );
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+    if(!wireframe)
+    {
+        glEnable(GL_LIGHTING);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_ALPHA_TEST);
+        glShadeModel(GL_SMOOTH);
+
+        int steps = 30;
+        float speed = 3.f;
+        for(int d=0; d<steps; d++)
+        {
+            float mcolor[] = { colorRed, colorGreen, colorBlue, (std::min(prior+0.3f, 1.f))*(1.f - d/(float)steps)*expf(-(d/(float)steps)*speed)};
+            glPushMatrix();
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mcolor);
+            glTranslatef(mean[0], mean[1], mean[2]);
+            glMultMatrixf(rotation);
+            glScalef(eigVal[0], eigVal[1], eigVal[2]);
+            //DrawSphere(0.01 + d * 2.8f / steps);
+            DrawStandardSphere(0.01 + d * 2.8f / steps);
+            glPopMatrix();
+        }
+    }
+    else
+    {
+        glDisable(GL_LIGHTING);
+        //glDisable(GL_DEPTH_TEST);
+        glEnable( GL_LINE_SMOOTH );
+        glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+
+        glPushMatrix();
+        glTranslatef(mean[0], mean[1], mean[2]);
+        glMultMatrixf(rotation);
+        glScalef(eigVal[0], eigVal[1], eigVal[2]);
+        glColor3d(0,0,0);
+        glLineWidth(2.f);
+        glDisable(GL_LINE_STIPPLE); // dashed/ dotted lines
+        DrawSphereIsolines(1);
+        glLineWidth(0.5f);
+        glEnable(GL_LINE_STIPPLE); // dashed/ dotted lines
+        glLineStipple (1, 0xAAAA); // dash pattern AAAA: dots
+        DrawSphereIsolines(2);
+        glPopMatrix();
+    }
+    glPopAttrib();
+    glEndList();
+    return list;
+}
+

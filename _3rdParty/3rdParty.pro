@@ -660,6 +660,27 @@ SOURCES += \
     gsl/sort/gsl_sort_sort.c \
     gsl/blas/gsl_blas_blas.c
 
+HEADERS += \
+    matio/mat5.h \
+    matio/matio.h \
+    matio/mat4.h \
+    matio/mat73.h \
+    matio/matioConfig.h \
+    matio/matio_pubconf.h \
+    matio/matio_private.h
+
+SOURCES += \
+    matio/inflate.c \
+    matio/mat4.c \
+    matio/read_data.c \
+    matio/io.c \
+    matio/mat73.c \
+    matio/matvar_cell.c \
+    matio/snprintf.c \
+    matio/endian.c \
+    matio/mat.c \
+    matio/mat5.c \
+    matio/matvar_struct.c
 
 #unix{
 #	BOOST = /usr/local/boost_1_47_0

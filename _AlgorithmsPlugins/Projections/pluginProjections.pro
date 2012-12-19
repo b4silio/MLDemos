@@ -57,9 +57,17 @@ SOURCES += 	\
     projectorSammon.cpp \
     projectorLDA.cpp
 
+#INCLUDEPATH += /opt/local/include
+#LIBS += -llapack -lblas
+HEADERS +=  isomap/fibheap.h \
+            isomap/isomap.h
+SOURCES +=  isomap/dijkstra.cpp \
+            isomap/isomap.cpp
+
 ###########################
 # Dependencies            #
 ###########################
+
 HEADERS +=  JnS/Matutil.h \
             JnS/JnS.h
 
