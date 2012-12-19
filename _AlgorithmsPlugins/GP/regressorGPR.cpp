@@ -25,7 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 void RegressorGPR::Train( std::vector<fvec> input, ivec labels)
 {
     if(!input.size()) return;
-    int dim = input[0].size()-1;
+    dim = input[0].size()-1;
     Matrix inputs(dim, input.size());
     RowVector outputs(input.size());
     int oDim = outputDim != -1 ? min(outputDim, dim) : dim;

@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     QGLFormat::setDefaultFormat(glf);
     */
 	QString filename = "";
-	if(argc > 1) filename = QString(argv[1]);
+    if(argc > 1) filename = QString(argv[1]);
     MLDemos w(filename);
      w.show();
     return a.exec();

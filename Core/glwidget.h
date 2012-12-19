@@ -52,13 +52,13 @@ private:
     int xRot, yRot, zRot;
     float xPos, yPos, zPos;
 
-    Canvas *canvas;
     float zoomFactor;
     int width, height;
 
     QPoint lastPos;
 
 public:
+    Canvas *canvas;
     std::vector<GLuint> drawSampleLists;
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;

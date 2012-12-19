@@ -290,6 +290,27 @@ int CContourMap::generate_levels(double min, double max, int num)
     return num;
 }
 
+int CContourMap::generate_levels_zero(double min, double max, int num)
+{
+    double step=(max-min)/(num-1);
+    if(levels) delete levels;
+    levels=new double[num];
+    n_levels=num;
+    if(num == 1)
+    {
+        levels[0] = (min < 0. && max > 0.) ? 0.f : (max + min)/2;
+    }
+    else
+    {
+        for(int i=0;i<num;i++)
+        {
+            levels[i]=min+step*i;
+            if(i && levels[i] > 0. && levels[i-1] <0.) levels[i] = 0.;
+        }
+    }
+    return num;
+}
+
 CContourMap::CContourMap()
 {
     levels=NULL;

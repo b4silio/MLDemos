@@ -24,6 +24,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dynamical.h"
 #include "clusterer.h"
 #include "maximize.h"
+#include "drawUtils.h"
 #include "roc.h"
 #include <algorithm>
 #include <QDebug>
@@ -35,6 +36,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <qcontour.h>
+#include <glUtils.h>
 
 using namespace std;
 
@@ -74,7 +76,12 @@ void MLDemos::Classify()
     {
         classifiers[tab]->Draw(canvas, classifier);
         glw->clearLists();
-        classifiers[tab]->DrawGL(canvas, glw, classifier);
+        if(canvas->canvasType == 1)
+        {
+            classifiers[tab]->DrawGL(canvas, glw, classifier);
+            if(canvas->data->GetDimCount() == 3) Draw3DClassifier(glw, classifier);
+        }
+
         UpdateInfo();
         qDebug() << "using draw timer" << classifier->UsesDrawTimer();
         if(drawTimer && classifier->UsesDrawTimer())
@@ -172,7 +179,7 @@ void MLDemos::Regression()
     {
         if(canvas->canvasType == 1)
         {
-            ui.canvasX3Spin->setValue(outputDim+1);
+            //ui.canvasX3Spin->setValue(outputDim+1);
         }
         else if(canvas->canvasType == 0)
         {
@@ -198,8 +205,12 @@ void MLDemos::Regression()
     Train(regressor, outputDim, trainRatio, trainList);
     regressors[tab]->Draw(canvas, regressor);
     glw->clearLists();
-    regressors[tab]->DrawGL(canvas, glw, regressor);
-
+    if(canvas->canvasType == 1)
+    {
+        regressors[tab]->DrawGL(canvas, glw, regressor);
+        // here we compute the regression plane for 3D datasets
+        if(canvas->data->GetDimCount() == 3) Draw3DRegressor(glw, regressor);
+    }
     // here we draw the errors for each sample
     if(canvas->data->GetDimCount() > 2 && canvas->canvasType == 0)
     {
@@ -270,7 +281,11 @@ void MLDemos::Dynamize()
     Train(dynamical);
     dynamicals[tab]->Draw(canvas,dynamical);
     glw->clearLists();
-    dynamicals[tab]->DrawGL(canvas, glw, dynamical);
+    if(canvas->canvasType == 1)
+    {
+        dynamicals[tab]->DrawGL(canvas, glw, dynamical);
+        if(canvas->data->GetDimCount() == 3) Draw3DDynamical(glw, dynamical);
+    }
 
     int w = canvas->width(), h = canvas->height();
 
@@ -521,7 +536,11 @@ void MLDemos::Cluster()
     drawTimer->Clear();
     clusterers[tab]->Draw(canvas,clusterer);
     glw->clearLists();
-    clusterers[tab]->DrawGL(canvas, glw, clusterer);
+    if(canvas->canvasType == 1)
+    {
+        clusterers[tab]->DrawGL(canvas, glw, clusterer);
+        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
+    }
 
 
     // we compute the stats on the clusters (f-measure, bic etc)
@@ -669,7 +688,11 @@ void MLDemos::ClusterTest()
     canvas->maps.model = QPixmap();
     clusterers[tab]->Draw(canvas, clusterer);
     glw->clearLists();
-    clusterers[tab]->DrawGL(canvas, glw, clusterer);
+    if(canvas->canvasType == 1)
+    {
+        clusterers[tab]->DrawGL(canvas, glw, clusterer);
+        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
+    }
 
 
     UpdateInfo();
@@ -896,7 +919,11 @@ void MLDemos::ClusterOptimize()
 
     clusterers[tab]->Draw(canvas, clusterer);
     glw->clearLists();
-    clusterers[tab]->DrawGL(canvas, glw, clusterer);
+    if(canvas->canvasType == 1)
+    {
+        clusterers[tab]->DrawGL(canvas, glw, clusterer);
+        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
+    }
 
     UpdateInfo();
     QString infoText = showStats->infoText->text();
@@ -935,7 +962,11 @@ void MLDemos::ClusterIterate()
     Train(clusterer);
     clusterers[tab]->Draw(canvas,clusterer);
     glw->clearLists();
-    clusterers[tab]->DrawGL(canvas, glw, clusterer);
+    if(canvas->canvasType == 1)
+    {
+        clusterers[tab]->DrawGL(canvas, glw, clusterer);
+        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
+    }
 
 
     // we fill in the canvas sampleColors
@@ -1099,7 +1130,11 @@ void MLDemos::Reinforce()
     Train(reinforcement);
     reinforcements[tab]->Draw(canvas, reinforcement);
     glw->clearLists();
-    reinforcements[tab]->DrawGL(canvas, glw, reinforcement);
+    if(canvas->canvasType == 1)
+    {
+        reinforcements[tab]->DrawGL(canvas, glw, reinforcement);
+        if(canvas->data->GetDimCount() == 3) Draw3DReinforcement(glw, reinforcement);
+    }
 
     // we draw the contours for the current maximization
     int w = 65;
@@ -1210,7 +1245,11 @@ void MLDemos::Project()
     ResetPositiveClass();
     projectors[tab]->Draw(canvas, projector);
     glw->clearLists();
-    projectors[tab]->DrawGL(canvas, glw, projector);
+    if(canvas->canvasType == 1)
+    {
+        projectors[tab]->DrawGL(canvas, glw, projector);
+        if(canvas->data->GetDimCount() == 3) Draw3DProjector(glw, projector);
+    }
     canvas->repaint();
     UpdateInfo();
 }
@@ -1261,7 +1300,11 @@ void MLDemos::ProjectManifold()
     ResetPositiveClass();
     projectors[tab]->Draw(canvas, projector);
     glw->clearLists();
-    projectors[tab]->DrawGL(canvas, glw, projector);
+    if(canvas->canvasType == 1)
+    {
+        projectors[tab]->DrawGL(canvas, glw, projector);
+        if(canvas->data->GetDimCount() == 3) Draw3DProjector(glw, projector);
+    }
     canvas->repaint();
     UpdateInfo();
 }
@@ -1291,6 +1334,7 @@ void MLDemos::ProjectRevert()
     CanvasOptionsChanged();
     ResetPositiveClass();
     canvas->repaint();
+    glw->clearLists();
     UpdateInfo();
     sourceData.clear();
     sourceLabels.clear();
@@ -1323,7 +1367,11 @@ void MLDemos::UpdateLearnedModel()
         if(glw)
         {
             glw->clearLists();
-            classifiers[tabUsedForTraining]->DrawGL(canvas, glw, classifier);
+            if(canvas->canvasType == 1)
+            {
+                classifiers[tabUsedForTraining]->DrawGL(canvas, glw, classifier);
+                if(canvas->data->GetDimCount() == 3) Draw3DClassifier(glw, classifier);
+            }
         }
         else
         {
@@ -1340,7 +1388,11 @@ void MLDemos::UpdateLearnedModel()
         if(glw)
         {
             glw->clearLists();
-            clusterers[tabUsedForTraining]->DrawGL(canvas, glw, clusterer);
+            if(canvas->canvasType == 1)
+            {
+                clusterers[tabUsedForTraining]->DrawGL(canvas, glw, clusterer);
+                if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
+            }
         }
         else clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
     }
@@ -1350,7 +1402,11 @@ void MLDemos::UpdateLearnedModel()
         if(glw)
         {
             glw->clearLists();
-            regressors[tabUsedForTraining]->DrawGL(canvas, glw, regressor);
+            if(canvas->canvasType == 1)
+            {
+                regressors[tabUsedForTraining]->DrawGL(canvas, glw, regressor);
+                if(canvas->data->GetDimCount() == 3) Draw3DRegressor(glw, regressor);
+            }
         }
         else
         {
@@ -1418,7 +1474,11 @@ void MLDemos::UpdateLearnedModel()
         if(glw)
         {
             glw->clearLists();
-            dynamicals[tabUsedForTraining]->DrawGL(canvas, glw, dynamical);
+            if(canvas->canvasType == 1)
+            {
+                dynamicals[tabUsedForTraining]->DrawGL(canvas, glw, dynamical);
+                if(canvas->data->GetDimCount() == 3) Draw3DDynamical(glw, dynamical);
+            }
         }
         else
         {
@@ -1505,7 +1565,11 @@ void MLDemos::UpdateLearnedModel()
         if(glw)
         {
             glw->clearLists();
-            projectors[tabUsedForTraining]->DrawGL(canvas, glw, projector);
+            if(canvas->canvasType == 1)
+            {
+                projectors[tabUsedForTraining]->DrawGL(canvas, glw, projector);
+                if(canvas->data->GetDimCount() == 3) Draw3DProjector(glw, projector);
+            }
         }
         else projectors[tabUsedForTraining]->Draw(canvas, projector);
     }

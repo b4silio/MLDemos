@@ -71,7 +71,7 @@ win32{
 win32{
     INCLUDEPATH += C:/DEV/glew-1.9.0/include
     LIBS += -LC:/DEV/glew-1.9.0/lib
-    LIBS += -lglew
+    LIBS += -lglew32 -lglu32 -lopengl32
 }
 
 # OPENCV

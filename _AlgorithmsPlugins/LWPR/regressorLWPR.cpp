@@ -31,7 +31,7 @@ RegressorLWPR::RegressorLWPR()
 void RegressorLWPR::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
-	int dim = samples[0].size();
+    dim = samples[0].size();
     DEL(model);
     model = new LWPR_Object(dim-1,1);
 	model->setInitD(initD);

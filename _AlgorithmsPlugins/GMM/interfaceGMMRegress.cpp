@@ -239,12 +239,47 @@ void RegrGMM::DrawGL(Canvas *canvas, GLWidget *glw, Regressor *regressor)
     float eigVal[3], rot[4*4];
     float* bigSigma = new float[dim*dim];
     float* bigMean = new float[dim];
+    int outputDim = ((RegressorGMR*)regressor)->outputDim;
 
     FOR(i, gmr->nstates)
     {
         gmr->getCovariance(i, bigSigma, false);
         gmr->getMean(i, bigMean);
         float prior = gmr->getPrior(i);
+
+        // Very Important! We need to swap the dimensions to get the proper output dim!
+        if(outputDim >= 0 && outputDim < dim-1)
+        {
+            float val = bigMean[dim-1];
+            bigMean[dim-1] = bigMean[outputDim];
+            bigMean[outputDim] = val;
+
+            FOR(y, dim-1)
+            {
+                FOR(x,y)
+                {
+                    if(y == outputDim)
+                    {
+                        float val = bigSigma[(dim-1)*dim + x];
+                        bigSigma[(dim-1)*dim + x] = bigSigma[y*dim + x];
+                        bigSigma[y*dim + x] = val;
+                        bigSigma[x*dim + y] = val;
+                        bigSigma[x*dim + (dim-1)] = bigSigma[(dim-1)*dim + x];
+                    }
+                    else if(x == outputDim)
+                    {
+                        float val = bigSigma[(dim-1)*dim + y];
+                        bigSigma[(dim-1)*dim + y] = bigSigma[y*dim + x];
+                        bigSigma[y*dim + x] = val;
+                        bigSigma[x*dim + y] = val;
+                        bigSigma[y*dim + (dim-1)] = bigSigma[(dim-1)*dim + y];
+                    }
+                }
+            }
+            val = bigSigma[outputDim*dim + outputDim];
+            bigSigma[outputDim*dim + outputDim] = bigSigma[(dim-1)*dim + (dim-1)];
+            bigSigma[(dim-1)*dim + (dim-1)] = val;
+        }
 
         mean[0] = bigMean[xIndex];
         mean[1] = bigMean[yIndex];

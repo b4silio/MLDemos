@@ -27,7 +27,7 @@ using namespace std;
 void RegressorGMR::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
-	int dim = samples[0].size();
+    dim = samples[0].size();
 
     if(outputDim != -1 && outputDim < dim-1)
     {

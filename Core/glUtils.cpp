@@ -4,6 +4,7 @@
 #include <gl.h>
 #endif
 #include "glUtils.h"
+#include <QDebug>
 
 unsigned int octa_indices[8][3]=
 {
@@ -208,7 +209,7 @@ GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior,
     else
     {
         glDisable(GL_LIGHTING);
-        //glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glEnable( GL_LINE_SMOOTH );
         glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 
@@ -231,3 +232,62 @@ GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior,
     return list;
 }
 
+GLuint DrawMeshGrid(float *values, float *mins, float *maxes, int xSteps, int ySteps, int valueDim)
+{
+    GLuint list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    glDisable( GL_TEXTURE_2D );
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glEnable( GL_LINE_SMOOTH );
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+
+    //glLineWidth(1.f);
+    //glDisable(GL_LINE_STIPPLE); // dashed/ dotted lines
+    glLineWidth(0.5f);
+    glEnable(GL_LINE_STIPPLE); // dashed/ dotted lines
+    glLineStipple (2, 0xAAAA); // dash pattern AAAA: dots
+
+
+    int xInd = 0, yInd = 1, zInd = valueDim;
+    if(valueDim == yInd) yInd = 2;
+    else if(valueDim == xInd) xInd = 2;
+
+    glColor3f(0.f,0.f,0.f);
+    float v[3];
+    for(int y=0; y<ySteps; y++)
+    {
+        v[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        glBegin(GL_LINE_STRIP);
+        for(int x=0; x<xSteps; x++)
+        {
+            v[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            v[zInd] = values[x+y*xSteps];
+            glVertex3f(v[0], v[1], v[2]);
+        }
+        glEnd();
+    }
+    for(int x=0; x<xSteps; x++)
+    {
+        v[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+        glBegin(GL_LINE_STRIP);
+        for(int y=0; y<ySteps; y++)
+        {
+            v[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+            v[zInd] = values[x+y*xSteps];
+            glVertex3f(v[0], v[1], v[2]);
+        }
+        glEnd();
+    }
+
+    glPopAttrib();
+    glEndList();
+    return list;
+}

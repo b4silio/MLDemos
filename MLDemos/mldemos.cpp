@@ -2421,12 +2421,17 @@ void MLDemos::CanvasTypeChanged()
         ui.canvasX1Label->setText(bProjected ? "e1" : "x1");
         ui.canvasX2Label->setText(bProjected ? "e2" : "x2");
         ui.canvasX3Label->setText(bProjected ? "e3" : "x3");
-        if(canvas->data->GetDimCount() > 2 && ui.canvasX3Spin->value() < 3) ui.canvasX3Spin->setValue(3);
+        // if we haven't really set the third dimension, we pick the one manually
+        if(canvas->data->GetDimCount() > 2 &&
+                ui.canvasX3Spin->value() == 0 ||
+                ui.canvasX3Spin->value() == ui.canvasX2Spin->value())
+            ui.canvasX3Spin->setValue(ui.canvasX2Spin->value() == canvas->data->GetDimCount() ?
+                                          canvas->data->GetDimCount()-1 : ui.canvasX2Spin->value()+1);
         if(regressor && canvas->data->GetDimCount() > 2 &&
                 ui.canvasX2Spin->value() == optionsRegress->outputDimCombo->currentIndex()+1)
         {
             ui.canvasX2Spin->setValue(ui.canvasX1Spin->value()+1);
-            ui.canvasX3Spin->setValue(optionsRegress->outputDimCombo->currentIndex()+1);
+            ui.canvasX3Spin->setValue(ui.canvasX2Spin->value()+1);
         }
         if(canvas->data->GetDimCount() <= 2) ui.canvasX3Spin->setValue(0);
     }

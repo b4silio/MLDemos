@@ -347,7 +347,7 @@ void GLWidget::paintGL()
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             vector< pair<float, int> > list;
-            float z=0;
+
             // get gl matrices
             GLdouble modelMatrix[16];
             glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
@@ -378,7 +378,11 @@ void GLWidget::paintGL()
             {
                 glCallList(drawSampleLists[list[i].second]);
             }
-            fflush(stdout);
+
+            FOR(i, drawLists.size())
+            {
+                glCallList(drawLists[i]);
+            }
         }
     }
     glPopMatrix();
