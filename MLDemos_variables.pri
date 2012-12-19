@@ -68,6 +68,12 @@ win32{
     CONFIG += link_pkgconfig
 }
 
+win32{
+    INCLUDEPATH += C:/DEV/glew-1.9.0/include
+    LIBS += -LC:/DEV/glew-1.9.0/lib
+    LIBS += -lglew
+}
+
 # OPENCV
 win32:CONFIG(opencv22){
     DEFINES += OPENCV22

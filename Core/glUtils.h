@@ -12,7 +12,9 @@
 #include <math.h>
 #include <vector>
 
-//#include <GL/gl.h>
+#ifdef WIN32
+#include <GL/glew.h>
+#endif
 
 #define rat_octahedron_solid_base	1
 #define rat_icosahedron_solid_base	2

@@ -117,7 +117,7 @@
 #define HAVE_VSNPRINTF /**/
 
 /* Have zlib */
-#define HAVE_ZLIB 1
+#undef HAVE_ZLIB
 
 /* Have va_copy */
 /* #undef HAVE___VA_COPY */

@@ -8,7 +8,6 @@ last-data.txt
 */ValgrindOut.xml
 pluginsDebug/*
 plugins/*
-mldemos
 
 # osx noise
 .DS_Store
@@ -46,3 +45,4 @@ CVS
 
 # temp files
 *~
+_3rdParty/ISODATA/Fil.tar.gz

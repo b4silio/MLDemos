@@ -1,3 +1,6 @@
+#ifdef WIN32
+#include <GL/glew.h>
+#endif
 #include <QtGui>
 #include <QtOpenGL>
 #include <QDebug>

@@ -2,7 +2,7 @@
 #define GLWIDGET_H
 
 #include <canvas.h>
-#include <vector.h>
+#include <vector>
 #include <QGLWidget>
 
 class GLWidget : public QGLWidget
