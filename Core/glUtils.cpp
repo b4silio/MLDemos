@@ -1,4 +1,8 @@
+#ifdef WIN32
+#include <GL/glew.h>
+#else
 #include <gl.h>
+#endif
 #include "glUtils.h"
 
 unsigned int octa_indices[8][3]=

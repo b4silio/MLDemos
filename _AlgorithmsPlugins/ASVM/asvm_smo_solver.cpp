@@ -216,11 +216,12 @@ int ASVM_SMO_Solver::learn(asvmdata& input1, unsigned int tclass, asvm* svmobj)
 	cout<<"Starting SMO..."<<endl;
 	fflush(stdout);
 
-	clock_t begin = clock();
+//	clock_t begin = clock();
 	doSMO();
-	clock_t ending = clock();
+//	clock_t ending = clock();
 	cout<<"Done"<<endl;
-	double elapsed = ((double)(ending - begin))/(double)CLOCKS_PER_SEC;
+    double elapsed = 0;
+    //((double)(ending - begin))/(double)CLOCKS_PER_SEC;
 
 	svmobj->setSVMFromOptimizedSol(x_smo, copy_data);
 	svmobj->printinfo();
