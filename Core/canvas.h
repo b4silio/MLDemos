@@ -162,6 +162,7 @@ public:
 	QPixmap GetScreenshot();
 
 public slots:
+    void Clear();
 	void ResizeEvent();
 	void SetConfidenceMap(QImage image);
 	void SetModelImage(QImage image);
@@ -225,11 +226,11 @@ public:
 
 		QColor color = SampleColor[label%SampleColorCnt];
 		QColor edge = Qt::black;
-        //if(label == 1)
-        //{
-        //	color = Qt::black;
-        //	edge = Qt::white;
-        //}
+        if(label == -1)
+        {
+            color = Qt::black;
+            edge = Qt::white;
+        }
 		//		radius = 10;
         if(painter.brush().color() != color) painter.setBrush(color);
         if(painter.pen().color() != edge) painter.setPen(edge);

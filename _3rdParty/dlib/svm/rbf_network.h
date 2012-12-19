@@ -16,19 +16,19 @@ namespace dlib
 // ------------------------------------------------------------------------------
 
     template <
-        typename K 
+        typename Kern 
         >
     class rbf_network_trainer 
     {
         /*!
-            This is an implemenation of an RBF network trainer that follows
+            This is an implementation of an RBF network trainer that follows
             the directions right off Wikipedia basically.  So nothing 
             particularly fancy.  Although the way the centers are selected
             is somewhat unique.
         !*/
 
     public:
-        typedef K kernel_type;
+        typedef Kern kernel_type;
         typedef typename kernel_type::scalar_type scalar_type;
         typedef typename kernel_type::sample_type sample_type;
         typedef typename kernel_type::mem_manager_type mem_manager_type;
@@ -103,7 +103,7 @@ namespace dlib
             typedef typename decision_function<kernel_type>::sample_vector_type sample_vector_type;
 
             // make sure requires clause is not broken
-            DLIB_ASSERT(x.nr() > 1 && x.nr() == y.nr() && x.nc() == 1 && y.nc() == 1,
+            DLIB_ASSERT(is_learning_problem(x,y),
                 "\tdecision_function rbf_network_trainer::train(x,y)"
                 << "\n\t invalid inputs were given to this function"
                 << "\n\t x.nr(): " << x.nr() 
@@ -117,22 +117,22 @@ namespace dlib
             linearly_independent_subset_finder<kernel_type> lisf(kernel, num_centers);
             fill_lisf(lisf, x);
 
-            const long num_centers = lisf.dictionary_size();
+            const long num_centers = lisf.size();
 
             // fill the K matrix with the output of the kernel for all the center and sample point pairs
-            matrix<scalar_type,0,0,mem_manager_type> Kmat(x.nr(), num_centers+1);
+            matrix<scalar_type,0,0,mem_manager_type> K(x.nr(), num_centers+1);
             for (long r = 0; r < x.nr(); ++r)
             {
                 for (long c = 0; c < num_centers; ++c)
                 {
-                    Kmat(r,c) = kernel(x(r), lisf[c]);
+                    K(r,c) = kernel(x(r), lisf[c]);
                 }
                 // This last column of the K matrix takes care of the bias term
-                Kmat(r,num_centers) = 1;
+                K(r,num_centers) = 1;
             }
 
             // compute the best weights by using the pseudo-inverse
-            scalar_vector_type weights(pinv(Kmat)*y);
+            scalar_vector_type weights(pinv(K)*y);
 
             // now put everything into a decision_function object and return it
             return decision_function<kernel_type> (remove_row(weights,num_centers),

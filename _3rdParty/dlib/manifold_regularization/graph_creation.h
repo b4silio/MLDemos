@@ -82,7 +82,7 @@ namespace dlib
         std::vector<sample_pair, alloc> edges;
         edges.reserve(num);
 
-        dlib::rand::kernel_1a rnd;
+        dlib::rand rnd;
         rnd.set_seed(cast_to_string(random_seed));
 
         // randomly sample a bunch of edges
@@ -211,7 +211,7 @@ namespace dlib
         std::vector<sample_pair, alloc> temp;
         temp.reserve(num);
 
-        dlib::rand::kernel_1a rnd;
+        dlib::rand rnd;
         rnd.set_seed(cast_to_string(random_seed));
 
         // randomly sample a bunch of edges
@@ -415,7 +415,8 @@ namespace dlib
     template <
         typename vector_type 
         >
-    unsigned long max_index_value_plus_one (
+    typename enable_if<is_same_type<sample_pair, typename vector_type::value_type>,unsigned long>::type
+    max_index_plus_one (
         const vector_type& pairs
     )
     {

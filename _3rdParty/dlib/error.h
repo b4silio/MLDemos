@@ -20,8 +20,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     enum error_type
-    {
-        EOTHER,        
+    {       
         EPORT_IN_USE,  
         ETIMEOUT,     
         ECONNECTION, 
@@ -53,7 +52,8 @@ namespace dlib
         EIMAGE_SAVE,
         ECAST_TO_STRING,
         ESTRING_CAST,
-        EUTF8_TO_UTF32
+        EUTF8_TO_UTF32,
+        EOPTION_PARSE
     };
 
 // ----------------------------------------------------------------------------------------
@@ -134,8 +134,7 @@ namespace dlib
                 - returns a string that names the contents of the type member.
         !*/
         {
-            if (type == EOTHER) return "EOTHER";
-            else if ( type == EPORT_IN_USE) return "EPORT_IN_USE";
+            if ( type == EPORT_IN_USE) return "EPORT_IN_USE";
             else if ( type == ETIMEOUT) return "ETIMEOUT";
             else if ( type == ECONNECTION) return "ECONNECTION"; 
             else if ( type == ELISTENER) return "ELISTENER"; 
@@ -167,6 +166,7 @@ namespace dlib
             else if ( type == ECAST_TO_STRING) return "ECAST_TO_STRING";
             else if ( type == ESTRING_CAST) return "ESTRING_CAST";
             else if ( type == EUTF8_TO_UTF32) return "EUTF8_TO_UTF32";
+            else if ( type == EOPTION_PARSE) return "EOPTION_PARSE";
             else return "undefined error type";
         }
 
@@ -248,8 +248,8 @@ namespace dlib
         )
         {
             std::cerr << "\n**************************** FATAL ERROR DETECTED ****************************";
-            std::cerr << message() << "\n";
-            std::cerr << "******************************************************************************\n" << "\n";
+            std::cerr << message() << std::endl;
+            std::cerr << "******************************************************************************\n" << std::endl;
         }
 
         void check_for_previous_fatal_errors()
@@ -257,13 +257,13 @@ namespace dlib
             static bool is_first_fatal_error = true;
             if (is_first_fatal_error == false)
             {
-                std::cerr << "\n\n ************************** FATAL ERROR DETECTED ************************** " << "\n";
-                std::cerr << " ************************** FATAL ERROR DETECTED ************************** " << "\n";
-                std::cerr << " ************************** FATAL ERROR DETECTED ************************** \n" << "\n";
+                std::cerr << "\n\n ************************** FATAL ERROR DETECTED ************************** " << std::endl;
+                std::cerr << " ************************** FATAL ERROR DETECTED ************************** " << std::endl;
+                std::cerr << " ************************** FATAL ERROR DETECTED ************************** \n" << std::endl;
                 std::cerr << "Two fatal errors have been detected, the first was inappropriately ignored. \n"
                           << "To prevent further fatal errors from being ignored this application will be \n"
                           << "terminated immediately and you should go fix this buggy program.\n\n"
-                          << "The error message from this fatal error was:\n" << this->what() << "\n\n" << "\n";
+                          << "The error message from this fatal error was:\n" << this->what() << "\n\n" << std::endl;
                 using namespace std;
                 assert(false);
                 abort();

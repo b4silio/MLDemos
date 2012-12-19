@@ -87,7 +87,7 @@ namespace
     }
 
     template <typename type>
-    type rnd_num (dlib::rand::float_1a& rnd)
+    type rnd_num (dlib::rand& rnd)
     {
         return static_cast<type>(10*rnd.get_random_double());
     }
@@ -99,11 +99,11 @@ namespace
         // It does this by performing an assignment that is subject to BLAS bindings and comparing the
         // results directly to an unevaluated matrix_exp that should be equal.
 
-        dlib::rand::float_1a rnd;
+        dlib::rand rnd;
 
         matrix<type> a(rows,cols), temp, temp2, temp3;
 
-        for (int i = 0; i < 6; ++i)
+        for (int k = 0; k < 6; ++k)
         {
             for (long r= 0; r < a.nr(); ++r)
             {
@@ -597,7 +597,7 @@ namespace
             c_check_equal( tmp(c_temp + trans(conj(c_cv4))*trans(c_rv4)), c_temp + trans(conj(c_cv4))*trans(c_rv4));
 
             DLIB_TEST(abs((static_cast<complex<type> >(c_rv4*c_cv4) + i) - ((c_rv4*c_cv4)(0) + i)) < std::sqrt(std::numeric_limits<type>::epsilon())*eps_mul );
-            DLIB_TEST(abs((rv4*cv4 + 1.0) - ((rv4*cv4)(0) + 1.0)) < std::sqrt(std::numeric_limits<type>::epsilon())*eps_mul);
+            DLIB_TEST(max(abs((rv4*cv4 + 1.0) - ((rv4*cv4)(0) + 1.0))) < std::sqrt(std::numeric_limits<type>::epsilon())*eps_mul);
 
         }
 
@@ -963,6 +963,18 @@ namespace
             DLIB_TEST(sum_cols(a) == b);
             DLIB_TEST(sum_rows(a) == c);
 
+        }
+
+        {
+            matrix<int> m(3,3);
+
+            m = 1, 2, 3,
+                4, 5, 6,
+                7, 8, 9;
+
+            DLIB_TEST(make_symmetric(m) == trans(make_symmetric(m)));
+            DLIB_TEST(lowerm(make_symmetric(m)) == lowerm(m));
+            DLIB_TEST(upperm(make_symmetric(m)) == trans(lowerm(m)));
         }
 
         {

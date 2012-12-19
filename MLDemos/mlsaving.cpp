@@ -87,8 +87,9 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("spinRadius", drawToolbarContext4->spinRadius->value());
 	settings.setValue("spinAlpha", drawToolbarContext4->spinAlpha->value());
 	settings.setValue("eraseCheck", drawToolbar->eraseButton->isChecked());
-	settings.setValue("sprayCheck", drawToolbar->sprayButton->isChecked());
-	settings.setValue("singleCheck", drawToolbar->singleButton->isChecked());
+    settings.setValue("sprayCheck", drawToolbar->sprayButton->isChecked());
+    settings.setValue("spray3DCheck", drawToolbar->spray3DButton->isChecked());
+    settings.setValue("singleCheck", drawToolbar->singleButton->isChecked());
 	settings.setValue("ellipseCheck", drawToolbar->ellipseButton->isChecked());
 	settings.setValue("lineCheck", drawToolbar->lineButton->isChecked());
 	settings.setValue("trajectoryCheck", drawToolbar->trajectoryButton->isChecked());
@@ -292,8 +293,9 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("spinRadius")) drawToolbarContext4->spinRadius->setValue(settings.value("spinRadius").toFloat());
 	if(settings.contains("spinAlpha")) drawToolbarContext4->spinAlpha->setValue(settings.value("spinAlpha").toFloat());
 	if(settings.contains("eraseCheck")) drawToolbar->eraseButton->setChecked(settings.value("eraseCheck").toBool());
-	if(settings.contains("sprayCheck")) drawToolbar->sprayButton->setChecked(settings.value("sprayCheck").toBool());
-	if(settings.contains("singleCheck")) drawToolbar->singleButton->setChecked(settings.value("singleCheck").toBool());
+    if(settings.contains("sprayCheck")) drawToolbar->sprayButton->setChecked(settings.value("sprayCheck").toBool());
+    if(settings.contains("spray3DCheck")) drawToolbar->spray3DButton->setChecked(settings.value("spray3DCheck").toBool());
+    if(settings.contains("singleCheck")) drawToolbar->singleButton->setChecked(settings.value("singleCheck").toBool());
 	if(settings.contains("ellipseCheck")) drawToolbar->ellipseButton->setChecked(settings.value("ellipseCheck").toBool());
 	if(settings.contains("lineCheck")) drawToolbar->lineButton->setChecked(settings.value("lineCheck").toBool());
 	if(settings.contains("trajectoryCheck")) drawToolbar->trajectoryButton->setChecked(settings.value("trajectoryCheck").toBool());

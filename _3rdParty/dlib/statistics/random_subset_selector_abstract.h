@@ -5,14 +5,14 @@
 
 #include <vector>
 #include "../rand/rand_kernel_abstract.h"
-#include "../memory_manager.h"
+#include "../algs.h"
 #include "../string.h"
 
 namespace dlib
 {
     template <
         typename T,
-        typename Rand_type = dlib::rand::kernel_1a
+        typename Rand_type = dlib::rand
         >
     class random_subset_selector
     {
@@ -71,7 +71,8 @@ namespace dlib
         !*/
     public:
         typedef T type;
-        typedef memory_manager<char>::kernel_1a mem_manager_type;
+        typedef T value_type;
+        typedef default_memory_manager mem_manager_type;
         typedef Rand_type rand_type;
 
         typedef typename std::vector<T>::iterator iterator;

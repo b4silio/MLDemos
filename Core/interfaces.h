@@ -30,6 +30,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "projector.h"
 #include "canvas.h"
 #include "drawTimer.h"
+#include "glwidget.h"
 #include <QtPlugin>
 #include <QWidget>
 #include <QSettings>
@@ -45,6 +46,7 @@ public:
 	virtual Classifier *GetClassifier() = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier) = 0;
     virtual ~ClassifierInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -97,6 +99,7 @@ public:
 	virtual Clusterer *GetClusterer() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer) = 0;
     virtual ~ClustererInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -148,7 +151,8 @@ public:
 	virtual Regressor *GetRegressor() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
-	virtual void DrawConfidence(Canvas *canvas, Regressor *regressor) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Regressor *regressor) = 0;
+    virtual void DrawConfidence(Canvas *canvas, Regressor *regressor) = 0;
     virtual ~RegressorInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -204,6 +208,7 @@ public:
 	virtual Dynamical *GetDynamical() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical) = 0;
     virtual ~DynamicalInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -295,6 +300,7 @@ public:
     virtual Reinforcement *GetReinforcement() = 0;
     virtual void DrawInfo(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement) = 0;
     virtual void DrawModel(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Reinforcement *reinforcement) = 0;
     virtual ~ReinforcementInterface(){}
 
     // virtual functions to manage the GUI and I/O
@@ -346,6 +352,7 @@ public:
     virtual Projector *GetProjector() = 0;
     virtual void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
     virtual void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector) = 0;
     virtual ~ProjectorInterface(){}
 
     // virtual functions to manage the GUI and I/O

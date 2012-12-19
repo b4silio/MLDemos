@@ -37,6 +37,7 @@ public:
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
     void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}
+    void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical){}
     void SaveModel(QString filename, Dynamical *dynamical);
     bool LoadModel(QString filename, Dynamical *dynamical);
 

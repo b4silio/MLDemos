@@ -321,14 +321,7 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         xmax=max((double)samples[i][xIndex]-kpca->mean[xIndex], xmax);
         ymin=min((double)samples[i][yIndex]-kpca->mean[yIndex], ymin);
         ymax=max((double)samples[i][yIndex]-kpca->mean[yIndex], ymax);
-        /*
-        xmin=min((double)samples[i][xIndex], xmin);
-        xmax=max((double)samples[i][xIndex], xmax);
-        ymin=min((double)samples[i][yIndex], ymin);
-        ymax=max((double)samples[i][yIndex], ymax);
-        */
     }
-    //qDebug() << "KPCAProjection::DrawModel - xmin:" << xmin << ", ymin:" << ymin << ", xman:" << xmax << ", ymax:" << ymax << ".";
 
     double xdiff = (xmax - xmin);
     double ydiff = (ymax - ymin);
@@ -410,6 +403,74 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
 
     contours->dimSpin->setRange(1, kpca->targetDims);
     DrawContours(contours->dimSpin->value());
+
+    if(canvas->canvasType) return;
+    if(!canvas->data->bProjected) // We are displaying a Manifold to 1D
+    {
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        // we need to sort the list of points
+        vector< pair<float, int> > points(projector->projected.size());
+        FOR(i, projector->projected.size())
+        {
+            points[i] = make_pair(projector->projected[i][0], i);
+        }
+        sort(points.begin(), points.end());
+        float minVal = points.front().first;
+        float maxVal = points.back().first;
+
+        // now we go through the points and compute the back projection
+        int steps = min((int)points.size(), 64);
+        int index = 0;
+        vector<QPointF> pointList;
+        FOR(i, steps)
+        {
+            float val = (i+1)/(float)steps*(maxVal-minVal) + minVal;
+            int nextIndex = (i+1)/(float)steps*points.size();
+            fvec mean(canvas->data->GetDimCount());
+            float meanVal = 0;
+            int count = 0;
+            while(index < points.size() && index < nextIndex)
+            //while(index < points.size() && points[index].first < val)
+            {
+                meanVal += points[index].first;
+                mean += canvas->data->GetSample(points[index].second);
+                count++;
+                index++;
+            }
+            mean /= count;
+            meanVal /= count;
+            // we look for the closest point to the value in projected space
+            int closest = 0;
+            float closestDist = FLT_MAX;
+            FOR(p, points.size())
+            {
+                float dist = (meanVal-points[p].first)*(meanVal-points[p].first);
+                if(dist < closestDist)
+                {
+                    closestDist = dist;
+                    closest = p;
+                }
+            }
+            QPointF point = canvas->toCanvasCoords(mean);
+            //QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(points[closest].second));
+            if(!count) pointList.push_back(pointList.back());
+            else pointList.push_back(point);
+        }
+        // and we draw it
+        FOR(i, pointList.size()-1)
+        {
+            painter.setPen(QPen(Qt::black, 2));
+            painter.drawLine(pointList[i], pointList[i+1]);
+        }
+        FOR(i, pointList.size())
+        {
+            painter.setPen(QPen(Qt::black, 3));
+            painter.setBrush(QBrush(QColor(255*i/pointList.size(), 255*i/pointList.size(), 255*i/pointList.size())));
+            painter.drawEllipse(pointList[i], 7, 7);
+        }
+    }
+
 }
 
 // virtual functions to manage the GUI and I/O
@@ -447,10 +508,10 @@ bool KPCAProjection::LoadOptions(QSettings &settings)
 
 void KPCAProjection::SaveParams(QTextStream &file)
 {
-    file << "clusterOptions" << ":" << "kernelTypeCombo" << " " << params->kernelTypeCombo->currentIndex() << "\n";
-    file << "clusterOptions" << ":" << "kernelDegSpin" << " " << params->kernelDegSpin->value() << "\n";
-    file << "clusterOptions" << ":" << "kernelWidthSpin" << " " << params->kernelWidthSpin->value() << "\n";
-    file << "clusterOptions" << ":" << "dimCountSpin" << " " << params->dimCountSpin->value() << "\n";
+    file << "projectOptions" << ":" << "kernelTypeCombo" << " " << params->kernelTypeCombo->currentIndex() << "\n";
+    file << "projectOptions" << ":" << "kernelDegSpin" << " " << params->kernelDegSpin->value() << "\n";
+    file << "projectOptions" << ":" << "kernelWidthSpin" << " " << params->kernelWidthSpin->value() << "\n";
+    file << "projectOptions" << ":" << "dimCountSpin" << " " << params->dimCountSpin->value() << "\n";
 }
 
 bool KPCAProjection::LoadParams(QString name, float value)

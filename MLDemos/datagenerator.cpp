@@ -28,16 +28,18 @@ void DataGenerator::OptionsChanged()
     ui->classesLabel->setText("Class");
     ui->dimLabel->setText("Dim");
     ui->classesCount->setEnabled(true);
+    ui->dimSpin->setEnabled(false);
     switch(type)
     {
     case 0: // checkerboard
         ui->radiusLabel->setText("Size");
+        ui->dimSpin->setEnabled(true);
         break;
     case 1: // concentric circles
         ui->gridCountLabel->setText("Circles");
         ui->radiusLabel->setText("Radius");
         break;
-    case 2: // swiss roll
+    case 2: // spirals
         ui->gridCountLabel->setText("Swirls");
         ui->radiusLabel->setText("Radius");
         break;
@@ -55,7 +57,39 @@ void DataGenerator::OptionsChanged()
         ui->gridCountLabel->setText("Noise");
         ui->radiusLabel->setText("Width");
         ui->classesCount->setEnabled(false);
+    case 6: // swiss rolls
+        ui->gridCountLabel->setText("Noise");
         break;
+    }
+}
+
+void GenerateRecursive(vector<fvec> &samples, ivec &labels, fvec &sample, int &label, fvec &starts,
+                       int d, int dim, float radius, int gridCount, int classesCount, int samplesPerCell)
+{
+    if(d==0)
+    {
+        FOR(x, gridCount)
+        {
+            starts[d] = x*radius;
+            FOR(i, samplesPerCell)
+            {
+                FOR(d, dim) sample[d] = (drand48()*radius + starts[d]) / gridCount - radius*0.5f;
+                samples.push_back(sample);
+                labels.push_back(label);
+            }
+            label = (label+1)%classesCount;
+        }
+        if(!(gridCount%classesCount)) label = (label+1)%classesCount;
+        return;
+    }
+    else
+    {
+        FOR(x, gridCount)
+        {
+            starts[d] = x*radius;
+            GenerateRecursive(samples, labels, sample, label, starts, d-1, dim, radius, gridCount, classesCount, samplesPerCell);
+        }
+        if(!(gridCount%classesCount)) label = (label+1)%classesCount;
     }
 }
 
@@ -74,10 +108,13 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
     {
     case 0: // checkerboard
     {
-        dim = 2;
-        sample.resize(dim);
         int samplesPerCell = count/(gridCount*gridCount);
         int label = 0;
+
+        fvec starts(dim);
+        GenerateRecursive(samples, labels, sample, label, starts,dim-1, dim, radius, gridCount, classesCount, samplesPerCell );
+
+        /*
         float xStart=0, xStop=0, yStart=0, yStop=0;
         FOR(y, gridCount)
         {
@@ -89,8 +126,8 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
                 xStop = xStart + radius;
                 FOR(i, samplesPerCell)
                 {
-                    sample[0] = drand48()*(xStop-xStart) + xStart;
-                    sample[1] = drand48()*(yStop-yStart) + yStart;
+                    sample[0] = ((drand48()-0.5)*(xStop-xStart) + xStart) / gridCount;
+                    sample[1] = ((drand48()-0.5)*(yStop-yStart) + yStart) / gridCount;
                     samples.push_back(sample);
                     labels.push_back(label);
                 }
@@ -98,6 +135,7 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
             }
             if(!(gridCount%classesCount)) label = (label+1)%classesCount;
         }
+        */
     }
         break;
     case 1: // concentric circles
@@ -124,7 +162,7 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
         }
     }
         break;
-    case 2: // swiss roll
+    case 2: // spirals
     {
         dim = 2;
         sample.resize(dim);
@@ -133,9 +171,11 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
         {
             FOR(i, samplesPerClass)
             {
-                float x = i/(float)samplesPerClass*M_PI*2*gridCount;
-                sample[0] = x * cosf(x + M_PI*2/classesCount*c)*radius;
-                sample[1] = x * sinf(x + M_PI*2/classesCount*c)*radius;
+                float swirls = M_PI*2*gridCount;
+                float x = (i+1)/(float)samplesPerClass*(swirls*swirls);
+                x = sqrtf(x);
+                sample[0] = cosf(x + M_PI*2/classesCount*c)*radius*x/swirls;
+                sample[1] = sinf(x + M_PI*2/classesCount*c)*radius*x/swirls;
                 samples.push_back(sample);
                 labels.push_back(c);
             }
@@ -185,6 +225,28 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
             if(gridCount > 1) y += drand48()*((gridCount-1)/(float)32);
             sample[0] = x;
             sample[1] = y;
+            samples.push_back(sample);
+            labels.push_back(0);
+        }
+    }
+        break;
+    case 6: // swiss roll
+    {
+        dim = 3;
+        sample.resize(dim);
+        FOR(i, count)
+        {
+            float t = 1.5f * M_PI * (1.f + 2.f * drand48());
+            float x = t * cos(t);
+            float y = t * sin(t);
+            float z = 21.f * (drand48()-0.5f);
+            x = x / 21.f * radius;
+            y = y / 21.f * radius;
+            z = z / 21.f * radius;
+
+            sample[0] = x + drand48()*((gridCount-1)/32.f);
+            sample[1] = y + drand48()*((gridCount-1)/32.f);
+            sample[2] = z + drand48()*((gridCount-1)/32.f);
             samples.push_back(sample);
             labels.push_back(0);
         }

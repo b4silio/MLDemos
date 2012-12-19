@@ -48,7 +48,9 @@ HEADERS += \
     contours.h \
     qcontour.h \
     animationlabel.h \
-    reinforcementProblem.h
+    reinforcementProblem.h \
+    glwidget.h \
+    glUtils.h
 
 SOURCES += \
 	canvas.cpp \
@@ -66,4 +68,6 @@ SOURCES += \
     contours.cpp \
     qcontour.cpp \
     animationlabel.cpp \
-    reinforcementProblem.cpp
+    reinforcementProblem.cpp \
+    glwidget.cpp \
+    glUtils.cpp
