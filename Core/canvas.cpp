@@ -394,14 +394,14 @@ void Canvas::paintEvent(QPaintEvent *event)
     bDrawing = true;
     QPainter painter(this);
     if(!canvasType) PaintStandard(painter);
-    else if(canvasType <= 4) PaintMultivariate(painter, canvasType-1);
+    else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3d, so we take out 2
     else
     {
         fvec params;
         params.push_back(xIndex);
         params.push_back(yIndex);
         params.push_back(zIndex);
-        PaintVariable(painter, canvasType-5, params);
+        PaintVariable(painter, canvasType-6, params);
     }
     bDrawing = false;
 }
@@ -1411,6 +1411,19 @@ void Canvas::leaveEvent(QEvent *event)
     //mouseAnchor = QPoint(-1,-1);
     repaint();
 }
+void Canvas::Clear()
+{
+    maps.grid = QPixmap();
+    maps.model = QPixmap();
+    maps.confidence = QPixmap();
+    maps.info = QPixmap();
+    maps.obstacles = QPixmap();
+    maps.trajectories = QPixmap();
+    maps.samples = QPixmap();
+    ResetSamples();
+    bNewCrosshair = true;
+    repaint();
+}
 
 void Canvas::wheelEvent(QWheelEvent *event)
 {
@@ -1489,14 +1502,14 @@ QPixmap Canvas::GetScreenshot()
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
     if(!canvasType) PaintStandard(painter);
-    else if(canvasType <= 4) PaintMultivariate(painter, canvasType-1);
+    else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3D View, so we take out 2
     else
     {
         fvec params;
         params.push_back(xIndex);
         params.push_back(yIndex);
         params.push_back(zIndex);
-        PaintVariable(painter, canvasType-5, params);
+        PaintVariable(painter, canvasType-6, params);
     }
     bShowCrosshair = tmp;
     return screenshot;

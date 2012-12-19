@@ -21,6 +21,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
+#include <MathLib/MathLib.h>
+#include <glUtils.h>
 
 using namespace std;
 
@@ -116,6 +118,91 @@ void ClustGMM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer
 		painter.setPen(Qt::black);
 		painter.drawEllipse(point,5,5);
 	}
+}
+
+void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
+{
+    if(!canvas || !glw || !clusterer) return;
+    int dim = canvas->data->GetDimCount();
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int zIndex = canvas->zIndex;
+    if(canvas->zIndex >= dim) zIndex = -1;
+
+    if(!dynamic_cast<ClustererGMM*>(clusterer)) return;
+    Gmm* gmm = dynamic_cast<ClustererGMM*>(clusterer)->gmm;
+
+    fvec mean(3);
+    float eigVal[3], rot[4*4];
+    float* bigSigma = new float[dim*dim];
+    float* bigMean = new float[dim];
+
+    FOR(i, gmm->nstates)
+    {
+        gmm->getCovariance(i, bigSigma, false);
+        gmm->getMean(i, bigMean);
+        float prior = 1.f;
+
+        mean[0] = bigMean[xIndex];
+        mean[1] = bigMean[yIndex];
+        mean[2] = zIndex >= 0 ? bigMean[zIndex] : 0;
+
+        MathLib::Matrix m(dim, dim);
+        FOR(d1, dim)
+        {
+            FOR(d2, dim)
+            {
+                m(d1,d2) = bigSigma[d1*dim + d2];
+            }
+        }
+        MathLib::Vector eigenValues(dim);
+        MathLib::Matrix eigenVectors(dim, dim);
+        m.EigenValuesDecomposition(eigenValues, eigenVectors);
+
+        // we get the scaling parameters
+        eigVal[0] =  sqrtf(eigenValues(xIndex));
+        eigVal[1] =  sqrtf(eigenValues(yIndex));
+        eigVal[2] =  zIndex >= 0 ? sqrtf(eigenValues(zIndex)) : 0.001;
+
+        // we get the angles
+        float norm;
+        float x1,y1,z1;
+        x1 = eigenVectors(xIndex,xIndex);
+        y1 = eigenVectors(xIndex,yIndex);
+        z1 = zIndex >= 0 ? eigenVectors(xIndex,zIndex) : 0;
+        norm = sqrtf(x1*x1 + y1*y1 + z1*z1);
+        x1 /= norm; y1 /= norm; z1 /= norm;
+
+        float x2,y2,z2;
+        x2 = eigenVectors(yIndex,xIndex);
+        y2 = eigenVectors(yIndex,yIndex);
+        z2 = zIndex >= 0 ? eigenVectors(yIndex,zIndex) : 0;
+        norm = sqrtf(x2*x2 + y2*y2 + z2*z2);
+        x2 /= norm; y2 /= norm; z2 /= norm;
+
+        float x3,y3,z3;
+        x3 = zIndex >= 0 ? eigenVectors(zIndex,xIndex) : 0;
+        y3 = zIndex >= 0 ? eigenVectors(zIndex,yIndex) : 0;
+        z3 = zIndex >= 0 ? eigenVectors(zIndex,zIndex) : 1;
+        norm = sqrtf(x3*x3 + y3*y3 + z3*z3);
+        x3 /= norm; y3 /= norm; z3 /= norm;
+
+        QColor color = SampleColor[(i+1)%SampleColorCnt];
+
+        float eigVec[9];
+        eigVec[0] = x1; eigVec[1] = x2; eigVec[2] = x3;
+        eigVec[3] = y1; eigVec[4] = y2; eigVec[5] = y3;
+        eigVec[6] = z1; eigVec[7] = z2; eigVec[8] = z3;
+
+        GLuint list= DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
+        glw->drawSampleLists.push_back(list);
+        glw->drawSampleListCenters[list] = mean;
+        list= DrawGaussian(&mean[0], eigVal, eigVec);
+        glw->drawSampleLists.push_back(list);
+    }
+
+    delete [] bigSigma;
+    delete [] bigMean;
 }
 
 void ClustGMM::SaveOptions(QSettings &settings)

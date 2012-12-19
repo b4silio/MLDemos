@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interfacePCAProjection.h"
 #include "interfaceLDAProjection.h"
 #include "interfaceKPCAProjection.h"
+#include "interfaceSammonProjection.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ PluginProjections::PluginProjections()
     projectors.push_back(new PCAProjection());
     projectors.push_back(new LDAProjection());
     projectors.push_back(new KPCAProjection());
+    projectors.push_back(new SammonProjection());
 }
 
 Q_EXPORT_PLUGIN2(mld_Projections, PluginProjections)

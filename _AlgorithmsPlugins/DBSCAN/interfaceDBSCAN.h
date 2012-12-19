@@ -74,6 +74,7 @@ public:
       (e.g. the projection axes, cluster centers or class boundaries, if these are available)
       */
     void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer){}
 
 	// virtual functions to manage the GUI and I/O
     /*!

@@ -38,7 +38,8 @@ public:
 	Regressor *GetRegressor();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor);
 	void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor);
-	void DrawConfidence(Canvas *canvas, Regressor *regressor);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Regressor *regressor){}
+    void DrawConfidence(Canvas *canvas, Regressor *regressor);
 
 	// virtual functions to manage the GUI and I/O
         QString GetName(){return QString("Support Vector Regression");}

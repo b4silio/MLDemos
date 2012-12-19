@@ -58,7 +58,7 @@ namespace
 
         sample_type m;
 
-        dlib::rand::float_1a rnd;
+        dlib::rand rnd;
 
         print_spinner();
         // we will make 50 points from each class
@@ -175,15 +175,24 @@ namespace
         krls<kernel_type> test(kernel_type(0.1),0.001);
         rvm_regression_trainer<kernel_type> rvm_test;
         rvm_test.set_kernel(test.get_kernel());
+
         krr_trainer<kernel_type> krr_test;
         krr_test.set_kernel(test.get_kernel());
+
+        svr_trainer<kernel_type> svr_test;
+        svr_test.set_kernel(test.get_kernel());
+        svr_test.set_epsilon_insensitivity(0.0001);
+        svr_test.set_c(10);
+
         rbf_network_trainer<kernel_type> rbf_test;
         rbf_test.set_kernel(test.get_kernel());
         rbf_test.set_num_centers(13);
 
         print_spinner();
         std::vector<sample_type> samples;
+        std::vector<sample_type> samples2;
         std::vector<double> labels;
+        std::vector<double> labels2;
         // now we train our object on a few samples of the sinc function.
         sample_type m;
         for (double x = -10; x <= 5; x += 0.6)
@@ -192,7 +201,9 @@ namespace
             test.train(m, sinc(x));
 
             samples.push_back(m);
+            samples2.push_back(m);
             labels.push_back(sinc(x));
+            labels2.push_back(2);
         }
 
         print_spinner();
@@ -201,6 +212,8 @@ namespace
         decision_function<kernel_type> test3 = rbf_test.train(samples, labels);
         print_spinner();
         decision_function<kernel_type> test4 = krr_test.train(samples, labels);
+        print_spinner();
+        decision_function<kernel_type> test5 = svr_test.train(samples, labels);
         print_spinner();
 
         // now we output the value of the sinc function for a few test points as well as the 
@@ -224,6 +237,34 @@ namespace
         m(0) = 0.1; dlog << LDEBUG << "krr: " << sinc(m(0)) << "   " << test4(m); DLIB_TEST(abs(sinc(m(0)) - test4(m)) < 0.01);
         m(0) = -4;  dlog << LDEBUG << "krr: " << sinc(m(0)) << "   " << test4(m); DLIB_TEST(abs(sinc(m(0)) - test4(m)) < 0.01);
         m(0) = 5.0; dlog << LDEBUG << "krr: " << sinc(m(0)) << "   " << test4(m); DLIB_TEST(abs(sinc(m(0)) - test4(m)) < 0.01);
+
+        m(0) = 2.5; dlog << LDEBUG << "svr: " << sinc(m(0)) << "   " << test5(m); DLIB_TEST(abs(sinc(m(0)) - test5(m)) < 0.01);
+        m(0) = 0.1; dlog << LDEBUG << "svr: " << sinc(m(0)) << "   " << test5(m); DLIB_TEST(abs(sinc(m(0)) - test5(m)) < 0.01);
+        m(0) = -4;  dlog << LDEBUG << "svr: " << sinc(m(0)) << "   " << test5(m); DLIB_TEST(abs(sinc(m(0)) - test5(m)) < 0.01);
+        m(0) = 5.0; dlog << LDEBUG << "svr: " << sinc(m(0)) << "   " << test5(m); DLIB_TEST(abs(sinc(m(0)) - test5(m)) < 0.01);
+
+
+        randomize_samples(samples, labels);
+        dlog << LINFO << "KRR MSE and R-squared: "<< cross_validate_regression_trainer(krr_test, samples, labels, 6);
+        dlog << LINFO << "SVR MSE and R-squared: "<< cross_validate_regression_trainer(svr_test, samples, labels, 6);
+        matrix<double,1,2> cv = cross_validate_regression_trainer(krr_test, samples, labels, 6);
+        DLIB_TEST(cv(0) < 1e-4);
+        DLIB_TEST(cv(1) > 0.99);
+        cv = cross_validate_regression_trainer(svr_test, samples, labels, 6);
+        DLIB_TEST(cv(0) < 1e-4);
+        DLIB_TEST(cv(1) > 0.99);
+
+
+
+
+        randomize_samples(samples2, labels2);
+        dlog << LINFO << "KRR MSE and R-squared: "<< cross_validate_regression_trainer(krr_test, samples2, labels2, 6);
+        dlog << LINFO << "SVR MSE and R-squared: "<< cross_validate_regression_trainer(svr_test, samples2, labels2, 6);
+        cv = cross_validate_regression_trainer(krr_test, samples2, labels2, 6);
+        DLIB_TEST(cv(0) < 1e-4);
+        cv = cross_validate_regression_trainer(svr_test, samples2, labels2, 6);
+        DLIB_TEST(cv(0) < 1e-4);
+
         dlog << LINFO << "   end test_regression()";
     }
 
@@ -249,6 +290,13 @@ namespace
         // Here we have set it to 0.01.
         kcentroid<kernel_type> test(kernel_type(0.1),0.01);
 
+
+        svm_one_class_trainer<kernel_type> one_class_trainer;
+        one_class_trainer.set_nu(0.4);
+        one_class_trainer.set_kernel(kernel_type(0.2));
+
+        std::vector<sample_type> samples;
+
         // now we train our object on a few samples of the sinc function.
         sample_type m;
         for (double x = -15; x <= 8; x += 1)
@@ -256,7 +304,10 @@ namespace
             m(0) = x;
             m(1) = sinc(x);
             test.train(m);
+            samples.push_back(m);
         }
+
+        decision_function<kernel_type> df = one_class_trainer.train(samples);
 
         running_stats<double> rs;
 
@@ -281,6 +332,15 @@ namespace
         m(0) = -1.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(rs.scale(test(m)) < 2, rs.scale(test(m)));
         m(0) = -0.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(rs.scale(test(m)) < 2, rs.scale(test(m)));
 
+        const double thresh = 0.01;
+        m(0) = -1.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+        m(0) = -1.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+        m(0) = -0;   m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+        m(0) = -0.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+        m(0) = -4.1; m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+        m(0) = -1.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+        m(0) = -0.5; m(1) = sinc(m(0)); DLIB_TEST_MSG(df(m)+thresh > 0, df(m));
+
         dlog << LDEBUG;
         // Lets output the distance from the centroid to some points that are NOT from the sinc function.
         // These numbers should all be significantly bigger than previous set of numbers.  We will also
@@ -291,30 +351,37 @@ namespace
         m(0) = -1.5; m(1) = sinc(m(0))+4;   
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         m(0) = -1.5; m(1) = sinc(m(0))+3;   
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         m(0) = -0;   m(1) = -sinc(m(0));    
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         m(0) = -0.5; m(1) = -sinc(m(0));    
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         m(0) = -4.1; m(1) = sinc(m(0))+2;   
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         m(0) = -1.5; m(1) = sinc(m(0))+0.9; 
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         m(0) = -0.5; m(1) = sinc(m(0))+1;   
         dlog << LDEBUG << "   " << test(m) << " is " << rs.scale(test(m)) << " standard deviations from sinc.";
         DLIB_TEST_MSG(rs.scale(test(m)) > 6, rs.scale(test(m)));
+        DLIB_TEST_MSG(df(m) + thresh < 0, df(m));
 
         dlog << LINFO << "   end test_anomaly_detection()";
     }
@@ -368,6 +435,10 @@ namespace
         trainer.set_kernel(kernel_type(gamma));
         trainer.set_nu(0.05);
 
+        svm_c_trainer<kernel_type> c_trainer;
+        c_trainer.set_kernel(kernel_type(gamma));
+        c_trainer.set_c(100);
+
         svm_c_linear_trainer<linear_kernel<matrix<double,0,1> > > lin_trainer;
         lin_trainer.set_c(100000);
         // use an ekm to linearize this dataset so we can use it with the lin_trainer
@@ -383,6 +454,8 @@ namespace
         matrix<scalar_type> krr_cv = cross_validate_trainer_threaded(krr_trainer, x,y, 4, 2);
         print_spinner();
         matrix<scalar_type> svm_cv = cross_validate_trainer(trainer, x,y, 4);
+        print_spinner();
+        matrix<scalar_type> svm_c_cv = cross_validate_trainer(c_trainer, x,y, 4);
         print_spinner();
         matrix<scalar_type> rbf_cv = cross_validate_trainer_threaded(rbf_trainer, x,y, 10, 2);
         print_spinner();
@@ -400,7 +473,8 @@ namespace
 
         dlog << LDEBUG << "rvm cv:        " << rvm_cv;
         dlog << LDEBUG << "krr cv:        " << krr_cv;
-        dlog << LDEBUG << "svm cv:        " << svm_cv;
+        dlog << LDEBUG << "nu-svm cv:     " << svm_cv;
+        dlog << LDEBUG << "C-svm cv:      " << svm_c_cv;
         dlog << LDEBUG << "rbf cv:        " << rbf_cv;
         dlog << LDEBUG << "lin cv:        " << lin_cv;
         dlog << LDEBUG << "ocas_ekm cv:   " << ocas_ekm_cv;
@@ -415,6 +489,7 @@ namespace
         DLIB_TEST_MSG(mean(rvm_cv) > 0.9, rvm_cv);
         DLIB_TEST_MSG(mean(krr_cv) > 0.9, krr_cv);
         DLIB_TEST_MSG(mean(svm_cv) > 0.9, svm_cv);
+        DLIB_TEST_MSG(mean(svm_c_cv) > 0.9, svm_c_cv);
         DLIB_TEST_MSG(mean(rbf_cv) > 0.9, rbf_cv);
         DLIB_TEST_MSG(mean(lin_cv) > 0.9, lin_cv);
         DLIB_TEST_MSG(mean(peg_cv) > 0.9, peg_cv);
@@ -493,7 +568,7 @@ namespace
         offset_kernel<sigmoid_kernel<sample_type> > k5;
         offset_kernel<radial_basis_kernel<sample_type> > k6;
 
-        dlib::rand::float_1a rnd;
+        dlib::rand rnd;
 
         sample_type x, y;
         for (int i = 0; i < 10; ++i)
@@ -507,6 +582,55 @@ namespace
             test_kernel_derivative(k5, x, y);
             test_kernel_derivative(k6, x, y);
         }
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    void test_svm_trainer2()
+    {
+        typedef matrix<double, 2, 1> sample_type;
+        typedef linear_kernel<sample_type> kernel_type;
+
+
+        std::vector<sample_type> samples;
+        std::vector<double> labels;
+
+        sample_type samp;
+        samp(0) = 1;
+        samp(1) = 1;
+        samples.push_back(samp);
+        labels.push_back(+1);
+
+        samp(0) = 1;
+        samp(1) = 2;
+        samples.push_back(samp);
+        labels.push_back(-1);
+
+        svm_c_trainer<kernel_type> trainer;
+
+        decision_function<kernel_type> df = trainer.train(samples, labels);
+
+        samp(0) = 1;
+        samp(1) = 1;
+        dlog << LINFO << "test +1 : "<< df(samp);
+        DLIB_TEST(df(samp) > 0);
+        samp(0) = 1;
+        samp(1) = 2;
+        dlog << LINFO << "test -1 : "<< df(samp);
+        DLIB_TEST(df(samp) < 0);
+
+        svm_nu_trainer<kernel_type> trainer2;
+        df = trainer2.train(samples, labels);
+
+        samp(0) = 1;
+        samp(1) = 1;
+        dlog << LINFO << "test +1 : "<< df(samp);
+        DLIB_TEST(df(samp) > 0);
+        samp(0) = 1;
+        samp(1) = 2;
+        dlog << LINFO << "test -1 : "<< df(samp);
+        DLIB_TEST(df(samp) < 0);
+
     }
 
 // ----------------------------------------------------------------------------------------
@@ -528,6 +652,7 @@ namespace
             test_clutering();
             test_regression();
             test_anomaly_detection();
+            test_svm_trainer2();
         }
     } a;
 

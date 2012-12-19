@@ -232,7 +232,7 @@ namespace
         using namespace bayes_node_utils;
 
 
-        graph<set<unsigned long>::compare_1b_c, set<unsigned long>::compare_1b_c>::kernel_1a_c join_tree;
+        graph<dlib::set<unsigned long>::compare_1b_c, dlib::set<unsigned long>::compare_1b_c>::kernel_1a_c join_tree;
 
         create_moral_graph(bn, join_tree);
         create_join_tree(join_tree, join_tree);
@@ -335,7 +335,7 @@ namespace
         bayesian_network_gibbs_sampler sampler;
         matrix<double,1,8> counts;
         set_all_elements(counts, 0);
-        const unsigned long rounds = 100000;
+        const unsigned long rounds = 200000;
         for (unsigned long i = 0; i < rounds; ++i)
         {
             sampler.sample_graph(bn);

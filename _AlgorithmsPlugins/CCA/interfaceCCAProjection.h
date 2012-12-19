@@ -21,6 +21,7 @@ public:
     Projector *GetProjector();
     void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector);
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector){}
 
     // virtual functions to manage the GUI and I/O
     QString GetName(){return QString("CCA");}

@@ -37,6 +37,7 @@ public:
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
     void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}
+    void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical){}
 
     // virtual functions to manage the GUI and I/O
     QString GetName(){return QString("SEDS");}

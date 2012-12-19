@@ -3,7 +3,7 @@
 # ##########################
 TEMPLATE = app
 QT -= network
-QT += svg
+QT += svg opengl
 TARGET = mldemos
 NAME = mldemos
 MLPATH =..

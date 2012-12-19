@@ -101,7 +101,7 @@ bool LDAProjection::LoadOptions(QSettings &settings)
 
 void LDAProjection::SaveParams(QTextStream &file)
 {
-    file << "clusterOptions" << ":" << "typeCombo" << " " << params->typeCombo->currentIndex() << "\n";
+    file << "projectOptions" << ":" << "typeCombo" << " " << params->typeCombo->currentIndex() << "\n";
 }
 
 bool LDAProjection::LoadParams(QString name, float value)

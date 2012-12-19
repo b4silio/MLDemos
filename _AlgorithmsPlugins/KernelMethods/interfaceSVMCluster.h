@@ -37,6 +37,7 @@ public:
 	Clusterer *GetClusterer();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer){}
 
 	// virtual functions to manage the GUI and I/O
         QString GetName(){return QString("Support Vector Machine");}

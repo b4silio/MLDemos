@@ -32,6 +32,10 @@
             ensures
                 - #item == a deserialized copy of the serializable_type that was
                   in the input stream in.
+                - Reads all the bytes associated with the serialized serializable_type
+                  contained inside the input stream and no more.  This means you
+                  can serialize multiple objects to an output stream and then read
+                  them all back in, one after another, using deserialize().
                 - if (serializable_type implements the enumerable interface) then
                     - item.at_start() == true
             throws                    
@@ -50,12 +54,15 @@
         - std::wstring
         - std::vector
         - std::map
+        - std::set
+        - std::pair
         - std::complex
         - dlib::uint64
         - dlib::int64
         - enumerable<T> where T is a serializable type
         - map_pair<D,R> where D and R are both serializable types.
         - C style arrays of serializable types
+        - Google protocol buffer objects.
 
     This file provides deserialization support to the following object types:
         - The C++ base types (NOT including pointer types)
@@ -63,10 +70,13 @@
         - std::wstring
         - std::vector
         - std::map
+        - std::set
+        - std::pair
         - std::complex
         - dlib::uint64
         - dlib::int64
         - C style arrays of serializable types
+        - Google protocol buffer objects.
 
     Support for deserialization of objects which implement the enumerable or
     map_pair interfaces is the responsibility of those objects.  
@@ -115,12 +125,15 @@
 #include <vector>
 #include <complex>
 #include <map>
+#include <set>
 #include <limits>
 #include "uintn.h"
 #include "interfaces/enumerable.h"
 #include "interfaces/map_pair.h"
 #include "enable_if.h"
 #include "unicode.h"
+#include "unicode.h"
+#include "byte_orderer.h"
 
 namespace dlib
 {
@@ -157,8 +170,8 @@ namespace dlib
         !*/
         {
             COMPILE_TIME_ASSERT(sizeof(T) <= 8);
-            unsigned char buf[8];
-            unsigned char size = 0;
+            unsigned char buf[9];
+            unsigned char size = sizeof(T);
             unsigned char neg;
             if (item < 0)
             {
@@ -170,25 +183,22 @@ namespace dlib
                 neg = 0;
             }
 
-            for (unsigned char i = 0; i < sizeof(T); ++i)
+            for (unsigned char i = 1; i <= sizeof(T); ++i)
             {
                 buf[i] = static_cast<unsigned char>(item&0xFF);                
                 item >>= 8;
-                if (item == 0) { size = i+1; break; }
+                if (item == 0) { size = i; break; }
             }
-            if (size == 0) 
-                size = sizeof(T);
-            size |= neg;
 
-            out.write(reinterpret_cast<char*>(&size),1);            
-            size &= 0x7F;  // strip off the neg flag 
-            out.write(reinterpret_cast<char*>(buf),size);
-
-            // check if there was an error
-            if (!out)
+            std::streambuf* sbuf = out.rdbuf();
+            buf[0] = size|neg;
+            if (sbuf->sputn(reinterpret_cast<char*>(buf),size+1) != size+1)
+            {
+                out.setstate(std::ios::eofbit | std::ios::badbit);
                 return true;
-            else 
-                return false;
+            }
+
+            return false;
         }
 
     // ------------------------------------------------------------------------------------
@@ -219,11 +229,20 @@ namespace dlib
             unsigned char size;
             bool is_negative;
 
+            std::streambuf* sbuf = in.rdbuf();
+
             item = 0;
-            in.read(reinterpret_cast<char*>(&size),1);
-            // check if an error occurred 
-            if (!in) 
+            int ch = sbuf->sbumpc();
+            if (ch != EOF)
+            {
+                size = static_cast<unsigned char>(ch);
+            }
+            else
+            {
+                in.setstate(std::ios::badbit);
                 return true;
+            }
+
             if (size&0x80)
                 is_negative = true;
             else
@@ -232,13 +251,16 @@ namespace dlib
             
             // check if the serialized object is too big
             if (size > sizeof(T))
+            {
                 return true;
+            }
 
-            in.read(reinterpret_cast<char*>(&buf),size);
-
-            // check if there was an error reading from in.
-            if (!in)
+            if (sbuf->sgetn(reinterpret_cast<char*>(&buf),size) != size)
+            {
+                in.setstate(std::ios::badbit);
                 return true;
+            }
+
 
             for (unsigned char i = size-1; true; --i)
             {
@@ -276,26 +298,25 @@ namespace dlib
         !*/
         {
             COMPILE_TIME_ASSERT(sizeof(T) <= 8);
-            unsigned char buf[8];
-            unsigned char size = 0;
+            unsigned char buf[9];
+            unsigned char size = sizeof(T);
 
-            for (unsigned char i = 0; i < sizeof(T); ++i)
+            for (unsigned char i = 1; i <= sizeof(T); ++i)
             {
                 buf[i] = static_cast<unsigned char>(item&0xFF);                
                 item >>= 8;
-                if (item == 0) { size = i+1; break; }
+                if (item == 0) { size = i; break; }
             }
-            if (size == 0) 
-                size = sizeof(T);
 
-            out.write(reinterpret_cast<char*>(&size),1);     
-            out.write(reinterpret_cast<char*>(buf),size);
-
-            // check if there was an error
-            if (!out)
+            std::streambuf* sbuf = out.rdbuf();
+            buf[0] = size;
+            if (sbuf->sputn(reinterpret_cast<char*>(buf),size+1) != size+1)
+            {
+                out.setstate(std::ios::eofbit | std::ios::badbit);
                 return true;
-            else 
-                return false;
+            }
+
+            return false;
         }
 
     // ------------------------------------------------------------------------------------
@@ -325,20 +346,33 @@ namespace dlib
             unsigned char size;
 
             item = 0;
-            in.read(reinterpret_cast<char*>(&size),1);
+
+            std::streambuf* sbuf = in.rdbuf();
+            int ch = sbuf->sbumpc();
+            if (ch != EOF)
+            {
+                size = static_cast<unsigned char>(ch);
+            }
+            else
+            {
+                in.setstate(std::ios::badbit);
+                return true;
+            }
+
+
             // mask out the 3 reserved bits
             size &= 0x8F;
+
             // check if an error occurred 
-            if (!in || size > sizeof(T)) 
+            if (size > sizeof(T)) 
                 return true;
            
 
-            in.read(reinterpret_cast<char*>(&buf),size);
-
-            // check if the serialized object is too big to fit into something of type T.
-            // or if there was an error reading from in.
-            if (!in)
+            if (sbuf->sgetn(reinterpret_cast<char*>(&buf),size) != size)
+            {
+                in.setstate(std::ios::badbit);
                 return true;
+            }
 
             for (unsigned char i = size-1; true; --i)
             {
@@ -361,11 +395,40 @@ namespace dlib
         inline void deserialize (T& item, std::istream& in) \
         { if (ser_helper::unpack_int(item,in)) throw serialization_error("Error deserializing object of type " + std::string(#T)); }   
 
+    template <typename T>
+    inline bool pack_byte (
+        const T& ch,
+        std::ostream& out
+    )
+    {
+        std::streambuf* sbuf = out.rdbuf();
+        return (sbuf->sputc((char)ch) == EOF);
+    }
+
+    template <typename T>
+    inline bool unpack_byte (
+        T& ch,
+        std::istream& in
+    )
+    {
+        std::streambuf* sbuf = in.rdbuf();
+        int temp = sbuf->sbumpc();
+        if (temp != EOF)
+        {
+            ch = static_cast<T>(temp);
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     #define USE_DEFAULT_BYTE_SERIALIZATION_FOR(T)  \
         inline void serialize (const T& item,std::ostream& out) \
-        { out.write(reinterpret_cast<const char*>(&item),1); if (!out) throw serialization_error("Error serializing object of type " + std::string(#T)); } \
+        { if (pack_byte(item,out)) throw serialization_error("Error serializing object of type " + std::string(#T)); } \
         inline void deserialize (T& item, std::istream& in) \
-        { in.read(reinterpret_cast<char*>(&item),1); if (!in) throw serialization_error("Error deserializing object of type " + std::string(#T)); }   
+        { if (unpack_byte(item,in)) throw serialization_error("Error deserializing object of type " + std::string(#T)); }   
 
 // ----------------------------------------------------------------------------------------
 
@@ -505,6 +568,18 @@ namespace dlib
         std::istream& in
     );
 
+    template <typename domain, typename compare, typename alloc>
+    void serialize (
+        const std::set<domain, compare, alloc>& item,
+        std::ostream& out
+    );
+
+    template <typename domain, typename compare, typename alloc>
+    void deserialize (
+        std::set<domain, compare, alloc>& item,
+        std::istream& in
+    );
+
     template <typename T, typename alloc>
     void serialize (
         const std::vector<T,alloc>& item,
@@ -604,6 +679,38 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
+    template <typename first_type, typename second_type>
+    void serialize (
+        const std::pair<first_type, second_type>& item,
+        std::ostream& out
+    )
+    {
+        try
+        { 
+            serialize(item.first,out); 
+            serialize(item.second,out); 
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while serializing object of type std::pair"); }
+    }
+
+    template <typename first_type, typename second_type>
+    void deserialize (
+        std::pair<first_type, second_type>& item,
+        std::istream& in 
+    )
+    {
+        try
+        { 
+            deserialize(item.first,in); 
+            deserialize(item.second,in); 
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while deserializing object of type std::pair"); }
+    }
+
+// ----------------------------------------------------------------------------------------
+
     template <typename domain, typename range, typename compare, typename alloc>
     void serialize (
         const std::map<domain,range, compare, alloc>& item,
@@ -654,6 +761,53 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
+    template <typename domain, typename compare, typename alloc>
+    void serialize (
+        const std::set<domain, compare, alloc>& item,
+        std::ostream& out
+    )
+    {
+        try
+        { 
+            const unsigned long size = static_cast<unsigned long>(item.size());
+
+            serialize(size,out); 
+            typename std::set<domain,compare,alloc>::const_iterator i;
+            for (i = item.begin(); i != item.end(); ++i)
+            {
+                serialize(*i,out);
+            }
+
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while serializing object of type std::set"); }
+    }
+
+    template <typename domain, typename compare, typename alloc>
+    void deserialize (
+        std::set<domain, compare, alloc>& item,
+        std::istream& in
+    )
+    {
+        try 
+        { 
+            item.clear();
+
+            unsigned long size;
+            deserialize(size,in); 
+            domain d;
+            for (unsigned long i = 0; i < size; ++i)
+            {
+                deserialize(d,in);
+                item.insert(d);
+            }
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while deserializing object of type std::set"); }
+    }
+
+// ----------------------------------------------------------------------------------------
+
     template <typename T, typename alloc>
     void serialize (
         const std::vector<T,alloc>& item,
@@ -692,6 +846,76 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
+    template <typename alloc>
+    void serialize (
+        const std::vector<char,alloc>& item,
+        std::ostream& out
+    )
+    {
+        try
+        { 
+            const unsigned long size = static_cast<unsigned long>(item.size());
+            serialize(size,out); 
+            out.write(&item[0], item.size());
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while serializing object of type std::vector"); }
+    }
+
+    template <typename alloc>
+    void deserialize (
+        std::vector<char, alloc>& item,
+        std::istream& in
+    )
+    {
+        try 
+        { 
+            unsigned long size;
+            deserialize(size,in); 
+            item.resize(size);
+            in.read(&item[0], item.size());
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while deserializing object of type std::vector"); }
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    template <typename alloc>
+    void serialize (
+        const std::vector<unsigned char,alloc>& item,
+        std::ostream& out
+    )
+    {
+        try
+        { 
+            const unsigned long size = static_cast<unsigned long>(item.size());
+            serialize(size,out); 
+            out.write((char*)&item[0], item.size());
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while serializing object of type std::vector"); }
+    }
+
+    template <typename alloc>
+    void deserialize (
+        std::vector<unsigned char, alloc>& item,
+        std::istream& in
+    )
+    {
+        try 
+        { 
+            unsigned long size;
+            deserialize(size,in); 
+            item.resize(size);
+            in.read((char*)&item[0], item.size());
+        }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while deserializing object of type std::vector"); }
+    }
+
+// ----------------------------------------------------------------------------------------
+
     inline void serialize (
         const std::string& item,
         std::ostream& out
@@ -711,27 +935,16 @@ namespace dlib
         std::istream& in
     )
     {
-        char* buf = 0;
-        try
-        {
-            unsigned long size;
-            try { deserialize(size,in); }
-            catch (serialization_error& e)
-            { throw serialization_error(e.info + "\n   while deserializing object of type std::string"); }
+        unsigned long size;
+        try { deserialize(size,in); }
+        catch (serialization_error& e)
+        { throw serialization_error(e.info + "\n   while deserializing object of type std::string"); }
 
-            buf = new char[size+1];
-            buf[size] = 0;            
-            in.read(buf,size);
-            item.assign(buf);
-            if (!in) throw serialization_error("Error deserializing object of type std::string");
-            delete [] buf;
-        }
-        catch (...)
+        item.resize(size);
+        if (size != 0)
         {
-            if (buf)
-                delete [] buf;
-            item.erase();
-            throw;
+            in.read(&item[0],size);
+            if (!in) throw serialization_error("Error deserializing object of type std::string");
         }
     }
 
@@ -943,6 +1156,92 @@ namespace dlib
         catch (serialization_error& e)
         {
             throw serialization_error(e.info + "\n   while deserializing an object of type std::complex");
+        }
+    }
+
+// ----------------------------------------------------------------------------------------
+}
+
+// forward declare the MessageLite object so we can reference it below.
+namespace google
+{
+    namespace protobuf
+    {
+        class MessageLite;
+    }
+}
+
+namespace dlib
+{
+
+    /*!A is_protocol_buffer
+        This is a template that tells you if a type is a Google protocol buffer object.  
+    !*/
+
+    template <typename T, typename U = void > 
+    struct is_protocol_buffer 
+    {
+        static const bool value = false;
+    };
+
+    template <typename T>
+    struct is_protocol_buffer <T,typename enable_if<is_convertible<T*,::google::protobuf::MessageLite*> >::type  >
+    {
+        static const bool value = true;
+    };
+
+    template <typename T>
+    typename enable_if<is_protocol_buffer<T> >::type serialize(const T& item, std::ostream& out)
+    {
+        // Note that Google protocol buffer messages are not self delimiting 
+        // (see https://developers.google.com/protocol-buffers/docs/techniques)
+        // This means they don't record their length or where they end, so we have 
+        // to record this information ourselves.  So we save the size as a little endian 32bit 
+        // integer prefixed onto the front of the message.
+
+        byte_orderer bo;
+
+        // serialize into temp string
+        std::string temp;
+        if (!item.SerializeToString(&temp))
+            throw dlib::serialization_error("Error while serializing a Google Protocol Buffer object.");
+        if (temp.size() > std::numeric_limits<uint32>::max())
+            throw dlib::serialization_error("Error while serializing a Google Protocol Buffer object, message too large.");
+
+        // write temp to the output stream
+        uint32 size = temp.size();
+        bo.host_to_little(size);
+        out.write((char*)&size, sizeof(size));
+        out.write(temp.c_str(), temp.size());
+    }
+
+    template <typename T>
+    typename enable_if<is_protocol_buffer<T> >::type deserialize(T& item, std::istream& in)
+    {
+        // Note that Google protocol buffer messages are not self delimiting 
+        // (see https://developers.google.com/protocol-buffers/docs/techniques)
+        // This means they don't record their length or where they end, so we have 
+        // to record this information ourselves.  So we save the size as a little endian 32bit 
+        // integer prefixed onto the front of the message.
+
+        byte_orderer bo;
+
+        uint32 size = 0;
+        // read the size
+        in.read((char*)&size, sizeof(size));
+        bo.little_to_host(size);
+        if (!in || size == 0)
+            throw dlib::serialization_error("Error while deserializing a Google Protocol Buffer object.");
+
+        // read the bytes into temp
+        std::string temp;
+        temp.resize(size);
+        in.read(&temp[0], size);
+
+        // parse temp into item
+        if (!in || !item.ParseFromString(temp))
+        {
+            throw dlib::serialization_error("Error while deserializing a Google Protocol Buffer object.");
         }
     }
 

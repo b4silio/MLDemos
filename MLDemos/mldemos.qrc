@@ -24,5 +24,6 @@
         <file>icons/algorithms.png</file>
         <file>icons/adddata.png</file>
         <file>icons/spinner-24x24.gif</file>
+        <file>icons/airbrush3D.png</file>
     </qresource>
 </RCC>

@@ -37,7 +37,6 @@ void cvDrawRect(IplImage *img, CvRect rect, CvScalar color, int thickness, int l
     cvRectangle(img, cvPoint(rect.x, rect.y), cvPoint(rect.x+rect.width, rect.y+rect.height), color, thickness, line_type, shift);
 }
 
-
 // directions: 0=clockwise, 1: counterclockwise, 2: flip
 IplImage *BasicOpenCV::Rotate90(IplImage *src, u32 direction)
 {

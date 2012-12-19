@@ -60,6 +60,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "expose.h"
 #include "dataImporter.h"
 #include "datagenerator.h"
+#include "glwidget.h"
 
 class MLDemos : public QMainWindow
 {
@@ -105,6 +106,7 @@ private:
 	QTime drawTime;
 	Canvas *canvas;
     Expose *expose;
+    GLWidget *glw;
     DataImporter *import;
     DataGenerator *generator;
     ReinforcementProblem reinforcementProblem;
@@ -237,6 +239,7 @@ private slots:
     void ClusterOptimize();
     void ClusterTest();
     void Project();
+    void ProjectManifold();
     void ProjectRevert();
     void ProjectReproject();
     void Avoidance();
@@ -266,8 +269,9 @@ private slots:
 	void DrawCrosshair();
     void DrawNone();
     void DrawSingle();
-	void DrawSpray();
-	void DrawLine();
+    void DrawSpray();
+    void DrawSpray3D();
+    void DrawLine();
 	void DrawTrajectory();
 	void DrawEllipse();
 	void DrawErase();

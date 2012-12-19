@@ -40,7 +40,7 @@
     <double>0.010000000000000</double>
    </property>
    <property name="value">
-    <double>0.025000000000000</double>
+    <double>0.160000000000000</double>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -133,7 +133,7 @@
     <double>0.010000000000000</double>
    </property>
    <property name="value">
-    <double>0.025000000000000</double>
+    <double>0.160000000000000</double>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="spinAngle">
