@@ -23,6 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QBitmap>
 #include <QDebug>
 #include "qcontour.h"
+#include <jacgrid/jacgrid.h>
 using namespace std;
 
 #define RES 256
@@ -594,7 +595,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     printf("Generating volumetric data: ");
     FOR(y, steps)
     {
-//        values[y] = new double[steps*steps];
+        //        values[y] = new double[steps*steps];
         minVals[y] = FLT_MAX;
         maxVals[y] = -FLT_MAX;
         sample[yIndex] = y/(float)(steps)*(maxes[yIndex]-mins[yIndex]) + mins[yIndex];
@@ -639,6 +640,99 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     printf("done.\n");
     fflush(stdout);
 
+    gridT valueGrid(0.f, steps, steps, steps);
+    FOR(i, steps*steps*steps) valueGrid[i] = values[i];
+    FOR(d, 3) valueGrid.unit[d] = (maxes[d] - mins[d])/steps;   /* length of a single edge in each dimension*/
+    FOR(d, 3) valueGrid.size[d] = maxes[d] - mins[d];           /* length of entire grid in each dimension */
+    FOR(d, 3) valueGrid.org[d] = mins[d];                       /* the origin of the grid i.e. coords of (0,0,0) */
+    FOR(d, 3) valueGrid.center[d] = (maxes[d] + mins[d])/2;     /* coords of center of grid */
+    surfaceT surf;
+    float surfThreshold = 0.f;
+    unsigned int surfIType = JACSurfaceTypes::SURF_CONTOUR;
+    printf("Generating isosurfaces: ");
+    fflush(stdout);
+    JACMakeSurface(surf, surfIType, valueGrid, surfThreshold);
+    //surf.Reduce(0.05);
+    printf("done.\n");
+    fflush(stdout);
+
+    printf("Generating mesh: ");
+
+    GLuint list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable( GL_TEXTURE_2D );
+
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+
+    // Create light components
+    GLfloat ambientLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    GLfloat diffuseLight[] = { .6f, .6f, .6f, 1.0f };
+    GLfloat specularLight[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+    //GLfloat position[] = { -1.5f, 1.0f, -4.0f, 1.0f };
+    GLfloat position[] = { 100.0f, 100.0f, 100.0f, 1.0f };
+    GLfloat position2[] = { -100.0f, -100.0f, 100.0f, 1.0f };
+
+    // Assign created components to GL_LIGHT0
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glEnable(GL_LIGHT1);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, specularLight);
+    glLightfv(GL_LIGHT1, GL_POSITION, position2);
+
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_COLOR_MATERIAL);
+    //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
+
+    GLfloat whiteSpecularMaterial[] = {1.0, 1.0, 1.0};
+    GLfloat shininess[] = {128}; //set the shininess of the
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, whiteSpecularMaterial);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+    //float mcolor[] = { 1.f, 0.f, 0.f, 0.2f};
+    //glMaterialfv(GL_FRONT, GL_DIFFUSE, mcolor);
+
+    glColor4f(1.f, 0.f, 0.f, 0.85f);
+    glBegin(GL_TRIANGLES);
+
+    std::vector<float> &vertices = surf.vertices;
+    //std::vector<float> &normals = surf.normals;
+    for (int i=0; i<surf.nconn; i += 3)
+    {
+        int index = surf.triangles[i];
+        //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
+        glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
+        glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
+        index = surf.triangles[i+1];
+        //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
+        glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
+        glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
+        index = surf.triangles[i+2];
+        //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
+        glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
+        glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
+    }
+    glEnd();
+
+    glPopAttrib();
+    glEndList();
+    glw->drawSampleLists.push_back(list);
+
+    printf("done.\n");
+    fflush(stdout);
+
+/*
     printf("Generating contours (X-Z): ");
     vector< vector<fvec> > paths;
     FOR(y, steps)
@@ -777,7 +871,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     printf(" done.\n");
     fflush(stdout);
 
-    GLuint list = glGenLists(1);
+    list = glGenLists(1);
     glNewList(list, GL_COMPILE);
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -815,6 +909,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     glPopAttrib();
     glEndList();
     glw->drawLists.push_back(list);
+    */
 }
 
 void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)

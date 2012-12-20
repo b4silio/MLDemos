@@ -93,8 +93,13 @@ fvec ClassifierGMM::TestMulti(const fvec &sample)
 	if(gmms.size()==2)
 	{
 		fvec res(1);
-		res[0] = log(pdf[1]) - log(pdf[0]);
-		return res;
+        float p1 = log(pdf[1]);
+        float p0 = log(pdf[0]);
+        if(p1 < 1e-7) p1 = 0;
+        if(p0 < 1e-7) p0 = 0;
+//        res[0] = pdf[1] - pdf[0];
+        res[0] = log(pdf[1]) - log(pdf[0]);
+        return res;
 	}
 
     float xmin=-100.f, xmax=100.f;

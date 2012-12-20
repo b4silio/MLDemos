@@ -9,11 +9,13 @@
 #include <mymaths.h>
 #include "glwidget.h"
 #include <MathLib/MathLib.h>
+#include "glUtils.h"
 
+#define ZoomZero 0.049f
 using namespace std;
 
 GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
-    : QGLWidget(parent), canvas(canvas), zoomFactor(0.049f)
+    : QGLWidget(parent), canvas(canvas), zoomFactor(ZoomZero)
 {
     width = 800;
     height = 600;
@@ -217,13 +219,51 @@ void GLWidget::initializeGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     glEnable( GL_POINT_SMOOTH );
 
     //glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
 }
+/*
+void drawsilhouette(void)
+{
+  int i;
 
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glEnable(GL_STENCIL_TEST);
+  glStencilFunc(GL_ALWAYS, 1, 1);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+  glDisable(GL_DEPTH_TEST);  // so the depth buffer doesn't change
+  for (i = -1; i < 2; i += 2) {  // set stencil around object
+    glViewport(i, 0, winWidth + i, winHeight);
+    curobj();
+  }
+  for (i = -1; i < 2; i += 2) {
+    glViewport(0, i, winWidth, winHeight + i);
+    curobj();
+  }
+
+  // cut out stencil where object is
+  glViewport(0, 0, winWidth, winHeight);
+  glStencilFunc(GL_ALWAYS, 0, 0);
+  curobj();
+
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+  glStencilFunc(GL_EQUAL, 1, 1);
+
+  glDisable(GL_LIGHTING);
+  glColor3f(1.f, 0.f, 0.f);  // draw silhouette red
+  glRotatef(-viewangle, 0.f, 1.f, 0.f);
+  glRecti(-50, -50, 50, 50);
+  glRotatef(viewangle, 0.f, 1.f, 0.f);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+  glDisable(GL_STENCIL_TEST);
+}
+*/
 void GLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -259,7 +299,7 @@ void GLWidget::paintGL()
             glLineWidth(1.f);
             glLineStipple (1, 0xFFFF);
             glColor3f(0,0,0);
-            float rad = 1.f*(zoomFactor/0.04f);
+            float rad = 1.f*(zoomFactor/ZoomZero);
             glBegin(GL_LINES);
             glVertex3f(-rad, 0, 0);
             glVertex3f(+rad, 0, 0);
@@ -313,7 +353,51 @@ void GLWidget::paintGL()
             {
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
                 glDisable(GL_LIGHTING);
-                glDepthMask(GL_FALSE);
+                glDisable(GL_TEXTURE_2D);
+                glDepthMask(GL_TRUE);
+
+                FOR(i, canvas->data->GetCount())
+                {
+                    fvec sample = canvas->data->GetSample(i);
+                    int label = canvas->data->GetLabel(i);
+                    QColor c = SampleColor[label%SampleColorCnt];
+                    if(i < canvas->sampleColors.size() && canvas->bDisplayLearned) c = canvas->sampleColors[i];
+                    float sX=0,sY=0,sZ=0;
+                    if(xIndex >= 0) sX = sample[xIndex];
+                    if(yIndex >= 0) sY = sample[yIndex];
+                    if(zIndex >= 0) sZ = sample[zIndex];
+                    float side = 0.008f*(zoomFactor/ZoomZero);
+
+                    glPushMatrix();
+
+                    glTranslatef(sX, sY, sZ);
+
+                    //glEnable(GL_LINE_SMOOTH);
+                    //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+                    glEnable (GL_BLEND);                // Enable Blending
+                    // Set The Blend Mode
+                    glBlendFunc (GL_SRC_ALPHA ,GL_ONE_MINUS_SRC_ALPHA);
+                    glEnable (GL_CULL_FACE);
+                    glPolygonMode (GL_BACK, GL_LINE);   // Draw Backfacing Polygons As Wireframes
+                    glLineWidth (4);                    // Set The Line Width
+                    glCullFace (GL_FRONT);              // Don't Draw Any Front-Facing Polygons
+                    glDepthFunc (GL_LEQUAL);            // Change The Depth Mode
+                    glColor3f(0,0,0);                   // Set The Outline Color
+                    DrawTessellatedSphere(side, 1);
+                    glDepthFunc (GL_LESS);              // Reset The Depth-Testing Mode
+                    glCullFace (GL_BACK);               // Reset The Face To Be Culled
+                    glPolygonMode (GL_BACK, GL_FILL);       // Reset Back-Facing Polygon Drawing Mode
+                    glDisable (GL_BLEND);
+
+                    glColor3f(c.redF(), c.greenF(), c.blueF());
+                    DrawTessellatedSphere(side, 1);
+
+                    glPopMatrix();
+                }
+
+                /*
+                glDisable(GL_LIGHTING);
+                //glDepthMask(GL_FALSE);
 
                 glEnable(GL_TEXTURE_2D);
                 glEnable(GL_POINT_SPRITE);
@@ -337,6 +421,8 @@ void GLWidget::paintGL()
                 }
                 glDepthMask(GL_TRUE);
                 glEnd();
+                /**/
+
                 glPopAttrib();
             }
         }
