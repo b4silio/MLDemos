@@ -53,8 +53,8 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
     ivec newLabels(labels.size());
     FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
 
-    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++) qDebug() << "inverse: " << it->first << it->second;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) qDebug() << "class: " << it->first << it->second;
+//    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++) qDebug() << "inverse: " << it->first << it->second;
+//    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) qDebug() << "class: " << it->first << it->second;
 
     std::map<int, vector<fvec> > sampleMap;
 
@@ -93,16 +93,16 @@ fvec ClassifierGMM::TestMulti(const fvec &sample)
 	if(gmms.size()==2)
 	{
 		fvec res(1);
-        float p1 = log(pdf[1]);
-        float p0 = log(pdf[0]);
-        if(p1 < 1e-7) p1 = 0;
-        if(p0 < 1e-7) p0 = 0;
 //        res[0] = pdf[1] - pdf[0];
-        res[0] = log(pdf[1]) - log(pdf[0]);
+        double p1 = log((double)pdf[1]);
+        double p0 = log((double)pdf[0]);
+//        if(fabs(p1) < 1e-6) p1 = 0;
+//        if(fabs(p0) < 1e-6) p0 = 0;
+        res[0] = (float)(p1 - p0);
         return res;
 	}
 
-    float xmin=-100.f, xmax=100.f;
+    float xmin=-100.f, xmax=100.f; // we clamp the value between these two
 	float sum = 0;
 	FOR(i, pdf.size())
 	{

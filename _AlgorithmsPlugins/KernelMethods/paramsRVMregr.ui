@@ -34,7 +34,7 @@
   <widget class="QLabel" name="svmEpsLabel">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>120</x>
      <y>70</y>
      <width>70</width>
      <height>16</height>
@@ -47,45 +47,6 @@
    </property>
    <property name="text">
     <string>eps</string>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="svmCSpin">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>90</y>
-     <width>71</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="toolTip">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;C: cost function (SVR)&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Capacity: maximum bases (0=auto/unlimited) (SOGP,KRLS)&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;KRLS: capacity of 1 not allowed (switches to 2)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="decimals">
-    <number>4</number>
-   </property>
-   <property name="minimum">
-    <double>0.000100000000000</double>
-   </property>
-   <property name="maximum">
-    <double>999.899999999999977</double>
-   </property>
-   <property name="singleStep">
-    <double>0.010000000000000</double>
-   </property>
-   <property name="value">
-    <double>0.001000000000000</double>
    </property>
   </widget>
   <widget class="QLabel" name="labelDegree">
@@ -109,7 +70,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QDoubleSpinBox" name="svmPSpin">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>120</x>
      <y>90</y>
      <width>71</width>
      <height>22</height>
@@ -192,24 +153,6 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="value">
     <number>2</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="svmCLabel">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>70</y>
-     <width>60</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Lambda</string>
    </property>
   </widget>
   <widget class="QComboBox" name="kernelTypeCombo">

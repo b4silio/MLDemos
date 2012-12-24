@@ -59,16 +59,65 @@ void ClustSVM::ChangeOptions()
 void ClustSVM::SetParams(Clusterer *clusterer)
 {
     if(!clusterer) return;
+    SetParams(clusterer, GetParams());
+}
+
+fvec ClustSVM::GetParams()
+{
     float svmNu = params->svmCSpin->value();
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
 
-    ClustererSVR *svm = ((ClustererSVR*) clusterer);
+    fvec par(4);
+    par[0] = svmNu;
+    par[1] = kernelType;
+    par[2] = kernelGamma;
+    par[3] = kernelDegree;
+    return par;
+}
+
+void ClustSVM::SetParams(Clusterer *clusterer, fvec parameters)
+{
+    if(!clusterer) return;
+    float svmNu = parameters.size() > 0 ? parameters[0] : 1;
+    int kernelType = parameters.size() > 1 ? parameters[1] : 0;
+    float kernelGamma = parameters.size() > 2 ? parameters[2] : 0;
+    int kernelDegree = parameters.size() > 3 ? parameters[3] : 0;
+
+    ClustererSVR *svm = dynamic_cast<ClustererSVR *>(clusterer);
+    if(!svm) return;
     svm->param.nu = svmNu;
     svm->param.kernel_type = kernelType;
     svm->param.gamma = 1 / kernelGamma;
     svm->param.degree = kernelDegree;
+}
+
+void ClustSVM::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Nu");
+    parameterNames.push_back("Kernel Type");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Kernel Degree");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("1.0f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
 }
 
 Clusterer *ClustSVM::GetClusterer()

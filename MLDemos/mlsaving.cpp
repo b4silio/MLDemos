@@ -73,7 +73,7 @@ void MLDemos::SaveLayoutOptions()
 	settings.beginGroup("drawingOptions");
 	settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
 	settings.setValue("spinCount", drawToolbarContext1->spinCount->value());
-	settings.setValue("spinSize", drawToolbarContext1->spinSize->value());
+    settings.setValue("spinSize", drawToolbar->radiusSpin->value());
 	settings.setValue("spinAngle", drawToolbarContext2->spinAngle->value());
 	settings.setValue("spinSigmaX", drawToolbarContext2->spinSigmaX->value());
 	settings.setValue("spinSigmaY", drawToolbarContext2->spinSigmaY->value());
@@ -279,7 +279,6 @@ void MLDemos::LoadLayoutOptions()
 	settings.beginGroup("drawingOptions");
 	if(settings.contains("infoCheck")) drawToolbarContext1->randCombo->setCurrentIndex(settings.value("infoCheck").toInt());
 	if(settings.contains("spinAngle")) drawToolbarContext2->spinAngle->setValue(settings.value("spinAngle").toFloat());
-	if(settings.contains("spinSize")) drawToolbarContext1->spinSize->setValue(settings.value("spinSize").toFloat());
 	if(settings.contains("spinCount")) drawToolbarContext1->spinCount->setValue(settings.value("spinCount").toFloat());
 	if(settings.contains("spinSigmaX")) drawToolbarContext2->spinSigmaX->setValue(settings.value("spinSigmaX").toFloat());
 	if(settings.contains("spinSigmaY")) drawToolbarContext2->spinSigmaY->setValue(settings.value("spinSigmaY").toFloat());
@@ -292,7 +291,8 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("spinObsRepulsionY")) drawToolbarContext3->spinRepulsionY->setValue(settings.value("spinObsRepulsionY").toFloat());
 	if(settings.contains("spinRadius")) drawToolbarContext4->spinRadius->setValue(settings.value("spinRadius").toFloat());
 	if(settings.contains("spinAlpha")) drawToolbarContext4->spinAlpha->setValue(settings.value("spinAlpha").toFloat());
-	if(settings.contains("eraseCheck")) drawToolbar->eraseButton->setChecked(settings.value("eraseCheck").toBool());
+    if(settings.contains("spinSize")) drawToolbar->radiusSpin->setValue(settings.value("spinSize").toFloat());
+    if(settings.contains("eraseCheck")) drawToolbar->eraseButton->setChecked(settings.value("eraseCheck").toBool());
     if(settings.contains("sprayCheck")) drawToolbar->sprayButton->setChecked(settings.value("sprayCheck").toBool());
     if(settings.contains("spray3DCheck")) drawToolbar->spray3DButton->setChecked(settings.value("spray3DCheck").toBool());
     if(settings.contains("singleCheck")) drawToolbar->singleButton->setChecked(settings.value("singleCheck").toBool());

@@ -57,9 +57,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "compare.h"
 #include "widget.h"
 #include "drawTimer.h"
-#include "expose.h"
 #include "dataImporter.h"
 #include "datagenerator.h"
+#include "gridsearch.h"
 #include "glwidget.h"
 
 class MLDemos : public QMainWindow
@@ -74,7 +74,8 @@ private:
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
-    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *compareWidget, *projectWidget;
+    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *projectWidget;
+    QWidget *compareWidget;
 
     QNamedWindow *rocWidget, *crossvalidWidget;
 
@@ -92,7 +93,7 @@ private:
     Ui::optionsReinforcementWidget *optionsReinforcement;
 	Ui::optionsCompare *optionsCompare;
 	Ui::DrawingToolbar *drawToolbar;
-	Ui::DrawingToolbarContext1 *drawToolbarContext1;
+    Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
 	Ui::DrawingToolbarContext3 *drawToolbarContext3;
 	Ui::DrawingToolbarContext4 *drawToolbarContext4;
@@ -105,7 +106,7 @@ private:
 	DrawTimer *drawTimer;
 	QTime drawTime;
 	Canvas *canvas;
-    Expose *expose;
+    GridSearch *gridSearch;
     GLWidget *glw;
     DataImporter *import;
     DataGenerator *generator;
@@ -185,6 +186,9 @@ public:
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
     ivec sourceLabels;
+    ivec selectedData;
+    fvec selectionWeights;
+    fvec selectionStart;
 
     QMutex mutex;
 	void resizeEvent( QResizeEvent *event );
@@ -267,23 +271,16 @@ private slots:
 	void ToClipboard();
 
 	void DrawCrosshair();
-    void DrawNone();
-    void DrawSingle();
-    void DrawSpray();
-    void DrawSpray3D();
-    void DrawLine();
-	void DrawTrajectory();
-	void DrawEllipse();
-	void DrawErase();
-	void DrawObstacle();
-	void DrawPaint();
 	void Drawing(fvec sample, int label);
+    void Editing(int editType, fvec position, int label);
 	void DrawingStopped();
+    void DimPlus();
+    void DimLess();
 
     void ManualSelection();
     void InputDimensions();
-    void ExposeData();
-	void FitToData();
+    void ShowGridSearch();
+    void FitToData();
 	void ZoomChanged(float d);
     void UpdateLearnedModel();
 	void CanvasMoveEvent();

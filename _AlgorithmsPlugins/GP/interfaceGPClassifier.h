@@ -114,6 +114,13 @@ public:
       Loads the parameter from file (or from string for the compare dialog)
       */
     bool LoadParams(QString name, float value);
+
+    void SetParams(Classifier *classifier, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
+
 };
 
 #endif // _INTERFACEGPCLASSIFIER_H_

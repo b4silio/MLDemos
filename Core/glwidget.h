@@ -5,6 +5,9 @@
 #include <vector>
 #include <QGLWidget>
 
+class QGLShaderProgram;
+class QGLShader;
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
@@ -13,6 +16,7 @@ public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
     void clearLists();
+    void LoadShader(QString vshader, QString fshader);
 
 public slots:
     void setXRotation(int angle);
@@ -56,6 +60,9 @@ private:
     int width, height;
 
     QPoint lastPos;
+
+    QGLShaderProgram *ShaderProgram;
+    QGLShader *VertexShader, *FragmentShader;
 
 public:
     Canvas *canvas;

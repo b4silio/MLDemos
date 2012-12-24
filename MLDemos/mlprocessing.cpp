@@ -344,8 +344,8 @@ void MLDemos::Dynamize()
         }
         else
         {
-            pair<fvec,fvec> bounds = canvas->data->GetBounds();
-            Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
+            //pair<fvec,fvec> bounds = canvas->data->GetBounds();
+            //Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
         }
     }
 
@@ -1364,7 +1364,7 @@ void MLDemos::UpdateLearnedModel()
     if(classifier)
     {
         QMutexLocker lock(&mutex);
-        if(glw)
+        if(glw->isVisible())
         {
             glw->clearLists();
             if(canvas->canvasType == 1)
@@ -1385,7 +1385,7 @@ void MLDemos::UpdateLearnedModel()
     if(clusterer)
     {
         QMutexLocker lock(&mutex);
-        if(glw)
+        if(glw->isVisible())
         {
             glw->clearLists();
             if(canvas->canvasType == 1)
@@ -1399,79 +1399,74 @@ void MLDemos::UpdateLearnedModel()
     if(regressor)
     {
         QMutexLocker lock(&mutex);
-        if(glw)
+        glw->clearLists();
+        if(canvas->canvasType == 1)
         {
-            glw->clearLists();
-            if(canvas->canvasType == 1)
-            {
-                regressors[tabUsedForTraining]->DrawGL(canvas, glw, regressor);
-                if(canvas->data->GetDimCount() == 3) Draw3DRegressor(glw, regressor);
-            }
+            regressors[tabUsedForTraining]->DrawGL(canvas, glw, regressor);
+            if(canvas->data->GetDimCount() == 3) Draw3DRegressor(glw, regressor);
         }
-        else
-        {
-            regressors[tabUsedForTraining]->Draw(canvas, regressor);
-            // here we draw the errors for each sample
-            int outputDim = optionsRegress->outputDimCombo->currentIndex();
-            ivec inputDims = GetInputDimensions();
-            //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
-            if(inputDims.size()==1 && inputDims[0] == outputDim) return;
 
-            int outputIndexInList = -1;
-            FOR(i, inputDims.size()) if(outputDim == inputDims[i])
+        regressors[tabUsedForTraining]->Draw(canvas, regressor);
+        // here we draw the errors for each sample
+        int outputDim = optionsRegress->outputDimCombo->currentIndex();
+        ivec inputDims = GetInputDimensions();
+        //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
+        if(inputDims.size()==1 && inputDims[0] == outputDim) return;
+
+        int outputIndexInList = -1;
+        FOR(i, inputDims.size()) if(outputDim == inputDims[i])
+        {
+            outputIndexInList = i;
+            break;
+        }
+        if(canvas->data->GetDimCount() > 2 && canvas->canvasType == 0)
+        {
+            vector<fvec> samples = canvas->data->GetSamples();
+            vector<fvec> subsamples = canvas->data->GetSampleDims(inputDims, outputIndexInList==-1 ? outputDim : -1);
+            ivec labels = canvas->data->GetLabels();
+            QPainter painter(&canvas->maps.model);
+            painter.setRenderHint(QPainter::Antialiasing);
+            // we draw the starting sample
+            painter.setOpacity(0.4);
+            painter.setPen(Qt::black);
+            painter.setBrush(Qt::white);
+            FOR(i, samples.size())
             {
-                outputIndexInList = i;
-                break;
+                fvec sample = samples[i];
+                QPointF point = canvas->toCanvasCoords(sample);
+                painter.drawEllipse(point, 6,6);
             }
-            if(canvas->data->GetDimCount() > 2 && canvas->canvasType == 0)
+            // we draw the estimated sample
+            painter.setPen(Qt::white);
+            painter.setBrush(Qt::black);
+            FOR(i, samples.size())
             {
-                vector<fvec> samples = canvas->data->GetSamples();
-                vector<fvec> subsamples = canvas->data->GetSampleDims(inputDims, outputIndexInList==-1 ? outputDim : -1);
-                ivec labels = canvas->data->GetLabels();
-                QPainter painter(&canvas->maps.model);
-                painter.setRenderHint(QPainter::Antialiasing);
-                // we draw the starting sample
-                painter.setOpacity(0.4);
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::white);
-                FOR(i, samples.size())
-                {
-                    fvec sample = samples[i];
-                    QPointF point = canvas->toCanvasCoords(sample);
-                    painter.drawEllipse(point, 6,6);
-                }
-                // we draw the estimated sample
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::black);
-                FOR(i, samples.size())
-                {
-                    fvec sample = samples[i];
-                    fvec estimate = regressor->Test(subsamples[i]);
-                    sample[outputDim] = estimate[0];
-                    QPointF point2 = canvas->toCanvasCoords(sample);
-                    painter.drawEllipse(point2, 5,5);
-                }
-                painter.setOpacity(1);
-                // we draw the error bars
-                FOR(i, samples.size())
-                {
-                    fvec sample = samples[i];
-                    fvec estimate = regressor->Test(subsamples[i]);
-                    QPointF point = canvas->toCanvasCoords(sample);
-                    sample[outputDim] = estimate[0];
-                    QPointF point2 = canvas->toCanvasCoords(sample);
-                    QColor color = SampleColor[labels[i]%SampleColorCnt];
-                    if(!labels[i]) color = Qt::black;
-                    painter.setPen(QPen(color, 1));
-                    painter.drawLine(point, point2);
-                }
+                fvec sample = samples[i];
+                fvec estimate = regressor->Test(subsamples[i]);
+                sample[outputDim] = estimate[0];
+                QPointF point2 = canvas->toCanvasCoords(sample);
+                painter.drawEllipse(point2, 5,5);
+            }
+            painter.setOpacity(1);
+            // we draw the error bars
+            FOR(i, samples.size())
+            {
+                fvec sample = samples[i];
+                fvec estimate = regressor->Test(subsamples[i]);
+                QPointF point = canvas->toCanvasCoords(sample);
+                sample[outputDim] = estimate[0];
+                QPointF point2 = canvas->toCanvasCoords(sample);
+                QColor color = SampleColor[labels[i]%SampleColorCnt];
+                if(!labels[i]) color = Qt::black;
+                painter.setPen(QPen(color, 1));
+                painter.drawLine(point, point2);
             }
         }
     }
     if(dynamical)
     {
         QMutexLocker lock(&mutex);
-        if(glw)
+        if(glw->isVisible())
         {
             glw->clearLists();
             if(canvas->canvasType == 1)
@@ -1540,8 +1535,8 @@ void MLDemos::UpdateLearnedModel()
                 }
                 else
                 {
-                    pair<fvec,fvec> bounds = canvas->data->GetBounds();
-                    Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
+                    //pair<fvec,fvec> bounds = canvas->data->GetBounds();
+                    //Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
                 }
             }
 
@@ -1562,7 +1557,7 @@ void MLDemos::UpdateLearnedModel()
     }
     if(!canvas->canvasType && projector)
     {
-        if(glw)
+        if(glw->isVisible())
         {
             glw->clearLists();
             if(canvas->canvasType == 1)

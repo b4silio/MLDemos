@@ -63,9 +63,10 @@ public:
 	Canvas(QWidget *parent);
 	~Canvas();
 
-	bool DeleteData(QPointF center, float radius);
-	static bool bCrossesAsDots;
-	void DrawSamples();
+    static bool bCrossesAsDots;
+    bool DeleteData(QPointF center, float radius);
+    ivec SelectSamples(QPointF center, float radius, fvec *weights=0);
+    void DrawSamples();
 	void DrawObstacles();
 	void DrawTrajectories();
 	void DrawTimeseries();

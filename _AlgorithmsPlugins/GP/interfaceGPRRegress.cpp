@@ -82,6 +82,96 @@ void RegrGPR::SetParams(Regressor *regressor)
     gpr->SetParams(kernelGamma, kernelNoise, capacity, kernelType, kernelDegree, bOptimize, bUseLikelihood);
 }
 
+fvec RegrGPR::GetParams()
+{
+    int kernelType = params->kernelTypeCombo->currentIndex();
+    float kernelGamma = params->kernelWidthSpin->value();
+    float kernelDegree = params->kernelDegSpin->value();
+    int capacity = params->capacitySpin->value();
+    bool bSparse = params->sparseCheck->isChecked();
+    double kernelNoise = params->noiseSpin->value();
+    bool bOptimize = params->optimizeCheck->isChecked();
+    bool bUseLikelihood = params->optimizeCombo->currentIndex() == 0;
+    fvec par(7);
+    par[0] = kernelType;
+    par[1] = kernelGamma;
+    par[2] = kernelDegree;
+    par[3] = capacity;
+    par[4] = kernelNoise;
+    par[5] = bOptimize;
+    par[6] = bUseLikelihood;
+    return par;
+}
+
+void RegrGPR::SetParams(Regressor *regressor, fvec parameters)
+{
+    if(!regressor) return;
+    RegressorGPR *gpr = dynamic_cast<RegressorGPR*>(regressor);
+    if(!gpr) return;
+
+    int i = 0;
+    int kernelType = parameters.size() > i ? parameters[i] : 0; i++;
+    float kernelGamma = parameters.size() > i ? parameters[i] : 0; i++;
+    float kernelDegree = parameters.size() > i ? parameters[i] : 0; i++;
+    int capacity = parameters.size() > i ? parameters[i] : 0; i++;
+    bool bSparse = parameters.size() > i ? parameters[i] : 0; i++;
+    double kernelNoise = parameters.size() > i ? parameters[i] : 0; i++;
+    bool bOptimize = parameters.size() > i ? parameters[i] : 0; i++;
+    bool bUseLikelihood = parameters.size() > i ? parameters[i] : 0; i++;
+    if(bSparse) capacity = -1;
+    gpr->SetParams(kernelGamma, kernelNoise, capacity, kernelType, kernelDegree, bOptimize, bUseLikelihood);
+}
+
+void RegrGPR::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("kernelType");
+    parameterNames.push_back("kernelGamma");
+    parameterNames.push_back("kernelDegree");
+    parameterNames.push_back("capacity");
+    parameterNames.push_back("bSparse");
+    parameterNames.push_back("kernelNoise");
+    parameterNames.push_back("bOptimize");
+    parameterNames.push_back("bUseLikelihood");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("99999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001f");
+    parameterValues.back().push_back("999999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+}
+
 QString RegrGPR::GetAlgoString()
 {
     float capacity = params->capacitySpin->value();

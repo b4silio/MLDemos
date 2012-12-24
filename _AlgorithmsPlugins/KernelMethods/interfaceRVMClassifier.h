@@ -50,6 +50,11 @@ public:
     bool LoadOptions(QSettings &settings);
     void SaveParams(QTextStream &stream);
     bool LoadParams(QString name, float value);
+    void SetParams(Classifier *classifier, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 public slots:
     void ChangeOptions();
 };

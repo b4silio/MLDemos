@@ -885,6 +885,9 @@ void Canvas::DrawSamples()
         maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
+        //maps.model = QPixmap(w,h);
+        //maps.model.setMask(bitmap);
+        //maps.model.fill(Qt::transparent);
     }
     QPainter painter(&maps.samples);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -1513,6 +1516,50 @@ QPixmap Canvas::GetScreenshot()
     }
     bShowCrosshair = tmp;
     return screenshot;
+}
+
+ivec Canvas::SelectSamples(QPointF center, float radius , fvec *weights)
+{
+    ivec selection;
+    if(weights) (*weights).clear();
+    int closest = 0;
+    float minDist = FLT_MAX;
+    FOR(i, data->GetCount())
+    {
+        QPointF dataPoint = toCanvasCoords(data->GetSample(i));
+        QPointF point = this->mapToParent(QPoint(dataPoint.x(), dataPoint.y()));
+        point -= center;
+        float dist = point.x()*point.x() + point.y()*point.y();
+        if(radius > 0)
+        {
+            if(!weights)
+            {
+                if(sqrtf(dist) < radius) selection.push_back(i);
+            }
+            else
+            {
+                if(sqrtf(dist) < radius*1.5f)
+                {
+                    selection.push_back(i);
+                    float weight = sqrtf(dist)/radius;
+                    (*weights).push_back(weight);
+                }
+            }
+        }
+        else
+        {
+            if(dist < minDist)
+            {
+                closest = i;
+                minDist = dist;
+            }
+        }
+    }
+    if(radius < 0)
+    {
+        selection.push_back(closest);
+    }
+    return selection;
 }
 
 bool Canvas::DeleteData( QPointF center, float radius )

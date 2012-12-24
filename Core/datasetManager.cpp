@@ -63,7 +63,6 @@ void DatasetManager::AddSample(fvec sample, int label, dsmFlags flag)
 {
 	if (!sample.size()) return;
 	size = sample.size();
-
 	samples.push_back(sample);
 	labels.push_back(label);
 	flags.push_back(flag);

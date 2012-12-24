@@ -22,6 +22,9 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     xRot = yRot = zRot = 0;
     xPos = yPos = zPos = 0.f;
 
+    ShaderProgram = NULL;
+    VertexShader = FragmentShader = NULL;
+
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(advanceGears()));
     timer->start(20);
@@ -222,6 +225,8 @@ void GLWidget::initializeGL()
     glDepthFunc(GL_LEQUAL);
 
     glEnable( GL_POINT_SMOOTH );
+
+    //LoadShader("../../../Basic.vsh", "../../../Basic.fsh");
 
     //glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
@@ -657,3 +662,54 @@ void GLWidget::normalizeAngle(int *angle)
 
 GLuint *GLWidget::textureNames = new GLuint[textureCount];
 unsigned char **GLWidget::textureData = 0;
+
+void GLWidget::LoadShader(QString vshader, QString fshader)
+{
+    if(ShaderProgram)
+        {
+        ShaderProgram->release();
+        ShaderProgram->removeAllShaders();
+        }
+    else ShaderProgram = new QGLShaderProgram;
+
+    if(VertexShader)
+        {
+        delete VertexShader;
+        VertexShader = NULL;
+        }
+
+    if(FragmentShader)
+        {
+        delete FragmentShader;
+        FragmentShader = NULL;
+        }
+
+    // load and compile vertex shader
+    QFileInfo vsh(vshader);
+    if(vsh.exists())
+        {
+        VertexShader = new QGLShader(QGLShader::Vertex);
+        if(VertexShader->compileSourceFile(vshader))
+            ShaderProgram->addShader(VertexShader);
+        else qWarning() << "Vertex Shader Error" << VertexShader->log();
+        }
+    else qWarning() << "Vertex Shader source file " << vshader << " not found.";
+
+
+    // load and compile fragment shader
+    QFileInfo fsh(fshader);
+    if(fsh.exists())
+        {
+        FragmentShader = new QGLShader(QGLShader::Fragment);
+        if(FragmentShader->compileSourceFile(fshader))
+            ShaderProgram->addShader(FragmentShader);
+        else qWarning() << "Fragment Shader Error" << FragmentShader->log();
+        }
+    else qWarning() << "Fragment Shader source file " << fshader << " not found.";
+
+    if(!ShaderProgram->link())
+        {
+        qWarning() << "Shader Program Linker Error" << ShaderProgram->log();
+        }
+    else ShaderProgram->bind();
+}

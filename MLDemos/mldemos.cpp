@@ -38,7 +38,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     : QMainWindow(parent, flags),
       canvas(0),
       glw(0),
-      expose(0),
+      gridSearch(0),
       classifier(0),
       regressor(0),
       dynamical(0),
@@ -224,30 +224,65 @@ void MLDemos::initToolBars()
     drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
     drawToolbar->singleButton->setIconSize(iconSize);
     drawToolbar->singleButton->setText("");
+    drawToolbar->singleButton->setAutoExclusive(true);
     drawToolbar->sprayButton->setIcon(QIcon(":/MLDemos/icons/airbrush.png"));
     drawToolbar->sprayButton->setIconSize(iconSize);
     drawToolbar->sprayButton->setText("");
+    drawToolbar->sprayButton->setAutoExclusive(true);
     drawToolbar->spray3DButton->setIcon(QIcon(":/MLDemos/icons/airbrush3D.png"));
     drawToolbar->spray3DButton->setIconSize(iconSize);
     drawToolbar->spray3DButton->setText("");
+    drawToolbar->spray3DButton->setAutoExclusive(true);
     drawToolbar->eraseButton->setIcon(QIcon(":/MLDemos/icons/erase.png"));
     drawToolbar->eraseButton->setIconSize(iconSize);
     drawToolbar->eraseButton->setText("");
+    drawToolbar->eraseButton->setAutoExclusive(true);
     drawToolbar->trajectoryButton->setIcon(QIcon(":/MLDemos/icons/trajectory.png"));
     drawToolbar->trajectoryButton->setIconSize(iconSize);
     drawToolbar->trajectoryButton->setText("");
+    drawToolbar->trajectoryButton->setAutoExclusive(true);
     drawToolbar->lineButton->setIcon(QIcon(":/MLDemos/icons/line.png"));
     drawToolbar->lineButton->setIconSize(iconSize);
     drawToolbar->lineButton->setText("");
+    drawToolbar->lineButton->setAutoExclusive(true);
     drawToolbar->ellipseButton->setIcon(QIcon(":/MLDemos/icons/ellipse.png"));
     drawToolbar->ellipseButton->setIconSize(iconSize);
     drawToolbar->ellipseButton->setText("");
+    drawToolbar->ellipseButton->setAutoExclusive(true);
     drawToolbar->paintButton->setIcon(QIcon(":/MLDemos/icons/bigbrush.png"));
     drawToolbar->paintButton->setIconSize(iconSize);
     drawToolbar->paintButton->setText("");
+    drawToolbar->paintButton->setAutoExclusive(true);
     drawToolbar->obstacleButton->setIcon(QIcon(":/MLDemos/icons/obstacle.png"));
     drawToolbar->obstacleButton->setIconSize(iconSize);
     drawToolbar->obstacleButton->setText("");
+    drawToolbar->obstacleButton->setAutoExclusive(true);
+    drawToolbar->dragButton->setAutoExclusive(true);
+    drawToolbar->dragButton->setIcon(QIcon(":/MLDemos/icons/drag.png"));
+    drawToolbar->dragButton->setIconSize(iconSize);
+    drawToolbar->dragButton->setText("");
+    drawToolbar->moveButton->setAutoExclusive(true);
+    drawToolbar->moveButton->setIcon(QIcon(":/MLDemos/icons/move.png"));
+    drawToolbar->moveButton->setIconSize(iconSize);
+    drawToolbar->moveButton->setText("");
+    drawToolbar->extrudeButton->setAutoExclusive(true);
+    drawToolbar->extrudeButton->setIcon(QIcon(":/MLDemos/icons/extrude.png"));
+    drawToolbar->extrudeButton->setIconSize(iconSize);
+    drawToolbar->extrudeButton->setText("");
+    drawToolbar->dimPlusButton->setAutoExclusive(true);
+    drawToolbar->dimPlusButton->setIcon(QIcon(":/MLDemos/icons/dimplus.png"));
+    drawToolbar->dimPlusButton->setIconSize(iconSize);
+    drawToolbar->dimPlusButton->setText("");
+    drawToolbar->dimLessButton->setAutoExclusive(true);
+    drawToolbar->dimLessButton->setIcon(QIcon(":/MLDemos/icons/dimless.png"));
+    drawToolbar->dimLessButton->setIconSize(iconSize);
+    drawToolbar->dimLessButton->setText("");
+    drawToolbar->sprayClassButton->setAutoExclusive(true);
+    drawToolbar->sprayClassButton->setIcon(QIcon(":/MLDemos/icons/sprayclass.png"));
+    drawToolbar->sprayClassButton->setIconSize(iconSize);
+    drawToolbar->sprayClassButton->setText("");
+    connect(drawToolbar->dimPlusButton, SIGNAL(clicked()), this, SLOT(DimPlus()));
+    connect(drawToolbar->dimLessButton, SIGNAL(clicked()), this, SLOT(DimLess()));
 }
 
 void MLDemos::initDialogs()
@@ -304,16 +339,6 @@ void MLDemos::initDialogs()
     connect(inputDimensions->clearSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsClear()));
     connect(inputDimensions->invertSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsInvert()));
     connect(inputDimensions->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsRandom()));
-
-    connect(drawToolbar->singleButton, SIGNAL(clicked()), this, SLOT(DrawSingle()));
-    connect(drawToolbar->sprayButton, SIGNAL(clicked()), this, SLOT(DrawSpray()));
-    connect(drawToolbar->spray3DButton, SIGNAL(clicked()), this, SLOT(DrawSpray3D()));
-    connect(drawToolbar->lineButton, SIGNAL(clicked()), this, SLOT(DrawLine()));
-    connect(drawToolbar->ellipseButton, SIGNAL(clicked()), this, SLOT(DrawEllipse()));
-    connect(drawToolbar->eraseButton, SIGNAL(clicked()), this, SLOT(DrawErase()));
-    connect(drawToolbar->trajectoryButton, SIGNAL(clicked()), this, SLOT(DrawTrajectory()));
-    connect(drawToolbar->obstacleButton, SIGNAL(clicked()), this, SLOT(DrawObstacle()));
-    connect(drawToolbar->paintButton, SIGNAL(clicked()), this, SLOT(DrawPaint()));
 
     connect(displayOptions->clipboardButton, SIGNAL(clicked()), this, SLOT(ToClipboard()));
     connect(displayOptions->mapCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
@@ -528,7 +553,7 @@ void MLDemos::initDialogs()
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
     connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
 
-    expose = new Expose(canvas);
+    gridSearch = new GridSearch(canvas);
     import = new DataImporter();
     generator = new DataGenerator(canvas);
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
@@ -536,6 +561,7 @@ void MLDemos::initDialogs()
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
     connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
+    gridSearch->show();
 }
 
 void MLDemos::initPlugins()
@@ -800,6 +826,11 @@ void MLDemos::HideContextMenus()
     drawContext4Widget->hide();
 }
 
+void MLDemos::ShowGridSearch()
+{
+    gridSearch->show();
+}
+
 void MLDemos::AddPlugin(InputOutputInterface *iIO)
 {
     inputoutputs.push_back(iIO);
@@ -1002,6 +1033,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["classifiers"][i]->show();
             else algoWidgets["classifiers"][i]->hide();
         }
+        if(index != -1 && index < classifiers.size()) gridSearch->SetClassifier(classifiers[index]);
     }
     if(algorithmOptions->tabClust->isVisible())
     {
@@ -1011,6 +1043,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["clusterers"][i]->show();
             else algoWidgets["clusterers"][i]->hide();
         }
+        if(index != -1 && index < clusterers.size()) gridSearch->SetClusterer(clusterers[index]);
     }
     if(algorithmOptions->tabDyn->isVisible())
     {
@@ -1020,6 +1053,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["dynamicals"][i]->show();
             else algoWidgets["dynamicals"][i]->hide();
         }
+        if(index != -1 && index < dynamicals.size()) gridSearch->SetDynamical(dynamicals[index]);
     }
     if(algorithmOptions->tabMax->isVisible())
     {
@@ -1029,6 +1063,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["maximizers"][i]->show();
             else algoWidgets["maximizers"][i]->hide();
         }
+        if(index != -1 && index < maximizers.size()) gridSearch->SetMaximizer(maximizers[index]);
     }
     if(algorithmOptions->tabProj->isVisible())
     {
@@ -1038,6 +1073,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["projectors"][i]->show();
             else algoWidgets["projectors"][i]->hide();
         }
+        if(index != -1 && index < projectors.size()) gridSearch->SetProjector(projectors[index]);
     }
     if(algorithmOptions->tabRegr->isVisible())
     {
@@ -1047,6 +1083,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["regressors"][i]->show();
             else algoWidgets["regressors"][i]->hide();
         }
+        if(index != -1 && index < regressors.size()) gridSearch->SetRegressor(regressors[index]);
     }
     if(algorithmOptions->tabReinf->isVisible())
     {
@@ -1056,6 +1093,7 @@ void MLDemos::AlgoChanged()
             if(i==index) algoWidgets["reinforcements"][i]->show();
             else algoWidgets["reinforcements"][i]->hide();
         }
+        if(index != -1 && index < reinforcements.size()) gridSearch->SetReinforcement(reinforcements[index]);
     }
 
     ChangeInfoFile();
@@ -1063,19 +1101,16 @@ void MLDemos::AlgoChanged()
     if(algorithmOptions->tabMax->isVisible() || algorithmOptions->tabReinf->isVisible())
     {
         drawToolbar->paintButton->setChecked(true);
-        DrawPaint();
     }
     if(algorithmOptions->tabDyn->isVisible())
     {
         drawToolbar->trajectoryButton->setChecked(true);
-        DrawTrajectory();
     }
     if(algorithmOptions->tabRegr->isVisible() || algorithmOptions->tabClass->isVisible() || algorithmOptions->tabClust->isVisible() || algorithmOptions->tabProj->isVisible())
     {
         if(!drawToolbar->sprayButton->isChecked() && !drawToolbar->spray3DButton->isChecked())
         {
             drawToolbar->sprayButton->setChecked(true);
-            DrawSpray();
         }
     }
 }
@@ -1411,155 +1446,6 @@ void MLDemos::ShiftDimensions()
         canvas->data->SetSamples(samples);
     }
     DisplayOptionChanged();
-}
-
-
-void MLDemos::DrawNone()
-{
-    drawToolbar->singleButton->setChecked(false);
-    drawToolbar->sprayButton->setChecked(false);
-    drawToolbar->spray3DButton->setChecked(false);
-    drawToolbar->eraseButton->setChecked(false);
-    drawToolbar->ellipseButton->setChecked(false);
-    drawToolbar->lineButton->setChecked(false);
-    drawToolbar->trajectoryButton->setChecked(false);
-    drawToolbar->obstacleButton->setChecked(false);
-    drawToolbar->paintButton->setChecked(false);
-}
-
-void MLDemos::DrawSingle()
-{
-    if(drawToolbar->singleButton->isChecked())
-    {
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawSpray()
-{
-    if(drawToolbar->sprayButton->isChecked())
-    {
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawSpray3D()
-{
-    if(drawToolbar->spray3DButton->isChecked())
-    {
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawErase()
-{
-    if(drawToolbar->eraseButton->isChecked())
-    {
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawLine()
-{
-    if(drawToolbar->lineButton->isChecked())
-    {
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawEllipse()
-{
-    if(drawToolbar->ellipseButton->isChecked())
-    {
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawTrajectory()
-{
-    if(drawToolbar->trajectoryButton->isChecked())
-    {
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawObstacle()
-{
-    if(drawToolbar->obstacleButton->isChecked())
-    {
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->paintButton->setChecked(false);
-    }
-}
-
-void MLDemos::DrawPaint()
-{
-    if(drawToolbar->paintButton->isChecked())
-    {
-        drawToolbar->eraseButton->setChecked(false);
-        drawToolbar->singleButton->setChecked(false);
-        drawToolbar->sprayButton->setChecked(false);
-        drawToolbar->spray3DButton->setChecked(false);
-        drawToolbar->ellipseButton->setChecked(false);
-        drawToolbar->lineButton->setChecked(false);
-        drawToolbar->trajectoryButton->setChecked(false);
-        drawToolbar->obstacleButton->setChecked(false);
-    }
 }
 
 void MLDemos::AvoidOptionChanged()
@@ -1923,17 +1809,30 @@ void MLDemos::InputDimensionsRandom()
 void MLDemos::DrawCrosshair()
 {
     int drawType = 0;
-    if(drawToolbar->singleButton->isChecked()) drawType = 1;
-    if(drawToolbar->sprayButton->isChecked()) drawType = 2;
-    if(drawToolbar->spray3DButton->isChecked()) drawType = 2;
-    if(drawToolbar->eraseButton->isChecked()) drawType = 3;
-    if(drawToolbar->ellipseButton->isChecked()) drawType = 4;
-    if(drawToolbar->lineButton->isChecked()) drawType = 5;
-    if(drawToolbar->trajectoryButton->isChecked()) drawType = 6;
-    if(drawToolbar->obstacleButton->isChecked()) drawType = 7;
-    if(drawToolbar->paintButton->isChecked()) drawType = 8;
+    if(drawToolbar->tabWidget->currentIndex() == 0) // drawingTab
+    {
+        if(drawToolbar->singleButton->isChecked()) drawType = 1;
+        if(drawToolbar->sprayButton->isChecked()) drawType = 2;
+        if(drawToolbar->spray3DButton->isChecked()) drawType = 9;
+        if(drawToolbar->trajectoryButton->isChecked()) drawType = 6;
+        if(drawToolbar->obstacleButton->isChecked()) drawType = 7;
+        if(drawToolbar->paintButton->isChecked()) drawType = 8;
+        if(drawToolbar->eraseButton->isChecked()) drawType = 3;
+    }
+    else if(drawToolbar->tabWidget->currentIndex() == 1) // editTab
+    {
+        if(drawToolbar->dragButton->isChecked()) drawType = -1;
+        if(drawToolbar->moveButton->isChecked()) drawType = -2;
+        if(drawToolbar->extrudeButton->isChecked()) drawType = -3;
+        if(drawToolbar->sprayClassButton->isChecked()) drawType = -4;
+    }
+    else if(drawToolbar->tabWidget->currentIndex() == 2)
+    {
+        if(drawToolbar->ellipseButton->isChecked()) drawType = 4;
+        if(drawToolbar->lineButton->isChecked()) drawType = 5;
+    }
 
-    if(!drawType || drawType == 1 || drawType == 6)
+    if(!drawType || drawType == 1 || drawType == 6 || drawType == -1 || drawType == -3)
     {
         canvas->crosshair = QPainterPath();
         canvas->bNewCrosshair = false;
@@ -1943,9 +1842,9 @@ void MLDemos::DrawCrosshair()
     float aX = drawToolbarContext2->spinSigmaX->value();
     float aY = drawToolbarContext2->spinSigmaY->value();
     float angle = -drawToolbarContext2->spinAngle->value()/180.f*PIf;
-    float s = drawToolbarContext1->spinSize->value();
+    float s = drawToolbar->radiusSpin->value();
+    //float s = drawToolbarContext1->spinSize->value();
     int size = (int)(s*canvas->height());
-    int sizeX = (int)(aX*canvas->height());
     int Size = canvas->height();
 
     QPainterPath cursor;
@@ -1971,6 +1870,9 @@ void MLDemos::DrawCrosshair()
         break;
     case 2: // spray
     case 3: // erase
+    case 9: // spray 3D
+    case -2: // move points
+    case -4:  // spray class
     {
         cursor.addEllipse(QPoint(0,0),size/2,size/2);
         canvas->crosshair = cursor;
@@ -2042,16 +1944,35 @@ void MLDemos::Drawing( fvec sample, int label)
 {
     if(canvas->canvasType) return;
     int drawType = 0; // none
-    if(drawToolbar->singleButton->isChecked()) drawType = 1;
-    if(drawToolbar->sprayButton->isChecked()) drawType = 2;
-    if(drawToolbar->spray3DButton->isChecked()) drawType = 9;
-    if(drawToolbar->eraseButton->isChecked()) drawType = 3;
-    if(drawToolbar->ellipseButton->isChecked()) drawType = 4;
-    if(drawToolbar->lineButton->isChecked()) drawType = 5;
-    if(drawToolbar->trajectoryButton->isChecked()) drawType = 6;
-    if(drawToolbar->obstacleButton->isChecked()) drawType = 7;
-    if(drawToolbar->paintButton->isChecked()) drawType = 8;
+    if(drawToolbar->tabWidget->currentIndex() == 0) // drawingTab
+    {
+        if(drawToolbar->singleButton->isChecked()) drawType = 1;
+        if(drawToolbar->sprayButton->isChecked()) drawType = 2;
+        if(drawToolbar->spray3DButton->isChecked()) drawType = 9;
+        if(drawToolbar->trajectoryButton->isChecked()) drawType = 6;
+        if(drawToolbar->obstacleButton->isChecked()) drawType = 7;
+        if(drawToolbar->paintButton->isChecked()) drawType = 8;
+        if(drawToolbar->eraseButton->isChecked()) drawType = 3;
+    }
+    else if(drawToolbar->tabWidget->currentIndex() == 1) // editTab
+    {
+        if(drawToolbar->dragButton->isChecked()) drawType = -1;
+        if(drawToolbar->moveButton->isChecked()) drawType = -2;
+        if(drawToolbar->extrudeButton->isChecked()) drawType = -3;
+        if(drawToolbar->sprayClassButton->isChecked()) drawType = -4;
+    }
+    else if(drawToolbar->tabWidget->currentIndex() == 2)
+    {
+        if(drawToolbar->ellipseButton->isChecked()) drawType = 4;
+        if(drawToolbar->lineButton->isChecked()) drawType = 5;
+    }
     if(!drawType) return;
+
+    if(drawType < 0)
+    {
+        Editing(-drawType, sample, label);
+        return;
+    }
 
     int speed = 6;
     bool bEmpty = canvas->data->GetCount() == 0;
@@ -2073,7 +1994,7 @@ void MLDemos::Drawing( fvec sample, int label)
         // we don't want to draw too often
         if(drawTime.elapsed() < 200/speed) return; // msec elapsed since last drawing
         int type = drawToolbarContext1->randCombo->currentIndex();
-        float s = drawToolbarContext1->spinSize->value();
+        float s = drawToolbar->radiusSpin->value();
         float size = s*canvas->height();
         int count = drawToolbarContext1->spinCount->value();
 
@@ -2119,12 +2040,20 @@ void MLDemos::Drawing( fvec sample, int label)
             //canvasSample.push_back(label ? RandN(1.f,0.5f) : RandN(-1.f,0.5f));
             //canvasSample.push_back(label ? RandN(-.5f,0.5f) : RandN(.5f,0.5f));
             canvas->data->AddSample(canvasSample, label);
+            if(bEmpty)
+            {
+                if(canvas->zooms.size() != dim)
+                {
+                    while(canvas->zooms.size() < dim) canvas->zooms.push_back(1.f);
+                    while(canvas->center.size() < dim) canvas->center.push_back(0.f);
+                }
+            }
         }
     }
         break;
     case 3: // erase
     {
-        float s = drawToolbarContext1->spinSize->value();
+        float s = drawToolbar->radiusSpin->value();
         float size = s*canvas->height();
         QPointF center = canvas->toCanvasCoords(sample);
         bool anythingDeleted = canvas->DeleteData(center, size/2);
@@ -2234,20 +2163,20 @@ void MLDemos::Drawing( fvec sample, int label)
         float alpha = drawToolbarContext4->spinAlpha->value();
         canvas->PaintReward(sample, radius, label ? alpha : -alpha);
         /*
-  // if we need to initialize the reward map
-  if(!canvas->data->GetReward()->rewards)
-  {
-   ivec size;
-   size.resize(2, 64);
-   int length = size[0]*size[1];
-   float *values = new float[length];
-   FOR(i, length) values[i] = rand()/(float)RAND_MAX - 0.5f;
-   canvas->data->GetReward()->SetReward(values, size, canvas->canvasTopLeft(), canvas->canvasBottomRight());
-   delete [] values;
-  }
-  canvas->data->GetReward()->ShiftValueAt(sample, 0.2, label ? 0.33 : -0.33);
-  //qDebug() << canvas->data->GetReward()->ValueAt(sample);
-  */
+      // if we need to initialize the reward map
+      if(!canvas->data->GetReward()->rewards)
+      {
+       ivec size;
+       size.resize(2, 64);
+       int length = size[0]*size[1];
+       float *values = new float[length];
+       FOR(i, length) values[i] = rand()/(float)RAND_MAX - 0.5f;
+       canvas->data->GetReward()->SetReward(values, size, canvas->canvasTopLeft(), canvas->canvasBottomRight());
+       delete [] values;
+      }
+      canvas->data->GetReward()->ShiftValueAt(sample, 0.2, label ? 0.33 : -0.33);
+      //qDebug() << canvas->data->GetReward()->ValueAt(sample);
+      */
     }
         break;
     }
@@ -2263,8 +2192,96 @@ void MLDemos::Drawing( fvec sample, int label)
     UpdateInfo();
 }
 
+void MLDemos::Editing(int editType, fvec position, int label)
+{
+    if(!selectedData.size()) // we're beginning our editing
+    {
+        QPointF center = canvas->toCanvasCoords(position);
+        float s = drawToolbar->radiusSpin->value();
+        float radius = s*canvas->height()/2;
+        switch(editType)
+        {
+        case 1: // drag a single point
+        {
+            selectedData = canvas->SelectSamples(center, -1);
+            selectionStart = position;
+        }
+            break;
+        case 2: // drag multiple points
+        {
+            selectedData = canvas->SelectSamples(center, radius, &selectionWeights);
+            selectionStart = position;
+        }
+            break;
+        case 3: // extrude points across the vertical
+        {
+            selectionStart = position;
+            selectedData = ivec(canvas->data->GetCount());
+            selectionWeights = fvec(canvas->data->GetCount());
+            int yIndex = canvas->yIndex;
+            selectionStart[yIndex] = canvas->center[yIndex];
+            FOR(i, selectedData.size()) selectedData[i] = i;
+            // we need to generate a fixed "spacing" so that we can 'scale' the samples
+            FOR(i, selectedData.size()) selectionWeights[i] = canvas->data->GetSample(i)[yIndex] + drand48()*2.f - 1.f;
+        }
+            break;
+        case 4: // change sample labels
+        {
+            int newLabel = drawToolbar->classSpin->value();
+            selectedData = canvas->SelectSamples(center, radius);
+            FOR(i, selectedData.size())
+            {
+                canvas->data->SetLabel(selectedData[i], newLabel);
+            }
+            selectedData.clear();
+        }
+            break;
+        }
+    }
+
+    switch(editType)
+    {
+    case 1:
+    case 2:
+    {
+        FOR(i, selectedData.size())
+        {
+            fvec sample = canvas->data->GetSample(selectedData[i]);
+            float weight = 1.f;
+            if(selectionWeights.size())
+            {
+                weight = max(cosf(max(0.f, selectionWeights[i]-0.75f)*(M_PI*0.75)),0.f);
+            }
+            sample += (position - selectionStart)*weight;
+            canvas->data->SetSample(selectedData[i], sample);
+        }
+        selectionStart = position;
+    }
+        break;
+    case 3:
+    {
+        int yIndex = canvas->yIndex;
+        float diff = (position - selectionStart)[yIndex];
+        FOR(i, selectedData.size())
+        {
+            fvec sample = canvas->data->GetSample(selectedData[i]);
+            sample[yIndex] = diff * selectionWeights[i];
+            canvas->data->SetSample(selectedData[i], sample);
+        }
+    }
+        break;
+    }
+
+    canvas->repaint();
+    canvas->ResetSamples();
+    ResetPositiveClass();
+    drawTime.restart();
+}
+
 void MLDemos::DrawingStopped()
 {
+    selectedData.clear();
+    selectionStart = fvec();
     if(trajectory.first != -1)
     {
         // the last point is a duplicate, we take it out
@@ -2287,13 +2304,56 @@ void MLDemos::DrawingStopped()
     }
 }
 
-void MLDemos::ExposeData()
+void MLDemos::DimPlus()
 {
-    if(!expose) return;
     if(!canvas->data->GetCount()) return;
-    //    if(!canvas->data->GetSamples()[0].size() <= 2) return;
-    expose->show();
-    expose->repaint();
+    vector<fvec> samples = canvas->data->GetSamples();
+    int dim = samples[0].size()+1;
+    FOR(i, samples.size())
+    {
+        samples[i].push_back(0);
+    }
+    canvas->data->SetSamples(samples);
+    canvas->zooms.push_back(1.f);
+    canvas->center.push_back(0.f);
+    canvas->ResetSamples();
+    ResetPositiveClass();
+    Clear();
+    if(canvas->canvasType == 0) ui.canvasX2Spin->setValue(dim);
+    canvas->repaint();
+}
+
+void MLDemos::DimLess()
+{
+    if(!canvas->data->GetCount()) return;
+    vector<fvec> samples = canvas->data->GetSamples();
+    int dim = samples[0].size();
+    switch(dim)
+    {
+    case 1:
+        break;
+    case 2:
+    {
+        FOR(i, samples.size()) samples[i][1] = 0;
+        canvas->data->SetSamples(samples);
+        canvas->center[1] = 0;
+        canvas->zooms[1] = 1.f;
+    }
+        break;
+    default:
+    {
+        FOR(i, samples.size()) samples[i].pop_back();
+        canvas->data->SetSamples(samples);
+        canvas->zooms.pop_back();
+        canvas->center.pop_back();
+        if(ui.canvasX2Spin->value() == dim) ui.canvasX2Spin->setValue(dim-1);
+    }
+        break;
+    }
+    canvas->ResetSamples();
+    ResetPositiveClass();
+    Clear();
+    canvas->repaint();
 }
 
 void MLDemos::FitToData()
@@ -2351,7 +2411,7 @@ void MLDemos::CanvasMoveEvent()
     UpdateLearnedModel();
 
     QMutexLocker lock(&mutex);
-    if(canvas->canvasType)
+    if(canvas->canvasType != 1)
     {
         if(classifier)
         {
@@ -2461,7 +2521,7 @@ void MLDemos::CanvasTypeChanged()
         canvas->Clear();
         canvas->repaint();
         ui.canvasWidget->repaint();
-//        ui.canvasWidget->hide();
+        //        ui.canvasWidget->hide();
         if(!ui.canvasArea->layout())
         {
             // this is an ugly hack that forces the layout behind to be drawn as a cleared image
@@ -2887,8 +2947,8 @@ void MLDemos::Load(QString filename)
     canvas->data->Load(filename.toAscii());
     MapFromReward();
     LoadParams(filename);
-//    QImage reward(filename + "-reward.png");
-//    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
+    //    QImage reward(filename + "-reward.png");
+    //    if(!reward.isNull()) canvas->maps.reward = QPixmap::fromImage(reward);
     ui.statusBar->showMessage("Data loaded successfully");
     ResetPositiveClass();
     optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
@@ -3151,7 +3211,8 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     ManualSelectionUpdated();
     optionsRegress->outputDimCombo->setCurrentIndex(optionsRegress->outputDimCombo->count()-1);
     CanvasOptionsChanged();
-    DrawNone();
+    drawToolbar->singleButton->setChecked(true);
+    drawToolbar->singleButton->setChecked(false);
     canvas->ResetSamples();
     canvas->repaint();
 }

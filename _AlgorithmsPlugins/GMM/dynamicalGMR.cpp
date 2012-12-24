@@ -33,7 +33,7 @@ void DynamicalGMR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	dim = trajectories[0][0].size()/2;
 	// we forget about time and just push in everything
 	vector<fvec> samples;
-	FOR(i, trajectories.size())
+    FOR(i, trajectories.size())
 	{
 		FOR(j, trajectories[i].size())
 		{

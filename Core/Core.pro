@@ -2,7 +2,7 @@
 # Configuration           #
 ###########################
 TEMPLATE = lib
-QT += svg
+QT += svg opengl
 NAME = Core
 MLPATH =..
 CONFIG += coreLib static

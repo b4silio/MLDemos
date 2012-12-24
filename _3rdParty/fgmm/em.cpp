@@ -318,7 +318,7 @@ int fgmm_kmeans( struct gmm * GMM,
         total_distance = fgmm_kmeans_e_step(GMM,data,data_length,pix);
         total_distance/=data_length;
 #ifndef NDEBUG
-        printf("Kmeans distance :: %f \n",total_distance);
+        //printf("Kmeans distance :: %f \n",total_distance);
 #endif
         // M step
         deltalik = total_distance - oldlik;
