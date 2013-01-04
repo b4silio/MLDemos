@@ -27,6 +27,17 @@ Projector *PCAProjection::GetProjector()
     return new ProjectorPCA();
 }
 
+fvec PCAProjection::GetParams()
+{
+    return fvec();
+}
+
+void PCAProjection::SetParams(Projector *projector, fvec parameters){}
+
+void PCAProjection::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues){}
+
 void PCAProjection::ShowEigenVectors()
 {
     if(!eigenWidget) return;

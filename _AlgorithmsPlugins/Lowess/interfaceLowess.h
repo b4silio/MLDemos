@@ -113,6 +113,11 @@ public:
       */
     bool LoadParams(QString name, float value);
 
+    void SetParams(Regressor *regressor, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // _INTERFACELOWESS_H_

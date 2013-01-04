@@ -132,6 +132,11 @@ void MLDemos::initToolBars()
     actionCompare->setStatusTip(tr("Compare Algorithms"));
     actionCompare->setCheckable(true);
 
+    actionGridsearch = new QAction(QIcon(":/MLDemos/icons/gridsearch.png"), tr("&Gridsearch"), this);
+    actionGridsearch->setShortcut(QKeySequence(tr("G")));
+    actionGridsearch->setStatusTip(tr("Grid Search Parameters"));
+    actionGridsearch->setCheckable(true);
+
     actionDrawSamples = new QAction(QIcon(":/MLDemos/icons/draw.png"), tr("&Drawing"), this);
     actionDrawSamples->setShortcut(QKeySequence(tr("W")));
     actionDrawSamples->setStatusTip(tr("Show Sample Drawing Options"));
@@ -169,6 +174,7 @@ void MLDemos::initToolBars()
     connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
     connect(actionAddData, SIGNAL(triggered()), this, SLOT(ShowAddData()));
+    connect(actionGridsearch, SIGNAL(triggered()), this, SLOT(ShowGridSearch()));
     connect(generator, SIGNAL(finished(int)), this, SLOT(HideAddData()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
@@ -199,12 +205,13 @@ void MLDemos::initToolBars()
     toolBar->addSeparator();
     toolBar->addAction(actionAlgorithms);
     toolBar->addAction(actionCompare);
+    toolBar->addAction(actionGridsearch);
     toolBar->addSeparator();
-    toolBar->addAction(actionAddData);
     toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
     toolBar->addSeparator();
     toolBar->addAction(actionDrawSamples);
+    toolBar->addAction(actionAddData);
     toolBar->addSeparator();
     toolBar->addAction(actionScreenshot);
     toolBar->addAction(actionDisplayOptions);
@@ -561,7 +568,6 @@ void MLDemos::initDialogs()
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
     connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
-    gridSearch->show();
 }
 
 void MLDemos::initPlugins()
@@ -824,11 +830,6 @@ void MLDemos::HideContextMenus()
     drawContext2Widget->hide();
     drawContext3Widget->hide();
     drawContext4Widget->hide();
-}
-
-void MLDemos::ShowGridSearch()
-{
-    gridSearch->show();
 }
 
 void MLDemos::AddPlugin(InputOutputInterface *iIO)
@@ -1204,6 +1205,18 @@ void MLDemos::ShowOptionCompare()
     else
     {
         compareWidget->hide();
+    }
+}
+
+void MLDemos::ShowGridSearch()
+{
+    if(actionGridsearch->isChecked())
+    {
+        gridSearch->show();
+    }
+    else
+    {
+        gridSearch->hide();
     }
 }
 

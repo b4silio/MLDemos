@@ -71,3 +71,5 @@ SOURCES += \
     reinforcementProblem.cpp \
     glwidget.cpp \
     glUtils.cpp
+
+RESOURCES +=

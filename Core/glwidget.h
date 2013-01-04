@@ -4,9 +4,20 @@
 #include <canvas.h>
 #include <vector>
 #include <QGLWidget>
+#include <QMatrix4x4>
 
+class QMatrix;
+class QMatrix4x4;
 class QGLShaderProgram;
 class QGLShader;
+
+struct GLObject
+{
+    QVector<QVector3D> vertices;
+    QVector<QVector3D> colors;
+    QString objectType;
+    QString surfaceType;
+};
 
 class GLWidget : public QGLWidget
 {
@@ -16,7 +27,22 @@ public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
     void clearLists();
-    void LoadShader(QString vshader, QString fshader);
+    void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
+    static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
+    {
+        glColor3f(c.redF(), c.greenF(), c.blueF());
+        float sX=0,sY=0,sZ=0;
+        if(xIndex >= 0) sX = sample[xIndex];
+        if(yIndex >= 0) sY = sample[yIndex];
+        if(zIndex >= 0) sZ = sample[zIndex];
+        glVertex3f(sX,sY,sZ);
+    }
+
+    static inline void glLine(fvec p1, fvec p2, int xIndex=0, int yIndex=1, int zIndex=2)
+    {
+        glVertex3f(p1[xIndex], p1[yIndex], zIndex >= 0 ? p1[zIndex] : 0.f);
+        glVertex3f(p2[xIndex], p2[yIndex], zIndex >= 0 ? p2[zIndex] : 0.f);
+    }
 
 public slots:
     void setXRotation(int angle);
@@ -44,15 +70,13 @@ protected:
     void wheelEvent(QWheelEvent *event);
     void resizeEvent(QResizeEvent *);
 
-private slots:
-    void advanceGears();
-
 private:
-    GLuint makeGear(const GLfloat *reflectance, GLdouble innerRadius,
-                    GLdouble outerRadius, GLdouble thickness,
-                    GLdouble toothSize, GLint toothCount);
     void normalizeAngle(int *angle);
 
+    QMatrix4x4 perspectiveMatrix;
+    QMatrix4x4 modelMatrix;
+    QVector4D viewport;
+    std::vector<GLObject> objects;
     int xRot, yRot, zRot;
     float xPos, yPos, zPos;
 
@@ -61,8 +85,7 @@ private:
 
     QPoint lastPos;
 
-    QGLShaderProgram *ShaderProgram;
-    QGLShader *VertexShader, *FragmentShader;
+    std::map<QString, QGLShaderProgram*> shaders;
 
 public:
     Canvas *canvas;
@@ -78,22 +101,6 @@ public:
     static const int textureCount = 2; // 0: samples, 1: wide circle
     static GLuint *textureNames;
     static unsigned char **textureData;
-
-    static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
-    {
-        glColor3f(c.redF(), c.greenF(), c.blueF());
-        float sX=0,sY=0,sZ=0;
-        if(xIndex >= 0) sX = sample[xIndex];
-        if(yIndex >= 0) sY = sample[yIndex];
-        if(zIndex >= 0) sZ = sample[zIndex];
-        glVertex3f(sX,sY,sZ);
-    }
-
-    static inline void glLine(fvec p1, fvec p2, int xIndex=0, int yIndex=1, int zIndex=2)
-    {
-        glVertex3f(p1[xIndex], p1[yIndex], zIndex >= 0 ? p1[zIndex] : 0.f);
-        glVertex3f(p2[xIndex], p2[yIndex], zIndex >= 0 ? p2[zIndex] : 0.f);
-    }
 };
 
 #endif

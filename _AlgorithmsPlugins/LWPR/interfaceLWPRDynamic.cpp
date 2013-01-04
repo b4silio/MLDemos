@@ -39,6 +39,48 @@ void DynamicLWPR::SetParams(Dynamical *dynamical)
 	((DynamicalLWPR *)dynamical)->SetParams(delta, alpha, gen);
 }
 
+fvec DynamicLWPR::GetParams()
+{
+    fvec par(3);
+    par[0] = params->lwprGenSpin->value();
+    par[1] = params->lwprInitialDSpin->value();
+    par[2] = params->lwprAlphaSpin->value();
+    return par;
+}
+
+void DynamicLWPR::SetParams(Dynamical *dynamical, fvec parameters)
+{
+    if(!dynamical) return;
+    int gen = parameters.size() > 0 ? parameters[0] : 1;
+    int delta = parameters.size() > 1 ? parameters[1] : 0;
+    int alpha = parameters.size() > 2 ? parameters[2] : 0;
+    ((DynamicalLWPR *)dynamical)->SetParams(delta, alpha, gen);
+}
+
+void DynamicLWPR::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Generation Threshold");
+    parameterNames.push_back("Initial Receptive Field Width");
+    parameterNames.push_back("Alpha Learning Rate");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+}
+
 Dynamical *DynamicLWPR::GetDynamical()
 {
 	DynamicalLWPR *dynamical = new DynamicalLWPR();

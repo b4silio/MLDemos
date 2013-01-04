@@ -17,6 +17,17 @@ Projector *LDAProjection::GetProjector()
     return new ProjectorLDA();
 }
 
+fvec LDAProjection::GetParams()
+{
+    return fvec();
+}
+
+void LDAProjection::SetParams(Projector *projector, fvec parameters){}
+
+void LDAProjection::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues){}
+
 void LDAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;

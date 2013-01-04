@@ -84,7 +84,6 @@ void ClassGMM::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("K-Means");
 }
 
-
 QString ClassGMM::GetAlgoString()
 {
     int clusters = params->gmmCount->value();

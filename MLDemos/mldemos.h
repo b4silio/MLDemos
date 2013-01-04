@@ -70,7 +70,7 @@ private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
 	*actionClearData, *actionClearModel, *actionScreenshot,
-	*actionNew, *actionSave, *actionLoad;
+    *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
@@ -218,13 +218,14 @@ private slots:
 	void ShowStatsDialog();
 	void ShowToolbar();
     void ShowAddData();
-	void HideSampleDrawing();
+    void ShowGridSearch();
+    void HideSampleDrawing();
     void HideOptionDisplay();
     void HideOptionCompare();
     void HideStatsDialog();
 	void HideToolbar();
     void HideAddData();
-	void AvoidOptionChanged();
+    void AvoidOptionChanged();
 	void DisplayOptionChanged();
 	void ColorMapChanged();
     void ActivateIO();
@@ -279,7 +280,6 @@ private slots:
 
     void ManualSelection();
     void InputDimensions();
-    void ShowGridSearch();
     void FitToData();
 	void ZoomChanged(float d);
     void UpdateLearnedModel();

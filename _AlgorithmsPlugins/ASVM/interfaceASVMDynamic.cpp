@@ -51,6 +51,98 @@ void DynamicASVM::SetParams(Dynamical *dynamical)
     asvm->SetParams(clusters, kernelWidth, Cparam, alphaTol, betaTol, betaRelax, epsilon, maxIteration);
 }
 
+
+fvec DynamicASVM::GetParams()
+{
+    int clusters = params->gmmCount->value();
+    double alphaTol = params->alphaTolSpin->value();
+    double betaTol = params->betaTolSpin->value();
+    double betaRelax = params->betaRelaxSpin->value();
+    double Cparam = params->CSpin->value();
+    double kernelWidth = params->kernelWidthSpin->value();
+    double epsilon = params->epsilonSpin->value();
+    int maxIteration = params->iterationCount->value();
+
+    int i=0;
+    fvec par(8);
+    par[i++] = clusters;
+    par[i++] = alphaTol;
+    par[i++] = betaTol;
+    par[i++] = betaRelax;
+    par[i++] = Cparam;
+    par[i++] = kernelWidth;
+    par[i++] = epsilon;
+    par[i++] = maxIteration;
+    return par;
+}
+
+void DynamicASVM::SetParams(Dynamical *dynamical, fvec parameters)
+{
+    if(!dynamical) return;
+    DynamicalASVM *asvm = dynamic_cast<DynamicalASVM *>(dynamical);
+    if(!asvm) return;
+
+    int i=0;
+    int clusters = parameters.size() > i ? parameters[i] : 1; i++;
+    double alphaTol = parameters.size() > i ? parameters[i] : 1; i++;
+    double betaTol = parameters.size() > i ? parameters[i] : 1; i++;
+    double betaRelax = parameters.size() > i ? parameters[i] : 1; i++;
+    double Cparam = parameters.size() > i ? parameters[i] : 1; i++;
+    double kernelWidth = parameters.size() > i ? parameters[i] : 1; i++;
+    double epsilon = parameters.size() > i ? parameters[i] : 1; i++;
+    int maxIteration = parameters.size() > i ? parameters[i] : 1; i++;
+    asvm->SetParams(clusters, kernelWidth, Cparam, alphaTol, betaTol, betaRelax, epsilon, maxIteration);
+}
+
+void DynamicASVM::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Components");
+    parameterNames.push_back("Alpha Tolerance");
+    parameterNames.push_back("Beta Tolerance");
+    parameterNames.push_back("Beta Relaxation");
+    parameterNames.push_back("Penalty Cost (C)");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Epsilon");
+    parameterNames.push_back("Max Iterations");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("9999999");
+}
+
 Dynamical *DynamicASVM::GetDynamical()
 {
     DynamicalASVM *dynamical = new DynamicalASVM();

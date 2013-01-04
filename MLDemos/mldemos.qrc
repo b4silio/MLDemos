@@ -31,5 +31,8 @@
         <file>icons/drag.png</file>
         <file>icons/dimplus.png</file>
         <file>icons/dimless.png</file>
+        <file>icons/gridsearch.png</file>
+        <file>shaders/drawSamples.fsh</file>
+        <file>shaders/drawSamples.vsh</file>
     </qresource>
 </RCC>

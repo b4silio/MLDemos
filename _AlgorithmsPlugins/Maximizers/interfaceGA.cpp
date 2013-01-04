@@ -43,6 +43,58 @@ void MaximizeInterfaceGA::SetParams(Maximizer *maximizer)
 	((MaximizeGA *)maximizer)->SetParams(mutation, cross, survival, population);
 }
 
+fvec MaximizeInterfaceGA::GetParams()
+{
+    double mutation = params->mutationSpin->value();
+    double cross = params->crossSpin->value();
+    double survival = params->survivalSpin->value();
+    int population = params->populationSpin->value();
+
+    fvec par(4);
+    par[0] = mutation;
+    par[1] = cross;
+    par[2] = survival;
+    par[3] = population;
+    return par;
+}
+
+void MaximizeInterfaceGA::SetParams(Maximizer *maximizer, fvec parameters)
+{
+    int i=0;
+    double mutation = parameters.size() > i ? parameters[i] : 0; i++;
+    double cross = parameters.size() > i ? parameters[i] : 0.1;
+    double survival = parameters.size() > i ? parameters[i] : 10;
+    int population = parameters.size() > i ? parameters[i] : false;
+
+    ((MaximizeGA *)maximizer)->SetParams(mutation, cross, survival, population);
+}
+
+void MaximizeInterfaceGA::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Mutation Rate");
+    parameterNames.push_back("Crossover Rate");
+    parameterNames.push_back("Survival Rate");
+    parameterNames.push_back("Population Size");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+}
+
 QString MaximizeInterfaceGA::GetAlgoString()
 {
 	double mutation = params->mutationSpin->value();

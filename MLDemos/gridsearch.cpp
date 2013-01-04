@@ -57,7 +57,7 @@ GridSearch::~GridSearch()
 void GridSearch::Clipboard()
 {
     QClipboard *clipboard = QApplication::clipboard();
-    QPixmap screenshot = *ui->displayLabel->pixmap();
+    QPixmap screenshot = pixmap;
     if(screenshot.isNull()) return;
     clipboard->setImage(screenshot.toImage());
     clipboard->setPixmap(screenshot);
@@ -269,11 +269,13 @@ void GridSearch::DisplayResults()
     FOR(y, ySteps+1)
     {
         int h = y*pixmap.height()/(ySteps);
+        if(y == ySteps) h = pixmap.height()-1;
         painter.drawLine(0,h, pixmap.width(), h);
     }
     FOR(x, xSteps+1)
     {
         int w = x*pixmap.width()/(xSteps);
+        if(x == xSteps) w = pixmap.width()-1;
         painter.drawLine(w, 0, w, pixmap.height());
     }
 
@@ -537,6 +539,7 @@ void GridSearch::Run()
     mapX = xSteps;
     mapY = ySteps;
     DisplayResults();
+    repaint();
 }
 
 void GridSearch::OptionsChanged()
@@ -664,6 +667,8 @@ void GridSearch::SetClassifier(ClassifierInterface *c)
     maximizer = 0;
     reinforcement = 0;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -678,6 +683,8 @@ void GridSearch::SetClusterer(ClustererInterface *c)
     maximizer = 0;
     reinforcement = 0;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -692,6 +699,8 @@ void GridSearch::SetRegressor(RegressorInterface *c)
     maximizer = 0;
     reinforcement = 0;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -706,6 +715,8 @@ void GridSearch::SetDynamical(DynamicalInterface *c)
     maximizer = 0;
     reinforcement = 0;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -720,6 +731,8 @@ void GridSearch::SetAvoidance(AvoidanceInterface *c)
     maximizer = 0;
     reinforcement = 0;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -734,6 +747,8 @@ void GridSearch::SetMaximizer(MaximizeInterface *c)
     maximizer = c;
     reinforcement = 0;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -748,6 +763,8 @@ void GridSearch::SetReinforcement(ReinforcementInterface *c)
     maximizer = 0;
     reinforcement = c;
     projector = 0;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }
 
@@ -762,5 +779,7 @@ void GridSearch::SetProjector(ProjectorInterface *c)
     maximizer = 0;
     reinforcement = 0;
     projector = c;
+    pixmap = QPixmap();
+    mousePoint = QPoint(-1,-1);
     Update();
 }

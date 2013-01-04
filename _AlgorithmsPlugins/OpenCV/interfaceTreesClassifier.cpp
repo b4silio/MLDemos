@@ -66,6 +66,71 @@ void ClassTrees::SetParams(Classifier *classifier)
     trees->SetParams(bBalanceClasses, minSampleCount, maxDepth, maxTrees, accuracyTolerance);
 }
 
+fvec ClassTrees::GetParams()
+{
+    bool bBalanceClasses= params->balanceClassesCheck->isChecked();
+    int minSampleCount = params->sampleCountSpin->value();
+    int maxDepth = params->maxDepthSpin->value();
+    int maxTrees = params->maxTreesSpin->value();
+    float accuracyTolerance = params->accuracySpin->value();
+
+    fvec par(5);
+    par[0] = maxTrees;
+    par[1] = maxDepth;
+    par[2] = minSampleCount;
+    par[3] = bBalanceClasses;
+    par[4] = accuracyTolerance;
+    return par;
+}
+
+void ClassTrees::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    int maxTrees = parameters.size() > 0 ? parameters[0] : 1;
+    int maxDepth = parameters.size() > 1 ? parameters[1] : 1;
+    int minSampleCount = parameters.size() > 2 ? parameters[2] : 1;
+    bool bBalanceClasses = parameters.size() > 3 ? parameters[3] : false;
+    float accuracyTolerance = parameters.size() > 4 ? parameters[4] : 10;
+
+    ClassifierTrees *trees = dynamic_cast<ClassifierTrees *>(classifier);
+    if(!trees) return;
+    trees->SetParams(bBalanceClasses, minSampleCount, maxDepth, maxTrees, accuracyTolerance);
+}
+
+void ClassTrees::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Maximum Trees");
+    parameterNames.push_back("Maximum Depth");
+    parameterNames.push_back("Minimum Samples per Node");
+    parameterNames.push_back("Balance Classes");
+    parameterNames.push_back("Accuracy Tolerance");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("Trees");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999.f");
+}
+
 QString ClassTrees::GetAlgoString()
 {
     bool bBalanceClasses= params->balanceClassesCheck->isChecked();

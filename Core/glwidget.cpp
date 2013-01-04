@@ -22,11 +22,7 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     xRot = yRot = zRot = 0;
     xPos = yPos = zPos = 0.f;
 
-    ShaderProgram = NULL;
-    VertexShader = FragmentShader = NULL;
-
     QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(advanceGears()));
     timer->start(20);
 }
 
@@ -137,7 +133,6 @@ void GLWidget::initializeGL()
     glLightfv(GL_LIGHT0, GL_POSITION, position);
     glEnable(GL_NORMALIZE); // so that when we scale stuff, the lighting doesnt go bonkers
 
-
     textureData = new unsigned char*[textureCount];
     // first we generate the samples sprite (a circle with a black c)
     FOR(i, textureCount)
@@ -226,49 +221,18 @@ void GLWidget::initializeGL()
 
     glEnable( GL_POINT_SMOOTH );
 
-    //LoadShader("../../../Basic.vsh", "../../../Basic.fsh");
+    // We initialize the shaders
+    QGLShaderProgram *program=0;
+    LoadShader(&program,":/MLDemos/shaders/drawSamples.vsh",":/MLDemos/shaders/drawSamples.fsh");
+    program->bindAttributeLocation("vertex", 0);
+    program->bindAttributeLocation("color", 1);
+    shaders["Samples"] = program;
+    program = 0;
 
     //glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
 }
-/*
-void drawsilhouette(void)
-{
-  int i;
 
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  glEnable(GL_STENCIL_TEST);
-  glStencilFunc(GL_ALWAYS, 1, 1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-  glDisable(GL_DEPTH_TEST);  // so the depth buffer doesn't change
-  for (i = -1; i < 2; i += 2) {  // set stencil around object
-    glViewport(i, 0, winWidth + i, winHeight);
-    curobj();
-  }
-  for (i = -1; i < 2; i += 2) {
-    glViewport(0, i, winWidth, winHeight + i);
-    curobj();
-  }
-
-  // cut out stencil where object is
-  glViewport(0, 0, winWidth, winHeight);
-  glStencilFunc(GL_ALWAYS, 0, 0);
-  curobj();
-
-  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-  glStencilFunc(GL_EQUAL, 1, 1);
-
-  glDisable(GL_LIGHTING);
-  glColor3f(1.f, 0.f, 0.f);  // draw silhouette red
-  glRotatef(-viewangle, 0.f, 1.f, 0.f);
-  glRecti(-50, -50, 50, 50);
-  glRotatef(viewangle, 0.f, 1.f, 0.f);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHTING);
-  glDisable(GL_STENCIL_TEST);
-}
-*/
 void GLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -280,6 +244,13 @@ void GLWidget::paintGL()
     glRotated(zRot / 16.0, 0.0, 0.0, 1.0);
     glTranslatef(xPos, yPos, zPos);
 
+    /*
+    program->setUniformValue("matrix", modelMatrix);
+    program->enableAttributeArray(0);
+    program->enableAttributeArray(1);
+    program->setAttributeArray(0, vertices.constData());
+    program->setAttributeArray(1, texCoords.constData());
+    */
     if(canvas)
     {
         int xIndex = canvas->xIndex;
@@ -351,9 +322,55 @@ void GLWidget::paintGL()
             glPopAttrib();
         }
 
+        modelMatrix = perspectiveMatrix;
+        modelMatrix.rotate(xRot / 16.0, 1.0, 0.0, 0.0);
+        modelMatrix.rotate(yRot / 16.0, 0.0, 1.0, 0.0);
+        modelMatrix.rotate(zRot / 16.0, 0.0, 0.0, 1.0);
+        modelMatrix.translate(xPos, yPos, zPos);
+
+        QVector<QVector3D> vertices;
+        QVector<GLfloat> colors;
+        srand(1);
+        FOR(i, canvas->data->GetCount())
+        {
+            fvec sample = canvas->data->GetSample(i);
+            vertices.append(QVector3D(xIndex >= 0 ? sample[xIndex] : 0,
+                                      yIndex >= 0 ? sample[yIndex] : 0,
+                                      zIndex >= 0 ? sample[zIndex] : 0));
+            colors.append(canvas->data->GetLabel(i));
+        }
+
         // here we draw the canvas points
         if(canvas->data->GetCount())
         {
+            QGLShaderProgram *program = shaders["Samples"];
+            program->bind();
+            program->setUniformValue("matrix", modelMatrix);
+            program->setUniformValue("viewport", viewport);
+            program->enableAttributeArray(0);
+            program->enableAttributeArray(1);
+            program->setAttributeArray(0, vertices.constData());
+            program->setAttributeArray(1, colors.constData(),1);
+
+            glPushAttrib(GL_ALL_ATTRIB_BITS);
+            glDisable(GL_LIGHTING);
+            glDisable(GL_TEXTURE_2D);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
+            glEnable(GL_BLEND);
+            glEnable(GL_ALPHA_TEST);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+            glPointSize(12);
+
+            // we actually draw stuff!
+            glDrawArrays(GL_POINTS,0,vertices.size());
+
+            glPopAttrib();
+
+            program->release();
+
             if(canvas->bDisplaySamples || (canvas->sampleColors.size() == canvas->data->GetCount() && canvas->bDisplayLearned))
             {
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -361,6 +378,7 @@ void GLWidget::paintGL()
                 glDisable(GL_TEXTURE_2D);
                 glDepthMask(GL_TRUE);
 
+                /*
                 FOR(i, canvas->data->GetCount())
                 {
                     fvec sample = canvas->data->GetSample(i);
@@ -399,6 +417,7 @@ void GLWidget::paintGL()
 
                     glPopMatrix();
                 }
+                /**/
 
                 /*
                 glDisable(GL_LIGHTING);
@@ -427,7 +446,6 @@ void GLWidget::paintGL()
                 glDepthMask(GL_TRUE);
                 glEnd();
                 /**/
-
                 glPopAttrib();
             }
         }
@@ -441,7 +459,9 @@ void GLWidget::paintGL()
 
             // get gl matrices
             GLdouble modelMatrix[16];
+            GLdouble projectionMatrix[16];
             glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
             MathLib::Matrix4 model;
             FOR(j, 4)
             {
@@ -490,6 +510,7 @@ void GLWidget::zoom(int delta)
         zoomFactor *= 1.1;
     }
     resizeGL(width, height);
+    repaint();
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -499,6 +520,7 @@ void GLWidget::resizeGL(int width, int height)
 
     int side = qMin(width, height);
     glViewport(0,0,width, height);
+    viewport = QVector4D(0,0,width,height);
     //    glViewport((width - side) / 2, (height - side) / 2, side, side);
     float ratio = width/(float)height;
 
@@ -512,6 +534,11 @@ void GLWidget::resizeGL(int width, int height)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslated(0.0, 0.0, -40.0);
+
+    perspectiveMatrix.setToIdentity();
+    perspectiveMatrix.frustum(left*zoomFactor, right*zoomFactor,
+                              bottom*zoomFactor, top*zoomFactor, zNear, zFar);
+    perspectiveMatrix.translate(0,0,-40);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -559,99 +586,6 @@ void GLWidget::resizeEvent(QResizeEvent *event)
     resizeGL(event->size().width(), event->size().height());
 }
 
-void GLWidget::advanceGears()
-{
-    updateGL();
-}
-
-GLuint GLWidget::makeGear(const GLfloat *reflectance, GLdouble innerRadius,
-                          GLdouble outerRadius, GLdouble thickness,
-                          GLdouble toothSize, GLint toothCount)
-{
-    const double Pi = 3.14159265358979323846;
-
-    GLuint list = glGenLists(1);
-    glNewList(list, GL_COMPILE);
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance);
-
-    GLdouble r0 = innerRadius;
-    GLdouble r1 = outerRadius - toothSize / 2.0;
-    GLdouble r2 = outerRadius + toothSize / 2.0;
-    GLdouble delta = (2.0 * Pi / toothCount) / 4.0;
-    GLdouble z = thickness / 2.0;
-    int i, j;
-
-    glShadeModel(GL_FLAT);
-
-    for (i = 0; i < 2; ++i) {
-        GLdouble sign = (i == 0) ? +1.0 : -1.0;
-
-        glNormal3d(0.0, 0.0, sign);
-
-        glBegin(GL_QUAD_STRIP);
-        for (j = 0; j <= toothCount; ++j) {
-            GLdouble angle = 2.0 * Pi * j / toothCount;
-            glVertex3d(r0 * cos(angle), r0 * sin(angle), sign * z);
-            glVertex3d(r1 * cos(angle), r1 * sin(angle), sign * z);
-            glVertex3d(r0 * cos(angle), r0 * sin(angle), sign * z);
-            glVertex3d(r1 * cos(angle + 3 * delta), r1 * sin(angle + 3 * delta),
-                       sign * z);
-        }
-        glEnd();
-
-        glBegin(GL_QUADS);
-        for (j = 0; j < toothCount; ++j) {
-            GLdouble angle = 2.0 * Pi * j / toothCount;
-            glVertex3d(r1 * cos(angle), r1 * sin(angle), sign * z);
-            glVertex3d(r2 * cos(angle + delta), r2 * sin(angle + delta),
-                       sign * z);
-            glVertex3d(r2 * cos(angle + 2 * delta), r2 * sin(angle + 2 * delta),
-                       sign * z);
-            glVertex3d(r1 * cos(angle + 3 * delta), r1 * sin(angle + 3 * delta),
-                       sign * z);
-        }
-        glEnd();
-    }
-
-    glBegin(GL_QUAD_STRIP);
-    for (i = 0; i < toothCount; ++i) {
-        for (j = 0; j < 2; ++j) {
-            GLdouble angle = 2.0 * Pi * (i + (j / 2.0)) / toothCount;
-            GLdouble s1 = r1;
-            GLdouble s2 = r2;
-            if (j == 1)
-                qSwap(s1, s2);
-
-            glNormal3d(cos(angle), sin(angle), 0.0);
-            glVertex3d(s1 * cos(angle), s1 * sin(angle), +z);
-            glVertex3d(s1 * cos(angle), s1 * sin(angle), -z);
-
-            glNormal3d(s2 * sin(angle + delta) - s1 * sin(angle),
-                       s1 * cos(angle) - s2 * cos(angle + delta), 0.0);
-            glVertex3d(s2 * cos(angle + delta), s2 * sin(angle + delta), +z);
-            glVertex3d(s2 * cos(angle + delta), s2 * sin(angle + delta), -z);
-        }
-    }
-    glVertex3d(r1, 0.0, +z);
-    glVertex3d(r1, 0.0, -z);
-    glEnd();
-
-    glShadeModel(GL_SMOOTH);
-
-    glBegin(GL_QUAD_STRIP);
-    for (i = 0; i <= toothCount; ++i) {
-        GLdouble angle = i * 2.0 * Pi / toothCount;
-        glNormal3d(-cos(angle), -sin(angle), 0.0);
-        glVertex3d(r0 * cos(angle), r0 * sin(angle), +z);
-        glVertex3d(r0 * cos(angle), r0 * sin(angle), -z);
-    }
-    glEnd();
-
-    glEndList();
-
-    return list;
-}
-
 void GLWidget::normalizeAngle(int *angle)
 {
     while (*angle < 0)
@@ -663,53 +597,49 @@ void GLWidget::normalizeAngle(int *angle)
 GLuint *GLWidget::textureNames = new GLuint[textureCount];
 unsigned char **GLWidget::textureData = 0;
 
-void GLWidget::LoadShader(QString vshader, QString fshader)
+void GLWidget::LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader)
 {
-    if(ShaderProgram)
+    QGLShaderProgram *program = *program_;
+    if(program)
+    {
+        program->release();
+        QList<QGLShader*> shaders = program->shaders();
+        FOR(i, shaders.size())
         {
-        ShaderProgram->release();
-        ShaderProgram->removeAllShaders();
+            delete shaders.at(i);
         }
-    else ShaderProgram = new QGLShaderProgram;
-
-    if(VertexShader)
-        {
-        delete VertexShader;
-        VertexShader = NULL;
-        }
-
-    if(FragmentShader)
-        {
-        delete FragmentShader;
-        FragmentShader = NULL;
-        }
+        program->removeAllShaders();
+    }
+    else program = new QGLShaderProgram;
+    QGLShader *VertexShader = NULL, *FragmentShader = NULL;
 
     // load and compile vertex shader
     QFileInfo vsh(vshader);
     if(vsh.exists())
-        {
+    {
         VertexShader = new QGLShader(QGLShader::Vertex);
         if(VertexShader->compileSourceFile(vshader))
-            ShaderProgram->addShader(VertexShader);
+            program->addShader(VertexShader);
         else qWarning() << "Vertex Shader Error" << VertexShader->log();
-        }
+    }
     else qWarning() << "Vertex Shader source file " << vshader << " not found.";
-
 
     // load and compile fragment shader
     QFileInfo fsh(fshader);
     if(fsh.exists())
-        {
+    {
         FragmentShader = new QGLShader(QGLShader::Fragment);
         if(FragmentShader->compileSourceFile(fshader))
-            ShaderProgram->addShader(FragmentShader);
+            program->addShader(FragmentShader);
         else qWarning() << "Fragment Shader Error" << FragmentShader->log();
-        }
+    }
     else qWarning() << "Fragment Shader source file " << fshader << " not found.";
 
-    if(!ShaderProgram->link())
-        {
-        qWarning() << "Shader Program Linker Error" << ShaderProgram->log();
-        }
-    else ShaderProgram->bind();
+    if(!program->link())
+    {
+        qWarning() << "Shader Program Linker Error" << program->log();
+    }
+    else program->bind();
+    program->release();
+    *program_ = program;
 }

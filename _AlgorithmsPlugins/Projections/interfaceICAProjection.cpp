@@ -16,6 +16,17 @@ Projector *ICAProjection::GetProjector()
     return new ProjectorICA();
 }
 
+fvec ICAProjection::GetParams()
+{
+    return fvec();
+}
+
+void ICAProjection::SetParams(Projector *projector, fvec parameters){}
+
+void ICAProjection::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues){}
+
 void ICAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;

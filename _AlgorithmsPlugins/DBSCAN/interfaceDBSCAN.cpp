@@ -75,22 +75,76 @@ void ClustDBSCAN::typeChanged(int ntype)
 
 void ClustDBSCAN::SetParams(Clusterer *clusterer)
 {
-    if(!clusterer) return;
-    // the dynamic cast ensures that the pointer we received is really a clusterDBSCAN
-    ClustererDBSCAN * dbscan = dynamic_cast<ClustererDBSCAN *>(clusterer);
-    // if it isnt, we return
-    if(!dbscan) return;
+    SetParams(clusterer, GetParams());
+}
 
-    // here we gather the different hyperparameters from the interface
+fvec ClustDBSCAN::GetParams()
+{
     double minpts = params->minptsSpin->value();
     double eps = params->epsSpin->value();
     int metric = params->metricCombo->currentIndex();
     int type = params->typeCombo->currentIndex();
     double depth = params->depthSpin->value();
 
+    int i=0;
+    fvec par(5);
+    par[i++] = minpts;
+    par[i++] = eps;
+    par[i++] = metric;
+    par[i++] = type;
+    par[i++] = depth;
+    return par;
+}
 
-    // and finally we set the parameters of the algorithm
+void ClustDBSCAN::SetParams(Clusterer *clusterer, fvec parameters)
+{
+    if(!clusterer) return;
+    ClustererDBSCAN * dbscan = dynamic_cast<ClustererDBSCAN *>(clusterer);
+    if(!dbscan) return;
+
+    int i=0;
+    float minpts = parameters.size() > i ? parameters[i] : 0; i++;
+    float eps = parameters.size() > i ? parameters[i] : 0; i++;
+    int metric = parameters.size() > i ? parameters[i] : 0; i++;
+    int type = parameters.size() > i ? parameters[i] : 0; i++;
+    float depth = parameters.size() > i ? parameters[i] : 0; i++;
+
     dbscan->SetParams(minpts, eps, metric,depth,type);
+}
+
+void ClustDBSCAN::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Min Points");
+    parameterNames.push_back("Epsilon");
+    parameterNames.push_back("Metric Type");
+    parameterNames.push_back("Algorithm");
+    parameterNames.push_back("Depth.");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000000001f");
+    parameterValues.back().push_back("99999999.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Cosine");
+    parameterValues.back().push_back("Euclidean");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("DBSCAN");
+    parameterValues.back().push_back("OPTICS");
+    parameterValues.back().push_back("OPTICS WP");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000000001f");
+    parameterValues.back().push_back("99999999.f");
 }
 
 Clusterer *ClustDBSCAN::GetClusterer()

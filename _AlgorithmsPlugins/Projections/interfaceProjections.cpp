@@ -64,6 +64,63 @@ void ClassProjections::SetParams(Classifier *classifier)
     }
 }
 
+fvec ClassProjections::GetParams()
+{
+    int type = params->linearTypeCombo->currentIndex();
+    int kernelType = params->kernelTypeCombo->currentIndex();
+    float kernelWidth = params->kernelWidthSpin->value();
+    int kernelDegree = params->kernelDegSpin->value();
+
+    fvec par(4);
+    par[0] = type;
+    par[1] = kernelType;
+    par[2] = kernelWidth;
+    par[3] = kernelDegree;
+    return par;
+}
+
+void ClassProjections::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    int type = parameters.size() > 0 ? parameters[0] : 1;
+    int kernelType = parameters.size() > 1 ? parameters[1] : 0;
+    float kernelWidth = parameters.size() > 2 ? parameters[2] : 0;
+    int kernelDegree = parameters.size() > 3 ? parameters[3] : 0;
+    float kernelOffset =  (kernelType == 3) ? kernelDegree : kernelWidth;
+    if(type == 4)
+        ((ClassifierKPCA *)classifier)->SetParams(kernelType, kernelDegree, kernelWidth, kernelOffset);
+    else ((ClassifierLinear *)classifier)->SetParams(type);
+}
+
+void ClassProjections::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Projection Type");
+    parameterNames.push_back("Kernel Type");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Kernel Degree");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("PCA");
+    parameterValues.back().push_back("Means-Only LDA");
+    parameterValues.back().push_back("LDA");
+    parameterValues.back().push_back("Fisher LDA");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
+}
+
 QString ClassProjections::GetAlgoString()
 {
     int type = params->linearTypeCombo->currentIndex();

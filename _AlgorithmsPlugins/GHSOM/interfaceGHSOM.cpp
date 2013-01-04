@@ -34,6 +34,138 @@ void GHSOMProjector::ChangeOptions()
     params->expandSpin->setVisible(bGrowing&&bFullTau);
 }
 
+
+void GHSOMProjector::SetParams(Projector *projector)
+{
+    if(!projector) return;
+    ProjectorGHSOM *ghsom = dynamic_cast<ProjectorGHSOM*>(projector);
+    if(!ghsom) return;
+    float tau1 = params->tau1Spin->value();
+    float tau2 = params->tau2Spin->value();
+    float learningRate = params->learnRateSpin->value();
+    float neighborhoodRadius = params->nrSpin->value();
+    int xSize = params->xSizeSpin->value();
+    int ySize = params->ySizeSpin->value();
+    int expandCycles = params->expandSpin->value();
+    int normalizationType = params->normalizationCombo->currentIndex();
+    bool bGrowing = params->growingCheck->isChecked();
+    if(!bGrowing)
+    {
+        tau1 = 1.0;
+        tau2 = 1.0;
+        expandCycles = 100;
+    }
+    ghsom->SetParams(tau1, tau2, xSize, ySize,
+                     expandCycles, normalizationType,
+                     learningRate, neighborhoodRadius);
+}
+
+fvec GHSOMProjector::GetParams()
+{
+    float tau1 = params->tau1Spin->value();
+    float tau2 = params->tau2Spin->value();
+    float learningRate = params->learnRateSpin->value();
+    float neighborhoodRadius = params->nrSpin->value();
+    int xSize = params->xSizeSpin->value();
+    int ySize = params->ySizeSpin->value();
+    int expandCycles = params->expandSpin->value();
+    int normalizationType = params->normalizationCombo->currentIndex();
+    bool bGrowing = params->growingCheck->isChecked();
+
+    int i=0;
+    fvec par(9);
+    par[i++] = tau1;
+    par[i++] = tau2;
+    par[i++] = learningRate;
+    par[i++] = neighborhoodRadius;
+    par[i++] = xSize;
+    par[i++] = ySize;
+    par[i++] = expandCycles;
+    par[i++] = normalizationType;
+    par[i++] = bGrowing;
+    return par;
+}
+
+void GHSOMProjector::SetParams(Projector *projector, fvec parameters)
+{
+    if(!projector) return;
+    ProjectorGHSOM *ghsom = dynamic_cast<ProjectorGHSOM*>(projector);
+    if(!ghsom) return;
+    int i=0;
+    float tau1 = parameters.size() > i ? parameters[i] : 0; i++;
+    float tau2 = parameters.size() > i ? parameters[i] : 0; i++;
+    float learningRate = parameters.size() > i ? parameters[i] : 0; i++;
+    float neighborhoodRadius = parameters.size() > i ? parameters[i] : 0; i++;
+    int xSize = parameters.size() > i ? parameters[i] : 0; i++;
+    int ySize = parameters.size() > i ? parameters[i] : 0; i++;
+    int expandCycles = parameters.size() > i ? parameters[i] : 0; i++;
+    int normalizationType = parameters.size() > i ? parameters[i] : 0; i++;
+    bool bGrowing = parameters.size() > i ? parameters[i] : 0; i++;
+
+    if(!bGrowing)
+    {
+        tau1 = 1.0;
+        tau2 = 1.0;
+        expandCycles = 100;
+    }
+
+    ghsom->SetParams(tau1, tau2, xSize, ySize,
+                     expandCycles, normalizationType,
+                     learningRate, neighborhoodRadius);
+}
+
+void GHSOMProjector::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Growth Rate 1");
+    parameterNames.push_back("Growth Rate 2");
+    parameterNames.push_back("Learning Rate");
+    parameterNames.push_back("Neighborhood Radius");
+    parameterNames.push_back("X Grid Size");
+    parameterNames.push_back("Y Grid Size");
+    parameterNames.push_back("Expand Cycles");
+    parameterNames.push_back("Normalization Type");
+    parameterNames.push_back("Growing");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("None");
+    parameterValues.back().push_back("Length");
+    parameterValues.back().push_back("Interval");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+}
+
 void GHSOMProjector::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
@@ -337,31 +469,6 @@ void GHSOMProjector::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
 QString GHSOMProjector::GetAlgoString()
 {
     return QString("GHSOM");
-}
-
-void GHSOMProjector::SetParams(Projector *projector)
-{
-    if(!projector) return;
-    ProjectorGHSOM *ghsom = dynamic_cast<ProjectorGHSOM*>(projector);
-    if(!ghsom) return;
-    float tau1 = params->tau1Spin->value();
-    float tau2 = params->tau2Spin->value();
-    float learningRate = params->learnRateSpin->value();
-    float neighborhoodRadius = params->nrSpin->value();
-    int xSize = params->xSizeSpin->value();
-    int ySize = params->ySizeSpin->value();
-    int expandCycles = params->expandSpin->value();
-    int normalizationType = params->normalizationCombo->currentIndex();
-    bool bGrowing = params->growingCheck->isChecked();
-    if(!bGrowing)
-    {
-        tau1 = 1.0;
-        tau2 = 1.0;
-        expandCycles = 100;
-    }
-    ghsom->SetParams(tau1, tau2, xSize, ySize,
-                     expandCycles, normalizationType,
-                     learningRate, neighborhoodRadius);
 }
 
 void GHSOMProjector::SaveOptions(QSettings &settings)

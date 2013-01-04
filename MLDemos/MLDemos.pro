@@ -87,11 +87,6 @@ SOURCES += \
     datagenerator.cpp \
     gridsearch.cpp
 
-
-
-
-
-
-
-
-
+OTHER_FILES += \
+    shaders/drawSamples.fsh \
+    shaders/drawSamples.vsh
