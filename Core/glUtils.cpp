@@ -4,7 +4,6 @@
 #include <gl.h>
 #endif
 #include "glUtils.h"
-#include <QDebug>
 
 unsigned int octa_indices[8][3]=
 {
@@ -164,6 +163,62 @@ void DrawSphereIsolines(double r, int segments)
     glEnd();
 }
 
+std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean, float *eigVal, float *eigVec)
+{
+    // we copy the eigenvectors to a 4x4 rotation matrix
+    float rotation[4*4];
+    rotation[0]  = eigVec[0]; rotation[0 + 1] = eigVec[1]; rotation[0 + 2] = eigVec[2]; rotation[0 + 3] = 0;
+    rotation[4]  = eigVec[3]; rotation[4 + 1] = eigVec[4]; rotation[4 + 2] = eigVec[5]; rotation[4 + 3] = 0;
+    rotation[8]  = eigVec[6]; rotation[8 + 1] = eigVec[7]; rotation[8 + 2] = eigVec[8]; rotation[8 + 3] = 0;
+    rotation[12] = 0;  rotation[12 + 1] = 0 ; rotation[12 + 2] = 0 ; rotation[12 + 3] = 1;
+
+    QMatrix4x4 rot;
+    for(int i=0; i<4; i++)
+    {
+        for(int j=0; j<4; j++)
+        {
+            rot(j,i) = rotation[i*4 + j];
+        }
+    }
+
+    QVector<QVector3D> vertices;
+    QMatrix4x4 model;
+    model.translate(mean[0], mean[1], mean[2]);
+    model *= rot;
+    model.scale(eigVal[0],eigVal[1],eigVal[2]);
+    int lats = 32, longs = 32; // amount of segments to be drawn
+    int i, j;
+    for(i = 0; i <= lats; i++) {
+        double lat0 = M_PI * (-0.5 + (double) (i - 1) / lats);
+        double z0  = radius*sin(lat0);
+        double zr0 =  radius*cos(lat0);
+
+        double lat1 = M_PI * (-0.5 + (double) i / lats);
+        double z1 = radius*sin(lat1);
+        double zr1 = radius*cos(lat1);
+
+        QVector3D A, B, oldA, oldB;
+        for(j = 0; j <= longs; j++) {
+            double lng = 2 * M_PI * (double) (j - 1) / longs;
+            double x = cos(lng);
+            double y = sin(lng);
+
+            A = QVector3D(x*zr0, y*zr0, z0);
+            B = QVector3D(x*zr1, y*zr1, z1);
+            if(j>0)
+            {
+                vertices.append(oldA);
+                vertices.append(oldB);
+                vertices.append(B);
+                vertices.append(A);
+            }
+            oldA = A;
+            oldB = B;
+        }
+    }
+    return std::make_pair(vertices, model);
+}
+
 GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior,
                     bool wireframe, float colorRed, float colorGreen, float colorBlue)
 {
@@ -209,7 +264,8 @@ GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior,
     else
     {
         glDisable(GL_LIGHTING);
-        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         glEnable( GL_LINE_SMOOTH );
         glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 

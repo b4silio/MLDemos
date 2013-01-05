@@ -706,12 +706,21 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     glColor4f(1.f, 0.f, 0.f, 0.85f);
     glBegin(GL_TRIANGLES);
 
+
+    GLObject o;
+
     std::vector<float> &vertices = surf.vertices;
     //std::vector<float> &normals = surf.normals;
     for (int i=0; i<surf.nconn; i += 3)
     {
         int index = surf.triangles[i];
+        o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+        index = surf.triangles[i+1];
+        o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+        index = surf.triangles[i+2];
+        o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
         //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
+        index = surf.triangles[i];
         glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
         glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
         index = surf.triangles[i+1];
@@ -727,7 +736,11 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
 
     glPopAttrib();
     glEndList();
-    glw->drawSampleLists.push_back(list);
+//    glw->drawSampleLists.push_back(list);
+
+    o.objectType = "Surfaces";
+    o.style = "triangles,smooth,transparent,blurry,color:1:0:0";
+    glw->objects.push_back(o);
 
     printf("done.\n");
     fflush(stdout);

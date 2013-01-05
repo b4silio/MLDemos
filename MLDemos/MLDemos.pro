@@ -89,4 +89,6 @@ SOURCES += \
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \
-    shaders/drawSamples.vsh
+    shaders/drawSamples.vsh \
+    shaders/smoothTransparent.fsh \
+    shaders/smoothTransparent.vsh

@@ -34,5 +34,7 @@
         <file>icons/gridsearch.png</file>
         <file>shaders/drawSamples.fsh</file>
         <file>shaders/drawSamples.vsh</file>
+        <file>shaders/smoothTransparent.fsh</file>
+        <file>shaders/smoothTransparent.vsh</file>
     </qresource>
 </RCC>

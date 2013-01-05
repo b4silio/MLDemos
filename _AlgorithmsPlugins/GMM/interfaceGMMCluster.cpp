@@ -234,10 +234,18 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         eigVec[3] = y1; eigVec[4] = y2; eigVec[5] = y3;
         eigVec[6] = z1; eigVec[7] = z2; eigVec[8] = z3;
 
-        GLuint list= DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
-        glw->drawSampleLists.push_back(list);
-        glw->drawSampleListCenters[list] = mean;
-        list= DrawGaussian(&mean[0], eigVal, eigVec);
+        pair<QVector<QVector3D>, QMatrix4x4> verts = DrawGaussian(1.f, &mean[0], eigVal, eigVec);
+        GLObject o;
+        o.vertices = verts.first;
+        o.model = verts.second;
+        o.objectType = "Surfaces";
+        o.style = "smooth,blurry";
+        o.style += QString(",color:%1:%2:%3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
+        glw->objects.push_back(o);
+        //GLuint list = DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
+        //glw->drawSampleLists.push_back(list);
+        //glw->drawSampleListCenters[list] = mean;
+        GLuint list= DrawGaussian(&mean[0], eigVal, eigVec); // we draw the wireframe version
         glw->drawSampleLists.push_back(list);
     }
 

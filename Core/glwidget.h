@@ -14,9 +14,25 @@ class QGLShader;
 struct GLObject
 {
     QVector<QVector3D> vertices;
-    QVector<QVector3D> colors;
+    QVector<QVector3D> normals;
+    QVector<GLfloat> colors;
+    QMatrix4x4 model;
     QString objectType;
-    QString surfaceType;
+    QString style;
+};
+
+struct GLLight
+{
+    GLfloat ambientLight[4];
+    GLfloat diffuseLight[4];
+    GLfloat specularLight[4];
+    GLfloat position[4];
+    GLLight();
+    GLLight(float x, float y, float z);
+    void SetPosition(float x, float y, float z);
+    void SetAmbient(float r, float g, float b, float a=1.f);
+    void SetDiffuse(float r, float g, float b, float a=1.f);
+    void SetSpecular(float r, float g, float b, float a=1.f);
 };
 
 class GLWidget : public QGLWidget
@@ -27,6 +43,11 @@ public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
     void clearLists();
+    void generateObjects();
+    void DrawObject(GLObject &o);
+    void DrawSamples(GLObject &o);
+    void DrawLines(GLObject &o);
+    void DrawSurfaces(GLObject &o);
     void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
     static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
     {
@@ -76,7 +97,6 @@ private:
     QMatrix4x4 perspectiveMatrix;
     QMatrix4x4 modelMatrix;
     QVector4D viewport;
-    std::vector<GLObject> objects;
     int xRot, yRot, zRot;
     float xPos, yPos, zPos;
 
@@ -92,6 +112,8 @@ public:
     std::vector<GLuint> drawSampleLists;
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;
+    std::vector<GLObject> objects;
+    std::vector<GLLight> lights;
 
     static const GLint texWidth = 128;
     static const GLint texHeight = 128;

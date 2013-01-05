@@ -12,6 +12,10 @@
 #include <math.h>
 #include <vector>
 
+#include <QVector>
+#include <QMatrix4x4>
+#include <QVector3D>
+
 #ifdef WIN32
 #include <GL/glew.h>
 #endif
@@ -43,5 +47,6 @@ extern GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prio
                                         float colorRed=0.5f, float colorGreen=0.5f, float colorBlue=0.5f);
 extern GLuint DrawMeshGrid(float *values, float *mins, float *maxes, int xSteps, int ySteps, int valueDim);
 
+std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean, float *eigVal, float *eigVec);
 
 #endif // GLUTILS_H
