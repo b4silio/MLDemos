@@ -205,7 +205,7 @@ std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean
 
             A = QVector3D(x*zr0, y*zr0, z0);
             B = QVector3D(x*zr1, y*zr1, z1);
-            if(j>0)
+            if(i>0 && j>0)
             {
                 vertices.append(oldA);
                 vertices.append(oldB);

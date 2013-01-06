@@ -538,12 +538,13 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
     maxes = center + dists;
 
     // and now we draw a nice grid
-    int xInd = 0, yInd = 1;
+    int xInd = 0, yInd = 1, zInd = regressor->outputDim;
     if(regressor->outputDim == yInd) yInd = 2;
     else if(regressor->outputDim == xInd) xInd = 2;
     int xSteps = 128, ySteps = 128;
     fvec point(dim,0);
     fvec gridPoints(xSteps*ySteps);
+    qDebug() << "Generating regression surface";
     FOR(y, ySteps)
     {
         point[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
@@ -555,9 +556,49 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
             gridPoints[x+y*xSteps] = res[0];
         }
     }
-    // and now we draw the thing itself
-    GLuint list = DrawMeshGrid(&gridPoints[0], &mins[0], &maxes[0], xSteps, ySteps, regressor->outputDim);
-    glw->drawSampleLists.push_back(list);
+    qDebug() << "Creating GLObject structure";
+
+    GLObject o;
+    QVector3D v1,v2,v3,v4,normal;
+    float pt1[3], pt2[3], pt3[3], pt4[3];
+    FOR(y, ySteps-1)
+    {
+        pt1[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        pt2[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        pt3[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        pt4[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        FOR(x, xSteps-1)
+        {
+            pt1[xInd] = x/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt2[xInd] = (x+1)/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt3[xInd] = (x+1)/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt4[xInd] = x/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+
+            pt1[zInd] = gridPoints[x    +    y*xSteps];
+            pt2[zInd] = gridPoints[(x+1)+    y*xSteps];
+            pt3[zInd] = gridPoints[(x+1)+(y+1)*xSteps];
+            pt4[zInd] = gridPoints[x    +(y+1)*xSteps];
+            v1 = QVector3D(pt1[0],pt1[1],pt1[2]);
+            v2 = QVector3D(pt2[0],pt2[1],pt2[2]);
+            v3 = QVector3D(pt3[0],pt3[1],pt3[2]);
+            v4 = QVector3D(pt4[0],pt4[1],pt4[2]);
+            QVector3D a = v2 - v1;
+            QVector3D b = v4 - v1;
+            normal = QVector3D::crossProduct(b,a);
+            o.vertices.append(v1);
+            o.vertices.append(v2);
+            o.vertices.append(v3);
+            o.vertices.append(v4);
+            o.normals.append(normal);
+            o.normals.append(normal);
+            o.normals.append(normal);
+            o.normals.append(normal);
+        }
+    }
+    qDebug() << "Done.";
+    o.objectType = "Surfaces,quads";
+    o.style = "smooth,transparent,blurry,isolines,color:0.8:0.8:0.8:0.7";
+    glw->objects.push_back(o);
 }
 
 void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
@@ -658,55 +699,6 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
 
     printf("Generating mesh: ");
 
-    GLuint list = glGenLists(1);
-    glNewList(list, GL_COMPILE);
-
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glDisable( GL_TEXTURE_2D );
-
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendEquation(GL_FUNC_ADD);
-
-    // Create light components
-    GLfloat ambientLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    GLfloat diffuseLight[] = { .6f, .6f, .6f, 1.0f };
-    GLfloat specularLight[] = { 0.4f, 0.4f, 0.4f, 1.0f };
-    //GLfloat position[] = { -1.5f, 1.0f, -4.0f, 1.0f };
-    GLfloat position[] = { 100.0f, 100.0f, 100.0f, 1.0f };
-    GLfloat position2[] = { -100.0f, -100.0f, 100.0f, 1.0f };
-
-    // Assign created components to GL_LIGHT0
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
-
-    glEnable(GL_LIGHT1);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuseLight);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, specularLight);
-    glLightfv(GL_LIGHT1, GL_POSITION, position2);
-
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_COLOR_MATERIAL);
-    //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
-
-    GLfloat whiteSpecularMaterial[] = {1.0, 1.0, 1.0};
-    GLfloat shininess[] = {128}; //set the shininess of the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, whiteSpecularMaterial);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
-
-    //float mcolor[] = { 1.f, 0.f, 0.f, 0.2f};
-    //glMaterialfv(GL_FRONT, GL_DIFFUSE, mcolor);
-
-    glColor4f(1.f, 0.f, 0.f, 0.85f);
-    glBegin(GL_TRIANGLES);
-
-
     GLObject o;
 
     std::vector<float> &vertices = surf.vertices;
@@ -719,210 +711,14 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
         o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
         index = surf.triangles[i+2];
         o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
-        //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
-        index = surf.triangles[i];
-        glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
-        glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
-        index = surf.triangles[i+1];
-        //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
-        glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
-        glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
-        index = surf.triangles[i+2];
-        //glNormal3f(normals[index*3],normals[index*3+1],normals[index*3+2]);
-        glNormal3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
-        glVertex3f(vertices[index*3],vertices[index*3+1],vertices[index*3+2]);
     }
-    glEnd();
-
-    glPopAttrib();
-    glEndList();
-//    glw->drawSampleLists.push_back(list);
 
     o.objectType = "Surfaces";
-    o.style = "triangles,smooth,transparent,blurry,color:1:0:0";
+    o.style = "smooth,transparent,wireframe,blurry,color:1:0:0:0.4";
     glw->objects.push_back(o);
 
     printf("done.\n");
     fflush(stdout);
-
-/*
-    printf("Generating contours (X-Z): ");
-    vector< vector<fvec> > paths;
-    FOR(y, steps)
-    {
-        double *slice = new double[steps*steps];
-        float minVal = FLT_MAX, maxVal = -FLT_MAX;
-        FOR(z, steps)
-        {
-            FOR(x, steps)
-            {
-                double v = values[x + (y + z*steps)*steps];
-                slice[x + z*steps] = v;
-                if(minVal > v) minVal = v;
-                if(maxVal < v) maxVal = v;
-            }
-        }
-        if(maxVal - minVal < 1e-5)
-        {
-            delete [] slice;
-            continue;
-        }
-
-        float heightValue = y/(float)(steps)*(maxes[yIndex]-mins[yIndex]) + mins[yIndex];
-
-        ValueMap valuemap(slice, steps, steps);
-        CContourMap map;
-        int levels = 2;
-        int zeroLevel = 1;
-        map.generate_levels_zero(minVal,maxVal,levels);
-        map.contour(&valuemap);
-        map.consolidate(); // connect all the lines
-
-        dvec altitudes;
-
-        int segmentCount = 0;
-        CContourLevel *level = map.level(zeroLevel);
-        if(!level || !level->contour_lines) continue;
-        for(int j=0; j<level->contour_lines->size(); j++)
-        {
-            CContour *line = level->contour_lines->at(j);
-            vector<SPoint> points = line->contourPoints();
-            fvec oldPoint(3,-1), point(3);
-            int emptyCount = 0;
-            vector<fvec> path;
-            for(int p=0; p<points.size(); p++)
-            {
-                point[xIndex] = points[p].x/(float)(steps-1)*(maxes[xIndex] - mins[xIndex]) + mins[xIndex];
-                point[yIndex] = heightValue;
-                point[zIndex] = points[p].y/(float)(steps-1)*(maxes[yIndex] - mins[yIndex]) + mins[yIndex];
-                if(p)
-                {
-                    fvec diff = (point - oldPoint);
-                    if(diff[xIndex] == 0 || diff[zIndex] == 0) emptyCount++;
-                }
-                if(emptyCount > points.size()*0.2f) break;
-                path.push_back(point);
-                oldPoint = point;
-            }
-            if(emptyCount / (float) points.size() > 0.2) continue; // we dont want stuff that has loads of empty segments
-            if(path.size()) paths.push_back(path);
-            segmentCount += path.size();
-        }
-        altitudes.push_back(map.alt(zeroLevel));
-        printf("diff: %f", maxVal-minVal);
-        delete [] slice;
-    }
-    fflush(stdout);
-
-    FOR(z, steps)
-    {
-        double *slice = new double[steps*steps];
-        float minVal = FLT_MAX, maxVal = -FLT_MAX;
-        FOR(y, steps)
-        {
-            FOR(x, steps)
-            {
-                double v = values[x + (y + z*steps)*steps];
-                slice[x + y*steps] = v;
-                if(minVal > v) minVal = v;
-                if(maxVal < v) maxVal = v;
-            }
-        }
-        if(maxVal - minVal < 1e-5)
-        {
-            delete [] slice;
-            continue;
-        }
-
-        float heightValue = z/(float)(steps)*(maxes[yIndex]-mins[yIndex]) + mins[yIndex];
-
-        ValueMap valuemap(slice, steps, steps);
-        CContourMap map;
-        int levels = 2;
-        int zeroLevel = 1;
-        map.generate_levels_zero(minVal,maxVal,levels);
-        map.contour(&valuemap);
-        map.consolidate(); // connect all the lines
-
-        dvec altitudes;
-
-        int segmentCount = 0;
-        CContourLevel *level = map.level(zeroLevel);
-        if(!level || !level->contour_lines) continue;
-        for(int j=0; j<level->contour_lines->size(); j++)
-        {
-            CContour *line = level->contour_lines->at(j);
-            vector<SPoint> points = line->contourPoints();
-            fvec oldPoint(3,-1), point(3);
-            int emptyCount = 0;
-            vector<fvec> path;
-            for(int p=0; p<points.size(); p++)
-            {
-                point[xIndex] = points[p].x/(float)(steps-1)*(maxes[xIndex] - mins[xIndex]) + mins[xIndex];
-                point[yIndex] = points[p].y/(float)(steps-1)*(maxes[yIndex] - mins[yIndex]) + mins[yIndex];
-                point[zIndex] = heightValue;
-                if(p)
-                {
-                    fvec diff = (point - oldPoint);
-                    if(diff[xIndex] == 0 || diff[yIndex] == 0) emptyCount++;
-                }
-                if(emptyCount > points.size()*0.2f) break;
-                path.push_back(point);
-                oldPoint = point;
-            }
-            if(emptyCount / (float) points.size() > 0.2) continue; // we dont want stuff that has loads of empty segments
-            if(path.size()) paths.push_back(path);
-            segmentCount += path.size();
-        }
-        altitudes.push_back(map.alt(zeroLevel));
-        printf("diff: %f", maxVal-minVal);
-        delete [] slice;
-    }
-    fflush(stdout);
-
-    delete [] values;
-    printf(" done.\n");
-    fflush(stdout);
-
-    list = glGenLists(1);
-    glNewList(list, GL_COMPILE);
-
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-    glDisable( GL_TEXTURE_2D );
-    glDisable(GL_POINT_SPRITE);
-    glEnable(GL_DEPTH_TEST);
-    //glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendEquation(GL_FUNC_ADD);
-
-    glDisable(GL_LIGHTING);
-    glEnable( GL_LINE_SMOOTH );
-    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-    glEnable( GL_POINT_SMOOTH );
-
-    glLineWidth(0.5f);
-    glDisable(GL_LINE_STIPPLE); // dashed/ dotted lines
-    //glLineWidth(0.5f);
-    //glEnable(GL_LINE_STIPPLE); // dashed/ dotted lines
-    //glLineStipple (2, 0xAAAA); // dash pattern AAAA: dots
-
-    FOR(i, paths.size())
-    {
-        glColor3f(0,0,0);
-        glBegin(GL_LINE_STRIP);
-        FOR(j, paths[i].size())
-        {
-            glVertex3f(paths[i][j][0], paths[i][j][1], paths[i][j][2]);
-        }
-        glEnd();
-    }
-
-    glPopAttrib();
-    glEndList();
-    glw->drawLists.push_back(list);
-    */
 }
 
 void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)

@@ -15,6 +15,7 @@ struct GLObject
 {
     QVector<QVector3D> vertices;
     QVector<QVector3D> normals;
+    QVector<QVector4D> barycentric;
     QVector<GLfloat> colors;
     QMatrix4x4 model;
     QString objectType;
@@ -90,12 +91,15 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
     void resizeEvent(QResizeEvent *);
+    void timerEvent(QTimerEvent *);
 
 private:
     void normalizeAngle(int *angle);
 
     QMatrix4x4 perspectiveMatrix;
-    QMatrix4x4 modelMatrix;
+    QMatrix4x4 modelViewMatrix;
+    QMatrix4x4 modelViewProjectionMatrix;
+    QMatrix3x3 normalMatrix;
     QVector4D viewport;
     int xRot, yRot, zRot;
     float xPos, yPos, zPos;

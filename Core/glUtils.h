@@ -46,7 +46,6 @@ extern void DrawSphereIsolines(double r=1.f, int segments=64);
 extern GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior=1.f, bool wireframe=true,
                                         float colorRed=0.5f, float colorGreen=0.5f, float colorBlue=0.5f);
 extern GLuint DrawMeshGrid(float *values, float *mins, float *maxes, int xSteps, int ySteps, int valueDim);
-
-std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean, float *eigVal, float *eigVec);
+extern std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean, float *eigVal, float *eigVec);
 
 #endif // GLUTILS_H

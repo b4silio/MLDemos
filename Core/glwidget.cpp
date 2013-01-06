@@ -22,8 +22,12 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     xRot = yRot = zRot = 0;
     xPos = yPos = zPos = 0.f;
 
-    QTimer *timer = new QTimer(this);
-    timer->start(20);
+    startTimer(20);
+}
+
+void GLWidget::timerEvent(QTimerEvent *)
+{
+    repaint();
 }
 
 GLWidget::~GLWidget()
@@ -59,23 +63,6 @@ void GLWidget::initializeGL()
     glGetIntegerv(GL_SAMPLES, &samples);
     qDebug("Have %d buffers and %d samples", bufs, samples);
     */
-    // Somewhere in the initialization part of your programâ¦
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-    // Create light components
-    GLfloat ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    GLfloat diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
-    GLfloat specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-    //GLfloat position[] = { -1.5f, 1.0f, -4.0f, 1.0f };
-    GLfloat position[] = { 10.0f, 10.0f, 10.0f, 1.0f };
-
-    // Assign created components to GL_LIGHT0
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
-    glEnable(GL_NORMALIZE); // so that when we scale stuff, the lighting doesnt go bonkers
 
     textureData = new unsigned char*[textureCount];
     // first we generate the samples sprite (a circle with a black c)
@@ -165,18 +152,38 @@ void GLWidget::initializeGL()
 
     glEnable( GL_POINT_SMOOTH );
 
+    // Somewhere in the initialization part of your programâ¦
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    // Create light components
+    GLfloat ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
+    GLfloat specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    //GLfloat position[] = { -1.5f, 1.0f, -4.0f, 1.0f };
+    GLfloat position[] = { 10.0f, 10.0f, 10.0f, 1.0f };
+
+    // Assign created components to GL_LIGHT0
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+    glEnable(GL_NORMALIZE); // so that when we scale stuff, the lighting doesnt go bonkers
+
     // We initialize the lights
     GLLight light;
     light.SetAmbient(0.1,0.1,0.1);
-    light.SetDiffuse(0.6,0.6,0.6);
-    light.SetSpecular(0.4,0.4,0.4);
-    light.SetPosition(100.0f, 100.0f, 100.0f);
+    light.SetDiffuse(0.5,0.5,0.5);
+    light.SetSpecular(0.5,0.5,0.5);
+    light.SetPosition(50.0f, 0.0f, 0.0f);
     lights.push_back(light);
     light.SetAmbient(0,0,0);
-    light.SetPosition(-100.0f, -100.0f, 100.0f);
+    light.SetSpecular(0,0,0);
+    light.SetPosition(-50.0f, 50.0f, -50.0f);
     lights.push_back(light);
     light.SetAmbient(0,0,0);
-    light.SetPosition(-100.0f, 150.0f, 100.0f);
+    light.SetSpecular(0,0,0);
+    light.SetPosition(50.0f, 50.0f, 50.0f);
     lights.push_back(light);
 
 
@@ -189,6 +196,8 @@ void GLWidget::initializeGL()
     program = 0;
     LoadShader(&program,":/MLDemos/shaders/smoothTransparent.vsh",":/MLDemos/shaders/smoothTransparent.fsh");
     program->bindAttributeLocation("vertex", 0);
+    program->bindAttributeLocation("vertexNormal", 1);
+    program->bindAttributeLocation("barycentric", 2);
     shaders["SmoothTransparent"] = program;
 
     //glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -228,9 +237,9 @@ void GLWidget::generateObjects()
 
 void GLWidget::DrawObject(GLObject &o)
 {
-    if(o.objectType == "Samples") DrawSamples(o);
-    else if(o.objectType == "Lines") DrawLines(o);
-    else if(o.objectType == "Surfaces") DrawSurfaces(o);
+    if(o.objectType.contains("Samples")) DrawSamples(o);
+    else if(o.objectType.contains("Lines")) DrawLines(o);
+    else if(o.objectType.contains("Surfaces")) DrawSurfaces(o);
 }
 
 void GLWidget::DrawSamples(GLObject &o)
@@ -238,7 +247,7 @@ void GLWidget::DrawSamples(GLObject &o)
     QGLShaderProgram *program = shaders["Samples"];
     program->bind();
 
-    program->setUniformValue("matrix", modelMatrix);
+    program->setUniformValue("matrix", modelViewProjectionMatrix);
     program->setUniformValue("viewport", viewport);
     program->enableAttributeArray(0);
     program->enableAttributeArray(1);
@@ -321,121 +330,45 @@ void GLWidget::DrawLines(GLObject &o)
     glPopAttrib();
 }
 
-GLLight::GLLight()
-{
-    position[0] = 100.f;
-    position[1] = 100.f;
-    position[2] = 100.f;
-    position[3] = 1.f;
-    ambientLight[0] = 0.1f;
-    ambientLight[1] = 0.1f;
-    ambientLight[2] = 0.1f;
-    ambientLight[3] = 1.f;
-    diffuseLight[0] = .7f;
-    diffuseLight[1] = .7f;
-    diffuseLight[2] = .7f;
-    diffuseLight[3] = 1.f;
-    specularLight[0] = 0;
-    specularLight[1] = 0;
-    specularLight[2] = 0;
-    specularLight[3] = 1.f;
-}
 
-GLLight::GLLight(float x, float y, float z)
+void RecomputeBarycentric(GLObject &o)
 {
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    position[3] = 1.f;
-    ambientLight[0] = 0.1f;
-    ambientLight[1] = 0.1f;
-    ambientLight[2] = 0.1f;
-    ambientLight[3] = 1.f;
-    diffuseLight[0] = .7f;
-    diffuseLight[1] = .7f;
-    diffuseLight[2] = .7f;
-    diffuseLight[3] = 1.f;
-    specularLight[0] = 0;
-    specularLight[1] = 0;
-    specularLight[2] = 0;
-    specularLight[3] = 1.f;
-}
-
-void GLLight::SetPosition(float x, float y, float z)
-{
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    position[3] = 1.f;
-}
-
-void GLLight::SetAmbient(float r, float g, float b, float a)
-{
-    ambientLight[0] = r;
-    ambientLight[1] = g;
-    ambientLight[2] = b;
-    ambientLight[3] = a;
-}
-
-void GLLight::SetDiffuse(float r, float g, float b, float a)
-{
-    diffuseLight[0] = r;
-    diffuseLight[1] = g;
-    diffuseLight[2] = b;
-    diffuseLight[3] = a;
-}
-
-void GLLight::SetSpecular(float r, float g, float b, float a)
-{
-    specularLight[0] = r;
-    specularLight[1] = g;
-    specularLight[2] = b;
-    specularLight[3] = a;
+    o.barycentric.resize(o.vertices.size());
+    if(o.objectType.contains("quadstrip")){}
+    else if(o.objectType.contains("quads"))
+    {
+        FOR(i, o.vertices.size()/4)
+        {
+            int index = i*4;
+            o.barycentric[index  ] = QVector4D(1,1,1,1);
+            o.barycentric[index+1] = QVector4D(0,1,1,1);
+            o.barycentric[index+2] = QVector4D(0,0,1,1);
+            o.barycentric[index+3] = QVector4D(1,0,1,1);
+        }
+    }
+    else
+    {
+        FOR(i, o.vertices.size()/3)
+        {
+            int index = i*3;
+            o.barycentric[index  ] = QVector4D(1,0,0,1);
+            o.barycentric[index+1] = QVector4D(0,1,0,1);
+            o.barycentric[index+2] = QVector4D(0,0,1,1);
+        }
+    }
 }
 
 void RecomputeNormals(GLObject &o)
 {
     // we need to go through all the faces
     o.normals.resize(o.vertices.size());
-    if(o.style.contains("quadstrip")) {}
-    else if(o.style.contains("triangles"))
+    if(o.objectType.contains("quadstrip")) {}
+    else if(o.objectType.contains("quads"))
     {
-        QVector<QVector3D> faceNormals(o.vertices.size()/3);
-        FOR(i, o.vertices.size()/3) // for each triangle
-        {
-            int index = i*3;
-            QVector3D a = o.vertices[index+1] - o.vertices[index];
-            QVector3D b = o.vertices[index+2] - o.vertices[index];
-            faceNormals[i] = QVector3D::crossProduct(b,a);
-            faceNormals[i].normalize();
-        }
-        // now that whe have these we need to know which vertices overlap
-        vector<int> twins(o.vertices.size());
-        FOR(i, twins.size()) twins[i] = i;
-        FOR(i, twins.size())
-        {
-            o.normals[i] = faceNormals[i/3];
-            //o.normals[i] = QVector3D(0,0,0);
-            if(twins[i] != i) // we have already passed by here
-            {
-                o.normals[i] = o.normals[twins[i]];
-                continue;
-            }
-            for(int j=i+1;j<twins.size();j++)
-            {
-                if(o.vertices[i] == o.vertices[j])
-                {
-                    twins[j] = i;
-                    o.normals[i] += faceNormals[j/3];
-                }
-            }
-            o.normals[i].normalize();
-        }
-    }
-    else // quads
-    {
+        qDebug() << "quads" << o.vertices.size();
         QVector3D a,b;
         QVector<QVector3D> faceNormals(o.vertices.size()/4);
+        qDebug() << "generating face normals";
         FOR(i, o.vertices.size()/4) // for each quad
         {
             int index = i*4;
@@ -460,6 +393,7 @@ void RecomputeNormals(GLObject &o)
             faceNormals[i] = bInvert ? QVector3D::crossProduct(a,b) : QVector3D::crossProduct(b,a);
             faceNormals[i].normalize();
         }
+        qDebug() << "gathering twins information";
         // now that whe have these we need to know which vertices overlap
         vector<int> twins(o.vertices.size());
         FOR(i, twins.size()) twins[i] = i;
@@ -481,6 +415,40 @@ void RecomputeNormals(GLObject &o)
             }
             o.normals[i].normalize();
         }
+        qDebug() << "done.";
+    }
+    else
+    {
+        QVector<QVector3D> faceNormals(o.vertices.size()/3);
+        FOR(i, o.vertices.size()/3) // for each triangle
+        {
+            int index = i*3;
+            QVector3D a = o.vertices[index+1] - o.vertices[index];
+            QVector3D b = o.vertices[index+2] - o.vertices[index];
+            faceNormals[i] = QVector3D::crossProduct(b,a);
+            faceNormals[i].normalize();
+        }
+        // now that whe have these we need to know which vertices overlap
+        vector<int> twins(o.vertices.size());
+        FOR(i, twins.size()) twins[i] = i;
+        FOR(i, twins.size())
+        {
+            o.normals[i] = faceNormals[i/3];
+            if(twins[i] != i) // we have already passed by here
+            {
+                o.normals[i] = o.normals[twins[i]];
+                continue;
+            }
+            for(int j=i+1;j<twins.size();j++)
+            {
+                if(o.vertices[i] == o.vertices[j])
+                {
+                    twins[j] = i;
+                    o.normals[i] += faceNormals[j/3];
+                }
+            }
+            o.normals[i].normalize();
+        }
     }
 }
 
@@ -490,15 +458,41 @@ void GLWidget::DrawSurfaces(GLObject &o)
     QStringList params = style.split(",");
     if(o.normals.size() != o.vertices.size()) // we need to recompute the normals
     {
+        qDebug() << "recomputing normals";
         RecomputeNormals(o);
+        qDebug() << "Done.";
+    }
+    if(o.barycentric.size() != o.vertices.size())
+    {
+        qDebug() << "recomputing barycentrics";
+        RecomputeBarycentric(o);
+        qDebug() << "Done.";
+    }
+
+    float alpha = 1.f;
+    if(style.contains("transparent")) alpha = 0.5f;
+    QVector4D material(0.5,0.5,0.5,alpha);
+    FOR(i, params.size())
+    {
+        if(params[i].contains("color"))
+        {
+            QStringList p = params[i].split(":");
+            float r = p[1].toFloat();
+            float g = p[2].toFloat();
+            float b = p[3].toFloat();
+            if(p.size() > 4) alpha = p[4].toFloat();
+            material = QVector4D(r,g,b,alpha);
+        }
     }
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
     glDisable(GL_TEXTURE_2D);
     if(style.contains("smooth")) glShadeModel(GL_SMOOTH);
     else glShadeModel (GL_FLAT);
+
+    if(style.contains("doublesided")) glCullFace(GL_NONE);
+    else glCullFace(GL_BACK);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -510,61 +504,85 @@ void GLWidget::DrawSurfaces(GLObject &o)
     glEnable(GL_COLOR_MATERIAL);
     //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
 
-    GLfloat whiteSpecularMaterial[] = {1.0, 1.0, 1.0};
-    GLfloat shininess[] = {128}; //set the shininess of the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, whiteSpecularMaterial);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
-
     // setup lights
     FOR(i, lights.size())
     {
         glEnable(GL_LIGHT0+i);
-        glLightfv(GL_LIGHT0, GL_AMBIENT, lights[i].ambientLight);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, lights[i].diffuseLight);
-        glLightfv(GL_LIGHT0, GL_SPECULAR, lights[i].specularLight);
-        glLightfv(GL_LIGHT0, GL_POSITION, lights[i].position);
+        glLightfv(GL_LIGHT0+i, GL_AMBIENT, lights[i].ambientLight);
+        glLightfv(GL_LIGHT0+i, GL_DIFFUSE, lights[i].diffuseLight);
+        glLightfv(GL_LIGHT0+i, GL_SPECULAR, lights[i].specularLight);
+        glLightfv(GL_LIGHT0+i, GL_POSITION, lights[i].position);
     }
 
-    if(style.contains("shader") && style.contains("transparent"))
+    if(style.contains("smooth"))
     {
+        QVector4D surfaceStyle(1,0,0,0);
+        if(style.contains("wireframe")) surfaceStyle.setY(1);
+        if(style.contains("isolines")) surfaceStyle.setY(2);
+        if(style.contains("blurry")) surfaceStyle.setZ(1);
+        QMatrix4x4 mvMatrix = modelViewMatrix * o.model;
+        QMatrix4x4 mvpMatrix = perspectiveMatrix * mvMatrix;
+        QMatrix3x3 normMatrix = mvMatrix.normalMatrix();
+        QVector4D l0pos = modelViewMatrix * QVector4D(lights[0].position[0],
+                                                  lights[0].position[1],
+                                                  lights[0].position[2],
+                                                  lights[0].position[3]);
+        QVector4D l1pos = modelViewMatrix * QVector4D(lights[1].position[0],
+                                                  lights[1].position[1],
+                                                  lights[1].position[2],
+                                                  lights[1].position[3]);
+        QVector4D l2pos = modelViewMatrix * QVector4D(lights[2].position[0],
+                                                  lights[2].position[1],
+                                                  lights[2].position[2],
+                                                  lights[2].position[3]);
         QGLShaderProgram *program = shaders["SmoothTransparent"];
         program->bind();
-        program->setUniformValue("matrix", modelMatrix);
+        program->setUniformValue("mvMatrix", mvMatrix);
+        program->setUniformValue("mvpMatrix", mvpMatrix);
+        program->setUniformValue("normalMatrix", normMatrix);
         program->setUniformValue("viewport", viewport);
+        program->setUniformValue("materialColor", material);
+        program->setUniformValue("surfaceStyle", surfaceStyle);
+        program->setUniformValueArray("lights[0].position", &l0pos,1);
+        program->setUniformValueArray("lights[0].ambient", lights[0].ambientLight,1,4);
+        program->setUniformValueArray("lights[0].diffuse", lights[0].diffuseLight,1,4);
+        program->setUniformValueArray("lights[0].specular", lights[0].specularLight,1,4);
+        program->setUniformValueArray("lights[1].position", &l1pos,1);
+        program->setUniformValueArray("lights[1].ambient", lights[1].ambientLight,1,4);
+        program->setUniformValueArray("lights[1].diffuse", lights[1].diffuseLight,1,4);
+        program->setUniformValueArray("lights[1].specular", lights[1].specularLight,1,4);
+        program->setUniformValueArray("lights[2].position", &l2pos,1);
+        program->setUniformValueArray("lights[2].ambient", lights[2].ambientLight,1,4);
+        program->setUniformValueArray("lights[2].diffuse", lights[2].diffuseLight,1,4);
+        program->setUniformValueArray("lights[2].specular", lights[2].specularLight,1,4);
         program->enableAttributeArray(0);
         program->enableAttributeArray(1);
+        program->enableAttributeArray(2);
         program->setAttributeArray(0, o.vertices.constData());
-        program->setAttributeArray(1, o.vertices.constData()); // we copy the vertices normals
+        program->setAttributeArray(1, o.normals.constData());
+        program->setAttributeArray(2, o.barycentric.constData());
 
-        if(style.contains("quadstrip")) glDrawArrays(GL_QUAD_STRIP, 0, o.vertices.size());
-        else if(style.contains("triangles")) glDrawArrays(GL_TRIANGLES, 0, o.vertices.size());
-        else glDrawArrays(GL_QUADS, 0, o.vertices.size());
-
+        GLenum mode = GL_TRIANGLES;
+        if(o.objectType.contains("quadstrip")) mode = GL_QUAD_STRIP;
+        else if(o.objectType.contains("quads")) mode = GL_QUADS;
+        glDrawArrays(mode, 0, o.vertices.size());
         program->release();
     }
     else
     {
-        float alpha = 1.f;
-        if(style.contains("transparent")) alpha = 0.8f;
-        glColor4f(0,0,0, alpha);
-        FOR(i, params.size())
-        {
-            if(params[i].contains("color"))
-            {
-                QStringList p = params[i].split(":");
-                float r = p[1].toFloat();
-                float g = p[2].toFloat();
-                float b = p[3].toFloat();
-                glColor4f(r,g,b,alpha);
-            }
-        }
+        GLfloat whiteSpecularMaterial[] = {1.0, 1.0, 1.0};
+        GLfloat shininess[] = {128}; //set the shininess of the
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, whiteSpecularMaterial);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+        glColor4f(material.x(), material.y(), material.z(), material.w());
         float model[16];
         FOR(i, 16) model[i] = o.model.constData()[i];
         glPushMatrix();
         glMultMatrixf(model);
-        if(style.contains("quadstrip")) glBegin(GL_QUAD_STRIP);
-        else if(style.contains("triangles")) glBegin(GL_TRIANGLES);
-        else glBegin(GL_QUADS);
+        if(o.objectType.contains("quadstrip")) glBegin(GL_QUAD_STRIP);
+        else if(o.objectType.contains("quads")) glBegin(GL_QUADS);
+        else glBegin(GL_TRIANGLES);
         FOR(i, o.vertices.size())
         {
             glNormal3f(o.normals.at(i).x(),o.normals.at(i).y(),o.normals.at(i).z());
@@ -641,7 +659,7 @@ void DrawAxes(float zoomFactor)
     glPopAttrib();
 }
 
-
+float angle = 0;
 void GLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -658,11 +676,22 @@ void GLWidget::paintGL()
     glTranslatef(xPos, yPos, zPos);
 
     // and once for shader-based geometry
-    modelMatrix = perspectiveMatrix;
-    modelMatrix.rotate(xRot / 16.0, 1.0, 0.0, 0.0);
-    modelMatrix.rotate(yRot / 16.0, 0.0, 1.0, 0.0);
-    modelMatrix.rotate(zRot / 16.0, 0.0, 0.0, 1.0);
-    modelMatrix.translate(xPos, yPos, zPos);
+    modelViewMatrix.setToIdentity();
+    modelViewMatrix.rotate(xRot / 16.0, 1.0, 0.0, 0.0);
+    modelViewMatrix.rotate(yRot / 16.0, 0.0, 1.0, 0.0);
+    modelViewMatrix.rotate(zRot / 16.0, 0.0, 0.0, 1.0);
+    modelViewMatrix.translate(xPos, yPos, zPos);
+
+    lights[0].position[0] = 2*sin(angle*0.1f);
+    lights[0].position[1] = 0;
+    lights[0].position[2] = 2*cos(angle*0.1f);
+    lights[1].position[0] = 2*sin(angle*0.13f);
+    lights[1].position[1] = -2*cos(angle*0.13f);
+    lights[1].position[2] = 2*sin(angle*0.13f);
+    angle += 0.1f;
+
+    modelViewProjectionMatrix = perspectiveMatrix*modelViewMatrix;
+    normalMatrix = modelViewMatrix.normalMatrix();
 
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
@@ -674,6 +703,21 @@ void GLWidget::paintGL()
     {
         DrawAxes(zoomFactor);
     }
+    // we draw the lights
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glShadeModel (GL_FLAT);
+    glDisable(GL_POINT_SPRITE);
+    FOR(i, lights.size())
+    {
+        glPushMatrix();
+        glTranslatef(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+        glColor3f(0,0,1.0);
+        DrawStandardSphere(0.05f);
+        glPopMatrix();
+    }
+    glPopAttrib();
 
     FOR(i, objects.size())
     {
@@ -942,4 +986,76 @@ void GLWidget::setZRotation(int angle)
         emit zRotationChanged(angle);
         updateGL();
     }
+}
+
+GLLight::GLLight()
+{
+    position[0] = 100.f;
+    position[1] = 100.f;
+    position[2] = 100.f;
+    position[3] = 1.f;
+    ambientLight[0] = 0.1f;
+    ambientLight[1] = 0.1f;
+    ambientLight[2] = 0.1f;
+    ambientLight[3] = 1.f;
+    diffuseLight[0] = .7f;
+    diffuseLight[1] = .7f;
+    diffuseLight[2] = .7f;
+    diffuseLight[3] = 1.f;
+    specularLight[0] = 0;
+    specularLight[1] = 0;
+    specularLight[2] = 0;
+    specularLight[3] = 1.f;
+}
+
+GLLight::GLLight(float x, float y, float z)
+{
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = 1.f;
+    ambientLight[0] = 0.1f;
+    ambientLight[1] = 0.1f;
+    ambientLight[2] = 0.1f;
+    ambientLight[3] = 1.f;
+    diffuseLight[0] = .7f;
+    diffuseLight[1] = .7f;
+    diffuseLight[2] = .7f;
+    diffuseLight[3] = 1.f;
+    specularLight[0] = 0;
+    specularLight[1] = 0;
+    specularLight[2] = 0;
+    specularLight[3] = 1.f;
+}
+
+void GLLight::SetPosition(float x, float y, float z)
+{
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = 1.f;
+}
+
+void GLLight::SetAmbient(float r, float g, float b, float a)
+{
+    ambientLight[0] = r;
+    ambientLight[1] = g;
+    ambientLight[2] = b;
+    ambientLight[3] = a;
+}
+
+void GLLight::SetDiffuse(float r, float g, float b, float a)
+{
+    diffuseLight[0] = r;
+    diffuseLight[1] = g;
+    diffuseLight[2] = b;
+    diffuseLight[3] = a;
+}
+
+void GLLight::SetSpecular(float r, float g, float b, float a)
+{
+    specularLight[0] = r;
+    specularLight[1] = g;
+    specularLight[2] = b;
+    specularLight[3] = a;
 }

@@ -237,9 +237,10 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         pair<QVector<QVector3D>, QMatrix4x4> verts = DrawGaussian(1.f, &mean[0], eigVal, eigVec);
         GLObject o;
         o.vertices = verts.first;
+        o.normals = verts.first; // on a sphere we have vertices == normals!
         o.model = verts.second;
-        o.objectType = "Surfaces";
-        o.style = "smooth,blurry";
+        o.objectType = "Surfaces,quads";
+        o.style = "smooth,transparent,blurry";
         o.style += QString(",color:%1:%2:%3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
         glw->objects.push_back(o);
         //GLuint list = DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());

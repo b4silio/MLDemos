@@ -9,7 +9,7 @@ void main()
 	vec2 pos = screenCoord - vec2(0.5);
     float radius = dot(pos,pos);
     if(radius > 0.25) discard;
-    if(radius > 0.16) gl_FragColor = vec4(0,0,0,1.);
+    if(radius > 0.12) gl_FragColor = vec4(0,0,0,1.);
     else
     {
         float s = sampleColor;
