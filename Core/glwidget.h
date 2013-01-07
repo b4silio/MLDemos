@@ -3,6 +3,7 @@
 
 #include <canvas.h>
 #include <vector>
+#include <QtOpenGL>
 #include <QGLWidget>
 #include <QMatrix4x4>
 
@@ -127,6 +128,9 @@ public:
     static const int textureCount = 2; // 0: samples, 1: wide circle
     static GLuint *textureNames;
     static unsigned char **textureData;
+
+    QGLFramebufferObject *render_fbo;
+    QGLFramebufferObject *texture_fbo;
 };
 
 #endif

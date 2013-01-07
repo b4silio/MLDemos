@@ -560,6 +560,8 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
 
     GLObject o;
     QVector3D v1,v2,v3,v4,normal;
+    vector<QVector3D> normalMap((ySteps-1)*(xSteps-1));
+    //ivec indices;
     float pt1[3], pt2[3], pt3[3], pt4[3];
     FOR(y, ySteps-1)
     {
@@ -569,10 +571,10 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
         pt4[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
         FOR(x, xSteps-1)
         {
-            pt1[xInd] = x/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-            pt2[xInd] = (x+1)/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-            pt3[xInd] = (x+1)/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-            pt4[xInd] = x/(float)ySteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt1[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt2[xInd] = (x+1)/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt3[xInd] = (x+1)/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt4[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
 
             pt1[zInd] = gridPoints[x    +    y*xSteps];
             pt2[zInd] = gridPoints[(x+1)+    y*xSteps];
@@ -582,22 +584,65 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
             v2 = QVector3D(pt2[0],pt2[1],pt2[2]);
             v3 = QVector3D(pt3[0],pt3[1],pt3[2]);
             v4 = QVector3D(pt4[0],pt4[1],pt4[2]);
-            QVector3D a = v2 - v1;
-            QVector3D b = v4 - v1;
+            QVector3D a = (v2 - v1).normalized();
+            QVector3D b = (v4 - v1).normalized();
             normal = QVector3D::crossProduct(b,a);
+            normalMap[y*(xSteps-1) + x] = normal.normalized();
             o.vertices.append(v1);
             o.vertices.append(v2);
             o.vertices.append(v3);
             o.vertices.append(v4);
-            o.normals.append(normal);
-            o.normals.append(normal);
-            o.normals.append(normal);
-            o.normals.append(normal);
+            /*
+            // trick to know where each vertex is
+            indices.push_back(x+y*xSteps);
+            indices.push_back((x+1)+y*xSteps);
+            indices.push_back((x+1)+(y+1)*xSteps);
+            indices.push_back(x+(y+1)*xSteps);
+            */
         }
     }
+    o.normals.resize(o.vertices.size());
+
+    // we compute the normals themselves
+    FOR(y, ySteps-1)
+    {
+        FOR(x,xSteps-1)
+        {
+            int i1 = (x + y*(xSteps-1))*4;
+            int i2 = ((x-1) + y*(xSteps-1))*4 + 1;
+            int i3 = ((x-1) + (y-1)*(xSteps-1))*4 + 2;
+            int i4 = (x + (y-1)*(xSteps-1))*4 + 3;
+            QVector3D n = normalMap[x + y*(xSteps-1)];
+            normal = QVector3D(0,0,0);
+            o.normals[i1] += n;
+            if(x)
+            {
+                o.normals[i2] += n;
+                if(y) o.normals[i3] += n;
+            }
+            if(y) o.normals[i4] += n;
+        }
+    }
+    FOR(i, o.normals.size()) o.normals[i].normalize();
+
+    /*
+    FOR(i, o.normals.size())
+    {
+        int x = indices[i]%xSteps;
+        int y = indices[i]/xSteps;
+        normal = QVector3D(0,0,0);
+        if(x<xSteps-1 && y<ySteps-1) normal += normalMap[x + y*(xSteps-1)];
+        if(x && y) normal += normalMap[(x-1) + (y-1)*(xSteps-1)];
+        if(x && y<ySteps-1) normal += normalMap[(x-1) + y*(xSteps-1)];
+        if(x<xSteps-1 && y) normal += normalMap[x + (y-1)*(xSteps-1)];
+        normal.normalize();
+        o.normals[i] = normal;
+    }
+    */
+
     qDebug() << "Done.";
     o.objectType = "Surfaces,quads";
-    o.style = "smooth,transparent,blurry,isolines,color:0.8:0.8:0.8:0.7";
+    o.style = "smooth,transparent,isolines,blurry,color:0.8:0.8:0.8:0.7";
     glw->objects.push_back(o);
 }
 
@@ -714,7 +759,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     }
 
     o.objectType = "Surfaces";
-    o.style = "smooth,transparent,wireframe,blurry,color:1:0:0:0.4";
+    o.style = "smooth,transparent,blurry,color:1:0:0:0.4";
     glw->objects.push_back(o);
 
     printf("done.\n");
