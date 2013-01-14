@@ -233,11 +233,10 @@ fvec DynamicalSEDS::Test( const fvec &sample)
 	if(!gmm) return res;
 	float *velocity = new float[dim];
 	float *sigma = new float[dim*(dim+1)/2];
-	fvec point; point.resize(2);
+    fvec point(dim,0);
 	point += (sample-endpoint)*resizeFactor;
 	gmm->doRegression(&point[0], velocity, sigma);
-	res[0] = velocity[0]/resizeFactor;
-	res[1] = velocity[1]/resizeFactor;
+    FOR(d, dim) res[d] = velocity[d]/resizeFactor;
 	delete [] velocity;
 	delete [] sigma;
 	return res;

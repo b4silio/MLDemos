@@ -57,7 +57,6 @@ protected:
 
 private:
     fPair GetParamsRange();
-    QRgb GetColor(float value, int colorscheme = 0);
     void DisplayResults();
 
 public slots:

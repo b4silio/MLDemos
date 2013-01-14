@@ -138,26 +138,52 @@ pair<vector<fvec>, ivec> DataGenerator::Generate()
         */
     }
         break;
-    case 1: // concentric circles
+    case 1: // concentric circles / sphere
     {
         int samplesPerCircle = count/(gridCount*classesCount);
         int cnt = 0;
-        FOR(i, gridCount)
+        if(dim == 2)
         {
-            FOR(c, classesCount)
+            FOR(i, gridCount)
             {
-                float radStart = radius*cnt/(float)(gridCount*classesCount);
-                float radStop = radius*(cnt+1)/(float)(gridCount*classesCount);
-                FOR(j, samplesPerCircle)
+                FOR(c, classesCount)
                 {
-                    float angle = drand48()*2*M_PI;
-                    float rad = drand48()*(radStop-radStart) + radStart;
-                    sample[0] = cos(angle)*rad;
-                    sample[1] = sin(angle)*rad;
-                    samples.push_back(sample);
-                    labels.push_back(c);
+                    float radStart = radius*cnt/(float)(gridCount*classesCount);
+                    float radStop = radius*(cnt+1)/(float)(gridCount*classesCount);
+                    FOR(j, samplesPerCircle)
+                    {
+                        float angle = drand48()*2*M_PI;
+                        float rad = drand48()*(radStop-radStart) + radStart;
+                        sample[0] = cos(angle)*rad;
+                        sample[1] = sin(angle)*rad;
+                        samples.push_back(sample);
+                        labels.push_back(c);
+                    }
+                    cnt++;
                 }
-                cnt++;
+            }
+        }
+        else if(dim == 3)
+        {
+            FOR(i, gridCount)
+            {
+                FOR(c, classesCount)
+                {
+                    float radStart = radius*cnt/(float)(gridCount*classesCount);
+                    float radStop = radius*(cnt+1)/(float)(gridCount*classesCount);
+                    FOR(j, samplesPerCircle)
+                    {
+                        float phi = drand48()*2*M_PI;
+                        float theta = drand48()*M_PI;
+                        float rad = drand48()*(radStop-radStart) + radStart;
+                        sample[0] = sin(theta)*cos(phi)*rad;
+                        sample[1] = sin(theta)*sin(phi)*rad;
+                        sample[2] = cos(theta)*rad;
+                        samples.push_back(sample);
+                        labels.push_back(c);
+                    }
+                    cnt++;
+                }
             }
         }
     }

@@ -93,4 +93,6 @@ OTHER_FILES += \
     shaders/smoothTransparent.fsh \
     shaders/smoothTransparent.vsh \
     shaders/renderFBO.fsh \
-    shaders/renderFBO.vsh
+    shaders/renderFBO.vsh \
+    shaders/blurFBO.fsh \
+    shaders/blurFBO.vsh

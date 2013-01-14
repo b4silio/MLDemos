@@ -11,10 +11,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <vector>
+#include <mymaths.h>
 
 #include <QVector>
 #include <QMatrix4x4>
 #include <QVector3D>
+#include <QtOpenGL>
 
 #ifdef WIN32
 #include <GL/glew.h>
@@ -34,6 +36,32 @@
 #	endif
 #endif
 
+
+struct GLObject
+{
+    QVector<QVector3D> vertices;
+    QVector<QVector3D> normals;
+    QVector<QVector4D> colors;
+    QVector<QVector4D> barycentric;
+    QMatrix4x4 model;
+    QString objectType;
+    QString style;
+};
+
+struct GLLight
+{
+    GLfloat ambientLight[4];
+    GLfloat diffuseLight[4];
+    GLfloat specularLight[4];
+    GLfloat position[4];
+    GLLight();
+    GLLight(float x, float y, float z);
+    void SetPosition(float x, float y, float z);
+    void SetAmbient(float r, float g, float b, float a=1.f);
+    void SetDiffuse(float r, float g, float b, float a=1.f);
+    void SetSpecular(float r, float g, float b, float a=1.f);
+};
+
 extern unsigned int octa_indices[8][3];
 extern float octa_verts[6][3];
 extern unsigned int icosa_indices[20][3];
@@ -47,5 +75,8 @@ extern GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prio
                                         float colorRed=0.5f, float colorGreen=0.5f, float colorBlue=0.5f);
 extern GLuint DrawMeshGrid(float *values, float *mins, float *maxes, int xSteps, int ySteps, int valueDim);
 extern std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean, float *eigVal, float *eigVec);
+extern std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussianLines(float radius, float *mean, float *eigVal, float *eigVec);
+extern GLObject GenerateMeshGrid(fvec &gridPoints, int xSteps, fvec mins, fvec maxes, int xInd=0, int yInd=1, int zInd=2);
+extern GLObject GenerateMeshGrid(float *gridPoints, int xSteps, int ySteps, fvec mins, fvec maxes, int xInd=0, int yInd=1, int zInd=2);
 
 #endif // GLUTILS_H

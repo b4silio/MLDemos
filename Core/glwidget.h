@@ -6,36 +6,12 @@
 #include <QtOpenGL>
 #include <QGLWidget>
 #include <QMatrix4x4>
+#include "glUtils.h"
 
 class QMatrix;
 class QMatrix4x4;
 class QGLShaderProgram;
 class QGLShader;
-
-struct GLObject
-{
-    QVector<QVector3D> vertices;
-    QVector<QVector3D> normals;
-    QVector<QVector4D> barycentric;
-    QVector<GLfloat> colors;
-    QMatrix4x4 model;
-    QString objectType;
-    QString style;
-};
-
-struct GLLight
-{
-    GLfloat ambientLight[4];
-    GLfloat diffuseLight[4];
-    GLfloat specularLight[4];
-    GLfloat position[4];
-    GLLight();
-    GLLight(float x, float y, float z);
-    void SetPosition(float x, float y, float z);
-    void SetAmbient(float r, float g, float b, float a=1.f);
-    void SetDiffuse(float r, float g, float b, float a=1.f);
-    void SetSpecular(float r, float g, float b, float a=1.f);
-};
 
 class GLWidget : public QGLWidget
 {
@@ -96,6 +72,7 @@ protected:
 
 private:
     void normalizeAngle(int *angle);
+    void RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program);
 
     QMatrix4x4 perspectiveMatrix;
     QMatrix4x4 modelViewMatrix;
@@ -113,12 +90,15 @@ private:
     std::map<QString, QGLShaderProgram*> shaders;
 
 public:
+    QMutex *mutex;
     Canvas *canvas;
     std::vector<GLuint> drawSampleLists;
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;
     std::vector<GLObject> objects;
     std::vector<GLLight> lights;
+    bool bDisplaySamples, bDisplayLines, bDisplaySurfaces, bDisplayTransparency, bDisplayBlurry;
+    bool bRotateCamera;
 
     static const GLint texWidth = 128;
     static const GLint texHeight = 128;

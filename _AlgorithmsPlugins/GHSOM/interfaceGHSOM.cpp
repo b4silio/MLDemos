@@ -259,7 +259,7 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            glColor3d(0,0,0);
+            glColor4f(0,0,0,1.f);
             glEnable(GL_LINE_STIPPLE); // enable dashed/ dotted lines
             glLineWidth(0.5f); // line width
             glLineStipple (1, 0xAAAA); // dash pattern AAAA: dots
@@ -303,12 +303,13 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
             glPopAttrib();
 
             glPushAttrib(GL_ALL_ATTRIB_BITS);
+            glDisable( GL_LIGHTING);
+            glEnable(GL_COLOR_MATERIAL);
+            glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_POINT_SPRITE);
             glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-//            glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[0]);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

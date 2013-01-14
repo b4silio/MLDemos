@@ -68,6 +68,12 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
 	settings.setValue("spinZoom", displayOptions->spinZoom->value());
     settings.setValue("legendCheck", displayOptions->legendCheck->isChecked());
+    settings.setValue("check3DSamples", displayOptions->check3DSamples->isChecked());
+    settings.setValue("check3DWireframe", displayOptions->check3DWireframe->isChecked());
+    settings.setValue("check3DSurfaces", displayOptions->check3DSurfaces->isChecked());
+    settings.setValue("check3DTransparency", displayOptions->check3DTransparency->isChecked());
+    settings.setValue("check3DBlurry", displayOptions->check3DBlurry->isChecked());
+    settings.setValue("check3DRotate", displayOptions->check3DRotate->isChecked());
     settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
@@ -272,6 +278,13 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
 	if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
     if(settings.contains("legendCheck")) displayOptions->legendCheck->setChecked(settings.value("legendCheck").toBool());
+    if(settings.contains("check3DSamples")) displayOptions->check3DSamples->setChecked(settings.value("check3DSamples").toBool());
+    if(settings.contains("check3DWireframe")) displayOptions->check3DWireframe->setChecked(settings.value("check3DWireframe").toBool());
+    if(settings.contains("check3DSurfaces")) displayOptions->check3DSurfaces->setChecked(settings.value("check3DSurfaces").toBool());
+    if(settings.contains("check3DTransparency")) displayOptions->check3DTransparency->setChecked(settings.value("check3DTransparency").toBool());
+    if(settings.contains("check3DBlurry")) displayOptions->check3DBlurry->setChecked(settings.value("check3DBlurry").toBool());
+    if(settings.contains("check3DRotate")) displayOptions->check3DRotate->setChecked(settings.value("check3DRotate").toBool());
+
     //if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
 	//if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
 	settings.endGroup();

@@ -1727,3 +1727,52 @@ QString Canvas::GetClassName(int classNumber)
     }
     return className;
 }
+
+QRgb Canvas::GetColorMapValue(float value, int colorscheme=2)
+{
+    float r, g, b;
+    switch(colorscheme)
+    {
+    case 0:
+    {
+        r = value;
+        g = 0;
+        b = 0;
+    }
+        break;
+    case 1: // autumn
+    {
+        r = value;
+        g = value*0.6;
+        b = value*0.2;
+    }
+        break;
+    case 2: // jet
+    {
+        float Red = 0, Green = 0, Blue = 0;
+
+        if (value < 0.5f) Red = value * 2;
+        else Red = (1.0f - value) * 2;
+
+        if (value >= 0.3f && value < 0.8f) Green = (value - 0.3f) * 2;
+        else if (value < 0.3f) Green = (0.3f - value) * 2;
+        else Green = (1.3f - value) * 2;
+
+        if (value >= 0.5f) Blue = (value - 0.5f) * 2;
+        else Blue = (0.5f - value) * 2;
+
+        r = Red;
+        g = Green;
+        b = Blue;
+    }
+    break;
+    case 3: // grayscale
+    {
+        r = value;
+        g = value;
+        b = value;
+    }
+    break;
+    }
+    return qRgb(r*255,g*255,b*255);
+}

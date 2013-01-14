@@ -185,7 +185,7 @@ void MLDemos::Regression()
         {
             ui.canvasX2Spin->setValue(outputDim+1);
         }
-        DisplayOptionChanged();
+        DisplayOptionsChanged();
     }
 
     regressor = regressors[tab]->GetRegressor();
@@ -284,7 +284,14 @@ void MLDemos::Dynamize()
     if(canvas->canvasType == 1)
     {
         dynamicals[tab]->DrawGL(canvas, glw, dynamical);
-        if(canvas->data->GetDimCount() == 3) Draw3DDynamical(glw, dynamical);
+        if(canvas->data->GetDimCount() == 3)
+        {
+            int displayStyle = optionsDynamic->displayCombo->currentIndex();
+            if(displayStyle == 3) // DS animation
+            {
+            }
+            else Draw3DDynamical(glw, dynamical, displayStyle);
+        }
     }
 
     int w = canvas->width(), h = canvas->height();
@@ -357,6 +364,8 @@ void MLDemos::Dynamize()
         dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
     }
     UpdateInfo();
+
+    //Draw2DDynamical(canvas, dynamical);
     if(dynamicals[tab]->UsesDrawTimer())
     {
         drawTimer->bColorMap = bColorMap;
@@ -1073,6 +1082,15 @@ void MLDemos::Maximize()
     delete [] data;
     canvas->repaint();
 
+    FOR(i, glw->objects.size())
+    {
+        if(glw->objects[i].objectType.contains("Maximization"))
+        {
+            glw->objects.erase(glw->objects.begin() + i);
+            i--;
+        }
+    }
+
     UpdateInfo();
     drawTimer->Stop();
     drawTimer->Clear();
@@ -1472,7 +1490,11 @@ void MLDemos::UpdateLearnedModel()
             if(canvas->canvasType == 1)
             {
                 dynamicals[tabUsedForTraining]->DrawGL(canvas, glw, dynamical);
-                if(canvas->data->GetDimCount() == 3) Draw3DDynamical(glw, dynamical);
+                if(canvas->data->GetDimCount() == 3)
+                {
+                    int displayStyle = optionsDynamic->displayCombo->currentIndex();
+                    if(displayStyle < 3) Draw3DDynamical(glw, dynamical,displayStyle);
+                }
             }
         }
         else

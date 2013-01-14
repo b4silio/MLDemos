@@ -75,12 +75,28 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     initDialogs();
     initToolBars();
     initPlugins();
+
+    glw = new GLWidget(canvas);
+    drawTimer = new DrawTimer(canvas, &mutex);
+    drawTimer->glw = glw;
+    drawTimer->classifier = &classifier;
+    drawTimer->regressor = &regressor;
+    drawTimer->dynamical = &dynamical;
+    drawTimer->clusterer = &clusterer;
+    drawTimer->maximizer = &maximizer;
+    drawTimer->reinforcement = &reinforcement;
+    drawTimer->reinforcementProblem = &reinforcementProblem;
+    connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
+    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
+    connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
+    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
+
     LoadLayoutOptions();
     SetTextFontSize();
     ShowToolbar();
     this->show();
 
-    DisplayOptionChanged();
+    DisplayOptionsChanged();
     UpdateInfo();
     FitToData();
     AlgoChanged();
@@ -98,14 +114,12 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     CanvasMoveEvent();
     CanvasTypeChanged();
     CanvasOptionsChanged();
+    Display3DOptionsChanged();
     ResetPositiveClass();
     ClusterChanged();
     ChangeInfoFile();
     drawTime.start();
     if(filename != "") Load(filename);
-
-    glw = new GLWidget(canvas);
-    //glw->show();
 }
 
 void MLDemos::initToolBars()
@@ -223,9 +237,9 @@ void MLDemos::initToolBars()
     connect(ui.actionSmall_Icons, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.canvasTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(CanvasTypeChanged()));
     connect(ui.canvasZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(CanvasOptionsChanged()));
-    connect(ui.canvasX1Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
-    connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
-    connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionChanged()));
+    connect(ui.canvasX1Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
+    connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
+    connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
 
     QSize iconSize(24,24);
     drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
@@ -334,7 +348,6 @@ void MLDemos::initDialogs()
     inputDimensions->setupUi(inputDimensionsDialog = new QDialog());
     rocWidget = new QNamedWindow("ROC Curve", false, showStats->rocWidget);
 
-
     connect(showStats->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(StatsChanged()));
     connect(rocWidget, SIGNAL(ResizeEvent(QResizeEvent *)), this, SLOT(StatsChanged()));
     connect(manualSelection->sampleList, SIGNAL(itemSelectionChanged()), this, SLOT(ManualSelectionChanged()));
@@ -348,14 +361,20 @@ void MLDemos::initDialogs()
     connect(inputDimensions->randomizeSelectionButton, SIGNAL(clicked()), this, SLOT(InputDimensionsRandom()));
 
     connect(displayOptions->clipboardButton, SIGNAL(clicked()), this, SLOT(ToClipboard()));
-    connect(displayOptions->mapCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-    connect(displayOptions->modelCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-    connect(displayOptions->infoCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-    connect(displayOptions->samplesCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-    connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
-    connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionChanged()));
+    connect(displayOptions->gridCheck, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
     connect(displayOptions->zoomFitButton, SIGNAL(clicked()), this, SLOT(FitToData()));
-    connect(displayOptions->legendCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionChanged()));
+    connect(displayOptions->mapCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionsChanged()));
+    connect(displayOptions->modelCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionsChanged()));
+    connect(displayOptions->infoCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionsChanged()));
+    connect(displayOptions->samplesCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionsChanged()));
+    connect(displayOptions->spinZoom, SIGNAL(valueChanged(double)), this, SLOT(DisplayOptionsChanged()));
+    connect(displayOptions->legendCheck, SIGNAL(clicked()), this, SLOT(DisplayOptionsChanged()));
+    connect(displayOptions->check3DSamples, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
+    connect(displayOptions->check3DWireframe, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
+    connect(displayOptions->check3DSurfaces, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
+    connect(displayOptions->check3DTransparency, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
+    connect(displayOptions->check3DBlurry, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
+    connect(displayOptions->check3DRotate, SIGNAL(clicked()), this, SLOT(Display3DOptionsChanged()));
 
     algorithmOptions = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
@@ -547,18 +566,6 @@ void MLDemos::initDialogs()
     connect(canvas, SIGNAL(Released()), this, SLOT(DrawingStopped()));
     connect(canvas, SIGNAL(CanvasMoveEvent()), this, SLOT(CanvasMoveEvent()));
     //connect(canvas, SIGNAL(ZoomChanged()), this, SLOT(ZoomChanged()));
-    drawTimer = new DrawTimer(canvas, &mutex);
-    drawTimer->classifier = &classifier;
-    drawTimer->regressor = &regressor;
-    drawTimer->dynamical = &dynamical;
-    drawTimer->clusterer = &clusterer;
-    drawTimer->maximizer = &maximizer;
-    drawTimer->reinforcement = &reinforcement;
-    drawTimer->reinforcementProblem = &reinforcementProblem;
-    connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
-    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
-    connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
-    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
 
     gridSearch = new GridSearch(canvas);
     import = new DataImporter();
@@ -1411,7 +1418,7 @@ void MLDemos::ResetPositiveClass()
 
 void MLDemos::ChangeActiveOptions()
 {
-    DisplayOptionChanged();
+    DisplayOptionsChanged();
 }
 
 void MLDemos::ClearData()
@@ -1458,7 +1465,7 @@ void MLDemos::ShiftDimensions()
         }
         canvas->data->SetSamples(samples);
     }
-    DisplayOptionChanged();
+    DisplayOptionsChanged();
 }
 
 void MLDemos::AvoidOptionChanged()
@@ -1488,7 +1495,7 @@ void MLDemos::ColorMapChanged()
     }
 }
 
-void MLDemos::DisplayOptionChanged()
+void MLDemos::DisplayOptionsChanged()
 {
     if(!canvas) return;
 
@@ -1564,6 +1571,19 @@ void MLDemos::DisplayOptionChanged()
     CanvasOptionsChanged();
     canvas->ResetSamples();
     canvas->repaint();
+}
+
+void MLDemos::Display3DOptionsChanged()
+{
+    canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    if(!glw) return;
+    glw->bDisplaySamples = displayOptions->check3DSamples->isChecked();
+    glw->bDisplayLines = displayOptions->check3DWireframe->isChecked();
+    glw->bDisplaySurfaces = displayOptions->check3DSurfaces->isChecked();
+    glw->bDisplayTransparency = displayOptions->check3DTransparency->isChecked();
+    glw->bDisplayBlurry = displayOptions->check3DBlurry->isChecked();
+    glw->bRotateCamera = displayOptions->check3DRotate->isChecked();
+    glw->update();
 }
 
 void MLDemos::ChangeInfoFile()
@@ -2377,7 +2397,7 @@ void MLDemos::FitToData()
     else zoom = 1/(-zoom) - 1;
     if(zoom == displayOptions->spinZoom->value())
     {
-        DisplayOptionChanged();
+        DisplayOptionsChanged();
         return;
     }
     displayOptions->spinZoom->blockSignals(true);
@@ -2413,7 +2433,7 @@ void MLDemos::FitToData()
             projectors[tabUsedForTraining]->Draw(canvas, projector);
         }
     }
-    DisplayOptionChanged();
+    DisplayOptionsChanged();
 }
 
 void MLDemos::CanvasMoveEvent()
@@ -2469,7 +2489,7 @@ void MLDemos::CanvasTypeChanged()
 
     if(!canvas->data->GetCount())
     {
-        if(type != 0 && !canvas->rewardPixmap().isNull()) // we only have rewards
+        if(type > 1 && !canvas->rewardPixmap().isNull()) // we only have rewards
         {
             ui.canvasTypeCombo->setCurrentIndex(0);
             return;
@@ -2531,6 +2551,7 @@ void MLDemos::CanvasTypeChanged()
     if ((!glw || !glw->isVisible()) && canvas->canvasType == type) return;
     if(type == 1) // 3D viewport
     {
+        displayOptions->tabWidget->setCurrentIndex(1);
         canvas->Clear();
         canvas->repaint();
         ui.canvasWidget->repaint();
@@ -2553,10 +2574,20 @@ void MLDemos::CanvasTypeChanged()
         glw->setSizePolicy(policy);
         glw->setMinimumSize(ui.canvasArea->size());
         glw->resize(ui.canvasArea->size());
+        FOR(i, glw->objects.size())
+        {
+            if(glw->objects[i].objectType.contains("Reward"))
+            {
+                glw->objects.erase(glw->objects.begin() + i);
+                i--;
+            }
+        }
         glw->show();
+        glw->repaint();
     }
     else
     {
+        displayOptions->tabWidget->setCurrentIndex(0);
         canvas->SetCanvasType(type);
         CanvasOptionsChanged();
         canvas->ResetSamples();

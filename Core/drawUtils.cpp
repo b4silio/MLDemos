@@ -23,9 +23,11 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QBitmap>
 #include <QDebug>
 #include "qcontour.h"
+#include "kmeans.h"
 #include <jacgrid/jacgrid.h>
 using namespace std;
 
+#define FOUR(a) {a;a;a;a;}
 #define RES 256
 void DrawEllipse(float *mean, float *sigma, float rad, QPainter *painter, QSize size)
 {
@@ -557,92 +559,11 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
         }
     }
     qDebug() << "Creating GLObject structure";
-
-    GLObject o;
-    QVector3D v1,v2,v3,v4,normal;
-    vector<QVector3D> normalMap((ySteps-1)*(xSteps-1));
-    //ivec indices;
-    float pt1[3], pt2[3], pt3[3], pt4[3];
-    FOR(y, ySteps-1)
-    {
-        pt1[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
-        pt2[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
-        pt3[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
-        pt4[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
-        FOR(x, xSteps-1)
-        {
-            pt1[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-            pt2[xInd] = (x+1)/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-            pt3[xInd] = (x+1)/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-            pt4[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
-
-            pt1[zInd] = gridPoints[x    +    y*xSteps];
-            pt2[zInd] = gridPoints[(x+1)+    y*xSteps];
-            pt3[zInd] = gridPoints[(x+1)+(y+1)*xSteps];
-            pt4[zInd] = gridPoints[x    +(y+1)*xSteps];
-            v1 = QVector3D(pt1[0],pt1[1],pt1[2]);
-            v2 = QVector3D(pt2[0],pt2[1],pt2[2]);
-            v3 = QVector3D(pt3[0],pt3[1],pt3[2]);
-            v4 = QVector3D(pt4[0],pt4[1],pt4[2]);
-            QVector3D a = (v2 - v1).normalized();
-            QVector3D b = (v4 - v1).normalized();
-            normal = QVector3D::crossProduct(b,a);
-            normalMap[y*(xSteps-1) + x] = normal.normalized();
-            o.vertices.append(v1);
-            o.vertices.append(v2);
-            o.vertices.append(v3);
-            o.vertices.append(v4);
-            /*
-            // trick to know where each vertex is
-            indices.push_back(x+y*xSteps);
-            indices.push_back((x+1)+y*xSteps);
-            indices.push_back((x+1)+(y+1)*xSteps);
-            indices.push_back(x+(y+1)*xSteps);
-            */
-        }
-    }
-    o.normals.resize(o.vertices.size());
-
-    // we compute the normals themselves
-    FOR(y, ySteps-1)
-    {
-        FOR(x,xSteps-1)
-        {
-            int i1 = (x + y*(xSteps-1))*4;
-            int i2 = ((x-1) + y*(xSteps-1))*4 + 1;
-            int i3 = ((x-1) + (y-1)*(xSteps-1))*4 + 2;
-            int i4 = (x + (y-1)*(xSteps-1))*4 + 3;
-            QVector3D n = normalMap[x + y*(xSteps-1)];
-            normal = QVector3D(0,0,0);
-            o.normals[i1] += n;
-            if(x)
-            {
-                o.normals[i2] += n;
-                if(y) o.normals[i3] += n;
-            }
-            if(y) o.normals[i4] += n;
-        }
-    }
-    FOR(i, o.normals.size()) o.normals[i].normalize();
-
-    /*
-    FOR(i, o.normals.size())
-    {
-        int x = indices[i]%xSteps;
-        int y = indices[i]/xSteps;
-        normal = QVector3D(0,0,0);
-        if(x<xSteps-1 && y<ySteps-1) normal += normalMap[x + y*(xSteps-1)];
-        if(x && y) normal += normalMap[(x-1) + (y-1)*(xSteps-1)];
-        if(x && y<ySteps-1) normal += normalMap[(x-1) + y*(xSteps-1)];
-        if(x<xSteps-1 && y) normal += normalMap[x + (y-1)*(xSteps-1)];
-        normal.normalize();
-        o.normals[i] = normal;
-    }
-    */
-
+    GLObject o = GenerateMeshGrid(gridPoints, xSteps, mins, maxes, xInd, yInd, zInd);
     qDebug() << "Done.";
-    o.objectType = "Surfaces,quads";
-    o.style = "smooth,transparent,isolines,blurry,color:0.8:0.8:0.8:0.7";
+    o.style = "smooth,transparent";
+    o.style += QString(",isolines:%1").arg(zInd);
+    o.style += ",blurry:3,color:1.0:1.0:1.0:0.4";
     glw->objects.push_back(o);
 }
 
@@ -672,6 +593,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     mins = center - dists*2;
     maxes = center + dists*2;
 
+    bool bMultiClass = false;
     // and now we draw a volume
     int steps = 64;
     fvec sample(dim);
@@ -712,7 +634,8 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
                             }
                         }
                         // we keep the class with the highest score
-                        values[x + (y + z*steps)*steps] = maxVal;
+                        values[x + (y + z*steps)*steps] = maxInd;
+                        bMultiClass = true;
                     }
                 }
                 else
@@ -726,52 +649,1164 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
     printf("done.\n");
     fflush(stdout);
 
-    gridT valueGrid(0.f, steps, steps, steps);
-    FOR(i, steps*steps*steps) valueGrid[i] = values[i];
-    FOR(d, 3) valueGrid.unit[d] = (maxes[d] - mins[d])/steps;   /* length of a single edge in each dimension*/
-    FOR(d, 3) valueGrid.size[d] = maxes[d] - mins[d];           /* length of entire grid in each dimension */
-    FOR(d, 3) valueGrid.org[d] = mins[d];                       /* the origin of the grid i.e. coords of (0,0,0) */
-    FOR(d, 3) valueGrid.center[d] = (maxes[d] + mins[d])/2;     /* coords of center of grid */
-    surfaceT surf;
-    float surfThreshold = 0.f;
-    unsigned int surfIType = JACSurfaceTypes::SURF_CONTOUR;
-    printf("Generating isosurfaces: ");
-    fflush(stdout);
-    JACMakeSurface(surf, surfIType, valueGrid, surfThreshold);
-    //surf.Reduce(0.05);
-    printf("done.\n");
-    fflush(stdout);
-
-    printf("Generating mesh: ");
-
-    GLObject o;
-
-    std::vector<float> &vertices = surf.vertices;
-    //std::vector<float> &normals = surf.normals;
-    for (int i=0; i<surf.nconn; i += 3)
+    if(bMultiClass)
     {
-        int index = surf.triangles[i];
-        o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
-        index = surf.triangles[i+1];
-        o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
-        index = surf.triangles[i+2];
-        o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+        int classCount = DatasetManager::GetClassCount(glw->canvas->data->GetLabels())+1;
+        FOR(c,classCount-1)
+        {
+            gridT valueGrid(0.f, steps, steps, steps);
+            /*
+            FOR(i, steps*steps*steps)
+            {
+                if(values[i] == c) valueGrid[i] = 1.f;
+                else
+                {
+                    valueGrid[i] = 2.f;
+                    for(int c2=c+1; c2<classCount; c2++)
+                        if(values[i] == c2) valueGrid[i] = -1.f;
+                }
+            }
+            */
+            FOR(i, steps*steps*steps) valueGrid[i] = values[i] == c ? 1.f : -1.f;
+            FOR(d, 3) valueGrid.unit[d] = (maxes[d] - mins[d])/steps;   /* length of a single edge in each dimension*/
+            FOR(d, 3) valueGrid.size[d] = maxes[d] - mins[d];           /* length of entire grid in each dimension */
+            FOR(d, 3) valueGrid.org[d] = mins[d];                       /* the origin of the grid i.e. coords of (0,0,0) */
+            FOR(d, 3) valueGrid.center[d] = (maxes[d] + mins[d])/2;     /* coords of center of grid */
+
+            surfaceT surf;
+            float surfThreshold = 0.f;
+            unsigned int surfIType = JACSurfaceTypes::SURF_CONTOUR;
+            printf("Generating isosurfaces: ");
+            fflush(stdout);
+            JACMakeSurface(surf, surfIType, valueGrid, surfThreshold);
+            JACSmoothSurface(surf);
+            JACSmoothSurface(surf);
+            JACSmoothSurface(surf);
+            //surf.Reduce(0.05);
+            printf("done.\n");
+            fflush(stdout);
+
+            printf("Generating mesh: ");
+
+            GLObject o;
+
+            std::vector<float> &vertices = surf.vertices;
+            //std::vector<float> &normals = surf.normals;
+            for (int i=0; i<surf.nconn; i += 3)
+            {
+                int index = surf.triangles[i];
+                o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+                index = surf.triangles[i+1];
+                o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+                index = surf.triangles[i+2];
+                o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+            }
+
+            QColor color = SampleColor[(c+1)%SampleColorCnt];
+            o.objectType = "Surfaces";
+            o.style = "smooth,transparent,blurry";
+            o.style += QString("color:%1:%2:%3:0.4").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
+            o.style += QString(",offset:%1").arg(c*0.5f,0,'f',2);
+            glw->objects.push_back(o);
+            printf("done.\n");
+            fflush(stdout);
+        }
     }
+    else
+    {
+        gridT valueGrid(0.f, steps, steps, steps);
+        FOR(i, steps*steps*steps) valueGrid[i] = values[i];
+        FOR(d, 3) valueGrid.unit[d] = (maxes[d] - mins[d])/steps;   /* length of a single edge in each dimension*/
+        FOR(d, 3) valueGrid.size[d] = maxes[d] - mins[d];           /* length of entire grid in each dimension */
+        FOR(d, 3) valueGrid.org[d] = mins[d];                       /* the origin of the grid i.e. coords of (0,0,0) */
+        FOR(d, 3) valueGrid.center[d] = (maxes[d] + mins[d])/2;     /* coords of center of grid */
 
-    o.objectType = "Surfaces";
-    o.style = "smooth,transparent,blurry,color:1:0:0:0.4";
-    glw->objects.push_back(o);
+        surfaceT surf;
+        float surfThreshold = 0.f;
+        unsigned int surfIType = JACSurfaceTypes::SURF_CONTOUR;
+        printf("Generating isosurfaces: ");
+        fflush(stdout);
+        JACMakeSurface(surf, surfIType, valueGrid, surfThreshold);
+        JACSmoothSurface(surf);
+        JACSmoothSurface(surf);
+        JACSmoothSurface(surf);
+        //surf.Reduce(0.05);
+        printf("done.\n");
+        fflush(stdout);
 
-    printf("done.\n");
-    fflush(stdout);
+        printf("Generating mesh: ");
+
+        GLObject o;
+
+        std::vector<float> &vertices = surf.vertices;
+        //std::vector<float> &normals = surf.normals;
+        for (int i=0; i<surf.nconn; i += 3)
+        {
+            int index = surf.triangles[i];
+            o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+            index = surf.triangles[i+1];
+            o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+            index = surf.triangles[i+2];
+            o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+        }
+
+        o.objectType = "Surfaces";
+        o.style = "smooth,transparent,blurry:1,color:0:0:0:0.3";
+        glw->objects.push_back(o);
+        printf("done.\n");
+        fflush(stdout);
+    }
 }
 
 void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
 {
+    // we get the boundaries of our axes
+    vector<fvec> samples = glw->canvas->data->GetSamples();
+    int dim = glw->canvas->data->GetDimCount();
+    fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MAX);
+    int xIndex = glw->canvas->xIndex;
+    int yIndex = glw->canvas->yIndex;
+    int zIndex = glw->canvas->zIndex;
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            mins[d] = min(mins[d], samples[i][d]);
+            maxes[d] = max(maxes[d], samples[i][d]);
+        }
+    }
+    fvec center = (maxes + mins)*0.5f;
+    fvec dists = (maxes - mins)*0.5f;
+    float maxDist = dists[0];
+    FOR(d, dim) maxDist = max(dists[d], maxDist);
+    dists = fvec(dim, maxDist);
+    // we double them just to be safe
+    mins = center - dists*2;
+    maxes = center + dists*2;
+
+    bool bMultiClass = false;
+    // and now we draw a volume
+    int steps = 64;
+    fvec sample(dim);
+    float *minVals = new float[steps];
+    float *maxVals = new float[steps];
+    double *values = new double[steps*steps*steps];
+    printf("Generating volumetric data: ");
+    bool bOneClass = true;
+    int clusterCount = clusterer->NbClusters();
+    FOR(y, steps)
+    {
+        //        values[y] = new double[steps*steps];
+        minVals[y] = FLT_MAX;
+        maxVals[y] = -FLT_MAX;
+        sample[yIndex] = y/(float)(steps)*(maxes[yIndex]-mins[yIndex]) + mins[yIndex];
+        FOR(z, steps)
+        {
+            sample[zIndex] = z/(float)steps*(maxes[zIndex]-mins[zIndex]) + mins[zIndex];
+            FOR(x, steps)
+            {
+                sample[xIndex] = x/(float)steps*(maxes[xIndex]-mins[xIndex]) + mins[xIndex];
+                fvec res = clusterer->Test(sample);
+                if(res.size() == 1) values[x + (y + z*steps)*steps] = res[0];
+                else
+                {
+
+                    float maxVal = res[0];
+                    int maxInd = 0;
+                    FOR(d, res.size())
+                    {
+                        if(maxVal < res[d])
+                        {
+                            maxInd = d;
+                            maxVal = res[d];
+                        }
+                    }
+                    // we keep the class with the highest score
+                    values[x + (y + z*steps)*steps] = maxInd;
+                    bOneClass = false;
+                }
+            }
+        }
+    }
+    printf("done.\n");
+    fflush(stdout);
+
+    if(!bOneClass)
+    {
+        FOR(c,clusterCount-1)
+        {
+            gridT valueGrid(0.f, steps, steps, steps);
+            FOR(i, steps*steps*steps)
+            {
+                if(values[i] == c) valueGrid[i] = 1.f;
+                else
+                {
+                    valueGrid[i] = 2.f;
+                    for(int c2=c+1; c2<clusterCount; c2++)
+                        if(values[i] == c2) valueGrid[i] = -1.f;
+                }
+            }
+            FOR(d, 3) valueGrid.unit[d] = (maxes[d] - mins[d])/steps;   /* length of a single edge in each dimension*/
+            FOR(d, 3) valueGrid.size[d] = maxes[d] - mins[d];           /* length of entire grid in each dimension */
+            FOR(d, 3) valueGrid.org[d] = mins[d];                       /* the origin of the grid i.e. coords of (0,0,0) */
+            FOR(d, 3) valueGrid.center[d] = (maxes[d] + mins[d])/2;     /* coords of center of grid */
+
+            surfaceT surf;
+            float surfThreshold = 0.f;
+            unsigned int surfIType = JACSurfaceTypes::SURF_CONTOUR;
+            printf("Generating isosurfaces: ");
+            fflush(stdout);
+            JACMakeSurface(surf, surfIType, valueGrid, surfThreshold);
+            JACSmoothSurface(surf);
+            JACSmoothSurface(surf);
+            JACSmoothSurface(surf);
+            //surf.Reduce(0.05);
+            printf("done.\n");
+            fflush(stdout);
+
+            printf("Generating mesh: ");
+
+            GLObject o;
+
+            std::vector<float> &vertices = surf.vertices;
+            //std::vector<float> &normals = surf.normals;
+            for (int i=0; i<surf.nconn; i += 3)
+            {
+                int index = surf.triangles[i];
+                o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+                index = surf.triangles[i+1];
+                o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+                index = surf.triangles[i+2];
+                o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+            }
+
+            QColor color = SampleColor[(c+1)%SampleColorCnt];
+            o.objectType = "Surfaces";
+            o.style = "smooth,transparent,blurry:1";
+            o.style += QString("color:%1:%2:%3:0.3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
+            o.style += QString(",offset:%1").arg((float)c,0,'f',2);
+            glw->objects.push_back(o);
+            printf("done.\n");
+            fflush(stdout);
+        }
+    }
+    else
+    {
+        gridT valueGrid(0.f, steps, steps, steps);
+        FOR(i, steps*steps*steps) valueGrid[i] = values[i];
+        FOR(d, 3) valueGrid.unit[d] = (maxes[d] - mins[d])/steps;   /* length of a single edge in each dimension*/
+        FOR(d, 3) valueGrid.size[d] = maxes[d] - mins[d];           /* length of entire grid in each dimension */
+        FOR(d, 3) valueGrid.org[d] = mins[d];                       /* the origin of the grid i.e. coords of (0,0,0) */
+        FOR(d, 3) valueGrid.center[d] = (maxes[d] + mins[d])/2;     /* coords of center of grid */
+
+        surfaceT surf;
+        float surfThreshold = 0.f;
+        unsigned int surfIType = JACSurfaceTypes::SURF_CONTOUR;
+        printf("Generating isosurfaces: ");
+        fflush(stdout);
+        JACMakeSurface(surf, surfIType, valueGrid, surfThreshold);
+        JACSmoothSurface(surf);
+        JACSmoothSurface(surf);
+        JACSmoothSurface(surf);
+        //surf.Reduce(0.05);
+        printf("done.\n");
+        fflush(stdout);
+
+        printf("Generating mesh: ");
+
+        GLObject o;
+
+        std::vector<float> &vertices = surf.vertices;
+        //std::vector<float> &normals = surf.normals;
+        for (int i=0; i<surf.nconn; i += 3)
+        {
+            int index = surf.triangles[i];
+            o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+            index = surf.triangles[i+1];
+            o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+            index = surf.triangles[i+2];
+            o.vertices.append(QVector3D(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));
+        }
+
+        o.objectType = "Surfaces";
+        o.style = "smooth,transparent,blurry:1,color:1:1:1:0.4";
+        glw->objects.push_back(o);
+        printf("done.\n");
+        fflush(stdout);
+    }
+}
+
+struct Streamline
+{
+    std::vector<fvec> trajectory;
+    int cluster;
+    int length;
+public:
+    Streamline() : length(0), cluster(0) {}
+    Streamline(std::vector<fvec> trajectory)
+        : trajectory(trajectory), length(trajectory.size()), cluster(0) {}
+    fvec &operator[](int i) {return trajectory[i];}
+    fvec &operator()(int i) {return trajectory[i];}
+    void push_back(const fvec point) {trajectory.push_back(point); length++;}
+    void clear() {trajectory.clear(); length = 0; cluster = 0;}
+    int size() {return length;}
+    fvec &back() {return trajectory.back();}
+    fvec &front() {return trajectory.front();}
+};
+
+inline float StreamDistance(Streamline &s, vector<fvec> &mean)
+{
+    float res = 0;
+    int dim = mean[0].size();
+    int length = min((int)mean.size(), s.length);
+    FOR(i, length)
+    {
+        FOR(d, dim) res += (mean[i][d]-s[i][d])*(mean[i][d]-s[i][d]);
+    }
+    return res;
+}
+
+ivec ClusterStreams(std::vector<Streamline> streams, int nbClusters, int maxIterations=5)
+{
+    if(!streams.size()) return ivec();
+    int count = streams.size();
+    nbClusters = min(count, nbClusters);
+    vector< vector<fvec> > means(nbClusters); // the clusters 'mean' trajectories
+    ivec clusters(count); // the responsiblity (which cluster each stream belongs to
+
+    // first thing we do is to invert all streams so that we can follow them backwards
+    FOR(i, count)
+    {
+        std::reverse(streams[i].trajectory.begin(), streams[i].trajectory.end());
+    }
+
+    // we initialize by picking actual trajectories
+    FOR(i, nbClusters)
+    {
+        int index = i * count / nbClusters;
+        means[i] = streams[index].trajectory;
+    }
+
+    FOR(it, maxIterations)
+    {
+        // we recompute the responsiblity for each cluster
+        qDebug() << "E Step" << it;
+        ivec newClusters(count,0);
+        FOR(i, count)
+        {
+            float minDist = FLT_MAX;
+            int minInd = 0;
+            FOR(j, nbClusters)
+            {
+                float dist = StreamDistance(streams[i], means[j]);
+                if(dist < minDist)
+                {
+                    minInd = j;
+                    minDist = dist;
+                }
+            }
+            newClusters[i] = minInd;
+        }
+        if(clusters == newClusters) break; // we've converged!
+        clusters = newClusters;
+
+        // and now we compute the new means
+        qDebug() << "M Step" << it;
+        ivec counts(nbClusters,0);
+        vector<ivec> meanCounts(nbClusters);
+        FOR(i, count)
+        {
+            int c = clusters[i];
+            if(!counts[c])
+            {
+                means[c] = streams[i].trajectory;
+                meanCounts[c].resize(streams[i].length,1);
+            }
+            else
+            {
+                FOR(j, streams[i].size())
+                {
+                    if(j < means[c].size())
+                    {
+                        means[c][j] += streams[i][j];
+                        meanCounts[c][j]++;
+                    }
+                    else
+                    {
+                        means[c].push_back(streams[i][j]);
+                        meanCounts[c].push_back(1);
+                    }
+                }
+            }
+            counts[c]++;
+        }
+        FOR(c, nbClusters)
+        {
+            FOR(j, means[c].size())
+            {
+                means[c][j] /= meanCounts[c][j];
+            }
+        }
+    }
+    return clusters;
+}
+
+unsigned int tessIndices[8][3] = {{0,1,2},{0,2,3},{0,3,4},{0,4,1},{5,2,1},{5,3,2},{5,4,3},{5,1,4}};
+float tessVerts[6][3] = {{0,0,-1},{1,0,0},{0,-1,0},{-1,0,0},{0,1,0},{0,0,1}};
+void normalize_vert(float *a)
+{
+    float d=sqrtf(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
+    d = 1.f/d;
+    a[0]*=d; a[1]*=d; a[2]*=d;
+}
+
+void draw_recursive_tri(float *a,float *b,float *c,unsigned int div, vector<fvec> &vertices)
+{
+    if (div==0)
+    {
+        fvec v(3);
+        v[0] = (a[0]+b[0]+c[0])/3.f;
+        v[1] = (a[1]+b[1]+c[1])/3.f;
+        v[2] = (a[2]+b[2]+c[2])/3.f;
+        vertices.push_back(v);
+    }
+    else
+    {
+        register unsigned int i;
+        float ab[3],ac[3],bc[3];
+        for (i=0; i<3; i++)
+        {
+            ab[i]=(a[i]+b[i])/2.0f;
+            ac[i]=(a[i]+c[i])/2.0f;
+            bc[i]=(b[i]+c[i])/2.0f;
+        }
+        normalize_vert(ab);
+        normalize_vert(ac);
+        normalize_vert(bc);
+        draw_recursive_tri(a,ab,ac,div-1,vertices);
+        draw_recursive_tri(b,bc,ab,div-1,vertices);
+        draw_recursive_tri(c,ac,bc,div-1,vertices);
+        draw_recursive_tri(ab,bc,ac,div-1,vertices);
+    }
+}
+
+float **tessellatedSphere(unsigned int detail)
+{
+    vector<fvec> vertices;
+    FOR(i, 8)
+        draw_recursive_tri
+                (
+                    tessVerts[tessIndices[i][0]],
+                    tessVerts[tessIndices[i][1]],
+                    tessVerts[tessIndices[i][2]],
+                    detail,vertices
+                    );
+    float **tess = new float*[vertices.size()];
+    FOR(i, vertices.size())
+    {
+        tess[i] = new float[3];
+        tess[i][0] = vertices[i][0];
+        tess[i][1] = vertices[i][1];
+        tess[i][2] = vertices[i][2];
+    }
+    return tess;
+}
+
+// level 1: 32, level 2: 128
+float **tesssphere = 0;
+int tesssize = 32;
+inline int binFromVector(float *v)
+{
+    if(!tesssphere) tesssphere = tessellatedSphere(1);
+    int bin = 0;
+    float minDist = FLT_MAX;
+    FOR(i, tesssize)
+    {
+        float *t = tesssphere[i];
+        float dist = (t[0]-v[0])*(t[0]-v[0]) + (t[1]-v[1])*(t[1]-v[1]) + (t[2]-v[2])*(t[2]-v[2]);
+        if(dist < minDist)
+        {
+            minDist = dist;
+            bin = i;
+        }
+    }
+    return bin;
+}
+
+fvec ComputeDynamicalEntropy(Dynamical *dynamical, fvec mins, fvec maxes, int gridSteps = 64, int hSteps = 16)
+{
+    // we begin by generating a dense grid of values
+    qDebug() << "dumping vectors to memory";
+    vector<fvec> grid(gridSteps*gridSteps*gridSteps);
+    fvec sample(3);
+    FOR(z, gridSteps)
+    {
+        sample[2] = z / (float)gridSteps * (maxes[2]-mins[2]) + mins[2];
+        FOR(y, gridSteps)
+        {
+            sample[1] = y / (float)gridSteps * (maxes[1]-mins[1]) + mins[1];
+            FOR(x, gridSteps)
+            {
+                sample[0] = x / (float)gridSteps * (maxes[0]-mins[0]) + mins[0];
+                fvec res = dynamical->Test(sample);
+//                res = res/sqrtf(res*res); // we normalize it
+                grid[x + (y + z*gridSteps)*gridSteps] = res;
+            }
+        }
+    }
+
+    if(!tesssphere) tesssphere = tessellatedSphere(1);
+
+    // bins: binCount*binCount*binCount
+    int binCount = tesssize;
+    int ratio = gridSteps/hSteps;
+    fvec H(hSteps*hSteps*hSteps);
+
+    FOR(i, hSteps)
+    {
+        FOR(j, hSteps)
+        {
+            FOR(k, hSteps)
+            {
+                int bins[32];
+                FOR(d, 32) bins[d] = 0;
+                // we get the histogram for the current subcube
+                FOR(z,ratio)
+                {
+                    FOR(y,ratio)
+                    {
+                        FOR(x,ratio)
+                        {
+                            float *val = &grid[(x + k*ratio) + (y+j*ratio + (z+i*ratio)*gridSteps)*gridSteps][0];
+                            int bin = binFromVector(val);
+                            bins[bin] += 1;
+                        }
+                    }
+                }
+                float sum = ratio*ratio*ratio;
+                float entropy = 0;
+                FOR(d, binCount)
+                {
+                    if(bins[d] == 0) continue;
+                    float p = bins[d]/sum;
+                    float e = p*log2(p);
+                    entropy -= e;
+                }
+                H[k + (j + i*hSteps)*hSteps] = entropy;
+            }
+        }
+    }
+    return H;
+}
+
+GLObject DrawEntropyField(fvec H, float minv, float maxv, int hSteps)
+{
+    qDebug() << "drawing entropy field";
+    GLObject o;
+    o.objectType = "Dynamize,Surfaces,quads";
+    o.style = "smooth";
+    float minH = FLT_MAX, maxH = -FLT_MAX;
+    FOR(i, hSteps*hSteps*hSteps)
+    {
+        minH = min(minH, H[i]);
+        maxH = max(maxH, H[i]);
+    }
+
+    FOR(i, hSteps)
+    {
+        float z = i/(float)hSteps*(maxv-minv) + minv;
+        FOR(j, hSteps)
+        {
+            float y = j/(float)hSteps*(maxv-minv) + minv;
+            FOR(k, hSteps)
+            {
+                float v = H[k + (j + i*hSteps)*hSteps];
+                v = (v-minH)/(maxH-minH);
+                if(v < 0.01) continue;
+                QColor color(Canvas::GetColorMapValue(v,2));
+                float x = k/(float)hSteps*(maxv-minv) + minv;
+                float r = 0.02;
+                o.vertices.push_back(QVector3D(x-r,y-r,z-r));
+                o.vertices.push_back(QVector3D(x+r,y-r,z-r));
+                o.vertices.push_back(QVector3D(x+r,y+r,z-r));
+                o.vertices.push_back(QVector3D(x-r,y+r,z-r));
+                FOUR(o.normals.push_back(QVector3D(0,0,1)));
+                FOUR(o.colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(), 1.f)));
+                o.vertices.push_back(QVector3D(x-r,y-r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y-r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y+r,z+r));
+                o.vertices.push_back(QVector3D(x-r,y+r,z+r));
+                FOUR(o.normals.push_back(QVector3D(0,0,-1)));
+                FOUR(o.colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(), 1.f)));
+                o.vertices.push_back(QVector3D(x-r,y-r,z-r));
+                o.vertices.push_back(QVector3D(x-r,y-r,z+r));
+                o.vertices.push_back(QVector3D(x-r,y+r,z+r));
+                o.vertices.push_back(QVector3D(x-r,y+r,z-r));
+                FOUR(o.normals.push_back(QVector3D(1,0,0)));
+                FOUR(o.colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(), 1.f)));
+                o.vertices.push_back(QVector3D(x+r,y-r,z-r));
+                o.vertices.push_back(QVector3D(x+r,y-r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y+r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y+r,z-r));
+                FOUR(o.normals.push_back(QVector3D(-1,0,0)));
+                FOUR(o.colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(), 1.f)));
+                o.vertices.push_back(QVector3D(x-r,y-r,z-r));
+                o.vertices.push_back(QVector3D(x-r,y-r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y-r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y-r,z-r));
+                FOUR(o.normals.push_back(QVector3D(0,1,0)));
+                FOUR(o.colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(), 1.f)));
+                o.vertices.push_back(QVector3D(x-r,y+r,z-r));
+                o.vertices.push_back(QVector3D(x-r,y+r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y+r,z+r));
+                o.vertices.push_back(QVector3D(x+r,y+r,z-r));
+                FOUR(o.normals.push_back(QVector3D(0,-1,0)));
+                FOUR(o.colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(), 1.f)));
+            }
+        }
+    }
+    return o;
+}
+
+GLObject DrawStreamTubes(vector<Streamline> streams, float diff, float maxSpeed, int xInd, int yInd, int zInd)
+{
+    GLObject o;
+    o.objectType = "Dynamize,Surfaces,quads";
+    o.style = "smooth";
+    FOR(i, streams.size())
+    {
+        if(streams[i].length < 2) continue;
+        float radius = diff*0.001;
+        QVector3D p1, p2;
+        vector<QVector3D> oldCircle;
+        vector<QVector3D> oldNormals;
+        QVector3D oldP, pos;
+        float oldSpeed = 0.f;
+        FOR(j, streams[i].length-1)
+        {
+            QVector3D d;
+            p1 = QVector3D(streams[i][j][xInd],streams[i][j][yInd],streams[i][j][zInd]);
+            p2 = QVector3D(streams[i][j+1][xInd],streams[i][j+1][yInd],streams[i][j+1][zInd]);
+            QVector3D dn = (p2-p1);
+            d = dn.normalized();
+            float speed = dn.length();
+            if(j==0)
+            {
+                if(d.z() != 0)
+                {
+                    float x=drand48(), y=drand48();
+                    float z=-(x*d.x() + y*d.y())/d.z();
+                    pos = QVector3D(x,y,z).normalized();
+                }
+                else
+                {
+                    float z=drand48(), y=drand48();
+                    float x=-(y*d.y() + z*d.z())/d.x();
+                    pos = QVector3D(x,y,z).normalized();
+                }
+            }
+            else
+            {
+                float dDot = QVector3D::dotProduct(d, pos);
+                pos = (pos - d*dDot).normalized();
+            }
+
+            // we want to generate a circle orthogonal to the segment direction
+            int segs=10;
+            QQuaternion quat(M_PI, d);
+            //QQuaternion quat(M_PI/(float)segs, d);
+            vector<QVector3D> circle(segs);
+            vector<QVector3D> normals(segs);
+            FOR(s, segs)
+            {
+                circle[s] = pos*radius*(speed*100.f);
+                normals[s] = pos;
+                pos = quat.rotatedVector(pos).normalized();
+            }
+            if(j > 0)
+            {
+                // we look for the closest point to each of the circle
+
+                int offset = 0;
+
+                float minDist=FLT_MAX;
+                int minInd = 0;
+                FOR(s, segs)
+                {
+                    QVector3D v = circle[0]-oldCircle[s];
+                    float dist = v.lengthSquared();
+                    if(dist < minDist)
+                    {
+                        minInd = s;
+                        minDist = dist;
+                    }
+                }
+                offset = minInd;
+                QColor cVal(Canvas::GetColorMapValue((speed+oldSpeed)*0.5/maxSpeed,2)); // jet color
+                QVector4D color(cVal.redF(),cVal.greenF(),cVal.blueF(),1);
+                //QVector4D color(d.x(),d.y(),d.z(),1);
+
+                FOR(s, segs)
+                {
+                    int i1 = s%segs;
+                    int i2 = (s+1)%segs;
+                    int oi1 = (s+offset)%segs;
+                    int oi2 = (s+1+offset)%segs;
+                    o.vertices.append(oldCircle[oi1] + p1);
+                    o.vertices.append(circle[i1] + p2);
+                    o.vertices.append(circle[i2] + p2);
+                    o.vertices.append(oldCircle[oi2] + p1);
+                    o.normals.append(oldNormals[i1]);
+                    o.normals.append(normals[i1]);
+                    o.normals.append(normals[i2]);
+                    o.normals.append(oldNormals[i2]);
+                    o.colors.append(color);
+                    o.colors.append(color);
+                    o.colors.append(color);
+                    o.colors.append(color);
+                }
+            }
+            oldP = p1;
+            oldCircle = circle;
+            oldNormals = normals;
+            oldSpeed = speed;
+        }
+    }
+    return o;
+}
+
+GLObject DrawStreamRibbon(vector<Streamline> streams, Dynamical *dynamical, vector<Obstacle> obstacles, float diff, float maxSpeed, int xInd, int yInd, int zInd)
+{
+    GLObject o;
+    o.objectType = "Dynamize,Surfaces,quads";
+    o.style = "smooth";
+    FOR(i, streams.size())
+    {
+        if(streams[i].length < 2) continue;
+        float radius = diff*0.05;
+        QVector3D p1, p2, q1, q2;
+        QVector3D pos;
+
+        // we generate the twin trajectory
+        vector<fvec> twin;
+        fvec sample(3);
+        p1 = QVector3D(streams[i][0][xInd],streams[i][0][yInd],streams[i][0][zInd]);
+        p2 = QVector3D(streams[i][1][xInd],streams[i][1][yInd],streams[i][1][zInd]);
+        QVector3D d = (p2-p1).normalized();
+        if(d.z() != 0)
+        {
+            float x=drand48(), y=drand48();
+            float z=-(x*d.x() + y*d.y())/d.z();
+            pos = QVector3D(x,y,z).normalized();
+        }
+        else
+        {
+            float z=drand48(), y=drand48();
+            float x=-(y*d.y() + z*d.z())/d.x();
+            pos = QVector3D(x,y,z).normalized();
+        }
+        q1 = pos + p1;
+        sample[xInd] = pos.x()*radius + p1.x();
+        sample[yInd] = pos.y()*radius + p1.y();
+        sample[zInd] = pos.z()*radius + p1.z();
+        twin.push_back(sample);
+        FOR(j, streams[i].length-1)
+        {
+            fvec res = dynamical->Test(sample);
+            if(dynamical->avoid)
+            {
+                dynamical->avoid->SetObstacles(obstacles);
+                fvec newRes = dynamical->avoid->Avoid(sample, res);
+                res = newRes;
+            }
+            sample += res*dynamical->dT;
+            fvec diff = sample - streams[i][j];
+            float norm = sqrtf(diff*diff);
+            if(norm > radius)
+            {
+                sample = streams[i][j] + diff/norm*radius;
+            }
+            twin.push_back(sample);
+        }
+
+        float oldSpeed = 0;
+        FOR(j, streams[i].length-1)
+        {
+            p1 = QVector3D(streams[i][j][xInd],streams[i][j][yInd],streams[i][j][zInd]);
+            p2 = QVector3D(streams[i][j+1][xInd],streams[i][j+1][yInd],streams[i][j+1][zInd]);
+            q1 = QVector3D(twin[j][xInd],twin[j][yInd],twin[j][zInd]);
+            q2 = QVector3D(twin[j+1][xInd],twin[j+1][yInd],twin[j+1][zInd]);
+            float speed = (p2-p1).length();
+            speed += (q2-q1).length();
+            speed /= 2;
+
+            QColor cVal(Canvas::GetColorMapValue((speed+oldSpeed)*0.5/maxSpeed,2)); // jet color
+            QVector4D color(cVal.redF(),cVal.greenF(),cVal.blueF(),1);
+
+            //QVector4D color(d1.x(),d1.y(),d1.z(),1);
+
+            o.vertices.append(p1);
+            o.vertices.append(p2);
+            o.vertices.append(q2);
+            o.vertices.append(q1);
+            o.colors.append(color);
+            o.colors.append(color);
+            o.colors.append(color);
+            o.colors.append(color);
+        }
+    }
+    return o;
+}
+
+GLObject DrawStreamLines(vector<Streamline> streams, int xInd, int yInd, int zInd)
+{
+    GLObject o;
+    o.objectType = "Dynamize,Lines";
+    o.style = "";
+//    o.style = QString("fading:%1").arg(steps);
+    FOR(i, streams.size())
+    {
+        QColor c = SampleColor[streams[i].cluster%(SampleColorCnt-1)+1];
+        FOR(j, streams[i].length-1)
+        {
+            o.vertices.append(QVector3D(streams[i][j][xInd],streams[i][j][yInd],streams[i][j][zInd]));
+            o.vertices.append(QVector3D(streams[i][j+1][xInd],streams[i][j+1][yInd],streams[i][j+1][zInd]));
+            o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
+            o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
+        }
+    }
+    return o;
+}
+
+void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle)
+{
+    if(!dynamical) return;
+    int dim = glw->canvas->data->GetDimCount();
+    if(dim != 3) return;
+    float dT = dynamical->dT*2; // in 3d we want longer 'trails'
+    int xInd = glw->canvas->xIndex;
+    int yInd = glw->canvas->yIndex;
+    int zInd = glw->canvas->zIndex;
+    vector<fvec> samples = glw->canvas->data->GetSamples();
+    vector< vector<fvec> > trajectories = glw->canvas->data->GetTrajectories(glw->canvas->trajectoryResampleType, glw->canvas->trajectoryResampleCount, glw->canvas->trajectoryCenterType, dT, true);
+    vector<Obstacle> obstacles = glw->canvas->data->GetObstacles();
+
+    fvec sample(dim,0);
+    float minv=FLT_MAX, maxv=-FLT_MAX;
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            minv = min(minv, samples[i][d]);
+            maxv = max(maxv, samples[i][d]);
+        }
+    }
+    float diff = maxv-minv;
+    minv = minv - diff*0.5;
+    maxv = maxv + diff*0.5;
+    diff = maxv - minv;
+
+    qDebug() << "computing field entropy";
+    int gridSteps = 80;
+    int hSteps = 20;
+    int hRatio = gridSteps/hSteps;
+    fvec H = ComputeDynamicalEntropy(dynamical, fvec(dim,minv), fvec(dim,maxv), gridSteps, hSteps);
+    vector< pair<float,int> > hList(H.size());
+    float hSum = 0;
+    float hmin = FLT_MAX, hmax = -FLT_MAX;
+    FOR(i, H.size())
+    {
+        hmin = min(hmin, H[i]);
+        hmax = max(hmax, H[i]);
+    }
+
+    FOR(i, H.size())
+    {
+        hList[i] = make_pair((H[i]-hmin)/(hmax-hmin), i);
+        hSum += hList[i].first;
+    }
+    //sort(hList.begin(), hList.end(), std::greater< pair<float,int> >());
+    sort(hList.begin(), hList.end()); // smallest to largest
+    reverse(hList.begin(), hList.end());
+
+    /*
+    FOR(i, hList.size())
+    {
+        qDebug() << "h values ["<< i <<"]:" << hList[i].first;
+    }
+    */
+    // we generate seed points proportionally to the field entropy
+    int seedlings = 80;
+    vector<fvec> seeds(seedlings);
+    float voxelSize = (maxv-minv)/(float)hSteps;
+    FOR(s, seedlings)
+    {
+        float r = drand48()*hSum;
+        float sum = 0;
+        FOR(i, hList.size())
+        {
+            sum += hList[i].first;
+            if(r < sum || i==hList.size()-1)
+            {
+                int index = hList[i].second;
+                int x = index%hSteps;
+                int y = (index/hSteps)%hSteps;
+                int z = index/(hSteps*hSteps);
+                // we generate a random sample inside the selected voxel
+                sample[0] = drand48()*voxelSize + (x/(float)hSteps*(maxv-minv) + minv);
+                sample[1] = drand48()*voxelSize + (y/(float)hSteps*(maxv-minv) + minv);
+                sample[2] = drand48()*voxelSize + (z/(float)hSteps*(maxv-minv) + minv);
+                seeds[s] = sample;
+                break;
+            }
+        }
+    }
+
+    fvec mins(3,minv), maxes(3,maxv), origin=(maxes+mins)*0.5f;
+    // we generate the trajectories
+    int steps = 400;
+    float maxSpeed = -FLT_MAX;
+    vector<Streamline> streams(seeds.size());
+    FOR(i, seeds.size())
+    {
+        sample = seeds[i];
+        Streamline s;
+        s.push_back(sample);
+        FOR(j, steps)
+        {
+            fvec res = dynamical->Test(sample);
+            if(dynamical->avoid)
+            {
+                dynamical->avoid->SetObstacles(obstacles);
+                fvec newRes = dynamical->avoid->Avoid(sample, res);
+                res = newRes;
+            }
+            float speed = sqrtf((res*dT)*(res*dT));
+            if(speed > maxSpeed) maxSpeed = speed;
+            sample += res*dT;
+            if(speed < 1e-4) break;
+            if(sqrtf((sample - origin)*(sample - origin)) > diff*0.7) break;
+            s.push_back(sample);
+        }
+        s.cluster = i;
+        streams[i] = s;
+    }
+
+    GLObject o;
+    switch(displayStyle)
+    {
+    case 0: // entropy field
+        o = DrawEntropyField(H, minv, maxv, hSteps);
+        break;
+    case 1: // tubes
+        o = DrawStreamTubes(streams, diff, maxSpeed, xInd, yInd, zInd);
+        break;
+    case 2: // ribbons
+        o = DrawStreamRibbon(streams, dynamical, obstacles, diff, maxSpeed, xInd, yInd, zInd);
+        break;
+    case 3: // Animation
+        o = DrawStreamLines(streams, xInd, yInd, zInd);
+        break;
+    }
+
+    // we replace the old vector field (if there is one) with the new one
+    glw->mutex->lock();
+    int oInd = -1;
+    FOR(i, glw->objects.size())
+    {
+        if(glw->objects[i].objectType.contains("Dynamize"))
+        {
+            oInd = i;
+            break;
+        }
+    }
+    if(oInd != -1) glw->objects[oInd] = o;
+    else glw->objects.push_back(o);
+    glw->mutex->unlock();
+
+    qDebug() << "done.";
+    return;
+
+/*
+    int steps = 400;
+    int gridSize = 10;
+    int count = gridSize*gridSize*gridSize;
+//    int count = 1024;
+
+    // we generate a bunch of trajectories
+    qDebug() << "generating streamlines";
+    vector<Streamline> streams(count);
+    FOR(i, count)
+    {
+        int index = i;
+        int x = index % gridSize;
+        int y = (index / gridSize) % gridSize;
+        int z = index / (gridSize*gridSize);
+        sample[xInd] = (x/(float)gridSize)*diff + minv;
+        sample[yInd] = (y/(float)gridSize)*diff + minv;
+        sample[zInd] = (z/(float)gridSize)*diff + minv;
+        //FOR(d, dim) sample[d] = drand48()*diff+ minv;
+
+        Streamline s;
+        s.push_back(sample);
+        FOR(j, steps)
+        {
+            fvec res = dynamical->Test(sample);
+            if(dynamical->avoid)
+            {
+                dynamical->avoid->SetObstacles(obstacles);
+                fvec newRes = dynamical->avoid->Avoid(sample, res);
+                res = newRes;
+            }
+            sample += res*dT;
+            if(res*res < 1e-5) break;
+            s.push_back(sample);
+        }
+        streams[i] = s;
+    }
+
+    qDebug() << "clustering streamlines";
+
+    // now we "cluster" them together
+    int nbClusters = 12;
+    int maxIterations = 40;
+    ivec clusters = ClusterStreams(streams, nbClusters, maxIterations);
+    ivec counts(nbClusters,0);
+    FOR(i, nbClusters) seeds[i].resize(dim);
+    FOR(i, streams.size())
+    {
+        streams[i].cluster = clusters[i];
+        seeds[clusters[i]] += streams[i].front();
+        counts[clusters[i]]++;
+    }
+    FOR(i, nbClusters) seeds[i] /= counts[i];
+
+
+    // we add explicitly the training trajectories
+    FOR(i, trajectories.size())
+    {
+        seeds.push_back(trajectories[i][0]);
+    }
+
+    // and now we regenerate our streamlines from the seeds
+    qDebug() << "generating clustered seeds";
+    vector<Streamline> clusteredStreams(seeds.size());
+
+    qDebug() << "generating GLObjects";
+
+    int streamStyle = 1;
+    //GLObject o;
+
+    switch(streamStyle)
+    {
+    case 0: // vector field
+    {
+        o.objectType = "Dynamize,Lines";
+        o.style = "";
+    //    o.style = QString("fading:%1").arg(steps);
+        FOR(i, streams.size())
+        {
+            QColor c = SampleColor[streams[i].cluster%(SampleColorCnt-1)+1];
+            FOR(j, streams[i].length-1)
+            {
+                o.vertices.append(QVector3D(streams[i][j][xInd],streams[i][j][yInd],streams[i][j][zInd]));
+                o.vertices.append(QVector3D(streams[i][j+1][xInd],streams[i][j+1][yInd],streams[i][j+1][zInd]));
+                o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
+                o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
+            }
+        }
+    }
+        break;
+    case 1: // tubes
+    {
+        o = DrawStreamTubes(streams);
+    }
+        break;
+    case 2: // stripes
+    {
+        o = DrawStreamRibbons(streams);
+    }
+        break;
+    }
+
+    // we replace the old vector field (if there is one) with the new one
+    glw->mutex->lock();
+    int oIndex = -1;
+    FOR(i, glw->objects.size())
+    {
+        if(glw->objects[i].objectType.contains("Dynamize"))
+        {
+            oIndex = i;
+            break;
+        }
+    }
+    if(oIndex != -1) glw->objects[oIndex] = o;
+    else glw->objects.push_back(o);
+    glw->mutex->unlock();
+    */
 }
 
 void Draw3DMaximizer(GLWidget *glw, Maximizer *maximizer){}
-void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical){}
 void Draw3DProjector(GLWidget *glw, Projector *projector){}
 void Draw3DReinforcement(GLWidget *glw, Reinforcement *reinforcement){}
 
+QLabel *label = 0;
+void Draw2DDynamical(Canvas *canvas, Dynamical *dynamical)
+{
+    int w = canvas->width();
+    int h = canvas->height();
+    // we start by generating random noise
+    QImage pixels(w,h,QImage::Format_RGB32);
+    FOR(i, w*h)
+    {
+        int x = i%w;
+        int y = i/w;
+        float value = max(0.f,min(1.f,RandN(0.5f,0.5f)));
+        pixels.setPixel(x,y,qRgb(value*255,value*255,value*255));
+    }
+
+    // now we "process" the noise by iteratively applying the DS to it
+    QPainter painter(&pixels);
+    painter.setRenderHint(QPainter::Antialiasing);
+    int iterations = 4;
+    float dT = 0.004;
+    vector<Obstacle> obstacles = canvas->data->GetObstacles();
+    qDebug() << "processing noise";
+    FOR(i, iterations)
+    {
+        qDebug() << "iteration" << i;
+        FOR(y, h)
+        {
+            FOR(x, w)
+            {
+                QPoint point(x,y);
+                QRgb val = pixels.pixel(point);
+                fvec sample = canvas->fromCanvas(x,y);
+                fvec res = dynamical->Test(sample);
+                if(dynamical->avoid)
+                {
+                    dynamical->avoid->SetObstacles(obstacles);
+                    fvec newRes = dynamical->avoid->Avoid(sample, res);
+                    res = newRes;
+                }
+                sample += res*dT;
+                QPointF point2 = canvas->toCanvasCoords(sample);
+                painter.setPen(QColor(val));
+                painter.drawLine(point, point2);
+                //if(point.x() < 0 || point.x() >= w || point.y() < 0 || point.y() >= h) continue;
+                //pixels.setPixel(point.x(), point.y(), val);
+            }
+        }
+    }
+
+    QPixmap pixmap = QPixmap::fromImage(pixels);
+//    QPixmap pixmap = QPixmap::fromImage(pixels).scaled(w*2, h*2,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    if(!label)
+    {
+        label = new QLabel();
+        label->setScaledContents(true);
+    }
+    label->setPixmap(pixmap);
+    label->show();
+}

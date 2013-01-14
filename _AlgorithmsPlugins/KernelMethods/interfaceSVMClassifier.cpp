@@ -497,6 +497,45 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
     }
 }
 
+void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
+{
+    int xInd = canvas->xIndex;
+    int yInd = canvas->yIndex;
+    int zInd = canvas->zIndex;
+    GLObject o;
+    o.objectType = "Samples";
+    o.style = "rings,pointsize:24";
+    vector<fvec> svs;
+    if(dynamic_cast<ClassifierPegasos*>(classifier))
+    {
+        // we want to draw the support vectors
+        svs = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
+    }
+    else if(dynamic_cast<ClassifierSVM*>(classifier))
+    {
+        int dim = canvas->data->GetDimCount();
+        // we want to draw the support vectors
+        svm_model *svm = dynamic_cast<ClassifierSVM*>(classifier)->GetModel();
+        if(svm)
+        {
+            fvec sv(dim);
+            FOR(i, svm->l)
+            {
+                FOR(d, dim) sv[d] = svm->SV[i][d].value;
+                svs.push_back(sv);
+            }
+        }
+    }
+    FOR(i, svs.size())
+    {
+        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd],svs[i][zInd]));
+        o.colors.append(QVector4D(0,0,0,1));
+    }
+    glw->mutex->lock();
+    glw->objects.push_back(o);
+    glw->mutex->unlock();
+}
+
 void ClassSVM::SaveOptions(QSettings &settings)
 {
     settings.setValue("kernelDeg", params->kernelDegSpin->value());

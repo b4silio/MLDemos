@@ -59,8 +59,7 @@ std::vector<fvec> DynamicalGMR::Test( const fvec &sample, int count)
 {
 	fvec start = sample;
 	dim = sample.size();
-	std::vector<fvec> res;
-	res.resize(count);
+    std::vector<fvec> res(count);
 	FOR(i, count) res[i].resize(dim,0);
 	if(!gmm) return res;
 	fvec velocity; velocity.resize(dim,0);
@@ -83,8 +82,7 @@ fvec DynamicalGMR::Test( const fvec &sample)
 	float *velocity = new float[dim];
 	float *sigma = new float[dim*(dim+1)/2];
 	gmm->doRegression(&sample[0], velocity, sigma);
-	res[0] = velocity[0];
-	res[1] = velocity[1];
+    FOR(d, dim) res[d] = velocity[d];
 	delete [] velocity;
 	delete [] sigma;
 	return res;

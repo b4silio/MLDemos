@@ -240,14 +240,33 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.normals = verts.first; // on a sphere we have vertices == normals!
         o.model = verts.second;
         o.objectType = "Surfaces,quads";
-        o.style = "smooth,transparent,blurry";
-        o.style += QString(",color:%1:%2:%3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
+        o.style = "smooth,transparent";
+        o.style += QString(",color:%1:%2:%3:0.5").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
         glw->objects.push_back(o);
+
+        verts = DrawGaussianLines(1.f, &mean[0], eigVal, eigVec);
+        o.objectType = "Lines";
+        o.style = "dotted,width:3";
+        o.vertices = verts.first;
+        o.normals.clear();
+        o.model = verts.second;
+        glw->objects.push_back(o);
+
+        verts = DrawGaussianLines(2.f, &mean[0], eigVal, eigVec);
+        o.objectType = "Lines";
+        o.style = "dotted,width:1";
+        o.vertices = verts.first;
+        o.normals.clear();
+        o.model = verts.second;
+        glw->objects.push_back(o);
+
         //GLuint list = DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
         //glw->drawSampleLists.push_back(list);
         //glw->drawSampleListCenters[list] = mean;
+        /*
         GLuint list= DrawGaussian(&mean[0], eigVal, eigVec); // we draw the wireframe version
         glw->drawSampleLists.push_back(list);
+        */
     }
 
     delete [] bigSigma;

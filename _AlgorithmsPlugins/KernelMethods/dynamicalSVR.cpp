@@ -24,7 +24,7 @@ using namespace std;
 
 const char *DynamicalSVR::GetInfoString()
 {
-	if(!svm1 || !svm2) return NULL;
+    if(!svms.size()) return NULL;
 	char *text = new char[1024];
 	sprintf(text, "%s\n", param.svm_type == NU_SVR ? "nu-SVR" : "eps-SVR");
 	sprintf(text, "%sKernel: ", text);
@@ -44,12 +44,12 @@ const char *DynamicalSVR::GetInfoString()
 		break;
 	}
 	sprintf(text, "%seps: %f \t nu: %f\n", text, param.eps, param.nu);
-	sprintf(text, "%sSupport Vectors: %d\n", text, svm1->l);
+    sprintf(text, "%sSupport Vectors: %d\n", text, svms[0]->l);
 	return text;
 }
 
 DynamicalSVR::DynamicalSVR()
-: svm1(0), svm2(0), node(0)
+: node(0)
 {
 	type = DYN_SVR;
 	// default values
@@ -78,6 +78,8 @@ DynamicalSVR::DynamicalSVR()
 
 DynamicalSVR::~DynamicalSVR()
 {
+    FOR(i, svms.size()) DEL(svms[i]);
+    svms.clear();
 	DEL(node);
 }
 
@@ -97,19 +99,17 @@ void DynamicalSVR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 		}
 	}
 	if(!samples.size()) return;
-	DEL(svm1);
-	DEL(svm2);
+    FOR(i, svms.size()) DEL(svms[i]);
+    svms.clear();
 	DEL(node);
 
 	svm_problem problem;
 	svm_node *x_space;
 
 	problem.l = samples.size();
-	problem.x = new svm_node *[problem.l];
-	x_space = new svm_node[(dim+1)*problem.l];
-
-	double *y1 = new double[problem.l];
-	double *y2 = new double[problem.l];
+    problem.x = new svm_node *[problem.l];
+    problem.y = new double[problem.l];
+    x_space = new svm_node[(dim+1)*problem.l];
 
 	FOR(i, problem.l)
 	{
@@ -120,30 +120,27 @@ void DynamicalSVR::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 		}
 		x_space[(dim+1)*i + dim].index = -1;
 		problem.x[i] = &x_space[(dim+1)*i];
-		y1[i] = samples[i][dim];
-		y2[i] = samples[i][dim+1];
+//        problem.y[i] = samples[i][dim];
 	}
+//    svms.push_back(svm_train(&problem, &param));
+    FOR(d, dim)
+    {
+        FOR(i, problem.l) problem.y[i] = samples[i][dim + d];
+        svms.push_back(svm_train(&problem, &param));
+    }
 
-	problem.y = y1;
-	svm1 = svm_train(&problem, &param);
-	problem.y = y2;
-	svm2 = svm_train(&problem, &param);
-
-	delete [] problem.x;
-	delete [] y1;
-	delete [] y2;
-
+    delete [] problem.x;
+    delete [] problem.y;
 }
 
 std::vector<fvec> DynamicalSVR::Test( const fvec &sample, const int count)
 {
 	fvec start = sample;
 	dim = sample.size();
-	std::vector<fvec> res;
-	res.resize(count);
+    std::vector<fvec> res(count);
 	FOR(i, count) res[i].resize(dim,0);
-	if(!svm1 || !svm2) return res;
-	fvec velocity; velocity.resize(dim,0);
+    if(svms.size() < dim) return res;
+    fvec velocity(dim,0);
 
 	if(!node) node = new svm_node[dim+1];
 	FOR(i, dim)
@@ -159,8 +156,7 @@ std::vector<fvec> DynamicalSVR::Test( const fvec &sample, const int count)
 		start += velocity*dT;
 
 		FOR(d, dim) node[d].value = start[d];
-		velocity[0] = (float)svm_predict(svm1, node);
-		velocity[1] = (float)svm_predict(svm2, node);
+        FOR(d, dim) velocity[d] = (float)svm_predict(svms[d], node);
 	}
 	return res;
 }
@@ -168,7 +164,7 @@ std::vector<fvec> DynamicalSVR::Test( const fvec &sample, const int count)
 fvec DynamicalSVR::Test( const fvec &sample )
 {
 	int dim = sample.size();
-	float estimate;
+    if(svms.size() != dim) return sample;
 	if(!node) node = new svm_node[dim+1];
 	FOR(i, dim)
 	{
@@ -176,17 +172,14 @@ fvec DynamicalSVR::Test( const fvec &sample )
 		node[i].value = sample[i];
 	}
 	node[dim].index = -1;
-	fvec res;
-	res.resize(dim);
-	res[0] = (float)svm_predict(svm1, node);
-	res[1] = (float)svm_predict(svm2, node);
+    fvec res(dim);
+    FOR(d, dim) res[d] = (float)svm_predict(svms[d], node);
 	return res;
 }
 
 fVec DynamicalSVR::Test( const fVec &sample )
 {
 	int dim = 2;
-	float estimate;
 	if(!node) node = new svm_node[dim+1];
 	FOR(i, dim)
 	{
@@ -195,8 +188,8 @@ fVec DynamicalSVR::Test( const fVec &sample )
 	}
 	node[dim].index = -1;
 	fVec res;
-	res[0] = (float)svm_predict(svm1, node);
-	res[1] = (float)svm_predict(svm2, node);
+    res[0] = (float)svm_predict(svms[0], node);
+    res[1] = (float)svm_predict(svms[1], node);
 	return res;
 }
 

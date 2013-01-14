@@ -226,7 +226,8 @@ private slots:
 	void HideToolbar();
     void HideAddData();
     void AvoidOptionChanged();
-	void DisplayOptionChanged();
+    void DisplayOptionsChanged();
+    void Display3DOptionsChanged();
 	void ColorMapChanged();
     void ActivateIO();
     void ActivateImport();

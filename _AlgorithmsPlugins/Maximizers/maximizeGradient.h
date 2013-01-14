@@ -35,6 +35,7 @@ public:
 	void SetParams(float strength, bool adaptive);
 
 	void Draw(QPainter &painter);
+    std::vector<GLObject> DrawGL();
 	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
 	fvec Test( const fvec &sample);
 	fvec Test(const fVec &sample);

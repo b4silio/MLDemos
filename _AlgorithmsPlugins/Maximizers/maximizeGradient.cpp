@@ -73,6 +73,24 @@ void MaximizeGradient::Draw(QPainter &painter)
 	painter.drawEllipse(point, 5, 5);
 }
 
+std::vector<GLObject> MaximizeGradient::DrawGL()
+{
+    vector<GLObject> objects;
+    GLObject o;
+    o.objectType = "Samples,Maximizer,Lines,linestrip";
+    o.style ="pointsize:10,width:2,dotted";
+    FOR(i, history.size()-1)
+    {
+            fvec &sample = history[i];
+            double value = historyValue[i]*0.5;
+            o.vertices.push_back(QVector3D(sample[0]*2-1, value+0.02, sample[1]*2-1));
+            o.colors.push_back(QVector3D(1,1,1));
+    }
+    o.vertices.push_back(QVector3D(history.back()[0]*2-1, historyValue.back()*0.5+0.02, history.back()[1]*2-1));
+    o.colors.append(QVector3D(0,1,0));
+    return objects;
+}
+
 void MaximizeGradient::Train(float *dataMap, fVec size, fvec startingPoint)
 {
 	w = size.x;

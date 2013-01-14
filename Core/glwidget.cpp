@@ -15,32 +15,36 @@
 using namespace std;
 
 GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers),parent), canvas(canvas), zoomFactor(ZoomZero)
-//    : QGLWidget(QGLFormat(QGL::SampleBuffers|QGL::AlphaChannel),parent), canvas(canvas), zoomFactor(ZoomZero)
+    : QGLWidget(QGLFormat(QGL::SampleBuffers),parent), canvas(canvas), zoomFactor(ZoomZero), mutex(new QMutex())
+    //    : QGLWidget(QGLFormat(QGL::SampleBuffers|QGL::AlphaChannel),parent), canvas(canvas), zoomFactor(ZoomZero)
 {
+    bDisplaySamples=bDisplayLines=bDisplaySurfaces=bDisplayTransparency=bDisplayBlurry=true;
+    bRotateCamera=false;
     makeCurrent();
     width = 800;
     height = 600;
 
     if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
         QGLFramebufferObjectFormat format;
-        format.setSamples(4);
+        format.setSamples(8);
         format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
 
         render_fbo = new QGLFramebufferObject(width, height, format);
         texture_fbo = new QGLFramebufferObject(width, height);
     } else {
-        render_fbo = new QGLFramebufferObject(width*4, height*4);
+        render_fbo = new QGLFramebufferObject(width*2, height*2);
         texture_fbo = render_fbo;
     }
     xRot = yRot = zRot = 0;
     xPos = yPos = zPos = 0.f;
 
+    if(parent) resize(parent->width(), parent->height());
     startTimer(20);
 }
 
 void GLWidget::timerEvent(QTimerEvent *)
 {
+    if(bRotateCamera) setYRotation(yRot + 3.f);
     repaint();
 }
 
@@ -68,16 +72,6 @@ void GLWidget::clearLists()
 
 void GLWidget::initializeGL()
 {
-    /*
-    // this enables multisampling (antialiasing)
-    glEnable(GL_MULTISAMPLE);
-    GLint bufs;
-    GLint samples;
-    glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
-    glGetIntegerv(GL_SAMPLES, &samples);
-    qDebug("Have %d buffers and %d samples", bufs, samples);
-    */
-
     textureData = new unsigned char*[textureCount];
     // first we generate the samples sprite (a circle with a black c)
     FOR(i, textureCount)
@@ -96,14 +90,14 @@ void GLWidget::initializeGL()
                 {
                 case 0: // samples
                 {
-                    if(r < 0.65)
+                    if(r < 0.7)
                     {
                         pData[offs + 0] = 255; //r
                         pData[offs + 1] = 255; //g
                         pData[offs + 2] = 255; //b
                         pData[offs + 3] = 255; // *
                     }
-                    else if (r < 0.9)
+                    else if (r < 0.95)
                     {
                         pData[offs + 0] = 0; //r
                         pData[offs + 1] = 0; //g
@@ -121,7 +115,7 @@ void GLWidget::initializeGL()
                     break;
                 case 1: // wide circle
                 {
-                    if(r > 0.6 && r < 0.9)
+                    if(r > 0.5 && r < 0.95)
                     {
                         pData[offs + 0] = 255; //r
                         pData[offs + 1] = 255; //g
@@ -187,47 +181,41 @@ void GLWidget::initializeGL()
     // We initialize the lights
     GLLight light;
     light.SetAmbient(0.1,0.1,0.1);
-    light.SetDiffuse(0.5,0.5,0.5);
-    light.SetSpecular(0.5,0.5,0.5);
+    light.SetDiffuse(0.8,0.8,0.8);
+    light.SetSpecular(1.0,1.0,1.0);
     light.SetPosition(50.0f, 0.0f, 0.0f);
     lights.push_back(light);
     light.SetAmbient(0,0,0);
     light.SetSpecular(0,0,0);
     light.SetPosition(-50.0f, 50.0f, -50.0f);
     lights.push_back(light);
-    light.SetAmbient(0,0,0);
-    light.SetSpecular(0,0,0);
     light.SetPosition(50.0f, 50.0f, 50.0f);
     lights.push_back(light);
-
 
     // We initialize the shaders
     QGLShaderProgram *program=0;
     LoadShader(&program,":/MLDemos/shaders/drawSamples.vsh",":/MLDemos/shaders/drawSamples.fsh");
     program->bindAttributeLocation("vertex", 0);
-    program->bindAttributeLocation("color", 1);
+//    program->bindAttributeLocation("color", 1);
     shaders["Samples"] = program;
     program = 0;
     LoadShader(&program,":/MLDemos/shaders/smoothTransparent.vsh",":/MLDemos/shaders/smoothTransparent.fsh");
     program->bindAttributeLocation("vertex", 0);
     program->bindAttributeLocation("vertexNormal", 1);
-    program->bindAttributeLocation("barycentric", 2);
+    program->bindAttributeLocation("vertexColor", 2);
+    program->bindAttributeLocation("barycentric", 3);
     shaders["SmoothTransparent"] = program;
     program = 0;
     LoadShader(&program, ":/MLDemos/shaders/renderFBO.vsh", ":/MLDemos/shaders/renderFBO.fsh");
     program->bindAttributeLocation("vertex",0);
     shaders["RenderFBO"] = program;
     program = 0;
+    LoadShader(&program, ":/MLDemos/shaders/blurFBO.vsh", ":/MLDemos/shaders/blurFBO.fsh");
+    program->bindAttributeLocation("vertex",0);
+    shaders["BlurFBO"] = program;
+    program = 0;
 
-    /*
     glEnable(GL_MULTISAMPLE);
-    GLint bufs;
-    GLint samples;
-    glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
-    glGetIntegerv(GL_SAMPLES, &samples);
-    qDebug("Have %d buffers and %d samples", bufs, samples);
-    */
-
     //glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
 }
@@ -243,15 +231,16 @@ void GLWidget::generateObjects()
 
     // we generate the canvas samples
     GLObject oSamples;
-    oSamples.objectType = "Samples";
+    oSamples.objectType = "Samples,Canvas";
     FOR(i, canvas->data->GetCount())
     {
         fvec sample = canvas->data->GetSample(i);
         if(canvas->data->GetFlag(i) == _TRAJ) continue; // we don't want to draw trajectories
         oSamples.vertices.append(QVector3D(xIndex >= 0 && xIndex < dim ? sample[xIndex] : 0,
-                                    yIndex >= 0 && yIndex < dim ? sample[yIndex] : 0,
-                                    zIndex >= 0 && zIndex < dim ? sample[zIndex] : 0));
-        oSamples.colors.append(canvas->data->GetLabel(i));
+                                           yIndex >= 0 && yIndex < dim ? sample[yIndex] : 0,
+                                           zIndex >= 0 && zIndex < dim ? sample[zIndex] : 0));
+        QColor color = SampleColor[canvas->data->GetLabel(i)%SampleColorCnt];
+        oSamples.colors.append(QVector4D(color.redF(), color.greenF(), color.blueF(),1));
     }
     // aaand the trajectories
     ivec trajLabels(canvas->data->GetSequences().size());
@@ -269,9 +258,10 @@ void GLWidget::generateObjects()
             o.vertices.append(QVector3D(xIndex >= 0 && xIndex < dim ? sample[xIndex] : 0,
                                         yIndex >= 0 && yIndex < dim ? sample[yIndex] : 0,
                                         zIndex >= 0 && zIndex < dim ? sample[zIndex] : 0));
-            o.colors.append(trajLabels[i]);
+            QColor color = SampleColor[trajLabels[i]%SampleColorCnt];
+            o.colors.append(QVector4D(color.redF(), color.greenF(), color.blueF(),1));
         }
-        o.objectType = "Samples,trajectories";
+        o.objectType = "Samples,Canvas,trajectories";
         o.style ="pointsize:5,width:0.5,dotted";
         oTrajs.push_back(o);
     }
@@ -285,7 +275,7 @@ void GLWidget::generateObjects()
             objects.erase(objects.begin()+i);
             i--;
         }
-        else if(!bReplacedSamples && objects[i].objectType.contains("Samples"))
+        else if(!bReplacedSamples && objects[i].objectType.contains("Samples,Canvas"))
         {
             objects[i] = oSamples;
             bReplacedSamples = true;
@@ -293,40 +283,64 @@ void GLWidget::generateObjects()
     }
     if(!bReplacedSamples) objects.push_back(oSamples);
     objects.insert(objects.end(),oTrajs.begin(),oTrajs.end());
+
+
+    if(!canvas->maps.reward.isNull())
+    {
+        int rewardIndex = -1;
+        FOR(i, objects.size())
+        {
+            if(objects[i].objectType.contains("Reward"))
+            {
+                rewardIndex = i;
+                break;
+            }
+        }
+        if(rewardIndex == -1)
+        {
+            int w = canvas->maps.reward.width();
+            int h = canvas->maps.reward.height();
+            float ratio = h/(float)w;
+            int xSteps = 100;
+            int ySteps = h * xSteps / w;
+            //int ySteps = h * xSteps / w;
+            QImage rewardImage = canvas->maps.reward.scaled(xSteps,ySteps,Qt::KeepAspectRatioByExpanding).toImage();
+            QRgb *pixels = (QRgb*) rewardImage.bits();
+            float *values = new float[xSteps*ySteps];
+            float maxData = 0;
+            FOR(i, xSteps*ySteps)
+            {
+                values[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+                maxData = max(maxData, values[i]);
+            }
+            if(maxData > 0)
+            {
+                FOR(i, xSteps*ySteps) values[i] = values[i]/maxData*0.5f; // we ensure that the data is normalized
+            }
+            fvec mins(3,-1.f);
+            fvec maxes(3,1.f);
+            fflush(stdout);
+            GLObject o = GenerateMeshGrid(values, xSteps, ySteps, mins, maxes, 0, 2, 1);
+            o.objectType = "Surfaces,Reward,quads";
+            o.style = "smooth,color:1:0.7:0.7:1,specularity:0.2,shininess:8";
+            objects.push_back(o);
+            KILL(values);
+            printf("reward mesh generated: %d vertices (%d normals)\n", o.vertices.size(), o.normals.size());fflush(stdout);
+        }
+    }
 }
 
 void GLWidget::DrawObject(GLObject &o)
 {
-    if(o.objectType.contains("Samples")) DrawSamples(o);
-    if(o.objectType.contains("Lines") || o.objectType.contains("trajectories")) DrawLines(o);
-    else if(o.objectType.contains("Surfaces")) DrawSurfaces(o);
+    if(bDisplaySamples && o.objectType.contains("Samples")) DrawSamples(o);
+    if(bDisplayLines && o.objectType.contains("Lines") || o.objectType.contains("trajectories")) DrawLines(o);
+    else if(bDisplaySurfaces && o.objectType.contains("Surfaces")) DrawSurfaces(o);
 }
 
 void GLWidget::DrawSamples(GLObject &o)
 {
     QString style = o.style.toLower();
-
-    QGLShaderProgram *program = shaders["Samples"];
-    program->bind();
-
-    program->setUniformValue("matrix", modelViewProjectionMatrix);
-    program->setUniformValue("viewport", viewport);
-    program->enableAttributeArray(0);
-    program->enableAttributeArray(1);
-    program->setAttributeArray(0, o.vertices.constData());
-    program->setAttributeArray(1, o.colors.constData(),1);
-
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glEnable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-//    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glPointSize(12);
+    float pointSize = 12.f;
     if(style.contains("pointsize"))
     {
         QStringList params = style.split(",");
@@ -335,12 +349,37 @@ void GLWidget::DrawSamples(GLObject &o)
             if(params[i].contains("pointsize"))
             {
                 QStringList p = params[i].split(":");
-                float s = p.at(1).toFloat();
-                glPointSize(s);
+                pointSize = p.at(1).toFloat();
                 break;
             }
         }
     }
+
+    QGLShaderProgram *program = shaders["Samples"];
+    program->bind();
+    program->enableAttributeArray(0);
+    program->enableAttributeArray(1);
+    program->setAttributeArray(0, o.vertices.constData());
+    program->setAttributeArray(1, o.colors.constData());
+    program->setUniformValue("matrix", modelViewProjectionMatrix);
+    program->setUniformValue("viewport", viewport);
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_TEXTURE_2D);
+    if(o.style.contains("rings")) glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[1]);
+    else glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    program->setUniformValue("color_texture", 0);
+
+    glPointSize(pointSize);
 
     // we actually draw stuff!
     glDrawArrays(GL_POINTS,0,o.vertices.size());
@@ -355,7 +394,6 @@ void GLWidget::DrawLines(GLObject &o)
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
-    glShadeModel (GL_FLAT);
     glDisable(GL_POINT_SPRITE);
 
     glEnable(GL_LINE_SMOOTH);
@@ -369,18 +407,25 @@ void GLWidget::DrawLines(GLObject &o)
     else glDisable(GL_LINE_STIPPLE);
 
     glLineWidth(1.f);
-    glLineStipple (1, 0xFFFF);
+    glLineStipple (3, 0xFFFF);
     glColor3f(0,0,0);
+
+    int fading = 0;
     QStringList params = style.split(",");
     FOR(i, params.size())
     {
+        if(params[i].contains("fading"))
+        {
+            QStringList p = params[i].split(":");
+            fading = p[1].toInt();
+        }
         if(params[i].contains("width"))
         {
             QStringList p = params[i].split(":");
             float val = p[1].toFloat();
             glLineWidth(val);
         }
-        if(params[i].contains("color"))
+        if(params[i].contains("linecolor"))
         {
             QStringList p = params[i].split(":");
             float r = p[1].toFloat();
@@ -396,13 +441,21 @@ void GLWidget::DrawLines(GLObject &o)
             glLineStipple (factor, pattern);
         }
     }
+
+    glPushMatrix();
+    glMultMatrixd(o.model.constData());
     if(o.objectType.contains("linestrip") || o.objectType.contains("trajectories")) glBegin(GL_LINE_STRIP);
     else glBegin(GL_LINES);
     FOR(i, o.vertices.size())
     {
         glVertex3f(o.vertices.at(i).x(),o.vertices.at(i).y(),o.vertices.at(i).z());
+        float alpha = 1.f;
+        if(fading) alpha = 1.f - ((i/2)%fading)/float(fading);
+        if(!o.objectType.contains("trajectories") && i < o.colors.size()) glColor4f(o.colors[i].x(), o.colors[i].y(), o.colors[i].z(), alpha);
+        else glColor4f(0,0,0,alpha);
     }
     glEnd();
+    glPopMatrix();
     glPopAttrib();
 }
 
@@ -441,10 +494,8 @@ void RecomputeNormals(GLObject &o)
     if(o.objectType.contains("quadstrip")) {}
     else if(o.objectType.contains("quads"))
     {
-        qDebug() << "quads" << o.vertices.size();
         QVector3D a,b;
         QVector<QVector3D> faceNormals(o.vertices.size()/4);
-        qDebug() << "generating face normals";
         FOR(i, o.vertices.size()/4) // for each quad
         {
             int index = i*4;
@@ -469,29 +520,38 @@ void RecomputeNormals(GLObject &o)
             faceNormals[i] = bInvert ? QVector3D::crossProduct(a,b) : QVector3D::crossProduct(b,a);
             faceNormals[i].normalize();
         }
-        qDebug() << "gathering twins information";
-        // now that whe have these we need to know which vertices overlap
-        vector<int> twins(o.vertices.size());
-        FOR(i, twins.size()) twins[i] = i;
-        FOR(i, twins.size())
+        if(o.vertices.size() < 65536) // if we have too many points it would be a tad too slow
         {
-            if(twins[i] != i) // we have already computed its twin
+            // now that whe have these we need to know which vertices overlap
+            vector<int> twins(o.vertices.size());
+            FOR(i, twins.size()) twins[i] = i;
+            FOR(i, twins.size())
             {
-                o.normals[i] = o.normals[twins[i]];
-                continue;
-            }
-            o.normals[i] = faceNormals[i/4];
-            for(int j=i+1;j<twins.size();j++)
-            {
-                if(o.vertices[i] == o.vertices[j])
+                if(twins[i] != i) // we have already computed its twin
                 {
-                    twins[j] = i;
-                    o.normals[i] += faceNormals[j/4];
+                    o.normals[i] = o.normals[twins[i]];
+                    continue;
                 }
+                o.normals[i] = faceNormals[i/4];
+                for(int j=i+1;j<twins.size();j++)
+                {
+                    if(o.vertices[i] == o.vertices[j])
+                    {
+                        twins[j] = i;
+                        o.normals[i] += faceNormals[j/4];
+                    }
+                }
+                o.normals[i].normalize();
             }
-            o.normals[i].normalize();
         }
-        qDebug() << "done.";
+        else // flatshaded crappy version
+        {
+            FOR(i, o.vertices.size())
+            {
+                int faceIndex = i/4;
+                o.normals[i] = faceNormals[faceIndex];
+            }
+        }
     }
     else
     {
@@ -504,26 +564,37 @@ void RecomputeNormals(GLObject &o)
             faceNormals[i] = QVector3D::crossProduct(b,a);
             faceNormals[i].normalize();
         }
-        // now that whe have these we need to know which vertices overlap
-        vector<int> twins(o.vertices.size());
-        FOR(i, twins.size()) twins[i] = i;
-        FOR(i, twins.size())
+        if(o.vertices.size() < 65536) // if we have too many points it would be a tad too slow
         {
-            o.normals[i] = faceNormals[i/3];
-            if(twins[i] != i) // we have already passed by here
+            // now that whe have these we need to know which vertices overlap
+            vector<int> twins(o.vertices.size());
+            FOR(i, twins.size()) twins[i] = i;
+            FOR(i, twins.size())
             {
-                o.normals[i] = o.normals[twins[i]];
-                continue;
-            }
-            for(int j=i+1;j<twins.size();j++)
-            {
-                if(o.vertices[i] == o.vertices[j])
+                o.normals[i] = faceNormals[i/3];
+                if(twins[i] != i) // we have already passed by here
                 {
-                    twins[j] = i;
-                    o.normals[i] += faceNormals[j/3];
+                    o.normals[i] = o.normals[twins[i]];
+                    continue;
                 }
+                for(int j=i+1;j<twins.size();j++)
+                {
+                    if(o.vertices[i] == o.vertices[j])
+                    {
+                        twins[j] = i;
+                        o.normals[i] += faceNormals[j/3];
+                    }
+                }
+                o.normals[i].normalize();
             }
-            o.normals[i].normalize();
+        }
+        else // flatshaded crappy version
+        {
+            FOR(i, o.vertices.size())
+            {
+                int faceIndex = i/4;
+                o.normals[i] = faceNormals[faceIndex];
+            }
         }
     }
 }
@@ -538,6 +609,16 @@ void GLWidget::DrawSurfaces(GLObject &o)
         RecomputeNormals(o);
         qDebug() << "Done.";
     }
+    if(o.colors.size() != o.vertices.size())
+    {
+        qDebug() << "filling in colors";
+        o.colors.resize(o.vertices.size());
+        FOR(i, o.vertices.size())
+        {
+            o.colors[i] = QVector4D(1,1,1,1);
+        }
+    }
+
     if(o.barycentric.size() != o.vertices.size())
     {
         qDebug() << "recomputing barycentrics";
@@ -545,9 +626,11 @@ void GLWidget::DrawSurfaces(GLObject &o)
         qDebug() << "Done.";
     }
 
-    float alpha = 1.f;
-    if(style.contains("transparent")) alpha = 0.5f;
-    QVector4D material(0.5,0.5,0.5,alpha);
+    float specularity = 0.7f;
+    float shininess = 8.f;
+    float alpha = style.contains("transparent") ? 0.5f : 1.f;
+    QVector4D material(1,1,1,alpha);
+    float offset = 0.f;
     FOR(i, params.size())
     {
         if(params[i].contains("color"))
@@ -559,6 +642,21 @@ void GLWidget::DrawSurfaces(GLObject &o)
             if(p.size() > 4) alpha = p[4].toFloat();
             material = QVector4D(r,g,b,alpha);
         }
+        else if(params[i].contains("specularity"))
+        {
+            QStringList p = params[i].split(":");
+            specularity = p[1].toFloat();
+        }
+        else if(params[i].contains("shininess"))
+        {
+            QStringList p = params[i].split(":");
+            shininess = p[1].toFloat();
+        }
+        else if(params[i].contains("offset"))
+        {
+            QStringList p = params[i].split(":");
+            offset = p[1].toFloat();
+        }
     }
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -567,18 +665,20 @@ void GLWidget::DrawSurfaces(GLObject &o)
     if(style.contains("smooth")) glShadeModel(GL_SMOOTH);
     else glShadeModel (GL_FLAT);
 
-    if(style.contains("doublesided")) glCullFace(GL_NONE);
-    else glCullFace(GL_BACK);
+    if(offset)
+    {
+        glPolygonOffset(offset, 1.0);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+    }
+//    glCullFace(GL_BACK);
+//    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnable(GL_COLOR_MATERIAL);
-    //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
 
     // setup lights
     FOR(i, lights.size())
@@ -594,23 +694,35 @@ void GLWidget::DrawSurfaces(GLObject &o)
     {
         QVector4D surfaceStyle(1,0,0,0);
         if(style.contains("wireframe")) surfaceStyle.setY(1);
-        if(style.contains("isolines")) surfaceStyle.setY(2);
+        if(style.contains("isolines"))
+        {
+            surfaceStyle.setY(2 + 1); // by default we draw isolines on the vertical axis
+            QStringList params = style.split(",");
+            FOR(i, params.size())
+            {
+                if(params[i].contains("isolines:"))
+                {
+                    QStringList p = params[i].split(":");
+                    surfaceStyle.setY(2 + p[1].toFloat());
+                }
+            }
+        }
         if(style.contains("blurry")) surfaceStyle.setZ(1);
         QMatrix4x4 mvMatrix = modelViewMatrix * o.model;
         QMatrix4x4 mvpMatrix = perspectiveMatrix * mvMatrix;
         QMatrix3x3 normMatrix = mvMatrix.normalMatrix();
         QVector4D l0pos = modelViewMatrix * QVector4D(lights[0].position[0],
-                                                  lights[0].position[1],
-                                                  lights[0].position[2],
-                                                  lights[0].position[3]);
+                                                      lights[0].position[1],
+                                                      lights[0].position[2],
+                                                      lights[0].position[3]);
         QVector4D l1pos = modelViewMatrix * QVector4D(lights[1].position[0],
-                                                  lights[1].position[1],
-                                                  lights[1].position[2],
-                                                  lights[1].position[3]);
+                                                      lights[1].position[1],
+                                                      lights[1].position[2],
+                                                      lights[1].position[3]);
         QVector4D l2pos = modelViewMatrix * QVector4D(lights[2].position[0],
-                                                  lights[2].position[1],
-                                                  lights[2].position[2],
-                                                  lights[2].position[3]);
+                                                      lights[2].position[1],
+                                                      lights[2].position[2],
+                                                      lights[2].position[3]);
         QGLShaderProgram *program = shaders["SmoothTransparent"];
         program->bind();
         program->setUniformValue("mvMatrix", mvMatrix);
@@ -619,6 +731,9 @@ void GLWidget::DrawSurfaces(GLObject &o)
         program->setUniformValue("viewport", viewport);
         program->setUniformValue("materialColor", material);
         program->setUniformValue("surfaceStyle", surfaceStyle);
+        program->setUniformValue("specularity", specularity);
+        program->setUniformValue("shininess", shininess);
+        program->setUniformValue("transparency", bDisplayTransparency);
         program->setUniformValueArray("lights[0].position", &l0pos,1);
         program->setUniformValueArray("lights[0].ambient", lights[0].ambientLight,1,4);
         program->setUniformValueArray("lights[0].diffuse", lights[0].diffuseLight,1,4);
@@ -634,9 +749,11 @@ void GLWidget::DrawSurfaces(GLObject &o)
         program->enableAttributeArray(0);
         program->enableAttributeArray(1);
         program->enableAttributeArray(2);
+        program->enableAttributeArray(3);
         program->setAttributeArray(0, o.vertices.constData());
         program->setAttributeArray(1, o.normals.constData());
-        program->setAttributeArray(2, o.barycentric.constData());
+        program->setAttributeArray(2, o.colors.constData());
+        program->setAttributeArray(3, o.barycentric.constData());
 
         GLenum mode = GL_TRIANGLES;
         if(o.objectType.contains("quadstrip")) mode = GL_QUAD_STRIP;
@@ -735,16 +852,35 @@ void DrawAxes(float zoomFactor)
     glPopAttrib();
 }
 
+void DrawLights(std::vector<GLLight> &lights)
+{
+    // we draw the lights
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    FOR(i, lights.size())
+    {
+        glPushMatrix();
+        glTranslatef(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+        glColor3f(0,0,1.0);
+        DrawStandardSphere(0.05f);
+        glPopMatrix();
+    }
+    glPopAttrib();
+}
+
 float angle = 0;
 void GLWidget::paintGL()
 {
-    bool bOk = render_fbo->bind();
-    if(!bOk) qDebug() << "failed to bind render buffer";
-    glClearColor(1.f, 1.f, 1.f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     if(!canvas) return;
+    mutex->lock();
     generateObjects();
+
+    render_fbo->bind();
+    glEnable(GL_MULTISAMPLE);
+    glClearColor(1.f, 1.f, 1.f, 1.0f);
+    glClearStencil(0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glPushMatrix();
 
@@ -761,13 +897,34 @@ void GLWidget::paintGL()
     modelViewMatrix.rotate(zRot / 16.0, 0.0, 0.0, 1.0);
     modelViewMatrix.translate(xPos, yPos, zPos);
 
-    lights[0].position[0] = 2*sin(angle*0.1f);
-    lights[0].position[1] = 0;
-    lights[0].position[2] = 2*cos(angle*0.1f);
-    lights[1].position[0] = 2*sin(angle*0.13f);
-    lights[1].position[1] = -2*cos(angle*0.13f);
-    lights[1].position[2] = 2*sin(angle*0.13f);
-    angle += 0.1f;
+    bool bHasReward = false;
+    FOR(i, objects.size())
+    {
+        if(objects[i].objectType.contains("Reward"))
+        {
+            bHasReward = true;
+            break;
+        }
+    }
+    if(bHasReward)
+    {
+        lights[0].position[0] = -5;
+        lights[0].position[1] = 0;
+        lights[0].position[2] = -5;
+        lights[1].position[0] = 5;
+        lights[1].position[1] = 5;
+        lights[1].position[2] = -5;
+    }
+    else
+    {
+        lights[0].position[0] = 2*sin(angle*0.1f);
+        lights[0].position[1] = 0;
+        lights[0].position[2] = 2*cos(angle*0.1f);
+        lights[1].position[0] = 2*sin(angle*0.13f);
+        lights[1].position[1] = -2*cos(angle*0.13f);
+        lights[1].position[2] = 2*sin(angle*0.13f);
+        angle += 0.1f;
+    }
 
     modelViewProjectionMatrix = perspectiveMatrix*modelViewMatrix;
     normalMatrix = modelViewMatrix.normalMatrix();
@@ -777,57 +934,156 @@ void GLWidget::paintGL()
     int zIndex = canvas->zIndex;
     int dim = canvas->data->GetDimCount();
 
-    // Here we draw the axes lines
-    if(canvas->bDisplayGrid)
-    {
-        DrawAxes(zoomFactor);
-    }
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-    bool bDrawLights = false;
-    if(bDrawLights)
+    bool bBlurry = false;
+    if(bDisplayBlurry && bDisplayTransparency)
     {
-        // we draw the lights
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_TEXTURE_2D);
-        FOR(i, lights.size())
+        FOR(i, objects.size())
         {
-            glPushMatrix();
-            glTranslatef(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
-            glColor3f(0,0,1.0);
-            DrawStandardSphere(0.05f);
-            glPopMatrix();
-        }
-        glPopAttrib();
-    }
-
-    FOR(i, objects.size())
-    {
-        if(objects[i].objectType.contains("trajectories"))
-        {
-            if(canvas->bDisplayTrajectories) DrawObject(objects[i]);
-        }
-    }
-    FOR(i, objects.size())
-    {
-        if(objects[i].objectType.contains("Samples") && !objects[i].objectType.contains("trajectories"))
-        {
-            // here we draw the canvas samples
-            if(canvas->bDisplaySamples || (canvas->sampleColors.size() == canvas->data->GetCount() && canvas->bDisplayLearned))
+            if(objects[i].objectType.contains("Surface") && objects[i].style.contains("blurry"))
             {
+                bBlurry = true;
+                break;
+            }
+        }
+        if(bBlurry)
+        {
+            // first we begin by drawing all our blurry surfaces
+            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+            //glDisable(GL_DEPTH_TEST);
+            glEnable(GL_STENCIL_TEST);
+            glStencilFunc(GL_ALWAYS, 1, 1);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+            int blurAmount = 3;
+            FOR(i, objects.size())
+            {
+                if(objects[i].objectType.contains("Surface") && objects[i].style.contains("blurry"))
+                {
+                    QStringList params = objects[i].style.split(",");
+                    FOR(j, params.size())
+                    {
+                        if(params[j].contains("blurry:"))
+                        {
+                            QStringList p = params[j].split(":");
+                            blurAmount = p[1].toFloat();
+                            break;
+                        }
+                    }
+                    DrawObject(objects[i]);
+                }
+            }
+            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+            glStencilFunc(GL_EQUAL, 1, 1);
+            glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+
+            // then we draw all the stuff that is BEHIND the surfaces
+            glDepthFunc(GL_GREATER);
+
+            // Here we draw the axes lines
+            if(canvas->bDisplayGrid) DrawAxes(zoomFactor);
+            // DrawLights(lights);
+            FOR(i, objects.size())
+            {
+                if(objects[i].objectType.contains("Canvas"))
+                {
+                    if(objects[i].objectType.contains("trajectories"))
+                    {
+                        if(canvas->bDisplayTrajectories) DrawObject(objects[i]);
+                    }
+                    else if(canvas->bDisplaySamples ||
+                            (canvas->sampleColors.size() == canvas->data->GetCount() && canvas->bDisplayLearned))
+                    {
+                        // we check if we need to recolor the object
+                        if(canvas->bDisplayLearned && canvas->sampleColors.size() == canvas->data->GetCount())
+                        {
+                            GLObject o = objects[i];
+                            FOR(j, o.vertices.size())
+                            {
+                                QColor c = canvas->sampleColors[j];
+                                o.colors[j] = QVector4D(c.redF(), c.greenF(), c.blueF(), 1);
+                            }
+                            DrawObject(o);
+                        }
+                        else DrawObject(objects[i]);
+                    }
+                }
+            }
+            FOR(i, objects.size())
+            {
+                if(objects[i].objectType.contains("Canvas")) continue;
+                if(objects[i].objectType.contains("Surface") && objects[i].style.contains("blurry")) continue;
                 DrawObject(objects[i]);
+            }
+            glDepthFunc(GL_LEQUAL);
+
+            QGLShaderProgram *program = shaders["BlurFBO"];
+            program->bind();
+            program->setUniformValue("bVertical", 1);
+            program->setUniformValue("amount", blurAmount);
+            QRect rect(0, 0, render_fbo->width(), render_fbo->height());
+            QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
+            RenderFBO(texture_fbo, program);
+            QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
+            program->setUniformValue("bVertical", 0);
+            RenderFBO(texture_fbo, program);
+            program->release();
+
+            glDisable(GL_STENCIL_TEST);
+            FOR(i, objects.size())
+            {
+                if(objects[i].objectType.contains("Surfaces") && objects[i].style.contains("blurry"))
+                    DrawObject(objects[i]);
+            }
+        }
+    }
+
+
+    // Here we draw the axes lines
+    if(canvas->bDisplayGrid) DrawAxes(zoomFactor);
+    // DrawLights(lights);
+
+    FOR(i, objects.size())
+    {
+        if(objects[i].objectType.contains("Canvas"))
+        {
+            if(objects[i].objectType.contains("trajectories"))
+            {
+                if(bDisplayLines) DrawObject(objects[i]);
+            }
+            else if(bDisplaySamples)
+            {
+                // we check if we need to recolor the object
+                if(canvas->bDisplayLearned && canvas->sampleColors.size() == canvas->data->GetCount())
+                {
+                    GLObject o = objects[i];
+                    FOR(j, o.vertices.size())
+                    {
+                        QColor c = canvas->sampleColors[j];
+                        o.colors[j] = QVector4D(c.redF(), c.greenF(), c.blueF(),1);
+                    }
+                    DrawObject(o);
+                }
+                else DrawObject(objects[i]);
             }
         }
     }
     FOR(i, objects.size())
     {
-        if(objects[i].objectType.contains("Samples")) continue;
+        if(objects[i].objectType.contains("Canvas")) continue;
+        if(bDisplayBlurry && bDisplayTransparency &&
+                objects[i].objectType.contains("Surface") &&
+                objects[i].style.contains("blurry")) continue;
         DrawObject(objects[i]);
     }
 
-    if(canvas->bDisplayInfo || canvas->bDisplayLearned)
+    glPopAttrib();
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    if(bDisplaySamples)
     {
         // we begin with the sample sprites
+        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[0]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -871,6 +1127,7 @@ void GLWidget::paintGL()
             glCallList(drawLists[i]);
         }
     }
+    glPopAttrib();
     glPopMatrix();
     render_fbo->release();
 
@@ -880,6 +1137,16 @@ void GLWidget::paintGL()
                                               render_fbo, rect);
     }
 
+    QGLShaderProgram *program = shaders["RenderFBO"];
+    program->bind();
+    RenderFBO(texture_fbo, program);
+    program->release();
+    mutex->unlock();
+}
+
+void GLWidget::RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program)
+{
+    if(!fbo || !program) return;
     // save GL state
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glMatrixMode(GL_PROJECTION);
@@ -895,43 +1162,27 @@ void GLWidget::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
 
-    QGLShaderProgram *program = shaders["RenderFBO"];
-    program->bind();
     program->setUniformValue("texture", 0);
-    program->setUniformValue("counter", angle);
     GLfloat fbo_vertices[] = {
-      -1, -1,
-       1, -1,
-      -1,  1,
-       1,  1,
+        -1, -1,
+        1, -1,
+        -1,  1,
+        1,  1,
     };
     program->enableAttributeArray(0);
     program->setAttributeArray(0,fbo_vertices,2);
 
     // we bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture_fbo->texture());
+    glBindTexture(GL_TEXTURE_2D, fbo->texture());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_MULTISAMPLE);
 
     glDrawArrays(GL_TRIANGLE_STRIP,0,4);
-
-    program->release();
-/*
-    glColor3f(1,1,1);
-
-    // Draw a textured quad
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0); glVertex3f(0, 0, 0);
-    glTexCoord2f(0, 1); glVertex3f(0, height, 0);
-    glTexCoord2f(1, 1); glVertex3f(width, height, 0);
-    glTexCoord2f(1, 0); glVertex3f(width, 0, 0);
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-*/
 
     // restore GL state
     glMatrixMode(GL_PROJECTION);
@@ -940,10 +1191,6 @@ void GLWidget::paintGL()
     glPopMatrix();
     glPopAttrib();
 
-
-//    QPixmap pixmap = QPixmap::fromImage(render_fbo->toImage());
-//    QPainter painter(this);
-//    painter.drawPixmap(QRect(0,0,width,height),pixmap.scaled(width,height,Qt::KeepAspectRatio,Qt::SmoothTransformation));
 }
 
 void GLWidget::zoom(int delta)
@@ -965,10 +1212,8 @@ void GLWidget::resizeGL(int width, int height)
     this->width = width;
     this->height = height;
 
-    int side = qMin(width, height);
     glViewport(0,0,width, height);
     viewport = QVector4D(0,0,width,height);
-    //    glViewport((width - side) / 2, (height - side) / 2, side, side);
     float ratio = width/(float)height;
 
     glMatrixMode(GL_PROJECTION);
@@ -989,10 +1234,11 @@ void GLWidget::resizeGL(int width, int height)
     if(width != render_fbo->width() && height != render_fbo->height())
     {
         if(render_fbo->isBound())render_fbo->release();
+        //if(texture_fbo && texture_fbo != render_fbo) delete texture_fbo;
         delete render_fbo;
         if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
             QGLFramebufferObjectFormat format;
-            format.setSamples(4);
+            format.setSamples(32);
             format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
             render_fbo = new QGLFramebufferObject(width, height, format);
             texture_fbo = new QGLFramebufferObject(width, height);
@@ -1162,76 +1408,4 @@ void GLWidget::setZRotation(int angle)
         emit zRotationChanged(angle);
         updateGL();
     }
-}
-
-GLLight::GLLight()
-{
-    position[0] = 100.f;
-    position[1] = 100.f;
-    position[2] = 100.f;
-    position[3] = 1.f;
-    ambientLight[0] = 0.1f;
-    ambientLight[1] = 0.1f;
-    ambientLight[2] = 0.1f;
-    ambientLight[3] = 1.f;
-    diffuseLight[0] = .7f;
-    diffuseLight[1] = .7f;
-    diffuseLight[2] = .7f;
-    diffuseLight[3] = 1.f;
-    specularLight[0] = 0;
-    specularLight[1] = 0;
-    specularLight[2] = 0;
-    specularLight[3] = 1.f;
-}
-
-GLLight::GLLight(float x, float y, float z)
-{
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    position[3] = 1.f;
-    ambientLight[0] = 0.1f;
-    ambientLight[1] = 0.1f;
-    ambientLight[2] = 0.1f;
-    ambientLight[3] = 1.f;
-    diffuseLight[0] = .7f;
-    diffuseLight[1] = .7f;
-    diffuseLight[2] = .7f;
-    diffuseLight[3] = 1.f;
-    specularLight[0] = 0;
-    specularLight[1] = 0;
-    specularLight[2] = 0;
-    specularLight[3] = 1.f;
-}
-
-void GLLight::SetPosition(float x, float y, float z)
-{
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    position[3] = 1.f;
-}
-
-void GLLight::SetAmbient(float r, float g, float b, float a)
-{
-    ambientLight[0] = r;
-    ambientLight[1] = g;
-    ambientLight[2] = b;
-    ambientLight[3] = a;
-}
-
-void GLLight::SetDiffuse(float r, float g, float b, float a)
-{
-    diffuseLight[0] = r;
-    diffuseLight[1] = g;
-    diffuseLight[2] = b;
-    diffuseLight[3] = a;
-}
-
-void GLLight::SetSpecular(float r, float g, float b, float a)
-{
-    specularLight[0] = r;
-    specularLight[1] = g;
-    specularLight[2] = b;
-    specularLight[3] = a;
 }

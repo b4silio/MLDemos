@@ -44,11 +44,13 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, fl
 QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 
+
+void Draw2DDynamical(Canvas *canvas, Dynamical *dynamical);
 void Draw3DClassifier(GLWidget *glw, Classifier *classifier);
 void Draw3DRegressor(GLWidget *glw, Regressor *regressor);
 void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer);
 void Draw3DMaximizer(GLWidget *glw, Maximizer *maximizer);
-void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical);
+void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle);
 void Draw3DProjector(GLWidget *glw, Projector *projector);
 void Draw3DReinforcement(GLWidget *glw, Reinforcement *reinforcement);
 

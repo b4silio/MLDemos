@@ -231,6 +231,27 @@ void ClassRVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
     }
 }
 
+void ClassRVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
+{
+    int xInd = canvas->xIndex;
+    int yInd = canvas->yIndex;
+    int zInd = canvas->zIndex;
+    if(!dynamic_cast<ClassifierRVM*>(classifier)) return;
+    // we want to draw the support vectors
+    vector<fvec> svs = dynamic_cast<ClassifierRVM*>(classifier)->GetSVs();
+    GLObject o;
+    o.objectType = "Samples";
+    o.style = "rings,pointsize:24";
+    FOR(i, svs.size())
+    {
+        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd],svs[i][zInd]));
+        o.colors.append(QVector4D(0,0,0,1));
+    }
+    glw->mutex->lock();
+    glw->objects.push_back(o);
+    glw->mutex->unlock();
+}
+
 void ClassRVM::SaveOptions(QSettings &settings)
 {
     settings.setValue("kernelDeg", params->kernelDegSpin->value());

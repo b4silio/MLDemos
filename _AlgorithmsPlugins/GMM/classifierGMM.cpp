@@ -42,7 +42,7 @@ ClassifierGMM::~ClassifierGMM()
 void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 {
 	if(!samples.size()) return;
-	vector< fvec > positives, negatives;
+    vector< fvec > positives, negatives;
 	classes.clear();
     classMap.clear();
     inverseMap.clear();

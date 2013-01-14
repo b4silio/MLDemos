@@ -238,6 +238,8 @@ public:
 		painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
 
 	}
+
+    static QRgb GetColorMapValue(float value, int colorscheme);
 };
 
 #endif // _CANVAS_H_

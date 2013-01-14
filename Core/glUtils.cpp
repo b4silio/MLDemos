@@ -4,6 +4,79 @@
 #include <gl.h>
 #endif
 #include "glUtils.h"
+#include <public.h>
+
+GLLight::GLLight()
+{
+    position[0] = 100.f;
+    position[1] = 100.f;
+    position[2] = 100.f;
+    position[3] = 1.f;
+    ambientLight[0] = 0.1f;
+    ambientLight[1] = 0.1f;
+    ambientLight[2] = 0.1f;
+    ambientLight[3] = 1.f;
+    diffuseLight[0] = .7f;
+    diffuseLight[1] = .7f;
+    diffuseLight[2] = .7f;
+    diffuseLight[3] = 1.f;
+    specularLight[0] = 0;
+    specularLight[1] = 0;
+    specularLight[2] = 0;
+    specularLight[3] = 1.f;
+}
+
+GLLight::GLLight(float x, float y, float z)
+{
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = 1.f;
+    ambientLight[0] = 0.1f;
+    ambientLight[1] = 0.1f;
+    ambientLight[2] = 0.1f;
+    ambientLight[3] = 1.f;
+    diffuseLight[0] = .7f;
+    diffuseLight[1] = .7f;
+    diffuseLight[2] = .7f;
+    diffuseLight[3] = 1.f;
+    specularLight[0] = 0;
+    specularLight[1] = 0;
+    specularLight[2] = 0;
+    specularLight[3] = 1.f;
+}
+
+void GLLight::SetPosition(float x, float y, float z)
+{
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = 1.f;
+}
+
+void GLLight::SetAmbient(float r, float g, float b, float a)
+{
+    ambientLight[0] = r;
+    ambientLight[1] = g;
+    ambientLight[2] = b;
+    ambientLight[3] = a;
+}
+
+void GLLight::SetDiffuse(float r, float g, float b, float a)
+{
+    diffuseLight[0] = r;
+    diffuseLight[1] = g;
+    diffuseLight[2] = b;
+    diffuseLight[3] = a;
+}
+
+void GLLight::SetSpecular(float r, float g, float b, float a)
+{
+    specularLight[0] = r;
+    specularLight[1] = g;
+    specularLight[2] = b;
+    specularLight[3] = a;
+}
 
 unsigned int octa_indices[8][3]=
 {
@@ -139,9 +212,9 @@ void DrawStandardSphere(double r, int lats, int longs)
 
 void DrawSphereIsolines(double r, int segments)
 {
-    glBegin(GL_LINE_LOOP);
     for (int plane=0; plane < 3; plane++)
     {
+        glBegin(GL_LINE_LOOP);
         for (float theta=0; theta <= M_PI*2.f; theta += (M_PI*2.f)/segments)
         {
             float x = cosf(theta)*r;
@@ -159,8 +232,8 @@ void DrawSphereIsolines(double r, int segments)
                 break;
             }
         }
+        glEnd();
     }
-    glEnd();
 }
 
 std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean, float *eigVal, float *eigVec)
@@ -214,6 +287,83 @@ std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussian(float radius, float *mean
             }
             oldA = A;
             oldB = B;
+        }
+    }
+    return std::make_pair(vertices, model);
+}
+
+std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussianLines(float radius, float *mean, float *eigVal, float *eigVec)
+{
+    // we copy the eigenvectors to a 4x4 rotation matrix
+    float rotation[4*4];
+    rotation[0]  = eigVec[0]; rotation[0 + 1] = eigVec[1]; rotation[0 + 2] = eigVec[2]; rotation[0 + 3] = 0;
+    rotation[4]  = eigVec[3]; rotation[4 + 1] = eigVec[4]; rotation[4 + 2] = eigVec[5]; rotation[4 + 3] = 0;
+    rotation[8]  = eigVec[6]; rotation[8 + 1] = eigVec[7]; rotation[8 + 2] = eigVec[8]; rotation[8 + 3] = 0;
+    rotation[12] = 0;  rotation[12 + 1] = 0 ; rotation[12 + 2] = 0 ; rotation[12 + 3] = 1;
+
+    QMatrix4x4 rot;
+    for(int i=0; i<4; i++)
+    {
+        for(int j=0; j<4; j++)
+        {
+            rot(j,i) = rotation[i*4 + j];
+        }
+    }
+
+    QVector<QVector3D> vertices;
+    QMatrix4x4 model;
+    model.translate(mean[0], mean[1], mean[2]);
+    model *= rot;
+    model.scale(eigVal[0],eigVal[1],eigVal[2]);
+
+    int segments = 64;
+    for (int plane=0; plane < 3; plane++)
+    {
+        float oldX, oldY;
+        float firstX, firstY;
+        for (float theta=0; theta <= M_PI*2.f; theta += (M_PI*2.f)/segments)
+        {
+            float x = cosf(theta)*radius;
+            float y = sinf(theta)*radius;
+            if(theta > 0)
+            {
+                switch(plane)
+                {
+                case 0: // x-y
+                    vertices.append(QVector3D(oldX,oldY,0));
+                    vertices.append(QVector3D(x,y,0));
+                    break;
+                case 1: // x-z
+                    vertices.append(QVector3D(oldX,0,oldY));
+                    vertices.append(QVector3D(x,0,y));
+                    break;
+                case 2: // y-z
+                    vertices.append(QVector3D(0,oldX,oldY));
+                    vertices.append(QVector3D(0,x,y));
+                    break;
+                }
+            }
+            else {
+                firstX = x;
+                firstY = y;
+            }
+            oldX = x;
+            oldY = y;
+        }
+        switch(plane)
+        {
+        case 0: // x-y
+            vertices.append(QVector3D(oldX,oldY,0));
+            vertices.append(QVector3D(firstX,firstY,0));
+            break;
+        case 1: // x-z
+            vertices.append(QVector3D(oldX,0,oldY));
+            vertices.append(QVector3D(firstX,0,firstY));
+            break;
+        case 2: // y-z
+            vertices.append(QVector3D(0,oldX,oldY));
+            vertices.append(QVector3D(0,firstX,firstY));
+            break;
         }
     }
     return std::make_pair(vertices, model);
@@ -346,4 +496,76 @@ GLuint DrawMeshGrid(float *values, float *mins, float *maxes, int xSteps, int yS
     glPopAttrib();
     glEndList();
     return list;
+}
+
+
+GLObject GenerateMeshGrid(fvec &gridPoints, int xSteps, fvec mins, fvec maxes, int xInd, int yInd, int zInd)
+{
+    int ySteps = gridPoints.size() / xSteps;
+    return GenerateMeshGrid(&gridPoints[0], xSteps, ySteps, mins, maxes, xInd, yInd, zInd);
+}
+
+GLObject GenerateMeshGrid(float *gridPoints, int xSteps, int ySteps, fvec mins, fvec maxes, int xInd, int yInd, int zInd)
+{
+    GLObject o;
+    QVector3D v1,v2,v3,v4,normal;
+    std::vector<QVector3D> normalMap((ySteps-1)*(xSteps-1));
+    float pt1[3], pt2[3], pt3[3], pt4[3];
+    FOR(y, ySteps-1)
+    {
+        pt1[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        pt2[yInd] = y/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        pt3[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        pt4[yInd] = (y+1)/(float)ySteps*(maxes[yInd]-mins[yInd]) + mins[yInd];
+        FOR(x, xSteps-1)
+        {
+            pt1[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt2[xInd] = (x+1)/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt3[xInd] = (x+1)/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+            pt4[xInd] = x/(float)xSteps*(maxes[xInd]-mins[xInd]) + mins[xInd];
+
+            pt1[zInd] = gridPoints[x    +    y*xSteps];
+            pt2[zInd] = gridPoints[(x+1)+    y*xSteps];
+            pt3[zInd] = gridPoints[(x+1)+(y+1)*xSteps];
+            pt4[zInd] = gridPoints[x    +(y+1)*xSteps];
+            v1 = QVector3D(pt1[0],pt1[1],pt1[2]);
+            v2 = QVector3D(pt2[0],pt2[1],pt2[2]);
+            v3 = QVector3D(pt3[0],pt3[1],pt3[2]);
+            v4 = QVector3D(pt4[0],pt4[1],pt4[2]);
+            QVector3D a = (v2 - v1).normalized();
+            QVector3D b = (v4 - v1).normalized();
+            normal = QVector3D::crossProduct(b,a);
+            normalMap[y*(xSteps-1) + x] = normal.normalized();
+            o.vertices.append(v1);
+            o.vertices.append(v2);
+            o.vertices.append(v3);
+            o.vertices.append(v4);
+        }
+    }
+    o.normals.resize(o.vertices.size());
+
+    // we compute the normals themselves
+    FOR(y, ySteps-1)
+    {
+        FOR(x,xSteps-1)
+        {
+            int i1 = (x + y*(xSteps-1))*4;
+            int i2 = ((x-1) + y*(xSteps-1))*4 + 1;
+            int i3 = ((x-1) + (y-1)*(xSteps-1))*4 + 2;
+            int i4 = (x + (y-1)*(xSteps-1))*4 + 3;
+            QVector3D n = normalMap[x + y*(xSteps-1)];
+            normal = QVector3D(0,0,0);
+            o.normals[i1] += n;
+            if(x)
+            {
+                o.normals[i2] += n;
+                if(y) o.normals[i3] += n;
+            }
+            if(y) o.normals[i4] += n;
+        }
+    }
+    FOR(i, o.normals.size()) o.normals[i].normalize();
+
+    o.objectType = "Surfaces,quads";
+    return o;
 }
