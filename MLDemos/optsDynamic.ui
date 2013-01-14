@@ -26,9 +26,9 @@
    <property name="geometry">
     <rect>
      <x>340</x>
-     <y>10</y>
+     <y>0</y>
      <width>180</width>
-     <height>171</height>
+     <height>191</height>
     </rect>
    </property>
    <property name="font">
@@ -299,7 +299,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>140</y>
+      <y>130</y>
       <width>80</width>
       <height>21</height>
      </rect>
@@ -330,7 +330,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>120</y>
+      <y>110</y>
       <width>100</width>
       <height>21</height>
      </rect>
@@ -372,7 +372,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>120</y>
+      <y>110</y>
       <width>31</width>
       <height>31</height>
      </rect>
@@ -400,7 +400,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>155</x>
-      <y>125</y>
+      <y>115</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -428,7 +428,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>150</y>
+      <y>140</y>
       <width>50</width>
       <height>20</height>
      </rect>
@@ -440,6 +440,60 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string>Drag Me!</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="displayCombo">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>162</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <item>
+     <property name="text">
+      <string>Entropy Field</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Streamlines</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Streamribbons</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Animated Surface</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>162</y>
+      <width>50</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Display</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>

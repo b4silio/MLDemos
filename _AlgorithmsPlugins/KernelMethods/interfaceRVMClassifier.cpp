@@ -94,14 +94,61 @@ QString ClassRVM::GetAlgoString()
 void ClassRVM::SetParams(Classifier *classifier)
 {
     if(!classifier) return;
+    SetParams(classifier, GetParams());
+}
+
+fvec ClassRVM::GetParams()
+{
     float svmC = params->svmCSpin->value();
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
 
+    fvec par(4);
+    par[0] = svmC;
+    par[1] = kernelType;
+    par[2] = kernelGamma;
+    par[3] = kernelDegree;
+    return par;
+}
+
+void ClassRVM::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    float svmC = parameters.size() > 0 ? parameters[0] : 1;
+    int kernelType = parameters.size() > 1 ? parameters[1] : 0;
+    float kernelGamma = parameters.size() > 2 ? parameters[2] : 0;
+    int kernelDegree = parameters.size() > 3 ? parameters[3] : 0;
 
     ClassifierRVM *rvm = dynamic_cast<ClassifierRVM *>(classifier);
     if(rvm) rvm->SetParams(svmC, kernelType, kernelGamma, kernelDegree);
+}
+
+void ClassRVM::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Penalty (C)");
+    parameterNames.push_back("Kernel Type");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Kernel Degree");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("99999999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
 }
 
 Classifier *ClassRVM::GetClassifier()
@@ -182,6 +229,27 @@ void ClassRVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
             else Canvas::drawCross(painter, point, 6, resp);
         }
     }
+}
+
+void ClassRVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
+{
+    int xInd = canvas->xIndex;
+    int yInd = canvas->yIndex;
+    int zInd = canvas->zIndex;
+    if(!dynamic_cast<ClassifierRVM*>(classifier)) return;
+    // we want to draw the support vectors
+    vector<fvec> svs = dynamic_cast<ClassifierRVM*>(classifier)->GetSVs();
+    GLObject o;
+    o.objectType = "Samples";
+    o.style = "rings,pointsize:24";
+    FOR(i, svs.size())
+    {
+        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd],svs[i][zInd]));
+        o.colors.append(QVector4D(0,0,0,1));
+    }
+    glw->mutex->lock();
+    glw->objects.push_back(o);
+    glw->mutex->unlock();
 }
 
 void ClassRVM::SaveOptions(QSettings &settings)

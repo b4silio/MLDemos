@@ -23,6 +23,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "mymaths.h"
 #include <QPainter>
+#include "glUtils.h"
 
 class Maximizer
 {
@@ -70,6 +71,8 @@ public:
 	}
 
     virtual void Draw(QPainter &painter){}
+    virtual std::vector<GLObject> DrawGL(){return std::vector<GLObject>();}
+
     virtual void Train(float *dataMap, fVec size, fvec startingPoint=fvec()){}
     virtual fvec Test( const fvec &sample){ return fvec(); }
     virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }

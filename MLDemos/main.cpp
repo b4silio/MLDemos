@@ -23,16 +23,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
     /*
-    // this enables multisampling (antialiasing)
+    // this should enable multisampling (antialiasing)
     QGLFormat glf = QGLFormat::defaultFormat();
     glf.setSampleBuffers(true);
-    glf.setSamples(4);
+    glf.setSamples(32);
     QGLFormat::setDefaultFormat(glf);
-    */
+    /**/
 	QString filename = "";
-	if(argc > 1) filename = QString(argv[1]);
+    if(argc > 1) filename = QString(argv[1]);
     MLDemos w(filename);
-     w.show();
+    w.show();
     return a.exec();
 }

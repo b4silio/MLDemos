@@ -46,6 +46,70 @@ void MaximizeInterfaceParticleFilters::SetParams(Maximizer *maximizer)
     parts->SetParams(particleCount, variance, keeperCount, newCount, bAdaptive);
 }
 
+fvec MaximizeInterfaceParticleFilters::GetParams()
+{
+    int particleCount = params->countSpin->value();
+    double keeperCount = params->copiesSpin->value() / 100.; // it's a percentage!
+    double newCount = params->newParticlesSpin->value() / 100.; // it's a percentage!
+    double variance = params->varianceSpin->value();
+    bool bAdaptive = params->adaptiveCheck->isChecked();
+
+    int i=0;
+    fvec par(5);
+    par[i++] = particleCount;
+    par[i++] = keeperCount;
+    par[i++] = newCount;
+    par[i++] = variance;
+    par[i++] = bAdaptive;
+    return par;
+}
+
+void MaximizeInterfaceParticleFilters::SetParams(Maximizer *maximizer, fvec parameters)
+{
+    if(!maximizer) return;
+    int i = 0;
+    int particleCount = parameters.size() > i ? parameters[i] : 1; i++;
+    double keeperCount = parameters.size() > i ? parameters[i] : 1; i++;
+    double newCount = parameters.size() > i ? parameters[i] : 1; i++;
+    double variance = parameters.size() > i ? parameters[i] : 1; i++;
+    bool bAdaptive = parameters.size() > i ? parameters[i] : 1; i++;
+
+    MaximizeParticles *parts = dynamic_cast<MaximizeParticles*>(maximizer);
+    if(!parts) return;
+    parts->SetParams(particleCount, variance, keeperCount, newCount, bAdaptive);
+}
+
+void MaximizeInterfaceParticleFilters::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Particle Count");
+    parameterNames.push_back("Survivors Rate");
+    parameterNames.push_back("New Randoms Rate");
+    parameterNames.push_back("Variance");
+    parameterNames.push_back("Adaptive");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+}
+
 QString MaximizeInterfaceParticleFilters::GetAlgoString()
 {
     int particleCount = params->countSpin->value();

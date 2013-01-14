@@ -46,6 +46,75 @@ void MaximizeInterfaceParticles::SetParams(Maximizer *maximizer)
 	((MaximizeSwarm *)maximizer)->SetParams(particleCount, mutation, inertia, inertiaInit, inertiaFinal, particleConfidence, swarmConfidence);
 }
 
+fvec MaximizeInterfaceParticles::GetParams()
+{
+    int particleCount = params->particleSpin->value();
+    double mutation = params->mutationSpin->value();
+    bool inertia = params->adaptiveCheck->isChecked();
+    double inertiaInit = params->inertiaInitSpin->value();
+    double inertiaFinal = params->inertiaFinalSpin->value();
+    double particleConfidence = params->particleConfidenceSpin->value();
+    double swarmConfidence = params->swarmConfidenceSpin->value();
+
+    int i=0;
+    fvec par(7);
+    par[i++] = particleCount;
+    par[i++] = mutation;
+    par[i++] = inertia;
+    par[i++] = inertiaInit;
+    par[i++] = inertiaFinal;
+    par[i++] = particleConfidence;
+    par[i++] = swarmConfidence;
+    return par;
+}
+
+void MaximizeInterfaceParticles::SetParams(Maximizer *maximizer, fvec parameters)
+{
+    if(!maximizer) return;
+    int i = 0;
+    int particleCount = parameters.size() > i ? parameters[i] : 1; i++;
+    double mutation = parameters.size() > i ? parameters[i] : 1; i++;
+    bool inertia = parameters.size() > i ? parameters[i] : 1; i++;
+    double inertiaInit = parameters.size() > i ? parameters[i] : 1; i++;
+    double inertiaFinal = parameters.size() > i ? parameters[i] : 1; i++;
+    double particleConfidence = parameters.size() > i ? parameters[i] : 1; i++;
+    double swarmConfidence = parameters.size() > i ? parameters[i] : 1; i++;
+
+    ((MaximizeSwarm *)maximizer)->SetParams(particleCount, mutation, inertia, inertiaInit, inertiaFinal, particleConfidence, swarmConfidence);
+}
+
+void MaximizeInterfaceParticles::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Particle Count");
+    parameterNames.push_back("Mutation Rate");
+    parameterNames.push_back("Inertia");
+    parameterNames.push_back("Initial Inertia");
+    parameterNames.push_back("Final Inertia");
+    parameterNames.push_back("Particle Confidence");
+    parameterNames.push_back("Swarm Confidence");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+}
+
 QString MaximizeInterfaceParticles::GetAlgoString()
 {
 	int particleCount = params->particleSpin->value();

@@ -49,6 +49,68 @@ void RegrLowess::SetParams(Regressor *regressor)
     myRegressor->SetParams(smoothFac, weightingFunc, fitType, normType);
 }
 
+fvec RegrLowess::GetParams()
+{
+    double smoothFac = params->paramSmoothingFac->value();
+    int weightingFunc = params->paramWeightingFunc->currentIndex();
+    int fitType = params->paramFitType->currentIndex();
+    int normType = params->paramNormType->currentIndex();
+
+    int i=0;
+    fvec par(4);
+    par[i++] = smoothFac;
+    par[i++] = weightingFunc;
+    par[i++] = fitType;
+    par[i++] = normType;
+    return par;
+}
+
+void RegrLowess::SetParams(Regressor *regressor, fvec parameters)
+{
+    if(!regressor) return;
+    RegressorLowess * myRegressor = dynamic_cast<RegressorLowess *>(regressor);
+    if(!myRegressor) return;
+
+    int i=0;
+    double smoothFac = parameters.size() > i ? parameters[i] : 0; i++;
+    lowessWeightFunc weightingFunc = parameters.size() > i ? (lowessWeightFunc)parameters[i] : (lowessWeightFunc)0; i++;
+    lowessFitType fitType = parameters.size() > i ? (lowessFitType)parameters[i] : (lowessFitType)0; i++;
+    lowessNormType normType = parameters.size() > i ? (lowessNormType)parameters[i] : (lowessNormType)0; i++;
+
+    myRegressor->SetParams(smoothFac, weightingFunc, fitType, normType);
+}
+
+void RegrLowess::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Smoothing Factor");
+    parameterNames.push_back("Weighting Function");
+    parameterNames.push_back("Fit Type");
+    parameterNames.push_back("Norm Type");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000000001f");
+    parameterValues.back().push_back("99999999.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Tricube");
+    parameterValues.back().push_back("Hann");
+    parameterValues.back().push_back("Uniform");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Quadratic");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("None");
+    parameterValues.back().push_back("Std Dev");
+    parameterValues.back().push_back("IQR");
+}
+
 QString RegrLowess::GetAlgoString()
 {
     // here we gather the different hyperparameters from the interface

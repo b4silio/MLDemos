@@ -45,6 +45,14 @@ void ReinforcementInterfaceDP::SetParams(Reinforcement *reinforcement)
 //    ((ReinforcementDP *)reinforcement)->SetParams(variance*variance, batchCheck);
 }
 
+fvec ReinforcementInterfaceDP::GetParams(){return fvec();}
+
+void ReinforcementInterfaceDP::SetParams(Reinforcement *reinforcement, fvec parameters){}
+
+void ReinforcementInterfaceDP::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues){}
+
 Reinforcement *ReinforcementInterfaceDP::GetReinforcement()
 {
     Reinforcement *reinforcement = NULL;

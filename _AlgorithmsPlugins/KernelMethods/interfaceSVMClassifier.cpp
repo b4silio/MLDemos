@@ -186,7 +186,172 @@ void ClassSVM::SetParams(Classifier *classifier)
         svm->param.degree = kernelDegree;
         svm->bOptimize = bOptimize;
     }
+}
 
+fvec ClassSVM::GetParams()
+{
+    int svmType = params->svmTypeCombo->currentIndex();
+    int maxSV = params->maxSVSpin->value();
+    float svmC = params->svmCSpin->value();
+    int kernelType = params->kernelTypeCombo->currentIndex();
+    float kernelGamma = params->kernelWidthSpin->value();
+    float kernelDegree = params->kernelDegSpin->value();
+    bool bOptimize = params->optimizeCheck->isChecked();
+
+    if(svmType == 2) // pegasos
+    {
+        fvec par(5);
+        par[0] = svmC;
+        par[1] = maxSV;
+        par[2] = kernelType;
+        par[3] = kernelGamma;
+        par[4] = kernelDegree;
+        return par;
+    }
+    else
+    {
+        fvec par(6);
+        par[0] = svmType;
+        par[1] = svmC;
+        par[2] = kernelType;
+        par[3] = kernelGamma;
+        par[4] = kernelDegree;
+        par[5] = bOptimize;
+        return par;
+    }
+}
+
+void ClassSVM::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    int svmType = params->svmTypeCombo->currentIndex();
+    float svmC, kernelGamma;
+    int maxSV, kernelType, kernelDegree;
+    bool bOptimize;
+    if(svmType == 2) // pegasos
+    {
+        svmC = parameters.size() > 0 ? parameters[0] : 1;
+        maxSV = parameters.size() > 1 ? parameters[1] : 0;
+        kernelType = parameters.size() > 2 ? parameters[2] : 0;
+        kernelGamma = parameters.size() > 3 ? parameters[3] : 0;
+        kernelDegree = parameters.size() > 4 ? parameters[4] : 0;
+    }
+    else
+    {
+        svmType = parameters.size() > 0 ? parameters[0] : 0;
+        svmC = parameters.size() > 1 ? parameters[1] : 1;
+        kernelType = parameters.size() > 2 ? parameters[2] : 0;
+        kernelGamma = parameters.size() > 3 ? parameters[3] : 0;
+        kernelDegree = parameters.size() > 4 ? parameters[4] : 0;
+        bOptimize = parameters.size() > 5 ? parameters[5] : 0;
+    }
+
+    ClassifierPegasos *pegasos = dynamic_cast<ClassifierPegasos *>(classifier);
+    if(pegasos) pegasos->SetParams(svmC, max(2,(int)maxSV), kernelType, kernelGamma, kernelDegree);
+
+    ClassifierSVM *svm = dynamic_cast<ClassifierSVM *>(classifier);
+    if(svm)
+    {
+        switch(svmType)
+        {
+        case 0:
+            svm->param.svm_type = C_SVC;
+            break;
+        case 1:
+            svm->param.svm_type = NU_SVC;
+            break;
+        }
+        switch(kernelType)
+        {
+        case 0:
+            svm->param.kernel_type = LINEAR;
+            break;
+        case 1:
+            svm->param.kernel_type = POLY;
+            break;
+        case 2:
+            svm->param.kernel_type = RBF;
+            break;
+        case 3:
+            svm->param.kernel_type = SIGMOID;
+            break;
+        }
+        svm->param.C = svm->param.nu = svmC;
+        svm->param.gamma = 1 / kernelGamma;
+        svm->param.coef0 = 0;
+        svm->param.degree = kernelDegree;
+        svm->bOptimize = bOptimize;
+    }
+}
+
+void ClassSVM::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    int svmType = params->svmTypeCombo->currentIndex();
+    if(svmType == 2)
+    {
+        parameterNames.push_back("Penalty (C)");
+        parameterNames.push_back("Max SV");
+        parameterNames.push_back("Kernel Type");
+        parameterNames.push_back("Kernel Width");
+        parameterNames.push_back("Kernel Degree");
+        parameterTypes.push_back("Real");
+        parameterTypes.push_back("Integer");
+        parameterTypes.push_back("List");
+        parameterTypes.push_back("Real");
+        parameterTypes.push_back("Integer");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("0");
+        parameterValues.back().push_back("9999999999999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("1");
+        parameterValues.back().push_back("999999999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("Linear");
+        parameterValues.back().push_back("Poly");
+        parameterValues.back().push_back("RBF");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("0.00000001f");
+        parameterValues.back().push_back("9999999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("1");
+        parameterValues.back().push_back("150");
+    }
+    else
+    {
+        parameterNames.push_back("SVM Type");
+        parameterNames.push_back("Penalty (C) / Nu");
+        parameterNames.push_back("Kernel Type");
+        parameterNames.push_back("Kernel Width");
+        parameterNames.push_back("Kernel Degree");
+        parameterNames.push_back("Optimize Kernel");
+        parameterTypes.push_back("List");
+        parameterTypes.push_back("Real");
+        parameterTypes.push_back("List");
+        parameterTypes.push_back("Real");
+        parameterTypes.push_back("Integer");
+        parameterTypes.push_back("List");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("Epsilon-SVM");
+        parameterValues.back().push_back("Nu-SVM");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("1");
+        parameterValues.back().push_back("999999999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("Linear");
+        parameterValues.back().push_back("Poly");
+        parameterValues.back().push_back("RBF");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("0.00000001f");
+        parameterValues.back().push_back("9999999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("1");
+        parameterValues.back().push_back("150");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("False");
+        parameterValues.back().push_back("True");
+    }
 }
 
 Classifier *ClassSVM::GetClassifier()
@@ -330,6 +495,45 @@ void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
             else Canvas::drawCross(painter, point, 6, resp);
         }
     }
+}
+
+void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
+{
+    int xInd = canvas->xIndex;
+    int yInd = canvas->yIndex;
+    int zInd = canvas->zIndex;
+    GLObject o;
+    o.objectType = "Samples";
+    o.style = "rings,pointsize:24";
+    vector<fvec> svs;
+    if(dynamic_cast<ClassifierPegasos*>(classifier))
+    {
+        // we want to draw the support vectors
+        svs = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
+    }
+    else if(dynamic_cast<ClassifierSVM*>(classifier))
+    {
+        int dim = canvas->data->GetDimCount();
+        // we want to draw the support vectors
+        svm_model *svm = dynamic_cast<ClassifierSVM*>(classifier)->GetModel();
+        if(svm)
+        {
+            fvec sv(dim);
+            FOR(i, svm->l)
+            {
+                FOR(d, dim) sv[d] = svm->SV[i][d].value;
+                svs.push_back(sv);
+            }
+        }
+    }
+    FOR(i, svs.size())
+    {
+        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd],svs[i][zInd]));
+        o.colors.append(QVector4D(0,0,0,1));
+    }
+    glw->mutex->lock();
+    glw->objects.push_back(o);
+    glw->mutex->unlock();
 }
 
 void ClassSVM::SaveOptions(QSettings &settings)

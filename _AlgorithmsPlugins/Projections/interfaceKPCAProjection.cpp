@@ -29,6 +29,68 @@ KPCAProjection::KPCAProjection()
     connect(contours->spinZoom, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
 }
 
+// virtual functions to manage the algorithm creation
+Projector *KPCAProjection::GetProjector()
+{
+    return new ProjectorKPCA(params->dimCountSpin->value());
+}
+
+void KPCAProjection::SetParams(Projector *projector)
+{
+    if(!projector) return;
+    ProjectorKPCA *kpca = dynamic_cast<ProjectorKPCA*>(projector);
+    if(!kpca) return;
+    // we add 1 to the kernel type because we have taken out the linear kernel
+    kpca->SetParams(params->kernelTypeCombo->currentIndex()+1, params->kernelDegSpin->value(), params->kernelWidthSpin->value());
+}
+
+fvec KPCAProjection::GetParams()
+{
+    int kernelType = params->kernelTypeCombo->currentIndex();
+    float kernelGamma = params->kernelWidthSpin->value();
+    float kernelDegree = params->kernelDegSpin->value();
+
+    fvec par(3);
+    par[0] = kernelType;
+    par[1] = kernelGamma;
+    par[2] = kernelDegree;
+    return par;
+}
+
+void KPCAProjection::SetParams(Projector *projector, fvec parameters)
+{
+    if(!projector) return;
+    int kernelType = parameters.size() > 0 ? parameters[0] : 0;
+    float kernelGamma = parameters.size() > 1 ? parameters[1] : 0.1;
+    int kernelDegree = parameters.size() > 2 ? parameters[2] : 1;
+
+    ProjectorKPCA *kpca = dynamic_cast<ProjectorKPCA*>(projector);
+    if(!kpca) return;
+    // we add 1 to the kernel type because we have taken out the linear kernel
+    kpca->SetParams(kernelType+1, kernelDegree, kernelGamma);
+}
+
+void KPCAProjection::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Kernel Type");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Kernel Degree");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
+}
+
 void KPCAProjection::SaveScreenshot()
 {
     const QPixmap *screenshot = contours->plotLabel->pixmap();
@@ -92,12 +154,6 @@ void KPCAProjection::ChangeOptions()
         break;
 
     }
-}
-
-// virtual functions to manage the algorithm creation
-Projector *KPCAProjection::GetProjector()
-{
-    return new ProjectorKPCA(params->dimCountSpin->value());
 }
 
 void KPCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
@@ -477,15 +533,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
 QString KPCAProjection::GetAlgoString()
 {
     return QString("KPCA");
-}
-
-void KPCAProjection::SetParams(Projector *projector)
-{
-    if(!projector) return;
-    ProjectorKPCA *kpca = dynamic_cast<ProjectorKPCA*>(projector);
-    if(!kpca) return;
-    // we add 1 to the kernel type because we have taken out the linear kernel
-    kpca->SetParams(params->kernelTypeCombo->currentIndex()+1, params->kernelDegSpin->value(), params->kernelWidthSpin->value());
 }
 
 void KPCAProjection::SaveOptions(QSettings &settings)

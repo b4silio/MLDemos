@@ -50,6 +50,7 @@ void RegressorRVM::Train(std::vector< fvec > _samples, ivec _labels)
 	labels.clear();
     if(!_samples.size()) return;
     if(_samples[0].size() > 2) return; // no multi-dim for now...
+    dim = _samples[0].size();
 
 	FOR(i, _samples.size())
 	{

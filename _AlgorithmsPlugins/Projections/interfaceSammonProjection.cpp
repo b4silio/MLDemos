@@ -17,6 +17,17 @@ Projector *SammonProjection::GetProjector()
     return new ProjectorSammon();
 }
 
+fvec SammonProjection::GetParams()
+{
+    return fvec();
+}
+
+void SammonProjection::SetParams(Projector *projector, fvec parameters){}
+
+void SammonProjection::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues){}
+
 void SammonProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;

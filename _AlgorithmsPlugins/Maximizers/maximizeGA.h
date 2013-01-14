@@ -40,6 +40,11 @@ public:
 	fvec Test( const fvec &sample);
 	fvec Test(const fVec &sample);
     const char *GetInfoString();
+    void SetParams(Maximizer *maximizer, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // _MAXIMIZE_GA_H_

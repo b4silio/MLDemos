@@ -37,25 +37,86 @@ ClustFlame::ClustFlame() {
 	params->setupUi(widget = new QWidget());
 }
 
-void ClustFlame::SetParams(Clusterer *clusterer) {
-    if(!clusterer) return;
-    // the dynamic cast ensures that the pointer we received is really a clusterFlame
-    ClustererFlame * myFlame = dynamic_cast<ClustererFlame *>(clusterer);
-    // if it isn't, we return
-    if(!myFlame) return;
+void ClustFlame::SetParams(Clusterer *clusterer)
+{
+    SetParams(clusterer, GetParams());
+}
 
-    // Gather the different hyperparameters from the interface.
-
+fvec ClustFlame::GetParams()
+{
     int knnParameter = (int)(params->knnBox->value());
     int knnMetric = (int)(params->metricBox->currentIndex());
     int maxIterationsParameter = (int)(params->maxIterationBox->value());
     bool isSeveralClasses = (bool)(params->isSeveralClassesBox->isChecked());
     float thresholdParameter = (float)(params->thresholdBox->value());
 
+    int i=0;
+    fvec par(5);
+    par[i++] = knnParameter;
+    par[i++] = knnMetric;
+    par[i++] = maxIterationsParameter;
+    par[i++] = isSeveralClasses;
+    par[i++] = thresholdParameter;
+    return par;
+}
+
+void ClustFlame::SetParams(Clusterer *clusterer, fvec parameters)
+{
+    if(!clusterer) return;
+    ClustererFlame * myFlame = dynamic_cast<ClustererFlame *>(clusterer);
+    if(!myFlame) return;
+
+    int i=0;
+    int knnParameter = parameters.size() > i ? parameters[i] : 0; i++;
+    int knnMetric = parameters.size() > i ? parameters[i] : 0; i++;
+    int maxIterationsParameter = parameters.size() > i ? parameters[i] : 0; i++;
+    bool isSeveralClasses = parameters.size() > i ? parameters[i] : 0; i++;
+    float thresholdParameter = parameters.size() > i ? parameters[i] : 0; i++;
+
     myFlame->SetParams(
         knnParameter, knnMetric,
         maxIterationsParameter,
         isSeveralClasses, thresholdParameter);
+}
+
+void ClustFlame::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("KNN Parameter");
+    parameterNames.push_back("KNN Metric");
+    parameterNames.push_back("Max Iterations");
+    parameterNames.push_back("Multiple Assignment");
+    parameterNames.push_back("Multi-Assign. Thresh.");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Euclidean");
+    parameterValues.back().push_back("Cosine");
+    parameterValues.back().push_back("Pearson");
+    parameterValues.back().push_back("UC Pearson");
+    parameterValues.back().push_back("SQ Pearson");
+    parameterValues.back().push_back("Dot Product");
+    parameterValues.back().push_back("Covariance");
+    parameterValues.back().push_back("Manhattan");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.f");
+    parameterValues.back().push_back("1.f");
 }
 
 Clusterer *ClustFlame::GetClusterer() {

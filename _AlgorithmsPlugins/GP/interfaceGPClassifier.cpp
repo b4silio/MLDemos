@@ -52,6 +52,58 @@ void ClassGP::SetParams(Classifier *classifier)
     myGP->SetParams(lengthscale,Method,Nsamp);
 }
 
+fvec ClassGP::GetParams()
+{
+    double lengthscale = 1.f/params->lengthscale->value();
+    lengthscale  = lengthscale*lengthscale;
+    int Method = params->evalmethod->currentIndex();
+    int Nsamp = params->Nsamp->value();
+
+    fvec par(3);
+    par[0] = lengthscale;
+    par[1] = Method;
+    par[2] = Nsamp;
+    return par;
+}
+
+void ClassGP::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    ClassifierGP * myGP = dynamic_cast<ClassifierGP *>(classifier);
+    if(!myGP) return;
+
+    int i = 0;
+    double lengthscale = parameters.size() > i ? parameters[i] : 0; i++;
+    int Method = parameters.size() > i ? parameters[i] : 0; i++;
+    int Nsamp = parameters.size() > i ? parameters[i] : 0; i++;
+
+    myGP->SetParams(lengthscale,Method,Nsamp);
+}
+
+void ClassGP::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Length Scale");
+    parameterNames.push_back("Evaluation Method");
+    parameterNames.push_back("Sampling Count");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("99999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Numerical");
+    parameterValues.back().push_back("Monte Carlo");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("9999");
+}
+
 QString ClassGP::GetAlgoString()
 {
     // here we gather the different hyperparameters from the interface

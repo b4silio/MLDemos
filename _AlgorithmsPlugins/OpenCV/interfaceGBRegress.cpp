@@ -41,6 +41,54 @@ void RegrGB::SetParams(Regressor *regressor)
     ((RegressorGB *)regressor)->SetParams(boostIters,boostLossType,boostTreeDepths);
 }
 
+fvec RegrGB::GetParams()
+{
+    int boostIters = params->boostIters->value();
+    int boostLossType = params->boostLossType->currentIndex();
+    int boostTreeDepths = params->boostTreeDepths->value();
+
+    fvec par(3);
+    par[0] = boostIters;
+    par[1] = boostLossType;
+    par[2] = boostTreeDepths;
+    return par;
+}
+
+void RegrGB::SetParams(Regressor *regressor, fvec parameters)
+{
+    if(!regressor) return;
+    int boostIters = parameters.size() > 0 ? parameters[0] : 1;
+    int boostLossType = parameters.size() > 1 ? parameters[1] : 1;
+    int boostTreeDepths = parameters.size() > 2 ? parameters[2] : 1;
+
+    ((RegressorGB *)regressor)->SetParams(boostIters,boostLossType+1,boostTreeDepths);
+}
+
+void RegrGB::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Iterations (WL count)");
+    parameterNames.push_back("Loss Type");
+    parameterNames.push_back("Tree Depth");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Squared Loss");
+    parameterValues.back().push_back("Absolute Loss");
+    parameterValues.back().push_back("Huber Loss");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+}
+
 QString RegrGB::GetAlgoString()
 {
     int boostIters = params->boostIters->value();

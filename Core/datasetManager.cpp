@@ -62,8 +62,15 @@ void DatasetManager::Clear()
 void DatasetManager::AddSample(fvec sample, int label, dsmFlags flag)
 {
 	if (!sample.size()) return;
+    int dim = GetDimCount();
 	size = sample.size();
-
+    if(dim != size) // we need to go through all our data and adjust the dimensions
+    {
+        FOR(i, samples.size())
+        {
+            while(samples[i].size() < size) samples[i].push_back(0.f);
+        }
+    }
 	samples.push_back(sample);
 	labels.push_back(label);
 	flags.push_back(flag);
@@ -73,9 +80,18 @@ void DatasetManager::AddSample(fvec sample, int label, dsmFlags flag)
 
 void DatasetManager::AddSamples(std::vector< fvec > newSamples, ivec newLabels, std::vector<dsmFlags> newFlags)
 {
-	FOR(i, newSamples.size())
+    if(!newSamples.size()) return;
+    int dim = GetDimCount();
+    size = newSamples[0].size();
+    if(dim != size) // we need to go through all our data and adjust the dimensions
+    {
+        FOR(i, samples.size())
+        {
+            while(samples[i].size() < size) samples[i].push_back(0.f);
+        }
+    }
+    FOR(i, newSamples.size())
 	{
-		if(newSamples[0].size()) size = newSamples[0].size();
 		if(newSamples[i].size())
 		{
 			samples.push_back(newSamples[i]);

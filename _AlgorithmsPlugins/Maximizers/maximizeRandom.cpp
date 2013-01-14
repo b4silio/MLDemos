@@ -81,6 +81,38 @@ void MaximizeRandom::Draw(QPainter &painter)
 	}
 }
 
+std::vector<GLObject> MaximizeRandom::DrawGL()
+{
+    vector<GLObject> objects;
+    GLObject o;
+    o.objectType = "Samples,Maximizer,Lines,linestrip";
+    o.style ="pointsize:10,width:2,dotted";
+    FOR(i, history.size()-1)
+    {
+            fvec &sample = history[i];
+            double value = historyValue[i]*0.5;
+            o.vertices.push_back(QVector3D(sample[0]*2-1, value+0.02, sample[1]*2-1));
+            o.colors.append(QVector3D(1,1,1));
+    }
+    o.vertices.push_back(QVector3D(history.back()[0]*2-1, historyValue.back()*0.5+0.02, history.back()[1]*2-1));
+    o.colors.append(QVector3D(0,1,0));
+    objects.push_back(o);
+    o = GLObject();
+    o.objectType = "Lines,Maximizer,linestrip";
+    o.style ="dotted";
+    // we generate a circle around the current maximum
+    int segments = 32;
+    float r = variance*2;
+    for (float theta=0; theta <= M_PI*2.f; theta += (M_PI*2.f)/segments)
+    {
+        float x = cosf(theta)*r + history.back()[0];
+        float y = sinf(theta)*r + history.back()[1];
+        o.vertices.push_back(QVector3D(x*2.f-1.f,historyValue.back()*0.5+0.02,y*2.f-1.f));
+    }
+    objects.push_back(o);
+    return objects;
+}
+
 void MaximizeRandom::Train(float *dataMap, fVec size, fvec startingPoint)
 {
 	w = size.x;

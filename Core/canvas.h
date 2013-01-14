@@ -63,9 +63,10 @@ public:
 	Canvas(QWidget *parent);
 	~Canvas();
 
-	bool DeleteData(QPointF center, float radius);
-	static bool bCrossesAsDots;
-	void DrawSamples();
+    static bool bCrossesAsDots;
+    bool DeleteData(QPointF center, float radius);
+    ivec SelectSamples(QPointF center, float radius, fvec *weights=0);
+    void DrawSamples();
 	void DrawObstacles();
 	void DrawTrajectories();
 	void DrawTimeseries();
@@ -237,6 +238,8 @@ public:
 		painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
 
 	}
+
+    static QRgb GetColorMapValue(float value, int colorscheme);
 };
 
 #endif // _CANVAS_H_

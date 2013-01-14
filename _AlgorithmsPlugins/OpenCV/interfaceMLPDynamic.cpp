@@ -41,6 +41,69 @@ void DynamicMLP::SetParams(Dynamical *dynamical)
 	((DynamicalMLP *)dynamical)->SetParams(activation, neurons, layers, alpha, beta);
 }
 
+fvec DynamicMLP::GetParams()
+{
+    float alpha = params->mlpAlphaSpin->value();
+    float beta = params->mlpBetaSpin->value();
+    int layers = params->mlpLayerSpin->value();
+    int neurons = params->mlpNeuronSpin->value();
+    int activation = params->mlpFunctionCombo->currentIndex()+1; // 1: sigmoid, 2: gaussian
+
+    fvec par(5);
+    par[0] = alpha;
+    par[1] = beta;
+    par[2] = layers;
+    par[3] = neurons;
+    par[4] = activation;
+    return par;
+}
+
+void DynamicMLP::SetParams(Dynamical *dynamical, fvec parameters)
+{
+    if(!dynamical) return;
+    float alpha = parameters.size() > 0 ? parameters[0] : 1;
+    float beta = parameters.size() > 1 ? parameters[1] : 1;
+    int layers = parameters.size() > 2 ? parameters[2] : 1;
+    int neurons = parameters.size() > 3 ? parameters[3] : 1;
+    int activation = parameters.size() > 4 ? parameters[4] : 0;
+
+    ((DynamicalMLP *)dynamical)->SetParams(activation, neurons, layers, alpha, beta);
+}
+
+void DynamicMLP::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Alpha");
+    parameterNames.push_back("Beta");
+    parameterNames.push_back("Hidden Layers");
+    parameterNames.push_back("Neurons per Layer");
+    parameterNames.push_back("Activation Function");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Hyperbolic Tangent");
+    parameterValues.back().push_back("Gaussian");
+}
+
 Dynamical *DynamicMLP::GetDynamical()
 {
 	DynamicalMLP *dynamical = new DynamicalMLP();

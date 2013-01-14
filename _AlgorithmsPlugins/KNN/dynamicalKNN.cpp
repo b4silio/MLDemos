@@ -74,11 +74,10 @@ std::vector<fvec> DynamicalKNN::Test( const fvec &sample, const int count)
 {
 	fvec start = sample;
 	dim = sample.size();
-	std::vector<fvec> res;
-	res.resize(count);
+    std::vector<fvec> res(count);
 	FOR(i, count) res[i].resize(dim,0);
 	if(!points.size()) return res;
-	fvec velocity; velocity.resize(dim,0);
+    fvec velocity(dim,0);
 	FOR(i, count)
 	{
 		res[i] = start;
@@ -103,8 +102,7 @@ fvec DynamicalKNN::Test( const fvec &sample )
 	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
 
 	float dsum = 0;
-	vector<fvec> scores;
-	scores.resize(k);
+    vector<fvec> scores(k);
 	FOR(i, k)
 	{
 		if(nnIdx[i] >= points.size()) continue;
@@ -120,9 +118,8 @@ fvec DynamicalKNN::Test( const fvec &sample )
 		dists[i] = 1./(dists[i])/dsum;
 	}
 
-	fvec mean, stdev;
-	mean.resize(dim,0);
-	stdev.resize(dim,0);
+    fvec mean(dim,0);
+    fvec stdev(dim,0);
 	int cnt = 0;
 	FOR(i, k)
 	{

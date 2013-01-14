@@ -3,7 +3,15 @@
 
 #include <canvas.h>
 #include <vector>
+#include <QtOpenGL>
 #include <QGLWidget>
+#include <QMatrix4x4>
+#include "glUtils.h"
+
+class QMatrix;
+class QMatrix4x4;
+class QGLShaderProgram;
+class QGLShader;
 
 class GLWidget : public QGLWidget
 {
@@ -13,6 +21,27 @@ public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
     void clearLists();
+    void generateObjects();
+    void DrawObject(GLObject &o);
+    void DrawSamples(GLObject &o);
+    void DrawLines(GLObject &o);
+    void DrawSurfaces(GLObject &o);
+    void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
+    static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
+    {
+        glColor3f(c.redF(), c.greenF(), c.blueF());
+        float sX=0,sY=0,sZ=0;
+        if(xIndex >= 0) sX = sample[xIndex];
+        if(yIndex >= 0) sY = sample[yIndex];
+        if(zIndex >= 0) sZ = sample[zIndex];
+        glVertex3f(sX,sY,sZ);
+    }
+
+    static inline void glLine(fvec p1, fvec p2, int xIndex=0, int yIndex=1, int zIndex=2)
+    {
+        glVertex3f(p1[xIndex], p1[yIndex], zIndex >= 0 ? p1[zIndex] : 0.f);
+        glVertex3f(p2[xIndex], p2[yIndex], zIndex >= 0 ? p2[zIndex] : 0.f);
+    }
 
 public slots:
     void setXRotation(int angle);
@@ -39,29 +68,37 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
     void resizeEvent(QResizeEvent *);
-
-private slots:
-    void advanceGears();
+    void timerEvent(QTimerEvent *);
 
 private:
-    GLuint makeGear(const GLfloat *reflectance, GLdouble innerRadius,
-                    GLdouble outerRadius, GLdouble thickness,
-                    GLdouble toothSize, GLint toothCount);
     void normalizeAngle(int *angle);
+    void RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program);
 
+    QMatrix4x4 perspectiveMatrix;
+    QMatrix4x4 modelViewMatrix;
+    QMatrix4x4 modelViewProjectionMatrix;
+    QMatrix3x3 normalMatrix;
+    QVector4D viewport;
     int xRot, yRot, zRot;
     float xPos, yPos, zPos;
 
-    Canvas *canvas;
     float zoomFactor;
     int width, height;
 
     QPoint lastPos;
 
+    std::map<QString, QGLShaderProgram*> shaders;
+
 public:
+    QMutex *mutex;
+    Canvas *canvas;
     std::vector<GLuint> drawSampleLists;
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;
+    std::vector<GLObject> objects;
+    std::vector<GLLight> lights;
+    bool bDisplaySamples, bDisplayLines, bDisplaySurfaces, bDisplayTransparency, bDisplayBlurry;
+    bool bRotateCamera;
 
     static const GLint texWidth = 128;
     static const GLint texHeight = 128;
@@ -72,21 +109,8 @@ public:
     static GLuint *textureNames;
     static unsigned char **textureData;
 
-    static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
-    {
-        glColor3f(c.redF(), c.greenF(), c.blueF());
-        float sX=0,sY=0,sZ=0;
-        if(xIndex >= 0) sX = sample[xIndex];
-        if(yIndex >= 0) sY = sample[yIndex];
-        if(zIndex >= 0) sZ = sample[zIndex];
-        glVertex3f(sX,sY,sZ);
-    }
-
-    static inline void glLine(fvec p1, fvec p2, int xIndex=0, int yIndex=1, int zIndex=2)
-    {
-        glVertex3f(p1[xIndex], p1[yIndex], zIndex >= 0 ? p1[zIndex] : 0.f);
-        glVertex3f(p2[xIndex], p2[yIndex], zIndex >= 0 ? p2[zIndex] : 0.f);
-    }
+    QGLFramebufferObject *render_fbo;
+    QGLFramebufferObject *texture_fbo;
 };
 
 #endif

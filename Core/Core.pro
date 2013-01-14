@@ -2,7 +2,7 @@
 # Configuration           #
 ###########################
 TEMPLATE = lib
-QT += svg
+QT += svg opengl
 NAME = Core
 MLPATH =..
 CONFIG += coreLib static
@@ -49,6 +49,7 @@ HEADERS += \
     qcontour.h \
     animationlabel.h \
     reinforcementProblem.h \
+    kmeans.h \
     glwidget.h \
     glUtils.h
 
@@ -69,5 +70,8 @@ SOURCES += \
     qcontour.cpp \
     animationlabel.cpp \
     reinforcementProblem.cpp \
+    kmeans.cpp \
     glwidget.cpp \
     glUtils.cpp
+
+RESOURCES +=

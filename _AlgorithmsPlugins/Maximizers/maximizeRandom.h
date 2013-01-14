@@ -32,11 +32,17 @@ public:
 
 	void SetParams(float variance=0);
 
-	void Draw(QPainter &painter);
+    void Draw(QPainter &painter);
+    std::vector<GLObject> DrawGL();
 	void Train(float *dataMap, fVec size, fvec startingPoint=fvec());
 	fvec Test( const fvec &sample);
 	fvec Test(const fVec &sample);
     const char *GetInfoString();
+    void SetParams(Maximizer *maximizer, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // _MAXIMIZE_RANDOM_H_

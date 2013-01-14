@@ -46,6 +46,50 @@ void ReinforcementInterfacePower::SetParams(Reinforcement *reinforcement)
     ((ReinforcementPower *)reinforcement)->SetParams(k, variance, bAdaptive);
 }
 
+
+fvec ReinforcementInterfacePower::GetParams()
+{
+    double variance = params->varianceSpin->value();
+    bool bAdaptive = params->adaptiveCheck->isChecked();
+    int k = params->kSpin->value();
+
+    fvec par(3);
+    par[0] = variance;
+    par[1] = bAdaptive;
+    par[2] = k;
+    return par;
+}
+
+void ReinforcementInterfacePower::SetParams(Reinforcement *reinforcement, fvec parameters)
+{
+    int i=0;
+    double variance = parameters.size() > i ? parameters[i] : 0; i++;
+    bool bAdaptive = parameters.size() > i ? parameters[i] : 0.1;
+    int k = parameters.size() > i ? parameters[i] : 10;
+    ((ReinforcementPower *)reinforcement)->SetParams(k, variance, bAdaptive);
+}
+
+void ReinforcementInterfacePower::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Variance");
+    parameterNames.push_back("Adaptive");
+    parameterNames.push_back("Population Size");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("1.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+}
+
 Reinforcement *ReinforcementInterfacePower::GetReinforcement()
 {
     Reinforcement *reinforcement = NULL;

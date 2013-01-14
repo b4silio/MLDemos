@@ -26,7 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class DynamicalSVR : public Dynamical
 {
 private:
-	svm_model *svm1, *svm2;
+    std::vector<svm_model*> svms;
 	svm_node *node;
 public:
 	svm_parameter param;
@@ -40,7 +40,6 @@ public:
     const char *GetInfoString();
 
 	void SetParams(int svmType, float svmC, float svmP, u32 kernelType, float kernelParam);
-    svm_model *GetModel(){return svm1;}
 };
 
 #endif // _DYNAMICAL_SVR_H_

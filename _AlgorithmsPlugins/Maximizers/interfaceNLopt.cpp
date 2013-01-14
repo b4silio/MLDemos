@@ -42,6 +42,49 @@ void MaximizeInterfaceNLopt::SetParams(Maximizer *maximizer)
     nlopt->SetParams(type, step);
 }
 
+fvec MaximizeInterfaceNLopt::GetParams()
+{
+    int type = params->algorithmCombo->currentIndex();
+    float step = params->stepSpin->value();
+
+    fvec par(2);
+    par[0] = type;
+    par[1] = step;
+    return par;
+}
+
+void MaximizeInterfaceNLopt::SetParams(Maximizer *maximizer, fvec parameters)
+{
+    int i=0;
+    int type = parameters.size() > i ? parameters[i] : 0; i++;
+    float step = parameters.size() > i ? parameters[i] : 0.1;
+
+    MaximizeNlopt *nlopt = dynamic_cast<MaximizeNlopt*>(maximizer);
+    if(!nlopt) return;
+    nlopt->SetParams(type, step);
+}
+
+void MaximizeInterfaceNLopt::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Algorithm Type");
+    parameterNames.push_back("Initial Stepsize");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Augmented Lagrangian");
+    parameterValues.back().push_back("BOBYQUA");
+    parameterValues.back().push_back("COBYLA");
+    parameterValues.back().push_back("Nelder-Mead");
+    parameterValues.back().push_back("NEWUOA");
+    parameterValues.back().push_back("Praxis");
+    parameterValues.back().push_back("SubPlex");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999.f");
+}
+
 Maximizer *MaximizeInterfaceNLopt::GetMaximizer()
 {
     Maximizer *maximizer = new MaximizeNlopt();
