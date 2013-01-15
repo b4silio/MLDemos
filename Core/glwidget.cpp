@@ -58,6 +58,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::clearLists()
 {
+    mutex->lock();
     FOR(i, drawSampleLists.size())
     {
         glDeleteLists(drawSampleLists[i], 1);
@@ -70,6 +71,7 @@ void GLWidget::clearLists()
     drawLists.clear();
     drawSampleListCenters.clear();
     objects.clear();
+    mutex->unlock();
 }
 
 void GLWidget::initializeGL()
@@ -140,8 +142,15 @@ void GLWidget::initializeGL()
                     }
                 }
                     break;
+                case 2: // fuzzy particle
+                {
+                    pData[offs + 0] = 255*(1.f-r);
+                    pData[offs + 1] = 255*(1.f-r);
+                    pData[offs + 2] = 255*(1.f-r);
+                    pData[offs + 3] = 255;
                 }
-                //printf("alpha: %f\n", pData[x + y*texWidth + 3]);
+                    break;
+                }
             }
         }
     }
@@ -346,6 +355,56 @@ void GLWidget::DrawObject(GLObject &o)
     if(bDisplaySamples && o.objectType.contains("Samples")) DrawSamples(o);
     if(bDisplayLines && o.objectType.contains("Lines") || o.objectType.contains("trajectories")) DrawLines(o);
     else if(bDisplaySurfaces && o.objectType.contains("Surfaces")) DrawSurfaces(o);
+    else if(bDisplayLines && o.objectType.contains("Particles")) DrawParticles(o);
+}
+
+void GLWidget::DrawParticles(GLObject &o)
+{
+    QString style = o.style.toLower();
+    float pointSize = 12.f;
+    if(style.contains("pointsize"))
+    {
+        QStringList params = style.split(",");
+        FOR(i, params.size())
+        {
+            if(params[i].contains("pointsize"))
+            {
+                QStringList p = params[i].split(":");
+                pointSize = p.at(1).toFloat();
+                break;
+            }
+        }
+    }
+
+    QGLShaderProgram *program = shaders["Samples"];
+    program->bind();
+    program->enableAttributeArray(0);
+    program->enableAttributeArray(1);
+    program->setAttributeArray(0, o.vertices.constData());
+    program->setAttributeArray(1, o.colors.constData());
+    program->setUniformValue("matrix", modelViewProjectionMatrix);
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[2]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    program->setUniformValue("color_texture", 0);
+    glEnable(GL_PROGRAM_POINT_SIZE_EXT);
+    glPointSize(pointSize);
+
+    // we actually draw stuff!
+    glDrawArrays(GL_POINTS,0,o.vertices.size());
+    glPopAttrib();
+
+    program->release();
 }
 
 void GLWidget::DrawSamples(GLObject &o)

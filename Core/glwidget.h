@@ -28,6 +28,7 @@ public:
     void generateObjects();
     void DrawObject(GLObject &o);
     void DrawSamples(GLObject &o);
+    void DrawParticles(GLObject &o);
     void DrawLines(GLObject &o);
     void DrawSurfaces(GLObject &o);
     void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
