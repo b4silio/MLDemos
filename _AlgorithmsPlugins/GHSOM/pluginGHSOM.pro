@@ -3,7 +3,6 @@
 # ##########################
 TEMPLATE = lib
 CONFIG += plugin
-QT += opengl
 NAME = mld_GHSOM
 MLPATH =../..
 

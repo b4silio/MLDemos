@@ -13,7 +13,7 @@
 
 #include "dataitem.h"
 #include "vector.h"
-typedef Vector<DataItem> Data_Vector;
+typedef GVector<DataItem> Data_Vector;
 /**
   *@author Michael Dittenbach
   */

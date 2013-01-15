@@ -21,8 +21,8 @@
 #include "neuron.h"
 #include "vector.h"
 #include "globals.h"
-typedef Vector<DataItem> Data_Vector;
-typedef Vector<char> String_Vector;
+typedef GVector<DataItem> Data_Vector;
+typedef GVector<char> String_Vector;
 class Neuron;
 /**
   *@author Michael Dittenbach

@@ -5,12 +5,13 @@ TEMPLATE = lib
 QT += svg opengl
 NAME = Core
 MLPATH =..
-CONFIG += coreLib static
+win32:CONFIG += coreLib
+else:CONFIG += coreLib static
 
 include($$MLPATH/MLDemos_variables.pri)
 
 win32{
-	DESTDIR = ../Core
+	DESTDIR = ..
 }
 ###########################
 # Files                   #

@@ -1,10 +1,7 @@
-#ifdef WIN32
-#include <GL/glew.h>
-#else
-#include <gl.h>
-#endif
 #include "glUtils.h"
 #include <public.h>
+
+QGLFunctions *gl = 0;
 
 GLLight::GLLight()
 {
@@ -387,7 +384,13 @@ GLuint DrawGaussian(float *mean, float *eigVal, float *eigVec, float prior,
     glDisable( GL_TEXTURE_2D );
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#ifndef WIN32
     glBlendEquation(GL_FUNC_ADD);
+#endif
+    /*
+	QGLFunctions gl(QGLContext::currentContext());
+	gl.glBlendEquation(GL_FUNC_ADD);
+	*/
     if(!wireframe)
     {
         glEnable(GL_LIGHTING);
@@ -447,8 +450,14 @@ GLuint DrawMeshGrid(float *values, float *mins, float *maxes, int xSteps, int yS
 
     glDisable( GL_TEXTURE_2D );
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#ifndef WIN32
     glBlendEquation(GL_FUNC_ADD);
+#endif
+	 /*
+	 QGLFunctions gl(QGLContext::currentContext());
+	 gl.glBlendEquation(GL_FUNC_ADD);
+	 */
 
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);

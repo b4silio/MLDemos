@@ -15,9 +15,9 @@
 #include "dataitem.h"
 #include "globals.h"
 #include "vector.h"
-typedef Vector<DataItem> Data_Vector;
-typedef Vector<char> String_Vector;
-typedef Vector<float> Double_Vector;
+typedef GVector<DataItem> Data_Vector;
+typedef GVector<char> String_Vector;
+typedef GVector<float> Double_Vector;
 class NeuronLayer;
 /**
   *@author Michael Dittenbach

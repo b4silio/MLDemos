@@ -1,7 +1,7 @@
-#include "interfaceGHSOM.h"
-#include "projectorGHSOM.h"
 #include <GHSOM/globals.h>
 #include <QGLWidget>
+#include "interfaceGHSOM.h"
+#include "projectorGHSOM.h"
 #include <QDebug>
 
 using namespace std;
@@ -208,14 +208,14 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
     int layerCount = 0;
     for(int i=Globals::layers->size()-1; i>0; i--)
     {
-        Vector<NeuronLayer> *layer = Globals::layers->elementAt(i);
+		GVector<NeuronLayer> *layer = Globals::layers->elementAt(i);
         layerCount += layer->size();
     }
     layerCount--;
 
     for(int i=Globals::layers->size()-1; i>0; i--) // we skip the first as it is just the average of all weights
     {
-        Vector<NeuronLayer> *layer = Globals::layers->elementAt(i);
+		GVector<NeuronLayer> *layer = Globals::layers->elementAt(i);
         FOR(j, layer->size())
         {
             Neuron ***map = layer->elementAt(j)->getMap();
@@ -419,12 +419,12 @@ void GHSOMProjector::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     int layerCount = 0;
     for(int i=Globals::layers->size()-1; i>0; i--)
     {
-        Vector<NeuronLayer> *layer = Globals::layers->elementAt(i);
+		GVector<NeuronLayer> *layer = Globals::layers->elementAt(i);
         layerCount += layer->size();
     }
     for(int i=Globals::layers->size()-1; i>0; i--) // we skip the first as it is just the average of all weights
     {
-        Vector<NeuronLayer> *layer = Globals::layers->elementAt(i);
+		GVector<NeuronLayer> *layer = Globals::layers->elementAt(i);
         FOR(j, layer->size()) DrawNeuronLayer(canvas, painter, layer->elementAt(j), --layerCount);
     }
 
@@ -435,7 +435,7 @@ void GHSOMProjector::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     FOR(i, Globals::layers->size())
     {
         printf("Layer[%d]", i);
-        Vector<NeuronLayer> *layer = Globals::layers->elementAt(i);
+		GVector<NeuronLayer> *layer = Globals::layers->elementAt(i);
         if(layer)
         {
             printf(": %d element(s)\n", layer->size());

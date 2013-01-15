@@ -15,81 +15,13 @@
 class DataItem;
 class NeuronLayer;
 
-template <class T>
-Vector<T>::Vector(){
-	vectorSize = 0;
-	vectorArray = NULL;
-}
-
-template <class T>
-Vector<T>::~Vector(){
-	removeAllElements();
-}
-
-template <class T>
-Vector<T>::Vector(const Vector &o)
-{
-    vectorSize = o.vectorSize;
-    vectorArray = new T*[vectorSize];
-    memcpy(vectorArray, o.vectorArray, vectorSize*sizeof(T*));
-}
-
-template <class T>
-Vector<T>& Vector<T>::operator=(const Vector& o)
-{
-    if(&o == this) return *this;
-    removeAllElements();
-    vectorSize = o.vectorSize;
-    vectorArray = new T*[vectorSize];
-    memcpy(vectorArray, o.vectorArray, vectorSize*sizeof(T*));
-    return *this;
-}
-
-/**  */
-template <class T>
-void Vector<T>::addElement(T *obj){
-    if(vectorArray)
-    {
-        T **newArray = new T*[vectorSize+1];
-        memcpy(newArray, vectorArray, vectorSize*sizeof(T*));
-        newArray[vectorSize] = obj;
-        delete [] vectorArray;
-        vectorArray = newArray;
-    }
-    else
-    {
-        vectorArray = new T*[1];
-        vectorArray[0] = obj;
-    }
-    ++vectorSize;
-}
-
-template <class T>
-T* Vector<T>::elementAt(int pos){
-    if(pos >= 0 && pos < vectorSize)
-	return vectorArray[pos];
-    else return NULL;
-}
-/**  */
-template <class T>
-int Vector<T>::size(){
-	return vectorSize;
-}
-/**  */
-template <class T>
-void Vector<T>::removeAllElements(){
-    delete [] vectorArray;
-	vectorArray = NULL;
-	vectorSize = 0;
-}
-
 void GHSOM_getTemplates()
 {
-    Vector<char> v1;
-    Vector<float> v2;
-    Vector<DataItem> v3;
-    Vector<NeuronLayer> v4;
-    Vector<Vector<NeuronLayer> > v5;
+	GVector<char> v1;
+	GVector<float> v2;
+	GVector<DataItem> v3;
+	GVector<NeuronLayer> v4;
+	GVector<GVector<NeuronLayer> > v5;
     char a0 = 'a';
     float b0 = 1.f;
     v1.addElement(&a0);
