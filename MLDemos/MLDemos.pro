@@ -2,8 +2,8 @@
 # Configuration      #
 # ##########################
 TEMPLATE = app
-QT -= network
-QT += svg opengl
+QT += opengl svg
+
 TARGET = mldemos
 NAME = mldemos
 MLPATH =..
@@ -16,10 +16,6 @@ RESOURCES += mldemos.qrc
 CONFIG += mainApp
 include($$MLPATH/MLDemos_variables.pri)
 
-#CONFIG += boost
-#INCLUDEPATH += $$BOOST
-
-macx:INCLUDEPATH += uiMac
 
 # ##########################
 # Source Files       #

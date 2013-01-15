@@ -100,7 +100,7 @@ public:
     std::vector<QColor> sampleColors;
     QStringList dimNames;
     std::map<int,QString> classNames;
-    QString GetClassName(int classNumber);
+	QString GetClassString(int classNumber);
 
 protected:
 	void paintEvent(QPaintEvent *event);

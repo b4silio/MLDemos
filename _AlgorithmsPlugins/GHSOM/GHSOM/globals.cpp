@@ -148,7 +148,7 @@ float *Globals::meanWeights(float *w1,float *w2){
     return res;
 }
 
-float *Globals::meanVector(Vector<DataItem> *dItems,int dataLength){
+float *Globals::meanVector(GVector<DataItem> *dItems,int dataLength){
     float *meanVector = new float[dataLength];
     for (int i=0;i<dataLength;i++){
         meanVector[i] = 0;

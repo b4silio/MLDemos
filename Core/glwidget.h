@@ -1,19 +1,23 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+#include "glUtils.h"
 #include <canvas.h>
 #include <vector>
 #include <QtOpenGL>
 #include <QGLWidget>
 #include <QMatrix4x4>
-#include "glUtils.h"
 
 class QMatrix;
 class QMatrix4x4;
 class QGLShaderProgram;
 class QGLShader;
 
+#ifdef WIN32
+class GLWidget : public QGLWidget, protected QGLFunctions
+#else
 class GLWidget : public QGLWidget
+#endif
 {
     Q_OBJECT
 

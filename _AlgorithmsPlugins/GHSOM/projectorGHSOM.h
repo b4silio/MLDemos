@@ -5,7 +5,6 @@
 #include <mymaths.h>
 #include <projector.h>
 
-
 class ProjectorGHSOM : public Projector
 {
 public:

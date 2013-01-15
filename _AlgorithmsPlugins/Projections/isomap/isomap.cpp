@@ -10,6 +10,7 @@
 #include "fibheap.h"
 #include <math.h>
 #include <float.h>
+#include <algorithm>
 #include <iostream>
 #include <queue>
 #include <MathLib/MathLib.h>

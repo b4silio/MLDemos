@@ -21,9 +21,9 @@ class Neuron;
 class NeuronLayer;
 
 
-typedef Vector<DataItem> Data_Vector;
-typedef Vector<Vector<NeuronLayer> > Vector_Vector;
-typedef Vector<NeuronLayer> Layer_Vector;
+typedef GVector<DataItem> Data_Vector;
+typedef GVector<GVector<NeuronLayer> > Vector_Vector;
+typedef GVector<NeuronLayer> Layer_Vector;
 
 /**
   *@author Michael Dittenbach

@@ -13,14 +13,22 @@
 #include <vector>
 #include <mymaths.h>
 
+#ifdef WIN32
+//#include <GL/glew.h>
+#endif
+
 #include <QVector>
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QtOpenGL>
+#include <QGLFunctions>
 
-#ifdef WIN32
-#include <GL/glew.h>
+#ifndef GL_MULTISAMPLE
+#define GL_MULTISAMPLE 0x809D
+#define GL_POINT_SPRITE 0x8861
+#define GL_COORD_REPLACE 0x8862
 #endif
+
 
 #define rat_octahedron_solid_base	1
 #define rat_icosahedron_solid_base	2

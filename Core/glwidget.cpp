@@ -1,8 +1,7 @@
-#ifdef WIN32
-#include <GL/glew.h>
-#endif
 #include <QtGui>
 #include <QtOpenGL>
+#include <QtOpenGL/QGLFunctions>
+#include <QtOpenGL/QGLShaderProgram>
 #include <QDebug>
 
 #include <math.h>
@@ -21,6 +20,9 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     bDisplaySamples=bDisplayLines=bDisplaySurfaces=bDisplayTransparency=bDisplayBlurry=true;
     bRotateCamera=false;
     makeCurrent();
+#ifdef WIN32
+    initializeGLFunctions(this->context());
+#endif
     width = 800;
     height = 600;
 
@@ -115,11 +117,18 @@ void GLWidget::initializeGL()
                     break;
                 case 1: // wide circle
                 {
-                    if(r > 0.5 && r < 0.95)
+                    if(r > 0.6 && r < 0.8)
                     {
                         pData[offs + 0] = 255; //r
                         pData[offs + 1] = 255; //g
                         pData[offs + 2] = 255; //b
+                        pData[offs + 3] = 255; // *
+                    }
+                    else if(r > 0.5 && r < 0.95) // the outlines
+                    {
+                        pData[offs + 0] = 0; //r
+                        pData[offs + 1] = 0; //g
+                        pData[offs + 2] = 0; //b
                         pData[offs + 3] = 255; // *
                     }
                     else
@@ -138,9 +147,10 @@ void GLWidget::initializeGL()
     }
 
     glGenTextures(2, textureNames); // 0: samples, 1: wide circles
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    FOR(i, textureCount)
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+
+	FOR(i, textureCount)
     {
         glBindTexture(GL_TEXTURE_2D, textureNames[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData[i]);
@@ -153,7 +163,7 @@ void GLWidget::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -218,6 +228,7 @@ void GLWidget::initializeGL()
     glEnable(GL_MULTISAMPLE);
     //glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
+
 }
 
 
@@ -362,7 +373,6 @@ void GLWidget::DrawSamples(GLObject &o)
     program->setAttributeArray(0, o.vertices.constData());
     program->setAttributeArray(1, o.colors.constData());
     program->setUniformValue("matrix", modelViewProjectionMatrix);
-    program->setUniformValue("viewport", viewport);
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
@@ -377,9 +387,9 @@ void GLWidget::DrawSamples(GLObject &o)
     else glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    program->setUniformValue("color_texture", 0);
-
-    glPointSize(pointSize);
+	program->setUniformValue("color_texture", 0);
+    glEnable(GL_PROGRAM_POINT_SIZE_EXT);
+	glPointSize(pointSize);
 
     // we actually draw stuff!
     glDrawArrays(GL_POINTS,0,o.vertices.size());
@@ -674,7 +684,7 @@ void GLWidget::DrawSurfaces(GLObject &o)
 //    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
     glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
+	glBlendEquation(GL_FUNC_ADD);
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -879,7 +889,8 @@ void GLWidget::paintGL()
     render_fbo->bind();
     glEnable(GL_MULTISAMPLE);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
-    glClearStencil(0);
+//	glClearColor(.5f, .5f, .5f, 1.0f);
+	glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glPushMatrix();
@@ -1190,7 +1201,6 @@ void GLWidget::RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program)
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     glPopAttrib();
-
 }
 
 void GLWidget::zoom(int delta)
