@@ -33,6 +33,7 @@ public:
     Projector *GetProjector();
     void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector);
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector){}
 
     // virtual functions to manage the GUI and I/O
     QString GetName(){return QString("Kernel PCA");}
@@ -44,6 +45,12 @@ public:
     bool LoadOptions(QSettings &settings);
     void SaveParams(QTextStream &stream);
     bool LoadParams(QString name, float value);
+    void SetParams(Projector *projector, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
+
 public slots:
     void ChangeOptions();
     void ShowContours();

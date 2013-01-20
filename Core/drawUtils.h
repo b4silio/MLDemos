@@ -26,6 +26,15 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "roc.h"
 #include <QPainter>
 
+#include "glwidget.h"
+#include "classifier.h"
+#include "clusterer.h"
+#include "regressor.h"
+#include "reinforcement.h"
+#include "projector.h"
+#include "dynamical.h"
+#include "maximize.h"
+
 void DrawEllipse(float *mean, float *sigma, float rad, QPainter *painter, QSize size);
 void DrawEllipse(float *mean, float *sigma, float rad, QPainter *painter, Canvas *canvas);
 void DrawArrow( const QPointF &ppt, const QPointF &pt, double sze, QPainter &painter);
@@ -34,5 +43,15 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
 QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
+
+
+void Draw2DDynamical(Canvas *canvas, Dynamical *dynamical);
+void Draw3DClassifier(GLWidget *glw, Classifier *classifier);
+void Draw3DRegressor(GLWidget *glw, Regressor *regressor);
+void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer);
+void Draw3DMaximizer(GLWidget *glw, Maximizer *maximizer);
+void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle);
+void Draw3DProjector(GLWidget *glw, Projector *projector);
+void Draw3DReinforcement(GLWidget *glw, Reinforcement *reinforcement);
 
 #endif // _DRAW_UTILS_H_

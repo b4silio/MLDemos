@@ -36,7 +36,8 @@ public:
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
-	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+    void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical){}
 
 	// virtual functions to manage the GUI and I/O
     QString GetName(){return QString("Gaussian Mixture Regression");}
@@ -49,6 +50,11 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+    void SetParams(Dynamical *dynamical, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // _INTERFACEGMMRDYNAMIC_H_

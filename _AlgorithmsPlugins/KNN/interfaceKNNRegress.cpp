@@ -49,6 +49,47 @@ void RegrKNN::SetParams(Regressor *regressor)
 	((RegressorKNN *)regressor)->SetParams(k, metricType, metricP);
 }
 
+fvec RegrKNN::GetParams()
+{
+    fvec par(3);
+    par[0] = params->knnKspin->value();
+    par[1] = params->knnNormCombo->currentIndex();
+    par[2] = params->knnNormSpin->value();
+    return par;
+}
+
+void RegrKNN::SetParams(Regressor *regressor, fvec parameters)
+{
+    if(!regressor) return;
+    int k = parameters.size() > 0 ? parameters[0] : 1;
+    int metricType = parameters.size() > 1 ? parameters[1] : 0;
+    int metricP = parameters.size() > 2 ? parameters[2] : 0;
+    ((RegressorKNN *)regressor)->SetParams(k, metricType, metricP);
+}
+
+void RegrKNN::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("K");
+    parameterNames.push_back("Metric Type");
+    parameterNames.push_back("Metric Power");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("L1");
+    parameterValues.back().push_back("L2");
+    parameterValues.back().push_back("Lp");
+    parameterValues.back().push_back("L-Inf");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
+}
+
 QString RegrKNN::GetAlgoString()
 {
 	int k = params->knnKspin->value();

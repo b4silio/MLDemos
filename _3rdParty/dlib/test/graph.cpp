@@ -45,7 +45,7 @@ namespace
         COMPILE_TIME_ASSERT(is_graph<graph>::value);
 
         graph a, b;
-        set<unsigned long>::compare_1b_c s;
+        dlib::set<unsigned long>::compare_1b_c s;
 
         DLIB_TEST(graph_contains_length_one_cycle(a) == false);
         DLIB_TEST(graph_contains_undirected_cycle(a) == false);
@@ -273,9 +273,9 @@ namespace
 
         DLIB_TEST(graph_is_connected(a));
 
-        set<set<unsigned long>::compare_1b_c>::kernel_1b_c sos;
+        dlib::set<dlib::set<unsigned long>::compare_1b_c>::kernel_1b_c sos;
 
-        dlib::graph<set<unsigned long>::compare_1b_c, set<unsigned long>::compare_1b_c>::kernel_1a_c join_tree;
+        dlib::graph<dlib::set<unsigned long>::compare_1b_c, dlib::set<unsigned long>::compare_1b_c>::kernel_1a_c join_tree;
         unsigned long temp;
         triangulate_graph_and_find_cliques(a,sos);
         DLIB_TEST(a.number_of_nodes() == 8);
@@ -323,6 +323,59 @@ namespace
     }
 
 
+    void test_copy()
+    {
+        {
+            graph<int,int>::kernel_1a_c a,b;
+
+            a.set_number_of_nodes(3);
+            a.node(0).data = 1;
+            a.node(1).data = 2;
+            a.node(2).data = 3;
+            a.add_edge(0,1);
+            a.add_edge(0,2);
+            edge(a,0,1) = 4;
+            edge(a,0,2) = 5;
+
+            a.add_edge(0,0);
+            edge(a,0,0) = 9;
+            copy_graph(a, b);
+
+            DLIB_TEST(b.number_of_nodes() == 3);
+            DLIB_TEST(b.node(0).data == 1);
+            DLIB_TEST(b.node(1).data == 2);
+            DLIB_TEST(b.node(2).data == 3);
+            DLIB_TEST(edge(b,0,1) == 4);
+            DLIB_TEST(edge(b,0,2) == 5);
+            DLIB_TEST(edge(b,0,0) == 9);
+        }
+        {
+            graph<int,int>::kernel_1a_c a,b;
+
+            a.set_number_of_nodes(4);
+            a.node(0).data = 1;
+            a.node(1).data = 2;
+            a.node(2).data = 3;
+            a.node(3).data = 8;
+            a.add_edge(0,1);
+            a.add_edge(0,2);
+            a.add_edge(2,3);
+            edge(a,0,1) = 4;
+            edge(a,0,2) = 5;
+            edge(a,2,3) = 6;
+
+            copy_graph(a, b);
+
+            DLIB_TEST(b.number_of_nodes() == 4);
+            DLIB_TEST(b.node(0).data == 1);
+            DLIB_TEST(b.node(1).data == 2);
+            DLIB_TEST(b.node(2).data == 3);
+            DLIB_TEST(b.node(3).data == 8);
+            DLIB_TEST(edge(b,0,1) == 4);
+            DLIB_TEST(edge(b,0,2) == 5);
+            DLIB_TEST(edge(b,2,3) == 6);
+        }
+    }
 
 
 
@@ -349,6 +402,8 @@ namespace
 
             dlog << LINFO << "testing kernel_1a";
             graph_test<graph<int>::kernel_1a>();
+
+            test_copy();
         }
     } a;
 

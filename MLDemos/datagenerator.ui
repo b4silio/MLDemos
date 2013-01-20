@@ -91,7 +91,7 @@
   </widget>
   <widget class="QSpinBox" name="dimSpin">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -136,7 +136,7 @@
    </item>
    <item>
     <property name="text">
-     <string>Swiss Roll</string>
+     <string>Spirals</string>
     </property>
    </item>
    <item>
@@ -152,6 +152,11 @@
    <item>
     <property name="text">
      <string>Cosine</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Swiss Roll</string>
     </property>
    </item>
   </widget>

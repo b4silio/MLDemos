@@ -65,24 +65,69 @@ void RegrRVM::ChangeOptions()
 void RegrRVM::SetParams(Regressor *regressor)
 {
     if(!regressor) return;
-    float svmC = params->svmCSpin->value();
+    SetParams(regressor, GetParams());
+}
+
+fvec RegrRVM::GetParams()
+{
+    float svmP = params->svmPSpin->value();
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
-    float svmP = params->svmPSpin->value();
 
-    RegressorRVM *rvm = dynamic_cast<RegressorRVM*>(regressor);
-    if(!rvm) return;
-    rvm->SetParams(svmP, kernelType, kernelGamma, kernelDegree);
+    fvec par(4);
+    par[0] = svmP;
+    par[1] = kernelType;
+    par[2] = kernelGamma;
+    par[3] = kernelDegree;
+    return par;
+}
+
+void RegrRVM::SetParams(Regressor *regressor, fvec parameters)
+{
+    if(!regressor) return;
+    float svmP = parameters.size() > 0 ? parameters[0] : 1;
+    int kernelType = parameters.size() > 1 ? parameters[1] : 0;
+    float kernelGamma = parameters.size() > 2 ? parameters[2] : 0;
+    int kernelDegree = parameters.size() > 3 ? parameters[3] : 0;
+
+    RegressorRVM *rvm = dynamic_cast<RegressorRVM *>(regressor);
+    if(rvm) rvm->SetParams(svmP, kernelType, kernelGamma, kernelDegree);
+}
+
+void RegrRVM::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Epsilon");
+    parameterNames.push_back("Kernel Type");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Kernel Degree");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("99999999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
 }
 
 QString RegrRVM::GetAlgoString()
 {
-    float svmC = params->svmCSpin->value();
+    float svmP = params->svmPSpin->value();
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
-    float svmP = params->svmPSpin->value();
 
     QString algo = QString("RVM %1").arg(svmP);
 
@@ -163,40 +208,36 @@ void RegrRVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 
 void RegrRVM::SaveOptions(QSettings &settings)
 {
+    settings.setValue("svmP", params->svmPSpin->value());
     settings.setValue("kernelDeg", params->kernelDegSpin->value());
     settings.setValue("kernelType", params->kernelTypeCombo->currentIndex());
     settings.setValue("kernelWidth", params->kernelWidthSpin->value());
-    settings.setValue("svmC", params->svmCSpin->value());
-    settings.setValue("svmP", params->svmPSpin->value());
 }
 
 bool RegrRVM::LoadOptions(QSettings &settings)
 {
+    if(settings.contains("svmP")) params->svmPSpin->setValue(settings.value("svmP").toFloat());
     if(settings.contains("kernelDeg")) params->kernelDegSpin->setValue(settings.value("kernelDeg").toFloat());
     if(settings.contains("kernelType")) params->kernelTypeCombo->setCurrentIndex(settings.value("kernelType").toInt());
     if(settings.contains("kernelWidth")) params->kernelWidthSpin->setValue(settings.value("kernelWidth").toFloat());
-    if(settings.contains("svmC")) params->svmCSpin->setValue(settings.value("svmC").toFloat());
-    if(settings.contains("svmP")) params->svmPSpin->setValue(settings.value("svmP").toFloat());
     ChangeOptions();
     return true;
 }
 
 void RegrRVM::SaveParams(QTextStream &file)
 {
+    file << "regressionOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
     file << "regressionOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
     file << "regressionOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
     file << "regressionOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
-    file << "regressionOptions" << ":" << "svmC" << " " << params->svmCSpin->value() << "\n";
-    file << "regressionOptions" << ":" << "svmP" << " " << params->svmPSpin->value() << "\n";
 }
 
 bool RegrRVM::LoadParams(QString name, float value)
 {
+    if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
     if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
     if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
     if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
-    if(name.endsWith("svmC")) params->svmCSpin->setValue(value);
-    if(name.endsWith("svmP")) params->svmPSpin->setValue(value);
     ChangeOptions();
     return true;
 }

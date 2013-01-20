@@ -394,14 +394,14 @@ void Canvas::paintEvent(QPaintEvent *event)
     bDrawing = true;
     QPainter painter(this);
     if(!canvasType) PaintStandard(painter);
-    else if(canvasType <= 4) PaintMultivariate(painter, canvasType-1);
+    else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3d, so we take out 2
     else
     {
         fvec params;
         params.push_back(xIndex);
         params.push_back(yIndex);
         params.push_back(zIndex);
-        PaintVariable(painter, canvasType-5, params);
+        PaintVariable(painter, canvasType-6, params);
     }
     bDrawing = false;
 }
@@ -712,7 +712,7 @@ void Canvas::DrawLegend(QPainter &painter)
         QFontMetrics fm = painter.fontMetrics();
         for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
         {
-            QString className = GetClassName(it->first);
+			QString className = GetClassString(it->first);
             QRect rect = fm.boundingRect(className);
             rectWidth = max(rectWidth, rect.width());
         }
@@ -727,7 +727,7 @@ void Canvas::DrawLegend(QPainter &painter)
             int label = it->first;
             QPointF point(x, y);
             drawSample(painter, point, 10, label);
-            QString className = GetClassName(label);
+			QString className = GetClassString(label);
             painter.drawText(x + 8, point.y()+3, className);
             //painter.drawText(QRect(x + 4, point.y()-10, 70, 20), Qt::AlignLeft + Qt::AlignCenter, className);
             y += 20;
@@ -885,6 +885,9 @@ void Canvas::DrawSamples()
         maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
+        //maps.model = QPixmap(w,h);
+        //maps.model.setMask(bitmap);
+        //maps.model.fill(Qt::transparent);
     }
     QPainter painter(&maps.samples);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -1411,6 +1414,19 @@ void Canvas::leaveEvent(QEvent *event)
     //mouseAnchor = QPoint(-1,-1);
     repaint();
 }
+void Canvas::Clear()
+{
+    maps.grid = QPixmap();
+    maps.model = QPixmap();
+    maps.confidence = QPixmap();
+    maps.info = QPixmap();
+    maps.obstacles = QPixmap();
+    maps.trajectories = QPixmap();
+    maps.samples = QPixmap();
+    ResetSamples();
+    bNewCrosshair = true;
+    repaint();
+}
 
 void Canvas::wheelEvent(QWheelEvent *event)
 {
@@ -1489,17 +1505,61 @@ QPixmap Canvas::GetScreenshot()
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
     if(!canvasType) PaintStandard(painter);
-    else if(canvasType <= 4) PaintMultivariate(painter, canvasType-1);
+    else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3D View, so we take out 2
     else
     {
         fvec params;
         params.push_back(xIndex);
         params.push_back(yIndex);
         params.push_back(zIndex);
-        PaintVariable(painter, canvasType-5, params);
+        PaintVariable(painter, canvasType-6, params);
     }
     bShowCrosshair = tmp;
     return screenshot;
+}
+
+ivec Canvas::SelectSamples(QPointF center, float radius , fvec *weights)
+{
+    ivec selection;
+    if(weights) (*weights).clear();
+    int closest = 0;
+    float minDist = FLT_MAX;
+    FOR(i, data->GetCount())
+    {
+        QPointF dataPoint = toCanvasCoords(data->GetSample(i));
+        QPointF point = this->mapToParent(QPoint(dataPoint.x(), dataPoint.y()));
+        point -= center;
+        float dist = point.x()*point.x() + point.y()*point.y();
+        if(radius > 0)
+        {
+            if(!weights)
+            {
+                if(sqrtf(dist) < radius) selection.push_back(i);
+            }
+            else
+            {
+                if(sqrtf(dist) < radius*1.5f)
+                {
+                    selection.push_back(i);
+                    float weight = sqrtf(dist)/radius;
+                    (*weights).push_back(weight);
+                }
+            }
+        }
+        else
+        {
+            if(dist < minDist)
+            {
+                closest = i;
+                minDist = dist;
+            }
+        }
+    }
+    if(radius < 0)
+    {
+        selection.push_back(closest);
+    }
+    return selection;
 }
 
 bool Canvas::DeleteData( QPointF center, float radius )
@@ -1656,7 +1716,7 @@ void Canvas::PaintGradient(QPointF position)
     painter.drawRect(maps.reward.rect());
 }
 
-QString Canvas::GetClassName(int classNumber)
+QString Canvas::GetClassString(int classNumber)
 {
     QString className = QString("Class %1").arg(classNumber);
     if(classNames.count(classNumber))
@@ -1666,4 +1726,53 @@ QString Canvas::GetClassName(int classNumber)
         return name;
     }
     return className;
+}
+
+QRgb Canvas::GetColorMapValue(float value, int colorscheme=2)
+{
+    float r, g, b;
+    switch(colorscheme)
+    {
+    case 0:
+    {
+        r = value;
+        g = 0;
+        b = 0;
+    }
+        break;
+    case 1: // autumn
+    {
+        r = value;
+        g = value*0.6;
+        b = value*0.2;
+    }
+        break;
+    case 2: // jet
+    {
+        float Red = 0, Green = 0, Blue = 0;
+
+        if (value < 0.5f) Red = value * 2;
+        else Red = (1.0f - value) * 2;
+
+        if (value >= 0.3f && value < 0.8f) Green = (value - 0.3f) * 2;
+        else if (value < 0.3f) Green = (0.3f - value) * 2;
+        else Green = (1.3f - value) * 2;
+
+        if (value >= 0.5f) Blue = (value - 0.5f) * 2;
+        else Blue = (0.5f - value) * 2;
+
+        r = Red;
+        g = Green;
+        b = Blue;
+    }
+    break;
+    case 3: // grayscale
+    {
+        r = value;
+        g = value;
+        b = value;
+    }
+    break;
+    }
+    return qRgb(r*255,g*255,b*255);
 }

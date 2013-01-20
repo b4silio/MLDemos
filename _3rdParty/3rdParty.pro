@@ -660,6 +660,45 @@ SOURCES += \
     gsl/sort/gsl_sort_sort.c \
     gsl/blas/gsl_blas_blas.c
 
+HEADERS += \
+    matio/mat5.h \
+    matio/matio.h \
+    matio/mat4.h \
+    matio/mat73.h \
+    matio/matioConfig.h \
+    matio/matio_pubconf.h \
+    matio/matio_private.h
+
+SOURCES += \
+    matio/inflate.c \
+    matio/mat4.c \
+    matio/read_data.c \
+    matio/io.c \
+    matio/mat73.c \
+    matio/matvar_cell.c \
+    matio/snprintf.c \
+    matio/endian.c \
+    matio/mat.c \
+    matio/mat5.c \
+    matio/matvar_struct.c
+
+HEADERS += \
+    jacgrid/atom.h \
+    jacgrid/cell_table.h \
+    jacgrid/grid.h \
+    jacgrid/jacgrid.h \
+    jacgrid/jacgrid_private.h \
+    jacgrid/linalg.h \
+    jacgrid/plane.h \
+    jacgrid/surface.h
+
+SOURCES += \
+    jacgrid/atom.cpp \
+    jacgrid/grid.cpp \
+    jacgrid/isosurface.cpp \
+    jacgrid/plane.cpp \
+    jacgrid/surface.cpp
+
 #unix{
 #	BOOST = /usr/local/boost_1_47_0
 #}else{

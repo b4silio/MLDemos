@@ -45,6 +45,42 @@ void ReinforcementInterfaceRandom::SetParams(Reinforcement *reinforcement)
     ((ReinforcementRandom *)reinforcement)->SetParams(variance*variance, bSingleDim);
 }
 
+fvec ReinforcementInterfaceRandom::GetParams()
+{
+    double variance = params->varianceSpin->value();
+    bool bSingleDim = params->singleDimCheck->isChecked();
+
+    fvec par(2);
+    par[0] = variance;
+    par[1] = bSingleDim;
+    return par;
+}
+
+void ReinforcementInterfaceRandom::SetParams(Reinforcement *reinforcement, fvec parameters)
+{
+    int i=0;
+    double variance = parameters.size() > i ? parameters[i] : 0.1; i++;
+    bool bSingleDim = parameters.size() > i ? parameters[i] : true;
+
+    ((ReinforcementRandom *)reinforcement)->SetParams(variance*variance, bSingleDim);
+}
+
+void ReinforcementInterfaceRandom::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Variance");
+    parameterNames.push_back("Use single dimension");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("999999999.f");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+}
+
 Reinforcement *ReinforcementInterfaceRandom::GetReinforcement()
 {
     Reinforcement *reinforcement = NULL;

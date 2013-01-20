@@ -58,6 +58,12 @@ public:
     void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor);
 
     /*!
+      The function called by the main program to draw the algorithm information on OpenGL
+      (e.g. the projection axes, cluster centers or class boundaries, if these are available)
+      */
+    void DrawGL(Canvas *canvas, GLWidget *glw, Regressor *regressor){}
+
+    /*!
       The function called by the main program to draw the model confidence (when available)
       */
     void DrawConfidence(Canvas *canvas, Regressor *regressor);
@@ -107,6 +113,11 @@ public:
       */
     bool LoadParams(QString name, float value);
 
+    void SetParams(Regressor *regressor, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // _INTERFACELOWESS_H_

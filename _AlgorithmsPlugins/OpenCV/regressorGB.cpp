@@ -126,7 +126,6 @@ fvec RegressorGB::Test( const fvec &sample)
     return res;
 }
 
-
 void RegressorGB::SetParams(int boostIters, int boostLossType, int boostTreeDepths)
 {
     this->boostIters = boostIters;

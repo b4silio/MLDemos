@@ -98,8 +98,7 @@ std::vector<fvec> DynamicalGPR::Test( const fvec &sample, const int count)
 
 fvec DynamicalGPR::Test( const fvec &sample )
 {
-	fvec res;
-	res.resize(2,0);
+    fvec res(dim);
 	if(!sogp) return res;
 	if(sample.size() < dim) return res;
 	Matrix _testout;
@@ -109,8 +108,7 @@ fvec DynamicalGPR::Test( const fvec &sample )
 		_testin(1+i) = sample[i];
 	}
 	_testout = sogp->predict(_testin);
-	res[0] = _testout(1,1);
-	res[1] = _testout(2,1);
+    FOR(d,dim) res[d] = _testout(d+1,1);
 	return res;
 }
 

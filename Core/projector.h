@@ -17,6 +17,7 @@ public:
 
     virtual void Train(std::vector< fvec > samples, ivec labels){}
     virtual fvec Project(const fvec &sample){ return sample; }
+    virtual float Project1D(const fvec &sample){ fvec proj = Project(sample); return proj.size() ? proj[0] : 0; }
     virtual fvec Project(const fVec &sample){ return Project((fvec)sample); }
     virtual const char *GetInfoString(){return NULL;}
     virtual std::vector<fvec> GetProjected(){ return projected; }

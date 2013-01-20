@@ -41,6 +41,8 @@ public:
 	float Test(const fVec &sample);
 	fvec TestMulti(const fvec &sample);
     const char *GetInfoString();
+    void SaveModel(std::string filename);
+    bool LoadModel(std::string filename);
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
 	void Update();

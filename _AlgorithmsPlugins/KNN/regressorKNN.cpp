@@ -25,7 +25,7 @@ using namespace std;
 void RegressorKNN::Train( std::vector< fvec > samples, ivec labels )
 {
 	if(!samples.size()) return;
-	int dim = samples[0].size()-1;
+    dim = samples[0].size()-1;
 	DEL(kdTree);
 	annClose();
 	ANN::MetricType = (ANN_METRIC)metricType;

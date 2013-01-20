@@ -55,6 +55,66 @@ void ClassBoost::SetParams(Classifier *classifier)
     boost->SetParams(weakCount, weakType, boostType, svmCount);
 }
 
+fvec ClassBoost::GetParams()
+{
+    int weakCount = params->boostCountSpin->value();
+    int weakType = params->boostLearnerType->currentIndex();
+    int boostType = params->boostType->currentIndex();
+    int svmCount = params->svmCountSpin->value();
+
+    fvec par(4);
+    par[0] = weakCount;
+    par[1] = weakType;
+    par[2] = boostType;
+    par[3] = svmCount;
+    return par;
+}
+
+void ClassBoost::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    int weakCount= parameters.size() > 0 ? parameters[0] : 1;
+    int weakType = parameters.size() > 1 ? parameters[1] : 0;
+    int boostType = parameters.size() > 2 ? parameters[2] : 0;
+    int svmCount = parameters.size() > 3 ? parameters[3] : 10;
+
+    ClassifierBoost *boost = dynamic_cast<ClassifierBoost *>(classifier);
+    if(!boost) return;
+    boost->SetParams(weakCount, weakType, boostType, svmCount);
+}
+
+void ClassBoost::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Weak Learner Count");
+    parameterNames.push_back("Weak Learner Type");
+    parameterNames.push_back("Boosting Variant");
+    parameterNames.push_back("Weak Learner Param");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Decision Stump");
+    parameterValues.back().push_back("Random Projection");
+    parameterValues.back().push_back("Random Rectangle");
+    parameterValues.back().push_back("Random Circle");
+    parameterValues.back().push_back("Random Gaussians");
+    parameterValues.back().push_back("Random SVM");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Discrete");
+    parameterValues.back().push_back("Real");
+    parameterValues.back().push_back("Logit");
+    parameterValues.back().push_back("Gentle");
+}
+
 QString ClassBoost::GetAlgoString()
 {
 	int weakCount = params->boostCountSpin->value();

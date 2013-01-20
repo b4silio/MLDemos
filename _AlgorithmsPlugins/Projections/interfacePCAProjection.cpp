@@ -27,6 +27,17 @@ Projector *PCAProjection::GetProjector()
     return new ProjectorPCA();
 }
 
+fvec PCAProjection::GetParams()
+{
+    return fvec();
+}
+
+void PCAProjection::SetParams(Projector *projector, fvec parameters){}
+
+void PCAProjection::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues){}
+
 void PCAProjection::ShowEigenVectors()
 {
     if(!eigenWidget) return;
@@ -101,34 +112,34 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
 void PCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *projector)
 {
     if(!canvas || !projector) return;
-    /*
-    if(canvas->canvasType) return;
-    vector<fvec> samples = projector->source;
-    vector<fvec> projected = projector->projected;
-    if(!projected.size() || !samples.size()) return;
-    if(projected[0].size() > samples[0].size()) return;
-    ivec labels = canvas->data->GetLabels();
-    qDebug() << "projected: " << projected[0].size() << "samples: " << samples[0].size();
+    ProjectorPCA *pca = dynamic_cast<ProjectorPCA*>(projector);
+    if(!pca) return;
+    if(canvas->data->bProjected) return; // We are displaying a Manifold to 1D
+    vector<fvec> eigs = pca->GetEigenVectors();
+    if(!eigs.size()) return;
 
-    int pDim = projected[0].size(), sDim = samples[0].size();
+    fvec topleft = canvas->fromCanvas(0,0);
+    fvec bottomRight = canvas->fromCanvas(canvas->width(), canvas->height());
+    fvec diff = (topleft - bottomRight);
+    float canvasSize = sqrtf(diff*diff);
+
+    fvec stop = eigs[0];
+    int dim = stop.size();
+    stop /= sqrtf(stop*stop);
+    stop *= canvasSize/2;
+
+    fvec start = stop*-1;
+    // we look for the average
+    fvec mean(dim,0);
+    FOR(i, pca->source.size()) mean += pca->source[i];
+    mean /= pca->source.size();
+    stop += mean;
+    start += mean;
+    QPointF p1 = canvas->toCanvasCoords(start);
+    QPointF p2 = canvas->toCanvasCoords(stop);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(QPen(Qt::black,0.5f));
-    FOR(i, samples.size())
-    {
-        //projected[i] = projector->Project(samples[i]);
-        QPointF p1 = canvas->toCanvasCoords(samples[i]);
-        QPointF p2 = canvas->toCanvasCoords(projected[i]);
-        painter.drawLine(p1, p2);
-    }
-    painter.setOpacity(0.3);
-    FOR(i, samples.size())
-    {
-        painter.setBrush(SampleColor[labels[i]%SampleColorCnt]);
-        painter.setPen(Qt::black);
-        QPointF p1 = canvas->toCanvasCoords(samples[i]);
-        painter.drawEllipse(p1, 5, 5);
-    }
-    */
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawLine(p1, p2);
 }
 
 // virtual functions to manage the GUI and I/O
@@ -167,7 +178,7 @@ bool PCAProjection::LoadOptions(QSettings &settings)
 
 void PCAProjection::SaveParams(QTextStream &file)
 {
-    //file << "clusterOptions" << ":" << "kernelCluster" << " " << params->kernelClusterSpin->value() << "\n";
+    //file << "projectOptions" << ":" << "kernelCluster" << " " << params->kernelClusterSpin->value() << "\n";
 }
 
 bool PCAProjection::LoadParams(QString name, float value)

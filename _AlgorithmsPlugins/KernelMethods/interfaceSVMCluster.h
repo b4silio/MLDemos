@@ -37,6 +37,7 @@ public:
 	Clusterer *GetClusterer();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
 	void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer){}
 
 	// virtual functions to manage the GUI and I/O
         QString GetName(){return QString("Support Vector Machine");}
@@ -48,6 +49,12 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+    void SetParams(Clusterer *clusterer, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
+
 public slots:
         void ChangeOptions();
 };

@@ -2,15 +2,16 @@
 # Configuration           #
 ###########################
 TEMPLATE = lib
-QT += svg
+QT += svg opengl
 NAME = Core
 MLPATH =..
-CONFIG += coreLib static
+win32:CONFIG += coreLib
+else:CONFIG += coreLib static
 
 include($$MLPATH/MLDemos_variables.pri)
 
 win32{
-	DESTDIR = ../Core
+	DESTDIR = ..
 }
 ###########################
 # Files                   #
@@ -48,7 +49,10 @@ HEADERS += \
     contours.h \
     qcontour.h \
     animationlabel.h \
-    reinforcementProblem.h
+    reinforcementProblem.h \
+    kmeans.h \
+    glwidget.h \
+    glUtils.h
 
 SOURCES += \
 	canvas.cpp \
@@ -66,4 +70,9 @@ SOURCES += \
     contours.cpp \
     qcontour.cpp \
     animationlabel.cpp \
-    reinforcementProblem.cpp
+    reinforcementProblem.cpp \
+    kmeans.cpp \
+    glwidget.cpp \
+    glUtils.cpp
+
+RESOURCES +=

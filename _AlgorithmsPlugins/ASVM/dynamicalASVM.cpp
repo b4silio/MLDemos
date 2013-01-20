@@ -152,10 +152,10 @@ void DynamicalASVM::Train(std::vector< std::vector<fvec> > trajectories, ivec la
 std::vector<fvec> DynamicalASVM::Test( const fvec &sample, int count)
 {
     fvec start = sample;
-    vector<fvec> res;
+    vector<fvec> res(count);
     FOR(i, count)
     {
-        res.push_back(start);
+        res[i] = start;
         fvec diff = Test(start);
         start += diff*dT;
     }
@@ -229,13 +229,10 @@ fvec DynamicalASVM::Test( const fvec &sample)
     dot = max(epsilon,dot);
     vel = residual + deriv*dot;
 
-    fvec res(dim);
-    res[0] = vel[0];
-    res[1] = vel[1];
     delete [] point;
     delete [] velocity;
     delete [] derivative;
-	return res;
+    return vel;
 }
 
 fVec DynamicalASVM::Test( const fVec &sample)

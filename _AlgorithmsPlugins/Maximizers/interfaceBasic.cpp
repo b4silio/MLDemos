@@ -101,6 +101,78 @@ void MaximizeBasic::SetParams(Maximizer *maximizer)
 	}
 }
 
+fvec MaximizeBasic::GetParams()
+{
+    int type = params->maximizeType->currentIndex();
+    double variance = params->varianceSpin->value();
+    int k = params->kSpin->value();
+    bool bAdaptive = params->adaptiveCheck->isChecked();
+
+    fvec par(4);
+    par[0] = type;
+    par[1] = variance;
+    par[2] = k;
+    par[3] = bAdaptive;
+    return par;
+}
+
+void MaximizeBasic::SetParams(Maximizer *maximizer, fvec parameters)
+{
+    int i=0;
+    int type = parameters.size() > i ? parameters[i] : 0; i++;
+    double variance = parameters.size() > i ? parameters[i] : 0.1;
+    int k = parameters.size() > i ? parameters[i] : 10;
+    bool bAdaptive = parameters.size() > i ? parameters[i] : false;
+
+    switch(type)
+    {
+    case 0: // random search
+        ((MaximizeRandom *)maximizer)->SetParams();
+        break;
+    case 1: // random walk
+        ((MaximizeRandom *)maximizer)->SetParams(variance*variance);
+        break;
+    case 2: // power
+        ((MaximizePower *)maximizer)->SetParams(k, variance*variance, bAdaptive);
+        break;
+    case 3: // Gradient
+        ((MaximizeGradient *)maximizer)->SetParams(variance, bAdaptive);
+        break;
+    case 4: // Donut
+        ((MaximizeDonut *)maximizer)->SetParams(k, variance*variance, bAdaptive);
+        break;
+    }
+}
+
+void MaximizeBasic::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Type");
+    parameterNames.push_back("Variance");
+    parameterNames.push_back("K/Count");
+    parameterNames.push_back("Adaptive");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Random Search");
+    parameterValues.back().push_back("Random Walk");
+    parameterValues.back().push_back("PoWER");
+    parameterValues.back().push_back("Gradient Ascent");
+    parameterValues.back().push_back("DONUT");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000001f");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+}
+
 Maximizer *MaximizeBasic::GetMaximizer()
 {
 	Maximizer *maximizer = NULL;

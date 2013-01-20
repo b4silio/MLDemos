@@ -39,6 +39,8 @@ public:
 	// virtual functions to manage the GUI and I/O
     void DrawInfo(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement){}
     void DrawModel(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement){}
+    void DrawGL(Canvas *canvas, GLWidget *glw, Reinforcement*reinforcement){}
+
     QString GetName(){return QString("DP");}
 	QString GetAlgoString();
     QString GetInfoFile(){return "RL-algos.html";}
@@ -48,6 +50,12 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+    void SetParams(Reinforcement *reinforcement, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
+
 public slots:
 	void ChangeOptions();
 };

@@ -6,6 +6,8 @@
 #include "statistics/statistics.h"
 #include "statistics/dpca.h"
 #include "statistics/random_subset_selector.h"
+#include "statistics/image_feature_sampling.h"
+#include "statistics/sammon.h"
 
 #endif // DLIB_STATISTICs_H_ 
 

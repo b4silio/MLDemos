@@ -24,5 +24,21 @@
         <file>icons/algorithms.png</file>
         <file>icons/adddata.png</file>
         <file>icons/spinner-24x24.gif</file>
+        <file>icons/airbrush3D.png</file>
+        <file>icons/sprayclass.png</file>
+        <file>icons/move.png</file>
+        <file>icons/extrude.png</file>
+        <file>icons/drag.png</file>
+        <file>icons/dimplus.png</file>
+        <file>icons/dimless.png</file>
+        <file>icons/gridsearch.png</file>
+        <file>shaders/drawSamples.fsh</file>
+        <file>shaders/drawSamples.vsh</file>
+        <file>shaders/smoothTransparent.fsh</file>
+        <file>shaders/smoothTransparent.vsh</file>
+        <file>shaders/renderFBO.vsh</file>
+        <file>shaders/renderFBO.fsh</file>
+        <file>shaders/blurFBO.vsh</file>
+        <file>shaders/blurFBO.fsh</file>
     </qresource>
 </RCC>

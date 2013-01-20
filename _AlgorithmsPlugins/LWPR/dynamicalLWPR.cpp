@@ -71,7 +71,7 @@ std::vector<fvec> DynamicalLWPR::Test( const fvec &sample, const int count)
 	res.resize(count);
 	FOR(i, count) res[i].resize(dim,0);
 	if(!model) return res;
-	dvec x; x.resize(dim,0);
+    dvec x(dim,0);
 	fvec velocity; velocity.resize(dim,0);
 	FOR(i, count)
 	{
@@ -88,11 +88,9 @@ std::vector<fvec> DynamicalLWPR::Test( const fvec &sample, const int count)
 fvec DynamicalLWPR::Test( const fvec &sample)
 {
 	int dim = sample.size();
-	fvec res;
-	res.resize(dim,0);
+    fvec res(dim,0);
 	if(!model) return res;
-	dvec x;
-	x.resize(dim,0);
+    dvec x(dim,0);
 	FOR(d, dim) x[d] = sample[d];
 	dvec y = model->predict(x);
 	FOR(d, dim) res[d] = y[d];

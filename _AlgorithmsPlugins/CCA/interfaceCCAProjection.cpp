@@ -206,6 +206,39 @@ void CCAProjection::SetParams(Projector *projector)
     ((ProjectorCCA*) projector)->setSeperatingIndex(params->lineSeperatingIndexEdit->text().toInt());
 }
 
+
+fvec CCAProjection::GetParams()
+{
+    int separatingIndex = params->lineSeperatingIndexEdit->text().toInt();
+
+    int i=0;
+    fvec par(1);
+    par[i++] = separatingIndex;
+    return par;
+}
+
+void CCAProjection::SetParams(Projector *projector, fvec parameters)
+{
+    if(!projector) return;
+    ProjectorCCA *cca = dynamic_cast<ProjectorCCA*>(projector);
+    if(!cca) return;
+    int i=0;
+    int separatingIndex = parameters.size() > i ? parameters[i] : 0; i++;
+
+    cca->setSeperatingIndex(separatingIndex);
+}
+
+void CCAProjection::GetParameterList(std::vector<QString> &parameterNames,
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Separating Index");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("9999999999");
+}
+
 void CCAProjection::SaveOptions(QSettings &settings)
 {
     //settings.setValue("typeCombo", params->typeCombo->currentIndex());

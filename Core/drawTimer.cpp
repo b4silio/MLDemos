@@ -44,6 +44,7 @@ DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
 	  bPaused(false),
 	  bColorMap(true),
 	  mutex(mutex),
+      glw(0),
       perm(0), w(0), h(0), dim(2), maximumVisitedCount(0)
 {
 
@@ -69,10 +70,22 @@ void DrawTimer::Clear()
 	bigMap = QImage(QSize(w,h), QImage::Format_ARGB32);
 	bigMap.fill(0xffffff);
 	modelMap = QImage(QSize(w,h), QImage::Format_ARGB32);
-	modelMap.fill(qRgba(255, 255, 255, 0));
-	KILL(perm);
+    modelMap.fill(qRgba(255, 255, 255, 0));
+    KILL(perm);
 	perm = randPerm(w*h);
 	drawMutex.unlock();
+    /*
+    glw->mutex->lock();
+    FOR(i, glw->objects.size())
+    {
+        if(glw->objects[i].objectType.contains("Dynamize"))
+        {
+            glw->objects.erase(glw->objects.begin() + i);
+            i--;
+        }
+    }
+    glw->mutex->unlock();
+    */
 }
 
 void DrawTimer::run()
@@ -80,7 +93,7 @@ void DrawTimer::run()
 	bRunning = true;
 	while(bRunning)
 	{
-        if(!canvas || canvas->canvasType) break;
+        if(!canvas || canvas->canvasType > 1) break;
         if((!classifier || !(*classifier)) &&
                 (!regressor || !(*regressor)) &&
                 (!dynamical || !(*dynamical)) &&
@@ -116,7 +129,22 @@ void DrawTimer::run()
             }
             else
             {
-                if(dynamical && (*dynamical))  emit bColorMap ? MapReady(bigMap) : MapReady(modelMap);
+                if(dynamical && (*dynamical))
+                {
+                    if(!bColorMap) emit MapReady(modelMap);
+                    else
+                    {
+                        emit MapReady(bigMap);
+                        /*
+                        QPainter painter(&modelMap);
+                        painter.setRenderHint(QPainter::Antialiasing);
+                        painter.setCompositionMode(QPainter::CompositionMode_Multiply);
+                        painter.drawImage(QPointF(0,0),bigMap);
+                        painter.end();
+                        emit MapReady(modelMap);
+                        */
+                    }
+                }
                 else emit MapReady(bigMap);
             }
             drawMutex.unlock();
@@ -348,9 +376,16 @@ void DrawTimer::Refine()
 		{
 			refineMax = 100;
 		}
+        if(dynamical && (*dynamical))
+        {
+            refineMax = 32;
+            drawMutex.lock();
+            if(bColorMap) modelMap.fill(qRgba(0,0,0,255));
+            drawMutex.unlock();
+        }
 		else
 		{
-			refineMax = 20;
+            refineMax = 32;
 		}
 	}
 	else
@@ -376,13 +411,32 @@ void DrawTimer::Refine()
             return;
         }
 
-        bRefined &= TestFast(start,stop); // we finish the current batch
-		if(dynamical && (*dynamical) && !bColorMap)
-		{
-			int cnt = 10000 / refineMax;
-			int steps = 8;
-            bRefined &= VectorsFast(cnt, steps);
-		}
+        mutex->lock();
+        int dim = canvas->data->GetDimCount();
+        mutex->unlock();
+
+        if(dim == 2)
+        {
+            bRefined &= TestFast(start,stop); // we finish the current batch
+            if(dynamical && (*dynamical))
+            {
+                int cnt = 10000 / refineMax;
+                int steps = 8;
+                bRefined &= VectorsFast(cnt, steps);
+            }
+        }
+        /*
+        else if(dim == 3 && canvas->canvasType == 1)
+        {
+            if(dynamical && (*dynamical))
+            {
+                //int cnt = 4096 / refineMax;
+                int cnt = 512 / refineMax;
+                int steps = 64;
+                bRefined &= VectorsGL(cnt, steps);
+            }
+        }
+        */
 	}
     if(bRefined) refineLevel++;
 }
@@ -394,26 +448,22 @@ bool DrawTimer::Vectors(int count, int steps)
     mutex->lock();
     if(!(*dynamical)) return false;
     dT = (*dynamical)->dT;// * (dynamical->count/100.f);
+    vector<Obstacle> obstacles = canvas->data->GetObstacles();
     mutex->unlock();
     //float dT = 0.02f;
-	fvec sample;
-	sample.resize(2,0);
+    fvec sample(2,0);
 	int w = canvas->width();
 	int h = canvas->height();
 	QMutexLocker drawLock(&drawMutex);
 	QPainter painter(&modelMap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-	vector<Obstacle> obstacles = canvas->data->GetObstacles();
 
-	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointUp(-FLT_MAX,-FLT_MAX);
-	QPointF oldPointDown(-FLT_MAX,-FLT_MAX);
 	FOR(i, count)
 	{
 		QPointF samplePre(rand()/(float)RAND_MAX * w, rand()/(float)RAND_MAX * h);
 		sample = canvas->toSampleCoords(samplePre);
-		float color = (rand()/(float)RAND_MAX*0.7f)*255.f;
+        float color = 255 - (rand()/(float)RAND_MAX*0.7f)*255.f;
 		color = 0;
 		QPointF oldPoint = canvas->toCanvasCoords(sample);
 		FOR(j, steps)
@@ -431,7 +481,7 @@ bool DrawTimer::Vectors(int count, int steps)
             sample += res*dT;
             float speed = sqrtf(res[0]*res[0] + res[1]*res[1]);
             QPointF point = canvas->toCanvasCoords(sample);
-            painter.setOpacity(speed);
+            painter.setOpacity(1 - speed);
             QColor c(color,color,color);
             painter.setPen(QPen(c, 0.25));
             painter.drawLine(point, oldPoint);
@@ -441,14 +491,105 @@ bool DrawTimer::Vectors(int count, int steps)
     return true;
 }
 
+bool DrawTimer::VectorsGL(int count, int steps)
+{
+    if(!bRunning || !mutex) return false;
+    float dT=0.001;
+    mutex->lock();
+    if(!(*dynamical)) return false;
+    dT = (*dynamical)->dT*2; // in 3d we want longer 'trails'
+    int dim = canvas->data->GetDimCount();
+    if(dim != 3) return false;
+    int xInd = canvas->xIndex;
+    int yInd = canvas->yIndex;
+    int zInd = canvas->zIndex;
+    vector<fvec> samples = canvas->data->GetSamples();
+    vector<Obstacle> obstacles = canvas->data->GetObstacles();
+    mutex->unlock();
+
+    fvec sample(dim,0);
+    float minv=FLT_MAX, maxv=-FLT_MAX;
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            minv = min(minv, samples[i][d]);
+            maxv = max(maxv, samples[i][d]);
+        }
+    }
+    float diff = maxv-minv;
+    minv = minv - diff*0.5f;
+    maxv = maxv + diff*0.5f;
+    diff = maxv - minv;
+
+    glw->mutex->lock();
+    vector<GLObject> objects = glw->objects;
+    glw->mutex->unlock();
+
+    int oIndex = -1;
+    GLObject o;
+    FOR(i, objects.size())
+    {
+        if(objects[i].objectType.contains("Dynamize"))
+        {
+            oIndex = i;
+            o = objects[i];
+            break;
+        }
+    }
+    if(oIndex == -1)
+    {
+        o.objectType = "Dynamize,Lines";
+        o.style = QString("fading:%1").arg(steps);
+    }
+
+    int prevCount = o.vertices.size()/(2*steps);
+    FOR(i, count)
+    {
+        /*
+        int index = prevCount + i;
+        int x = index % 16;
+        int y = (index / 16) % 16;
+        int z = (index / 256);
+        sample[xInd] = (x/16.f)*diff + minv;
+        sample[yInd] = (y/16.f)*diff + minv;
+        sample[zInd] = (z/16.f)*diff + minv;
+        */
+        FOR(d, dim) sample[d] = drand48()*diff+ minv;
+
+        fvec oldSample = sample;
+        FOR(j, steps)
+        {
+            if(!(*dynamical)) return false;
+            mutex->lock();
+            fvec res = (*dynamical)->Test(sample);
+            if((*dynamical)->avoid)
+            {
+                (*dynamical)->avoid->SetObstacles(obstacles);
+                fvec newRes = (*dynamical)->avoid->Avoid(sample, res);
+                res = newRes;
+            }
+            mutex->unlock();
+            sample += res*dT;
+            o.vertices.append(QVector3D(oldSample[xInd],oldSample[yInd],oldSample[zInd]));
+            o.vertices.append(QVector3D(sample[xInd],sample[yInd],sample[zInd]));
+            oldSample = sample;
+        }
+    }
+    glw->mutex->lock();
+    if(oIndex != -1) glw->objects[oIndex] = o;
+    else glw->objects.push_back(o);
+    glw->mutex->unlock();
+    return true;
+}
+
 void DrawTimer::Maximization()
 {
     if(!maximizer || !(*maximizer)) return;
     QMutexLocker lock(mutex);
     if(!bRunning) return;
 
-    fvec sample = (*maximizer)->Test((*maximizer)->Maximum());
-
+    fvec maxSample = (*maximizer)->Test((*maximizer)->Maximum());
     double value = (*maximizer)->MaximumValue();
     if(value >= (*maximizer)->stopValue)
     {
@@ -484,6 +625,7 @@ void DrawTimer::Maximization()
     painter.setRenderHint(QPainter::Antialiasing, false);
     painter.drawLine(legendRect.x(), y, legendRect.x()+legendRect.width(), y);
 
+    // we paint the visited history
     QPainter painter2(&bigMap);
     w = bigMap.width(), h = bigMap.height();
     painter2.setRenderHint(QPainter::Antialiasing, true);
@@ -498,6 +640,58 @@ void DrawTimer::Maximization()
         QPointF point(sample[0]*w, sample[1]*h);
         painter2.setBrush(QColor(255,255-value, 255-value));
         painter2.drawEllipse(point, 8, 8);
+    }
+
+    if(glw && canvas->canvasType == 1)
+    {
+        glw->mutex->lock();
+        vector<GLObject> objects = glw->objects;
+        glw->mutex->unlock();
+        int oIndex = -1;
+        FOR(i, objects.size())
+        {
+            if(objects[i].objectType.contains("Samples") &&
+                    objects[i].objectType.contains("Maximization"))
+            {
+                oIndex = i;
+                break;
+            }
+        }
+        GLObject o;
+        if(oIndex != -1) o = objects[oIndex];
+        else
+        {
+            o.objectType = "Samples,Maximization";
+            o.style ="pointsize:12,dotted";
+        }
+        if(o.colors.size()) o.colors.back() = QVector4D(0,0,0,1);
+        // we replace all past points as history
+
+        for(int i=maximumVisitedCount; i<visited.size(); i++)
+        {
+            fvec &sample = visited[i];
+            // we want to paint the last visited points
+            double value = (*maximizer)->GetValue(sample);
+            value = max(0.,min(1.,value))*0.5;
+            o.vertices.push_back(QVector3D(sample[0]*2-1, value+0.02, sample[1]*2-1));
+            o.colors.push_back(QVector4D(0,0,0,1));
+        }
+        vector<GLObject> oList = (*maximizer)->DrawGL();
+
+        glw->mutex->lock();
+        if(oIndex != -1) glw->objects[oIndex] = o;
+        else glw->objects.push_back(o);
+
+        FOR(i, glw->objects.size())
+        {
+            if(glw->objects[i].objectType.contains("Maximizer"))
+            {
+                glw->objects.erase(glw->objects.begin() + i);
+                i--;
+            }
+        }
+        if(oList.size()) glw->objects.insert(glw->objects.end(), oList.begin(), oList.end());
+        glw->mutex->unlock();
     }
     maximumVisitedCount = visited.size();
 }
@@ -554,8 +748,8 @@ bool DrawTimer::VectorsFast(int count, int steps)
 	{
 		QPointF samplePre(rand()/(float)RAND_MAX * w, rand()/(float)RAND_MAX * h);
 		sample = canvas->toSampleCoords(samplePre);
-		float color = (rand()/(float)RAND_MAX*0.7f)*255.f;
-		color = 0;
+        float color = (rand()/(float)RAND_MAX*0.7f)*255.f;
+        color = bColorMap ? 255 : 0;
 		QPointF oldPoint = canvas->toCanvasCoords(sample);
 		FOR(j, steps)
 		{
@@ -694,6 +888,7 @@ bool DrawTimer::TestFast(int start, int stop)
         }
         else if(*dynamical && bColorMap)
         {
+            QColor color;
             val = (*dynamical)->Test(sample);
             if((*dynamical)->avoid)
             {
@@ -703,12 +898,20 @@ bool DrawTimer::TestFast(int start, int stop)
             }
             float speed = sqrtf(val[0]*val[0] + val[1]*val[1]);
             speed = min(1.f,speed);
-            int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
-            hue = max(0, min(359,hue));
-            QColor color = QColor::fromHsv(hue, 255, 255);
-            color.setRed(255*(1-speed) + color.red()*speed);
-            color.setGreen(255*(1-speed) + color.green()*speed);
-            color.setBlue(255*(1-speed) + color.blue()*speed);
+            const int colorStyle = 1;
+            if(colorStyle == 0) // velocity as colors
+            {
+                int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
+                hue = max(0, min(359,hue));
+                color = QColor::fromHsv(hue, 255, 255);
+                color.setRed(255*(1-speed) + color.red()*speed);
+                color.setGreen(255*(1-speed) + color.green()*speed);
+                color.setBlue(255*(1-speed) + color.blue()*speed);
+            }
+            else if(colorStyle == 1) // speed as color
+            {
+                color = QColor(Canvas::GetColorMapValue(speed, 2));
+            }
             drawMutex.lock();
             bigMap.setPixel(x,y,color.rgb());
             drawMutex.unlock();

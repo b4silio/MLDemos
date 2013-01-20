@@ -8,6 +8,7 @@
 #include <ctime>
 #include <dlib/statistics.h>
 #include <dlib/rand.h>
+#include <dlib/svm.h>
 #include <algorithm>
 
 #include "tester.h"
@@ -133,7 +134,7 @@ namespace
         void test_running_covariance (
         )
         {
-            dlib::rand::float_1a rnd;
+            dlib::rand rnd;
             std::vector<matrix<double,0,1> > vects;
 
             running_covariance<matrix<double,0,1> > cov, cov2;
@@ -191,12 +192,109 @@ namespace
 
         }
 
+        void test_running_stats()
+        {
+            print_spinner();
+
+            running_stats<double> rs, rs2;
+
+            running_scalar_covariance<double> rsc1, rsc2;
+
+            for (double i = 0; i < 100; ++i)
+            {
+                rs.add(i);
+
+                rsc1.add(i,i);
+                rsc2.add(i,i);
+                rsc2.add(i,-i);
+            }
+
+            // make sure the running_stats and running_scalar_covariance agree
+            DLIB_TEST_MSG(std::abs(rs.mean() - rsc1.mean_x()) < 1e-10, std::abs(rs.mean() - rsc1.mean_x()));
+            DLIB_TEST(std::abs(rs.mean() - rsc1.mean_y()) < 1e-10);
+            DLIB_TEST(std::abs(rs.stddev() - rsc1.stddev_x()) < 1e-10);
+            DLIB_TEST(std::abs(rs.stddev() - rsc1.stddev_y()) < 1e-10);
+            DLIB_TEST(std::abs(rs.variance() - rsc1.variance_x()) < 1e-10);
+            DLIB_TEST(std::abs(rs.variance() - rsc1.variance_y()) < 1e-10);
+            DLIB_TEST(rs.current_n() == rsc1.current_n());
+
+            DLIB_TEST(std::abs(rsc1.correlation() - 1) < 1e-10);
+            DLIB_TEST(std::abs(rsc2.correlation() - 0) < 1e-10);
+
+
+
+            // test serialization of running_stats
+            ostringstream sout;
+            serialize(rs, sout);
+            istringstream sin(sout.str());
+            deserialize(rs2, sin);
+            // make sure the running_stats and running_scalar_covariance agree
+            DLIB_TEST_MSG(std::abs(rs2.mean() - rsc1.mean_x()) < 1e-10, std::abs(rs2.mean() - rsc1.mean_x()));
+            DLIB_TEST(std::abs(rs2.mean() - rsc1.mean_y()) < 1e-10);
+            DLIB_TEST(std::abs(rs2.stddev() - rsc1.stddev_x()) < 1e-10);
+            DLIB_TEST(std::abs(rs2.stddev() - rsc1.stddev_y()) < 1e-10);
+            DLIB_TEST(std::abs(rs2.variance() - rsc1.variance_x()) < 1e-10);
+            DLIB_TEST(std::abs(rs2.variance() - rsc1.variance_y()) < 1e-10);
+            DLIB_TEST(rs2.current_n() == rsc1.current_n());
+
+        }
+
+        void test_randomize_samples()
+        {
+            std::vector<unsigned int> t(15),u(15),v(15);
+
+            for (unsigned long i = 0; i < t.size(); ++i)
+            {
+                t[i] = i;
+                u[i] = i+1;
+                v[i] = i+2;
+            }
+            randomize_samples(t,u,v);
+
+            DLIB_TEST(t.size() == 15);
+            DLIB_TEST(u.size() == 15);
+            DLIB_TEST(v.size() == 15);
+
+            for (unsigned long i = 0; i < t.size(); ++i)
+            {
+                const unsigned long val = t[i];
+                DLIB_TEST(u[i] == val+1);
+                DLIB_TEST(v[i] == val+2);
+            }
+        }
+        void test_randomize_samples2()
+        {
+            dlib::matrix<int,15,1> t(15),u(15),v(15);
+
+            for (long i = 0; i < t.size(); ++i)
+            {
+                t(i) = i;
+                u(i) = i+1;
+                v(i) = i+2;
+            }
+            randomize_samples(t,u,v);
+
+            DLIB_TEST(t.size() == 15);
+            DLIB_TEST(u.size() == 15);
+            DLIB_TEST(v.size() == 15);
+
+            for (long i = 0; i < t.size(); ++i)
+            {
+                const long val = t(i);
+                DLIB_TEST(u(i) == val+1);
+                DLIB_TEST(v(i) == val+2);
+            }
+        }
+
         void perform_test (
         )
         {
             test_random_subset_selector();
             test_random_subset_selector2();
             test_running_covariance();
+            test_running_stats();
+            test_randomize_samples();
+            test_randomize_samples2();
         }
     } a;
 

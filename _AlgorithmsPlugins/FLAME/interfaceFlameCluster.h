@@ -63,6 +63,7 @@ public:
       (e.g. the projection axes, cluster centers or class boundaries, if these are available)
       */
     void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer);
+    void DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer){}
 
         // virtual functions to manage the GUI and I/O
     /*!
@@ -109,6 +110,12 @@ public:
       Loads the parameter from file (or from string for the compare dialog)
       */
     bool LoadParams(QString name, float value);
+
+    void SetParams(Clusterer *clusterer, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // INTERFACEFLAMECLUSTER_H

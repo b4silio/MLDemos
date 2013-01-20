@@ -33,7 +33,7 @@ namespace dlib
                 least squares or least squares SVM). 
 
                 The exact definition of what this algorithm does is this:
-                    Find w and b that minimizes the following (x_i are input samples and y_i are labels):
+                    Find w and b that minimizes the following (x_i are input samples and y_i are target values):
                         lambda*dot(w,w) + sum_over_i( (f(x_i) - y_i)^2 )
                         where f(x) == dot(x,w) - b
 
@@ -233,16 +233,14 @@ namespace dlib
                   Also, x should contain sample_type objects.
                 - y == a matrix or something convertible to a matrix via vector_to_matrix().
                   Also, y should contain scalar_type objects.
-                - is_vector(x) == true
-                - is_vector(y) == true
-                - x.size() == y.size() > 0
+                - is_learning_problem(x,y) == true
                 - if (get_lambda() == 0 && will_use_regression_loss_for_loo_cv() == false) then
                     - is_binary_classification_problem(x,y) == true
                       (i.e. if you want this algorithm to estimate a lambda appropriate for
                       classification functions then you had better give a valid classification
                       problem)
             ensures
-                - performs kernel ridge regression given the training samples in x and labels in y.  
+                - performs kernel ridge regression given the training samples in x and target values in y.  
                 - returns a decision_function F with the following properties:
                     - F(new_x) == predicted y value
 
@@ -277,7 +275,7 @@ namespace dlib
         const decision_function<kernel_type> train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& y,
-            scalar_type& looe
+            std::vector<scalar_type>& loo_values
         ) const;
         /*!
             requires
@@ -285,12 +283,10 @@ namespace dlib
             ensures
                 - returns train(x,y)
                   (i.e. executes train(x,y) and returns its result)
-                - if (will_use_regression_loss_for_loo_cv())
-                    - #looe == the mean squared error as determined by leave-one-out 
-                      cross-validation.  
-                - else
-                    - #looe == the fraction of samples misclassified as determined by
-                      leave-one-out cross-validation.
+                - #loo_values.size() == y.size()
+                - for all valid i:
+                    - #loo_values[i] == leave-one-out prediction for the value of y(i) based 
+                      on all the training samples other than (x(i),y(i)).
         !*/
 
         template <
@@ -300,7 +296,7 @@ namespace dlib
         const decision_function<kernel_type> train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& y,
-            scalar_type& looe,
+            std::vector<scalar_type>& loo_values,
             scalar_type& lambda_used 
         ) const;
         /*!
@@ -309,12 +305,10 @@ namespace dlib
             ensures
                 - returns train(x,y)
                   (i.e. executes train(x,y) and returns its result)
-                - if (will_use_regression_loss_for_loo_cv())
-                    - #looe == the mean squared error as determined by leave-one-out 
-                      cross-validation.  
-                - else
-                    - #looe == the fraction of samples misclassified as determined by
-                      leave-one-out cross-validation.
+                - #loo_values.size() == y.size()
+                - for all valid i:
+                    - #loo_values[i] == leave-one-out prediction for the value of y(i) based 
+                      on all the training samples other than (x(i),y(i)).
                 - #lambda_used == the value of lambda used to generate the 
                   decision_function.  Note that this lambda value is always 
                   equal to get_lambda() if get_lambda() isn't 0.

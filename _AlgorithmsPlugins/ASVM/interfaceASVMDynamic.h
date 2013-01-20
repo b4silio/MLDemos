@@ -37,6 +37,7 @@ public:
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
     void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}
+    void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical){}
     void SaveModel(QString filename, Dynamical *dynamical);
     bool LoadModel(QString filename, Dynamical *dynamical);
 
@@ -51,6 +52,11 @@ public:
 	bool LoadOptions(QSettings &settings);
 	void SaveParams(QTextStream &stream);
 	bool LoadParams(QString name, float value);
+    void SetParams(Dynamical *dynamical, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
 };
 
 #endif // _INTERFACEASVMDYNAMIC_H_

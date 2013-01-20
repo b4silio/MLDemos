@@ -68,12 +68,18 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
 	settings.setValue("spinZoom", displayOptions->spinZoom->value());
     settings.setValue("legendCheck", displayOptions->legendCheck->isChecked());
+    settings.setValue("check3DSamples", displayOptions->check3DSamples->isChecked());
+    settings.setValue("check3DWireframe", displayOptions->check3DWireframe->isChecked());
+    settings.setValue("check3DSurfaces", displayOptions->check3DSurfaces->isChecked());
+    settings.setValue("check3DTransparency", displayOptions->check3DTransparency->isChecked());
+    settings.setValue("check3DBlurry", displayOptions->check3DBlurry->isChecked());
+    settings.setValue("check3DRotate", displayOptions->check3DRotate->isChecked());
     settings.endGroup();
 
 	settings.beginGroup("drawingOptions");
 	settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
 	settings.setValue("spinCount", drawToolbarContext1->spinCount->value());
-	settings.setValue("spinSize", drawToolbarContext1->spinSize->value());
+    settings.setValue("spinSize", drawToolbar->radiusSpin->value());
 	settings.setValue("spinAngle", drawToolbarContext2->spinAngle->value());
 	settings.setValue("spinSigmaX", drawToolbarContext2->spinSigmaX->value());
 	settings.setValue("spinSigmaY", drawToolbarContext2->spinSigmaY->value());
@@ -87,8 +93,9 @@ void MLDemos::SaveLayoutOptions()
 	settings.setValue("spinRadius", drawToolbarContext4->spinRadius->value());
 	settings.setValue("spinAlpha", drawToolbarContext4->spinAlpha->value());
 	settings.setValue("eraseCheck", drawToolbar->eraseButton->isChecked());
-	settings.setValue("sprayCheck", drawToolbar->sprayButton->isChecked());
-	settings.setValue("singleCheck", drawToolbar->singleButton->isChecked());
+    settings.setValue("sprayCheck", drawToolbar->sprayButton->isChecked());
+    settings.setValue("spray3DCheck", drawToolbar->spray3DButton->isChecked());
+    settings.setValue("singleCheck", drawToolbar->singleButton->isChecked());
 	settings.setValue("ellipseCheck", drawToolbar->ellipseButton->isChecked());
 	settings.setValue("lineCheck", drawToolbar->lineButton->isChecked());
 	settings.setValue("trajectoryCheck", drawToolbar->trajectoryButton->isChecked());
@@ -271,6 +278,13 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
 	if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
     if(settings.contains("legendCheck")) displayOptions->legendCheck->setChecked(settings.value("legendCheck").toBool());
+    if(settings.contains("check3DSamples")) displayOptions->check3DSamples->setChecked(settings.value("check3DSamples").toBool());
+    if(settings.contains("check3DWireframe")) displayOptions->check3DWireframe->setChecked(settings.value("check3DWireframe").toBool());
+    if(settings.contains("check3DSurfaces")) displayOptions->check3DSurfaces->setChecked(settings.value("check3DSurfaces").toBool());
+    if(settings.contains("check3DTransparency")) displayOptions->check3DTransparency->setChecked(settings.value("check3DTransparency").toBool());
+    if(settings.contains("check3DBlurry")) displayOptions->check3DBlurry->setChecked(settings.value("check3DBlurry").toBool());
+    if(settings.contains("check3DRotate")) displayOptions->check3DRotate->setChecked(settings.value("check3DRotate").toBool());
+
     //if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
 	//if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
 	settings.endGroup();
@@ -278,7 +292,6 @@ void MLDemos::LoadLayoutOptions()
 	settings.beginGroup("drawingOptions");
 	if(settings.contains("infoCheck")) drawToolbarContext1->randCombo->setCurrentIndex(settings.value("infoCheck").toInt());
 	if(settings.contains("spinAngle")) drawToolbarContext2->spinAngle->setValue(settings.value("spinAngle").toFloat());
-	if(settings.contains("spinSize")) drawToolbarContext1->spinSize->setValue(settings.value("spinSize").toFloat());
 	if(settings.contains("spinCount")) drawToolbarContext1->spinCount->setValue(settings.value("spinCount").toFloat());
 	if(settings.contains("spinSigmaX")) drawToolbarContext2->spinSigmaX->setValue(settings.value("spinSigmaX").toFloat());
 	if(settings.contains("spinSigmaY")) drawToolbarContext2->spinSigmaY->setValue(settings.value("spinSigmaY").toFloat());
@@ -291,9 +304,11 @@ void MLDemos::LoadLayoutOptions()
 	if(settings.contains("spinObsRepulsionY")) drawToolbarContext3->spinRepulsionY->setValue(settings.value("spinObsRepulsionY").toFloat());
 	if(settings.contains("spinRadius")) drawToolbarContext4->spinRadius->setValue(settings.value("spinRadius").toFloat());
 	if(settings.contains("spinAlpha")) drawToolbarContext4->spinAlpha->setValue(settings.value("spinAlpha").toFloat());
-	if(settings.contains("eraseCheck")) drawToolbar->eraseButton->setChecked(settings.value("eraseCheck").toBool());
-	if(settings.contains("sprayCheck")) drawToolbar->sprayButton->setChecked(settings.value("sprayCheck").toBool());
-	if(settings.contains("singleCheck")) drawToolbar->singleButton->setChecked(settings.value("singleCheck").toBool());
+    if(settings.contains("spinSize")) drawToolbar->radiusSpin->setValue(settings.value("spinSize").toFloat());
+    if(settings.contains("eraseCheck")) drawToolbar->eraseButton->setChecked(settings.value("eraseCheck").toBool());
+    if(settings.contains("sprayCheck")) drawToolbar->sprayButton->setChecked(settings.value("sprayCheck").toBool());
+    if(settings.contains("spray3DCheck")) drawToolbar->spray3DButton->setChecked(settings.value("spray3DCheck").toBool());
+    if(settings.contains("singleCheck")) drawToolbar->singleButton->setChecked(settings.value("singleCheck").toBool());
 	if(settings.contains("ellipseCheck")) drawToolbar->ellipseButton->setChecked(settings.value("ellipseCheck").toBool());
 	if(settings.contains("lineCheck")) drawToolbar->lineButton->setChecked(settings.value("lineCheck").toBool());
 	if(settings.contains("trajectoryCheck")) drawToolbar->trajectoryButton->setChecked(settings.value("trajectoryCheck").toBool());
@@ -758,6 +773,66 @@ void MLDemos::ExportOutput()
     file.close();
 }
 
+void MLDemos::LoadClassifier()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    int tab = optionsClassify->algoList->currentIndex();
+    if(tab >= classifiers.size() || !classifiers[tab]) return;
+    Classifier *classifier = classifiers[tab]->GetClassifier();
+    bool ok = classifier->LoadModel(filename.toStdString());
+    if(ok)
+    {
+        DEL(this->classifier);
+        this->classifier = classifier;
+        tabUsedForTraining = tab;
+        classifiers[tab]->Draw(canvas, classifier);
+        if(drawTimer->isRunning()) drawTimer->Stop();
+        drawTimer->Clear();
+        drawTimer->start(QThread::NormalPriority);
+    }
+    else DEL(classifier);
+}
+
+void MLDemos::SaveClassifier()
+{
+    if(!classifier) return;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    if(!filename.endsWith(".model")) filename += ".model";
+    classifier->SaveModel(filename.toStdString());
+}
+
+void MLDemos::LoadRegressor()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    int tab = optionsRegress->algoList->currentIndex();
+    if(tab >= regressors.size() || !regressors[tab]) return;
+    Regressor *regressor = regressors[tab]->GetRegressor();
+    bool ok = regressor->LoadModel(filename.toStdString());
+    if(ok)
+    {
+        DEL(this->regressor);
+        this->regressor = regressor;
+        tabUsedForTraining = tab;
+        regressors[tab]->Draw(canvas, regressor);
+        if(drawTimer->isRunning()) drawTimer->Stop();
+        drawTimer->Clear();
+        drawTimer->start(QThread::NormalPriority);
+    }
+    else DEL(regressor);
+}
+
+void MLDemos::SaveRegressor()
+{
+    if(!regressor) return;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
+    if(filename.isEmpty()) return;
+    if(!filename.endsWith(".model")) filename += ".model";
+    regressor->SaveModel(filename.toStdString());
+}
+
 void MLDemos::LoadDynamical()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Load Model"), "", tr("Model (*.model)"));
@@ -765,7 +840,7 @@ void MLDemos::LoadDynamical()
     int tab = optionsDynamic->algoList->currentIndex();
     if(tab >= dynamicals.size() || !dynamicals[tab]) return;
     Dynamical *dynamical = dynamicals[tab]->GetDynamical();
-    bool ok = dynamicals[tab]->LoadModel(filename, dynamical);
+    bool ok = dynamical->LoadModel(filename.toStdString());
     if(ok)
     {
         DEL(this->dynamical);
@@ -789,9 +864,8 @@ void MLDemos::SaveDynamical()
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Model"), "", tr("Model (*.model)"));
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".model")) filename += ".model";
-    dynamicals[tabUsedForTraining]->SaveModel(filename, dynamical);
+    dynamical->SaveModel(filename.toStdString());
 }
-
 
 void MLDemos::MapFromReward()
 {

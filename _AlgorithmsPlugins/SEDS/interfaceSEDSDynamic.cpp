@@ -57,11 +57,98 @@ void DynamicSEDS::SetParams(Dynamical *dynamical)
     seds->SetParams(clusters, bPrior, bMu, bSigma, objectiveType, maxIteration, constraintCriterion, optimizationType);
     seds->displayLabel = params->graphLabel;
 
-
 	//float penalty = params->sedsPenaltySpin->value();
 	//int maxMinorIteration = params->minorIterationCount->value();
 	//((DynamicalSEDS *)dynamical)->SetParams(clusters, penalty, bPrior, bMu, bSigma, objectiveType, maxIteration);
 	//((DynamicalSEDS *)dynamical)->SetParams(clusters, penalty, bPrior, bMu, bSigma, objectiveType, maxIteration, maxMinorIteration, constraintCriterion);
+}
+
+fvec DynamicSEDS::GetParams()
+{
+    int clusters = params->sedsCount->value();
+    bool bPrior = params->sedsCheckPrior->isChecked();
+    bool bMu = params->sedsCheckMu->isChecked();
+    bool bSigma = params->sedsCheckSigma->isChecked();
+    int objectiveType = params->sedsObjectiveCombo->currentIndex();
+//    int optimizationType = params->sedsOptimizationCombo->currentIndex();
+    int maxIteration = params->iterationCount->value();
+    int constraintCriterion = params->sedsConstraintCombo->currentIndex();
+
+    int i=0;
+    fvec par(7);
+    par[i++] = clusters;
+    par[i++] = bPrior;
+    par[i++] = bMu;
+    par[i++] = bSigma;
+    par[i++] = objectiveType;
+//    par[i++] = optimizationType;
+    par[i++] = maxIteration;
+    par[i++] = constraintCriterion;
+    return par;
+}
+
+void DynamicSEDS::SetParams(Dynamical *dynamical, fvec parameters)
+{
+    if(!dynamical) return;
+    int i=0;
+    int clusters = parameters.size() > i ? parameters[i] : 1; i++;
+    bool bPrior = parameters.size() > i ? parameters[i] : 1; i++;
+    bool bMu = parameters.size() > i ? parameters[i] : 1; i++;
+    bool bSigma = parameters.size() > i ? parameters[i] : 1; i++;
+    int objectiveType = parameters.size() > i ? parameters[i] : 1; i++;
+//    int optimizationType = parameters.size() > i ? parameters[i] : 1; i++;
+    int optimizationType = 0;
+    int maxIteration = parameters.size() > i ? parameters[i] : 1; i++;
+    int constraintCriterion = parameters.size() > i ? parameters[i] : 1; i++;
+    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS *>(dynamical);
+    if(!seds) return;
+
+    seds->SetParams(clusters, bPrior, bMu, bSigma, objectiveType, maxIteration, constraintCriterion, optimizationType);
+    seds->displayLabel = params->graphLabel;
+}
+
+void DynamicSEDS::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Components");
+    parameterNames.push_back("Optimize Prior");
+    parameterNames.push_back("Optimize Mu");
+    parameterNames.push_back("Optimize Sigma");
+    parameterNames.push_back("Objective Function");
+    parameterNames.push_back("Max Iterations");
+    parameterNames.push_back("Constraint Criterion");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("MSE");
+    parameterValues.back().push_back("Likelihood");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("99999");
 }
 
 Dynamical *DynamicSEDS::GetDynamical()
@@ -112,20 +199,6 @@ void DynamicSEDS::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
         painter.setPen(QPen(Qt::white, 2));
         painter.drawEllipse(point, 2, 2);
     }
-}
-
-void DynamicSEDS::SaveModel(QString filename, Dynamical *dynamical)
-{
-    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
-    if(!seds) return;
-    seds->SaveModel(filename.toStdString());
-}
-
-bool DynamicSEDS::LoadModel(QString filename, Dynamical *dynamical)
-{
-    DynamicalSEDS *seds = dynamic_cast<DynamicalSEDS*>(dynamical);
-    if(!seds) return false;
-    return seds->LoadModel(filename.toStdString());
 }
 
 void DynamicSEDS::SaveOptions(QSettings &settings)

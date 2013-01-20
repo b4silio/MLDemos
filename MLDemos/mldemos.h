@@ -57,9 +57,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "compare.h"
 #include "widget.h"
 #include "drawTimer.h"
-#include "expose.h"
 #include "dataImporter.h"
 #include "datagenerator.h"
+#include "gridsearch.h"
+#include "glwidget.h"
 
 class MLDemos : public QMainWindow
 {
@@ -69,11 +70,12 @@ private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
 	*actionClearData, *actionClearModel, *actionScreenshot,
-	*actionNew, *actionSave, *actionLoad;
+    *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
-    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *compareWidget, *projectWidget;
+    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *projectWidget;
+    QWidget *compareWidget;
 
     QNamedWindow *rocWidget, *crossvalidWidget;
 
@@ -91,7 +93,7 @@ private:
     Ui::optionsReinforcementWidget *optionsReinforcement;
 	Ui::optionsCompare *optionsCompare;
 	Ui::DrawingToolbar *drawToolbar;
-	Ui::DrawingToolbarContext1 *drawToolbarContext1;
+    Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
 	Ui::DrawingToolbarContext3 *drawToolbarContext3;
 	Ui::DrawingToolbarContext4 *drawToolbarContext4;
@@ -104,7 +106,8 @@ private:
 	DrawTimer *drawTimer;
 	QTime drawTime;
 	Canvas *canvas;
-    Expose *expose;
+    GridSearch *gridSearch;
+    GLWidget *glw;
     DataImporter *import;
     DataGenerator *generator;
     ReinforcementProblem reinforcementProblem;
@@ -183,6 +186,9 @@ public:
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
     ivec sourceLabels;
+    ivec selectedData;
+    fvec selectionWeights;
+    fvec selectionStart;
 
     QMutex mutex;
 	void resizeEvent( QResizeEvent *event );
@@ -212,14 +218,16 @@ private slots:
 	void ShowStatsDialog();
 	void ShowToolbar();
     void ShowAddData();
-	void HideSampleDrawing();
+    void ShowGridSearch();
+    void HideSampleDrawing();
     void HideOptionDisplay();
     void HideOptionCompare();
     void HideStatsDialog();
 	void HideToolbar();
     void HideAddData();
-	void AvoidOptionChanged();
-	void DisplayOptionChanged();
+    void AvoidOptionChanged();
+    void DisplayOptionsChanged();
+    void Display3DOptionsChanged();
 	void ColorMapChanged();
     void ActivateIO();
     void ActivateImport();
@@ -237,6 +245,7 @@ private slots:
     void ClusterOptimize();
     void ClusterTest();
     void Project();
+    void ProjectManifold();
     void ProjectRevert();
     void ProjectReproject();
     void Avoidance();
@@ -247,6 +256,10 @@ private slots:
 	void ClearData();
     void ShiftDimensions();
 	void SetROCInfo();
+    void LoadClassifier();
+    void SaveClassifier();
+    void LoadRegressor();
+    void SaveRegressor();
     void LoadDynamical();
     void SaveDynamical();
 
@@ -260,22 +273,15 @@ private slots:
 	void ToClipboard();
 
 	void DrawCrosshair();
-    void DrawNone();
-    void DrawSingle();
-	void DrawSpray();
-	void DrawLine();
-	void DrawTrajectory();
-	void DrawEllipse();
-	void DrawErase();
-	void DrawObstacle();
-	void DrawPaint();
 	void Drawing(fvec sample, int label);
+    void Editing(int editType, fvec position, int label);
 	void DrawingStopped();
+    void DimPlus();
+    void DimLess();
 
     void ManualSelection();
     void InputDimensions();
-    void ExposeData();
-	void FitToData();
+    void FitToData();
 	void ZoomChanged(float d);
     void UpdateLearnedModel();
 	void CanvasMoveEvent();

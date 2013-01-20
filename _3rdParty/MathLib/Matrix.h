@@ -510,266 +510,266 @@ public:
         return *this;
     }
 
-  /**
+    /**
    * \brief Assign a matrix to the current matrix rows
    * \param vector   The input matrix
    * \param row      The starting row
    */
-  inline Matrix& SetRowSpace(const Matrix &matrix, const unsigned int row)
-  {
-    if(row<this->row){
-      const unsigned int ki = (column<=matrix.column?column:matrix.column);
-      const unsigned int kj = (row+matrix.row<=this->row?row+matrix.row:this->row);
-      for (unsigned int j = row; j < kj; j++)
-        for (unsigned int i = 0; i < ki; i++)
-          _[j*column+i] = matrix._[(j-row)*matrix.column+i];
+    inline Matrix& SetRowSpace(const Matrix &matrix, const unsigned int row)
+    {
+        if(row<this->row){
+            const unsigned int ki = (column<=matrix.column?column:matrix.column);
+            const unsigned int kj = (row+matrix.row<=this->row?row+matrix.row:this->row);
+            for (unsigned int j = row; j < kj; j++)
+                for (unsigned int i = 0; i < ki; i++)
+                    _[j*column+i] = matrix._[(j-row)*matrix.column+i];
+        }
+        return *this;
     }
-    return *this;
-  }
 
-  /**
+    /**
    * \brief Assign a matrix to the current matrix columns
    * \param vector   The input matrix
    * \param col      The starting column
    */
-  inline Matrix& SetColumnSpace(const Matrix &matrix, const unsigned int col)
-  {
-    if(col<this->column){
-      const unsigned int kj = (row<=matrix.row?row:matrix.row);
-      const unsigned int ki = (col+matrix.column<=this->column?col+matrix.column:this->column);
-      for (unsigned int j = 0; j < kj; j++)
-        for (unsigned int i = col; i < ki; i++)
-          _[j*column+i] = matrix._[j*matrix.column+(i-col)];
+    inline Matrix& SetColumnSpace(const Matrix &matrix, const unsigned int col)
+    {
+        if(col<this->column){
+            const unsigned int kj = (row<=matrix.row?row:matrix.row);
+            const unsigned int ki = (col+matrix.column<=this->column?col+matrix.column:this->column);
+            for (unsigned int j = 0; j < kj; j++)
+                for (unsigned int i = col; i < ki; i++)
+                    _[j*column+i] = matrix._[j*matrix.column+(i-col)];
+        }
+        return *this;
     }
-    return *this;
-  }
 
 
-  inline Matrix GetRowSpace(const Vector& ids, Matrix &result) const
-  {
-    int s = ids.Size();
-    IndicesVector id;
-    for(int i=0;i<s;i++) id.push_back(int(ROUND(ids.At(i))));
-    return GetRowSpace(id,result);
-  }
+    inline Matrix GetRowSpace(const Vector& ids, Matrix &result) const
+    {
+        int s = ids.Size();
+        IndicesVector id;
+        for(int i=0;i<s;i++) id.push_back(int(ROUND(ids.At(i))));
+        return GetRowSpace(id,result);
+    }
 
-  /**
+    /**
    * \brief Get a matrix spanning several rows of the matrix
    * \param ids      The indices of the desired rows
    * \return         The resulting matrix
    */
-  inline Matrix GetRowSpace(const IndicesVector& ids) const
-  {
-    Matrix result(ids.size(),column);
-    return GetRowSpace(ids,result);
-  }
-
-  inline Matrix& GetRowSpace(const IndicesVector& ids, Matrix &result) const
-  {
-    const unsigned int k=ids.size();
-    result.Resize(k,column,false);
-    for(unsigned int i=0;i<k;i++){
-      const unsigned int g      = ids[i];
-      const unsigned int offset = i*column;
-      if(g<row){
-        for(unsigned int j=0;j<column;j++)
-          result._[offset+j] = _[g*column+j];
-      }else{
-        for(unsigned int j=0;j<column;j++)
-          result._[offset+j] = R_ZERO;
-      }
+    inline Matrix GetRowSpace(const IndicesVector& ids) const
+    {
+        Matrix result(ids.size(),column);
+        return GetRowSpace(ids,result);
     }
-    return result;
-  }
 
-  inline Matrix GetColumnSpace(const Vector& ids, Matrix &result) const
-  {
-    int s = ids.Size();
-    IndicesVector id;
-    for(int i=0;i<s;i++) id.push_back(int(ROUND(ids.At(i))));
-    return GetColumnSpace(id,result);
-  }
-  /**
+    inline Matrix& GetRowSpace(const IndicesVector& ids, Matrix &result) const
+    {
+        const unsigned int k=ids.size();
+        result.Resize(k,column,false);
+        for(unsigned int i=0;i<k;i++){
+            const unsigned int g      = ids[i];
+            const unsigned int offset = i*column;
+            if(g<row){
+                for(unsigned int j=0;j<column;j++)
+                    result._[offset+j] = _[g*column+j];
+            }else{
+                for(unsigned int j=0;j<column;j++)
+                    result._[offset+j] = R_ZERO;
+            }
+        }
+        return result;
+    }
+
+    inline Matrix GetColumnSpace(const Vector& ids, Matrix &result) const
+    {
+        int s = ids.Size();
+        IndicesVector id;
+        for(int i=0;i<s;i++) id.push_back(int(ROUND(ids.At(i))));
+        return GetColumnSpace(id,result);
+    }
+    /**
    * \brief Get a matrix spanning several columns of the matrix
    * \param ids      The indices of the desired columns
    * \return         The resulting matrix
    */
-  inline Matrix GetColumnSpace(const IndicesVector& ids) const
-  {
-    Matrix result(row,ids.size());
-    return GetColumnSpace(ids,result);
-  }
-
-  inline Matrix& GetColumnSpace(const IndicesVector& ids, Matrix &result) const
-  {
-    const unsigned int k=ids.size();
-    result.Resize(row,k);
-    for(unsigned int i=0;i<k;i++){
-      const unsigned int g = ids[i];
-      if(g<column){
-        for(unsigned int j=0;j<row;j++)
-          result._[j*k+i] = _[j*column+g];
-      }else{
-        for(unsigned int j=0;j<row;j++)
-          result._[j*k+i] = R_ZERO;
-      }
+    inline Matrix GetColumnSpace(const IndicesVector& ids) const
+    {
+        Matrix result(row,ids.size());
+        return GetColumnSpace(ids,result);
     }
-    return result;
-  }
 
-  inline Matrix GetMatrixSpace(const Vector& rowIds, const Vector& colIds, Matrix &result) const
-  {
-    int r = rowIds.Size();
-    int c = colIds.Size();
-    IndicesVector idr,idc;
-    for(int i=0;i<r;i++) idr.push_back(int(ROUND(rowIds.At(i))));
-    for(int i=0;i<c;i++) idc.push_back(int(ROUND(colIds.At(i))));
-    return GetMatrixSpace(idr,idc,result);
-  }
-  /**
+    inline Matrix& GetColumnSpace(const IndicesVector& ids, Matrix &result) const
+    {
+        const unsigned int k=ids.size();
+        result.Resize(row,k);
+        for(unsigned int i=0;i<k;i++){
+            const unsigned int g = ids[i];
+            if(g<column){
+                for(unsigned int j=0;j<row;j++)
+                    result._[j*k+i] = _[j*column+g];
+            }else{
+                for(unsigned int j=0;j<row;j++)
+                    result._[j*k+i] = R_ZERO;
+            }
+        }
+        return result;
+    }
+
+    inline Matrix GetMatrixSpace(const Vector& rowIds, const Vector& colIds, Matrix &result) const
+    {
+        int r = rowIds.Size();
+        int c = colIds.Size();
+        IndicesVector idr,idc;
+        for(int i=0;i<r;i++) idr.push_back(int(ROUND(rowIds.At(i))));
+        for(int i=0;i<c;i++) idc.push_back(int(ROUND(colIds.At(i))));
+        return GetMatrixSpace(idr,idc,result);
+    }
+    /**
    * \brief Get a matrix spanning several rows and columns of the matrix
    * \param rowIds      The indices of the desired rows
    * \param colIds      The indices of the desired columns
    * \return            The resulting matrix
    */
-  inline Matrix GetMatrixSpace(const IndicesVector& rowIds,const IndicesVector& colIds) const
-  {
-    Matrix result(rowIds.size(),colIds.size());
-    return GetMatrixSpace(rowIds,colIds,result);
-  }
-
-  inline Matrix& GetMatrixSpace(const IndicesVector& rowIds,const IndicesVector& colIds, Matrix &result) const
-  {
-    const unsigned int k1=rowIds.size();
-    const unsigned int k2=colIds.size();
-    result.Resize(k1,k2);
-    for(unsigned int i=0;i<k1;i++){
-      const unsigned int g1 = rowIds[i];
-      if(g1<row){
-        for(unsigned int j=0;j<k2;j++){
-          const unsigned int g2 = colIds[j];
-          if(g2<column){
-            result._[i*k2+j] = _[g1*column+g2];
-          }else{
-            result._[i*k2+j] = R_ZERO;
-          }
-        }
-      }else{
-        for(unsigned int j=0;j<k2;j++)
-          result._[i*k2+j] = R_ZERO;
-      }
+    inline Matrix GetMatrixSpace(const IndicesVector& rowIds,const IndicesVector& colIds) const
+    {
+        Matrix result(rowIds.size(),colIds.size());
+        return GetMatrixSpace(rowIds,colIds,result);
     }
-    return result;
-  }
 
-  /**
+    inline Matrix& GetMatrixSpace(const IndicesVector& rowIds,const IndicesVector& colIds, Matrix &result) const
+    {
+        const unsigned int k1=rowIds.size();
+        const unsigned int k2=colIds.size();
+        result.Resize(k1,k2);
+        for(unsigned int i=0;i<k1;i++){
+            const unsigned int g1 = rowIds[i];
+            if(g1<row){
+                for(unsigned int j=0;j<k2;j++){
+                    const unsigned int g2 = colIds[j];
+                    if(g2<column){
+                        result._[i*k2+j] = _[g1*column+g2];
+                    }else{
+                        result._[i*k2+j] = R_ZERO;
+                    }
+                }
+            }else{
+                for(unsigned int j=0;j<k2;j++)
+                    result._[i*k2+j] = R_ZERO;
+            }
+        }
+        return result;
+    }
+
+    /**
    * \brief Set a specified column set of the matrix with columns of the source matrix
    * \param ids      The indices of the desired columns
    * \param source   The source matrix
    * \return         The resulting matrix
    */
-  inline Matrix& SetColumnSpace(const IndicesVector& ids, const Matrix &source)
-  {
-    const unsigned int k      = MIN(ids.size(),source.column);
-    const unsigned int r      = MIN(row,source.row);
-    for(unsigned int i=0;i<k;i++){
-      const unsigned int g = ids[i];
-      if(g<column){
-        for(unsigned int j=0;j<r;j++)
-          _[j*column+g] = source._[j*source.column+i];
-      }
+    inline Matrix& SetColumnSpace(const IndicesVector& ids, const Matrix &source)
+    {
+        const unsigned int k      = MIN(ids.size(),source.column);
+        const unsigned int r      = MIN(row,source.row);
+        for(unsigned int i=0;i<k;i++){
+            const unsigned int g = ids[i];
+            if(g<column){
+                for(unsigned int j=0;j<r;j++)
+                    _[j*column+g] = source._[j*source.column+i];
+            }
+        }
+        return *this;
     }
-    return *this;
-  }
 
 
-  inline Matrix& InsertSubRow(unsigned int startRow, unsigned int startColumn,
-                              const Matrix& matrix,
-                              unsigned int matrixRow,
-                              unsigned int matrixStartColumn, unsigned int matrixColumnLength){
+    inline Matrix& InsertSubRow(unsigned int startRow, unsigned int startColumn,
+                                const Matrix& matrix,
+                                unsigned int matrixRow,
+                                unsigned int matrixStartColumn, unsigned int matrixColumnLength){
 
-    // Check submatrix boundaries
-    if((matrixRow         >= matrix.row)||
-       (matrixStartColumn >= matrix.column)) return *this;
+        // Check submatrix boundaries
+        if((matrixRow         >= matrix.row)||
+                (matrixStartColumn >= matrix.column)) return *this;
 
-    // Check matrix boundaries
-    if((startRow    >= row)||
-       (startColumn >= column)) return *this;
+        // Check matrix boundaries
+        if((startRow    >= row)||
+                (startColumn >= column)) return *this;
 
-    if(matrixStartColumn+matrixColumnLength > matrix.column) matrixColumnLength = matrix.column-matrixStartColumn;
+        if(matrixStartColumn+matrixColumnLength > matrix.column) matrixColumnLength = matrix.column-matrixStartColumn;
 
-    if(startColumn+matrixColumnLength > column) matrixColumnLength = column-startColumn;
+        if(startColumn+matrixColumnLength > column) matrixColumnLength = column-startColumn;
 
-    unsigned int rowOffset       = startRow*column;
-    unsigned int matrixRowOffset = matrixRow*matrix.column;
-    unsigned int colOffset       = startColumn;
-    unsigned int matrixColOffset = matrixStartColumn;
-    for(unsigned int j=0;j<matrixColumnLength;j++){
-      _[rowOffset+colOffset] = matrix._[matrixRowOffset+matrixColOffset];
-      colOffset++;
-      matrixColOffset++;
+        unsigned int rowOffset       = startRow*column;
+        unsigned int matrixRowOffset = matrixRow*matrix.column;
+        unsigned int colOffset       = startColumn;
+        unsigned int matrixColOffset = matrixStartColumn;
+        for(unsigned int j=0;j<matrixColumnLength;j++){
+            _[rowOffset+colOffset] = matrix._[matrixRowOffset+matrixColOffset];
+            colOffset++;
+            matrixColOffset++;
+        }
+        return *this;
     }
-    return *this;
-  }
 
-  inline Matrix& InsertSubColumn(unsigned int startRow, unsigned int startColumn,
-                                 const Matrix& matrix,
-                                 unsigned int matrixStartRow, unsigned int matrixRowLength,
-                                 unsigned int matrixColumn){
+    inline Matrix& InsertSubColumn(unsigned int startRow, unsigned int startColumn,
+                                   const Matrix& matrix,
+                                   unsigned int matrixStartRow, unsigned int matrixRowLength,
+                                   unsigned int matrixColumn){
 
-    if((matrixStartRow >= matrix.row)||
-       (matrixColumn   >= matrix.column)) return *this;
-    if((startRow    >= row)||
-       (startColumn >= column)) return *this;
+        if((matrixStartRow >= matrix.row)||
+                (matrixColumn   >= matrix.column)) return *this;
+        if((startRow    >= row)||
+                (startColumn >= column)) return *this;
 
-    if(matrixStartRow+   matrixRowLength    > matrix.row)    matrixRowLength    = matrix.row   -matrixStartRow;
+        if(matrixStartRow+   matrixRowLength    > matrix.row)    matrixRowLength    = matrix.row   -matrixStartRow;
 
-    if(startRow+   matrixRowLength    > row)    matrixRowLength    = row   -startRow;
+        if(startRow+   matrixRowLength    > row)    matrixRowLength    = row   -startRow;
 
-    unsigned int rowOffset       = startRow*column;
-    unsigned int matrixRowOffset = matrixStartRow*matrix.column;
-    for(unsigned int i=0;i<matrixRowLength;i++){
-      _[rowOffset+startColumn] = matrix._[matrixRowOffset+matrixColumn];
-      rowOffset       +=column;
-      matrixRowOffset +=matrix.column;
+        unsigned int rowOffset       = startRow*column;
+        unsigned int matrixRowOffset = matrixStartRow*matrix.column;
+        for(unsigned int i=0;i<matrixRowLength;i++){
+            _[rowOffset+startColumn] = matrix._[matrixRowOffset+matrixColumn];
+            rowOffset       +=column;
+            matrixRowOffset +=matrix.column;
+        }
+        return *this;
     }
-    return *this;
-  }
 
-  inline Matrix& InsertSubMatrix(unsigned int startRow, unsigned int startColumn,
-                                 const Matrix& matrix,
-                                 unsigned int matrixStartRow, unsigned int matrixRowLength,
-                                 unsigned int matrixStartColumn, unsigned int matrixColumnLength){
+    inline Matrix& InsertSubMatrix(unsigned int startRow, unsigned int startColumn,
+                                   const Matrix& matrix,
+                                   unsigned int matrixStartRow, unsigned int matrixRowLength,
+                                   unsigned int matrixStartColumn, unsigned int matrixColumnLength){
 
-    // Check submatrix boundaries
-    if((matrixStartRow    >= matrix.row)||
-       (matrixStartColumn >= matrix.column)) return *this;
+        // Check submatrix boundaries
+        if((matrixStartRow    >= matrix.row)||
+                (matrixStartColumn >= matrix.column)) return *this;
 
-    // Check matrix boundaries
-    if((startRow    >= row)||
-       (startColumn >= column)) return *this;
+        // Check matrix boundaries
+        if((startRow    >= row)||
+                (startColumn >= column)) return *this;
 
-    if(matrixStartRow+   matrixRowLength    > matrix.row)    matrixRowLength    = matrix.row   -matrixStartRow;
-    if(matrixStartColumn+matrixColumnLength > matrix.column) matrixColumnLength = matrix.column-matrixStartColumn;
+        if(matrixStartRow+   matrixRowLength    > matrix.row)    matrixRowLength    = matrix.row   -matrixStartRow;
+        if(matrixStartColumn+matrixColumnLength > matrix.column) matrixColumnLength = matrix.column-matrixStartColumn;
 
-    if(startRow+   matrixRowLength    > row)    matrixRowLength    = row   -startRow;
-    if(startColumn+matrixColumnLength > column) matrixColumnLength = column-startColumn;
+        if(startRow+   matrixRowLength    > row)    matrixRowLength    = row   -startRow;
+        if(startColumn+matrixColumnLength > column) matrixColumnLength = column-startColumn;
 
-    unsigned int rowOffset       = startRow*column;
-    unsigned int matrixRowOffset = matrixStartRow*matrix.column;
-    for(unsigned int i=0;i<matrixRowLength;i++){
-      unsigned int colOffset       = startColumn;
-      unsigned int matrixColOffset = matrixStartColumn;
-      for(unsigned int j=0;j<matrixColumnLength;j++){
-        _[rowOffset+colOffset] = matrix._[matrixRowOffset+matrixColOffset];
-        colOffset++;
-        matrixColOffset++;
-      }
-      rowOffset       +=column;
-      matrixRowOffset +=matrix.column;
+        unsigned int rowOffset       = startRow*column;
+        unsigned int matrixRowOffset = matrixStartRow*matrix.column;
+        for(unsigned int i=0;i<matrixRowLength;i++){
+            unsigned int colOffset       = startColumn;
+            unsigned int matrixColOffset = matrixStartColumn;
+            for(unsigned int j=0;j<matrixColumnLength;j++){
+                _[rowOffset+colOffset] = matrix._[matrixRowOffset+matrixColOffset];
+                colOffset++;
+                matrixColOffset++;
+            }
+            rowOffset       +=column;
+            matrixRowOffset +=matrix.column;
+        }
+        return *this;
     }
-    return *this;
-  }
 
     inline Matrix operator - () const
     {
@@ -913,30 +913,30 @@ public:
 
     inline Matrix& operator ^= (Vector vec)
     {
-    
-      for (unsigned int j = 0; j < row; j++)
-	{
-	  REALTYPE scalar = vec(j);
-	  for (unsigned int i = 0; i < column; i++)
-	    _[j*column+i] *= scalar;
-	}
-      return *this;
+
+        for (unsigned int j = 0; j < row; j++)
+        {
+            REALTYPE scalar = vec(j);
+            for (unsigned int i = 0; i < column; i++)
+                _[j*column+i] *= scalar;
+        }
+        return *this;
     }
 
 
-     
+
     /* Row wise division by a vector */
 
     inline Matrix& operator /= (Vector vec)
     {
-    
-      for (unsigned int j = 0; j < row; j++)
-	{
-	  REALTYPE scalar = R_ONE/vec(j);
-	  for (unsigned int i = 0; i < column; i++)
-	    _[j*column+i] *= scalar;
-	}
-      return *this;
+
+        for (unsigned int j = 0; j < row; j++)
+        {
+            REALTYPE scalar = R_ONE/vec(j);
+            for (unsigned int i = 0; i < column; i++)
+                _[j*column+i] *= scalar;
+        }
+        return *this;
     }
 
 
@@ -1931,7 +1931,7 @@ public:
         }
         return *this;
     }
-/*
+    /*
     /// Print the matrix of stdout
     void Print() const
     {
@@ -1949,117 +1949,117 @@ public:
         }
     }
 */
-  /// Print the matrix of stdout
-  void Print() const;
-  void Print(string name) const;
+    /// Print the matrix of stdout
+    void Print() const;
+    void Print(string name) const;
 
-  friend std::ostream& operator<<(std::ostream& out, const Matrix & a){
-  PRINT_BEGIN(out);
+    friend std::ostream& operator<<(std::ostream& out, const Matrix & a){
+        PRINT_BEGIN(out);
 
-  for (unsigned int j = 0; j < a.RowSize(); j++){
-    for (unsigned int i = 0; i < a.ColumnSize(); i++){
-      out.width(PRINT_WIDTH);
-      out << a.AtNoCheck(j,i)<<" ";
+        for (unsigned int j = 0; j < a.RowSize(); j++){
+            for (unsigned int i = 0; i < a.ColumnSize(); i++){
+                out.width(PRINT_WIDTH);
+                out << a.AtNoCheck(j,i)<<" ";
+            }
+            //out <<"; ";
+        }
+
+        PRINT_END(out);
+
+        return out;
     }
-    //out <<"; ";
-  }
 
-  PRINT_END(out);
-
-  return out;
-  }
-
-  /*{
+    /*{
     std::cout<<*this;
   }*/
 
-  /**
+    /**
    * \brief Do a QR Decomposition of the matrix, where A=QR, and Q is a base and ortonornal matrix and R a triangular matrix
    * \param Q The resulting Q
    * \param R The resulting R
    */
-  void QRDecomposition(Matrix & Q, Matrix & R){
-    Matrix QR;
-    QRDecomposition(Q,R,QR);
-  }
+    void QRDecomposition(Matrix & Q, Matrix & R){
+        Matrix QR;
+        QRDecomposition(Q,R,QR);
+    }
 
-  /**
+    /**
    * \brief Do a QR Decomposition of the matrix, where A=QR, and Q is a base and ortonornal matrix and R a triangular matrix
    * \param Q The resulting Q
    * \param R The resulting R
    * \param QR A temporary processing matrix
    */
-  void QRDecomposition(Matrix & Q, Matrix & R, Matrix & QR){
-    if(row>=column){
-      QR = *this;
-    }else{
-      Transpose(QR);
-    }
-    unsigned int m = QR.row;
-    unsigned int n = QR.column;
-    Vector RDiag(n);
-
-    for(unsigned int k=0;k<n;k++){
-      REALTYPE nrm = R_ZERO;
-      for (unsigned int i = k; i < m; i++) {
-        nrm = hypot_s(nrm, QR(i,k));
-      }
-      if (nrm != R_ZERO) {
-        if(QR(k,k)<R_ZERO){
-          nrm = -nrm;
-        }
-        for (unsigned int i = k; i < m; i++) {
-            QR(i,k) /= nrm;
-        }
-        QR(k,k)+=R_ONE;
-
-        for (unsigned int j = k + 1; j < n; j++) {
-          REALTYPE s = R_ZERO;
-          for (unsigned int i = k; i < m; i++) {
-              s += QR(i,k) * QR(i,j);
-          }
-          s = -s / QR(k,k);
-          for (unsigned int i = k; i < m; i++) {
-              QR(i,j) += s * QR(i,k);
-          }
-        }
-      }
-      RDiag(k) = -nrm;
-    }
-
-    R.Resize(n,n);
-    for(unsigned int i = 0; i < n; i++) {
-      for(unsigned int j = 0; j < n; j++) {
-        if(i<j){
-          R(i,j) = QR(i,j);
-        }else if(i==j){
-          R(i,j) = RDiag(i);
+    void QRDecomposition(Matrix & Q, Matrix & R, Matrix & QR){
+        if(row>=column){
+            QR = *this;
         }else{
-          R(i,j) = R_ZERO;
+            Transpose(QR);
         }
-      }
-    }
+        unsigned int m = QR.row;
+        unsigned int n = QR.column;
+        Vector RDiag(n);
 
-    Q.Resize(m,n);
-    for(int k= n-1;k>=0;k--){
-      for(unsigned int i = 0; i < m; i++) {
-        Q(i,k) = R_ZERO;
-      }
-      Q(k,k)=R_ONE;
-      for(unsigned int j = k; j < n; j++) {
-        if(QR(k,k)!=R_ZERO){
-          REALTYPE s = R_ZERO;
-          for(unsigned int i = k; i < m; i++) {
-            s += QR(i,k) * Q(i,j);
-          }
-          s = -s / QR(k,k);
-          for(unsigned int i = k; i < m; i++) {
-            Q(i,j) = Q(i,j) + s*QR(i,k);
-          }
+        for(unsigned int k=0;k<n;k++){
+            REALTYPE nrm = R_ZERO;
+            for (unsigned int i = k; i < m; i++) {
+                nrm = hypot_s(nrm, QR(i,k));
+            }
+            if (nrm != R_ZERO) {
+                if(QR(k,k)<R_ZERO){
+                    nrm = -nrm;
+                }
+                for (unsigned int i = k; i < m; i++) {
+                    QR(i,k) /= nrm;
+                }
+                QR(k,k)+=R_ONE;
+
+                for (unsigned int j = k + 1; j < n; j++) {
+                    REALTYPE s = R_ZERO;
+                    for (unsigned int i = k; i < m; i++) {
+                        s += QR(i,k) * QR(i,j);
+                    }
+                    s = -s / QR(k,k);
+                    for (unsigned int i = k; i < m; i++) {
+                        QR(i,j) += s * QR(i,k);
+                    }
+                }
+            }
+            RDiag(k) = -nrm;
         }
-      }
+
+        R.Resize(n,n);
+        for(unsigned int i = 0; i < n; i++) {
+            for(unsigned int j = 0; j < n; j++) {
+                if(i<j){
+                    R(i,j) = QR(i,j);
+                }else if(i==j){
+                    R(i,j) = RDiag(i);
+                }else{
+                    R(i,j) = R_ZERO;
+                }
+            }
+        }
+
+        Q.Resize(m,n);
+        for(int k= n-1;k>=0;k--){
+            for(unsigned int i = 0; i < m; i++) {
+                Q(i,k) = R_ZERO;
+            }
+            Q(k,k)=R_ONE;
+            for(unsigned int j = k; j < n; j++) {
+                if(QR(k,k)!=R_ZERO){
+                    REALTYPE s = R_ZERO;
+                    for(unsigned int i = k; i < m; i++) {
+                        s += QR(i,k) * Q(i,j);
+                    }
+                    s = -s / QR(k,k);
+                    for(unsigned int i = k; i < m; i++) {
+                        Q(i,j) = Q(i,j) + s*QR(i,k);
+                    }
+                }
+            }
+        }
     }
-  }
 
 
     /**
@@ -2157,7 +2157,7 @@ public:
         return result;
     }
 
-        /**
+    /**
      * \brief Do a compressed tridiagonalization of the matrix (Use TriDiag() to recover a normal form of the matrix)
      * \param result The resulting matrix. It has three rows, one for the diagonal element, and the others of the up and down diagonal elements
      * \param trans  The resulting transformation matrix
@@ -2689,115 +2689,115 @@ public:
     }
 
 
-  /// Sort the column of the matrix according to the indices of the input vector elements sorted according to thir abolut value
-  Matrix& SortColumnAbs(Vector & values){
-    const int k = (values.Size()<column?values.Size():column);
-    REALTYPE cmax;
-    int maxId;
-    for(int i=0;i<k-1;i++){
-      cmax  = fabs(values._[i]);
-      maxId = i;
-      for(int j=i+1;j<k;j++){
-        if(cmax<fabs(values._[j])){
-          cmax = fabs(values._[j]);
-          maxId = j;
+    /// Sort the column of the matrix according to the indices of the input vector elements sorted according to thir abolut value
+    Matrix& SortColumnAbs(Vector & values){
+        const int k = (values.Size()<column?values.Size():column);
+        REALTYPE cmax;
+        int maxId;
+        for(int i=0;i<k-1;i++){
+            cmax  = fabs(values._[i]);
+            maxId = i;
+            for(int j=i+1;j<k;j++){
+                if(cmax<fabs(values._[j])){
+                    cmax = fabs(values._[j]);
+                    maxId = j;
+                }
+            }
+            if(maxId!=i){
+                REALTYPE tmp       = values._[i];
+                values._[i]     = values._[maxId];
+                values._[maxId] = tmp;
+                SwapColumn(i,maxId);
+            }
         }
-      }
-      if(maxId!=i){
-        REALTYPE tmp       = values._[i];
-        values._[i]     = values._[maxId];
-        values._[maxId] = tmp;
-        SwapColumn(i,maxId);
-      }
+        return *this;
     }
-    return *this;
-  }
 
-  Matrix& SquareRoot(Matrix& result){
-    Vector eigValD;
-    Matrix eigVal;
-    Matrix eigVec;
-    EigenValuesDecomposition(eigValD, eigVec);
-    for(unsigned int i=0;i<eigValD.Size();i++) eigValD(i) = sqrt(eigValD(i));
-    eigVal.Diag(eigValD);
-    eigVec.Mult(eigVal,result);
-    eigVal = result;
-    eigVec.STranspose();
-    eigVal.Mult(eigVec,result);
-    return result;
-  }
-
-  Matrix& InverseSquareRoot(Matrix& result){
-    Vector eigValD;
-    Matrix eigVal;
-    Matrix eigVec;
-    EigenValuesDecomposition(eigValD, eigVec);
-    for(unsigned int i=0;i<eigValD.Size();i++) eigValD(i) = sqrt(1.0/eigValD(i));
-    eigVal.Diag(eigValD);
-    eigVec.Mult(eigVal,result);
-    eigVal = result;
-    eigVec.STranspose();
-    eigVal.Mult(eigVec,result);
-    return result;
-  }
-
-  /// Do a Gram-Schmidt ortonormalization of the matrix  but an extra column (the base) is added. Using RemoveZeroColumn may then help clean the matrix.
-  Matrix& GramSchmidt(Vector &base){
-    Matrix unit(row,1);
-    unit.SetColumn(base,0);
-    Matrix ext;
-    unit.HCat(*this,ext);
-    ext.GramSchmidt();
-    (*this) = ext;
-    return *this;
-  }
-
-  /// Do a Gram-Schmidt ortonormalization of the matrix
-  Matrix& GramSchmidt(){
-    Vector res(row),tmp(row),tmp2(row),tmp3(row);
-    for(unsigned int i=0;i<column;i++){
-      GetColumn(i,tmp);
-      res = tmp;
-      for(unsigned int j=0;j<i;j++){
-        GetColumn(j,tmp2);
-        res-=tmp2.Mult((tmp2.Dot(tmp)),tmp3);
-      }
-      REALTYPE norm = res.Norm();
-      if(norm>EPSILON){
-        res /= norm;
-      }else{
-        res.Zero();
-      }
-      SetColumn(res,i);
+    Matrix& SquareRoot(Matrix& result){
+        Vector eigValD;
+        Matrix eigVal;
+        Matrix eigVec;
+        EigenValuesDecomposition(eigValD, eigVec);
+        for(unsigned int i=0;i<eigValD.Size();i++) eigValD(i) = sqrt(eigValD(i));
+        eigVal.Diag(eigValD);
+        eigVec.Mult(eigVal,result);
+        eigVal = result;
+        eigVec.STranspose();
+        eigVal.Mult(eigVec,result);
+        return result;
     }
-    return *this;
-  }
 
-  /// Remove the columns of the matrix being zero
-  Matrix& RemoveZeroColumns(){
-    int zeroCnt = 0;
-    int colCnt  = 0;
-    while(colCnt < int(column)-zeroCnt){
+    Matrix& InverseSquareRoot(Matrix& result){
+        Vector eigValD;
+        Matrix eigVal;
+        Matrix eigVec;
+        EigenValuesDecomposition(eigValD, eigVec);
+        for(unsigned int i=0;i<eigValD.Size();i++) eigValD(i) = sqrt(1.0/eigValD(i));
+        eigVal.Diag(eigValD);
+        eigVec.Mult(eigVal,result);
+        eigVal = result;
+        eigVec.STranspose();
+        eigVal.Mult(eigVec,result);
+        return result;
+    }
 
-      bool bIsZero = true;
-      for(unsigned int j=0;j<row;j++){
-        if(fabs(_[j*column+colCnt])>EPSILON){
-          bIsZero = false;
-          break;
+    /// Do a Gram-Schmidt ortonormalization of the matrix  but an extra column (the base) is added. Using RemoveZeroColumn may then help clean the matrix.
+    Matrix& GramSchmidt(Vector &base){
+        Matrix unit(row,1);
+        unit.SetColumn(base,0);
+        Matrix ext;
+        unit.HCat(*this,ext);
+        ext.GramSchmidt();
+        (*this) = ext;
+        return *this;
+    }
+
+    /// Do a Gram-Schmidt ortonormalization of the matrix
+    Matrix& GramSchmidt(){
+        Vector res(row),tmp(row),tmp2(row),tmp3(row);
+        for(unsigned int i=0;i<column;i++){
+            GetColumn(i,tmp);
+            res = tmp;
+            for(unsigned int j=0;j<i;j++){
+                GetColumn(j,tmp2);
+                res-=tmp2.Mult((tmp2.Dot(tmp)),tmp3);
+            }
+            REALTYPE norm = res.Norm();
+            if(norm>EPSILON){
+                res /= norm;
+            }else{
+                res.Zero();
+            }
+            SetColumn(res,i);
         }
-      }
-      if(bIsZero){
-        if(colCnt<int(column)-1-zeroCnt){
-          SwapColumn(colCnt,int(column)-1-zeroCnt);
-        }
-        zeroCnt++;
-      }else{
-        colCnt++;
-      }
+        return *this;
     }
-    Resize(row,column-zeroCnt,true);
-    return *this;
-  }
+
+    /// Remove the columns of the matrix being zero
+    Matrix& RemoveZeroColumns(){
+        int zeroCnt = 0;
+        int colCnt  = 0;
+        while(colCnt < int(column)-zeroCnt){
+
+            bool bIsZero = true;
+            for(unsigned int j=0;j<row;j++){
+                if(fabs(_[j*column+colCnt])>EPSILON){
+                    bIsZero = false;
+                    break;
+                }
+            }
+            if(bIsZero){
+                if(colCnt<int(column)-1-zeroCnt){
+                    SwapColumn(colCnt,int(column)-1-zeroCnt);
+                }
+                zeroCnt++;
+            }else{
+                colCnt++;
+            }
+        }
+        Resize(row,column-zeroCnt,true);
+        return *this;
+    }
 
 
     REALTYPE Trace(){
@@ -2909,7 +2909,7 @@ public:
 
     /// Load a matrix from filename
     bool Load(const char* filename);
-    /// Save a matrix to filename , if max_row is set, save only the first max_row to file. 
+    /// Save a matrix to filename , if max_row is set, save only the first max_row to file.
     bool Save(const char* filename, unsigned int precision=6,int max_row = -1);
     /// Load a matrix from filename
     bool LoadBinary(const char* filename);

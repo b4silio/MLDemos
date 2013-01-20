@@ -76,6 +76,80 @@ void DynamicGPR::SetParams(Dynamical *dynamical)
     gpr->SetParams(kernelGamma, noise, capacity, kernelType, kernelDegree);
 }
 
+fvec DynamicGPR::GetParams()
+{
+    int kernelType = params->kernelTypeCombo->currentIndex();
+    float kernelGamma = params->kernelWidthSpin->value();
+    float kernelDegree = params->kernelDegSpin->value();
+    int capacity = params->capacitySpin->value();
+    bool bSparse = params->sparseCheck->isChecked();
+    double kernelNoise = params->noiseSpin->value();
+    fvec par(5);
+    par[0] = kernelType;
+    par[1] = kernelGamma;
+    par[2] = kernelDegree;
+    par[3] = capacity;
+    par[4] = kernelNoise;
+    return par;
+}
+
+void DynamicGPR::SetParams(Dynamical *dynamical, fvec parameters)
+{
+    if(!dynamical) return;
+    DynamicalGPR *gpr = dynamic_cast<DynamicalGPR*>(dynamical);
+    if(!gpr) return;
+
+    int i = 0;
+    int kernelType = parameters.size() > i ? parameters[i] : 0; i++;
+    float kernelGamma = parameters.size() > i ? parameters[i] : 0; i++;
+    float kernelDegree = parameters.size() > i ? parameters[i] : 0; i++;
+    int capacity = parameters.size() > i ? parameters[i] : 0; i++;
+    bool bSparse = parameters.size() > i ? parameters[i] : 0; i++;
+    double kernelNoise = parameters.size() > i ? parameters[i] : 0; i++;
+    if(bSparse) capacity = -1;
+    gpr->SetParams(kernelGamma, kernelNoise, capacity, kernelType, kernelDegree);
+}
+
+void DynamicGPR::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("kernelType");
+    parameterNames.push_back("kernelGamma");
+    parameterNames.push_back("kernelDegree");
+    parameterNames.push_back("capacity");
+    parameterNames.push_back("bSparse");
+    parameterNames.push_back("kernelNoise");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.00000001f");
+    parameterValues.back().push_back("99999999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("9999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("False");
+    parameterValues.back().push_back("True");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.0000000001f");
+    parameterValues.back().push_back("999999999999");
+}
+
 Dynamical *DynamicGPR::GetDynamical()
 {
     Dynamical *dynamical = new DynamicalGPR();

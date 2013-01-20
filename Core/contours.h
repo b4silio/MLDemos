@@ -102,6 +102,7 @@ class CContourMap
    public:
       CContourMap();
       int generate_levels(double min,double max, int num);
+      int generate_levels_zero(double min,double max, int num);
       int add_segment(SPair t,int level);
       int dump();
       int contour(CRaster *r);

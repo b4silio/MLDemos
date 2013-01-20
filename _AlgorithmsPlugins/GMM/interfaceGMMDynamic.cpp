@@ -33,11 +33,51 @@ DynamicGMM::DynamicGMM()
 void DynamicGMM::SetParams(Dynamical *dynamical)
 {
 	if(!dynamical) return;
-	int clusters = params->gmmCount->value();
-	int covType = params->gmmCovarianceCombo->currentIndex();
-	int initType = params->gmmInitCombo->currentIndex();
+    SetParams(dynamical, GetParams());
+}
 
-	((DynamicalGMR *)dynamical)->SetParams(clusters, covType, initType);
+fvec DynamicGMM::GetParams()
+{
+    fvec par(3);
+    par[0] = params->gmmCount->value();
+    par[1] = params->gmmCovarianceCombo->currentIndex();
+    par[2] = params->gmmInitCombo->currentIndex();
+    return par;
+}
+
+void DynamicGMM::SetParams(Dynamical *dynamical, fvec parameters)
+{
+    if(!dynamical) return;
+    int clusters = parameters.size() > 0 ? parameters[0] : 1;
+    int covType = parameters.size() > 1 ? parameters[1] : 0;
+    int initType = parameters.size() > 2 ? parameters[2] : 0;
+    ((DynamicalGMR *)dynamical)->SetParams(clusters, covType, initType);
+}
+
+void DynamicGMM::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Components Count");
+    parameterNames.push_back("Covariance Type");
+    parameterNames.push_back("Initialization Type");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Full");
+    parameterValues.back().push_back("Diagonal");
+    parameterValues.back().push_back("Spherical");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Random");
+    parameterValues.back().push_back("Uniform");
+    parameterValues.back().push_back("K-Means");
 }
 
 Dynamical *DynamicGMM::GetDynamical()
@@ -65,7 +105,7 @@ void DynamicGMM::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamica
     {
         float* bigSigma = new float[dim*dim];
         float* bigMean = new float[dim];
-        gmm->getCovariance(i, bigSigma, false);
+        gmm->getCovariance(i, bigSigma);
         sigma[0] = bigSigma[xIndex*dim + xIndex];
         sigma[1] = bigSigma[yIndex*dim + xIndex];
         sigma[2] = bigSigma[yIndex*dim + yIndex];

@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>230</width>
+    <width>240</width>
     <height>120</height>
    </rect>
   </property>
@@ -27,8 +27,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>230</width>
-    <height>120</height>
+    <width>9999999</width>
+    <height>9999999</height>
    </size>
   </property>
   <property name="font">
@@ -40,96 +40,12 @@
   <property name="windowTitle">
    <string>Display Options</string>
   </property>
-  <widget class="QCheckBox" name="modelCheck">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>30</y>
-     <width>90</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Lucida Grande</family>
-    </font>
-   </property>
-   <property name="text">
-    <string>Learned Model</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="mapCheck">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>90</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Lucida Grande</family>
-    </font>
-   </property>
-   <property name="text">
-    <string>Density Map</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="infoCheck">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>90</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Lucida Grande</family>
-    </font>
-   </property>
-   <property name="text">
-    <string>Model Info</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="samplesCheck">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>90</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Lucida Grande</family>
-    </font>
-   </property>
-   <property name="text">
-    <string>Samples</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QPushButton" name="clipboardButton">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>140</x>
      <y>10</y>
-     <width>90</width>
+     <width>80</width>
      <height>20</height>
     </rect>
    </property>
@@ -149,8 +65,8 @@
   <widget class="QDoubleSpinBox" name="spinZoom">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>80</y>
+     <x>140</x>
+     <y>90</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -179,9 +95,9 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>85</x>
-     <y>80</y>
-     <width>40</width>
+     <x>140</x>
+     <y>70</y>
+     <width>50</width>
      <height>20</height>
     </rect>
    </property>
@@ -195,14 +111,14 @@
     <string>Zoom</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="zoomFitButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>80</y>
+     <x>190</x>
+     <y>90</y>
      <width>40</width>
      <height>20</height>
     </rect>
@@ -223,8 +139,8 @@
   <widget class="QCheckBox" name="gridCheck">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>50</y>
+     <x>140</x>
+     <y>40</y>
      <width>50</width>
      <height>17</height>
     </rect>
@@ -241,13 +157,13 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QCheckBox" name="legendCheck">
+  <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>90</y>
-     <width>90</width>
-     <height>17</height>
+     <x>5</x>
+     <y>5</y>
+     <width>121</width>
+     <height>111</height>
     </rect>
    </property>
    <property name="font">
@@ -255,12 +171,302 @@
      <family>Lucida Grande</family>
     </font>
    </property>
-   <property name="text">
-    <string>Legends</string>
+   <property name="tabPosition">
+    <enum>QTabWidget::West</enum>
    </property>
-   <property name="checked">
-    <bool>true</bool>
+   <property name="currentIndex">
+    <number>1</number>
    </property>
+   <widget class="QWidget" name="tab2d">
+    <attribute name="title">
+     <string>2D</string>
+    </attribute>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QScrollArea" name="scrollArea_2">
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>98</width>
+          <height>94</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="samplesCheck">
+           <property name="font">
+            <font>
+             <family>Lucida Grande</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>Samples</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="modelCheck">
+           <property name="font">
+            <font>
+             <family>Lucida Grande</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>Learned Model</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="infoCheck">
+           <property name="font">
+            <font>
+             <family>Lucida Grande</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>Model Info</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="mapCheck">
+           <property name="font">
+            <font>
+             <family>Lucida Grande</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>Density Map</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="legendCheck">
+           <property name="font">
+            <font>
+             <family>Lucida Grande</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>Legends</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="tab3d">
+    <attribute name="title">
+     <string>3D</string>
+    </attribute>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="geometry">
+      <rect>
+       <x>2</x>
+       <y>0</y>
+       <width>90</width>
+       <height>90</height>
+      </rect>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>78</width>
+        <height>131</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>-1</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Data display</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check3DSamples">
+         <property name="font">
+          <font>
+           <family>Lucida Grande</family>
+          </font>
+         </property>
+         <property name="text">
+          <string>Samples</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check3DWireframe">
+         <property name="font">
+          <font>
+           <family>Lucida Grande</family>
+          </font>
+         </property>
+         <property name="text">
+          <string>Wireframes</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check3DSurfaces">
+         <property name="font">
+          <font>
+           <family>Lucida Grande</family>
+          </font>
+         </property>
+         <property name="text">
+          <string>Surfaces</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Effects</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check3DTransparency">
+         <property name="font">
+          <font>
+           <family>Lucida Grande</family>
+          </font>
+         </property>
+         <property name="text">
+          <string>Transparency</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check3DBlurry">
+         <property name="font">
+          <font>
+           <family>Lucida Grande</family>
+          </font>
+         </property>
+         <property name="text">
+          <string>Blur</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QCheckBox" name="check3DRotate">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>89</y>
+       <width>83</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lucida Grande</family>
+      </font>
+     </property>
+     <property name="text">
+      <string>Rotate Camera</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <resources/>

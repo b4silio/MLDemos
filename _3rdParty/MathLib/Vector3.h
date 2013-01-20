@@ -14,8 +14,8 @@
  * Public License for more details
  */
 
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#ifndef MATHLIB_VECTOR3_H
+#define MATHLIB_VECTOR3_H
 
 #include "MathLibCommon.h"
 

@@ -67,6 +67,7 @@ namespace dlib
 
     public:
         typedef typename matrix_traits<EXP>::type type;
+        typedef type value_type;
         typedef typename matrix_traits<EXP>::const_ret_type const_ret_type;
         typedef typename matrix_traits<EXP>::mem_manager_type mem_manager_type;
         typedef typename matrix_traits<EXP>::layout_type layout_type;
@@ -182,6 +183,23 @@ namespace dlib
     /*
         is_matrix<T>::value == 1 if T is a matrix type else 0
     */
+
+// ----------------------------------------------------------------------------------------
+
+    template <
+        typename EXP
+        >
+    class matrix_diag_exp : public matrix_exp<EXP> 
+    {
+        /*!
+            This is a matrix expression type used to represent diagonal matrices.
+            That is, square matrices with all off diagonal elements equal to 0.
+        !*/
+
+    protected:
+        matrix_diag_exp() {}
+        matrix_diag_exp(const matrix_diag_exp& item ):matrix_exp<EXP>(item) {}
+    };
 
 // ----------------------------------------------------------------------------------------
 

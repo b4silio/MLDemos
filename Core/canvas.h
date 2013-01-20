@@ -63,9 +63,10 @@ public:
 	Canvas(QWidget *parent);
 	~Canvas();
 
-	bool DeleteData(QPointF center, float radius);
-	static bool bCrossesAsDots;
-	void DrawSamples();
+    static bool bCrossesAsDots;
+    bool DeleteData(QPointF center, float radius);
+    ivec SelectSamples(QPointF center, float radius, fvec *weights=0);
+    void DrawSamples();
 	void DrawObstacles();
 	void DrawTrajectories();
 	void DrawTimeseries();
@@ -99,7 +100,7 @@ public:
     std::vector<QColor> sampleColors;
     QStringList dimNames;
     std::map<int,QString> classNames;
-    QString GetClassName(int classNumber);
+	QString GetClassString(int classNumber);
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -162,6 +163,7 @@ public:
 	QPixmap GetScreenshot();
 
 public slots:
+    void Clear();
 	void ResizeEvent();
 	void SetConfidenceMap(QImage image);
 	void SetModelImage(QImage image);
@@ -225,17 +227,19 @@ public:
 
 		QColor color = SampleColor[label%SampleColorCnt];
 		QColor edge = Qt::black;
-        //if(label == 1)
-        //{
-        //	color = Qt::black;
-        //	edge = Qt::white;
-        //}
+        if(label == -1)
+        {
+            color = Qt::black;
+            edge = Qt::white;
+        }
 		//		radius = 10;
         if(painter.brush().color() != color) painter.setBrush(color);
         if(painter.pen().color() != edge) painter.setPen(edge);
 		painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
 
 	}
+
+    static QRgb GetColorMapValue(float value, int colorscheme);
 };
 
 #endif // _CANVAS_H_

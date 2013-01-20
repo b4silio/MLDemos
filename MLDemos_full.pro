@@ -15,8 +15,8 @@ MLDemos.depends = Core
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-#SUBDIRS += Reinforcements
-SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME Lowess DBSCAN CCA ASVM
+#SUBDIRS += GMM Kernel SEDS LWPR KNN Maximizers OpenCV GHSOM
+SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME DBSCAN Lowess CCA ASVM GHSOM
 #SUBDIRS += Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
@@ -36,6 +36,7 @@ FLAME.file = $$ALGOPATH/FLAME/pluginFlame.pro
 DBSCAN.file = $$ALGOPATH/DBSCAN/pluginDBSCAN.pro
 HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 CCA.file = $$ALGOPATH/CCA/pluginCCA.pro
+GHSOM.file = $$ALGOPATH/GHSOM/pluginGHSOM.pro
 # still too experimental
 MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
 QTMeans.file = $$ALGOPATH/QTMeans/pluginQTMeans.pro
@@ -44,7 +45,7 @@ Example.file = $$ALGOPATH/Example/pluginExample.pro
 
 # input plugins
 INPUTPATH = _IOPlugins
-SUBDIRS += PCAFaces
+#SUBDIRS += PCAFaces
 #SUBDIRS += ImportTimeseries
 PCAFaces.file = $$INPUTPATH/PCAFaces/pluginPCAFaces.pro
 RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro

@@ -30,6 +30,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "projector.h"
 #include "canvas.h"
 #include "drawTimer.h"
+#include "glwidget.h"
 #include <QtPlugin>
 #include <QWidget>
 #include <QSettings>
@@ -38,6 +39,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QUrl>
 #include <QTextStream>
 
+// Parameter Types: List, Integer, Real
+// Parameter Values:
+// List : list of the possible elements
+// Integer : integer range with 2 values (start - stop)
+// Real : real number range (start - stop)
+
 class ClassifierInterface
 {
 public:
@@ -45,6 +52,7 @@ public:
 	virtual Classifier *GetClassifier() = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier) = 0;
     virtual ~ClassifierInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -53,12 +61,17 @@ public:
 	virtual QString GetInfoFile() = 0;
 	virtual QWidget *GetParameterWidget() = 0;
 	virtual void SetParams(Classifier *classifier) = 0;
-	virtual void SaveOptions(QSettings &settings) = 0;
+    virtual void SaveOptions(QSettings &settings) = 0;
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(Classifier *classifier, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 
-	// drawing function
+    // drawing function
 	void Draw(Canvas *canvas, Classifier *classifier)
 	{
 		if(!classifier || !canvas) return;
@@ -97,6 +110,7 @@ public:
 	virtual Clusterer *GetClusterer() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer) = 0;
     virtual ~ClustererInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -109,6 +123,11 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(Clusterer *clusterer, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 
 	void Draw(Canvas *canvas, Clusterer *clusterer)
 	{
@@ -148,7 +167,8 @@ public:
 	virtual Regressor *GetRegressor() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor) = 0;
-	virtual void DrawConfidence(Canvas *canvas, Regressor *regressor) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Regressor *regressor) = 0;
+    virtual void DrawConfidence(Canvas *canvas, Regressor *regressor) = 0;
     virtual ~RegressorInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -161,6 +181,11 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(Regressor* regressor, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 
 	void Draw(Canvas *canvas, Regressor *regressor)
 	{
@@ -168,7 +193,6 @@ public:
 		canvas->liveTrajectory.clear();
 		int w = canvas->width();
 		int h = canvas->height();
-
 		{
 			canvas->maps.confidence = QPixmap(w,h);
 			canvas->maps.model = QPixmap(w,h);
@@ -190,11 +214,9 @@ public:
             if(!canvas->canvasType) DrawInfo(canvas, painter, regressor);
 			canvas->maps.info = infoPixmap;
 		}
-
 		DrawConfidence(canvas, regressor);
 		canvas->repaint();
 	}
-
 };
 
 class DynamicalInterface
@@ -204,6 +226,7 @@ public:
 	virtual Dynamical *GetDynamical() = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
 	virtual void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical) = 0;
     virtual ~DynamicalInterface(){}
 
 	// virtual functions to manage the GUI and I/O
@@ -217,8 +240,11 @@ public:
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
 	virtual bool UsesDrawTimer() = 0;
-    virtual void SaveModel(QString filename, Dynamical *dynamical){}
-    virtual bool LoadModel(QString filename, Dynamical *dynamical){return true;}
+    virtual void SetParams(Dynamical *dynamical, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 
 	void Draw(Canvas *canvas, Dynamical *dynamical)
 	{
@@ -269,6 +295,11 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(ObstacleAvoidance *avoid, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 };
 
 class MaximizeInterface
@@ -288,6 +319,11 @@ public:
 	virtual bool LoadOptions(QSettings &settings) = 0;
 	virtual void SaveParams(QTextStream &stream) = 0;
 	virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(Maximizer *maximizer, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 };
 
 class ReinforcementInterface
@@ -297,6 +333,7 @@ public:
     virtual Reinforcement *GetReinforcement() = 0;
     virtual void DrawInfo(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement) = 0;
     virtual void DrawModel(Canvas *canvas, QPainter &painter, Reinforcement *reinforcement) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Reinforcement *reinforcement) = 0;
     virtual ~ReinforcementInterface(){}
 
     // virtual functions to manage the GUI and I/O
@@ -309,6 +346,13 @@ public:
     virtual bool LoadOptions(QSettings &settings) = 0;
     virtual void SaveParams(QTextStream &stream) = 0;
     virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(Reinforcement *reinforcement, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
+
+
     // drawing function
     void Draw(Canvas *canvas, Reinforcement *reinforcement)
     {
@@ -348,6 +392,7 @@ public:
     virtual Projector *GetProjector() = 0;
     virtual void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
     virtual void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector) = 0;
+    virtual void DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector) = 0;
     virtual ~ProjectorInterface(){}
 
     // virtual functions to manage the GUI and I/O
@@ -360,6 +405,11 @@ public:
     virtual bool LoadOptions(QSettings &settings) = 0;
     virtual void SaveParams(QTextStream &stream) = 0;
     virtual bool LoadParams(QString name, float value) = 0;
+    virtual void SetParams(Projector *projector, fvec parameters) = 0;
+    virtual fvec GetParams() = 0;
+    virtual void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues) = 0;
 
     void Draw(Canvas *canvas, Projector *projector)
     {

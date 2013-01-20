@@ -21,6 +21,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
+#include <MathLib/MathLib.h>
+#include <glUtils.h>
 
 using namespace std;
 
@@ -33,11 +35,51 @@ RegrGMM::RegrGMM()
 void RegrGMM::SetParams(Regressor *regressor)
 {
 	if(!regressor) return;
-	int clusters = params->gmmCount->value();
-	int covType = params->gmmCovarianceCombo->currentIndex();
-	int initType = params->gmmInitCombo->currentIndex();
+    SetParams(regressor, GetParams());
+}
 
-	((RegressorGMR *)regressor)->SetParams(clusters, covType, initType);
+fvec RegrGMM::GetParams()
+{
+    fvec par(3);
+    par[0] = params->gmmCount->value();
+    par[1] = params->gmmCovarianceCombo->currentIndex();
+    par[2] = params->gmmInitCombo->currentIndex();
+    return par;
+}
+
+void RegrGMM::SetParams(Regressor *regressor, fvec parameters)
+{
+    if(!regressor) return;
+    int clusters = parameters.size() > 0 ? parameters[0] : 1;
+    int covType = parameters.size() > 1 ? parameters[1] : 0;
+    int initType = parameters.size() > 2 ? parameters[2] : 0;
+    ((RegressorGMR *)regressor)->SetParams(clusters, covType, initType);
+}
+
+void RegrGMM::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.clear();
+    parameterTypes.clear();
+    parameterValues.clear();
+    parameterNames.push_back("Components Count");
+    parameterNames.push_back("Covariance Type");
+    parameterNames.push_back("Initialization Type");
+    parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("List");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Full");
+    parameterValues.back().push_back("Diagonal");
+    parameterValues.back().push_back("Spherical");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Random");
+    parameterValues.back().push_back("Uniform");
+    parameterValues.back().push_back("K-Means");
 }
 
 QString RegrGMM::GetAlgoString()
@@ -105,7 +147,7 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	{
 		float* bigSigma = new float[dim*dim];
 		float* bigMean = new float[dim];
-		gmm->getCovariance(i, bigSigma, false);
+        gmm->getCovariance(i, bigSigma);
 		sigma[0] = bigSigma[xIndex*dim + xIndex];
 		sigma[1] = bigSigma[yIndex*dim + xIndex];
 		sigma[2] = bigSigma[yIndex*dim + yIndex];
@@ -124,13 +166,6 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		painter.drawEllipse(point, 2, 2);
 		painter.setPen(QPen(Qt::white, 2));
 		painter.drawEllipse(point, 2, 2);
-		/*
-		QColor color = CVColor[(i+1)%CVColorCnt];
-		painter.setPen(QPen(Qt::black, 12));
-		painter.drawEllipse(point, 8, 8);
-		painter.setPen(QPen(color,4));
-		painter.drawEllipse(point, 8, 8);
-		*/
 	}
 }
 
@@ -226,6 +261,124 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
     painter.setPen(QPen(Qt::black, 0.25));
     painter.drawPath(pathUpUp);
     painter.drawPath(pathDownDown);
+}
+
+void RegrGMM::DrawGL(Canvas *canvas, GLWidget *glw, Regressor *regressor)
+{
+    if(!canvas || !glw || !regressor) return;
+    int dim = canvas->data->GetDimCount();
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int zIndex = canvas->zIndex;
+    if(canvas->zIndex >= dim) zIndex = -1;
+
+    if(!dynamic_cast<RegressorGMR*>(regressor)) return;
+    Gmm* gmr = dynamic_cast<RegressorGMR*>(regressor)->gmm;
+
+    fvec mean(3);
+    float eigVal[3], rot[4*4];
+    float* bigSigma = new float[dim*dim];
+    float* bigMean = new float[dim];
+    int outputDim = ((RegressorGMR*)regressor)->outputDim;
+
+    FOR(i, gmr->nstates)
+    {
+        gmr->getCovariance(i, bigSigma, false);
+        gmr->getMean(i, bigMean);
+        float prior = gmr->getPrior(i);
+
+        // Very Important! We need to swap the dimensions to get the proper output dim!
+        if(outputDim >= 0 && outputDim < dim-1)
+        {
+            float val = bigMean[dim-1];
+            bigMean[dim-1] = bigMean[outputDim];
+            bigMean[outputDim] = val;
+
+            FOR(y, dim-1)
+            {
+                FOR(x,y)
+                {
+                    if(y == outputDim)
+                    {
+                        float val = bigSigma[(dim-1)*dim + x];
+                        bigSigma[(dim-1)*dim + x] = bigSigma[y*dim + x];
+                        bigSigma[y*dim + x] = val;
+                        bigSigma[x*dim + y] = val;
+                        bigSigma[x*dim + (dim-1)] = bigSigma[(dim-1)*dim + x];
+                    }
+                    else if(x == outputDim)
+                    {
+                        float val = bigSigma[(dim-1)*dim + y];
+                        bigSigma[(dim-1)*dim + y] = bigSigma[y*dim + x];
+                        bigSigma[y*dim + x] = val;
+                        bigSigma[x*dim + y] = val;
+                        bigSigma[y*dim + (dim-1)] = bigSigma[(dim-1)*dim + y];
+                    }
+                }
+            }
+            val = bigSigma[outputDim*dim + outputDim];
+            bigSigma[outputDim*dim + outputDim] = bigSigma[(dim-1)*dim + (dim-1)];
+            bigSigma[(dim-1)*dim + (dim-1)] = val;
+        }
+
+        mean[0] = bigMean[xIndex];
+        mean[1] = bigMean[yIndex];
+        mean[2] = zIndex >= 0 ? bigMean[zIndex] : 0;
+
+        MathLib::Matrix m(dim, dim);
+        FOR(d1, dim)
+        {
+            FOR(d2, dim)
+            {
+                m(d1,d2) = bigSigma[d1*dim + d2];
+            }
+        }
+        MathLib::Vector eigenValues(dim);
+        MathLib::Matrix eigenVectors(dim, dim);
+        m.EigenValuesDecomposition(eigenValues, eigenVectors);
+
+        // we get the scaling parameters
+        eigVal[0] =  sqrtf(eigenValues(xIndex));
+        eigVal[1] =  sqrtf(eigenValues(yIndex));
+        eigVal[2] =  zIndex >= 0 ? sqrtf(eigenValues(zIndex)) : 0.001;
+
+        // we get the angles
+        float norm;
+        float x1,y1,z1;
+        x1 = eigenVectors(xIndex,xIndex);
+        y1 = eigenVectors(xIndex,yIndex);
+        z1 = zIndex >= 0 ? eigenVectors(xIndex,zIndex) : 0;
+        norm = sqrtf(x1*x1 + y1*y1 + z1*z1);
+        x1 /= norm; y1 /= norm; z1 /= norm;
+
+        float x2,y2,z2;
+        x2 = eigenVectors(yIndex,xIndex);
+        y2 = eigenVectors(yIndex,yIndex);
+        z2 = zIndex >= 0 ? eigenVectors(yIndex,zIndex) : 0;
+        norm = sqrtf(x2*x2 + y2*y2 + z2*z2);
+        x2 /= norm; y2 /= norm; z2 /= norm;
+
+        float x3,y3,z3;
+        x3 = zIndex >= 0 ? eigenVectors(zIndex,xIndex) : 0;
+        y3 = zIndex >= 0 ? eigenVectors(zIndex,yIndex) : 0;
+        z3 = zIndex >= 0 ? eigenVectors(zIndex,zIndex) : 1;
+        norm = sqrtf(x3*x3 + y3*y3 + z3*z3);
+        x3 /= norm; y3 /= norm; z3 /= norm;
+
+        float eigVec[9];
+        eigVec[0] = x1; eigVec[1] = x2; eigVec[2] = x3;
+        eigVec[3] = y1; eigVec[4] = y2; eigVec[5] = y3;
+        eigVec[6] = z1; eigVec[7] = z2; eigVec[8] = z3;
+
+        GLuint list= DrawGaussian(&mean[0], eigVal, eigVec, prior, false, 0.8f, 0.8f, 0.8f);
+        glw->drawSampleLists.push_back(list);
+        glw->drawSampleListCenters[list] = mean;
+        list= DrawGaussian(&mean[0], eigVal, eigVec);
+        glw->drawSampleLists.push_back(list);
+    }
+
+    delete [] bigSigma;
+    delete [] bigMean;
 }
 
 void RegrGMM::SaveOptions(QSettings &settings)

@@ -87,6 +87,11 @@
          </item>
          <item>
           <property name="text">
+           <string>3D View</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>Scatterplots</string>
           </property>
          </item>
@@ -214,7 +219,7 @@
              </font>
             </property>
             <property name="text">
-             <string>size</string>
+             <string>z</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -232,7 +237,7 @@
              <number>0</number>
             </property>
             <property name="value">
-             <number>0</number>
+             <number>3</number>
             </property>
            </widget>
           </item>

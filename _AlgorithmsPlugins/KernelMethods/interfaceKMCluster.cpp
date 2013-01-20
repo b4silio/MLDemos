@@ -127,6 +127,111 @@ void ClustKM::SetParams(Clusterer *clusterer)
     }
 }
 
+
+fvec ClustKM::GetParams()
+{
+    fvec par(5);
+    int method = params->kmeansMethodCombo->currentIndex();
+    if(method == 2)
+    {
+        par[0] = params->kmeansClusterSpin->value();
+        par[1] = params->kernelTypeCombo->currentIndex();
+        par[2] = params->kernelWidthSpin->value();
+        par[3] = params->kernelDegSpin->value();
+        par[4] = params->kernelWidthSpin->value();
+    }
+    else
+    {
+        par.resize(4);
+        par[0] = params->kmeansClusterSpin->value();
+        par[1] = params->kmeansNormSpin->value();
+        par[2] = params->kmeansBetaSpin->value();
+        par[3] = params->KMeansPlusPlusCheckBox->isChecked();
+    }
+    return par;
+}
+
+void ClustKM::SetParams(Clusterer *clusterer, fvec parameters)
+{
+    if(!clusterer) return;
+    int method = params->kmeansMethodCombo->currentIndex();
+    if(method == 2)
+    {
+        int clusters = parameters.size() > 0 ? parameters[0] : 1;
+        int kernelType = parameters.size() > 1 ? parameters[1] : 0;
+        float kernelWidth = parameters.size() > 2 ? parameters[2] : 0.1;
+        int kernelDegree = parameters.size() > 3 ? parameters[3] : 1;
+        int kernelOffset = parameters.size() > 4 ? parameters[4] : 0;
+        ClustererKKM *clust = dynamic_cast<ClustererKKM*>(clusterer);
+        if(!clust) return;
+        clust->SetParams(clusters, kernelType, kernelWidth, kernelDegree, kernelOffset);
+    }
+    else
+    {
+        int clusters = parameters.size() > 0 ? parameters[0] : 1;
+        int power = parameters.size() > 1 ? parameters[1] : 0.1;
+        float beta = parameters.size() > 3 ? parameters[3] : 0;
+        bool kmeansPlusPlus = parameters.size() > 4 ? parameters[4] : 0;
+        ClustererKM *clust = dynamic_cast<ClustererKM*>(clusterer);
+        if(!clust) return;
+        clust->SetParams(clusters, method, beta, power, kmeansPlusPlus);
+    }
+}
+
+void ClustKM::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    int method = params->kmeansMethodCombo->currentIndex();
+    parameterNames.push_back("Components Count");
+    parameterTypes.push_back("Integer");
+    if(method==2)
+    {
+        parameterNames.push_back("Kernel Type");
+        parameterNames.push_back("Kernel Width");
+        parameterNames.push_back("Kernel Degree");
+        parameterNames.push_back("Kernel Offset");
+        parameterTypes.push_back("List");
+        parameterTypes.push_back("Real");
+        parameterTypes.push_back("Integer");
+        parameterTypes.push_back("Real");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("0.000001f");
+        parameterValues.back().push_back("99999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("Linear");
+        parameterValues.back().push_back("Poly");
+        parameterValues.back().push_back("RBF");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("1");
+        parameterValues.back().push_back("150");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("-99999");
+        parameterValues.back().push_back("99999");
+    }
+    else
+    {
+        parameterNames.push_back("Metric Power");
+        parameterNames.push_back("beta");
+        parameterNames.push_back("KMeans PlusPlus");
+        parameterTypes.push_back("List");
+        parameterTypes.push_back("Real");
+        parameterTypes.push_back("List");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("Manhattan");
+        parameterValues.back().push_back("Euclidean");
+        parameterValues.back().push_back("Lp");
+        parameterValues.back().push_back("Infinite");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("0.000001f");
+        parameterValues.back().push_back("999999");
+        parameterValues.push_back(vector<QString>());
+        parameterValues.back().push_back("False");
+        parameterValues.back().push_back("True");
+    }
+}
+
+
 Clusterer *ClustKM::GetClusterer()
 {
     Clusterer *clusterer;

@@ -185,9 +185,24 @@ QString ClassMVM::GetAlgoString()
 void ClassMVM::SetParams(Classifier *classifier)
 {
     if(!classifier) return;
-    int kernelType = params->kernelTypeCombo->currentIndex();
-    float kernelGamma = params->kernelWidthSpin->value();
-    float kernelDegree = params->kernelDegSpin->value();
+    SetParams(classifier, GetParams());
+}
+
+fvec ClassMVM::GetParams()
+{
+    fvec par(3);
+    par[0] = params->kernelTypeCombo->currentIndex();
+    par[1] = params->kernelWidthSpin->value();
+    par[2] = params->kernelDegSpin->value();
+    return par;
+}
+
+void ClassMVM::SetParams(Classifier *classifier, fvec parameters)
+{
+    if(!classifier) return;
+    int kernelType = parameters.size() > 0 ? parameters[0] : 1;
+    int kernelGamma = parameters.size() > 1 ? parameters[1] : 0;
+    int kernelDegree = parameters.size() > 2 ? parameters[2] : 0;
 
     ClassifierMVM *mvm = dynamic_cast<ClassifierMVM *>(classifier);
     if(!mvm) return;
@@ -212,6 +227,29 @@ void ClassMVM::SetParams(Classifier *classifier)
     mvm->manualSamples = samples;
     mvm->manualLabels = labels;
 }
+
+void ClassMVM::GetParameterList(std::vector<QString> &parameterNames,
+                             std::vector<QString> &parameterTypes,
+                             std::vector< std::vector<QString> > &parameterValues)
+{
+    parameterNames.push_back("Kernel Type");
+    parameterNames.push_back("Kernel Width");
+    parameterNames.push_back("Kernel Degree");
+    parameterTypes.push_back("List");
+    parameterTypes.push_back("Real");
+    parameterTypes.push_back("Integer");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("Linear");
+    parameterValues.back().push_back("Poly");
+    parameterValues.back().push_back("RBF");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("0.000001f");
+    parameterValues.back().push_back("999999");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("1");
+    parameterValues.back().push_back("150");
+}
+
 
 Classifier *ClassMVM::GetClassifier()
 {

@@ -9,6 +9,7 @@
 #include "empirical_kernel_map.h"
 #include "linearly_independent_subset_finder.h"
 #include "../statistics.h"
+#include "rr_trainer.h"
 #include "krr_trainer_abstract.h"
 #include <vector>
 #include <iostream>
@@ -31,43 +32,41 @@ namespace dlib
         krr_trainer (
         ) :
             verbose(false),
-            use_regression_loss(true),
-            lambda(0),
             max_basis_size(400),
             ekm_stale(true)
         {
-            // default lambda search list
-            lams = logspace(-9, 2, 50); 
         }
 
         void be_verbose (
         )
         {
             verbose = true;
+            trainer.be_verbose();
         }
 
         void be_quiet (
         )
         {
             verbose = false;
+            trainer.be_quiet();
         }
 
         void use_regression_loss_for_loo_cv (
         )
         {
-            use_regression_loss = true;
+            trainer.use_regression_loss_for_loo_cv();
         }
 
         void use_classification_loss_for_loo_cv (
         )
         {
-            use_regression_loss = false;
+            trainer.use_classification_loss_for_loo_cv();
         }
 
         bool will_use_regression_loss_for_loo_cv (
         ) const
         {
-            return use_regression_loss;
+            return trainer.will_use_regression_loss_for_loo_cv();
         }
 
         const kernel_type get_kernel (
@@ -144,17 +143,17 @@ namespace dlib
             DLIB_ASSERT(lambda_ >= 0,
                 "\t void krr_trainer::set_lambda()"
                 << "\n\t lambda must be greater than or equal to 0"
-                << "\n\t lambda: " << lambda 
+                << "\n\t lambda_: " << lambda_
                 << "\n\t this:   " << this
                 );
 
-            lambda = lambda_;
+            trainer.set_lambda(lambda_);
         }
 
         const scalar_type get_lambda (
         ) const
         {
-            return lambda;
+            return trainer.get_lambda();
         }
 
         template <typename EXP>
@@ -172,14 +171,13 @@ namespace dlib
                 << "\n\t this:   " << this
                 );
 
-
-            lams = matrix_cast<scalar_type>(lambdas);
+            trainer.set_search_lambdas(lambdas);
         }
 
         const matrix<scalar_type,0,0,mem_manager_type>& get_search_lambdas (
         ) const
         {
-            return lams;
+            return trainer.get_search_lambdas();
         }
 
         template <
@@ -191,7 +189,8 @@ namespace dlib
             const in_scalar_vector_type& y
         ) const
         {
-            scalar_type temp, temp2;
+            std::vector<scalar_type> temp;
+            scalar_type temp2;
             return do_train(vector_to_matrix(x), vector_to_matrix(y), false, temp, temp2);
         }
 
@@ -202,11 +201,11 @@ namespace dlib
         const decision_function<kernel_type> train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& y,
-            scalar_type& looe
+            std::vector<scalar_type>& loo_values
         ) const
         {
             scalar_type temp;
-            return do_train(vector_to_matrix(x), vector_to_matrix(y), true, looe, temp);
+            return do_train(vector_to_matrix(x), vector_to_matrix(y), true, loo_values, temp);
         }
 
         template <
@@ -216,11 +215,11 @@ namespace dlib
         const decision_function<kernel_type> train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& y,
-            scalar_type& looe,
+            std::vector<scalar_type>& loo_values,
             scalar_type& lambda_used 
         ) const
         {
-            return do_train(vector_to_matrix(x), vector_to_matrix(y), true, looe, lambda_used);
+            return do_train(vector_to_matrix(x), vector_to_matrix(y), true, loo_values, lambda_used);
         }
 
 
@@ -233,13 +232,13 @@ namespace dlib
         const decision_function<kernel_type> do_train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& y,
-            bool output_looe,
-            scalar_type& best_looe,
+            const bool output_loo_values,
+            std::vector<scalar_type>& loo_values,
             scalar_type& the_lambda
         ) const
         {
             // make sure requires clause is not broken
-            DLIB_ASSERT(is_vector(x) && is_vector(y) && x.size() == y.size() && x.size() > 0,
+            DLIB_ASSERT(is_learning_problem(x,y),
                 "\t decision_function krr_trainer::train(x,y)"
                 << "\n\t invalid inputs were given to this function"
                 << "\n\t is_vector(x): " << is_vector(x)
@@ -295,11 +294,11 @@ namespace dlib
                 // a convenient way of dealing with the bias term later on.
                 if (verbose == false)
                 {
-                    proj_x(i) = join_cols(ekm.project(x(i)), ones_matrix<scalar_type>(1,1));
+                    proj_x(i) = ekm.project(x(i));
                 }
                 else
                 {
-                    proj_x(i) = join_cols(ekm.project(x(i),err), ones_matrix<scalar_type>(1,1));
+                    proj_x(i) = ekm.project(x(i),err);
                     rs.add(err);
                 }
             }
@@ -310,173 +309,18 @@ namespace dlib
                 std::cout << "Standard deviation of EKM projection error: " << rs.stddev() << std::endl;
             }
 
-            /*
-                Notes on the solution of KRR
 
-                Let A = an proj_x.size() by ekm.out_vector_size() matrix which contains
-                all the projected data samples.
+            decision_function<linear_kernel<matrix<scalar_type,0,0,mem_manager_type> > > lin_df;
 
-                Let I = an identity matrix
+            if (output_loo_values)
+                lin_df = trainer.train(proj_x,y, loo_values, the_lambda);
+            else
+                lin_df = trainer.train(proj_x,y);
 
-                Let C = trans(A)*A
-                Let L = trans(A)*y
-
-                Then the optimal w is given by:
-                    w = inv(C + lambda*I) * L 
-
-
-                There is a trick to compute leave one out cross validation results for many different
-                lambda values quickly.  The following paper has a detailed discussion of various
-                approaches:
-
-                    Notes on Regularized Least Squares by Ryan M. Rifkin and Ross A. Lippert.
-
-                    In the implementation of the krr_trainer I'm only using two simple equations
-                    from the above paper.
-
-
-                    First note that inv(C + lambda*I) can be computed for many different lambda
-                    values in an efficient way by using an eigen decomposition of C.  So we use
-                    the fact that:
-                        inv(C + lambda*I) == V*inv(D + lambda*I)*trans(V)
-                        where V*D*trans(V) == C 
-
-                    Also, via some simple linear algebra the above paper works out that the leave one out 
-                    value for a sample x(i) is equal to the following (we refer to proj_x(i) as x(i) for brevity):
-                        Let G = inv(C + lambda*I)
-                        let val = trans(x(i))*G*x(i);
-
-                        leave one out value for sample x(i):
-                        LOOV = (trans(w)*x(i) - y(i)*val) / (1 - val)
-
-                        leave one out error for sample x(i):
-                        LOOE = loss(y(i), LOOV)
-            */
-
-            general_matrix_type C, tempm, G;
-            column_matrix_type  L, tempv, w;
-
-            // compute C and L
-            for (long i = 0; i < proj_x.size(); ++i)
-            {
-                C += proj_x(i)*trans(proj_x(i));
-                L += y(i)*proj_x(i);
-            }
-
-            eigenvalue_decomposition<general_matrix_type> eig(C);
-            const general_matrix_type V = eig.get_pseudo_v();
-            const column_matrix_type  D = eig.get_real_eigenvalues();
-
-            // We can save some work by pre-multiplying the proj_x vectors by trans(V)
-            // and saving the result so we don't have to recompute it over and over later.
-            matrix<column_matrix_type,0,1,mem_manager_type > Vx;
-            if (lambda == 0 || output_looe)
-            {
-                // Save the transpose of V into a temporary because the subsequent matrix
-                // vector multiplies will be faster (because of better cache locality).
-                const general_matrix_type transV(trans(V));
-                Vx.set_size(proj_x.size());
-                for (long i = 0; i < proj_x.size(); ++i)
-                    Vx(i) = squared(transV*proj_x(i));
-            }
-
-            the_lambda = lambda;
-
-            // If we need to automatically select a lambda then do so using the LOOE trick described
-            // above.
-            if (lambda == 0)
-            {
-                best_looe = std::numeric_limits<scalar_type>::max();
-
-                // Compute leave one out errors for a bunch of different lambdas and pick the best one.
-                for (long idx = 0; idx < lams.size(); ++idx)
-                {
-                    // first compute G
-                    tempv = reciprocal(D + uniform_matrix<scalar_type>(D.nr(),D.nc(), lams(idx)));
-                    tempm = scale_columns(V,tempv);
-                    G = tempm*trans(V);
-
-                    // compute the solution w for the current lambda
-                    w = G*L;
-
-                    scalar_type looe = 0;
-                    for (long i = 0; i < proj_x.size(); ++i)
-                    {
-                        // perform equivalent of: val = trans(proj_x(i))*G*proj_x(i);
-                        const scalar_type val = dot(tempv, Vx(i));
-                        const scalar_type temp = (1 - val);
-                        scalar_type loov;
-                        if (temp != 0)
-                            loov = (trans(w)*proj_x(i) - y(i)*val) / temp;
-                        else
-                            loov = 0;
-
-                        looe += loss(loov, y(i));
-                    }
-
-                    if (looe < best_looe)
-                    {
-                        best_looe = looe;
-                        the_lambda = lams(idx);
-                    }
-                }
-
-                // mark that we saved the looe to best_looe already
-                output_looe = false;
-                best_looe /= proj_x.size();
-
-                if (verbose)
-                {
-                    using namespace std;
-                    cout << "Using lambda: " << the_lambda << endl;
-                    cout << "LOO Error:    " << best_looe << endl;
-                }
-            }
-
-
-
-            // Now perform the main training.  That is, find w.
-            // first, compute G = inv(C + the_lambda*I)
-            tempv = reciprocal(D + uniform_matrix<scalar_type>(D.nr(),D.nc(), the_lambda));
-            tempm = scale_columns(V,tempv);
-            G = tempm*trans(V);
-            w = G*L;
-           
-
-            // If we haven't done this already and we are supposed to then compute the LOO error rate for 
-            // the current lambda and store the result in best_looe.
-            if (output_looe)
-            {
-                best_looe = 0;
-                for (long i = 0; i < proj_x.size(); ++i)
-                {
-                    // perform equivalent of: val = trans(proj_x(i))*G*proj_x(i);
-                    const scalar_type val = dot(tempv, Vx(i));
-                    const scalar_type temp = (1 - val);
-                    scalar_type loov;
-                    if (temp != 0)
-                        loov = (trans(w)*proj_x(i) - y(i)*val) / temp;
-                    else
-                        loov = 0;
-
-                    best_looe += loss(loov, y(i));
-                }
-
-                best_looe /= proj_x.size();
-
-                if (verbose)
-                {
-                    using namespace std;
-                    cout << "Using lambda: " << the_lambda << endl;
-                    cout << "LOO Error:    " << best_looe << endl;
-                }
-            }
-
-
-            // convert w into a proper decision function
+            // convert the linear decision function into a kernelized one.
             decision_function<kernel_type> df;
-            df = ekm.convert_to_decision_function(colm(w,0,w.size()-1));
-            df.b = -w(w.size()-1); // don't forget about the bias we stuck onto all the vectors
+            df = ekm.convert_to_decision_function(lin_df.basis_vectors(0));
+            df.b = lin_df.b; 
 
             // If we used an automatically derived basis then there isn't any point in
             // keeping the ekm around.  So free its memory.
@@ -488,25 +332,6 @@ namespace dlib
             return df;
         }
 
-        inline scalar_type loss (
-            const scalar_type& a,
-            const scalar_type& b
-        ) const
-        {
-            if (use_regression_loss)
-            {
-                return (a-b)*(a-b);
-            }
-            else
-            {
-                // if a and b have the same sign then no loss
-                if (a*b >= 0)
-                    return 0;
-                else
-                    return 1;
-            }
-        }
-
 
         /*!
             CONVENTION
@@ -514,19 +339,19 @@ namespace dlib
                     - kern or basis have changed since the last time
                       they were loaded into the ekm
 
-                - get_lambda() == lambda
+                - get_lambda() == trainer.get_lambda()
                 - get_kernel() == kern
                 - get_max_basis_size() == max_basis_size
-                - will_use_regression_loss_for_loo_cv() == use_regression_loss
-                - get_search_lambdas() == lams
+                - will_use_regression_loss_for_loo_cv() == trainer.will_use_regression_loss_for_loo_cv() 
+                - get_search_lambdas() == trainer.get_search_lambdas() 
 
                 - basis_loaded() == (basis.size() != 0)
         !*/
 
-        bool verbose;
-        bool use_regression_loss;
+        rr_trainer<linear_kernel<matrix<scalar_type,0,0,mem_manager_type> > > trainer;
 
-        scalar_type lambda;
+        bool verbose;
+
 
         kernel_type kern;
         unsigned long max_basis_size;
@@ -535,7 +360,6 @@ namespace dlib
         mutable empirical_kernel_map<kernel_type> ekm;
         mutable bool ekm_stale; 
 
-        matrix<scalar_type,0,0,mem_manager_type> lams; 
     }; 
 
 }

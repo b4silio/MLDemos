@@ -28,6 +28,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "clusterer.h"
 #include "maximize.h"
 #include "reinforcement.h"
+#include "glwidget.h"
 #include <QMutex>
 #include <QMutexLocker>
 
@@ -53,6 +54,7 @@ public:
 	void Clear();
     bool TestFast(int start, int stop);
     bool Vectors(int count, int steps);
+    bool VectorsGL(int count, int steps);
     bool VectorsFast(int count, int steps);
 	void Maximization();
     void Reinforce();
@@ -68,7 +70,8 @@ public:
     ReinforcementProblem *reinforcementProblem;
 
 	QMutex *mutex, drawMutex;
-	bool bPaused;
+    GLWidget *glw;
+    bool bPaused;
 	bool bRunning;
 	bool bColorMap;
     int maximumVisitedCount;

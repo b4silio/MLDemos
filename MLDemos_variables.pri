@@ -6,6 +6,24 @@
 ##############################
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
+QT += core gui svg opengl
+
+DEPENDPATH += . \
+		.. \
+		$${MLPATH}/Core \
+		$${MLPATH}/_3rdParty
+INCLUDEPATH += . \
+		$${MLPATH}/Core \
+		$${MLPATH}/MLDemos \
+		$${MLPATH}/_3rdParty
+
+win32:LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
+CONFIG(coreLib){
+}else{
+	LIBS += -L$$MLPATH/Core -lCore
+}
+LIBS += -L$$MLPATH/_3rdParty -l3rdParty
+
 
 ########################################
 # Location of intermediate build files #
@@ -66,6 +84,12 @@ win32{
     CONFIG += MACX
 }else:unix{
     CONFIG += link_pkgconfig
+}
+
+win32{
+	#INCLUDEPATH += C:/DEV/glew-1.9.0/include
+	#LIBS += -LC:/DEV/glew-1.9.0/lib
+	#LIBS += -lglew32 -lglu32 -lopengl32 -lglut32win
 }
 
 # OPENCV
@@ -139,9 +163,6 @@ CONFIG(boost){
     }
 }
 
-# QT
-QT = core gui svg opengl
-
 ###############
 # Misc. stuff #
 ###############
@@ -159,9 +180,9 @@ CONFIG(debug, debug|release){
 #	QMAKE_LFLAGS += -pg
 }else{
 	message("release mode")
-	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-        macx-g++:QMAKE_CXXFLAGS += -O2
-        win32-g++:QMAKE_CXXFLAGS += -O2
+#	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
+#        macx-g++:QMAKE_CXXFLAGS += -O2
+#        win32-g++:QMAKE_CXXFLAGS += -O2
 }
 
 win32{
@@ -188,20 +209,6 @@ win32{
 #QMAKE_LFLAGS += -pg
 #QMAKE_LFLAGS_DEBUG += -pg
 
-DEPENDPATH += . \
-		.. \
-		$${MLPATH}/Core \
-		$${MLPATH}/_3rdParty
-INCLUDEPATH += . \
-		$${MLPATH}/Core \
-		$${MLPATH}/MLDemos \
-		$${MLPATH}/_3rdParty
-
-CONFIG(coreLib){
-}else{
-	LIBS += -L$$MLPATH/Core -lCore
-}
-LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 
 ################################
 # Turn the bloody warnings off #

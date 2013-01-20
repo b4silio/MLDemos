@@ -58,6 +58,13 @@ public:
       */
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
+
+    /*!
+      The function called by the main program to draw the algorithm information on OpenGL
+      (e.g. the projection axes, cluster centers or class boundaries, if these are available)
+      */
+    void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier){}
+
     /*!
       Function that returns the name of the algorithm (will appear in the algorithm options panel tab)
       */
@@ -107,6 +114,13 @@ public:
       Loads the parameter from file (or from string for the compare dialog)
       */
     bool LoadParams(QString name, float value);
+
+    void SetParams(Classifier *classifier, fvec parameters);
+    fvec GetParams();
+    void GetParameterList(std::vector<QString> &parameterNames,
+                                 std::vector<QString> &parameterTypes,
+                                 std::vector< std::vector<QString> > &parameterValues);
+
 };
 
 #endif // _INTERFACEGPCLASSIFIER_H_
