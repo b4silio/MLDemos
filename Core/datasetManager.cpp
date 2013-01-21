@@ -716,12 +716,10 @@ std::pair<fvec, fvec> DatasetManager::GetBounds()
 
 u32 DatasetManager::GetClassCount(ivec classes)
 {
-	u32 counts[256];
-	memset(counts, 0, 256*sizeof(u32));
-	FOR(i, classes.size()) counts[classes[i]]++;
-	u32 result = 0;
-	for (u32 i=1; i<256; i++) result += counts[i] > 0 ? 1 : 0;
-	return result;
+    int cnt=0;
+    map<int,int> classMap;
+    FOR(i, classes.size()) if(!classMap.count(classes[i])) classMap[classes[i]] = cnt++;
+    return classMap.size();
 }
 
 bvec DatasetManager::GetFreeFlags()

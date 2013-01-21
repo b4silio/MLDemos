@@ -13,10 +13,6 @@
 #include <vector>
 #include <mymaths.h>
 
-#ifdef WIN32
-//#include <GL/glew.h>
-#endif
-
 #include <QVector>
 #include <QMatrix4x4>
 #include <QVector3D>

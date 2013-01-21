@@ -38,6 +38,7 @@ void DataGenerator::OptionsChanged()
     case 1: // concentric circles
         ui->gridCountLabel->setText("Circles");
         ui->radiusLabel->setText("Radius");
+        ui->dimSpin->setEnabled(true);
         break;
     case 2: // spirals
         ui->gridCountLabel->setText("Swirls");

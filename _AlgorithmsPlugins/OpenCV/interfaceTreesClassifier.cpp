@@ -155,48 +155,6 @@ Classifier *ClassTrees::GetClassifier()
 	return classifier;
 }
 
-void ClassTrees::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-	if(!classifier || !canvas) return;
-	painter.setRenderHint(QPainter::Antialiasing, true);
-
-	int posClass = 1;
-
-	float resMin = FLT_MAX;
-	float resMax = -FLT_MAX;
-    std::vector<fvec> samples = canvas->data->GetSamples();
-
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec sample = canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        fvec res = classifier->TestMulti(sample);
-        if(res.size() == 1)
-        {
-            float response = res[0];
-            if(response > 0)
-            {
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
-            }
-            else
-            {
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
-            }
-        }
-        else
-        {
-            int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-            int resp = classifier->inverseMap[max];
-            if(label == resp) Canvas::drawSample(painter, point, 9, label);
-            else Canvas::drawCross(painter, point, 6, resp);
-        }
-    }
-}
-
 void ClassTrees::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
     if(!classifier || !canvas) return;

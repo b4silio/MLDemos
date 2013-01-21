@@ -48,11 +48,6 @@ public:
     Classifier *GetClassifier();
 
     /*!
-      The function called by the main program to draw the learned model (e.g. the classified samples)
-      */
-    void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
-
-    /*!
       The function called by the main program to draw the model information
       (e.g. the projection axes, cluster centers or class boundaries, if these are available)
       */

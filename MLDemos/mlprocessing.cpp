@@ -49,7 +49,9 @@ void MLDemos::Classify()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -75,6 +77,7 @@ void MLDemos::Classify()
     if(trained)
     {
         classifiers[tab]->Draw(canvas, classifier);
+        DrawClassifiedSamples(canvas, classifier, classifierMulti);
         glw->clearLists();
         if(canvas->canvasType == 1)
         {
@@ -86,7 +89,6 @@ void MLDemos::Classify()
         qDebug() << "using draw timer" << classifier->UsesDrawTimer();
         if(drawTimer && classifier->UsesDrawTimer())
         {
-            drawTimer->classifier = &this->classifier;
             drawTimer->start(QThread::NormalPriority);
         }
         if(canvas->canvasType) CanvasOptionsChanged();
@@ -95,7 +97,7 @@ void MLDemos::Classify()
         canvas->sampleColors.resize(samples.size());
         FOR(i, samples.size())
         {
-            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i]);
+            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i], &classifierMulti);
         }
         if(canvas->canvasType)
         {
@@ -156,7 +158,9 @@ void MLDemos::Regression()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -267,7 +271,9 @@ void MLDemos::Dynamize()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -518,7 +524,9 @@ void MLDemos::Cluster()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -630,7 +638,9 @@ void MLDemos::ClusterTest()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -734,7 +744,9 @@ void MLDemos::ClusterOptimize()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1017,7 +1029,9 @@ void MLDemos::Maximize()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1123,7 +1137,9 @@ void MLDemos::Reinforce()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1221,7 +1237,9 @@ void MLDemos::Project()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1281,7 +1299,9 @@ void MLDemos::ProjectManifold()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1335,7 +1355,9 @@ void MLDemos::ProjectRevert()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1394,6 +1416,7 @@ void MLDemos::UpdateLearnedModel()
         else
         {
             classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            DrawClassifiedSamples(canvas, classifier, classifierMulti);
             if(classifier->UsesDrawTimer() && !drawTimer->isRunning())
             {
                 drawTimer->start(QThread::NormalPriority);
@@ -1591,4 +1614,59 @@ void MLDemos::UpdateLearnedModel()
         else projectors[tabUsedForTraining]->Draw(canvas, projector);
     }
     UpdateInfo();
+}
+
+void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti)
+{
+    if(!canvas || !classifier) return;
+    int w = canvas->width(), h = canvas->height();
+    canvas->maps.model = QPixmap(w,h);
+    QBitmap bitmap(w,h);
+    bitmap.clear();
+    canvas->maps.model.setMask(bitmap);
+    canvas->maps.model.fill(Qt::transparent);
+    QPainter painter(&canvas->maps.model);
+
+    // we draw the samples
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    FOR(i, canvas->data->GetCount())
+    {
+        fvec sample = canvas->data->GetSample(i);
+        int label = canvas->data->GetLabel(i);
+        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
+        fvec res;
+        if(classifier->IsMultiClass()) res = classifier->TestMulti(sample);
+        else if(classifierMulti.size())
+        {
+            FOR(c, classifierMulti.size())
+            {
+                res.push_back(classifierMulti[c]->Test(sample));
+            }
+        }
+        else res.push_back(classifier->Test(sample));
+        if(res.size()==1)
+        {
+            int posClass = 1;
+            float response = res[0];
+            if(response > 0)
+            {
+                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
+                else Canvas::drawCross(painter, point, 6, 2);
+            }
+            else
+            {
+                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
+                else Canvas::drawCross(painter, point, 6, 0);
+            }
+        }
+        else
+        {
+            int max = 0;
+            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+            int resp = classifier->inverseMap[max];
+            if(label == resp) Canvas::drawSample(painter, point, 9, label);
+            else Canvas::drawCross(painter, point, 6, label);
+        }
+    }
+
 }

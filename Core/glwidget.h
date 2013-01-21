@@ -78,6 +78,7 @@ protected:
 private:
     void normalizeAngle(int *angle);
     void RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program);
+    void RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects);
 
     QMatrix4x4 perspectiveMatrix;
     QMatrix4x4 modelViewMatrix;
@@ -116,6 +117,7 @@ public:
 
     QGLFramebufferObject *render_fbo;
     QGLFramebufferObject *texture_fbo;
+    QGLFramebufferObject *light_fbo;
 };
 
 #endif

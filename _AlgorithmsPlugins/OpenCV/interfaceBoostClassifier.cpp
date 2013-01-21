@@ -152,38 +152,6 @@ Classifier *ClassBoost::GetClassifier()
 	return classifier;
 }
 
-void ClassBoost::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-	if(!classifier || !canvas) return;
-	painter.setRenderHint(QPainter::Antialiasing, true);
-
-	int posClass = 1;
-	bool bUseMinMax = false;
-    bUseMinMax = true;
-
-	float resMin = FLT_MAX;
-	float resMax = -FLT_MAX;
-    std::vector<fvec> samples = canvas->data->GetSamples();
-
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec sample = canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        float response = classifier->Test(sample);
-        if(response > 0)
-        {
-            if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-            else Canvas::drawCross(painter, point, 6, 2);
-        }
-        else
-        {
-            if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-            else Canvas::drawCross(painter, point, 6, 0);
-        }
-    }
-}
-
 void ClassBoost::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
     if(!classifier || !canvas) return;

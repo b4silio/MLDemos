@@ -43,7 +43,8 @@ FORMS += aboutDialog.ui \
     manualSelection.ui \
     inputDimensions.ui \
     datagenerator.ui \
-    gridsearch.ui
+    gridsearch.ui \
+    visualization.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -70,7 +71,8 @@ HEADERS += basicMath.h \
     compare.h \
     spline.h \
     datagenerator.h \
-    gridsearch.h
+    gridsearch.h \
+    visualization.h
 
 SOURCES += \
 	main.cpp \
@@ -81,7 +83,8 @@ SOURCES += \
     compare.cpp \
     mltrain.cpp \
     datagenerator.cpp \
-    gridsearch.cpp
+    gridsearch.cpp \
+    visualization.cpp
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \
@@ -91,4 +94,8 @@ OTHER_FILES += \
     shaders/renderFBO.fsh \
     shaders/renderFBO.vsh \
     shaders/blurFBO.fsh \
-    shaders/blurFBO.vsh
+    shaders/blurFBO.vsh \
+    shaders/depthSamples.fsh \
+    shaders/depthSamples.vsh \
+    shaders/drawSamplesShadow.fsh \
+    shaders/drawSamplesShadow.vsh

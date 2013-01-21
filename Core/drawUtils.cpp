@@ -651,7 +651,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
 
     if(bMultiClass)
     {
-        int classCount = DatasetManager::GetClassCount(glw->canvas->data->GetLabels())+1;
+        int classCount = DatasetManager::GetClassCount(glw->canvas->data->GetLabels());
         FOR(c,classCount-1)
         {
             gridT valueGrid(0.f, steps, steps, steps);

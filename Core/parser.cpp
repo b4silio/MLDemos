@@ -367,10 +367,26 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
 
     if(labelMaps[outputLabelColumn].size() && outputLabelColumn != -1)
     {
-        for(map<string,int>::iterator it=labelMaps[outputLabelColumn].begin(); it!=labelMaps[outputLabelColumn].end(); it++)
+        bool bNumerical = true;
+        FORIT(labelMaps[outputLabelColumn], string, int)
         {
-            classNames[it->second] = QString(it->first.c_str());
+            bool ok;
+            QString(it->first.c_str()).toFloat(&ok);
+            if(!ok)
+            {
+                bNumerical = false;
+                break;
+            }
         }
+        if(!bNumerical)
+        {
+            FORIT(labelMaps[outputLabelColumn], string, int)
+            {
+                classNames[it->second] = QString(it->first.c_str());
+                //else classNames[it->second] = QString("Class %1").arg(QString(it->first.c_str()).toFloat());
+            }
+        }
+        else classNames.clear();
     }
     if(outputLabelColumn == -1)
     {

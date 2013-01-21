@@ -182,49 +182,6 @@ void ClassProjections::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *c
     if(projectionWindow && projectionWindow->isVisible()) ShowProjection();
 }
 
-void ClassProjections::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-    if(!classifier || !canvas) return;
-    if(!this->canvas) this->canvas = canvas;
-    if(canvas->canvasType) return;
-    painter.setRenderHint(QPainter::Antialiasing, true);
-
-    int posClass = 1;
-    bool bUseMinMax = true;
-    float resMin = FLT_MAX;
-    float resMax = -FLT_MAX;
-    if(bUseMinMax)
-    {
-        // TODO: get the min and max for all samples
-        std::vector<fvec> samples = canvas->data->GetSamples();
-        FOR(i, samples.size())
-        {
-            float val = classifier->Test(samples[i]);
-            if(val > resMax) resMax = val;
-            if(val < resMin) resMin = val;
-        }
-        if(resMin == resMax) resMin -= 3;
-    }
-
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec sample = canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        float response = classifier->Test(sample);
-        if(response > 0)
-        {
-            if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-            else Canvas::drawCross(painter, point, 6, 2);
-        }
-        else
-        {
-            if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-            else Canvas::drawCross(painter, point, 6, 0);
-        }
-    }
-}
-
 void ClassProjections::ShowProjection()
 {
     //if(projectionWindow && projectionWindow->isVisible())

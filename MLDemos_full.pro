@@ -15,7 +15,7 @@ MLDemos.depends = Core
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
-#SUBDIRS += GMM Kernel SEDS LWPR KNN Maximizers OpenCV GHSOM
+#SUBDIRS += GMM Kernel SEDS LWPR Maximizers GHSOM OpenCV
 SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME DBSCAN Lowess CCA ASVM GHSOM
 #SUBDIRS += Example
 
