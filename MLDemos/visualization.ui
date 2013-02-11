@@ -78,7 +78,7 @@
             </font>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>7</number>
            </property>
            <item>
             <property name="text">
@@ -112,12 +112,12 @@
            </item>
            <item>
             <property name="text">
-             <string>Distribution: Splatter Plot</string>
+             <string>Distribution: Correlations</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Distribution: Correlations</string>
+             <string>Distrubution: Density</string>
             </property>
            </item>
           </widget>

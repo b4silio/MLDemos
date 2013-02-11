@@ -25,6 +25,7 @@ private:
     void GenerateSplatterPlot();
     void GenerateIndividualPlot();
     void GenerateCorrelationPlot();
+    void GenerateDensityPlot();
     QPixmap GetGraphPixmap(int type, int inputType, int dim, int classCount, int index, int w, int h,
                            std::map<int,std::vector< std::pair<fvec,fvec> > > classGraphData,
                            std::vector< std::map<int,fvec> > dimClassData,
@@ -35,7 +36,7 @@ private:
                           fvec maxes, std::map<int,fvec> dimMaxes);
     fvec BoxPlot(fvec data);
     fvec Density(fvec data, float minv, float maxv, int bins=11);
-
+    fvec KernelDensity(fvec data, float sigma, float minv, float maxv, int bins=31);
 public:
     explicit Visualization(Canvas *canvas, QWidget *parent = 0);
     ~Visualization();

@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QBitmap>
 #include <QDebug>
+
 using namespace std;
 
 Visualization::Visualization(Canvas *canvas, QWidget *parent) :
@@ -72,6 +73,9 @@ void Visualization::OptionsChanged()
     ui->flavorCombo->hide();
     ui->zoomSlider->hide();
     ui->axesWidget->hide();
+    ui->x1Combo->setEnabled(true);
+    ui->x2Combo->setEnabled(true);
+    ui->x3Combo->setEnabled(true);
     ui->inputCombo->hide();
     switch(index)
     {
@@ -86,6 +90,9 @@ void Visualization::OptionsChanged()
         break;
     case 4: // samples: bubble plots
         ui->axesWidget->show();
+        ui->x1Combo->setEnabled(true);
+        ui->x2Combo->setEnabled(true);
+        ui->x3Combo->setEnabled(true);
         break;
     case 5: // distribution: Individual plots
     {
@@ -104,7 +111,20 @@ void Visualization::OptionsChanged()
         ui->flavorCombo->blockSignals(false);
     }
         break;
-    case 6: // distribution: splatter plots
+    case 6: // distribution: Correlation
+    {
+        ui->flavorCombo->blockSignals(true);
+        ui->flavorCombo->clear();
+        ui->flavorCombo->addItem("Scatterplot Circles");
+        ui->flavorCombo->addItem("Scatterplot Ellipses");
+        ui->flavorCombo->addItem("Scatterplot Graphs");
+        ui->flavorCombo->setCurrentIndex(0);
+        ui->flavorCombo->show();
+        ui->flavorCombo->blockSignals(false);
+    }
+        break;
+        /*
+    case 7: // distribution: splatter plots
         ui->axesWidget->show();
         ui->flavorCombo->blockSignals(true);
         ui->flavorCombo->clear();
@@ -115,18 +135,21 @@ void Visualization::OptionsChanged()
         ui->flavorCombo->show();
         ui->flavorCombo->blockSignals(false);
         break;
-    case 7: // distribution: Correlation
-    {
-        ui->axesWidget->hide();
+        */
+    case 7: // distribution: density
+        ui->inputCombo->show();
+        ui->axesWidget->show();
+        ui->x1Combo->setEnabled(true);
+        ui->x2Combo->setEnabled(false);
+        ui->x3Combo->setEnabled(false);
         ui->flavorCombo->blockSignals(true);
         ui->flavorCombo->clear();
-        ui->flavorCombo->addItem("Scatterplot Circles");
-        ui->flavorCombo->addItem("Scatterplot Ellipses");
-        ui->flavorCombo->addItem("Scatterplot Graphs");
+        ui->flavorCombo->addItem("Overlapping Kernel");
+        ui->flavorCombo->addItem("Cumulative Kernel");
+        ui->flavorCombo->addItem("StreamGraph");
         ui->flavorCombo->setCurrentIndex(0);
         ui->flavorCombo->show();
         ui->flavorCombo->blockSignals(false);
-    }
         break;
     }
     Update();
@@ -160,15 +183,21 @@ void Visualization::Update()
         break;
     case 5: // distribution: Individual plots
         ui->scrollAreaWidgetContents->layout()->addWidget(spacer);
-        //ui->scrollAreaWidgetContents->layout()->;
         ui->scrollAreaWidgetContents->adjustSize();
         GenerateIndividualPlot();
         break;
-    case 6: // distribution: splatter plots
+    case 6: // distribution: Correlation
+        ui->scrollAreaWidgetContents->layout()->addWidget(spacer);
+        ui->scrollAreaWidgetContents->adjustSize();
+        GenerateCorrelationPlot();
+        break;
+        /*
+    case 7: // distribution: splatter plots
         GenerateSplatterPlot();
         break;
-    case 7: // distribution: Correlation
-        GenerateCorrelationPlot();
+        */
+    case 7: // distribution: density
+        GenerateDensityPlot();
         break;
     }
     ui->display->repaint();
@@ -383,7 +412,7 @@ void Visualization::GenerateParallelCoords()
 
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QPixmap pixmap = QPixmap(ui->scrollArea->width(), ui->scrollArea->height());
+    QPixmap pixmap = QPixmap(ui->scrollArea->width()-2, ui->scrollArea->height()-2);
     pixmap.fill(Qt::white);
     QPainter painter(&pixmap);
     FOR(d, dim)
@@ -630,8 +659,16 @@ void Visualization::GenerateIndividualPlot()
             {
                 classGraphData[it->first].resize(dim);
             }
-            fvec box = BoxPlot(it->second);
-            fvec density = Density(it->second, box[4], box[0], (flavorType==3?15:31)); // 3: violin plot
+            fvec &data = it->second;
+            float mean=0, sigma=0;
+            FOR(i, data.size()) mean += data[i];
+            mean /= data.size();
+            FOR(i, data.size()) sigma += (data[i]-mean)*(data[i]-mean);
+            sigma /= data.size();
+            sigma = sqrt(sigma);
+            fvec box = BoxPlot(data);
+            fvec density = KernelDensity(data, sigma, box[4], box[0], 31);
+            //fvec density = Density(data, box[4], box[0], (flavorType==3?15:31)); // 3: violin plot
             classGraphData[it->first][d] = make_pair(box, density);
         }
         dimClassData.push_back(classData);
@@ -728,6 +765,606 @@ void Visualization::GenerateIndividualPlot()
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 }
 
+void adaptFontSize(QPainter * painter, int flags, QRectF rect, QString text){
+    QFont font = painter->font();
+    QRect fontBoundRect;
+    fontBoundRect = painter->fontMetrics().boundingRect(rect.toRect(),flags, text);
+    while(rect.width() < fontBoundRect.width() ||  rect.height() < fontBoundRect.height()){
+        font.setPointSizeF(font.pointSizeF()*0.95);
+        painter->setFont(font);
+        fontBoundRect = painter->fontMetrics().boundingRect(rect.toRect(),flags, text);
+    }
+}
+
+void Visualization::GenerateCorrelationPlot()
+{
+    std::vector<fvec> samples = data->GetSamples();
+    ivec labels = data->GetLabels();
+    if(!samples.size()) return;
+    int dim = samples[0].size();
+    int gridX = dim;
+    int gridY = dim;
+    int flavorType = ui->flavorCombo->currentIndex();
+
+    fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN);
+    FOR(d, dim)
+    {
+        FOR(i, samples.size())
+        {
+            mins[d] = min(mins[d], samples[i][d]);
+            maxes[d] = max(maxes[d], samples[i][d]);
+        }
+    }
+
+    int pad = 20;
+    int w = max(24,min(100, (ui->scrollArea->width()-12-2*pad)/gridX));
+    int h = w;
+    //int mapW = (ui->scrollArea->width()-12)/gridX - pad*2;
+    //int mapH = (ui->scrollArea->height()-12)/gridX - pad*2;
+    int mapW = gridX * w + pad*2;
+    int mapH = gridY * h + pad*2;
+
+    // we compute the correlations
+    // sum((x - muX)*(y-muY)) / sqrt(sigmaX*sigmaY);
+    // or
+    // (n*sum(x*y) - sum(x)*sum(y))/(sqrt(n*sum(x*x)-(sum(x)^2)*sqrt(n*sum(y*y)-(sum(y)^2));
+
+    fvec sums(dim,0), sqsum(dim,0);
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            sums[d] += samples[i][d];
+            sqsum[d] += samples[i][d]*samples[i][d];
+        }
+    }
+
+    double n = samples.size();
+    dvec corr(dim*dim, 0);
+    FOR(d, dim) corr[dim*d + d] = 1.f;
+    FOR(d1, dim)
+    {
+        FOR(d2, d1)
+        {
+            if(d1==d2) continue;
+            double a=0;
+            FOR(i, samples.size())
+            {
+                a += samples[i][d1]*samples[i][d2];
+            }
+            double rho = n*a - sums[d1]*sums[d2];
+            rho /= sqrt(n*sqsum[d1] - sums[d1]*sums[d1])*sqrt(n*sqsum[d2] - sums[d2]*sums[d2]);
+            corr[dim*d1 + d2] = rho;
+            corr[dim*d2 + d1] = rho;
+        }
+    }
+
+    QPixmap pixmap(mapW, mapH);
+    pixmap.fill(Qt::white);
+    QPainter painter(&pixmap);
+
+    // we draw the underlying grid
+    QColor gridLines = Qt::black;
+    QColor gridBackground = Qt::white;
+    switch(flavorType)
+    {
+    case 0:
+        gridBackground = QColor(128,128,128);
+        gridLines = Qt::white;
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    }
+    if(flavorType != 1)
+    {
+        painter.setBrush(gridBackground);
+        painter.setPen(QPen(Qt::black,2));
+        painter.drawRect(pad, pad, w*dim, h*dim);
+        painter.setPen(QPen(gridLines, 1));
+        painter.setOpacity(0.5f);
+        painter.setBrush(Qt::NoBrush);
+        FOR(d, dim+1)
+        {
+            painter.drawLine(pad + d*w, pad, pad + d*w, mapH-pad);
+            painter.drawLine(pad, pad + d*h, mapW-pad, pad + d*h);
+        }
+    }
+
+    // we write the dimension names on the diagonal
+    QFont font = painter.font();
+    font.setPointSize(10);
+    painter.setFont(font);
+    QTextOption o(Qt::AlignCenter);
+    o.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    painter.setPen(QPen(gridLines, 1));
+    painter.setOpacity(0.5f);
+
+    int optimalFontSize = font.pointSize();
+    // we look for the longest dimension name
+    QRectF r(0,0,w,h);
+    QString longestName;
+    QStringList names;
+    FOR(d, dim)
+    {
+        QString dimName;
+        if(d < canvas->dimNames.size()) dimName = canvas->dimNames[d];
+        else
+        {
+            if(w > 50) dimName = QString("Dimension %1").arg(d+1);
+            else dimName = QString("Dim %1").arg(d+1);
+        }
+        if(longestName.length() < dimName.length()) longestName = dimName;
+        names << dimName;
+    }
+    int flags = Qt::TextDontClip|Qt::TextWrapAnywhere;
+    adaptFontSize(&painter, flags, r, longestName);
+    FOR(d, dim)
+    {
+        painter.drawText(QRectF(pad+d*w, pad+d*h, w, h), names.at(d), o);
+    }
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    optimalFontSize = font.pointSize();
+    if(flavorType == 2)
+    {
+        flags = Qt::TextDontClip|Qt::TextWordWrap;
+        QString t = QString("0.000");
+        font.setPointSize(50);
+        painter.setFont(font);
+        adaptFontSize(&painter, flags, r, t);
+        font = painter.font();
+        optimalFontSize = font.pointSize();
+    }
+    // and now we draw the correlations themselves
+    painter.setOpacity(1.f);
+    painter.setPen(QPen(Qt::black, 1));
+    FOR(d1, dim)
+    {
+        FOR(d2, dim)
+        {
+            if(d1 == d2) continue;
+            double rho = corr[dim*d1 + d2];
+            rho = rho > 0 ? min(1., rho) : max(-1., rho);
+            QPointF center(pad + d1*w + w/2, pad + d2*h + h/2);
+            switch(flavorType)
+            {
+            case 0: // circles
+            {
+                QColor color = rho > 0 ? QColor((1-rho)*255, (1-rho)*255, 255) : QColor(255, (1+rho)*255, (1+rho)*255);
+                float radius = w*0.49*fabs(rho);
+                painter.setBrush(color);
+                painter.drawEllipse(center, radius, radius);
+            }
+                break;
+            case 1: // ellipses
+            {
+                QColor color = rho > 0 ? QColor((1-rho)*255, (1-rho)*255, 255) : QColor(255, (1+rho)*255, (1+rho)*255);
+                float radius = w*0.49*(1-fabs(rho));
+                painter.setBrush(color);
+                painter.translate(center);
+                painter.rotate(rho > 0 ? -45 : 45);
+                painter.drawEllipse(QPointF(0,0), w*0.49, radius);
+                painter.rotate(rho > 0 ? 45 : -45);
+                painter.translate(-center);
+            }
+                break;
+            case 2: // graphs
+            {
+                QRectF r(center.x()-w/2,center.y()-h/2,w,h);
+                if (d1 > d2) // we write down the value
+                {
+                    painter.setPen(Qt::black);
+                    QString text = QString("%1").arg(rho, 0, 'f', 3);
+                    font.setPointSize(max(5.,optimalFontSize*fabs(rho)));
+                    painter.setFont(font);
+                    painter.drawText(r, text, o);
+                    font.setPointSize(10);
+                    /*
+                    double t = rho / sqrt((1. - rho*rho)/(n-2));
+                    // now we should compute the p value (area under the curve for the student t distribution)
+                    painter.setFont(font);
+                    if (t < 0.001) painter.drawText(r.x(), r.y(), r.width(), r.height(), Qt::AlignRight|Qt::AlignTop, "***");
+                    else if(t<0.01)painter.drawText(r.x(), r.y(), r.width(), r.height(), Qt::AlignRight|Qt::AlignTop, "**");
+                    else if(t<0.05)painter.drawText(r.x(), r.y(), r.width(), r.height(), Qt::AlignRight|Qt::AlignTop, "*");
+                    else painter.drawText(r.x(), r.y(), r.width(), r.height(), Qt::AlignRight|Qt::AlignTop, QString("%1").arg(t,0,'f',3));
+                    */
+                }
+                else // we draw the correlation
+                {
+                    painter.setBrush(Qt::NoBrush);
+                    painter.setPen(Qt::black);
+                    painter.setOpacity(0.5);
+                    int rad = 3;
+                    FOR(i, samples.size())
+                    {
+                        float x = (samples[i][d1]-mins[d1])/(maxes[d1]-mins[d1])*(w-2*(rad+1)) + center.x() - w/2 + (rad+1);
+                        float y = (1.f-(samples[i][d2]-mins[d2])/(maxes[d2]-mins[d2]))*(h-2*(rad+1)) + center.y() - h/2 + (rad+1);
+                        painter.drawEllipse(QPointF(x,y), rad, rad);
+                    }
+                    painter.setOpacity(1);
+                    painter.setPen(QPen(Qt::red,2));
+                    painter.drawLine(center-QPointF(w*0.3, -h*0.3*rho), center+QPointF(w*0.3, -h*0.3*rho));
+                }
+            }
+                break;
+            }
+        }
+    }
+
+    displayPixmap = pixmap;
+    ui->display->setMinimumSize(displayPixmap.size());
+    ui->display->setMaximumSize(displayPixmap.size());
+}
+
+void Visualization::GenerateDensityPlot()
+{
+    std::vector<fvec> samples = data->GetSamples();
+    ivec labels = data->GetLabels();
+    if(!samples.size()) return;
+    int dim = samples[0].size();
+    if(!dim) return;
+    int flavorType = ui->flavorCombo->currentIndex();
+    int inputType = ui->inputCombo->currentIndex();
+    int classCount = data->GetClassCount(labels);
+    int count = inputType ? classCount : dim;
+    int D = min(dim, ui->x1Combo->currentIndex());
+
+    fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN);
+    FOR(d, dim)
+    {
+        FOR(i, samples.size())
+        {
+            mins[d] = min(mins[d], samples[i][d]);
+            maxes[d] = max(maxes[d], samples[i][d]);
+        }
+    }
+
+    int pad = 30;
+    int mapW = (ui->scrollArea->width()-12) - pad*2, mapH = (ui->scrollArea->height()-12) - pad*2;
+
+    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QPixmap pixmap = QPixmap(ui->scrollArea->width()-2, ui->scrollArea->height()-2);
+    pixmap.fill(Qt::white);
+
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    map<int,int> classMap;
+    int cnt=0;
+    FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
+
+    vector<fvec> densities(count);
+    int densityBins = inputType ? 256 : 128;
+    fvec maxDensities(count, -FLT_MAX);
+    fvec sumDensities(densityBins,0);
+    if(!inputType)
+    {
+        FOR(d, count)
+        {
+            float mean=0, sigma=0;
+            fvec data(samples.size());
+            FOR(i, samples.size())
+            {
+                data[i] = samples[i][d];
+                mean += data[i];
+            }
+            mean /= data.size();
+            FOR(i, data.size()) sigma += (data[i]-mean)*(data[i]-mean);
+            sigma /= data.size();
+            sigma = sqrtf(sigma);
+            densities[d] = KernelDensity(data, sigma, mins[d], maxes[d], densityBins);
+            FOR(i, densityBins)
+            {
+                if(maxDensities[d] < densities[d][i]) maxDensities[d] = densities[d][i];
+                sumDensities[i] += densities[d][i];
+            }
+        }
+    }
+    else
+    {
+        int c=0;
+        FORIT(classMap, int, int)
+        {
+            float mean=0, sigma=0;
+            int meanCount=0;
+            int label = it->first;
+            fvec data;
+            FOR(i, samples.size())
+            {
+                if(labels[i] != label) continue;
+                data.push_back(samples[i][D]);
+                mean += samples[i][D];
+                meanCount++;
+            }
+            mean /= meanCount;
+            FOR(i, data.size()) sigma += (data[i]-mean)*(data[i]-mean);
+            sigma /= data.size();
+            sigma = sqrtf(sigma);
+            densities[c] = KernelDensity(data, sigma, mins[D], maxes[D], densityBins);
+            FOR(i, densityBins)
+            {
+                if(maxDensities[c] < densities[c][i]) maxDensities[c] = densities[c][i];
+                sumDensities[i] += densities[c][i];
+            }
+            c++;
+        }
+    }
+    float maxDensity = -FLT_MAX;
+    FOR(i, densityBins) if(maxDensity < sumDensities[i]) maxDensity = sumDensities[i];
+
+    fvec baseline(densityBins,0);
+    fvec streamCenter(densityBins, 0);
+    fvec perm(count);
+
+    if(flavorType == 2)
+    {
+        // first we can sort the dimensions so that the ones with the least variability
+        // lay in the center of the stream graph. To do so we simply compute the variance
+        // on the density
+        fvec means(count,0);
+        FOR(i, densityBins)
+        {
+            FOR(d, count) means[d] += densities[d][i];
+        }
+        means /= densityBins;
+        fvec sigmas(count,0);
+        FOR(i, densityBins)
+        {
+            FOR(d, count) sigmas[d] += (densities[d][i]-means[d])*(densities[d][i]-means[d]);
+        }
+        sigmas /= densityBins;
+        FOR(d, count) sigmas[d] = sqrt(sigmas[d]);
+
+        // now we can sort them
+        vector< pair<float,int> > sigmaInd;
+        FOR(d, count) sigmaInd.push_back(make_pair(sigmas[d],d));
+        std::sort(sigmaInd.begin(), sigmaInd.end()); // sort smallest to largest
+
+        // we want to fill in the permutation as a flip-flop
+        // (small ones in the middle, large ones out)
+        // TODO actually do it!
+        //FOR(d, dim) perm[d] = sigmaInd[d].second;
+        int top=(count-1)/2, bottom=(count-1)/2+1;
+        FOR(d, count)
+        {
+            if(d%2==0 && top>=0) perm[top--] = sigmaInd[d].second;
+            else if(bottom<count) perm[bottom++] = sigmaInd[d].second;
+        }
+
+        // and redistribute the densities
+        vector<fvec> newDensities(count);
+        FOR(d, count) newDensities[d] = densities[perm[d]];
+        densities = newDensities;
+
+        // Set shape of baseline values.
+        FOR(i, densityBins)
+        {
+            // the 'center' is a rolling point. It is initialized as the previous
+            // iteration's center value
+            streamCenter[i] = i == 0 ? 0 : streamCenter[i-1];
+
+            // find the total size of all layers at this point
+            float totalSize = sumDensities[i];
+
+            // account for the change of every layer to offset the center point
+            FOR(d, count)
+            {
+                float increase;
+                float moveUp;
+                if (i == 0) {
+                    increase = densities[d][i];
+                    moveUp = 0.5f;
+                } else {
+                    float belowSize = 0.5f * densities[d][i];
+                    for (int k = d + 1; k < count; k++) {
+                        belowSize += densities[k][i];
+                    }
+                    increase = densities[d][i] - densities[d][i-1];
+                    moveUp = totalSize == 0 ? 0 : (belowSize / totalSize);
+                }
+                streamCenter[i] += (moveUp - 0.5) * increase;
+            }
+
+            // set baseline to the bottom edge according to the center line
+            //baseline[i] = streamCenter[i] - 0.5f * totalSize;
+        }
+    }
+
+    baseline = fvec(densityBins,0);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    QPointF origin(pad, mapH+pad);
+
+    // we recenter the graph so that it will pass through the center at its highest density
+    if(flavorType==2)
+    {
+        int maxInd = 0;
+        float maxVal = -FLT_MAX;
+        FOR(i, densityBins)
+        {
+            if(maxVal < sumDensities[i])
+            {
+                maxVal = sumDensities[i];
+                maxInd = i;
+            }
+        }
+        float center = streamCenter[maxInd];
+        origin.setY(pad + mapH/2 + center/maxDensity*mapH);
+        maxDensity *= 1.1;
+    }
+
+    // we draw the area under the curve(s)
+    vector < vector<QPointF> > pathTops, pathBottoms;
+    FOR(d, count)
+    {
+        vector<QPointF> pathTop, pathBottom;
+        QPointF old;
+        float oldCum;
+        FOR(i, densityBins)
+        {
+            float x = i / (float)(densityBins-1) * mapW;
+            float y;
+            switch(flavorType)
+            {
+            case 0:
+                painter.setOpacity(0.5);
+                y = densities[d][i] / maxDensities[d] * mapH;
+                break;
+            case 1:
+                y = baseline[i] + (densities[d][i] / maxDensity) * mapH;
+                break;
+            case 2:
+                y = (baseline[i] + densities[d][i]+streamCenter[i]-0.5*sumDensities[i])/maxDensity*mapH;
+                break;
+            }
+
+            QPointF p(x,-y);
+            pathTop.push_back(p);
+            if(i)
+            {
+                QPolygonF poly;
+                if(flavorType == 2)
+                {
+                    int y1 = - (baseline[i-1] + streamCenter[i-1]-0.5*sumDensities[i-1])/maxDensity*mapH;
+                    int y2 = - (baseline[i] + streamCenter[i]-0.5*sumDensities[i])/maxDensity*mapH;
+                    if(i==1) pathBottom.push_back(QPointF(old.x(), y1));
+                    pathBottom.push_back(QPointF(p.x(), y2));
+                }
+                else
+                {
+                    if(i==1) pathBottom.push_back(QPointF(old.x(), -oldCum));
+                    pathBottom.push_back(QPointF(p.x(),-baseline[i]));
+                }
+                if(flavorType == 0)
+                {
+                    painter.setPen(Qt::black);
+                    painter.setOpacity(1);
+                    painter.drawLine(origin + old, origin + p);
+                    painter.setPen(Qt::NoPen);
+                    painter.setOpacity(0.5);
+                }
+            }
+            old = p;
+            oldCum = baseline[i];
+            if(flavorType==1) baseline[i] = y;
+        }
+        if(flavorType)
+        {
+            FOR(i, densityBins)
+            {
+                baseline[i] += densities[d][i];
+            }
+        }
+        pathTops.push_back(pathTop);
+        pathBottoms.push_back(pathBottom);
+    }
+
+    if(flavorType==2 && inputType)
+    {
+        float maxVal = -FLT_MAX;
+        float minVal = FLT_MAX;
+        FOR(i, pathTops.size())
+        {
+            FOR(j, pathTops[i].size())
+            {
+                if(minVal > pathTops[i][j].y()) minVal = pathTops[i][j].y();
+                if(maxVal < pathBottoms[i][j].y()) maxVal = pathBottoms[i][j].y();
+            }
+        }
+        FOR(i, pathTops.size())
+        {
+            FOR(j, pathTops[i].size())
+            {
+                pathTops[i][j].setY((pathTops[i][j].y()-minVal)/(maxVal-minVal)*mapH);
+                pathBottoms[i][j].setY((pathBottoms[i][j].y()-minVal)/(maxVal-minVal)*mapH);
+            }
+        }
+        origin.setY(pad);
+    }
+
+    FOR(d, count)
+    {
+        QColor color = ui->grayscaleCheck->isChecked() ? QColor(255*d/count,255*d/count,255*d/count) : (d ? SampleColor[d%SampleColorCnt] : QColor(220,220,220));
+        if(flavorType == 2)
+        {
+            int dp = perm[d];
+            color = ui->grayscaleCheck->isChecked() ? QColor(255*dp/count,255*dp/count,255*dp/count) : (dp ? SampleColor[dp%SampleColorCnt] : QColor(220,220,220));
+        }
+        painter.setBrush(color);
+
+        // we generate the path itself
+        QPainterPath surface(origin + pathTops[d].front());
+        FOR(i, pathTops[d].size()-1) surface.lineTo(origin + pathTops[d][i+1]);
+        FOR(i, pathBottoms[d].size()) surface.lineTo(origin + pathBottoms[d][pathBottoms[d].size()-1-i]);
+        if(flavorType==0) painter.setOpacity(0.6);
+        painter.drawPath(surface);
+        if(flavorType==0)
+        {
+            QPainterPath path(origin + pathTops[d].front());
+            FOR(i, pathTops[d].size()-1) path.lineTo(origin + pathTops[d][i+1]);
+            // and then the graph lines
+            painter.setOpacity(1);
+            painter.setPen(QPen(Qt::black, 1));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawPath(path);
+        }
+    }
+    if(flavorType > 0)
+    {
+        FOR(d, count)
+        {
+            QPainterPath path(origin + pathTops[d].front());
+            FOR(i, pathTops[d].size()-1) path.lineTo(origin + pathTops[d][i+1]);
+            // and then the graph lines
+            painter.setOpacity(1);
+            painter.setPen(QPen(Qt::black, 1));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawPath(path);
+            if(flavorType==2 && !d)
+            {
+                QPainterPath bottom(origin + pathBottoms[d].front());
+                FOR(i, pathBottoms[d].size()-1) bottom.lineTo(origin + pathBottoms[d][i+1]);
+                painter.drawPath(bottom);
+            }
+        }
+    }
+
+    // we draw the axes
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawLine(pad, mapH+pad, mapW+pad-1, mapH+pad);
+    painter.drawLine(pad, pad, pad, mapH+pad);
+
+    QFont font = painter.font();
+    font.setPointSize(16);
+    painter.setFont(font);
+    painter.drawText(pad, mapH+pad, mapW, pad, Qt::AlignCenter, "Normalized Coordinate Range");
+    painter.save();
+    painter.rotate(-90);
+    switch(flavorType)
+    {
+    case 0:
+        painter.drawText(-mapH-pad, 0, mapH, pad, Qt::AlignCenter, "Normalized Density");
+        break;
+    case 1:
+        painter.drawText(-mapH-pad, 0, mapH, pad, Qt::AlignCenter, "Cumulative Density");
+        break;
+    case 2:
+        painter.drawText(-mapH-pad, 0, mapH, pad, Qt::AlignCenter, "Density");
+        break;
+    }
+    painter.restore();
+    font.setPointSize(12);
+    painter.setFont(font);
+    painter.drawText(pad/2, mapH+pad+2, pad, pad, Qt::AlignHCenter|Qt::AlignTop, QString("0"));
+    painter.drawText(pad+mapW-pad/2, mapH+pad+2, pad, pad, Qt::AlignHCenter|Qt::AlignTop, QString("1"));
+
+    displayPixmap = pixmap;
+}
+
 void Visualization::GenerateSplatterPlot()
 {
     std::vector<fvec> samples = data->GetSamples();
@@ -798,11 +1435,6 @@ void Visualization::GenerateSplatterPlot()
     }
 
     displayPixmap = pixmap;
-}
-
-void Visualization::GenerateCorrelationPlot()
-{
-
 }
 
 QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int classCount,
@@ -1114,6 +1746,13 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
             int midPoint = -1;
             int lowPoint = -1;
             float highX=0, midX=0, lowX=0;
+            float sumDensity = 0;
+            maxDensity = -FLT_MAX;
+            FOR(i, density.size())
+            {
+                if(maxDensity < density[i]) maxDensity = density[i];
+                sumDensity += density[i];
+            }
 
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setPen(color);
@@ -1124,8 +1763,8 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
             FOR(i, density.size())
             {
                 float y = ((i+1)/(float)(density.size()+1))*(topPoint-bottomPoint) + bottomPoint;
-                if(quartile < 2) v += density[i];
-                else v -= density[i];
+                if(quartile < 2) v += density[i]/sumDensity;
+                else v -= density[i]/sumDensity;
                 float x = v*w/2;
                 if(!i)
                 {
@@ -1167,8 +1806,8 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
             FOR(i, density.size())
             {
                 float y = ((i+1)/(float)(density.size()+1))*(topPoint-bottomPoint) + bottomPoint;
-                if(quartile < 2) v += density[i];
-                else v -= density[i];
+                if(quartile < 2) v += density[i]/sumDensity;
+                else v -= density[i]/sumDensity;
                 float x = v*w/2;
                 if(!i)
                 {
@@ -1534,6 +2173,28 @@ fvec Visualization::Density(fvec data, float minv, float maxv, int bins)
         int index = (v-minv)/(maxv-minv)*bins;
         index = min(bins-1,max(0,index));
         density[index] += 1.f/count;
+    }
+    return density;
+}
+
+fvec Visualization::KernelDensity(fvec data, float sigma, float minv, float maxv, int bins)
+{
+    fvec density(bins,0);
+    if(!data.size()) return density;
+    const int count = data.size();
+    double scale = 1 / sqrt(2*M_PI);
+    double h = sigma*pow(4./3.,0.2)*pow(count,-0.2);
+    FOR(i, bins)
+    {
+        double iV = double(i)/bins*(maxv-minv) + minv;
+        double x = 0;
+        FOR(j, count)
+        {
+            double a = (data[j]-iV) / h;
+            double k = exp(-0.5*a*a)*scale;
+            x += k;
+        }
+        density[i] = x / (count*h);
     }
     return density;
 }
