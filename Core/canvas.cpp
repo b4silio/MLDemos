@@ -393,7 +393,8 @@ void Canvas::paintEvent(QPaintEvent *event)
     if(bDrawing) return;
     bDrawing = true;
     QPainter painter(this);
-    if(!canvasType) PaintStandard(painter);
+    if(!canvasType) PaintStandard(painter); // we only draw if we're actually on the canvas
+    /*
     else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3d, so we take out 2
     else
     {
@@ -403,6 +404,7 @@ void Canvas::paintEvent(QPaintEvent *event)
         params.push_back(zIndex);
         PaintVariable(painter, canvasType-6, params);
     }
+    */
     bDrawing = false;
 }
 

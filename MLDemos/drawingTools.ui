@@ -665,7 +665,7 @@ p, li { white-space: pre-wrap; }
     </font>
    </property>
    <property name="minimum">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="maximum">
     <number>255</number>

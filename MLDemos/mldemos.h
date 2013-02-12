@@ -61,6 +61,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "datagenerator.h"
 #include "gridsearch.h"
 #include "glwidget.h"
+#include "visualization.h"
 
 class MLDemos : public QMainWindow
 {
@@ -108,6 +109,7 @@ private:
 	Canvas *canvas;
     GridSearch *gridSearch;
     GLWidget *glw;
+    Visualization *vis;
     DataImporter *import;
     DataGenerator *generator;
     ReinforcementProblem reinforcementProblem;
@@ -128,6 +130,7 @@ private:
     void Test(Maximizer *maximizer);
     void RewardFromMap(QImage rewardMap);
     void MapFromReward();
+    void DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti);
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
@@ -183,6 +186,7 @@ public:
     Maximizer *maximizer;
     Reinforcement *reinforcement;
     Projector *projector;
+    std::vector<Classifier *> classifierMulti;
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
     ivec sourceLabels;
@@ -316,7 +320,6 @@ private slots:
 	void CompareRemove();
     void CanvasTypeChanged();
     void CanvasOptionsChanged();
-
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);

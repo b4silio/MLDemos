@@ -45,8 +45,10 @@ public:
 	void Vectors(int count, int steps, QPainter &painter);
 	void VectorsFast(int count, int steps, QPainter &painter);
 	void Maximization(QPainter &painter);
+    void DrawClassificationSamples(Canvas *canvas, QPainter &painter, Classifier *classifier, std::vector<Classifier*> classifierMulti);
 
 	Classifier *classifier;
+    std::vector<Classifier *> classifierMulti;
 	Regressor *regressor;
 	Dynamical *dynamical;
 	Clusterer *clusterer;

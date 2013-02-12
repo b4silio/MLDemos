@@ -50,7 +50,6 @@ class ClassifierInterface
 public:
 	// virtual functions to manage the algorithm creation
 	virtual Classifier *GetClassifier() = 0;
-	virtual void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
 	virtual void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier) = 0;
     virtual void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier) = 0;
     virtual ~ClassifierInterface(){}
@@ -79,26 +78,16 @@ public:
 		int w = canvas->width();
 		int h = canvas->height();
 
-		{
-			canvas->maps.model = QPixmap(w,h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			canvas->maps.model.setMask(bitmap);
-			canvas->maps.model.fill(Qt::transparent);
-			QPainter painter(&canvas->maps.model);
-            if(!canvas->canvasType) DrawModel(canvas, painter, classifier);
-		}
+        canvas->maps.info = QPixmap(w,h);
+        QBitmap bitmap(w,h);
+        bitmap.clear();
+        canvas->maps.info.setMask(bitmap);
+        canvas->maps.info.fill(Qt::transparent);
+        QPainter painter(&canvas->maps.info);
+        if(!canvas->canvasType) DrawInfo(canvas, painter, classifier);
 
-		{
-			canvas->maps.info = QPixmap(w,h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			canvas->maps.info.setMask(bitmap);
-			canvas->maps.info.fill(Qt::transparent);
-			QPainter painter(&canvas->maps.info);
-            if(!canvas->canvasType) DrawInfo(canvas, painter, classifier);
-		}
-		canvas->maps.confidence = QPixmap();
+        canvas->maps.model = QPixmap();
+        canvas->maps.confidence = QPixmap();
 		canvas->repaint();
 	}
 };
