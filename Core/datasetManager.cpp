@@ -295,7 +295,22 @@ void DatasetManager::ResetFlags()
 
 void DatasetManager::SetSample(int index, fvec sample)
 {
-	if(index >= 0 && index < samples.size()) samples[index] = sample;
+    if(index >= 0 && index < samples.size()) samples[index] = sample;
+}
+
+string DatasetManager::GetCategorical(int dimension, int value)
+{
+    string s;
+    if(categorical.count(dimension) && value < categorical[dimension].size())
+    {
+        s = categorical[dimension][value];
+    }
+    return s;
+}
+
+bool DatasetManager::IsCategorical(int dimension)
+{
+    return categorical.count(dimension) > 0;
 }
 
 fvec DatasetManager::GetSampleDim(int index, ivec inputDims, int outputDim)

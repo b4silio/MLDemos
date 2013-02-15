@@ -206,6 +206,7 @@ public slots:
 	void SetTimeseries(std::vector<TimeSerie> timeseries);
     void SetDimensionNames(QStringList headers);
     void SetClassNames(std::map<int,QString> classNames);
+    void SetCategorical(std::map<int,std::vector<std::string> > categorical);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);

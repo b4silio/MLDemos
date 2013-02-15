@@ -45,6 +45,7 @@ private:
     CSVParser *inputParser;
     QStringList headers;
     std::map<int, QString> classNames;
+    std::map<int, std::vector<std::string> > categorical;
 
     bool saveFile(const QString &filename, QIODevice *data);
 
@@ -54,7 +55,8 @@ signals:
 	void SetTimeseries(std::vector<TimeSerie> series);
     void SetDimensionNames(QStringList headers);
     void SetClassNames(std::map<int, QString> classNames);
-	void QueryClassifier(std::vector<fvec> samples);
+    void SetCategorical(std::map<int, std::vector<std::string> > categorical);
+    void QueryClassifier(std::vector<fvec> samples);
     void QueryRegressor(std::vector<fvec> samples);
     void QueryDynamical(std::vector<fvec> samples);
 	void QueryClusterer(std::vector<fvec> samples);

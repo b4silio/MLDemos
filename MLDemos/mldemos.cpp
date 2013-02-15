@@ -574,6 +574,7 @@ void MLDemos::initDialogs()
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
+    connect(import, SIGNAL(SetCategorical(std::map<int,std::vector<std::string> >)), this, SLOT(SetCategorical(std::map<int,std::vector<std::string> >)));
     connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
 }
 
@@ -2548,6 +2549,7 @@ void MLDemos::CanvasTypeChanged()
     if ((!glw || !glw->isVisible()) && (!vis || !vis->isVisible()) && canvas->canvasType == type) return;
     if(type == 1) // 3D viewport
     {
+        vis->hide();
         displayOptions->tabWidget->setCurrentIndex(1);
         canvas->Clear();
         canvas->repaint();
@@ -3304,6 +3306,15 @@ void MLDemos::SetDimensionNames(QStringList headers)
 void MLDemos::SetClassNames(std::map<int,QString> classNames)
 {
     canvas->classNames = classNames;
+    ResetPositiveClass();
+    CanvasOptionsChanged();
+    canvas->ResetSamples();
+    canvas->repaint();
+}
+
+void MLDemos::SetCategorical(std::map<int,std::vector<std::string> > categorical)
+{
+    canvas->data->categorical = categorical;
     ResetPositiveClass();
     CanvasOptionsChanged();
     canvas->ResetSamples();

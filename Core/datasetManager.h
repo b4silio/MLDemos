@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include "public.h"
+#include <string.h>
 
 enum DatasetManagerFlags
 {
@@ -159,6 +160,7 @@ protected:
 
 public:
     bool bProjected;
+    std::map<int, std::vector<std::string> > categorical;
 
 public:
 	DatasetManager(int dimension = 2);
@@ -193,6 +195,9 @@ public:
 	ivec GetLabels(){return labels;}
 	void SetLabel(int index, int label){if(index<labels.size())labels[index] = label;}
     void SetLabels(ivec labels){this->labels = labels;}
+
+    std::string GetCategorical(int dimension, int value);
+    bool IsCategorical(int dimension);
 
 	// functions to manage sequences
 	void AddSequence(int start, int stop);
