@@ -61,6 +61,7 @@ private:
 
 public slots:
     void MouseMove(QMouseEvent *);
+    void Close();
     void OptionsChanged();
     void DisplayChanged();
     void Run();

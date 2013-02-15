@@ -20,7 +20,7 @@ INCLUDEPATH += . \
 win32:LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
 CONFIG(coreLib){
 }else{
-	LIBS += -L$$MLPATH/Core -lCore
+    LIBS += -L$$MLPATH -L$$MLPATH/Core -lCore
 }
 LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 

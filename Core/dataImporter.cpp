@@ -228,9 +228,11 @@ void DataImporter::SendData()
     // @note we have a bootle neck in getData... limit default nbSamples to ~2000
     pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, nbSamples);
     classNames = inputParser->getClassNames();
+    categorical = inputParser->getCategorical();
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     emit(SetDimensionNames(headers));
     emit(SetClassNames(classNames));
+    emit(SetCategorical(categorical));
 
     // Data in dataset Manager has been updated, update visual reminder
     gui->dumpButton->setStyleSheet("color: rgb(0, 0, 0)");

@@ -82,6 +82,25 @@ void GLWidget::clearLists()
     drawLists.clear();
     drawSampleListCenters.clear();
     objects.clear();
+    if(render_fbo->isBound())render_fbo->release();
+    //if(texture_fbo && texture_fbo != render_fbo) delete texture_fbo;
+    delete render_fbo;
+    delete light_fbo;
+    delete lightBlur_fbo;
+    if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
+        QGLFramebufferObjectFormat format;
+        format.setSamples(64);
+        format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
+        render_fbo = new QGLFramebufferObject(width, height, format);
+        texture_fbo = new QGLFramebufferObject(width, height);
+    } else {
+        render_fbo = new QGLFramebufferObject(width*2, height*2);
+        texture_fbo = render_fbo;
+    }
+    QGLFramebufferObjectFormat format;
+    format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
+    light_fbo = new QGLFramebufferObject(width,height, format);
+    lightBlur_fbo = new QGLFramebufferObject(width,height);
     mutex->unlock();
 }
 
@@ -370,6 +389,7 @@ void GLWidget::generateObjects()
 
 void GLWidget::DrawObject(GLObject &o)
 {
+    if(!o.vertices.size()) return;
     if(bDisplaySamples && o.objectType.contains("Samples")) DrawSamples(o);
     if(bDisplayLines && o.objectType.contains("Lines") || o.objectType.contains("trajectories")) DrawLines(o);
     else if(bDisplaySurfaces && o.objectType.contains("Surfaces")) DrawSurfaces(o);
@@ -985,6 +1005,13 @@ void GLWidget::paintGL()
     modelViewMatrix.translate(xPos, yPos, zPos);
 
     bool bHasReward = false;
+    if(!objects.size())
+    {
+        glClearColor(1,1,1,1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mutex->unlock();
+        return;
+    }
     FOR(i, objects.size())
     {
         if(objects[i].objectType.contains("Reward"))

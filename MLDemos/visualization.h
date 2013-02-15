@@ -34,6 +34,7 @@ private:
     QPixmap GetStarPixmap(int inputType, int dim, int classCount, int index, int w, int h,
                           fvec mins, std::map<int,fvec> dimMins,
                           fvec maxes, std::map<int,fvec> dimMaxes);
+    QPixmap GetRadialPixmap(std::map<int,std::vector< std::pair<fvec,fvec> > > classGraphData, int inputType, int dim, int classCount, int index, int w, int h, fvec mins, fvec maxes);
     fvec BoxPlot(fvec data);
     fvec Density(fvec data, float minv, float maxv, int bins=11);
     fvec KernelDensity(fvec data, float sigma, float minv, float maxv, int bins=31);

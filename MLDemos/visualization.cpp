@@ -9,6 +9,34 @@
 
 using namespace std;
 
+/*
+// color set from
+// http://www.dickblick.com/products/prismacolor-nupastel-color-sets/#photos
+QColor DimColor[] = {QColor(237,233,230),QColor(42,46,47),QColor(93,84,75),
+                     QColor(154,92,77),QColor(82,67,148),QColor(46,80,118),
+                     QColor(74,114,184),QColor(68,139,123),QColor(148,182,122),
+                     QColor(254,197,68),QColor(231,92,49),QColor(215,85,83)};
+int DimColorCnt = 12;
+*/
+// color set from
+// http://cdn.dickblick.com/items/200/34/20034-4809-3-3ww-l.jpg
+QColor DimColor[] = {QColor("#ebecee"),QColor("#6e7275"),QColor("#9ba0a4"),
+                      QColor("#202221"),QColor("#4c4845"),QColor("#765c4b"),
+                      QColor("#62443c"),QColor("#964a32"),QColor("#89553d"),
+                      QColor("#ddaf4d"),QColor("#ac732e"),QColor("#b28474"),
+                      QColor("#54376d"),QColor("#883058"),QColor("#453983"),
+                      QColor("#1d2226"),QColor("#20466b"),QColor("#1552af"),
+                      QColor("#2768bc"),QColor("#89b8d4"),QColor("#008099"),
+                      QColor("#9ed2c5"),QColor("#3e785f"),QColor("#00897f"),
+                      QColor("#349b7e"),QColor("#85bda2"),QColor("#5e634d"),
+                      QColor("#9fb670"),QColor("#86ab7f"),QColor("#3e4442"),
+                      QColor("#dfde82"),QColor("#f4f1e0"),QColor("#fdbc22"),
+                      QColor("#f89d2a"),QColor("#fb8c16"),QColor("#f3e0b8"),
+                      QColor("#ffb6a5"),QColor("#fd8539"),QColor("#df4f2d"),
+                      QColor("#b63f45"),QColor("#de447a"),QColor("#9a342f"),
+                      QColor("#914060"),QColor("#723e40")};
+int DimColorCnt = 44;
+
 Visualization::Visualization(Canvas *canvas, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Visualization), spacer(0),
@@ -106,6 +134,7 @@ void Visualization::OptionsChanged()
         ui->flavorCombo->addItem("Violin Plots");
         ui->flavorCombo->addItem("Raws");
         ui->flavorCombo->addItem("Star Plots");
+        ui->flavorCombo->addItem("Radial Density Plots");
         ui->flavorCombo->setCurrentIndex(1);
         ui->flavorCombo->show();
         ui->flavorCombo->blockSignals(false);
@@ -667,7 +696,7 @@ void Visualization::GenerateIndividualPlot()
             sigma /= data.size();
             sigma = sqrt(sigma);
             fvec box = BoxPlot(data);
-            fvec density = KernelDensity(data, sigma, box[4], box[0], 31);
+            fvec density = KernelDensity(data, sigma, box[4], box[0], flavorType == 7 ? 47 : 31);
             //fvec density = Density(data, box[4], box[0], (flavorType==3?15:31)); // 3: violin plot
             classGraphData[it->first][d] = make_pair(box, density);
         }
@@ -700,13 +729,18 @@ void Visualization::GenerateIndividualPlot()
         w = 80;
         h = 220;
     }
-    else // star plots
+    else if(flavorType == 6) // star plots
     {
-        w = 100;
-        h = 120;
+        w = 200;
+        h = 220;
+    }
+    else // radial plots
+    {
+        w = 300;
+        h = 320;
     }
 
-    int mapW = ui->scrollArea->width()-12;
+    int mapW = ui->scrollArea->width()-24;
     int mapH = ui->scrollArea->height()-12;
 
     // depending on how many classes/dimensions we have, we adjust the grid count
@@ -724,7 +758,7 @@ void Visualization::GenerateIndividualPlot()
         perItemCount = dim;
         break;
     }
-    if(flavorType == 6)
+    if(flavorType >= 6)
     {
         totalCount = count;
         perItemCount = 1;
@@ -751,9 +785,20 @@ void Visualization::GenerateIndividualPlot()
                                           classGraphData, dimClassData,
                                           mins, dimMins,
                                           maxes, dimMaxes);
-        painter.setBrush(SampleColor[i%SampleColorCnt]);
         QPoint tl((i%gridX)*(w*perItemCount+pad), (i/gridX)*h);
-        painter.drawRect(tl.x(), tl.y(), w*perItemCount+pad, h);
+        if(flavorType <= 6)
+        {
+            switch(inputType)
+            {
+            case 0:
+                painter.setBrush(DimColor[i%DimColorCnt]);
+                break;
+            case 1:
+                painter.setBrush(SampleColor[i%SampleColorCnt]);
+                break;
+            }
+            painter.drawRect(tl.x(), tl.y(), w*perItemCount+pad, h);
+        }
         painter.drawPixmap(tl, smallPix);
     }
 
@@ -1099,6 +1144,7 @@ void Visualization::GenerateDensityPlot()
     fvec streamCenter(densityBins, 0);
     fvec perm(count);
 
+    // streamgraph
     if(flavorType == 2)
     {
         // first we can sort the dimensions so that the ones with the least variability
@@ -1225,7 +1271,6 @@ void Visualization::GenerateDensityPlot()
             pathTop.push_back(p);
             if(i)
             {
-                QPolygonF poly;
                 if(flavorType == 2)
                 {
                     int y1 = - (baseline[i-1] + streamCenter[i-1]-0.5*sumDensities[i-1])/maxDensity*mapH;
@@ -1287,11 +1332,16 @@ void Visualization::GenerateDensityPlot()
 
     FOR(d, count)
     {
-        QColor color = ui->grayscaleCheck->isChecked() ? QColor(255*d/count,255*d/count,255*d/count) : (d ? SampleColor[d%SampleColorCnt] : QColor(220,220,220));
+        if(flavorType == 0 && maxDensities[d] == 0) continue;
+        QColor color = ui->grayscaleCheck->isChecked() ?
+                    QColor(255*d/count,255*d/count,255*d/count) :
+                    (d ? (inputType ? SampleColor[d%SampleColorCnt] : DimColor[d%DimColorCnt]) : QColor(220,220,220));
         if(flavorType == 2)
         {
             int dp = perm[d];
-            color = ui->grayscaleCheck->isChecked() ? QColor(255*dp/count,255*dp/count,255*dp/count) : (dp ? SampleColor[dp%SampleColorCnt] : QColor(220,220,220));
+            color = ui->grayscaleCheck->isChecked() ?
+                        QColor(255*dp/count,255*dp/count,255*dp/count) :
+                        (dp ? (inputType ? SampleColor[dp%SampleColorCnt] : DimColor[dp%DimColorCnt]) : QColor(220,220,220));
         }
         painter.setBrush(color);
 
@@ -1445,6 +1495,7 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
                                       fvec maxes, std::map<int,fvec> dimMaxes)
 {
     if(type == 6) return GetStarPixmap(inputType, dim, classCount, index, w, h, mins, dimMins, maxes, dimMaxes);
+    else if(type == 7) return GetRadialPixmap(classGraphData, inputType, dim, classCount, index, w, h, mins, maxes);
 
     int perItemCount;
     int d;
@@ -1507,13 +1558,16 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
     painter.setFont(font);
     painter.setPen(QPen(Qt::black,1));
     char text[255];
-    int axisSteps = 10;
+    bool bCategorical = data->IsCategorical(d);
+    int axisSteps = bCategorical ? data->categorical[d].size()-1 : 10;
     int axisH = h / (axisSteps+1);
     FOR(i, axisSteps+1)
     {
         float value = (maxesText - minsText)*i/(axisSteps) + minsText;
         int y = h - ((maxesPoint-minsPoint)*i/(axisSteps) + minsPoint);
-        sprintf(text, format, value);
+        if(bCategorical) strcpy(text, data->GetCategorical(d, i).c_str());
+        else sprintf(text, format, value);
+
         painter.drawText(firstTl.x(), firstTl.y() + y-axisH/2, pad*1.5-6, axisH, Qt::AlignVCenter | Qt::AlignRight, QString(text));
         painter.drawLine(firstTl + QPointF(pad*1.5-3, y), firstTl + QPointF(pad*1.5, y));
     }
@@ -1616,7 +1670,10 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
                 break;
             }
         }
-        else color = SampleColor[b%SampleColorCnt];
+        else
+        {
+            color = inputType ? DimColor[b%DimColorCnt] : SampleColor[b%SampleColorCnt];
+        }
 
         switch(type)
         {
@@ -2073,13 +2130,18 @@ QPixmap Visualization::GetStarPixmap(int inputType, int dim, int classCount, int
             maxv = (dMaxes[d]-mins[d])/(maxes[d]-mins[d]);
             break;
         }
+        if(minv == maxv)
+        {
+            minv = 0;
+            maxv = 0.1;
+        }
 
         // we now draw the arcs in 16th of degree
         float angleStart = (360*16)*d/dMins.size();
         float angleLen = (360*16)/dMins.size();
         float maxR = maxRadius * maxv;
         float minR = maxRadius * minv;
-        QColor color = SampleColor[d%SampleColorCnt];
+        QColor color = inputType ? DimColor[d%DimColorCnt] : SampleColor[d%SampleColorCnt];
         float ratio = 0.1;
         QColor lighterColor(color.red()*ratio + 255*(1-ratio),
                             color.green()*ratio + 255*(1-ratio),
@@ -2088,6 +2150,218 @@ QPixmap Visualization::GetStarPixmap(int inputType, int dim, int classCount, int
         painter.drawPie(QRectF(center-QPointF(maxR,maxR), center+QPoint(maxR,maxR)),angleStart, angleLen);
         painter.setBrush(lighterColor);
         painter.drawPie(QRectF(center-QPointF(minR,minR), center+QPoint(minR,minR)),angleStart, angleLen);
+    }
+
+    return pixmap;
+}
+
+QPixmap Visualization::GetRadialPixmap(std::map<int,std::vector< std::pair<fvec,fvec> > > classGraphData, int inputType, int dim, int classCount, int index, int w, int h, fvec mins, fvec maxes)
+{
+    int d;
+    int cCnt;
+    switch(inputType)
+    {
+    case 0:
+        d = index;
+        cCnt = 0;
+        break;
+    case 1:
+        d = 0;
+        cCnt = index;
+        break;
+    }
+    int pad = 20;
+    w += pad;
+    h = h-pad*1.5;
+
+    int classId = cCnt;
+    int c=0;
+    for(map<int,vector<pair<fvec,fvec> > >::iterator it = classGraphData.begin(); it != classGraphData.end(); it++)
+    {
+        if(c==cCnt)
+        {
+            classId = it->first;
+            break;
+        }
+        c++;
+    }
+
+    QPixmap pixmap(w, h+pad*1.5);
+    QBitmap bitmap(w, h+pad*1.5);
+    pixmap.setMask(bitmap);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(QPen(Qt::black, 2));
+
+    // then we write the graph description/name
+    QFont font = painter.font();
+    font.setPointSize(12);
+    painter.setFont(font);
+    switch(inputType)
+    {
+    case 0:
+        painter.drawText(0, h+pad/2, w, pad, Qt::AlignHCenter|Qt::AlignCenter, ui->x1Combo->itemText(d));
+        break;
+    case 1:
+    {
+        QString className = QString("Class %1").arg(classId);
+        if(canvas->classNames.count(classId)) className = canvas->classNames[classId];
+        painter.drawText(0, h+pad/2, w, pad, Qt::AlignHCenter|Qt::AlignCenter, className);
+    }
+        break;
+    }
+
+    vector<fvec> densities;
+    switch(inputType)
+    {
+    case 0: // dimension
+    {
+        int cCnt = 0;
+        for(map<int,vector<pair<fvec,fvec> > >::iterator it = classGraphData.begin(); it != classGraphData.end(); it++, cCnt++)
+        {
+            fvec density = it->second[d].second;
+            densities.push_back(density);
+        }
+    }
+        break;
+    case 1: // classCount
+    {
+        FOR(d, dim)
+        {
+            fvec density = classGraphData[classId][d].second;
+            densities.push_back(density);
+        }
+    }
+        break;
+    }
+    int bins = densities[0].size();
+
+    fvec sums(bins,0);
+    FOR(i, densities.size())
+    {
+        FOR(j, densities[i].size())
+        {
+            sums[j] += densities[i][j];
+        }
+    }
+    float maxSum = 0;
+    float centerRadius = 3.f;
+    FOR(i, sums.size())
+    {
+        maxSum = max(maxSum, sums[i]);
+    }
+    maxSum += centerRadius;
+
+    // we recompute the center
+    int maxRadius = min(w,h)*0.5;
+    float angleLen = 2*M_PI/(bins);
+    QPointF center(0,0);
+    //QPointF center(w/2, h/2 + pad/2);
+    float minx=FLT_MAX, miny=FLT_MAX, maxx=-FLT_MAX, maxy=-FLT_MAX;
+    FOR(i, bins)
+    {
+        float angleStart = i*angleLen;
+        float radius = (sums[i]+centerRadius)/maxSum*maxRadius;
+        float x = radius*cosf(angleStart);
+        float y = radius*sinf(angleStart);
+        minx = min(minx, x);
+        maxx = max(maxx, x);
+        miny = min(miny, y);
+        maxy = max(maxy, y);
+    }
+    center = QPointF(w/2, h/2 + pad/2) - QPointF((maxx+minx)/2, (maxy+miny)/2);
+    float diffx = maxx-minx;
+    float diffy = maxy-miny;
+    float diff = max(diffx,diffy);
+    float radDif = min(w,h) * 0.9 / diff;
+    maxRadius *= radDif;
+    //qDebug() << "diff" << (diff/min(w,h)) << "->" << radDif;
+
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::black, 0.5));
+    fvec pads(bins,centerRadius);
+    FOR(i, densities.size())
+    {
+        QColor color = inputType ? DimColor[i%DimColorCnt] : SampleColor[i%SampleColorCnt];
+        //if(i==0) color = Qt::lightGray;
+        float oldRadius = 0;
+        float oldSmallRadius = 0;
+        painter.setBrush(color);
+        FOR(j, bins+1)
+        {
+            float angleStart = (j%bins)*angleLen;
+            float smallRadius = pads[j%bins]/maxSum*maxRadius;
+            float radius = (pads[j%bins] + densities[i][j%bins])/maxSum*maxRadius;
+            if(j)
+            {
+                QPolygonF p;
+                p << center+QPointF(radius*cosf(angleStart),radius*sinf(angleStart));
+                p << center+QPointF(oldRadius*cosf(angleStart-angleLen),oldRadius*sinf(angleStart-angleLen));
+                p << center+QPointF(oldSmallRadius*cosf(angleStart-angleLen),oldSmallRadius*sinf(angleStart-angleLen));
+                p << center+QPointF(smallRadius*cosf(angleStart),smallRadius*sinf(angleStart));
+                painter.drawPolygon(p);
+            }
+            oldRadius = radius;
+            oldSmallRadius = smallRadius;
+        }
+        pads += densities[i];
+    }
+
+    pads = fvec(bins,centerRadius);
+    painter.setPen(QPen(Qt::black, 1));
+    FOR(i, densities.size())
+    {
+        float oldRadius = 0;
+        float oldSmallRadius = 0;
+        FOR(j, bins+1)
+        {
+            float angleStart = (j%bins)*angleLen;
+            float smallRadius = pads[j%bins]/maxSum*maxRadius;
+            if(i==0)
+            {
+                if(j)
+                {
+                    painter.drawLine(center+QPointF(smallRadius*cosf(angleStart),smallRadius*sinf(angleStart)),
+                                     center+QPointF(oldSmallRadius*cosf(angleStart-angleLen),oldSmallRadius*sinf(angleStart-angleLen)));
+                }
+            }
+            float radius = (pads[j%bins] + densities[i][j%bins])/maxSum*maxRadius;
+            if(j)
+            {
+                painter.drawLine(center+QPointF(radius*cosf(angleStart),radius*sinf(angleStart)),
+                                 center+QPointF(oldRadius*cosf(angleStart-angleLen),oldRadius*sinf(angleStart-angleLen)));
+            }
+            oldRadius = radius;
+            oldSmallRadius = smallRadius;
+        }
+        pads += densities[i];
+    }
+
+    font.setPointSize(9);
+    painter.setFont(font);
+    switch(inputType)
+    {
+    case 0: // dimension
+    {
+        float minv = mins[d];
+        float maxv = maxes[d];
+        float rad = centerRadius/maxSum*maxRadius;
+        QString text;
+        text = QString("%1").arg(minv, 0, 'f', 2);
+        painter.drawText(center.x(), center.y()-10, rad-4, 10, Qt::AlignRight|Qt::AlignVCenter, text);
+        text = QString("%1").arg((maxv-minv)*1./4. + minv, 0, 'f', 2);
+        painter.drawText(center.x()-40, center.y()-rad+4, 80, 10, Qt::AlignHCenter|Qt::AlignTop, text);
+        text = QString("%1").arg((maxv-minv)*2./4. + minv, 0, 'f', 2);
+        painter.drawText(center.x()-rad+4, center.y()-5, rad-4, 10, Qt::AlignLeft|Qt::AlignVCenter, text);
+        text = QString("%1").arg((maxv-minv)*3./4. + minv, 0, 'f', 2);
+        painter.drawText(center.x()-40, center.y()+rad-14, 80, 10, Qt::AlignHCenter|Qt::AlignBottom, text);
+        text = QString("%1").arg(maxv, 0, 'f', 2);
+        painter.drawText(center.x(), center.y(), rad-4, 10, Qt::AlignRight|Qt::AlignVCenter, text);
+    }
+        break;
+    case 1: // class
+        break;
     }
 
     return pixmap;
@@ -2180,7 +2454,7 @@ fvec Visualization::Density(fvec data, float minv, float maxv, int bins)
 fvec Visualization::KernelDensity(fvec data, float sigma, float minv, float maxv, int bins)
 {
     fvec density(bins,0);
-    if(!data.size()) return density;
+    if(!data.size() || sigma==0 || sigma != sigma) return density;
     const int count = data.size();
     double scale = 1 / sqrt(2*M_PI);
     double h = sigma*pow(4./3.,0.2)*pow(count,-0.2);

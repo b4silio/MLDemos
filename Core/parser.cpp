@@ -364,6 +364,36 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
             }
         }
     }
+    FOR(j, dim)
+    {
+        if(j == outputLabelColumn) continue;
+        bool bNumerical = true;
+        FORIT(labelMaps[j], string, int)
+        {
+            bool ok;
+            QString(it->first.c_str()).toFloat(&ok);
+            if(!ok)
+            {
+                bNumerical = false;
+                break;
+            }
+        }
+        if(bNumerical) continue;
+        int itemCount = 0;
+        FORIT(labelMaps[j], string, int)
+        {
+            itemCount = max(itemCount, it->second);
+        }
+        itemCount++;
+        qDebug() << "itemCount" << itemCount;
+        vector<string> cat(itemCount);
+        FORIT(labelMaps[j], string, int)
+        {
+            int index = it->second;
+            cat[index] = it->first;
+        }
+        categorical[ j>outputLabelColumn ? j-1 : j ] = cat;
+    }
 
     if(labelMaps[outputLabelColumn].size() && outputLabelColumn != -1)
     {
