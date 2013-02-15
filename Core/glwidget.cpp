@@ -1318,6 +1318,7 @@ void GLWidget::RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::ve
     {
 
         GLObject& o = objects[i];
+        if(!o.vertices.size()) continue;
         QString style = o.style.toLower();
         if(style.contains("transparent")) continue;
         float pointSize = 12.f;
