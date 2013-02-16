@@ -131,10 +131,10 @@ void Visualization::OptionsChanged()
             ui->inputCombo->clear();
             ui->inputCombo->addItem("By Dimension");
             ui->inputCombo->addItem("By Class");
-            ui->inputCombo->show();
             ui->inputCombo->setCurrentIndex(i);
             ui->inputCombo->blockSignals(false);
         }
+        ui->inputCombo->show();
         int i = ui->flavorCombo->currentIndex();
         ui->flavorCombo->blockSignals(true);
         ui->flavorCombo->clear();
@@ -185,7 +185,6 @@ void Visualization::OptionsChanged()
             ui->inputCombo->clear();
             ui->inputCombo->addItem("By Dimension");
             ui->inputCombo->addItem("Combined");
-            ui->inputCombo->show();
             ui->inputCombo->setCurrentIndex(i);
             ui->inputCombo->blockSignals(false);
         }

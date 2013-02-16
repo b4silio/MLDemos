@@ -59,6 +59,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "drawTimer.h"
 #include "dataImporter.h"
 #include "datagenerator.h"
+#include "dataseteditor.h"
 #include "gridsearch.h"
 #include "glwidget.h"
 #include "visualization.h"
@@ -112,6 +113,7 @@ private:
     Visualization *vis;
     DataImporter *import;
     DataGenerator *generator;
+    DatasetEditor *dataEdit;
     ReinforcementProblem reinforcementProblem;
 	ipair trajectory;
 	Obstacle obstacle;
@@ -213,6 +215,7 @@ public slots:
 	void QueryClusterer(std::vector<fvec> samples);
 	void QueryMaximizer(std::vector<fvec> samples);
     void QueryProjector(std::vector<fvec> samples);
+    void DataEdited();
 
 private slots:
 	void ShowAbout();
@@ -259,8 +262,8 @@ private slots:
     void AddData();
     void Clear();
 	void ClearData();
-    void ShiftDimensions();
-	void SetROCInfo();
+    void ShowDataEditor();
+    void SetROCInfo();
     void LoadClassifier();
     void SaveClassifier();
     void LoadRegressor();
