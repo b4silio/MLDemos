@@ -56,6 +56,7 @@ void DatasetManager::Clear()
 	labels.clear();
 	sequences.clear();
 	rewards.Clear();
+    categorical.clear();
 	KILL(perm);
 }
 

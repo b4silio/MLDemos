@@ -766,33 +766,115 @@ void Canvas::DrawAxes(QPainter &painter)
     painter.setBrush(Qt::NoBrush);
     painter.setFont(QFont("Lucida Grande", 9));
     painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
-    for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+    // we draw the grid lines
+    int minGridWidth = 32;
+    if(data->IsCategorical(xIndex))
     {
-        float canvasX = toCanvasCoords(x,0).x();
-        if(canvasX < 0 || canvasX > w) continue;
-        painter.drawLine(canvasX, 0, canvasX, h);
+        int cnt = data->categorical[xIndex].size();
+        FOR(i, cnt)
+        {
+            float canvasX = toCanvasCoords(i,0).x();
+            if(canvasX < 0 || canvasX > w) continue;
+            painter.drawLine(canvasX, 0, canvasX, h);
+        }
+    }
+    else
+    {
+        int cnt = 0;
+        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult) cnt++;
+        if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
+        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+        {
+            float canvasX = toCanvasCoords(x,0).x();
+            if(canvasX < 0 || canvasX > w) continue;
+            painter.drawLine(canvasX, 0, canvasX, h);
+        }
     }
     painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
-    for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+
+    if(data->IsCategorical(yIndex))
     {
-        float canvasY = toCanvasCoords(0,y).y();
-        if(canvasY < 0 || canvasY > w) continue;
-        painter.drawLine(0, canvasY, w, canvasY);
+        int cnt = data->categorical[yIndex].size();
+        FOR(i, cnt)
+        {
+            float canvasY = toCanvasCoords(0,i).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            painter.drawLine(0, canvasY, w, canvasY);
+        }
     }
-    painter.setPen(QPen(Qt::black, 0.5));
-    for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+    else
     {
-        float canvasX = toCanvasCoords(x,0).x();
-        if(canvasX < 0 || canvasX > w) continue;
-        painter.drawText(canvasX, h-5, QString("%1").arg((int)(x/mult)*mult));
+        int cnt = 0;
+        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult) cnt++;
+        if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
+        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+        {
+            float canvasY = toCanvasCoords(0,y).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            painter.drawLine(0, canvasY, w, canvasY);
+        }
+    }
+    // we draw the tick values
+    painter.setPen(QPen(Qt::black, 0.5));
+    if(data->IsCategorical(xIndex))
+    {
+        int cnt = data->categorical[xIndex].size();
+        FOR(i, cnt)
+        {
+            string name = data->GetCategorical(xIndex, i);
+            float canvasX = toCanvasCoords(i,0).x();
+            if(canvasX < 0 || canvasX > w) continue;
+            painter.drawText(canvasX, h-5, QString(name.c_str()));
+        }
+    }
+    else
+    {
+        float gridW = 0;
+        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+        {
+            float canvasX = toCanvasCoords(x,0).x();
+            if(gridW == 0)
+            {
+                float x2 = toCanvasCoords(x + mult, 0).x();
+                gridW = x2 - canvasX;
+            }
+            if(canvasX < 0 || canvasX > w) continue;
+            float val = (int)(x/mult)*mult;
+            QString s;
+            if(mult >= 1) s = QString("%1").arg(val, 0, 'f', 0);
+            else if(mult >= 0.1) s = QString("%1").arg(val, 0, 'f', 1);
+            else if(mult >= 0.01) s = QString("%1").arg(val, 0, 'f', 2);
+            else s = QString("%1").arg(val);
+            painter.drawText(canvasX, h-15, max((float)minGridWidth,gridW), 10, Qt::AlignLeft | Qt::AlignBottom, s);
+        }
     }
     // we now have the measure of the ticks, we can draw this
     painter.setPen(QPen(Qt::black, 0.5));
-    for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+    if(data->IsCategorical(yIndex))
     {
-        float canvasY = toCanvasCoords(0,y).y();
-        if(canvasY < 0 || canvasY > w) continue;
-        painter.drawText(2, canvasY, QString("%1").arg((int)(y/mult)*mult));
+        int cnt = data->categorical[yIndex].size();
+        FOR(i, cnt)
+        {
+            string name = data->GetCategorical(yIndex, i);
+            float canvasY = toCanvasCoords(0,i).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            painter.drawText(2, canvasY, QString(name.c_str()));
+        }
+    }
+    else
+    {
+        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+        {
+            float canvasY = toCanvasCoords(0,y).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            float val = (int)(y/mult)*mult;
+            QString s;
+            if(mult >= 1) s = QString("%1").arg(val, 0, 'f', 0);
+            else if(mult >= 0.1) s = QString("%1").arg(val, 0, 'f', 1);
+            else if(mult >= 0.01) s = QString("%1").arg(val, 0, 'f', 2);
+            else s = QString("%1").arg(val);
+            painter.drawText(2, canvasY, s);
+        }
     }
 
     // we get the dimension names
