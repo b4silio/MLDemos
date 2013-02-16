@@ -19,6 +19,9 @@ DatasetEditor::DatasetEditor(Canvas *canvas, QWidget *parent) :
     connect(ui->categoryNameButton, SIGNAL(clicked()), this, SLOT(ChangeCategoryName()));
     connect(ui->shiftButton, SIGNAL(clicked()), this, SLOT(ShiftDimensions()));
     connect(ui->resetButton, SIGNAL(clicked()), this, SLOT(ResetDimensions()));
+    connect(ui->swapButton, SIGNAL(clicked()), this, SLOT(SwapDimensions()));
+    connect(ui->asClassButton, SIGNAL(clicked()), this, SLOT(SetAsClass()));
+
     ui->dimLabelsWidget->setAcceptDrops(true);
     ui->dimLabelsWidget->installEventFilter(this);
     if(!ui->dimLabelsWidget->layout())
@@ -287,6 +290,33 @@ void DatasetEditor::ShiftDimensions()
     ResetDimensions();
 }
 
+void DatasetEditor::SwapDimensions()
+{
+    int dimCount = data->GetDimCount();
+    int count = data->GetCount();
+    vector<fvec> samples = data->GetSamples();
+    ivec labels = data->GetLabels();
+    vector<fvec> newSamples;
+    ivec newLabels;
+    fvec sample(count);
+    FOR(d, dimCount)
+    {
+        FOR(i, count)
+        {
+            sample[i] = samples[d][i];
+        }
+        newSamples.push_back(sample);
+        newLabels.push_back(0);
+    }
+    data->SetSamples(newSamples);
+    data->SetLabels(labels);
+    data->categorical.clear();
+    canvas->dimNames.clear();
+    canvas->classNames.clear();
+    emit(DataEdited());
+    ResetDimensions();
+}
+
 void DatasetEditor::ResetDimensions()
 {
     int dimCount = data->GetDimCount();
@@ -310,6 +340,44 @@ void DatasetEditor::ResetDimensions()
         dimLabels.push_back(label);
         ((QGridLayout *)ui->dimLabelsWidget->layout())->addWidget(dimLabels.back(), i/4, i%4);
     }
+}
+
+void DatasetEditor::SetAsClass()
+{
+    vector<fvec> samples = data->GetSamples();
+    int index = ui->dimNameCombo->currentIndex();
+    ivec labels = data->GetLabels();
+    ivec newLabels;
+    std::map<int,QString> newClassNames;
+    FOR(i, labels.size())
+    {
+        int label = (int)samples[i][index];
+        newLabels.push_back(label);
+    }
+    FOR(i, samples.size())
+    {
+        samples[i][index] = labels[i];
+    }
+    data->SetSamples(samples);
+    data->SetLabels(newLabels);
+    if(canvas->dimNames.size()>index) canvas->dimNames[index] = "Class";
+
+    vector<string> newCat;
+    int cnt=0;
+    FORIT(canvas->classNames, int, QString)
+    {
+        newCat[cnt++] = it->second.toStdString();
+    }
+
+    if(data->IsCategorical(index))
+    {
+        FOR(i, data->categorical[index].size()) newClassNames[i] = data->categorical[index][i].c_str();
+    }
+    canvas->classNames = newClassNames;
+    data->categorical[index] = newCat;
+
+    emit(DataEdited());
+    ResetDimensions();
 }
 
 void DatasetEditor::ChangeClassName()

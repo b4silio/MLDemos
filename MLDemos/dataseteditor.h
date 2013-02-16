@@ -30,7 +30,9 @@ public slots:
     void ChangeDimName();
     void ChangeCategoryName();
     void ShiftDimensions();
+    void SwapDimensions();
     void ResetDimensions();
+    void SetAsClass();
 
 signals:
     void DataEdited();
