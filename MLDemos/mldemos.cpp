@@ -61,7 +61,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
     connect(ui.actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
-    connect(ui.actionShift_Dimensions, SIGNAL(triggered()), this, SLOT(ShiftDimensions()));
+    connect(ui.actionEditDataset, SIGNAL(triggered()), this, SLOT(ShowDataEditor()));
     connect(ui.actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
@@ -77,6 +77,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
 
     glw = new GLWidget(canvas);
     vis = new Visualization(canvas);
+    dataEdit = new DatasetEditor(canvas);
     drawTimer = new DrawTimer(canvas, &mutex);
     drawTimer->glw = glw;
     drawTimer->classifier = &classifier;
@@ -91,6 +92,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
     connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
     connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
+    connect(dataEdit, SIGNAL(DataEdited()), this, SLOT(DataEdited()));
 
     LoadLayoutOptions();
     SetTextFontSize();
@@ -1423,6 +1425,7 @@ void MLDemos::ResetPositiveClass()
     ui.canvasX2Spin->setRange(1,dimCount);
     ui.canvasX3Spin->setRange(0,dimCount);
     canvas->SetDim(ui.canvasX1Spin->value()-1,ui.canvasX2Spin->value()-1, ui.canvasX3Spin->value()-1);
+    dataEdit->Update();
     ManualSelectionUpdated();
     InputDimensionsUpdated();
 }
@@ -1454,30 +1457,21 @@ void MLDemos::ClearData()
     Clear();
     ResetPositiveClass();
     FitToData();
-    ManualSelectionUpdated();
     UpdateInfo();
 }
 
-void MLDemos::ShiftDimensions()
+void MLDemos::DataEdited()
 {
-    if(canvas)
-    {
-        vector<fvec> samples = canvas->data->GetSamples();
-        if(!samples.size()) return;
-        int dim = samples[0].size();
-        if(dim < 2) return;
-        FOR(i, samples.size())
-        {
-            float tmp = samples[i][0];
-            FOR(d, dim-1)
-            {
-                samples[i][d] = samples[i][d+1];
-            }
-            samples[i][dim-1] = tmp;
-        }
-        canvas->data->SetSamples(samples);
-    }
-    DisplayOptionsChanged();
+    canvas->ResetSamples();
+    FitToData();
+    ResetPositiveClass();
+    UpdateInfo();
+    canvas->repaint();
+}
+
+void MLDemos::ShowDataEditor()
+{
+    dataEdit->show();
 }
 
 void MLDemos::AvoidOptionChanged()
@@ -2235,7 +2229,6 @@ void MLDemos::Drawing( fvec sample, int label)
         optionsCompare->outputDimCombo->setCurrentIndex(canvas->data->GetDimCount()-1);
         optionsRegress->outputDimCombo->setCurrentIndex(canvas->data->GetDimCount()-1);
     }
-    ManualSelectionUpdated();
     UpdateInfo();
 }
 
@@ -3047,6 +3040,7 @@ void MLDemos::ImportData(QString filename)
     import->Parse(filename);
     import->SendData();
     if(import->GetHeaders().size()) canvas->dimNames = import->GetHeaders();
+    ResetPositiveClass();
     ui.statusBar->showMessage("Data loaded successfully");
 }
 
@@ -3092,7 +3086,6 @@ void MLDemos::dropEvent(QDropEvent *event)
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");
             ResetPositiveClass();
-            ManualSelectionUpdated();
             UpdateInfo();
             canvas->repaint();
         }
@@ -3101,7 +3094,6 @@ void MLDemos::dropEvent(QDropEvent *event)
             ClearData();
             ImportData(filename);
             ResetPositiveClass();
-            ManualSelectionUpdated();
             UpdateInfo();
             canvas->repaint();
         }
@@ -3299,6 +3291,7 @@ void MLDemos::SetDimensionNames(QStringList headers)
     canvas->dimNames = headers;
     ResetPositiveClass();
     CanvasOptionsChanged();
+    dataEdit->Update();
     canvas->ResetSamples();
     canvas->repaint();
 }
@@ -3308,6 +3301,7 @@ void MLDemos::SetClassNames(std::map<int,QString> classNames)
     canvas->classNames = classNames;
     ResetPositiveClass();
     CanvasOptionsChanged();
+    dataEdit->Update();
     canvas->ResetSamples();
     canvas->repaint();
 }
@@ -3317,6 +3311,7 @@ void MLDemos::SetCategorical(std::map<int,std::vector<std::string> > categorical
     canvas->data->categorical = categorical;
     ResetPositiveClass();
     CanvasOptionsChanged();
+    dataEdit->Update();
     canvas->ResetSamples();
     canvas->repaint();
 }

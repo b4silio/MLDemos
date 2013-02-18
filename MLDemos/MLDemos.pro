@@ -44,7 +44,8 @@ FORMS += aboutDialog.ui \
     inputDimensions.ui \
     datagenerator.ui \
     gridsearch.ui \
-    visualization.ui
+    visualization.ui \
+    dataseteditor.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -72,7 +73,8 @@ HEADERS += basicMath.h \
     spline.h \
     datagenerator.h \
     gridsearch.h \
-    visualization.h
+    visualization.h \
+    dataseteditor.h
 
 SOURCES += \
 	main.cpp \
@@ -84,7 +86,8 @@ SOURCES += \
     mltrain.cpp \
     datagenerator.cpp \
     gridsearch.cpp \
-    visualization.cpp
+    visualization.cpp \
+    dataseteditor.cpp
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \

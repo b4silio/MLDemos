@@ -329,6 +329,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     int dim = data[0].size();
     if(outputLabelColumn != -1) outputLabelColumn = min(dim-1, outputLabelColumn);
     classNames.clear();
+    categorical.clear();
     vector< map<string,int> > labelMaps(dim);
     ivec labelCounters(dim,0);
     pair<map<string,int>::iterator,bool> ret;
@@ -372,7 +373,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         {
             bool ok;
             QString(it->first.c_str()).toFloat(&ok);
-            if(!ok)
+            if(!ok && it->first != "?")
             {
                 bNumerical = false;
                 break;
@@ -385,7 +386,6 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
             itemCount = max(itemCount, it->second);
         }
         itemCount++;
-        qDebug() << "itemCount" << itemCount;
         vector<string> cat(itemCount);
         FORIT(labelMaps[j], string, int)
         {
@@ -402,7 +402,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         {
             bool ok;
             QString(it->first.c_str()).toFloat(&ok);
-            if(!ok)
+            if(!ok && it->first != "?")
             {
                 bNumerical = false;
                 break;

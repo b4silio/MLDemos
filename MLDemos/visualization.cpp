@@ -47,7 +47,7 @@ Visualization::Visualization(Canvas *canvas, QWidget *parent) :
     connect(ui->grayscaleCheck, SIGNAL(clicked()), this, SLOT(OptionsChanged()));
     connect(ui->updateButton, SIGNAL(clicked()), this, SLOT(Update()));
     connect(ui->flavorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
-    connect(ui->inputCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
+    connect(ui->inputCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
     connect(ui->x1Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
     connect(ui->x2Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
     connect(ui->x3Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
@@ -124,7 +124,18 @@ void Visualization::OptionsChanged()
         break;
     case 5: // distribution: Individual plots
     {
+        if(ui->inputCombo->itemText(1) != "By Class")
+        {
+            int i = ui->inputCombo->currentIndex();
+            ui->inputCombo->blockSignals(true);
+            ui->inputCombo->clear();
+            ui->inputCombo->addItem("By Dimension");
+            ui->inputCombo->addItem("By Class");
+            ui->inputCombo->setCurrentIndex(i);
+            ui->inputCombo->blockSignals(false);
+        }
         ui->inputCombo->show();
+        int i = ui->flavorCombo->currentIndex();
         ui->flavorCombo->blockSignals(true);
         ui->flavorCombo->clear();
         ui->flavorCombo->addItem("Histograms");
@@ -135,19 +146,20 @@ void Visualization::OptionsChanged()
         ui->flavorCombo->addItem("Raws");
         ui->flavorCombo->addItem("Star Plots");
         ui->flavorCombo->addItem("Radial Density Plots");
-        ui->flavorCombo->setCurrentIndex(1);
+        ui->flavorCombo->setCurrentIndex(i>=0&&i<ui->flavorCombo->count() ? i : 1);
         ui->flavorCombo->show();
         ui->flavorCombo->blockSignals(false);
     }
         break;
     case 6: // distribution: Correlation
     {
+        int i = ui->flavorCombo->currentIndex();
         ui->flavorCombo->blockSignals(true);
         ui->flavorCombo->clear();
         ui->flavorCombo->addItem("Scatterplot Circles");
         ui->flavorCombo->addItem("Scatterplot Ellipses");
         ui->flavorCombo->addItem("Scatterplot Graphs");
-        ui->flavorCombo->setCurrentIndex(0);
+        ui->flavorCombo->setCurrentIndex(i>=0&&i<ui->flavorCombo->count() ? i : 0);
         ui->flavorCombo->show();
         ui->flavorCombo->blockSignals(false);
     }
@@ -166,17 +178,28 @@ void Visualization::OptionsChanged()
         break;
         */
     case 7: // distribution: density
+        if(ui->inputCombo->itemText(1) != "Combined")
+        {
+            int i = ui->inputCombo->currentIndex();
+            ui->inputCombo->blockSignals(true);
+            ui->inputCombo->clear();
+            ui->inputCombo->addItem("By Dimension");
+            ui->inputCombo->addItem("Combined");
+            ui->inputCombo->setCurrentIndex(i);
+            ui->inputCombo->blockSignals(false);
+        }
         ui->inputCombo->show();
-        ui->axesWidget->show();
+        if(!ui->inputCombo->currentIndex()) ui->axesWidget->show();
         ui->x1Combo->setEnabled(true);
         ui->x2Combo->setEnabled(false);
         ui->x3Combo->setEnabled(false);
+        int i = ui->flavorCombo->currentIndex();
         ui->flavorCombo->blockSignals(true);
         ui->flavorCombo->clear();
         ui->flavorCombo->addItem("Overlapping Kernel");
         ui->flavorCombo->addItem("Cumulative Kernel");
         ui->flavorCombo->addItem("StreamGraph");
-        ui->flavorCombo->setCurrentIndex(0);
+        ui->flavorCombo->setCurrentIndex(i>=0&&i<ui->flavorCombo->count() ? i : 0);
         ui->flavorCombo->show();
         ui->flavorCombo->blockSignals(false);
         break;
@@ -244,18 +267,28 @@ void Visualization::UpdateDims()
     ui->x1Combo->clear();
     ui->x2Combo->clear();
     ui->x3Combo->clear();
-    QStringList dimNames = canvas->dimNames;
-    if(dimNames.size() == 0)
+    bool bClassInput = ui->inputCombo->isVisible() && ui->inputCombo->currentIndex();
+    QStringList dimNames;
+    if(!bClassInput)
     {
-        FOR(i, dims)
+        dimNames = canvas->dimNames;
+        if(dimNames.size() == 0)
         {
-            dimNames << QString("Dimension %1").arg(i+1);
+            FOR(i, dims)
+            {
+                dimNames << QString("Dimension %1").arg(i+1);
+            }
         }
+    }
+    else
+    {
+        int classCount = data->GetClassCount(data->GetLabels());
+        FOR(c, classCount) dimNames << canvas->GetClassString(c);
     }
     dimNames << QString("none");
     FOR(i, dimNames.size())
     {
-        ui->x1Combo->addItem(dimNames[i]);
+        if(i<dimNames.size()-1) ui->x1Combo->addItem(dimNames[i]);
         ui->x2Combo->addItem(dimNames[i]);
         ui->x3Combo->addItem(dimNames[i]);
     }
@@ -318,7 +351,6 @@ void Visualization::GenerateAndrewsPlot()
                 if(!d) value += v*sqrtf(2.f);
                 else
                 {
-
                     value += v * (d%2 ? sin(t*((d+1)/2)) : cos(t*((d+1)/2)));
                 }
             }
@@ -1054,7 +1086,7 @@ void Visualization::GenerateDensityPlot()
     int flavorType = ui->flavorCombo->currentIndex();
     int inputType = ui->inputCombo->currentIndex();
     int classCount = data->GetClassCount(labels);
-    int count = inputType ? classCount : dim;
+    int count = inputType ? dim : classCount;
     int D = min(dim, ui->x1Combo->currentIndex());
 
     fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN);
@@ -1085,7 +1117,7 @@ void Visualization::GenerateDensityPlot()
     int densityBins = inputType ? 256 : 128;
     fvec maxDensities(count, -FLT_MAX);
     fvec sumDensities(densityBins,0);
-    if(!inputType)
+    if(inputType)
     {
         FOR(d, count)
         {
@@ -1335,13 +1367,13 @@ void Visualization::GenerateDensityPlot()
         if(flavorType == 0 && maxDensities[d] == 0) continue;
         QColor color = ui->grayscaleCheck->isChecked() ?
                     QColor(255*d/count,255*d/count,255*d/count) :
-                    (d ? (inputType ? SampleColor[d%SampleColorCnt] : DimColor[d%DimColorCnt]) : QColor(220,220,220));
+                    (d ? (inputType ? DimColor[d%DimColorCnt] : SampleColor[d%SampleColorCnt]) : QColor(220,220,220));
         if(flavorType == 2)
         {
             int dp = perm[d];
             color = ui->grayscaleCheck->isChecked() ?
                         QColor(255*dp/count,255*dp/count,255*dp/count) :
-                        (dp ? (inputType ? SampleColor[dp%SampleColorCnt] : DimColor[dp%DimColorCnt]) : QColor(220,220,220));
+                        (dp ? (inputType ? DimColor[dp%DimColorCnt] : SampleColor[dp%SampleColorCnt]) : QColor(220,220,220));
         }
         painter.setBrush(color);
 
@@ -1411,6 +1443,42 @@ void Visualization::GenerateDensityPlot()
     painter.setFont(font);
     painter.drawText(pad/2, mapH+pad+2, pad, pad, Qt::AlignHCenter|Qt::AlignTop, QString("0"));
     painter.drawText(pad+mapW-pad/2, mapH+pad+2, pad, pad, Qt::AlignHCenter|Qt::AlignTop, QString("1"));
+
+    // we draw the legend
+    int maxLength = 0;
+    int maxCount = 0;
+    FOR(i, count)
+    {
+        QString s = inputType ? (canvas->dimNames.size() > i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
+        int y = pad + 5 + i*20;
+        if(y > pad + mapH - 10) break;
+        int length = painter.fontMetrics().width(s);
+        maxLength = max(maxLength, length);
+        maxCount++;
+    }
+    if(maxCount < count) maxCount--;
+    int legendW = 10 + 17 + maxLength;
+    int legendH = min(10 + count*20, mapH - 10);
+    painter.setBrush(Qt::white);
+    painter.setOpacity(0.5);
+    painter.setPen(Qt::NoPen);
+    painter.drawRect(pad + mapW - legendW, pad, legendW, legendH);
+    painter.setBrush(Qt::NoBrush);
+    painter.setOpacity(1);
+    painter.setPen(Qt::black);
+    painter.drawRect(pad + mapW - legendW, pad, legendW, legendH);
+    painter.setRenderHints(QPainter::Antialiasing);
+    FOR(i, count)
+    {
+        QString s = inputType ? (canvas->dimNames.size() > i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
+        int y = pad + 5 + i*20;
+        if(y > pad + mapH - 10) break;
+        if(i == maxCount) s = "  ...";
+        painter.drawText(pad + mapW - legendW + 22, y, legendW-20, 20, Qt::AlignLeft|Qt::AlignVCenter, s);
+        QColor color = inputType ? DimColor[i%DimColorCnt] : SampleColor[i%SampleColorCnt];
+        painter.setBrush(color);
+        painter.drawEllipse(QPoint(pad + mapW - legendW + 5 + 7, y + 10), 6, 6);
+    }
 
     displayPixmap = pixmap;
 }

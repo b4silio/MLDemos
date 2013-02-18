@@ -278,7 +278,7 @@
     <addaction name="actionGenerate_Data"/>
     <addaction name="actionClearModel"/>
     <addaction name="actionClearData"/>
-    <addaction name="actionShift_Dimensions"/>
+    <addaction name="actionEditDataset"/>
     <addaction name="separator"/>
     <addaction name="menuDisplay_Options"/>
    </widget>
@@ -483,9 +483,9 @@
     <string>Data (csv, txt)</string>
    </property>
   </action>
-  <action name="actionShift_Dimensions">
+  <action name="actionEditDataset">
    <property name="text">
-    <string>Shift Dimensions</string>
+    <string>Edit Dataset</string>
    </property>
    <property name="toolTip">
     <string>Shift dimensions by one dimension to the right</string>

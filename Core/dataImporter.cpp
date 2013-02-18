@@ -37,7 +37,7 @@ void DataImporter::Start()
     {
         gui = new Ui::DataImporterDialog();
         gui->setupUi(guiDialog = new QDialog());
-        guiDialog->setWindowTitle("CVS Import");
+        guiDialog->setWindowTitle("Load Formatted Data");
         connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
         connect(guiDialog, SIGNAL(finished(int)), this, SLOT(Closing()));
         connect(gui->classColumnSpin, SIGNAL(valueChanged(int)), this, SLOT(classColumnChanged(int)));
@@ -99,6 +99,7 @@ void DataImporter::Parse(QString filename)
     this->filename = filename;
     headers.clear();
     inputParser->clear();
+    categorical.clear();
     int separatorType = gui->separatorCombo->currentIndex();
     inputParser->parse(filename.toStdString().c_str(), separatorType);
     vector<vector<string> > rawData = inputParser->getRawData();
@@ -225,12 +226,18 @@ void DataImporter::SendData()
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
     int nbSamples = gui->importLimitSpin->value();
-    // @note we have a bootle neck in getData... limit default nbSamples to ~2000
     pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, nbSamples);
     classNames = inputParser->getClassNames();
     categorical = inputParser->getCategorical();
     emit(SetData(data.first, data.second, vector<ipair>(), false));
-    emit(SetDimensionNames(headers));
+    QStringList dimensionNames = headers;
+    int classColumn = gui->classColumnSpin->value()-1;
+    if(dimensionNames.size() && !gui->classIgnoreCheck->isChecked())
+    {
+        if(classColumn < 0 || classColumn == dimensionNames.size()-1) dimensionNames.pop_back();
+        else dimensionNames.erase(dimensionNames.begin() + classColumn);
+    }
+    emit(SetDimensionNames(dimensionNames));
     emit(SetClassNames(classNames));
     emit(SetCategorical(categorical));
 
