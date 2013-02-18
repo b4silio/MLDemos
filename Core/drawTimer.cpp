@@ -785,7 +785,8 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample, std::vector<Clas
     if(classifier->IsMultiClass())
     {
         fvec val = classifier->TestMulti(sample);
-        if(val.size() == 1)
+        if(!val.size()) return QColor(0,0,0);
+        else if(val.size() == 1)
         {
             float v = val[0];
             int color = fabs(v)*128;

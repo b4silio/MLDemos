@@ -848,7 +848,7 @@ void MLDemos::LoadClassifier()
     if(ok)
     {
         if(!classifierMulti.size()) DEL(this->classifier);
-        classifier = 0;
+        this->classifier = 0;
         FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
         this->classifier = classifier;
         tabUsedForTraining = tab;
