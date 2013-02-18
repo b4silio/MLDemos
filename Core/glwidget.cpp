@@ -1284,7 +1284,7 @@ void GLWidget::paintGL()
 
 void GLWidget::RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects)
 {
-    if(!fbo) return;
+    if(!fbo || !objects.size()) return;
 
     //glMatrixMode(GL_PROJECTION);
     //glPushMatrix();
