@@ -396,6 +396,11 @@ void DatasetEditor::ChangeDimName()
     QString name = ui->dimNameEdit->text();
     if(name.isEmpty()) name = QString("Dimension %1").arg(index);
     if(index < canvas->dimNames.size()) canvas->dimNames[index] = name;
+    else
+    {
+        while(canvas->dimNames.size() < index) canvas->dimNames.push_back(QString("Dimension %1").arg(canvas->dimNames.size()));
+        canvas->dimNames.push_back(name);
+    }
     ui->dimNameCombo->setItemText(index, name);
     canvas->repaint();
 }

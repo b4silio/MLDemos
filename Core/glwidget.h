@@ -25,6 +25,7 @@ public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
     void clearLists();
+    void killObjects();
     void generateObjects();
     void DrawObject(GLObject &o);
     void DrawSamples(GLObject &o);
@@ -102,6 +103,7 @@ public:
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;
     std::vector<GLObject> objects;
+    ivec killList;
     std::vector<GLLight> lights;
     bool bDisplaySamples, bDisplayLines, bDisplaySurfaces, bDisplayTransparency, bDisplayBlurry;
     bool bRotateCamera;

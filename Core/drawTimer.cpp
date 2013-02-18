@@ -577,8 +577,10 @@ bool DrawTimer::VectorsGL(int count, int steps)
         }
     }
     glw->mutex->lock();
-    if(oIndex != -1) glw->objects[oIndex] = o;
-    else glw->objects.push_back(o);
+    //if(oIndex != -1) glw->objects[oIndex] = o;
+    //else glw->objects.push_back(o);
+    if(oIndex != -1) glw->killList.push_back(oIndex);
+    glw->objects.push_back(o);
     glw->mutex->unlock();
     return true;
 }
@@ -679,15 +681,16 @@ void DrawTimer::Maximization()
         vector<GLObject> oList = (*maximizer)->DrawGL();
 
         glw->mutex->lock();
-        if(oIndex != -1) glw->objects[oIndex] = o;
-        else glw->objects.push_back(o);
+        if(oIndex != -1) glw->killList.push_back(oIndex);
+        glw->objects.push_back(o);
+        //if(oIndex != -1) glw->objects[oIndex] = o;
+        //else glw->objects.push_back(o);
 
         FOR(i, glw->objects.size())
         {
             if(glw->objects[i].objectType.contains("Maximizer"))
             {
-                glw->objects.erase(glw->objects.begin() + i);
-                i--;
+                glw->killList.push_back(i);
             }
         }
         if(oList.size()) glw->objects.insert(glw->objects.end(), oList.begin(), oList.end());
