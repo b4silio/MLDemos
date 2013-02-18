@@ -1043,7 +1043,8 @@ void GLWidget::paintGL()
     modelViewProjectionMatrix = perspectiveMatrix*modelViewMatrix;
     normalMatrix = modelViewMatrix.normalMatrix();
 
-    RenderShadowMap(light_fbo, lights[0], objects);
+    // currently broken in windows (crashes for some reason every now and then)
+    //RenderShadowMap(light_fbo, lights[0], objects);
     bool bDisplayShadowMap = false;
     if (bDisplayShadowMap)
     {
