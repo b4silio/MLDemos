@@ -300,7 +300,7 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
         param.kernel_dim = dim;
         param.kernel_weight = new double[dim];
         FOR(d, dim) param.kernel_weight[d] = param.gamma;
-        param.gamma = 1;
+        param.gamma = 1.;
         svm->param = param;
     }
     //delete svm;
@@ -347,20 +347,35 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
             DEL(svm);
             svm = svm_train(problem, &param);
             obj = svm_get_dual_objective_function(svm);
-            qDebug() << "it" << it << i << "obj" << obj << "(" << oldObj << ")" << "gamma step" << gammaStep << "gamma" << s;
+            //qDebug() << "it" << it << i << "obj" << obj << "(" << oldObj << ")" << "gamma step" << gammaStep << "gamma" << s;
             if(obj < oldObj)
             {
                 break;
             }
             gammaStep *= 0.5;
         }
-        FOR(d, dim) sigmas[d] = newSigmas[d];
+        bAllZeros = true;
+        FOR(d, dim)
+        {
+            sigmas[d] = newSigmas[d];
+            if(sigmas[d] != 0) bAllZeros = false;
+        }
         if(obj > oldObj)
         {
             DEL(svm);
-            FOR(d, dim) param.kernel_weight[d] = sigmas[d];
+            FOR(d, dim)
+            {
+                param.kernel_weight[d] = sigmas[d];
+            }
             svm = svm_train(problem, &param);
             break;
+        }
+
+        if(bAllZeros)
+        {
+            qDebug() << "starting again!";
+            FOR(d, dim) param.kernel_weight[d] = sigmas[d] = drand48();
+            it = 0;
         }
 
         //qDebug() << "iteration" << it << "norm" << norm;
@@ -370,6 +385,12 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
         if(fabs(oldObj-obj) < 1e-5) break;
         oldObj = obj;
     }
+    QString s;
+    FOR(d, dim)
+    {
+        s += QString("%1 ").arg(1. / sigmas[d]);
+    }
+    qDebug() << "gamma" << s;
 }
 
 void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
