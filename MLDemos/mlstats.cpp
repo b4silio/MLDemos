@@ -339,13 +339,10 @@ void MLDemos::UpdateInfo()
     if(maximizer)  information += "\nMaximizer: "  + QString(maximizer->GetInfoString());
 
     information += "\nCurrent Dataset:\n";
+    information += QString("    %1 Samples\n    %2 Positives\n    %3 Negatives\n\n").arg(count).arg(pcount).arg(ncount);
     char string[255];
-    sprintf(string, "    %d Samples\n    %d Positives\n    %d Negatives\n\n", count, pcount, ncount);
-    information += QString(string);
     information +=    "       Min - Max          Mean  ,    Var\n";
-    sprintf(string,   "    %.3f    %.3f      %.3f   ,   %.3f  %.3f\n", sMin[0], sMax[0], sMean[0], sSigma[0], sSigma[1]);
-    sprintf(string, "%s    %.3f    %.3f      %.3f   ,   %.3f  %.3f\n", string, sMin[1], sMax[1], sMean[1], sSigma[2], sSigma[3]);
-    information += string;
-
+    information += QString("    %1    %2      %3   ,   %4  %5\n").arg(sMin[0],0,'f',3).arg(sMax[0],0,'f',3).arg(sMean[0],0,'f',3).arg(sSigma[0],0,'f',3).arg(sSigma[1]);
+    information += QString("    %1    %2      %3   ,   %4  %5\n").arg(sMin[1],0,'f',3).arg(sMax[1],0,'f',3).arg(sMean[1],0,'f',3).arg(sSigma[2],0,'f',3).arg(sSigma[3]);
     showStats->infoText->setText(information);
 }

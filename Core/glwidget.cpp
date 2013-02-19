@@ -65,6 +65,9 @@ GLWidget::~GLWidget()
 {
     makeCurrent();
     clearLists();
+    FOR(i, textureCount) delete [] textureData[i];
+    delete [] textureData;
+    textureData = 0;
 }
 
 void GLWidget::clearLists()
@@ -81,7 +84,9 @@ void GLWidget::clearLists()
     drawSampleLists.clear();
     drawLists.clear();
     drawSampleListCenters.clear();
-    objects.clear();
+    killList.resize(objects.size());
+    FOR(i, objects.size()) killList[i] = i;
+    /*
     if(render_fbo->isBound())render_fbo->release();
     //if(texture_fbo && texture_fbo != render_fbo) delete texture_fbo;
     delete render_fbo;
@@ -101,7 +106,24 @@ void GLWidget::clearLists()
     format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
     light_fbo = new QGLFramebufferObject(width,height, format);
     lightBlur_fbo = new QGLFramebufferObject(width,height);
+    */
     mutex->unlock();
+}
+
+void GLWidget::killObjects()
+{
+    if(!killList.size()) return;
+    std::sort(killList.begin(), killList.end(), std::greater<int>());
+    FOR(i, killList.size())
+    {
+        qDebug() << "killing object " << killList[i] << "->" << objects[killList[i]].objectType;
+        objects.erase(objects.begin() + killList[i]);
+    }
+    killList.clear();
+    FOR(i, objects.size())
+    {
+        qDebug() << "left alive" << i << "->" << objects[i].objectType;
+    }
 }
 
 void GLWidget::initializeGL()
@@ -996,6 +1018,7 @@ void GLWidget::paintGL()
 {
     if(!canvas) return;
     mutex->lock();
+    killObjects();
     generateObjects();
 
     modelViewMatrix.setToIdentity();

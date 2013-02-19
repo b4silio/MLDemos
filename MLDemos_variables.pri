@@ -17,7 +17,13 @@ INCLUDEPATH += . \
 		$${MLPATH}/MLDemos \
 		$${MLPATH}/_3rdParty
 
-win32:LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
+win32{
+    CONFIG(debug){
+        LIBS += -lQtSvgd4 -lQtOpenGLd4 -lQtGuid4 -lQtCored4
+    }else{
+        LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
+    }
+}
 CONFIG(coreLib){
 }else{
     LIBS += -L$$MLPATH -L$$MLPATH/Core -lCore

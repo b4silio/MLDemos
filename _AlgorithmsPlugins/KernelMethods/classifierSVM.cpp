@@ -21,12 +21,15 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "classifierSVM.h"
 #include <nlopt/nlopt.hpp>
 #include <QDebug>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
 ClassifierSVM::ClassifierSVM()
     : svm(0), node(0), x_space(0)
 {
+    dim = 2;
     bMultiClass = true;
     classCount = 0;
     // default values
@@ -263,12 +266,12 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 {
     svm_problem problem;
 
-    int data_dimension = samples[0].size();
+    dim = samples[0].size();
     problem.l = samples.size();
     problem.y = new double[problem.l];
     problem.x = new svm_node *[problem.l];
     KILL(x_space);
-    x_space = new svm_node[(data_dimension+1)*problem.l];
+    x_space = new svm_node[(dim +1)*problem.l];
 
     classMap.clear();
     int cnt=0;
@@ -279,13 +282,13 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 
     FOR(i, problem.l)
     {
-        FOR(j, data_dimension)
+        FOR(j, dim )
         {
-            x_space[(data_dimension+1)*i + j].index = j+1;
-            x_space[(data_dimension+1)*i + j].value = samples[i][j];
+            x_space[(dim +1)*i + j].index = j+1;
+            x_space[(dim +1)*i + j].value = samples[i][j];
         }
-        x_space[(data_dimension+1)*i + data_dimension].index = -1;
-        problem.x[i] = &x_space[(data_dimension+1)*i];
+        x_space[(dim +1)*i + dim ].index = -1;
+        problem.x[i] = &x_space[(dim +1)*i];
         problem.y[i] = newLabels[i];
     }
 
@@ -407,4 +410,228 @@ const char *ClassifierSVM::GetInfoString()
     sprintf(text, "%sC: %f \t nu: %f\n", text, param.C, param.nu);
     sprintf(text, "%sSupport Vectors: %d\n", text, svm->l);
     return text;
+}
+
+void ClassifierSVM::SaveModel(std::string filename)
+{
+    std::cout << "saving SVM model";
+    if(!svm)
+    {
+        std::cout << "Error: Nothing to save!" << std::endl;
+        return; // nothing to save!
+    }
+
+    // Save the dataset to a file
+    std::ofstream file(filename.c_str());
+
+    if(!file){
+        std::cout << "Error: Could not open the file!" << std::endl;
+        return;
+    }
+
+    file << dim << " " << classCount << endl;
+    file << param.svm_type << " " << param.kernel_type << endl;
+    file << (param.kernel_weight==0 ? 0 : param.kernel_dim) << " ";
+    if(param.kernel_weight)
+    {
+        FOR(i, param.kernel_dim) file << param.kernel_weight[i] << " ";
+        file << endl;
+    }
+    file << param.eps << " " << param.C << " " << param.nu << " " << param.p << endl;
+    file << (param.weight_label==0 ? 0 : param.nr_weight);
+    FOR(i, param.nr_weight) file << " " << param.weight_label[i];
+    FOR(i, param.nr_weight) file << " " << param.weight[i];
+    file << endl;
+    file << param.normalizeKernel << " " << param.kernel_norm << " " << param.cache_size << " " << param.shrinking << " " << param.probability << endl;
+
+    if(param.kernel_type == POLY) file << param.degree << " ";
+    if(param.kernel_type == POLY || param.kernel_type == RBF || param.kernel_type == SIGMOID) file << param.gamma << " ";
+    if(param.kernel_type == POLY || param.kernel_type == SIGMOID) file << param.coef0;
+    file << endl;
+
+    file << svm->nr_class << " " << svm->l << endl;
+    FOR(i, svm->nr_class*(svm->nr_class-1)/2) file << svm->rho[i] << " ";
+    file << endl;
+
+    file << (svm->label!=0) << " " << (svm->probA!=0) << " " << (svm->probB!=0) << " " << (svm->nSV!=0) << endl;
+    if(svm->label)
+    {
+        FOR(i, svm->nr_class) file << svm->label[i] << " ";
+        file << endl;
+    }
+    if(svm->probA)
+    {
+        FOR(i, svm->nr_class*(svm->nr_class-1)/2) file << svm->probA[i] << " ";
+        file << endl;
+    }
+    if(svm->probB)
+    {
+        FOR(i, svm->nr_class*(svm->nr_class-1)/2) file << svm->probB[i] << " ";
+        file << endl;
+    }
+    if(svm->nSV)
+    {
+        FOR(i, svm->nr_class) file << svm->nSV[i] << " ";
+        file << endl;
+    }
+
+    file << (param.kernel_type == PRECOMPUTED) << endl;
+    FOR(i, svm->l)
+    {
+        FOR(j, svm->nr_class-1) file << svm->sv_coef[j][i] << " ";
+
+        const svm_node *p = svm->SV[i];
+
+        if(param.kernel_type == PRECOMPUTED) file << (int)(p->value) << " ";
+        else
+        {
+            while(p->index != -1)
+            {
+                file << p->index << " " << p->value << " ";
+                p++;
+            }
+        }
+        file << endl;
+    }
+
+    file << type << " " << bOptimize << endl;
+
+    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
+    {
+        file << it->first << " " << it->second << " ";
+    }
+    file << endl;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++)
+    {
+        file << it->first << " " << it->second << " ";
+    }
+    file << endl;
+
+    file.close();
+}
+
+#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+bool ClassifierSVM::LoadModel(std::string filename)
+{
+    std::cout << "Loading SVM model" << std::endl;
+    if(svm) DEL(svm);
+    if(node) DEL(node);
+    if(x_space) DEL(x_space);
+
+    std::ifstream file(filename.c_str());
+    if(!file.is_open()){
+        std::cout << "Error: Could not open the file!" << std::endl;
+        return false;
+    }
+
+    file >> dim >> classCount;
+
+    svm = new svm_model;
+    file >> param.svm_type >> param.kernel_type;
+    file >> param.kernel_dim;
+    if(param.kernel_dim)
+    {
+        param.kernel_weight= Malloc(double, param.kernel_dim);
+        FOR(i, param.kernel_dim) file >> param.kernel_weight[i];
+    }
+    file >> param.eps >> param.C >> param.nu >> param.p;
+    file >> param.nr_weight;
+    if(param.nr_weight)
+    {
+        param.weight_label = Malloc(int, param.nr_weight);
+        param.weight = Malloc(double, param.nr_weight);
+        FOR(i, param.nr_weight) file >> param.weight_label[i];
+        FOR(i, param.nr_weight) file >> param.weight[i];
+    }
+    file >> param.normalizeKernel >> param.kernel_norm >> param.cache_size >> param.shrinking >> param.probability;
+
+    if(param.kernel_type == POLY) file >> param.degree;
+    if(param.kernel_type == POLY || param.kernel_type == RBF || param.kernel_type == SIGMOID) file >> param.gamma;
+    if(param.kernel_type == POLY || param.kernel_type == SIGMOID) file >> param.coef0;
+
+    file >> svm->nr_class >> svm->l;
+    svm->rho = Malloc(double, svm->nr_class*(svm->nr_class-1)/2);
+    FOR(i, svm->nr_class*(svm->nr_class-1)/2) file >> svm->rho[i];
+
+    int label, probA, probB, nSV;
+    file >> label >> probA >> probB >> nSV;
+    if(label)
+    {
+        svm->label = Malloc(int, svm->nr_class);
+        FOR(i, svm->nr_class) file >> svm->label[i];
+    }
+    if(probA)
+    {
+        svm->probA = Malloc(double, svm->nr_class*(svm->nr_class-1)/2);
+        FOR(i, svm->nr_class*(svm->nr_class-1)/2) file >> svm->probA[i];
+    }
+    if(probB)
+    {
+        svm->probB = Malloc(double, svm->nr_class*(svm->nr_class-1)/2);
+        FOR(i, svm->nr_class*(svm->nr_class-1)/2) file >> svm->probB[i];
+    }
+    if(nSV)
+    {
+        svm->nSV = Malloc(int, svm->nr_class);
+        FOR(i, svm->nr_class) file >> svm->nSV[i];
+    }
+
+    bool bPrecomputed;
+    file >> bPrecomputed;
+
+    svm->sv_coef = Malloc(double *, svm->nr_class-1);
+    svm->SV = Malloc(svm_node*, svm->l);
+    FOR(i, svm->nr_class-1) svm->sv_coef[i] = Malloc(double, svm->l);
+    ivec indices;
+    dvec values;
+    int index = 0;
+    double value = 0;
+    FOR(i, svm->l)
+    {
+        FOR(j, svm->nr_class-1) file >> svm->sv_coef[j][i];
+
+        if(bPrecomputed)
+        {
+            param.kernel_type = PRECOMPUTED;
+            file >> value;
+        }
+        else
+        {
+            svm->SV[i] = Malloc(svm_node, dim + 1);
+            FOR(j, dim)
+            {
+                file >> svm->SV[i][j].index;
+                file >> svm->SV[i][j].value;
+            }
+            svm->SV[i][dim].index = -1;
+            svm->SV[i][dim].value = 0;
+        }
+    }
+
+    file >> type >> bOptimize;
+    inverseMap.clear();
+    classMap.clear();
+    FOR(i, classCount)
+    {
+        int first, second;
+        file >> first >> second;
+        inverseMap[first] = second;
+    }
+    FOR(i, classCount)
+    {
+        int first, second;
+        file >> first >> second;
+        classMap[first] = second;
+    }
+
+    classCount = svm->nr_class;
+    FOR(i, classCount)
+    {
+        classes[i] = svm->label[i];
+    }
+
+    file.close();
+    svm->param = param;
+
+    return true;
 }

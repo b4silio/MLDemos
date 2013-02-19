@@ -469,6 +469,37 @@ void MLDemos::SaveParams( QString filename )
         }
         out << "\n";
     }
+    if(canvas->classNames.size())
+    {
+        out << "classNames" << " " << canvas->classNames.size();
+        FORIT(canvas->classNames, int, QString)
+        {
+            int index = it->first;
+            QString name = it->second;
+            name.replace("\n", "_");
+            name.replace(" ", "_");
+            name.replace("\t", "_");
+            out << " " << index << " " << name;
+        }
+        out << "\n";
+    }
+    if(canvas->data->categorical.size())
+    {
+        out << "categorical" << " " << canvas->data->categorical.size();
+        for(map<int,vector<string> >::iterator it=canvas->data->categorical.begin(); it != canvas->data->categorical.end(); it++)
+        {
+            out << " " << it->first << " " << it->second.size();
+            FOR(i, it->second.size())
+            {
+                QString name(it->second[i].c_str());
+                name.replace("\n", "_");
+                name.replace(" ", "_");
+                name.replace("\t", "_");
+                out << " " << name;
+            }
+        }
+        out << "\n";
+    }
     if(classifier)
     {
         int tab = optionsClassify->algoList->currentIndex();
@@ -634,6 +665,39 @@ void MLDemos::LoadParams( QString filename )
             }
             //qDebug() << "dimensions: " << dimensionNames;
         }
+        if(line.startsWith("classNames"))
+        {
+            int namesCount = value;
+            canvas->classNames.clear();
+            FOR(i, namesCount)
+            {
+                int index;
+                QString name;
+                in >> index;
+                in >> name;
+                canvas->classNames[index] = name;
+            }
+        }
+        if(line.startsWith("categorical"))
+        {
+            int namesCount = value;
+            canvas->data->categorical.clear();
+            FOR(i, namesCount)
+            {
+                int index;
+                int dimCount;
+                QString name;
+                in >> index;
+                in >> dimCount;
+                vector<string> cats;
+                FOR(j, dimCount)
+                {
+                    in >> name;
+                    cats.push_back(name.toStdString());
+                }
+                canvas->data->categorical[index] = cats;
+            }
+        }
         if(line.startsWith(classGroup))
         {
             bClass = true;
@@ -784,7 +848,7 @@ void MLDemos::LoadClassifier()
     if(ok)
     {
         if(!classifierMulti.size()) DEL(this->classifier);
-        classifier = 0;
+        this->classifier = 0;
         FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
         this->classifier = classifier;
         tabUsedForTraining = tab;

@@ -1513,6 +1513,40 @@ private:
 	Qfloat *QD;
 };
 
+svm_parameter& svm_parameter::operator= (const svm_parameter &param) {
+    if (this == &param) return *this;
+    svm_type = param.svm_type;
+    kernel_type = param.kernel_type;
+    degree = param.degree;
+    gamma = param.gamma;
+    coef0 = param.coef0;
+    kernel_dim = param.kernel_dim;
+    if(kernel_dim)
+    {
+        if(kernel_weight) free(kernel_weight);
+        kernel_weight = (double*)malloc(sizeof(double)*kernel_dim);
+        memcpy(kernel_weight, param.kernel_weight, kernel_dim*sizeof(double));
+    }
+    normalizeKernel = param.normalizeKernel;
+    kernel_norm = param.kernel_norm;
+    cache_size = param.cache_size;
+    eps = param.eps;
+    C = param.C;
+    nr_weight = param.nr_weight;
+    if(nr_weight)
+    {
+        if(weight) free(weight);
+        if(weight_label) free(weight_label);
+        weight = (double*)malloc(sizeof(double)*nr_weight);
+        weight_label = (int*)malloc(sizeof(int)*nr_weight);
+    }
+    nu = param.nu;
+    p = param.p;
+    shrinking = param.shrinking;
+    probability = param.probability;
+    return *this;
+}
+
 //
 // construct and solve various formulations
 //

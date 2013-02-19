@@ -2571,8 +2571,9 @@ void MLDemos::CanvasTypeChanged()
         {
             if(glw->objects[i].objectType.contains("Reward"))
             {
-                glw->objects.erase(glw->objects.begin() + i);
-                i--;
+                glw->killList.push_back(i);
+                //glw->objects.erase(glw->objects.begin() + i);
+                //i--;
             }
         }
         glw->show();

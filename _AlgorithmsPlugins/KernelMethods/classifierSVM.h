@@ -46,6 +46,8 @@ public:
     const char *GetInfoString();
 	void SetParams(int svmType, float svmC, u32 kernelType, float kernelParam);
     svm_model *GetModel(){return svm;}
+    void SaveModel(std::string filename);
+    bool LoadModel(std::string filename);
 };
 
 #endif // _CLASSIFIER_SVM_H_

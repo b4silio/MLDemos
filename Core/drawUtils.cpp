@@ -1620,8 +1620,10 @@ void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle)
             break;
         }
     }
-    if(oInd != -1) glw->objects[oInd] = o;
-    else glw->objects.push_back(o);
+    if(oInd != -1) glw->killList.push_back(oInd);
+    glw->objects.push_back(o);
+    //if(oInd != -1) glw->objects[oInd] = o;
+    //else glw->objects.push_back(o);
     glw->mutex->unlock();
 
     qDebug() << "done.";
