@@ -262,6 +262,116 @@ void ClassifierSVM::Optimize(svm_problem *problem)
     delete data;
 }
 
+double kernelFunction(svm_model *svm, int d)
+{
+    // sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j)*(x_i-x_j)*(x_i-x_j))
+    double accumulator = 0;
+    int nsv = svm->l;
+    int nclass = svm->nr_class-1;
+    for(int c=0; c<nclass; c++)
+    {
+        double *sv_coef = svm->sv_coef[c];
+        double sum = 0;
+        for(int i=0; i<nsv; i++)
+        {
+            for(int j=0; j<=i; j++)
+            {
+                double diff = svm->SV[i][d].value-svm->SV[j][d].value;
+                double value = -sv_coef[i] * sv_coef[j] * Kernel::k_function(svm->SV[i],svm->SV[j],svm->param) * diff * diff;
+                sum += j==i ? value : 2*value;
+            }
+        }
+        // sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j))
+        accumulator += 0.5*sum;
+    }
+    return 1. - accumulator;
+}
+
+void ClassifierSVM::OptimizeGradient(svm_problem *problem)
+{
+    if( param.kernel_type == LINEAR) return;
+    if( param.kernel_type == POLY) return Optimize(problem);
+    qDebug() << "optimizing kernel weights";
+
+    double gamma = param.gamma;
+    if( param.kernel_type == RBF)
+    {
+        param.kernel_type = RBFWEIGH;
+        param.kernel_dim = dim;
+        param.kernel_weight = new double[dim];
+        FOR(d, dim) param.kernel_weight[d] = param.gamma;
+        param.gamma = 1;
+        svm->param = param;
+    }
+    //delete svm;
+    //svm = svm_train(problem, &param);
+
+    // we begin by computing the kernel dimension
+    dvec sigmas(dim, gamma), newSigmas(dim, gamma);
+    dvec deltas(dim, 0);
+
+    //double oldObj = svm_get_dual_objective_function(svm);
+    double oldObj = 0;
+    qDebug() << "Initial objective function" << oldObj;
+    double gammaStep = 5;
+    int iterations = 100;
+    bool bAllZeros = true;
+    FOR(it, iterations)
+    {
+        //QString s1, s2;
+        double norm=0;
+        FOR(d, dim)
+        {
+            double delta = kernelFunction(svm, d);
+            deltas[d] = delta;
+            //s1 += QString("%1 ").arg(delta);
+            norm += deltas[d]*deltas[d];
+        }
+        norm = sqrt(norm);
+        // find the step size
+        //gammaStep = 2;
+        double obj;
+
+        int gammaIter = 10;
+        FOR(i, gammaIter)
+        {
+            QString s;
+            FOR(d, dim)
+            {
+                //if(fabs(deltas[d]) <= 1e-4) continue;
+                newSigmas[d] = sigmas[d] - deltas[d]*gammaStep;
+                newSigmas[d] = max(0.,newSigmas[d]);
+                s += QString("%1 ").arg(1./newSigmas[d],0,'f',3);
+            }
+            FOR(d, dim) param.kernel_weight[d] = newSigmas[d];
+            DEL(svm);
+            svm = svm_train(problem, &param);
+            obj = svm_get_dual_objective_function(svm);
+            qDebug() << "it" << it << i << "obj" << obj << "(" << oldObj << ")" << "gamma step" << gammaStep << "gamma" << s;
+            if(obj < oldObj)
+            {
+                break;
+            }
+            gammaStep *= 0.5;
+        }
+        FOR(d, dim) sigmas[d] = newSigmas[d];
+        if(obj > oldObj)
+        {
+            DEL(svm);
+            FOR(d, dim) param.kernel_weight[d] = sigmas[d];
+            svm = svm_train(problem, &param);
+            break;
+        }
+
+        //qDebug() << "iteration" << it << "norm" << norm;
+        //qDebug() << "\tobjective function" << obj;
+        //qDebug() << "\tdelta" << s1;
+        //qDebug() << "\tgamma" << s2;
+        if(fabs(oldObj-obj) < 1e-5) break;
+        oldObj = obj;
+    }
+}
+
 void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 {
     svm_problem problem;
@@ -292,11 +402,11 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
         problem.y[i] = newLabels[i];
     }
 
-    DEL(svm);
+    delete(svm);
     DEL(node);
     svm = svm_train(&problem, &param);
 
-    if(bOptimize) Optimize(&problem);
+    if(bOptimize) OptimizeGradient(&problem);
 
     delete [] problem.x;
     delete [] problem.y;
@@ -510,7 +620,8 @@ void ClassifierSVM::SaveModel(std::string filename)
     file.close();
 }
 
-#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+//#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+#define Malloc(type,n) new type[n]
 bool ClassifierSVM::LoadModel(std::string filename)
 {
     std::cout << "Loading SVM model" << std::endl;
