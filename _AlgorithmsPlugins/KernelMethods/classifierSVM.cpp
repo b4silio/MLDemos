@@ -264,7 +264,7 @@ void ClassifierSVM::Optimize(svm_problem *problem)
 
 double kernelFunction(svm_model *svm, int d)
 {
-    // sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j)*(x_i-x_j)*(x_i-x_j))
+    // 1 - 0.5 * sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j)*(x_i-x_j)*(x_i-x_j)) / C
     double accumulator = 0;
     int nsv = svm->l;
     int nclass = svm->nr_class-1;
@@ -277,23 +277,24 @@ double kernelFunction(svm_model *svm, int d)
             for(int j=0; j<=i; j++)
             {
                 double diff = svm->SV[i][d].value-svm->SV[j][d].value;
-                double value = -sv_coef[i] * sv_coef[j] * Kernel::k_function(svm->SV[i],svm->SV[j],svm->param) * diff * diff;
+                double value = - sv_coef[i] * sv_coef[j] * Kernel::k_function(svm->SV[i],svm->SV[j],svm->param);
+                value *= diff * diff;
                 sum += j==i ? value : 2*value;
             }
         }
-        // sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j))
         accumulator += 0.5*sum;
     }
-    return 1. - accumulator;
+    return 1 - accumulator/svm->param.C;
 }
 
 void ClassifierSVM::OptimizeGradient(svm_problem *problem)
 {
-    if( param.kernel_type == LINEAR) return;
+    if( param.kernel_type == LINEAR || param.kernel_type == SIGMOID || param.kernel_type == RBFWMATRIX) return;
     if( param.kernel_type == POLY) return Optimize(problem);
     qDebug() << "optimizing kernel weights";
 
     double gamma = param.gamma;
+    double C = param.C;
     if( param.kernel_type == RBF)
     {
         param.kernel_type = RBFWEIGH;
@@ -301,21 +302,48 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
         param.kernel_weight = new double[dim];
         FOR(d, dim) param.kernel_weight[d] = param.gamma;
         param.gamma = 1.;
+        param.C = 1.;
         svm->param = param;
     }
-    //delete svm;
-    //svm = svm_train(problem, &param);
+    delete svm;
+    svm = svm_train(problem, &param);
+
+    QString s;
+    /*
+    int count = problem->l;
+    FOR(d, dim)
+    {
+        float mean = 0, sigma = 0;
+        FOR(i, count)
+        {
+            qDebug() << "d" << d << "i" << i << problem->x[i][d].index;
+            mean += problem->x[i][d].value;
+            count++;
+        }
+        mean /= count;
+        FOR(i, count)
+        {
+            float diff = problem->x[i][d].value - mean;
+            sigma += diff*diff;
+        }
+        sigma /= count;
+        sigma = sqrtf(sigma);
+        param.kernel_weight[d] = sigma*pow(4./3.,0.2)*pow(count,-0.2);
+        s += QString("%1 ").arg(param.kernel_weight[d]);
+    }
+    */
 
     // we begin by computing the kernel dimension
-    dvec sigmas(dim, gamma), newSigmas(dim, gamma);
+    dvec gammas(dim, gamma), newGammas(dim, gamma);
     dvec deltas(dim, 0);
 
-    //double oldObj = svm_get_dual_objective_function(svm);
+    double firstObj = svm_get_dual_objective_function(svm);
     double oldObj = 0;
-    qDebug() << "Initial objective function" << oldObj;
-    double gammaStep = 5;
-    int iterations = 100;
+    qDebug() << "Initial objective function" << oldObj << "gamma" << s;
+    double gammaStep = 1;
+    int iterations = 30;
     bool bAllZeros = true;
+    int restarts = 0;
     FOR(it, iterations)
     {
         //QString s1, s2;
@@ -332,40 +360,49 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
         //gammaStep = 2;
         double obj;
 
+        // armijo's rule
+        double beta = 0.5; // the decay factor for the step
+        double scale = 0.5; // the scaling for the acceptance of a step
         int gammaIter = 10;
         FOR(i, gammaIter)
         {
-            QString s;
+            QString s, s1, ds;
             FOR(d, dim)
             {
                 //if(fabs(deltas[d]) <= 1e-4) continue;
-                newSigmas[d] = sigmas[d] - deltas[d]*gammaStep;
-                newSigmas[d] = max(0.,newSigmas[d]);
-                s += QString("%1 ").arg(1./newSigmas[d],0,'f',3);
+                newGammas[d] = gammas[d] - deltas[d]*gammaStep;
+                newGammas[d] = max(0.,newGammas[d]);
+                s += QString("%1 ").arg(1./newGammas[d],0,'f',3);
+                ds += QString("%1 ").arg(deltas[d],0,'f',3);
+                s1 += QString("%1 ").arg(newGammas[d],0,'f',3);
             }
-            FOR(d, dim) param.kernel_weight[d] = newSigmas[d];
+            FOR(d, dim) param.kernel_weight[d] = newGammas[d];
             DEL(svm);
             svm = svm_train(problem, &param);
             obj = svm_get_dual_objective_function(svm);
-            //qDebug() << "it" << it << i << "obj" << obj << "(" << oldObj << ")" << "gamma step" << gammaStep << "gamma" << s;
+            qDebug() << "it" << it << i << "obj" << obj << "(" << oldObj << ")" << "gamma step" << gammaStep << "delta" << ds << "gamma" << s1 << "(" << s << ")";
             if(obj < oldObj)
+            //if(obj - oldObj <= scale * gammaStep * norm)
             {
                 break;
             }
-            gammaStep *= 0.5;
+            gammaStep *= beta;
         }
         bAllZeros = true;
-        FOR(d, dim)
+        if(obj < oldObj)
         {
-            sigmas[d] = newSigmas[d];
-            if(sigmas[d] != 0) bAllZeros = false;
+            FOR(d, dim)
+            {
+                gammas[d] = newGammas[d];
+                if(gammas[d] != 0) bAllZeros = false;
+            }
         }
         if(obj > oldObj)
         {
             DEL(svm);
             FOR(d, dim)
             {
-                param.kernel_weight[d] = sigmas[d];
+                param.kernel_weight[d] = gammas[d];
             }
             svm = svm_train(problem, &param);
             break;
@@ -373,24 +410,34 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
 
         if(bAllZeros)
         {
-            qDebug() << "starting again!";
-            FOR(d, dim) param.kernel_weight[d] = sigmas[d] = drand48();
+            FOR(d, dim)
+            {
+                gammas[d] = gamma;
+                param.kernel_weight[d] = gammas[d];
+            }
+            param.C = param.C*2;
             it = 0;
+            oldObj = firstObj;
+            restarts++;
+            if(restarts > 10) break;
+            qDebug() << "starting again!" << "C" << param.C << "gamma" << gammas[0];
         }
-
-        //qDebug() << "iteration" << it << "norm" << norm;
-        //qDebug() << "\tobjective function" << obj;
-        //qDebug() << "\tdelta" << s1;
-        //qDebug() << "\tgamma" << s2;
-        if(fabs(oldObj-obj) < 1e-5) break;
-        oldObj = obj;
+        else
+        {
+            if(fabs(oldObj-obj) < 1e-5) break;
+            oldObj = obj;
+        }
     }
-    QString s;
+    s = "";
     FOR(d, dim)
     {
-        s += QString("%1 ").arg(1. / sigmas[d]);
+        s += QString("%1 ").arg(1. / gammas[d]);
     }
     qDebug() << "gamma" << s;
+
+    param.C = C;
+    DEL(svm);
+    svm = svm_train(problem, &param);
 }
 
 void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)

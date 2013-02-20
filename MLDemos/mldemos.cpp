@@ -170,7 +170,11 @@ void MLDemos::initToolBars()
 
     actionClearData = new QAction(QIcon(":/MLDemos/icons/cleardata.png"), tr("Clear Data"), this);
     actionClearData->setShortcut(QKeySequence(tr("X")));
-    actionClearData->setStatusTip(tr("Clear all data"));
+    actionClearData->setStatusTip(tr("Clear data (Keep models)"));
+
+    actionClearAll = new QAction(QIcon(":/MLDemos/icons/clearall.png"), tr("Clear Data and Model"), this);
+    actionClearAll->setShortcut(QKeySequence(tr("X")));
+    actionClearAll->setStatusTip(tr("Clear data and model"));
 
     actionScreenshot = new QAction(QIcon(":/MLDemos/icons/screenshot.png"), tr("Save Screenshot"), this);
     actionScreenshot->setShortcut(QKeySequence(tr("Alt+S")));
@@ -194,6 +198,7 @@ void MLDemos::initToolBars()
     connect(actionGridsearch, SIGNAL(triggered()), this, SLOT(ShowGridSearch()));
     connect(generator, SIGNAL(finished(int)), this, SLOT(HideAddData()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
+    connect(actionClearAll, SIGNAL(triggered()), this, SLOT(ClearAll()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
     connect(actionScreenshot, SIGNAL(triggered()), this, SLOT(Screenshot()));
     connect(actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
@@ -226,6 +231,7 @@ void MLDemos::initToolBars()
     toolBar->addSeparator();
     toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
+    toolBar->addAction(actionClearAll);
     toolBar->addSeparator();
     toolBar->addAction(actionDrawSamples);
     toolBar->addAction(actionAddData);
@@ -288,6 +294,10 @@ void MLDemos::initToolBars()
     drawToolbar->moveButton->setIcon(QIcon(":/MLDemos/icons/move.png"));
     drawToolbar->moveButton->setIconSize(iconSize);
     drawToolbar->moveButton->setText("");
+    drawToolbar->moveClassButton->setAutoExclusive(true);
+    drawToolbar->moveClassButton->setIcon(QIcon(":/MLDemos/icons/move-class.png"));
+    drawToolbar->moveClassButton->setIconSize(iconSize);
+    drawToolbar->moveClassButton->setText("");
     drawToolbar->extrudeButton->setAutoExclusive(true);
     drawToolbar->extrudeButton->setIcon(QIcon(":/MLDemos/icons/extrude.png"));
     drawToolbar->extrudeButton->setIconSize(iconSize);
@@ -992,6 +1002,7 @@ void MLDemos::closeEvent(QCloseEvent *event)
         DEL(dynamical);
         if(!classifierMulti.size()) DEL(classifier);
         classifier = 0;
+        sourceDims.clear();
         FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
         DEL(maximizer);
         DEL(reinforcement);
@@ -1358,6 +1369,7 @@ void MLDemos::Clear()
     qApp->processEvents();
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(regressor);
     DEL(dynamical);
@@ -1365,6 +1377,7 @@ void MLDemos::Clear()
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
+    sourceDims.clear();
     glw->clearLists();
     canvas->maps.confidence = QPixmap();
     canvas->maps.model = QPixmap();
@@ -1436,6 +1449,21 @@ void MLDemos::ChangeActiveOptions()
 }
 
 void MLDemos::ClearData()
+{
+    sourceData.clear();
+    sourceLabels.clear();
+    projectedData.clear();
+    if(canvas)
+    {
+        canvas->sampleColors.clear();
+        canvas->data->Clear();
+        canvas->maps.model = QPixmap();
+    }
+    UpdateInfo();
+    canvas->repaint();
+}
+
+void MLDemos::ClearAll()
 {
     sourceData.clear();
     sourceLabels.clear();
@@ -1864,8 +1892,9 @@ void MLDemos::DrawCrosshair()
     {
         if(drawToolbar->dragButton->isChecked()) drawType = -1;
         if(drawToolbar->moveButton->isChecked()) drawType = -2;
-        if(drawToolbar->extrudeButton->isChecked()) drawType = -3;
-        if(drawToolbar->sprayClassButton->isChecked()) drawType = -4;
+        if(drawToolbar->moveClassButton->isChecked()) drawType = -3;
+        if(drawToolbar->extrudeButton->isChecked()) drawType = -4;
+        if(drawToolbar->sprayClassButton->isChecked()) drawType = -5;
     }
     else if(drawToolbar->tabWidget->currentIndex() == 2)
     {
@@ -1913,7 +1942,7 @@ void MLDemos::DrawCrosshair()
     case 3: // erase
     case 9: // spray 3D
     case -2: // move points
-    case -4:  // spray class
+    case -5:  // spray class
     {
         cursor.addEllipse(QPoint(0,0),size/2,size/2);
         canvas->crosshair = cursor;
@@ -1999,8 +2028,9 @@ void MLDemos::Drawing( fvec sample, int label)
     {
         if(drawToolbar->dragButton->isChecked()) drawType = -1;
         if(drawToolbar->moveButton->isChecked()) drawType = -2;
-        if(drawToolbar->extrudeButton->isChecked()) drawType = -3;
-        if(drawToolbar->sprayClassButton->isChecked()) drawType = -4;
+        if(drawToolbar->moveClassButton->isChecked()) drawType = -3;
+        if(drawToolbar->extrudeButton->isChecked()) drawType = -4;
+        if(drawToolbar->sprayClassButton->isChecked()) drawType = -5;
     }
     else if(drawToolbar->tabWidget->currentIndex() == 2)
     {
@@ -2027,6 +2057,7 @@ void MLDemos::Drawing( fvec sample, int label)
         // we don't want to draw too often
         if(drawTime.elapsed() < 50/speed) return; // msec elapsed since last drawing
         canvas->data->AddSample(sample, label);
+        if(!selectedData.size()) selectedData.push_back(0);
     }
         break;
     case 2: // spray samples
@@ -2089,6 +2120,7 @@ void MLDemos::Drawing( fvec sample, int label)
                     while(canvas->center.size() < dim) canvas->center.push_back(0.f);
                 }
             }
+            if(!selectedData.size()) selectedData.push_back(0);
         }
     }
         break;
@@ -2253,7 +2285,26 @@ void MLDemos::Editing(int editType, fvec position, int label)
             selectionStart = position;
         }
             break;
-        case 3: // extrude points across the vertical
+        case 3: // drag multiple points of the same class
+        {
+            ivec closestSample = canvas->SelectSamples(center,-1);
+            if(closestSample.size())
+            {
+                int closest = closestSample[0];
+                int closestLabel = canvas->data->GetLabel(closest);
+                selectedData.clear();
+                selectionWeights.clear();
+                FOR(i, canvas->data->GetCount())
+                {
+                    if(canvas->data->GetLabel(i) != closestLabel) continue;
+                    selectedData.push_back(i);
+                    selectionWeights.push_back(1);
+                }
+                selectionStart = position;
+            }
+        }
+            break;
+        case 4: // extrude points across the vertical
         {
             selectionStart = position;
             selectedData = ivec(canvas->data->GetCount());
@@ -2265,7 +2316,7 @@ void MLDemos::Editing(int editType, fvec position, int label)
             FOR(i, selectedData.size()) selectionWeights[i] = canvas->data->GetSample(i)[yIndex] + drand48()*2.f - 1.f;
         }
             break;
-        case 4: // change sample labels
+        case 5: // change sample labels
         {
             int newLabel = drawToolbar->classSpin->value();
             selectedData = canvas->SelectSamples(center, radius);
@@ -2274,6 +2325,7 @@ void MLDemos::Editing(int editType, fvec position, int label)
                 canvas->data->SetLabel(selectedData[i], newLabel);
             }
             selectedData.clear();
+            canvas->sampleColors.clear();
         }
             break;
         }
@@ -2283,6 +2335,7 @@ void MLDemos::Editing(int editType, fvec position, int label)
     {
     case 1:
     case 2:
+    case 3:
     {
         FOR(i, selectedData.size())
         {
@@ -2294,11 +2347,13 @@ void MLDemos::Editing(int editType, fvec position, int label)
             }
             sample += (position - selectionStart)*weight;
             canvas->data->SetSample(selectedData[i], sample);
+            canvas->sampleColors.clear();
+            canvas->maps.model = QPixmap();
         }
         selectionStart = position;
     }
         break;
-    case 3:
+    case 4:
     {
         int yIndex = canvas->yIndex;
         float diff = (position - selectionStart)[yIndex];
@@ -2320,8 +2375,16 @@ void MLDemos::Editing(int editType, fvec position, int label)
 
 void MLDemos::DrawingStopped()
 {
+    if(selectedData.size() || (canvas->sampleColors.size() && canvas->sampleColors.size() != canvas->data->GetCount()))
+    {
+        if(classifier) DrawClassifiedSamples(canvas, classifier, classifierMulti);
+        if(clusterer) clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+        if(regressor) regressors[tabUsedForTraining]->Draw(canvas, regressor);
+        if(dynamical) dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+    }
     selectedData.clear();
     selectionStart = fvec();
+
     if(trajectory.first != -1)
     {
         // the last point is a duplicate, we take it out
@@ -2748,6 +2811,13 @@ void MLDemos::Navigation( fvec sample )
     if(classifier)
     {
         float score;
+        if(sourceDims.size())
+        {
+            fvec newSample(sourceDims.size());
+            FOR(d, sourceDims.size()) newSample[d] = sample[sourceDims[d]];
+            sample = newSample;
+        }
+
         if(classifier->IsMultiClass())
         {
             fvec res = classifier->TestMulti(sample);
@@ -3363,7 +3433,14 @@ void MLDemos::QueryClassifier(std::vector<fvec> samples)
         results.resize(samples.size());
         FOR(i, samples.size())
         {
-            result[0] = classifier->Test(samples[i]);
+            fvec sample = samples[i];
+            if(sourceDims.size())
+            {
+                fvec newSample(sourceDims.size());
+                FOR(d, sourceDims.size()) newSample[d] = sample[sourceDims[d]];
+                sample = newSample;
+            }
+            result[0] = classifier->Test(sample);
             results[i] = result;
         }
     }

@@ -99,6 +99,7 @@ public:
     int canvasType;
     std::vector<QColor> sampleColors;
     QStringList dimNames;
+    ivec sourceDims;
     std::map<int,QString> classNames;
 	QString GetClassString(int classNumber);
 

@@ -155,7 +155,7 @@ void DrawSVG::DrawClassificationSamples(Canvas *canvas, QPainter &painter, Class
     painter.setRenderHint(QPainter::Antialiasing, true);
     FOR(i, canvas->data->GetCount())
     {
-        fvec sample = canvas->data->GetSample(i);
+        fvec sample = canvas->sourceDims.size() ? canvas->data->GetSampleDim(i, canvas->sourceDims) : canvas->data->GetSample(i);
         int label = canvas->data->GetLabel(i);
         QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
         fvec res;

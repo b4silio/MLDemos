@@ -71,7 +71,7 @@ class MLDemos : public QMainWindow
 private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
-	*actionClearData, *actionClearModel, *actionScreenshot,
+    *actionClearData, *actionClearModel, *actionClearAll, *actionScreenshot,
     *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
@@ -192,6 +192,7 @@ public:
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
     ivec sourceLabels;
+    ivec sourceDims;
     ivec selectedData;
     fvec selectionWeights;
     fvec selectionStart;
@@ -261,7 +262,8 @@ private slots:
 	void CompareScreenshot();
     void AddData();
     void Clear();
-	void ClearData();
+    void ClearData();
+    void ClearAll();
     void ShowDataEditor();
     void SetROCInfo();
     void LoadClassifier();

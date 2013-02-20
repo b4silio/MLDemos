@@ -77,6 +77,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
 
     ivec inputDims = GetInputDimensions();
     vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
+    sourceDims = inputDims;
 
     vector<fvec> trainSamples, testSamples;
     ivec trainLabels, testLabels;
@@ -424,11 +425,11 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
         outputIndexInList = i;
         break;
     }
+    sourceDims = inputDims;
 
     vector<fvec> samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
     ivec labels = canvas->data->GetLabels();
     if(!samples.size()) return;
-    int cnt = samples.size();
     int dim = samples[0].size();
     if(dim < 2) return;
 
@@ -889,6 +890,7 @@ void MLDemos::Compare()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(projector);
@@ -1057,6 +1059,7 @@ void MLDemos::Compare()
                 }
                 if(!classifierMulti.size()) DEL(classifier);
                 classifier = 0;
+                sourceDims.clear();
                 FOR(c,classifierMulti.size()) DEL(classifierMulti[c]); classifierMulti.clear();
 
                 progress.setValue(f + i*folds);
@@ -1131,6 +1134,7 @@ void MLDemos::Compare()
                     resultTest.push_back(error);
                 }
                 DEL(regressor);
+                sourceDims.clear();
 
                 progress.setValue(f + i*folds);
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);

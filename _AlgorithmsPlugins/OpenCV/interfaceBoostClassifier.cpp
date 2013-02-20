@@ -160,11 +160,6 @@ void ClassBoost::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classif
     bool bUseMinMax = false;
     bUseMinMax = true;
 
-    float resMin = FLT_MAX;
-    float resMax = -FLT_MAX;
-    std::vector<fvec> samples = canvas->data->GetSamples();
-    ivec labels = canvas->data->GetLabels();
-
     ClassifierBoost *boost = dynamic_cast<ClassifierBoost*>(classifier);
     if(!boost) return;
     fvec weights = boost->GetErrorWeights();

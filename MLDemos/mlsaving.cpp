@@ -803,7 +803,7 @@ void MLDemos::ExportOutput()
     if(classifier || clusterer || regressor)
     {
         out << "#Sample(n-dims) TrueClass ComputedValue(s)\n";
-        vector<fvec> samples = canvas->data->GetSamples();
+        vector<fvec> samples = sourceDims.size() ? canvas->data->GetSampleDims(sourceDims) : canvas->data->GetSamples();
         ivec labels = canvas->data->GetLabels();
         FOR(i, samples.size())
         {

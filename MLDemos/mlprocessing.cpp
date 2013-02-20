@@ -51,6 +51,7 @@ void MLDemos::Classify()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -82,18 +83,18 @@ void MLDemos::Classify()
         if(canvas->canvasType == 1)
         {
             classifiers[tab]->DrawGL(canvas, glw, classifier);
-            if(canvas->data->GetDimCount() == 3) Draw3DClassifier(glw, classifier);
+            if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
         }
 
         UpdateInfo();
-        qDebug() << "using draw timer" << classifier->UsesDrawTimer();
         if(drawTimer && classifier->UsesDrawTimer())
         {
             drawTimer->start(QThread::NormalPriority);
         }
         if(canvas->canvasType) CanvasOptionsChanged();
         // we fill in the canvas sampleColors
-        vector<fvec> samples = canvas->data->GetSamples();
+        ivec inputDims = GetInputDimensions();
+        vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
         canvas->sampleColors.resize(samples.size());
         FOR(i, samples.size())
         {
@@ -160,6 +161,7 @@ void MLDemos::Regression()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -273,6 +275,7 @@ void MLDemos::Dynamize()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -526,6 +529,7 @@ void MLDemos::Cluster()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -640,6 +644,7 @@ void MLDemos::ClusterTest()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -746,6 +751,7 @@ void MLDemos::ClusterOptimize()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -1031,6 +1037,7 @@ void MLDemos::Maximize()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -1138,6 +1145,7 @@ void MLDemos::Reinforce()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -1238,6 +1246,7 @@ void MLDemos::Project()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -1300,6 +1309,7 @@ void MLDemos::ProjectManifold()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -1356,6 +1366,7 @@ void MLDemos::ProjectRevert()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
@@ -1409,7 +1420,7 @@ void MLDemos::UpdateLearnedModel()
             if(canvas->canvasType == 1)
             {
                 classifiers[tabUsedForTraining]->DrawGL(canvas, glw, classifier);
-                if(canvas->data->GetDimCount() == 3) Draw3DClassifier(glw, classifier);
+                if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
             }
         }
         else
@@ -1626,11 +1637,14 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
     canvas->maps.model.fill(Qt::transparent);
     QPainter painter(&canvas->maps.model);
 
+    QString s;
+    FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
+
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);
     FOR(i, canvas->data->GetCount())
     {
-        fvec sample = canvas->data->GetSample(i);
+        fvec sample = sourceDims.size() ? canvas->data->GetSampleDim(i, sourceDims) : canvas->data->GetSample(i);
         int label = canvas->data->GetLabel(i);
         QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
         fvec res;
