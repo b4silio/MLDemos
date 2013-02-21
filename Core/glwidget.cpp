@@ -20,6 +20,29 @@ QMatrix4x4 lightMvpMatrix;
 QGLFramebufferObject *lightBlur_fbo;
 QLabel *lightLabel = 0;
 
+void checkGL()
+{
+    GLEnum errors = glGetError();
+
+    switch(errors)
+    {
+    case GL_INVALID_ENUM:
+        qDebug() << "Function called with inappropriate enum.";
+        break;
+    case GL_INVALID_VALUE:
+        qDebug() << "Function called with out of range numeric value.";
+    case GL_INVALID_OPERATION:
+        qDebug() << "Operation performed out of context, or not allowed in the current state";
+        break;
+    case GL_INVALID_FRAMEBUFFER_OPERATION:
+        qDebug() << "Framebuffer object is not complete yet";
+        break;
+    case GL_OUT_OF_MEMORY:
+        qDebug() << "Out of Memory";
+        break;
+    }
+}
+
 GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers),parent), canvas(canvas), zoomFactor(ZoomZero), mutex(new QMutex())
     //    : QGLWidget(QGLFormat(QGL::SampleBuffers|QGL::AlphaChannel),parent), canvas(canvas), zoomFactor(ZoomZero)
@@ -208,10 +231,10 @@ void GLWidget::initializeGL()
     }
 
     glGenTextures(2, textureNames); // 0: samples, 1: wide circles
-	glEnable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
 
-	FOR(i, textureCount)
+    FOR(i, textureCount)
     {
         glBindTexture(GL_TEXTURE_2D, textureNames[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData[i]);
@@ -224,7 +247,7 @@ void GLWidget::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glEnable(GL_BLEND);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -814,11 +837,11 @@ void GLWidget::DrawSurfaces(GLObject &o)
         glPolygonOffset(offset, 1.0);
         glEnable(GL_POLYGON_OFFSET_FILL);
     }
-//    glCullFace(GL_BACK);
-//    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+    //    glCullFace(GL_BACK);
+    //    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
     glEnable(GL_BLEND);
-	glBlendEquation(GL_FUNC_ADD);
+    glBlendEquation(GL_FUNC_ADD);
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -856,17 +879,17 @@ void GLWidget::DrawSurfaces(GLObject &o)
         QMatrix4x4 mvpMatrix = perspectiveMatrix * mvMatrix;
         QMatrix3x3 normMatrix = mvMatrix.normalMatrix();
         QVector4D l0pos = modelViewMatrix * QVector4D(lights[0].position[0],
-                                                      lights[0].position[1],
-                                                      lights[0].position[2],
-                                                      lights[0].position[3]);
+                lights[0].position[1],
+                lights[0].position[2],
+                lights[0].position[3]);
         QVector4D l1pos = modelViewMatrix * QVector4D(lights[1].position[0],
-                                                      lights[1].position[1],
-                                                      lights[1].position[2],
-                                                      lights[1].position[3]);
+                lights[1].position[1],
+                lights[1].position[2],
+                lights[1].position[3]);
         QVector4D l2pos = modelViewMatrix * QVector4D(lights[2].position[0],
-                                                      lights[2].position[1],
-                                                      lights[2].position[2],
-                                                      lights[2].position[3]);
+                lights[2].position[1],
+                lights[2].position[2],
+                lights[2].position[3]);
         QGLShaderProgram *program = shaders["SmoothTransparent"];
         program->bind();
         program->setUniformValue("mvMatrix", mvMatrix);
@@ -1085,8 +1108,8 @@ void GLWidget::paintGL()
     render_fbo->bind();
     glEnable(GL_MULTISAMPLE);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
-//	glClearColor(.5f, .5f, .5f, 1.0f);
-	glClearStencil(0);
+    //	glClearColor(.5f, .5f, .5f, 1.0f);
+    glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glPushMatrix();
@@ -1319,7 +1342,7 @@ void GLWidget::RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::ve
     fbo->bind();
     glEnable(GL_MULTISAMPLE);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
-//    glClearColor(.5f, .5f, .5f, 1.0f);
+    //    glClearColor(.5f, .5f, .5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
@@ -1329,7 +1352,7 @@ void GLWidget::RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::ve
     QVector3D lightUp(0,1,0);
     QVector3D lightPos(light.position[0], light.position[1], light.position[2]);
     lightMvMatrix.setToIdentity();
-//    mvMatrix.lookAt(QVector3D(0,0,-40), QVector3D(0,0,0), lightUp);
+    //    mvMatrix.lookAt(QVector3D(0,0,-40), QVector3D(0,0,0), lightUp);
     lightMvMatrix.lookAt(lightPos, QVector3D(0,0,0), lightUp);
     lightPMatrix.setToIdentity();
     lightPMatrix.perspective(90.,1.,zNear,zFar);
