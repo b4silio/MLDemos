@@ -49,7 +49,23 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 
     int cnt=0;
     FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+    bool bBinary = classMap.size() == 2;
+    if(bBinary)
+    {
+        int positive = INT_MIN;
+        int negative;
+        FOR(i, labels.size()) positive = max(positive, labels[i]);
+        FORIT(classMap, int, int)
+        {
+            if(it->first != positive)
+            {
+                negative = it->first;
+                break;
+            }
+        }
+        classMap[negative] = -1;
+    }
+    FORIT(classMap, int, int) inverseMap[it->second] = it->first;
     ivec newLabels(labels.size());
     FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
 

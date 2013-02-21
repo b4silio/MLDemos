@@ -66,7 +66,6 @@ void MLDemos::Classify()
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
     int ratioIndex = optionsClassify->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
-    int positive = optionsClassify->positiveSpin->value();
     vector<bool> trainList;
     if(optionsClassify->manualTrainButton->isChecked())
     {
@@ -74,7 +73,7 @@ void MLDemos::Classify()
         trainList = GetManualSelection();
     }
 
-    bool trained = Train(classifier, positive, trainRatio, trainList);
+    bool trained = Train(classifier, trainRatio, trainList);
     if(trained)
     {
         classifiers[tab]->Draw(canvas, classifier);
@@ -1636,6 +1635,11 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
     canvas->maps.model.setMask(bitmap);
     canvas->maps.model.fill(Qt::transparent);
     QPainter painter(&canvas->maps.model);
+    int posClass = INT_MIN;
+    FORIT(classifier->classMap, int, int)
+    {
+        posClass = max(posClass, it->first);
+    }
 
     QString s;
     FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
@@ -1659,16 +1663,15 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
         else res.push_back(classifier->Test(sample));
         if(res.size()==1)
         {
-            int posClass = 1;
             float response = res[0];
             if(response > 0)
             {
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
+                if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
                 else Canvas::drawCross(painter, point, 6, 2);
             }
             else
             {
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
+                if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
                 else Canvas::drawCross(painter, point, 6, 0);
             }
         }
