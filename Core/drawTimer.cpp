@@ -524,12 +524,14 @@ bool DrawTimer::VectorsGL(int count, int steps)
 
     glw->mutex->lock();
     vector<GLObject> objects = glw->objects;
+    vector<bool> objectAlive = glw->objectAlive;
     glw->mutex->unlock();
 
     int oIndex = -1;
     GLObject o;
     FOR(i, objects.size())
     {
+        if(!objectAlive[i]) continue;
         if(objects[i].objectType.contains("Dynamize"))
         {
             oIndex = i;
@@ -580,7 +582,7 @@ bool DrawTimer::VectorsGL(int count, int steps)
     //if(oIndex != -1) glw->objects[oIndex] = o;
     //else glw->objects.push_back(o);
     if(oIndex != -1) glw->killList.push_back(oIndex);
-    glw->objects.push_back(o);
+    glw->AddObject(o);
     glw->mutex->unlock();
     return true;
 }
@@ -682,18 +684,20 @@ void DrawTimer::Maximization()
 
         glw->mutex->lock();
         if(oIndex != -1) glw->killList.push_back(oIndex);
-        glw->objects.push_back(o);
-        //if(oIndex != -1) glw->objects[oIndex] = o;
-        //else glw->objects.push_back(o);
+        glw->AddObject(o);
 
         FOR(i, glw->objects.size())
         {
+            if(!glw->objectAlive[i]) continue;
             if(glw->objects[i].objectType.contains("Maximizer"))
             {
                 glw->killList.push_back(i);
             }
         }
-        if(oList.size()) glw->objects.insert(glw->objects.end(), oList.begin(), oList.end());
+        FOR(i, oList.size())
+        {
+            glw->AddObject(oList[i]);
+        }
         glw->mutex->unlock();
     }
     maximumVisitedCount = visited.size();

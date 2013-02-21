@@ -242,7 +242,8 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.objectType = "Surfaces,quads";
         o.style = "smooth,transparent";
         o.style += QString(",color:%1:%2:%3:0.5").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
-        glw->objects.push_back(o);
+        glw->mutex->lock();
+        glw->AddObject(o);
 
         verts = DrawGaussianLines(1.f, &mean[0], eigVal, eigVec);
         o.objectType = "Lines";
@@ -250,7 +251,7 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.vertices = verts.first;
         o.normals.clear();
         o.model = verts.second;
-        glw->objects.push_back(o);
+        glw->AddObject(o);
 
         verts = DrawGaussianLines(2.f, &mean[0], eigVal, eigVec);
         o.objectType = "Lines";
@@ -258,7 +259,8 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.vertices = verts.first;
         o.normals.clear();
         o.model = verts.second;
-        glw->objects.push_back(o);
+        glw->AddObject(o);
+        glw->mutex->unlock();
 
         //GLuint list = DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
         //glw->drawSampleLists.push_back(list);

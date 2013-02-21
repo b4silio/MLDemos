@@ -24,6 +24,8 @@ class GLWidget : public QGLWidget
 public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
+    void AddObject(GLObject &o);
+    void SetObject(int index, GLObject &o);
     void clearLists();
     void killObjects();
     void generateObjects();
@@ -103,6 +105,7 @@ public:
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;
     std::vector<GLObject> objects;
+    std::vector<bool> objectAlive;
     ivec killList;
     std::vector<GLLight> lights;
     bool bDisplaySamples, bDisplayLines, bDisplaySurfaces, bDisplayTransparency, bDisplayBlurry;

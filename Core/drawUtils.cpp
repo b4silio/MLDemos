@@ -637,7 +637,9 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
     o.style = "smooth,transparent";
     o.style += QString(",isolines:%1").arg(zInd);
     o.style += ",blurry:3,color:1.0:1.0:1.0:0.4";
-    glw->objects.push_back(o);
+    glw->mutex->lock();
+    glw->AddObject(o);
+    glw->mutex->unlock();
 }
 
 void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
@@ -780,7 +782,9 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
             o.style = "smooth,transparent,blurry";
             o.style += QString("color:%1:%2:%3:0.4").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
             o.style += QString(",offset:%1").arg(c*0.5f,0,'f',2);
-            glw->objects.push_back(o);
+            glw->mutex->lock();
+            glw->AddObject(o);
+            glw->mutex->unlock();
             printf("done.\n");
             fflush(stdout);
         }
@@ -825,7 +829,9 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
 
         o.objectType = "Surfaces";
         o.style = "smooth,transparent,blurry:1,color:0:0:0:0.3";
-        glw->objects.push_back(o);
+        glw->mutex->lock();
+        glw->AddObject(o);
+        glw->mutex->unlock();
         printf("done.\n");
         fflush(stdout);
     }
@@ -958,7 +964,9 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
             o.style = "smooth,transparent,blurry:1";
             o.style += QString("color:%1:%2:%3:0.3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
             o.style += QString(",offset:%1").arg((float)c,0,'f',2);
-            glw->objects.push_back(o);
+            glw->mutex->lock();
+            glw->AddObject(o);
+            glw->mutex->unlock();
             printf("done.\n");
             fflush(stdout);
         }
@@ -1003,7 +1011,9 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
 
         o.objectType = "Surfaces";
         o.style = "smooth,transparent,blurry:1,color:1:1:1:0.4";
-        glw->objects.push_back(o);
+        glw->mutex->lock();
+        glw->AddObject(o);
+        glw->mutex->unlock();
         printf("done.\n");
         fflush(stdout);
     }
@@ -1687,6 +1697,7 @@ void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle)
     int oInd = -1;
     FOR(i, glw->objects.size())
     {
+        if(!glw->objectAlive[i]) continue;
         if(glw->objects[i].objectType.contains("Dynamize"))
         {
             oInd = i;
@@ -1694,131 +1705,8 @@ void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle)
         }
     }
     if(oInd != -1) glw->killList.push_back(oInd);
-    glw->objects.push_back(o);
-    //if(oInd != -1) glw->objects[oInd] = o;
-    //else glw->objects.push_back(o);
+    glw->AddObject(o);
     glw->mutex->unlock();
-
-    qDebug() << "done.";
-    return;
-
-/*
-    int steps = 400;
-    int gridSize = 10;
-    int count = gridSize*gridSize*gridSize;
-//    int count = 1024;
-
-    // we generate a bunch of trajectories
-    qDebug() << "generating streamlines";
-    vector<Streamline> streams(count);
-    FOR(i, count)
-    {
-        int index = i;
-        int x = index % gridSize;
-        int y = (index / gridSize) % gridSize;
-        int z = index / (gridSize*gridSize);
-        sample[xInd] = (x/(float)gridSize)*diff + minv;
-        sample[yInd] = (y/(float)gridSize)*diff + minv;
-        sample[zInd] = (z/(float)gridSize)*diff + minv;
-        //FOR(d, dim) sample[d] = drand48()*diff+ minv;
-
-        Streamline s;
-        s.push_back(sample);
-        FOR(j, steps)
-        {
-            fvec res = dynamical->Test(sample);
-            if(dynamical->avoid)
-            {
-                dynamical->avoid->SetObstacles(obstacles);
-                fvec newRes = dynamical->avoid->Avoid(sample, res);
-                res = newRes;
-            }
-            sample += res*dT;
-            if(res*res < 1e-5) break;
-            s.push_back(sample);
-        }
-        streams[i] = s;
-    }
-
-    qDebug() << "clustering streamlines";
-
-    // now we "cluster" them together
-    int nbClusters = 12;
-    int maxIterations = 40;
-    ivec clusters = ClusterStreams(streams, nbClusters, maxIterations);
-    ivec counts(nbClusters,0);
-    FOR(i, nbClusters) seeds[i].resize(dim);
-    FOR(i, streams.size())
-    {
-        streams[i].cluster = clusters[i];
-        seeds[clusters[i]] += streams[i].front();
-        counts[clusters[i]]++;
-    }
-    FOR(i, nbClusters) seeds[i] /= counts[i];
-
-
-    // we add explicitly the training trajectories
-    FOR(i, trajectories.size())
-    {
-        seeds.push_back(trajectories[i][0]);
-    }
-
-    // and now we regenerate our streamlines from the seeds
-    qDebug() << "generating clustered seeds";
-    vector<Streamline> clusteredStreams(seeds.size());
-
-    qDebug() << "generating GLObjects";
-
-    int streamStyle = 1;
-    //GLObject o;
-
-    switch(streamStyle)
-    {
-    case 0: // vector field
-    {
-        o.objectType = "Dynamize,Lines";
-        o.style = "";
-    //    o.style = QString("fading:%1").arg(steps);
-        FOR(i, streams.size())
-        {
-            QColor c = SampleColor[streams[i].cluster%(SampleColorCnt-1)+1];
-            FOR(j, streams[i].length-1)
-            {
-                o.vertices.append(QVector3D(streams[i][j][xInd],streams[i][j][yInd],streams[i][j][zInd]));
-                o.vertices.append(QVector3D(streams[i][j+1][xInd],streams[i][j+1][yInd],streams[i][j+1][zInd]));
-                o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
-                o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
-            }
-        }
-    }
-        break;
-    case 1: // tubes
-    {
-        o = DrawStreamTubes(streams);
-    }
-        break;
-    case 2: // stripes
-    {
-        o = DrawStreamRibbons(streams);
-    }
-        break;
-    }
-
-    // we replace the old vector field (if there is one) with the new one
-    glw->mutex->lock();
-    int oIndex = -1;
-    FOR(i, glw->objects.size())
-    {
-        if(glw->objects[i].objectType.contains("Dynamize"))
-        {
-            oIndex = i;
-            break;
-        }
-    }
-    if(oIndex != -1) glw->objects[oIndex] = o;
-    else glw->objects.push_back(o);
-    glw->mutex->unlock();
-    */
 }
 
 void Draw3DMaximizer(GLWidget *glw, Maximizer *maximizer){}

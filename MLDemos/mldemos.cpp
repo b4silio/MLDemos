@@ -172,7 +172,7 @@ void MLDemos::initToolBars()
     actionClearData->setShortcut(QKeySequence(tr("X")));
     actionClearData->setStatusTip(tr("Clear data (Keep models)"));
 
-    actionClearAll = new QAction(QIcon(":/MLDemos/icons/clearall.png"), tr("Clear Data and Model"), this);
+    actionClearAll = new QAction(QIcon(":/MLDemos/icons/clearall.png"), tr("Clear All"), this);
     actionClearAll->setShortcut(QKeySequence(tr("X")));
     actionClearAll->setStatusTip(tr("Clear data and model"));
 
@@ -2632,6 +2632,7 @@ void MLDemos::CanvasTypeChanged()
         glw->resize(ui.canvasArea->size());
         FOR(i, glw->objects.size())
         {
+            if(!glw->objectAlive[i]) continue;
             if(glw->objects[i].objectType.contains("Reward"))
             {
                 glw->killList.push_back(i);

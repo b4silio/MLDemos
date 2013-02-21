@@ -22,8 +22,7 @@ QLabel *lightLabel = 0;
 
 void checkGL()
 {
-    GLEnum errors = glGetError();
-
+    GLenum errors = glGetError();
     switch(errors)
     {
     case GL_INVALID_ENUM:
@@ -93,6 +92,19 @@ GLWidget::~GLWidget()
     textureData = 0;
 }
 
+void GLWidget::AddObject(GLObject &o)
+{
+    objects.push_back(o);
+    objectAlive.push_back(true);
+}
+
+void GLWidget::SetObject(int index, GLObject &o)
+{
+    if (index < 0 || index > objects.size()) return;
+    objects[index] = o;
+    objectAlive[index] = true;
+}
+
 void GLWidget::clearLists()
 {
     mutex->lock();
@@ -109,43 +121,34 @@ void GLWidget::clearLists()
     drawSampleListCenters.clear();
     killList.resize(objects.size());
     FOR(i, objects.size()) killList[i] = i;
-    /*
-    if(render_fbo->isBound())render_fbo->release();
-    //if(texture_fbo && texture_fbo != render_fbo) delete texture_fbo;
-    delete render_fbo;
-    delete light_fbo;
-    delete lightBlur_fbo;
-    if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
-        QGLFramebufferObjectFormat format;
-        format.setSamples(64);
-        format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
-        render_fbo = new QGLFramebufferObject(width, height, format);
-        texture_fbo = new QGLFramebufferObject(width, height);
-    } else {
-        render_fbo = new QGLFramebufferObject(width*2, height*2);
-        texture_fbo = render_fbo;
-    }
-    QGLFramebufferObjectFormat format;
-    format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
-    light_fbo = new QGLFramebufferObject(width,height, format);
-    lightBlur_fbo = new QGLFramebufferObject(width,height);
-    */
     mutex->unlock();
 }
 
 void GLWidget::killObjects()
 {
     if(!killList.size()) return;
+    objectAlive.resize(objects.size(), true);
     std::sort(killList.begin(), killList.end(), std::greater<int>());
     FOR(i, killList.size())
     {
+#ifdef WIN32
         qDebug() << "killing object " << killList[i] << "->" << objects[killList[i]].objectType;
+        //objects.erase(objects.begin() + killList[i]);
+        objectAlive[killList[i]] = false;
+        GLObject &o = objects[killList[i]];
+        o.vertices.clear();
+        //o.barycentric.clear();
+        //o.colors.clear();
+        //o.normals.clear();
+#else
         objects.erase(objects.begin() + killList[i]);
+        objectAlive.erase(objectAlive.begin() + killList[i]);
+#endif
     }
     killList.clear();
     FOR(i, objects.size())
     {
-        qDebug() << "left alive" << i << "->" << objects[i].objectType;
+        qDebug() << i << (objectAlive[i] ? "alive" : "dead") << "->" << objects[i].objectType << "->" << objects[i].vertices.size();
     }
 }
 
@@ -375,17 +378,23 @@ void GLWidget::generateObjects()
         if(objects[i].objectType.contains("trajectories"))
         {
             objects.erase(objects.begin()+i);
+            objectAlive.erase(objectAlive.begin() + i);
             i--;
         }
         else if(!bReplacedSamples && objects[i].objectType.contains("Samples,Canvas"))
         {
             objects[i] = oSamples;
+            objectAlive[i] = true;
             bReplacedSamples = true;
         }
     }
-    if(!bReplacedSamples) objects.push_back(oSamples);
+    if(!bReplacedSamples)
+    {
+        objects.push_back(oSamples);
+        objectAlive.push_back(true);
+    }
     objects.insert(objects.end(),oTrajs.begin(),oTrajs.end());
-
+    objectAlive.resize(objects.size(), true);
 
     if(!canvas->maps.reward.isNull())
     {
@@ -426,6 +435,7 @@ void GLWidget::generateObjects()
             o.objectType = "Surfaces,Reward,quads";
             o.style = "smooth,color:1:0.7:0.7:1,specularity:0.2,shininess:8";
             objects.push_back(o);
+            objectAlive.push_back(true);
             KILL(values);
             printf("reward mesh generated: %d vertices (%d normals)\n", o.vertices.size(), o.normals.size());fflush(stdout);
         }
@@ -510,49 +520,78 @@ void GLWidget::DrawSamples(GLObject &o)
 
     QGLShaderProgram *program = bDisplayShadows ? shaders["SamplesShadow"] : shaders["Samples"];
     program->bind();
+    checkGL();
     program->enableAttributeArray(0);
+    checkGL();
     program->enableAttributeArray(1);
+    checkGL();
     program->setAttributeArray(0, o.vertices.constData());
+    checkGL();
     program->setAttributeArray(1, o.colors.constData());
+    checkGL();
     program->setUniformValue("matrix", modelViewProjectionMatrix);
+    checkGL();
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+    checkGL();
     glDisable(GL_LIGHTING);
+    checkGL();
     glEnable(GL_DEPTH_TEST);
+    checkGL();
     glDepthMask(GL_TRUE);
+    checkGL();
     glEnable(GL_BLEND);
+    checkGL();
     glEnable(GL_ALPHA_TEST);
+    checkGL();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    checkGL();
 
     glActiveTexture(GL_TEXTURE0);
+    checkGL();
     glEnable(GL_TEXTURE_2D);
+    checkGL();
     glEnable(GL_POINT_SPRITE);
+    checkGL();
     if(o.style.contains("rings")) glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[1]);
     else glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[0]);
+    checkGL();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    checkGL();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    checkGL();
     program->setUniformValue("color_texture", 0);
+    checkGL();
 
     if(bDisplayShadows)
     {
         glEnable(GL_LIGHTING);
+        checkGL();
         program->setUniformValue("lightMvpMatrix", lightMvpMatrix);
         program->setUniformValue("lightMvMatrix", lightMvMatrix);
         glActiveTexture(GL_TEXTURE1);
+        checkGL();
         glEnable(GL_TEXTURE_2D);
+        checkGL();
         glBindTexture(GL_TEXTURE_2D, light_fbo->texture());
+        checkGL();
         program->setUniformValue("shadow_texture", 1);
         program->setUniformValue("pointSize", pointSize);
         glActiveTexture(GL_TEXTURE0);
+        checkGL();
     }
 
     glEnable(GL_PROGRAM_POINT_SIZE_EXT);
+    checkGL();
     glPointSize(pointSize);
+    checkGL();
 
     // we actually draw stuff!
     glDrawArrays(GL_POINTS,0,o.vertices.size());
+    checkGL();
 
     glPopAttrib();
+    checkGL();
 
     program->release();
 }
@@ -1106,6 +1145,7 @@ void GLWidget::paintGL()
     }
 
     render_fbo->bind();
+    checkGL();
     glEnable(GL_MULTISAMPLE);
     glClearColor(1.f, 1.f, 1.f, 1.0f);
     //	glClearColor(.5f, .5f, .5f, 1.0f);
@@ -1121,12 +1161,14 @@ void GLWidget::paintGL()
     glTranslatef(xPos, yPos, zPos);
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+    checkGL();
 
     bool bBlurry = false;
     if(bDisplayBlurry && bDisplayTransparency)
     {
         FOR(i, objects.size())
         {
+            if(!objectAlive[i]) continue;
             if(objects[i].objectType.contains("Surface") && objects[i].style.contains("blurry"))
             {
                 bBlurry = true;
@@ -1141,9 +1183,11 @@ void GLWidget::paintGL()
             glEnable(GL_STENCIL_TEST);
             glStencilFunc(GL_ALWAYS, 1, 1);
             glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+            checkGL();
             int blurAmount = 3;
             FOR(i, objects.size())
             {
+                if(!objectAlive[i]) continue;
                 if(objects[i].objectType.contains("Surface") && objects[i].style.contains("blurry"))
                 {
                     QStringList params = objects[i].style.split(",");
@@ -1162,6 +1206,7 @@ void GLWidget::paintGL()
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
             glStencilFunc(GL_EQUAL, 1, 1);
             glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+            checkGL();
 
             // then we draw all the stuff that is BEHIND the surfaces
             glDepthFunc(GL_GREATER);
@@ -1171,6 +1216,7 @@ void GLWidget::paintGL()
             // DrawLights(lights);
             FOR(i, objects.size())
             {
+                if(!objectAlive[i]) continue;
                 if(objects[i].objectType.contains("Canvas"))
                 {
                     if(objects[i].objectType.contains("trajectories"))
@@ -1197,6 +1243,7 @@ void GLWidget::paintGL()
             }
             FOR(i, objects.size())
             {
+                if(!objectAlive[i]) continue;
                 if(objects[i].objectType.contains("Canvas")) continue;
                 if(objects[i].objectType.contains("Surface") && objects[i].style.contains("blurry")) continue;
                 DrawObject(objects[i]);
@@ -1218,6 +1265,7 @@ void GLWidget::paintGL()
             glDisable(GL_STENCIL_TEST);
             FOR(i, objects.size())
             {
+                if(!objectAlive[i]) continue;
                 if(objects[i].objectType.contains("Surfaces") && objects[i].style.contains("blurry"))
                     DrawObject(objects[i]);
             }
@@ -1230,6 +1278,7 @@ void GLWidget::paintGL()
 
     FOR(i, objects.size())
     {
+        if(!objectAlive[i]) continue;
         if(objects[i].objectType.contains("Canvas"))
         {
             if(objects[i].objectType.contains("trajectories"))
@@ -1255,6 +1304,7 @@ void GLWidget::paintGL()
     }
     FOR(i, objects.size())
     {
+        if(!objectAlive[i]) continue;
         if(objects[i].objectType.contains("Canvas")) continue;
         if(bDisplayBlurry && bDisplayTransparency &&
                 objects[i].objectType.contains("Surface") &&

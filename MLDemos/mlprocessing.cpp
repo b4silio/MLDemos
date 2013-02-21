@@ -1105,6 +1105,7 @@ void MLDemos::Maximize()
 
     FOR(i, glw->objects.size())
     {
+        if(!glw->objectAlive[i]) continue;
         if(glw->objects[i].objectType.contains("Maximization"))
         {
             glw->killList.push_back(i);
