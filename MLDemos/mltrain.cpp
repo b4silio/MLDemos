@@ -35,26 +35,35 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec trainList)
+bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex)
 {
     if(!classifier) return false;
     ivec labels = canvas->data->GetLabels();
     ivec newLabels;
     std::map<int,int> binaryClassMap, binaryInverseMap;
     int classCount = DatasetManager::GetClassCount(labels);
+    int positive = INT_MIN; // positive class is always the largest class index
+    int negative = 0;
+    FOR(i, labels.size()) positive = max(positive, labels[i]);
+    int cnt=0;
+    FOR(i, labels.size()) if(!binaryClassMap.count(labels[i])) binaryClassMap[labels[i]] = cnt++;
+    FORIT(binaryClassMap, int, int)
+    {
+        binaryInverseMap[it->second] = it->first;
+        if(it->first != positive) negative = it->first;
+    }
+    if(positiveIndex != -1)
+    {
+        positive = positiveIndex;
+        negative = -positiveIndex-1;
+        classCount = 2;
+    }
 
     newLabels.resize(labels.size(), 1);
     bool bMulticlass = classifier->IsMultiClass() || classCount > 2;
-    if(!bMulticlass)
+    if(!bMulticlass || positiveIndex != -1)
     {
-        if(positive == 0)
-        {
-            FOR(i, labels.size()) newLabels[i] = (!labels[i] || labels[i] == -1) ? 1 : -1;
-        }
-        else
-        {
-            FOR(i, labels.size()) newLabels[i] = (labels[i] == positive) ? 1 : -1;
-        }
+        FOR(i, labels.size()) newLabels[i] = (labels[i] == positive) ? 1 : -1;
         bool bHasPositive = false, bHasNegative = false;
         FOR(i, newLabels.size())
         {
@@ -63,13 +72,13 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             bHasNegative |= newLabels[i] == -1;
         }
         if((!bHasPositive || !bHasNegative) && !classifier->SingleClass()) return false;
+        binaryClassMap[negative] = -1;
+        binaryInverseMap[-1] = negative;
+        qDebug() << "negative class" << negative;
     }
     else
     {
         newLabels = labels;
-        int cnt=0;
-        FOR(i, labels.size()) if(!binaryClassMap.count(labels[i])) binaryClassMap[labels[i]] = cnt++;
-        for(map<int,int>::iterator it=binaryClassMap.begin(); it != binaryClassMap.end(); it++) binaryInverseMap[it->second] = it->first;
         if(binaryClassMap.size() > 2) binaryClassMap.clear(); // standard multiclass, no problems
     }
     classifier->rocdata.clear();
@@ -77,6 +86,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
 
     ivec inputDims = GetInputDimensions();
     vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
+    sourceDims = inputDims;
 
     vector<fvec> trainSamples, testSamples;
     ivec trainLabels, testLabels;
@@ -103,9 +113,9 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     else
     {
         map<int,int> classCnt, trainClassCnt, testClassCnt;
-        FOR(i, labels.size())
+        FOR(i, newLabels.size())
         {
-            classCnt[labels[i]]++;
+            classCnt[newLabels[i]]++;
         }
 
         trainCnt = (int)(samples.size()*trainRatio);
@@ -128,7 +138,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
             testClassCnt[trainLabels[i]]++;
         }
         // we need to make sure that we have at least one sample per class
-        for(map<int,int>::iterator it=classCnt.begin();it!=classCnt.end();it++)
+        FORIT(classCnt, int, int)
         {
             if(!trainClassCnt.count(it->first))
             {
@@ -148,10 +158,30 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
     }
 
     // do the actual training
-    if(classifier->IsMultiClass() || !bMulticlass) classifier->Train(trainSamples, trainLabels);
+    if(classifier->IsMultiClass() || !bMulticlass)
+    {
+        classifier->Train(trainSamples, trainLabels);
+        // fix the labels for binary classification
+        if(classCount == 2)
+        {
+            if(!classifier->IsMultiClass())
+            {
+                classifier->classMap = binaryClassMap;
+                classifier->inverseMap = binaryInverseMap;
+            }
+            else
+            {
+                // if we forced binary classification on multi-class
+                if(positiveIndex != -1)
+                {
+                    classifier->inverseMap[-1] = negative;
+                }
+            }
+        }
+    }
     else
     {
-        qDebug() << "we're going fake-multiclass! (" << classCount << ")";
+        qDebug() << "we're going one-vs-all multiclass! (" << classCount << ")";
         // if we are going multiclass on a single-class classifier, we need to train N one-vs-all models
         FOR(c, classCount)
         {
@@ -254,7 +284,7 @@ bool MLDemos::Train(Classifier *classifier, int positive, float trainRatio, bvec
         int microTP = 0, microFP = 0, microCount = 0;
         float microPrecision = 0.f;
         float microRecall = 0.f;
-        for(map<int,int>::iterator it = countPerClass.begin(); it != countPerClass.end(); it++)
+        FORIT(countPerClass, int, int)
         {
             int c = it->first;
             int tp = truePerClass[c];
@@ -424,11 +454,11 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
         outputIndexInList = i;
         break;
     }
+    sourceDims = inputDims;
 
     vector<fvec> samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
     ivec labels = canvas->data->GetLabels();
     if(!samples.size()) return;
-    int cnt = samples.size();
     int dim = samples[0].size();
     if(dim < 2) return;
 
@@ -889,6 +919,7 @@ void MLDemos::Compare()
     DEL(dynamical);
     if(!classifierMulti.size()) DEL(classifier);
     classifier = 0;
+    sourceDims.clear();
     FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(projector);
@@ -985,7 +1016,7 @@ void MLDemos::Compare()
             {
                 classifier = classifiers[tab]->GetClassifier();
                 if(!classifier) continue;
-                Train(classifier, positive, trainRatio, trainList);
+                Train(classifier, trainRatio, trainList);
                 bool bMulti = classifier->IsMultiClass() && DatasetManager::GetClassCount(canvas->data->GetLabels()) > 2;
                 if(classifier->rocdata.size()>0)
                 {
@@ -1057,6 +1088,7 @@ void MLDemos::Compare()
                 }
                 if(!classifierMulti.size()) DEL(classifier);
                 classifier = 0;
+                sourceDims.clear();
                 FOR(c,classifierMulti.size()) DEL(classifierMulti[c]); classifierMulti.clear();
 
                 progress.setValue(f + i*folds);
@@ -1131,6 +1163,7 @@ void MLDemos::Compare()
                     resultTest.push_back(error);
                 }
                 DEL(regressor);
+                sourceDims.clear();
 
                 progress.setValue(f + i*folds);
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);

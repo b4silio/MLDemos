@@ -71,7 +71,7 @@ class MLDemos : public QMainWindow
 private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
-	*actionClearData, *actionClearModel, *actionScreenshot,
+    *actionClearData, *actionClearModel, *actionClearAll, *actionScreenshot,
     *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
     QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
@@ -121,7 +121,7 @@ private:
     QString lastTrainingInfo;
 
 	void closeEvent(QCloseEvent *event);
-    bool Train(Classifier *classifier, int positive, float trainRatio=1, bvec trainList = bvec());
+    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1);
     void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
     void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0);
@@ -192,6 +192,7 @@ public:
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
     ivec sourceLabels;
+    ivec sourceDims;
     ivec selectedData;
     fvec selectionWeights;
     fvec selectionStart;
@@ -261,7 +262,8 @@ private slots:
 	void CompareScreenshot();
     void AddData();
     void Clear();
-	void ClearData();
+    void ClearData();
+    void ClearAll();
     void ShowDataEditor();
     void SetROCInfo();
     void LoadClassifier();

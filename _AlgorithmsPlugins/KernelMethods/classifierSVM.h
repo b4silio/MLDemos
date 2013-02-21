@@ -40,6 +40,7 @@ public:
 	~ClassifierSVM();
 	void Train(std::vector< fvec > samples, ivec labels);
     void Optimize(svm_problem *problem);
+    void OptimizeGradient(svm_problem *problem);
     float Test(const fvec &sample);
 	float Test(const fVec &sample);
 	fvec TestMulti(const fvec &sample);

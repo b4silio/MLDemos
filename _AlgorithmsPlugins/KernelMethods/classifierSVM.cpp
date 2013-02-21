@@ -262,6 +262,184 @@ void ClassifierSVM::Optimize(svm_problem *problem)
     delete data;
 }
 
+double kernelFunction(svm_model *svm, int d)
+{
+    // 1 - 0.5 * sum_i sum_j (a_i*a_j*y_i*y_j*k(x_i,x_j)*(x_i-x_j)*(x_i-x_j)) / C
+    double accumulator = 0;
+    int nsv = svm->l;
+    int nclass = svm->nr_class-1;
+    for(int c=0; c<nclass; c++)
+    {
+        double *sv_coef = svm->sv_coef[c];
+        double sum = 0;
+        for(int i=0; i<nsv; i++)
+        {
+            for(int j=0; j<=i; j++)
+            {
+                double diff = svm->SV[i][d].value-svm->SV[j][d].value;
+                double value = - sv_coef[i] * sv_coef[j] * Kernel::k_function(svm->SV[i],svm->SV[j],svm->param);
+                value *= diff * diff;
+                sum += j==i ? value : 2*value;
+            }
+        }
+        accumulator += 0.5*sum;
+    }
+    return 1 - accumulator/svm->param.C;
+}
+
+void ClassifierSVM::OptimizeGradient(svm_problem *problem)
+{
+    if( param.kernel_type == LINEAR || param.kernel_type == SIGMOID || param.kernel_type == RBFWMATRIX) return;
+    if( param.kernel_type == POLY) return Optimize(problem);
+    qDebug() << "optimizing kernel weights";
+
+    double gamma = param.gamma;
+    double C = param.C;
+    if( param.kernel_type == RBF)
+    {
+        param.kernel_type = RBFWEIGH;
+        param.kernel_dim = dim;
+        param.kernel_weight = new double[dim];
+        FOR(d, dim) param.kernel_weight[d] = param.gamma;
+        param.gamma = 1.;
+        param.C = 1.;
+        svm->param = param;
+    }
+    delete svm;
+    svm = svm_train(problem, &param);
+
+    QString s;
+    /*
+    int count = problem->l;
+    FOR(d, dim)
+    {
+        float mean = 0, sigma = 0;
+        FOR(i, count)
+        {
+            qDebug() << "d" << d << "i" << i << problem->x[i][d].index;
+            mean += problem->x[i][d].value;
+            count++;
+        }
+        mean /= count;
+        FOR(i, count)
+        {
+            float diff = problem->x[i][d].value - mean;
+            sigma += diff*diff;
+        }
+        sigma /= count;
+        sigma = sqrtf(sigma);
+        param.kernel_weight[d] = sigma*pow(4./3.,0.2)*pow(count,-0.2);
+        s += QString("%1 ").arg(param.kernel_weight[d]);
+    }
+    */
+
+    // we begin by computing the kernel dimension
+    dvec gammas(dim, gamma), newGammas(dim, gamma);
+    dvec deltas(dim, 0);
+
+    double firstObj = svm_get_dual_objective_function(svm);
+    double oldObj = 0;
+    qDebug() << "Initial objective function" << oldObj << "gamma" << s;
+    double gammaStep = 1;
+    int iterations = 30;
+    bool bAllZeros = true;
+    int restarts = 0;
+    FOR(it, iterations)
+    {
+        //QString s1, s2;
+        double norm=0;
+        FOR(d, dim)
+        {
+            double delta = kernelFunction(svm, d);
+            deltas[d] = delta;
+            //s1 += QString("%1 ").arg(delta);
+            norm += deltas[d]*deltas[d];
+        }
+        norm = sqrt(norm);
+        // find the step size
+        //gammaStep = 2;
+        double obj;
+
+        // armijo's rule
+        double beta = 0.5; // the decay factor for the step
+        double scale = 0.5; // the scaling for the acceptance of a step
+        int gammaIter = 10;
+        FOR(i, gammaIter)
+        {
+            QString s, s1, ds;
+            FOR(d, dim)
+            {
+                //if(fabs(deltas[d]) <= 1e-4) continue;
+                newGammas[d] = gammas[d] - deltas[d]*gammaStep;
+                newGammas[d] = max(0.,newGammas[d]);
+                s += QString("%1 ").arg(1./newGammas[d],0,'f',3);
+                ds += QString("%1 ").arg(deltas[d],0,'f',3);
+                s1 += QString("%1 ").arg(newGammas[d],0,'f',3);
+            }
+            FOR(d, dim) param.kernel_weight[d] = newGammas[d];
+            DEL(svm);
+            svm = svm_train(problem, &param);
+            obj = svm_get_dual_objective_function(svm);
+            qDebug() << "it" << it << i << "obj" << obj << "(" << oldObj << ")" << "gamma step" << gammaStep << "delta" << ds << "gamma" << s1 << "(" << s << ")";
+            if(obj < oldObj)
+            //if(obj - oldObj <= scale * gammaStep * norm)
+            {
+                break;
+            }
+            gammaStep *= beta;
+        }
+        bAllZeros = true;
+        if(obj < oldObj)
+        {
+            FOR(d, dim)
+            {
+                gammas[d] = newGammas[d];
+                if(gammas[d] != 0) bAllZeros = false;
+            }
+        }
+        if(obj > oldObj)
+        {
+            DEL(svm);
+            FOR(d, dim)
+            {
+                param.kernel_weight[d] = gammas[d];
+            }
+            svm = svm_train(problem, &param);
+            break;
+        }
+
+        if(bAllZeros)
+        {
+            FOR(d, dim)
+            {
+                gammas[d] = gamma;
+                param.kernel_weight[d] = gammas[d];
+            }
+            param.C = param.C*2;
+            it = 0;
+            oldObj = firstObj;
+            restarts++;
+            if(restarts > 10) break;
+            qDebug() << "starting again!" << "C" << param.C << "gamma" << gammas[0];
+        }
+        else
+        {
+            if(fabs(oldObj-obj) < 1e-5) break;
+            oldObj = obj;
+        }
+    }
+    s = "";
+    FOR(d, dim)
+    {
+        s += QString("%1 ").arg(1. / gammas[d]);
+    }
+    qDebug() << "gamma" << s;
+
+    param.C = C;
+    DEL(svm);
+    svm = svm_train(problem, &param);
+}
+
 void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 {
     svm_problem problem;
@@ -273,10 +451,28 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
     KILL(x_space);
     x_space = new svm_node[(dim +1)*problem.l];
 
+    classes.clear();
     classMap.clear();
+    inverseMap.clear();
     int cnt=0;
     FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+    bool bBinary = classMap.size() == 2;
+    if(bBinary)
+    {
+        int positive = INT_MIN;
+        int negative;
+        FOR(i, labels.size()) positive = max(positive, labels[i]);
+        FORIT(classMap, int, int)
+        {
+            if(it->first != positive)
+            {
+                negative = it->first;
+                break;
+            }
+        }
+        classMap[negative] = -1;
+    }
+    FORIT(classMap, int, int) inverseMap[it->second] = it->first;
     ivec newLabels(labels.size());
     FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
 
@@ -292,11 +488,11 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
         problem.y[i] = newLabels[i];
     }
 
-    DEL(svm);
+    delete(svm);
     DEL(node);
     svm = svm_train(&problem, &param);
 
-    if(bOptimize) Optimize(&problem);
+    if(bOptimize) OptimizeGradient(&problem);
 
     delete [] problem.x;
     delete [] problem.y;
@@ -309,7 +505,7 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
     FOR(i, classCount)
     {
         classes[i] = svm->label[i];
-        //qDebug() << "classes: " << i << classes[i];
+        qDebug() << "label" << i << svm->label[i];
     }
     //FOR(j, labels.size()) qDebug() << "label:" << j << labels[j];
 
@@ -328,6 +524,8 @@ float ClassifierSVM::Test( const fvec &sample )
     }
     node[data_dimension].index = -1;
     estimate = (float)svm_predict(svm, node);
+    // if we have a binary class in which the negative class is not the first
+    if(svm->label[0] != -1) estimate *= -1;
     return estimate;
 }
 
@@ -347,6 +545,8 @@ float ClassifierSVM::Test( const fVec &sample )
         node[i].value = sample._[i];
     }
     estimate = (float)svm_predict(svm, node);
+    // if we have a binary class in which the negative class is not the first
+    if(svm->label[0] != -1) estimate *= -1;
     return estimate;
 }
 
@@ -510,7 +710,8 @@ void ClassifierSVM::SaveModel(std::string filename)
     file.close();
 }
 
-#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+//#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+#define Malloc(type,n) new type[n]
 bool ClassifierSVM::LoadModel(std::string filename)
 {
     std::cout << "Loading SVM model" << std::endl;

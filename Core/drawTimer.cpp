@@ -779,8 +779,15 @@ bool DrawTimer::VectorsFast(int count, int steps)
     return true;
 }
 
-QColor DrawTimer::GetColor(Classifier *classifier, fvec sample, std::vector<Classifier*> *classifierMulti)
+QColor DrawTimer::GetColor(Classifier *classifier, fvec sample, std::vector<Classifier*> *classifierMulti, ivec sourceDims)
 {
+    if(sourceDims.size())
+    {
+        fvec newSample(sourceDims.size());
+        FOR(d, sourceDims.size()) newSample[d] = sample[d];
+        sample = newSample;
+    }
+
     QColor c;
     if(classifier->IsMultiClass())
     {

@@ -155,7 +155,7 @@ void DrawSVG::DrawClassificationSamples(Canvas *canvas, QPainter &painter, Class
     painter.setRenderHint(QPainter::Antialiasing, true);
     FOR(i, canvas->data->GetCount())
     {
-        fvec sample = canvas->data->GetSample(i);
+        fvec sample = canvas->sourceDims.size() ? canvas->data->GetSampleDim(i, canvas->sourceDims) : canvas->data->GetSample(i);
         int label = canvas->data->GetLabel(i);
         QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
         fvec res;
@@ -170,17 +170,33 @@ void DrawSVG::DrawClassificationSamples(Canvas *canvas, QPainter &painter, Class
         else res.push_back(classifier->Test(sample));
         if(res.size()==1)
         {
-            int posClass = 1;
             float response = res[0];
-            if(response > 0)
+            if(classifier->inverseMap[-1] < 0) // we forced binary classification
             {
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
+                int positive = -classifier->inverseMap[-1]-1;
+                if(response > 0)
+                {
+                    if(label == positive) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(label != positive) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
             }
             else
             {
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
+                if(response > 0)
+                {
+                    if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
             }
         }
         else

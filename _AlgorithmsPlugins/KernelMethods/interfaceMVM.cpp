@@ -302,7 +302,7 @@ void ClassMVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
     if(bUseMinMax)
     {
         // TODO: get the min and max for all samples
-        std::vector<fvec> samples = canvas->data->GetSamples();
+        std::vector<fvec> samples = canvas->sourceDims.size() ? canvas->data->GetSampleDims(canvas->sourceDims) : canvas->data->GetSamples();
         FOR(i, samples.size())
         {
             float val = classifier->Test(samples[i]);

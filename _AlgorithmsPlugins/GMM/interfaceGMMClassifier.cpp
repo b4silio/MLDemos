@@ -159,7 +159,9 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
             painter.setPen(QPen(Qt::black, 0.5));
             DrawEllipse(mean, sigma, 2, &painter, canvas);
             QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
-            QColor color = SampleColor[classifier->inverseMap[g]%SampleColorCnt];
+            QColor color = classifier->inverseMap.size() == 2 ?
+                        SampleColor[classifier->inverseMap[-1]==g ? 0 : 1] :
+                        SampleColor[classifier->inverseMap[g]%SampleColorCnt];
             painter.setPen(QPen(Qt::black, 12));
             painter.drawEllipse(point, 6, 6);
             painter.setPen(QPen(color,4));

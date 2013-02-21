@@ -316,8 +316,35 @@ bool DatasetManager::IsCategorical(int dimension)
 
 fvec DatasetManager::GetSampleDim(int index, ivec inputDims, int outputDim)
 {
-    if(index>=samples.size()) return fvec();
+    if(index >= samples.size()) return fvec();
     if(!inputDims.size()) return samples[index];
+    if(outputDim == -1)
+    {
+        fvec sample(inputDims.size());
+        FOR(d, inputDims.size()) sample[d] = samples[index][inputDims[d]];
+        return sample;
+    }
+    else
+    {
+        int outputIndex = -1;
+        FOR(d, inputDims.size())
+        {
+            if(outputDim == inputDims[d])
+            {
+                outputIndex = d;
+                break;
+            }
+        }
+        fvec sample(inputDims.size() + (outputIndex==-1 ? 0 : 1));
+        FOR(d, inputDims.size())
+        {
+            if(d==outputIndex) sample.back() = samples[index][inputDims[d]];
+            else sample[d<outputIndex ? d : d-1] = samples[index][inputDims[d]];
+        }
+        if(outputIndex == -1) sample.back() = samples[index][outputDim];
+        return sample;
+    }
+
     int dim = inputDims.size();
     fvec sample(dim + outputDim!=-1?1:0);
     FOR(d, dim) sample[d] = samples[index][inputDims[d]];
@@ -330,16 +357,51 @@ std::vector< fvec > DatasetManager::GetSampleDims(ivec inputDims, int outputDim)
     if(!inputDims.size()) return samples;
 
     vector<fvec> newSamples = samples;
-    int newDim = inputDims.size() + (outputDim != -1 ? 1 : 0);
-    FOR(i, samples.size())
+    int newDim = inputDims.size();
+    if(outputDim == -1)
     {
-        fvec newSample(newDim);
+        FOR(i, samples.size())
+        {
+            fvec newSample(newDim);
+            FOR(d, inputDims.size())
+            {
+                newSample[d] = samples[i][inputDims[d]];
+            }
+            newSamples[i] = newSample;
+        }
+    }
+    else
+    {
+        int outputIndex = -1;
         FOR(d, inputDims.size())
         {
-            newSample[d] = samples[i][inputDims[d]];
+            if(outputDim == inputDims[d])
+            {
+                newDim--;
+                break;
+            }
         }
-        if(outputDim != -1) newSample[newDim-1] = samples[i][outputDim];
-        newSamples[i] = newSample;
+        FOR(i, samples.size())
+        {
+            fvec newSample(newDim);
+            if(outputIndex == -1)
+            {
+                FOR(d, newDim-1)
+                {
+                    newSample[d] = samples[i][inputDims[d]];
+                }
+                newSample[newDim-1] = samples[i][outputDim];
+            }
+            else
+            {
+                FOR(d, newDim)
+                {
+                    if(d == outputIndex) newSample[newDim-1] = samples[i][inputDims[d]];
+                    else newSample[d<outputIndex?d:d-1] = samples[i][inputDims[d]];
+                }
+            }
+            newSamples[i] = newSample;
+        }
     }
     return newSamples;
 }
