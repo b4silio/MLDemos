@@ -284,7 +284,7 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, in
         int microTP = 0, microFP = 0, microCount = 0;
         float microPrecision = 0.f;
         float microRecall = 0.f;
-        for(map<int,int>::iterator it = countPerClass.begin(); it != countPerClass.end(); it++)
+        FORIT(countPerClass, int, int)
         {
             int c = it->first;
             int tp = truePerClass[c];

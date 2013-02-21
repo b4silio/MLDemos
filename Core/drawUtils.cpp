@@ -147,65 +147,138 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
     font.setBold(true);
     painter.setFont(font);
 
+    bool bMultiClass = false;
+    FOR(d, rocdata.size())
+    {
+        FOR(i, rocdata[d].size())
+        {
+            if(rocdata[d][i].second > 1)
+            {
+                bMultiClass = true;
+                break;
+            }
+        }
+        if(bMultiClass) break;
+    }
+
     FOR(d, rocdata.size())
     {
         int minCol = 128;
         int color = (rocdata.size() == 1) ? 255 : (255 - minCol)*(rocdata.size() - d -1)/(rocdata.size()-1) + minCol;
         color = 255 - color;
 
+        std::vector<fvec> allData;
         std::vector<f32pair> data = rocdata[d];
         if(!data.size()) continue;
-        std::sort(data.begin(), data.end());
 
-        std::vector<fvec> allData;
-        FOR(i, data.size())
+        if(bMultiClass)
         {
-            float thresh = data[i].first;
-            u32 tp = 0, fp = 0;
-            u32 fn = 0, tn = 0;
+            std::map<int,int> countPerClass;
+            std::map<int,int> truePerClass;
+            std::map<int,int> falsePerClass;
+            FOR(i, data.size())
+            {
+                countPerClass[data[i].second]++;
+                if(data[i].first != data[i].second) falsePerClass[data[i].first]++;
+                else truePerClass[data[i].first]++;
+            }
 
-            FOR(j, data.size())
+            float macroFMeasure = 0.f, microFMeasure = 0.f;
+            int microTP = 0, microFP = 0, microTN = 0, microCount = 0;
+            float microPrecision = 0.f;
+            float microRecall = 0.f;
+            FORIT(countPerClass, int, int)
             {
-                if(data[j].second == 1)
-                {
-                    if(data[j].first >= thresh) tp++;
-                    else fn++;
-                }
-                else
-                {
-                    if(data[j].first >= thresh) fp++;
-                    else tn++;
-                }
+                int c = it->first;
+                int tp = truePerClass[c];
+                int fp = falsePerClass[c];
+                int fn = countPerClass[c] - tp;
+                int tn = countPerClass[c] - fp;
+                int count = it->second;
+                microTP += tp;
+                microFP += fp;
+                microTN += tn;
+                microCount += count;
+                float precision = tp / float(tp + fp);
+                float recall = tp / float(count);
+                macroFMeasure += 2*precision*recall/(precision+recall);
             }
-            fVec val;
-            float fmeasure = 0;
-            if((fp+tn)>0 && (tp+fn)>0 && (tp+fp)>0)
-            {
-                val=fVec(fp/float(fp+tn), 1 - tp/float(tp+fn));
-                float precision = tp / float(tp+fp);
-                float recall = tp /float(tp+fn);
-                fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
-            }
+            macroFMeasure /= countPerClass.size();
+            microPrecision = microTP / float(microTP + microFP);
+            microRecall = microTP / float(microCount);
+            microFMeasure = 2*microPrecision*microRecall/(microPrecision + microRecall);
+
+            fVec val = fVec(microFP/float(microFP+microTN), 1 - microRecall);
+            float fmeasure = microFMeasure;
 
             fvec dat;
             dat.push_back(val.x);
             dat.push_back(val.y);
-            dat.push_back(data[i].first);
+            dat.push_back(0.5);
             dat.push_back(fmeasure);
             allData.push_back(dat);
+        }
+        else
+        {
+            std::sort(data.begin(), data.end());
+            FOR(i, data.size())
+            {
+                fVec val;
+                float fmeasure = 0;
+                float thresh = data[i].first;
+                u32 tp = 0, fp = 0;
+                u32 fn = 0, tn = 0;
+
+                FOR(j, data.size())
+                {
+                    if(data[j].second == 1)
+                    {
+                        if(data[j].first >= thresh) tp++;
+                        else fn++;
+                    }
+                    else
+                    {
+                        if(data[j].first >= thresh) fp++;
+                        else tn++;
+                    }
+                }
+                if((fp+tn)>0 && (tp+fn)>0 && (tp+fp)>0)
+                {
+                    val=fVec(fp/float(fp+tn), 1 - tp/float(tp+fn));
+                    float precision = tp / float(tp+fp);
+                    float recall = tp /float(tp+fn);
+                    fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
+                }
+                fvec dat;
+                dat.push_back(val.x);
+                dat.push_back(val.y);
+                dat.push_back(data[i].first);
+                dat.push_back(fmeasure);
+                allData.push_back(dat);
+            }
         }
 
         painter.setPen(QPen(QColor(color,color,color), 1.f));
 
-        fVec pt1, pt2;
-        FOR(i, allData.size()-1)
+        if(allData.size() > 1)
         {
-            pt1 = fVec(allData[i][0]*size.width(), allData[i][1]*size.height());
-            pt2 = fVec(allData[i+1][0]*size.width(), allData[i+1][1]*size.height());
+            fVec pt1, pt2;
+            FOR(i, allData.size()-1)
+            {
+                pt1 = fVec(allData[i][0]*size.width(), allData[i][1]*size.height());
+                pt2 = fVec(allData[i+1][0]*size.width(), allData[i+1][1]*size.height());
+                painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
+            }
+            pt1 = fVec(0,size.width());
             painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
         }
-        pt1 = fVec(0,size.width());
-        painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
+        else if(allData.size())
+        {
+            fVec point;
+            point = fVec(allData[0][0]*size.width(), allData[0][1]*size.height());
+            painter.drawLine(QPointF(PAD, size.height()+PAD), QPointF(point.x+PAD, point.y+PAD));
+            painter.drawLine(QPointF(point.x+PAD, point.y+PAD), QPointF(size.width()+PAD, PAD));
+        }
 
         if(d < roclabels.size())
         {
