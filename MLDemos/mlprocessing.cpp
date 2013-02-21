@@ -73,7 +73,8 @@ void MLDemos::Classify()
         trainList = GetManualSelection();
     }
 
-    bool trained = Train(classifier, trainRatio, trainList);
+    int positiveIndex = optionsClassify->binaryCheck->isChecked() ? optionsClassify->positiveSpin->value() : -1;
+    bool trained = Train(classifier, trainRatio, trainList, positiveIndex);
     if(trained)
     {
         classifiers[tab]->Draw(canvas, classifier);
@@ -1644,6 +1645,9 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
     QString s;
     FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
 
+    int forcedPositive = classifier->inverseMap[-1] < 0 ? -classifier->inverseMap[-1]-1 : -1;
+    qDebug() << "forced Positive" << forcedPositive;
+
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);
     FOR(i, canvas->data->GetCount())
@@ -1664,15 +1668,31 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
         if(res.size()==1)
         {
             float response = res[0];
-            if(response > 0)
+            if(forcedPositive != -1) // we forced binary classification
             {
-                if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
+                if(response > 0)
+                {
+                    if(label == forcedPositive) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(label != forcedPositive) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
             }
             else
             {
-                if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
+                if(response > 0)
+                {
+                    if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
             }
         }
         else
@@ -1684,5 +1704,4 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
             else Canvas::drawCross(painter, point, 6, label);
         }
     }
-
 }

@@ -121,7 +121,7 @@ private:
     QString lastTrainingInfo;
 
 	void closeEvent(QCloseEvent *event);
-    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec());
+    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1);
     void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
     void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0);

@@ -35,7 +35,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
+bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex)
 {
     if(!classifier) return false;
     ivec labels = canvas->data->GetLabels();
@@ -52,10 +52,16 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
         binaryInverseMap[it->second] = it->first;
         if(it->first != positive) negative = it->first;
     }
+    if(positiveIndex != -1)
+    {
+        positive = positiveIndex;
+        negative = -positiveIndex-1;
+        classCount = 2;
+    }
 
     newLabels.resize(labels.size(), 1);
     bool bMulticlass = classifier->IsMultiClass() || classCount > 2;
-    if(!bMulticlass)
+    if(!bMulticlass || positiveIndex != -1)
     {
         FOR(i, labels.size()) newLabels[i] = (labels[i] == positive) ? 1 : -1;
         bool bHasPositive = false, bHasNegative = false;
@@ -68,6 +74,7 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
         if((!bHasPositive || !bHasNegative) && !classifier->SingleClass()) return false;
         binaryClassMap[negative] = -1;
         binaryInverseMap[-1] = negative;
+        qDebug() << "negative class" << negative;
     }
     else
     {
@@ -106,9 +113,9 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
     else
     {
         map<int,int> classCnt, trainClassCnt, testClassCnt;
-        FOR(i, labels.size())
+        FOR(i, newLabels.size())
         {
-            classCnt[labels[i]]++;
+            classCnt[newLabels[i]]++;
         }
 
         trainCnt = (int)(samples.size()*trainRatio);
@@ -131,7 +138,7 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
             testClassCnt[trainLabels[i]]++;
         }
         // we need to make sure that we have at least one sample per class
-        for(map<int,int>::iterator it=classCnt.begin();it!=classCnt.end();it++)
+        FORIT(classCnt, int, int)
         {
             if(!trainClassCnt.count(it->first))
             {
@@ -154,6 +161,7 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
     if(classifier->IsMultiClass() || !bMulticlass)
     {
         classifier->Train(trainSamples, trainLabels);
+        // fix the labels for binary classification
         if(classCount == 2)
         {
             if(!classifier->IsMultiClass())
@@ -163,20 +171,17 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList)
             }
             else
             {
-                qDebug() << "class Map";
-                FORIT(classifier->classMap, int, int)
+                // if we forced binary classification on multi-class
+                if(positiveIndex != -1)
                 {
-                    qDebug() << "class" << it->first << it->second << positive;
+                    classifier->inverseMap[-1] = negative;
                 }
-                //classifier->inverseMap[-1] = negative;
-                //classifier->classMap = binaryClassMap;
-                //classifier->inverseMap = binaryInverseMap;
             }
         }
     }
     else
     {
-        qDebug() << "we're going fake-multiclass! (" << classCount << ")";
+        qDebug() << "we're going one-vs-all multiclass! (" << classCount << ")";
         // if we are going multiclass on a single-class classifier, we need to train N one-vs-all models
         FOR(c, classCount)
         {

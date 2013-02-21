@@ -106,6 +106,7 @@ void MLDemos::SaveLayoutOptions()
 
     settings.beginGroup("classificationOptions");
     settings.setValue("positiveClass", optionsClassify->positiveSpin->value());
+    settings.setValue("binaryCheck", optionsClassify->binaryCheck->isChecked());
     settings.setValue("trainRatio", optionsClassify->traintestRatioCombo->currentIndex());
     settings.setValue("tab", optionsClassify->algoList->currentIndex());
     settings.endGroup();
@@ -318,6 +319,7 @@ void MLDemos::LoadLayoutOptions()
 
     settings.beginGroup("classificationOptions");
     if(settings.contains("positiveClass")) optionsClassify->positiveSpin->setValue(settings.value("positiveClass").toFloat());
+    if(settings.contains("binaryCheck")) optionsClassify->binaryCheck->setChecked(settings.value("binaryCheck").toBool());
     if(settings.contains("trainRatio")) optionsClassify->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
     if(settings.contains("tab")) optionsClassify->algoList->setCurrentIndex(settings.value("tab").toInt());
     settings.endGroup();
@@ -506,6 +508,7 @@ void MLDemos::SaveParams( QString filename )
         sprintf(groupName,"classificationOptions");
         out << groupName << ":" << "tab" << " " << optionsClassify->algoList->currentIndex() << "\n";
         out << groupName << ":" << "positiveClass" << " " << optionsClassify->positiveSpin->value() << "\n";
+        out << groupName << ":" << "binaryCheck" << " " << optionsClassify->binaryCheck->isChecked() << "\n";
         if(tab < classifiers.size() && classifiers[tab])
         {
             classifiers[tab]->SaveParams(out);
@@ -704,6 +707,7 @@ void MLDemos::LoadParams( QString filename )
             algorithmOptions->tabWidget->setCurrentWidget(algorithmOptions->tabClass);
             if(line.endsWith("tab")) optionsClassify->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("positiveClass")) optionsClassify->positiveSpin->setValue((int)value);
+            if(line.endsWith("binaryCheck")) optionsClassify->binaryCheck->setChecked((int)value);
             if(tab < classifiers.size() && classifiers[tab]) classifiers[tab]->LoadParams(line,value);
         }
         if(line.startsWith(regrGroup))
