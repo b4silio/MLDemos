@@ -34,7 +34,7 @@ using namespace std;
 /******************************************/
 u32 DatasetManager::IDCount = 0;
 
-DatasetManager::DatasetManager(int dimension)
+DatasetManager::DatasetManager(const int dimension)
 : size(dimension)
 {
     bProjected = false;
@@ -60,7 +60,7 @@ void DatasetManager::Clear()
 	KILL(perm);
 }
 
-void DatasetManager::AddSample(fvec sample, int label, dsmFlags flag)
+void DatasetManager::AddSample(const fvec sample, const int label, const dsmFlags flag)
 {
 	if (!sample.size()) return;
     int dim = GetDimCount();
@@ -79,7 +79,7 @@ void DatasetManager::AddSample(fvec sample, int label, dsmFlags flag)
 	perm = randPerm(samples.size());
 }
 
-void DatasetManager::AddSamples(std::vector< fvec > newSamples, ivec newLabels, std::vector<dsmFlags> newFlags)
+void DatasetManager::AddSamples(const std::vector< fvec > newSamples, const ivec newLabels, const std::vector<dsmFlags> newFlags)
 {
     if(!newSamples.size()) return;
     int dim = GetDimCount();
@@ -106,12 +106,12 @@ void DatasetManager::AddSamples(std::vector< fvec > newSamples, ivec newLabels, 
 	perm = randPerm(samples.size());
 }
 
-void DatasetManager::AddSamples(DatasetManager &newSamples)
+void DatasetManager::AddSamples(const DatasetManager &newSamples)
 {
 	AddSamples(newSamples.GetSamples(), newSamples.GetLabels(), newSamples.GetFlags());
 }
 
-void DatasetManager::RemoveSample(unsigned int index)
+void DatasetManager::RemoveSample(const unsigned int index)
 {
 	if(index >= samples.size()) return;
 	if(samples.size() == 1)
@@ -158,7 +158,7 @@ void DatasetManager::RemoveSample(unsigned int index)
 	}
 }
 
-void DatasetManager::RemoveSamples(ivec indices)
+void DatasetManager::RemoveSamples(const ivec indices)
 {
     if(indices.size() > samples.size()) return;
     // we sort the indices
@@ -173,7 +173,7 @@ void DatasetManager::RemoveSamples(ivec indices)
     }
 }
 
-void DatasetManager::AddSequence(int start, int stop)
+void DatasetManager::AddSequence(const int start, const int stop)
 {
 	if(start >= samples.size() || stop >= samples.size()) return;
 	for(int i=start; i<=stop; i++) flags[i] = _TRAJ;
@@ -182,7 +182,7 @@ void DatasetManager::AddSequence(int start, int stop)
 	std::sort(sequences.begin(), sequences.end());
 }
 
-void DatasetManager::AddSequence(ipair newSequence)
+void DatasetManager::AddSequence(const ipair newSequence)
 {
 	if(newSequence.first >= samples.size() || newSequence.second >= samples.size()) return;
 	for(int i=newSequence.first; i<=newSequence.second; i++) flags[i] = _TRAJ;
@@ -191,7 +191,7 @@ void DatasetManager::AddSequence(ipair newSequence)
 	std::sort(sequences.begin(), sequences.end());
 }
 
-void DatasetManager::AddSequences(std::vector< ipair > newSequences)
+void DatasetManager::AddSequences(const std::vector< ipair > newSequences)
 {
 	sequences.reserve(sequences.size()+newSequences.size());
 	FOR(i, newSequences.size())
@@ -200,14 +200,14 @@ void DatasetManager::AddSequences(std::vector< ipair > newSequences)
 	}
 }
 
-void DatasetManager::RemoveSequence(unsigned int index)
+void DatasetManager::RemoveSequence(const unsigned int index)
 {
 	if(index >= sequences.size()) return;
 	for(int i=index; i<sequences.size()-1; i++) sequences[i] = sequences[i+1];
 	sequences.pop_back();
 }
 
-void DatasetManager::AddTimeSerie(std::string name, std::vector<fvec> data, std::vector<long int>  timestamps)
+void DatasetManager::AddTimeSerie(const std::string name, const std::vector<fvec> data, const std::vector<long int>  timestamps)
 {
 	TimeSerie serie;
 	serie.name = name;
@@ -216,23 +216,23 @@ void DatasetManager::AddTimeSerie(std::string name, std::vector<fvec> data, std:
 	AddTimeSerie(serie);
 }
 
-void DatasetManager::AddTimeSerie(TimeSerie serie)
+void DatasetManager::AddTimeSerie(const TimeSerie serie)
 {
 	series.push_back(serie);
 }
 
-void DatasetManager::AddTimeSeries(std::vector< TimeSerie > newTimeSeries)
+void DatasetManager::AddTimeSeries(const vector newTimeSeries)
 {
 	series.insert(series.end(), newTimeSeries.begin(), newTimeSeries.end());
 }
 
-void DatasetManager::RemoveTimeSerie(unsigned int index)
+void DatasetManager::RemoveTimeSerie(const unsigned int index)
 {
 	if(index >= series.size()) return;
 	series.erase(series.begin() + index);
 }
 
-void DatasetManager::AddObstacle(fvec center, fvec axes, float angle, fvec power, fvec repulsion)
+void DatasetManager::AddObstacle(const fvec center, const fvec axes, const float angle, const fvec power, const fvec repulsion)
 {
 	Obstacle o;
 	o.center = center;
@@ -243,26 +243,26 @@ void DatasetManager::AddObstacle(fvec center, fvec axes, float angle, fvec power
 	obstacles.push_back(o);
 }
 
-void DatasetManager::AddObstacles(std::vector<Obstacle> newObstacles)
+void DatasetManager::AddObstacles(const std::vector<Obstacle> newObstacles)
 {
 	FOR(i, newObstacles.size()) obstacles.push_back(newObstacles[i]);
 }
 
-void DatasetManager::RemoveObstacle(unsigned int index)
+void DatasetManager::RemoveObstacle(const unsigned int index)
 {
 	if(index >= obstacles.size()) return;
 	for(int i=index; i<obstacles.size()-1; i++) obstacles[i] = obstacles[i+1];
 	obstacles.pop_back();
 }
 
-void DatasetManager::AddReward(float *values, ivec size, fvec lowerBoundary, fvec higherBoundary)
+void DatasetManager::AddReward(const float *values, const ivec size, const fvec lowerBoundary, const fvec higherBoundary)
 {
 	rewards.SetReward(values, size, lowerBoundary, higherBoundary);
 }
 
 // we compare the current sample with all the ones in the dataset
 // and return the smallest distance
-double DatasetManager::Compare(fvec sample)
+double DatasetManager::Compare(const fvec sample) const
 {
 	if(!sample.size()) return 1.0;
 
@@ -283,7 +283,7 @@ double DatasetManager::Compare(fvec sample)
 	return minDist;
 }
 
-void DatasetManager::Randomize(int seed)
+void DatasetManager::Randomize(const int seed)
 {
 	KILL(perm);
 	if(samples.size()) perm = randPerm(samples.size(), seed);
@@ -294,12 +294,12 @@ void DatasetManager::ResetFlags()
 	FOR(i, samples.size()) flags[i] = _UNUSED;
 }
 
-void DatasetManager::SetSample(int index, fvec sample)
+void DatasetManager::SetSample(const int index, const fvec sample)
 {
     if(index >= 0 && index < samples.size()) samples[index] = sample;
 }
 
-string DatasetManager::GetCategorical(int dimension, int value)
+string DatasetManager::GetCategorical(const int dimension, const int value) const
 {
     string s;
     if(categorical.count(dimension) && value < categorical[dimension].size())
@@ -309,12 +309,12 @@ string DatasetManager::GetCategorical(int dimension, int value)
     return s;
 }
 
-bool DatasetManager::IsCategorical(int dimension)
+bool DatasetManager::IsCategorical(const int dimension) const
 {
     return categorical.count(dimension) > 0;
 }
 
-fvec DatasetManager::GetSampleDim(int index, ivec inputDims, int outputDim)
+fvec DatasetManager::GetSampleDim(const int index, const ivec inputDims, const int outputDim) const
 {
     if(index >= samples.size()) return fvec();
     if(!inputDims.size()) return samples[index];
@@ -352,7 +352,7 @@ fvec DatasetManager::GetSampleDim(int index, ivec inputDims, int outputDim)
     return sample;
 }
 
-std::vector< fvec > DatasetManager::GetSampleDims(ivec inputDims, int outputDim)
+std::vector< fvec > DatasetManager::GetSampleDims(const ivec inputDims, const int outputDim) const
 {
     if(!inputDims.size()) return samples;
 
@@ -406,7 +406,7 @@ std::vector< fvec > DatasetManager::GetSampleDims(ivec inputDims, int outputDim)
     return newSamples;
 }
 
-std::vector< fvec > DatasetManager::GetSamples(u32 count, dsmFlags flag, dsmFlags replaceWith)
+std::vector< fvec > DatasetManager::GetSamples(const u32 count, const dsmFlags flag, const dsmFlags replaceWith) const
 {
 	std::vector< fvec > selected;
 	if (!samples.size() || !perm) return selected;
@@ -437,7 +437,7 @@ std::vector< fvec > DatasetManager::GetSamples(u32 count, dsmFlags flag, dsmFlag
 	return selected;
 }
 
-std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(int resampleType, int resampleCount, int centerType, float dT, int zeroEnding)
+std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(const int resampleType, const int resampleCount, const int centerType, const float dT, const int zeroEnding) const
 {
 
 	// we split the data into trajectories
@@ -593,7 +593,7 @@ std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(int resample
 }
 
 
-void DatasetManager::Save(const char *filename)
+void DatasetManager::Save(const char *filename) const
 {
     if(!samples.size() && rewards.Empty()) return;
 	u32 sampleCnt = samples.size();
@@ -624,7 +624,7 @@ void DatasetManager::Save(const char *filename)
 	}
 
 	// we load the obstacles
-	if(obstacles.size())
+    if(obstacles.size())
 	{
 		file << "o " << obstacles.size() << "\n";
 		FOR(i, obstacles.size())
@@ -763,7 +763,7 @@ bool DatasetManager::Load(const char *filename)
 	return samples.size() > 0;
 }
 
-int DatasetManager::GetDimCount()
+int DatasetManager::GetDimCount() const
 {
 	int dim = 2;
 	if(samples.size()) dim = samples[0].size();
@@ -774,7 +774,7 @@ int DatasetManager::GetDimCount()
 	return dim;
 }
 
-std::pair<fvec, fvec> DatasetManager::GetBounds()
+std::pair<fvec, fvec> DatasetManager::GetBounds() const
 {
     if(!samples.size()) return make_pair(fvec(),fvec());
     int dim = samples[0].size();
@@ -792,7 +792,7 @@ std::pair<fvec, fvec> DatasetManager::GetBounds()
     return make_pair(mins, maxes);
 }
 
-u32 DatasetManager::GetClassCount(ivec classes)
+u32 DatasetManager::GetClassCount(const ivec classes)
 {
     int cnt=0;
     map<int,int> classMap;
@@ -800,7 +800,7 @@ u32 DatasetManager::GetClassCount(ivec classes)
     return classMap.size();
 }
 
-bvec DatasetManager::GetFreeFlags()
+bvec DatasetManager::GetFreeFlags() const
 {
 	bvec res;
 	FOR(i, flags.size()) res.push_back(flags[i] == _UNUSED);
@@ -831,7 +831,7 @@ RewardMap& RewardMap::operator= (const RewardMap& r)
   return *this;
 }
 
-void RewardMap::SetReward(double *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary)
+void RewardMap::SetReward(const double *rewards, const ivec size, const fvec lowerBoundary, const fvec higherBoundary)
 {
 	this->lowerBoundary = lowerBoundary;
 	this->higherBoundary = higherBoundary;
@@ -844,7 +844,7 @@ void RewardMap::SetReward(double *rewards, ivec size, fvec lowerBoundary, fvec h
     memcpy(this->rewards, rewards, length*sizeof(double));
 }
 
-void RewardMap::SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary)
+void RewardMap::SetReward(const float *rewards, const ivec size, const fvec lowerBoundary, const fvec higherBoundary)
 {
     this->lowerBoundary = lowerBoundary;
     this->higherBoundary = higherBoundary;
@@ -860,7 +860,7 @@ void RewardMap::SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec hi
     }
 }
 
-float *RewardMap::GetRewardFloat()
+float *RewardMap::GetRewardFloat() const
 {
     if(!length) return 0;
     float *rewards = new float[length];
@@ -884,7 +884,7 @@ void RewardMap::Zero()
 }
 
 // return the value of the reward function at the coordinates provided
-float RewardMap::ValueAt(fvec sample)
+float RewardMap::ValueAt(fvec sample) const
 {
 	if(!rewards) return 0.f;
 	ivec index;
@@ -910,7 +910,7 @@ float RewardMap::ValueAt(fvec sample)
 	return rewards[rewardIndex];
 }
 
-void RewardMap::SetValueAt(fvec sample, double value)
+void RewardMap::SetValueAt(const fvec sample, const double value)
 {
 	if(!rewards) return;
 	ivec index;
@@ -933,7 +933,7 @@ void RewardMap::SetValueAt(fvec sample, double value)
 	rewards[rewardIndex] = value;
 }
 
-void RewardMap::ShiftValueAt(fvec sample, double shift)
+void RewardMap::ShiftValueAt(const fvec sample, const double shift)
 {
 	if(!rewards) return;
 	ivec index;
@@ -956,7 +956,7 @@ void RewardMap::ShiftValueAt(fvec sample, double shift)
 	rewards[rewardIndex] += shift;
 }
 
-void RewardMap::ShiftValueAt(fvec sample, double radius, double shift)
+void RewardMap::ShiftValueAt(const fvec sample, const double radius, const double shift)
 {
 	if(!rewards) return;
 	ivec index;

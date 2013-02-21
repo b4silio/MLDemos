@@ -10,7 +10,7 @@
 #include <MathLib/MathLib.h>
 #include "glUtils.h"
 
-#define ZoomZero 0.049f
+#define ZoomZero 0.0125f
 using namespace std;
 
 bool bDisplayShadows = false;
@@ -1545,6 +1545,7 @@ void GLWidget::zoom(int delta)
     {
         zoomFactor *= 1.1;
     }
+    qDebug() << "zoomFactor" << zoomFactor;
     resizeGL(width, height);
     repaint();
 }

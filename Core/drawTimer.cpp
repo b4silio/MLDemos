@@ -174,7 +174,7 @@ void DrawTimer::Animate()
         drawMutex.unlock();
         if((*dynamical)->avoid) (*dynamical)->avoid->SetObstacles(obstacles);
 
-        vector< vector<fvec> > trajectories;
+        vector< vector<fvec> > trajectories(targets.size());
         // animate each target
         FOR(i, targets.size())
         {
@@ -203,7 +203,7 @@ void DrawTimer::Animate()
                 speed = sqrtf(speed);
                 if(speed <= 1e-5) ages[i] = 0;
             }
-            trajectories.push_back(targetTrajectory);
+            trajectories[i] = targetTrajectory;
         }
         mutex->unlock();
 
@@ -264,7 +264,7 @@ void DrawTimer::Animate()
         ivec ages = canvas->targetAge;
         drawMutex.unlock();
 
-        vector< vector<fvec> > trajectories;
+        vector< vector<fvec> > trajectories(targets.size());
         // animate each target
         FOR(i, targets.size())
         {
@@ -294,7 +294,7 @@ void DrawTimer::Animate()
                 speed = sqrtf(speed);
                 if(speed <= 1e-5) ages[i] = 0;
             }
-            trajectories.push_back(targetTrajectory);
+            trajectories[i] = targetTrajectory;
         }
         mutex->unlock();
 

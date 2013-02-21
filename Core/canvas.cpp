@@ -1307,10 +1307,10 @@ void Canvas::DrawTrajectories()
     vector< vector<fvec> > trajectories = data->GetTrajectories(trajectoryResampleType, trajectoryResampleCount, trajectoryCenterType, 0.1, true);
     if(bDrawing)
     {
-        vector<fvec> trajectory;
+        vector<fvec> trajectory(sequences.back().second-sequences.back().first);
         for(int i=sequences.back().first; i<sequences.back().second; i++)
         {
-            trajectory.push_back(data->GetSample(i));
+            trajectory[i-sequences.back().first] = data->GetSample(i);
         }
         if(trajectory.size()) trajectories.push_back(trajectory);
     }

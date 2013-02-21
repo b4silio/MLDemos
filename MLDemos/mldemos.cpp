@@ -1610,7 +1610,15 @@ void MLDemos::DisplayOptionsChanged()
 
 void MLDemos::Display3DOptionsChanged()
 {
-    canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    if(canvas->canvasType == 0)
+    {
+        if(canvas->bDisplayGrid != displayOptions->gridCheck->isChecked())
+        {
+            canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+            canvas->repaint();
+        }
+    }
+    else canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
     if(!glw) return;
     glw->bDisplaySamples = displayOptions->check3DSamples->isChecked();
     glw->bDisplayLines = displayOptions->check3DWireframe->isChecked();

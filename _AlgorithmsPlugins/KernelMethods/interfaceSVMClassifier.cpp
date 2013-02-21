@@ -539,7 +539,7 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
         o.colors.append(QVector4D(0,0,0,1));
     }
     glw->mutex->lock();
-    glw->objects.push_back(o);
+    glw->AddObject(o);
     glw->mutex->unlock();
 }
 
