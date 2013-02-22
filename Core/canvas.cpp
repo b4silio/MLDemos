@@ -168,7 +168,7 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
         DrawRewards();
         if(!maps.reward.isNull())
         {
-            painter.setBackgroundMode(Qt::TransparentMode);
+            painter.setBackgroundMode(Qt::OpaqueMode);
             painter.drawPixmap(geometry(), maps.reward);
         }
         if(bSvg)

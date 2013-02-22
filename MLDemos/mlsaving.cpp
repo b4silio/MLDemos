@@ -393,6 +393,14 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("radiusSpin")) generator->ui->radiusSpin->setValue(settings.value("radiusSpin").toFloat());
     settings.endGroup();
 
+    if(optionsClassify->algoList->currentIndex() < 0 || optionsClassify->algoList->currentIndex() > optionsClassify->algoList->count()) optionsClassify->algoList->setCurrentIndex(0);
+    if(optionsCluster->algoList->currentIndex() < 0 || optionsCluster->algoList->currentIndex() > optionsCluster->algoList->count()) optionsCluster->algoList->setCurrentIndex(0);
+    if(optionsDynamic->algoList->currentIndex() < 0 || optionsDynamic->algoList->currentIndex() > optionsDynamic->algoList->count()) optionsDynamic->algoList->setCurrentIndex(0);
+    if(optionsMaximize->algoList->currentIndex() < 0 || optionsMaximize->algoList->currentIndex() > optionsMaximize->algoList->count()) optionsMaximize->algoList->setCurrentIndex(0);
+    if(optionsProject->algoList->currentIndex() < 0 || optionsProject->algoList->currentIndex() > optionsProject->algoList->count()) optionsProject->algoList->setCurrentIndex(0);
+    if(optionsRegress->algoList->currentIndex() < 0 || optionsRegress->algoList->currentIndex() > optionsRegress->algoList->count()) optionsRegress->algoList->setCurrentIndex(0);
+    if(optionsReinforcement->algoList->currentIndex() < 0 || optionsReinforcement->algoList->currentIndex() > optionsReinforcement->algoList->count()) optionsReinforcement->algoList->setCurrentIndex(0);
+
     FOR(i,classifiers.size())
     {
         if(!classifiers[i]) continue;
