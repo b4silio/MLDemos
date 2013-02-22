@@ -324,7 +324,7 @@ void DrawEigenvals(QPainter &painter, fvec eigs, bool bSkipFirstEigenvector)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    int rectW = (w-2*pad) / (dim-1) - 2;
+    int rectW = (w-2*pad) / dim - 2;
     FOR(i, dim)
     {
         float eigval = eigs[i];
@@ -431,7 +431,7 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     }
     sort(eigenvalues.begin(), eigenvalues.end(), std::greater<float>());
     eigenvalues.resize(params->dimCountSpin->value());
-    FOR(i, eigenvalues.size()) qDebug() << "eigs" << i << eigenvalues[i];
+    //FOR(i, eigenvalues.size()) qDebug() << "eigs" << i << eigenvalues[i];
 
     float accumulator = 0;
     float maxEigVal = 0;

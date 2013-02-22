@@ -511,12 +511,12 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
 
 }
 
-float ClassifierSVM::Test( const fvec &sample )
+float ClassifierSVM::Test( const fvec &sample ) const
 {
     int data_dimension = sample.size();
     if(!svm) return 0;
     float estimate;
-    if(!node) node = new svm_node[data_dimension+1];
+    svm_node *node = new svm_node[data_dimension+1];
     FOR(i, data_dimension)
     {
         node[i].index = i+1;
@@ -529,16 +529,14 @@ float ClassifierSVM::Test( const fvec &sample )
     return estimate;
 }
 
-float ClassifierSVM::Test( const fVec &sample )
+float ClassifierSVM::Test( const fVec &sample ) const
 {
     int data_dimension = 2;
     if(!svm) return 0;
     float estimate;
-    if(!node)
-    {
-        node = new svm_node[data_dimension+1];
-        node[data_dimension].index = -1;
-    }
+    svm_node *node = new svm_node[data_dimension+1];
+    node[data_dimension].index = -1;
+
     FOR(i, data_dimension)
     {
         node[i].index = i+1;
@@ -550,7 +548,7 @@ float ClassifierSVM::Test( const fVec &sample )
     return estimate;
 }
 
-fvec ClassifierSVM::TestMulti(const fvec &sample)
+fvec ClassifierSVM::TestMulti(const fvec &sample) const
 {
     if(classCount == 2)
     {
@@ -559,15 +557,13 @@ fvec ClassifierSVM::TestMulti(const fvec &sample)
         return res;
     }
     int maxClass = classCount;
-    FOR(i, classCount) maxClass = max(maxClass, classes[i]);
+    FOR(i, classCount) maxClass = max(maxClass, classes.at(i));
     fvec resp(maxClass,0);
     int data_dimension = sample.size();
     if(!svm) return resp;
-    if(!node)
-    {
-        node = new svm_node[data_dimension+1];
-        node[data_dimension].index = -1;
-    }
+
+    svm_node *node = new svm_node[data_dimension+1];
+    node[data_dimension].index = -1;
     FOR(i, data_dimension)
     {
         node[i].index = i+1;
@@ -578,7 +574,7 @@ fvec ClassifierSVM::TestMulti(const fvec &sample)
     //int max = 0;
     FOR(i, classCount)
     {
-        resp[classes[i]] = decisions[i];
+        resp[classes.at(i)] = decisions[i];
         //if(resp[max] < resp[classes[i]]) max = i;
     }
     //resp[max] += classCount;
@@ -586,7 +582,7 @@ fvec ClassifierSVM::TestMulti(const fvec &sample)
     return resp;
 }
 
-const char *ClassifierSVM::GetInfoString()
+const char *ClassifierSVM::GetInfoString() const
 {
     if(!svm) return NULL;
     char *text = new char[1024];
@@ -612,7 +608,7 @@ const char *ClassifierSVM::GetInfoString()
     return text;
 }
 
-void ClassifierSVM::SaveModel(std::string filename)
+void ClassifierSVM::SaveModel(std::string filename) const
 {
     std::cout << "saving SVM model";
     if(!svm)
@@ -696,12 +692,12 @@ void ClassifierSVM::SaveModel(std::string filename)
 
     file << type << " " << bOptimize << endl;
 
-    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
+    for(map<int,int>::const_iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
     {
         file << it->first << " " << it->second << " ";
     }
     file << endl;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++)
+    for(map<int,int>::const_iterator it=classMap.begin(); it != classMap.end(); it++)
     {
         file << it->first << " " << it->second << " ";
     }

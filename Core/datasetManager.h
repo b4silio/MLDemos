@@ -111,12 +111,13 @@ struct TimeSerie
 		}
 		return *this;
 	}
-    fvec& operator[] (const unsigned int i) const {return data[i];}
-    fvec& operator() (const unsigned int i) const {return data[i];}
-	void clear(){data.clear();timestamps.clear();}
+    fvec& operator[] (const unsigned int i) {return data[i];}
+    fvec& operator() (const unsigned int i) {return data[i];}
+    const fvec& at(const unsigned int i) const {return data.at(i);}
+    void clear(){data.clear();timestamps.clear();}
     size_t size() const {return data.size();}
-    std::vector<fvec>::iterator begin() const {return data.begin();}
-    std::vector<fvec>::iterator end() const {return data.end();}
+    std::vector<fvec>::iterator begin() {return data.begin();}
+    std::vector<fvec>::iterator end() {return data.end();}
 
 	TimeSerie& operator+=(const TimeSerie& t) {
 		data.insert(data.end(), t.data.begin(), t.data.end());
@@ -181,12 +182,12 @@ public:
     void AddSamples(const std::vector< fvec > samples, const ivec newLabels=ivec(), const std::vector<dsmFlags> newFlags=std::vector<dsmFlags>());
     void AddSamples(const DatasetManager &newSamples);
     void RemoveSample(const unsigned int index);
-    void RemoveSamples(const ivec indices);
+    void RemoveSamples(ivec indices);
 
     fvec GetSample(const int index=0) const { return (index < samples.size()) ? samples[index] : fvec(); }
     fvec GetSampleDim(const int index, const ivec inputDims, const int outputDim=-1) const;
     std::vector< fvec > GetSamples() const {return samples;}
-    std::vector< fvec > GetSamples(const u32 count, const dsmFlags flag=_UNUSED, const dsmFlags replaceWith=_TRAIN) const;
+    std::vector< fvec > GetSamples(const u32 count, const dsmFlags flag=_UNUSED, const dsmFlags replaceWith=_TRAIN);
     std::vector< fvec > GetSampleDims(const ivec inputDims, const int outputDim=-1) const ;
     void SetSample(const int index, const fvec sample);
     void SetSamples(const std::vector<fvec> samples){this->samples = samples;}
@@ -219,14 +220,14 @@ public:
 
 	// functions to manage rewards
     void AddReward(const float *values, const ivec size, const fvec lowerBoundary, const fvec higherBoundary);
-    RewardMap *GetReward() const {return &rewards;}
+    RewardMap *GetReward() {return &rewards;}
 
 	// functions to manage time series
     void AddTimeSerie(const std::string name, const std::vector<fvec> data, const std::vector<long int> timestamps=std::vector<long int>());
     void AddTimeSerie(const TimeSerie serie);
     void AddTimeSeries(const std::vector< TimeSerie > newTimeSeries);
     void RemoveTimeSerie(const unsigned int index);
-    std::vector<TimeSerie>& GetTimeSeries() const {return series;}
+    std::vector<TimeSerie>& GetTimeSeries() {return series;}
 
 	// functions to manage flags
     dsmFlags GetFlag(const int index) const {return index < flags.size() ? flags[index] : _UNUSED;}
@@ -235,7 +236,7 @@ public:
     std::vector<bool> GetFreeFlags() const ;
 	void ResetFlags();
 
-    void Save(const char *filename) const ;
+    void Save(const char *filename);
 	bool Load(const char *filename);
 };
 

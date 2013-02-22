@@ -113,12 +113,12 @@ void ClassifierLinear::Train( std::vector< fvec > samples, ivec labels )
     }
 }
 
-float ClassifierLinear::Test(const fvec &sample )
+float ClassifierLinear::Test(const fvec &sample ) const
 {
 	float response = 0;
     if(linearType < 4) // pca, lda, fisher
 	{
-		fVec point(sample[0] - meanAll[0], sample[1] - meanAll[1]);
+        fVec point(sample[0] - meanAll.at(0), sample[1] - meanAll.at(1));
 		float estimate = W*point;
 		response = -(estimate - threshold);
 	}
@@ -131,8 +131,8 @@ float ClassifierLinear::Test(const fvec &sample )
 
 			FOR(d,sample.size())
 			{
-				distPos += fabs(projected[d] - meanPos[d]);
-				distNeg += fabs(projected[d] - meanNeg[d]);
+                distPos += fabs(projected[d] - meanPos.at(d));
+                distNeg += fabs(projected[d] - meanNeg.at(d));
 			}
 		}
 		response = (distNeg - distPos);
@@ -145,7 +145,7 @@ float ClassifierLinear::Test(const fvec &sample )
     return response;
 }
 
-const char *ClassifierLinear::GetInfoString()
+const char *ClassifierLinear::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "");
@@ -184,12 +184,12 @@ void Invert(double *sigma, double *invSigma)
 	invSigma[3] = sigma[0] / det;
 }
 
-fvec ClassifierLinear::Project(const fvec &sample)
+fvec ClassifierLinear::Project(const fvec &sample) const
 {
 	fvec newSample = sample;
     if(linearType < 4) // pca, lda, fisher
 	{
-		fVec mean(meanAll[0], meanAll[1]);
+        fVec mean(meanAll.at(0), meanAll.at(1));
 		fVec point(sample[0], sample[1]);
 		float dot = W*(point-mean);
 		fVec proj(dot*W.x, dot*W.y);
@@ -201,7 +201,7 @@ fvec ClassifierLinear::Project(const fvec &sample)
 	return newSample;
 }
 
-void ClassifierLinear::SetParams( u32 linearType )
+void ClassifierLinear::SetParams(const u32 linearType )
 {
 	this->linearType = linearType;
 	if(linearType == 1 || linearType == 2) bSingleClass = false;

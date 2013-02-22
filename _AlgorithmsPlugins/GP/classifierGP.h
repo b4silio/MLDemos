@@ -98,14 +98,14 @@ public:
     /**
       Binary classification function, takes a sample, returns a real value, negative for class 0 and positive for class 1
       */
-    float Test(const fvec &sample);
+    float Test(const fvec &sample) const ;
 
 
     /**
       Information string for the Algorithm Information and Statistics panel in the main program interface.
       Here you probably will put the number of parameters, the training time or anything else
       */
-    const char *GetInfoString();
+    const char *GetInfoString() const ;
 
     /**
       Function to set the algorithm hyper-parameters, called prior to the training itself

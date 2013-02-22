@@ -158,7 +158,7 @@ void DatasetManager::RemoveSample(const unsigned int index)
 	}
 }
 
-void DatasetManager::RemoveSamples(const ivec indices)
+void DatasetManager::RemoveSamples(ivec indices)
 {
     if(indices.size() > samples.size()) return;
     // we sort the indices
@@ -221,7 +221,7 @@ void DatasetManager::AddTimeSerie(const TimeSerie serie)
 	series.push_back(serie);
 }
 
-void DatasetManager::AddTimeSeries(const vector newTimeSeries)
+void DatasetManager::AddTimeSeries(const vector<TimeSerie> newTimeSeries)
 {
 	series.insert(series.end(), newTimeSeries.begin(), newTimeSeries.end());
 }
@@ -302,9 +302,9 @@ void DatasetManager::SetSample(const int index, const fvec sample)
 string DatasetManager::GetCategorical(const int dimension, const int value) const
 {
     string s;
-    if(categorical.count(dimension) && value < categorical[dimension].size())
+    if(categorical.count(dimension) && value < categorical.at(dimension).size())
     {
-        s = categorical[dimension][value];
+        s = categorical.at(dimension)[value];
     }
     return s;
 }
@@ -406,7 +406,7 @@ std::vector< fvec > DatasetManager::GetSampleDims(const ivec inputDims, const in
     return newSamples;
 }
 
-std::vector< fvec > DatasetManager::GetSamples(const u32 count, const dsmFlags flag, const dsmFlags replaceWith) const
+std::vector< fvec > DatasetManager::GetSamples(const u32 count, const dsmFlags flag, const dsmFlags replaceWith)
 {
 	std::vector< fvec > selected;
 	if (!samples.size() || !perm) return selected;
@@ -437,9 +437,9 @@ std::vector< fvec > DatasetManager::GetSamples(const u32 count, const dsmFlags f
 	return selected;
 }
 
-std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(const int resampleType, const int resampleCount, const int centerType, const float dT, const int zeroEnding) const
+std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(const int resampleType, const int resampleCount_, const int centerType, const float dT, const int zeroEnding) const
 {
-
+    int resampleCount = resampleCount_;
 	// we split the data into trajectories
 	vector< vector<fvec> > trajectories;
 	if(!sequences.size() || !samples.size()) return trajectories;
@@ -593,7 +593,7 @@ std::vector< std::vector < fvec > > DatasetManager::GetTrajectories(const int re
 }
 
 
-void DatasetManager::Save(const char *filename) const
+void DatasetManager::Save(const char *filename)
 {
     if(!samples.size() && rewards.Empty()) return;
 	u32 sampleCnt = samples.size();
@@ -766,10 +766,10 @@ bool DatasetManager::Load(const char *filename)
 int DatasetManager::GetDimCount() const
 {
 	int dim = 2;
-	if(samples.size()) dim = samples[0].size();
-	if(series.size() && series[0].size())
+    if(samples.size()) dim = samples.at(0).size();
+    if(series.size() && series.at(0).size())
 	{
-		dim = series[0][0].size()+1;
+        dim = series.at(0).at(0).size()+1;
 	}
 	return dim;
 }
@@ -781,12 +781,12 @@ std::pair<fvec, fvec> DatasetManager::GetBounds() const
     fvec mins(dim,FLT_MAX), maxes(dim,-FLT_MAX);
     FOR(i, samples.size())
     {
-        fvec& sample = samples[i];
+        const fvec& sample = samples.at(i);
         int dim = sample.size();
         FOR(d,dim)
         {
-            if(mins[d] > sample[d]) mins[d] = sample[d];
-            if(maxes[d] < sample[d]) maxes[d] = sample[d];
+            if(mins[d] > sample[d]) mins[d] = sample.at(d);
+            if(maxes[d] < sample[d]) maxes[d] = sample.at(d);
         }
     }
     return make_pair(mins, maxes);

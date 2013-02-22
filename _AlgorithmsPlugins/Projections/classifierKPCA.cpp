@@ -132,7 +132,7 @@ void ClassifierKPCA::Train(std::vector< fvec > samples, ivec labels)
 	}
 }
 
-float ClassifierKPCA::Test( const fvec &sample )
+float ClassifierKPCA::Test( const fvec &sample ) const
 {
 	float estimate = 0;
 	if(!pca) return estimate;
@@ -144,7 +144,7 @@ float ClassifierKPCA::Test( const fvec &sample )
 	return estimate;
 }
 
-float ClassifierKPCA::Test( const fVec &sample )
+float ClassifierKPCA::Test( const fVec &sample ) const
 {
 	float estimate = 0;
 	if(!pca) return estimate;
@@ -163,7 +163,7 @@ void ClassifierKPCA::SetParams(int kernelType, int kernelDegree, float kernelGam
     this->kernelOffset = kernelOffset;
 }
 
-const char *ClassifierKPCA::GetInfoString()
+const char *ClassifierKPCA::GetInfoString() const
 {
 	char *text = new char[1024];
 	/*

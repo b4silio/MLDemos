@@ -45,8 +45,8 @@ public:
     ClassifierMVM();
     ~ClassifierMVM();
 	void Train(std::vector< fvec > samples, ivec labels);
-    float Test(const fvec &sample);
-    const char *GetInfoString();
+    float Test(const fvec &sample) const ;
+    const char *GetInfoString() const ;
     void SetParams(u32 kernelType, float kernelParam, ivec indices, fvec alphas);
 };
 

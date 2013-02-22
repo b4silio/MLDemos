@@ -510,12 +510,12 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 }
 
 
-float ClassifierBoost::Test( const fvec &sample )
+float ClassifierBoost::Test( const fvec &sample ) const
 {
     return Test(sample, 0);
 }
 
-float ClassifierBoost::Test( const fvec &sample, fvec *responses)
+float ClassifierBoost::Test( const fvec &sample, fvec *responses) const
 {
     if(!model) return 0;
     if(!learners.size()) return 0;
@@ -674,7 +674,7 @@ void ClassifierBoost::SetParams( u32 weakCount, int weakType, int boostType, int
     }
 }
 
-const char *ClassifierBoost::GetInfoString()
+const char *ClassifierBoost::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "Boosting\n");

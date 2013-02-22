@@ -102,7 +102,7 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 	}
 }
 
-fvec ClassifierGMM::TestMulti(const fvec &sample)
+fvec ClassifierGMM::TestMulti(const fvec &sample) const
 {
 	fvec pdf(gmms.size());
 	FOR(i, gmms.size()) pdf[i] = gmms[i]->pdf((float*)&sample[0]);
@@ -129,7 +129,7 @@ fvec ClassifierGMM::TestMulti(const fvec &sample)
 	return pdf;
 }
 
-float ClassifierGMM::Test( const fvec &sample)
+float ClassifierGMM::Test( const fvec &sample) const
 {
 	fvec pdf = TestMulti(sample);
 	if(pdf.size() < 2) return 0;
@@ -137,7 +137,7 @@ float ClassifierGMM::Test( const fvec &sample)
 	return res;
 }
 
-float ClassifierGMM::Test( const fVec &_sample)
+float ClassifierGMM::Test( const fVec &_sample) const
 {
 	if(!gmms.size()) return 0;
 	fVec sample = _sample;
@@ -158,7 +158,7 @@ void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 	this->initType = initType;
 }
 
-const char *ClassifierGMM::GetInfoString()
+const char *ClassifierGMM::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "GMM\n");
@@ -197,7 +197,7 @@ void ClassifierGMM::Update()
 
 }
 
-void ClassifierGMM::SaveModel(std::string filename)
+void ClassifierGMM::SaveModel(const std::string filename) const
 {
     std::cout << "saving GMM model";
     if(!gmms.size())
@@ -218,12 +218,12 @@ void ClassifierGMM::SaveModel(std::string filename)
     int classCount = gmms.size();
     file << dim << " " << classCount << endl;
 
-    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
+    for(map<int,int>::const_iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
     {
         file << it->first << " " << it->second << " ";
     }
     file << endl;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++)
+    for(map<int,int>::const_iterator it=classMap.begin(); it != classMap.end(); it++)
     {
         file << it->first << " " << it->second << " ";
     }
@@ -268,7 +268,7 @@ void ClassifierGMM::SaveModel(std::string filename)
     file.close();
 }
 
-bool ClassifierGMM::LoadModel(std::string filename)
+bool ClassifierGMM::LoadModel(const string filename)
 {
     std::cout << "loading GMM model: " << filename;
 

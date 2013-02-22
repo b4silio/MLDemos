@@ -41,10 +41,9 @@ void ClassifierKNN::Train( std::vector< fvec > samples, ivec labels )
 	}
 	kdTree = new ANNkd_tree(dataPts, samples.size(), dim);
 
-	FOR(i, labels.size())
-	{
-		counts[i] = 0;
-	}
+    int cnt=0;
+    FOR(i, labels.size()) if(!classMap.count(labels.at(i))) classMap[labels.at(i)] = cnt++;
+    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
 }
 
 ClassifierKNN::~ClassifierKNN()
@@ -53,16 +52,13 @@ ClassifierKNN::~ClassifierKNN()
 	DEL(kdTree);
 }
 
-fvec ClassifierKNN::TestMulti(const fvec &sample)
+fvec ClassifierKNN::TestMulti(const fvec &sample) const
 {
 	if(!samples.size()) return fvec();
 	fvec score;
 
-    int cnt=0;
-    FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
     ivec newLabels(labels.size());
-    FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
+    FOR(i, newLabels.size()) newLabels[i] = classMap.at(labels.at(i));
 
 	double eps = 0; // error bound
 	ANNpoint queryPt; // query point
@@ -71,19 +67,13 @@ fvec ClassifierKNN::TestMulti(const fvec &sample)
 	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
 	FOR(i, sample.size()) queryPt[i] = sample[i];
 	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
-    cnt = 0;
-
-	for(map<int,int>::iterator it = counts.begin(); it != counts.end(); it++)
-	{
-		it->second = 0;
-	}
-
+    std::map<int,int> counts;
 	FOR(i, k)
 	{
         if(nnIdx[i] >= newLabels.size()) continue;
         int label = newLabels[nnIdx[i]];
-		if(counts.count(label)) counts[label]++;
-		cnt++;
+        if(!counts.count(label)) counts[label] = 0;
+        counts[label]++;
 	}
 	delete [] nnIdx; // clean things up
 	delete [] dists;
@@ -106,15 +96,10 @@ fvec ClassifierKNN::TestMulti(const fvec &sample)
 			score[i] /= sum;
 		}
 	}
-
-//	map<int,int>::iterator it = max_element(counts.begin(), counts.end()).second;
-//	int label = it->first;
-//	score = it->second / (float)cnt;
-
 	return score;
 }
 
-float ClassifierKNN::Test( const fvec &sample )
+float ClassifierKNN::Test( const fvec &sample ) const
 {
 	if(!samples.size()) return 0;
 	float score = 0;
@@ -144,7 +129,7 @@ float ClassifierKNN::Test( const fvec &sample )
 	return score;
 }
 
-float ClassifierKNN::Test( const fVec &sample )
+float ClassifierKNN::Test( const fVec &sample ) const
 {
 	if(!samples.size()) return 0;
 	float score = 0;
@@ -195,7 +180,7 @@ void ClassifierKNN::SetParams( u32 k, int metricType, u32 metricP )
 	}
 }
 
-const char *ClassifierKNN::GetInfoString()
+const char *ClassifierKNN::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "KNN\n");

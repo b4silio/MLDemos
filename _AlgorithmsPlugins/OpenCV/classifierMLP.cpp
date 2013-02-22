@@ -79,7 +79,7 @@ void ClassifierMLP::Train(std::vector< fvec > samples, ivec labels)
 	cvReleaseMat(&layers);
 }
 
-float ClassifierMLP::Test( const fvec &sample)
+float ClassifierMLP::Test( const fvec &sample) const
 {
 	if(!mlp) return 0;
 	float *_input = new float[dim];
@@ -101,7 +101,7 @@ void ClassifierMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount,
 	this->beta = beta; 
 }
 
-const char *ClassifierMLP::GetInfoString()
+const char *ClassifierMLP::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "Multi-Layer Perceptron\n");

@@ -207,7 +207,7 @@ void ClassifierGP::Train(std::vector< fvec > samples, ivec labels)
 }
 
 
-float ClassifierGP::Test(const fvec &sample)
+float ClassifierGP::Test(const fvec &sample) const
 {
     float smp_raw_array[MAX_DIM]; // float array for testing data
     float  k_star_raw_array[MAX_N_TRAIN]; //float array for covariance k(x*,X)
@@ -263,7 +263,7 @@ float ClassifierGP::Test(const fvec &sample)
 
 }
 
-const char *ClassifierGP::GetInfoString()
+const char *ClassifierGP::GetInfoString() const
 {
     char *text = new char[1024];
     sprintf(text, "My Classifier Example\n");
@@ -271,7 +271,7 @@ const char *ClassifierGP::GetInfoString()
     sprintf(text, "%sTraining informations:\n", text);
 
     // here you can fill in whatever information you want
-    for(map<int,fvec>::iterator it=centers.begin(); it != centers.end(); it++)
+    for(map<int,fvec>::const_iterator it=centers.begin(); it != centers.end(); it++)
     {
         sprintf(text, "%sCenter for class %d\n", text, it->first);
         FOR(d, it->second.size())

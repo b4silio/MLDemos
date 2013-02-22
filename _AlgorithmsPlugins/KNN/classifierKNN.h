@@ -39,12 +39,12 @@ private:
 public:
     ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){bMultiClass = true;}
 	~ClassifierKNN();
-	void Train(std::vector< fvec > samples, ivec labels);
-	fvec TestMulti(const fvec &sample);
-	float Test( const fvec &sample);
-	float Test( const fVec &sample);
+    void Train(std::vector< fvec > samples, ivec labels);
+    fvec TestMulti(const fvec &sample) const ;
+    float Test( const fvec &sample) const ;
+    float Test( const fVec &sample) const ;
 	void SetParams(u32 k, int metricType, u32 metricP);
-    const char *GetInfoString();
+    const char *GetInfoString() const ;
 };
 
 #endif // _CLASSIFIER_KNN_H_

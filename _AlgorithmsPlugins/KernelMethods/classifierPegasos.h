@@ -40,16 +40,16 @@ public:
     ClassifierPegasos():maxSV(10),lambda(0.001), kernelType(2), decFunction(0){}
     ~ClassifierPegasos();
 	void Train(std::vector< fvec > samples, ivec labels);
-	float Test(const fvec &sample);
-    const char *GetInfoString();
+    float Test(const fvec &sample) const ;
+    const char *GetInfoString() const ;
 	void SetParams(float lambda, int maxSV, int kernelType, float kernelParam, int kernelDegree)
         {this->lambda = lambda; this->maxSV = maxSV; this->kernelType=kernelType;this->kernelParam=kernelParam;this->kernelDegree=kernelDegree;}
-	std::vector<fvec> GetSVs();
+    std::vector<fvec> GetSVs() const ;
 
     template <int N> void KillDim();
     template <int N> void TrainDim(std::vector< fvec > _samples, ivec _labels);
-    template <int N> float TestDim(const fvec &sample);
-    template <int N> std::vector<fvec> GetSVsDim();
+    template <int N> float TestDim(const fvec &sample) const ;
+    template <int N> std::vector<fvec> GetSVsDim() const ;
 };
 
 #endif // _CLASSIFIER_PEGASOS_H_
