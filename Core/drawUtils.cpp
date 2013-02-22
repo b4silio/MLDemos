@@ -835,6 +835,9 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
         printf("done.\n");
         fflush(stdout);
     }
+    delete [] minVals;
+    delete [] maxVals;
+    delete [] values;
 }
 
 void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
