@@ -881,11 +881,9 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample, std::vector<Clas
 bool DrawTimer::TestFast(int start, int stop)
 {
     if(stop < 0 || stop > w*h) stop = w*h;
-    int dim=2;
-    vector<Obstacle> obstacles;
     mutex->lock();
-    dim=canvas->data->GetDimCount();
-    obstacles = canvas->data->GetObstacles();
+    int dim=canvas->data->GetDimCount();
+    vector<Obstacle> obstacles = canvas->data->GetObstacles();
     mutex->unlock();
     if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
     fvec sample(dim);

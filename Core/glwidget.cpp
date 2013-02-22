@@ -880,12 +880,13 @@ void GLWidget::DrawSurfaces(GLObject &o)
     //    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
     glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
+    //glBlendEquation(GL_FUNC_ADD);
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
 
+    qDebug() << "enabling lights" << lights.size();
     // setup lights
     FOR(i, lights.size())
     {
