@@ -305,9 +305,9 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 {
     QPixmap boxplot(size);
     if(!allData.size()) return boxplot;
-    QBitmap bitmap;
-    bitmap.clear();
-    boxplot.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //boxplot.setMask(bitmap);
     boxplot.fill(Qt::transparent);
     QPainter painter(&boxplot);
 
@@ -433,9 +433,9 @@ QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal, float min
 {
     QPixmap histogram(size);
     if(!allData.size()) return histogram;
-    QBitmap bitmap;
-    bitmap.clear();
-    histogram.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //histogram.setMask(bitmap);
     histogram.fill(Qt::transparent);
     QPainter painter(&histogram);
 
@@ -519,9 +519,9 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 {
     QPixmap rawData(size);
     if(!allData.size()) return rawData;
-    QBitmap bitmap;
-    bitmap.clear();
-    rawData.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //rawData.setMask(bitmap);
     rawData.fill(Qt::transparent);
     QPainter painter(&rawData);
 

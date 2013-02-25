@@ -135,7 +135,7 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, in
         {
             testSamples[i-trainCnt] = samples[perm[i]];
             testLabels[i-trainCnt] = newLabels[perm[i]];
-            testClassCnt[trainLabels[i]]++;
+            testClassCnt[testLabels[i-trainCnt]]++;
         }
         // we need to make sure that we have at least one sample per class
         FORIT(classCnt, int, int)

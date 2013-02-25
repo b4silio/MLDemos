@@ -69,9 +69,9 @@ void CompareAlgorithms::Update()
 	QSize boxSize(rW*names.size(),200);
 
 	pixmap = QPixmap(boxSize.width(),boxSize.height()+2*hPad);
-	QBitmap bitmap;
-	bitmap.clear();
-	pixmap.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
 	pixmap.fill(Qt::transparent);
 	QPainter painter(&pixmap);
 

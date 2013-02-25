@@ -46,8 +46,9 @@ ClustDBSCAN::ClustDBSCAN()
 void ClustDBSCAN::showZoom()
 {
         QPixmap pixmap(graphzoom->graph->size());
-        QBitmap bitmap(graphzoom->graph->size());
-        pixmap.setMask(bitmap);
+        //QBitmap bitmap(graphzoom->graph->size());
+        //bitmap.clear();
+        //pixmap.setMask(bitmap);
         pixmap.fill(Qt::transparent);
         QPainter dPainter(&pixmap);
         DrawDendogram(dPainter,true);
@@ -361,8 +362,9 @@ void ClustDBSCAN::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *cluste
 
     // and plot the small graph
     QPixmap pixmap(params->dendoGraph->size());
-    QBitmap bitmap(params->dendoGraph->size());
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(params->dendoGraph->size());
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter dPainter(&pixmap);
     DrawDendogram(dPainter,false);

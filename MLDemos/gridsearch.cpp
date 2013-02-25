@@ -243,8 +243,9 @@ void GridSearch::DisplayResults()
     int cH = ui->colorbarLabel->height();
     int cpad = 6;
     QPixmap colorBar(cW,cH);
-    QBitmap bitmap(cW,cH);
-    colorBar.setMask(bitmap);
+    //QBitmap bitmap(cW,cH);
+    //bitmap.clea();
+    //colorBar.setMask(bitmap);
     colorBar.fill(Qt::transparent);
     QPainter painterBar(&colorBar);
     painterBar.setBrush(Qt::NoBrush);

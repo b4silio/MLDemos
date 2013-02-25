@@ -220,9 +220,9 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
             int w = width();
             int h = height();
             maps.model = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.model.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.model.setMask(bitmap);
             maps.model.fill(Qt::transparent);
             QPainter painter(&maps.model);
             DrawSampleColors(painter);
@@ -284,9 +284,9 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             int w = width();
             int h = height();
             maps.samples = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.samples.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.samples.setMask(bitmap);
             maps.samples.fill(Qt::transparent);
             Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), data->GetFlags(), type, data->bProjected, dimNames, bounds);
         }
@@ -300,9 +300,9 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             int w = width();
             int h = height();
             maps.trajectories = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.trajectories.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.trajectories.setMask(bitmap);
             maps.trajectories.fill(Qt::transparent);
             Expose::DrawTrajectories(maps.trajectories, data->GetTrajectories(trajectoryResampleType, trajectoryResampleCount, trajectoryCenterType, 0.1, true), data->GetLabels(), type, 0, bounds);
         }
@@ -316,9 +316,9 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             int w = width();
             int h = height();
             maps.model = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.model.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.model.setMask(bitmap);
             maps.model.fill(Qt::transparent);
             Expose::DrawData(maps.model, data->GetSamples(), sampleColors, data->GetFlags(), type, data->bProjected, true, dimNames);
         }
@@ -351,9 +351,9 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.samples.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         Expose::DrawVariableData(maps.samples, data->GetSamples(), data->GetLabels(), type, params, data->bProjected);
     }
@@ -365,9 +365,9 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
         int w = width();
         int h = height();
         maps.trajectories = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.trajectories.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.trajectories.setMask(bitmap);
         maps.trajectories.fill(Qt::transparent);
     }
     painter.setBackgroundMode(Qt::TransparentMode);
@@ -378,9 +378,9 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
         int w = width();
         int h = height();
         maps.model = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.model.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.model.setMask(bitmap);
         maps.model.fill(Qt::transparent);
         Expose::DrawVariableData(maps.model, data->GetSamples(), sampleColors, type, params, data->bProjected);
     }
@@ -902,9 +902,9 @@ void Canvas::RedrawAxes()
     int w = width();
     int h = height();
     maps.grid = QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    maps.grid.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //maps.grid.setMask(bitmap);
     maps.grid.fill(Qt::transparent);
 
     QPainter painter(&maps.grid);
@@ -949,9 +949,9 @@ void Canvas::DrawSamples()
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.samples.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
         return;
@@ -964,9 +964,9 @@ void Canvas::DrawSamples()
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.samples.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
         //maps.model = QPixmap(w,h);
@@ -1077,9 +1077,9 @@ void Canvas::DrawObstacles()
     int w = width();
     int h = height();
     maps.obstacles = QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    maps.obstacles.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //maps.obstacles.setMask(bitmap);
     maps.obstacles.fill(Qt::transparent);
 
     QPainter painter(&maps.obstacles);
@@ -1092,9 +1092,9 @@ void Canvas::DrawRewards()
     int w = width();
     int h = height();
     maps.reward= QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    maps.reward.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //maps.reward.setMask(bitmap);
     maps.reward.fill(Qt::transparent);
 
     if(!data->GetReward()->rewards) return;
@@ -1260,9 +1260,9 @@ void Canvas::DrawTrajectories()
     if(!count || (!data->GetSequences().size() && (data->GetFlag(count-1) != _TRAJ)))
     {
         maps.trajectories = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.trajectories.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.trajectories.setMask(bitmap);
         maps.trajectories.fill(Qt::transparent);
         drawnTrajectories = 0;
     }
@@ -1288,9 +1288,9 @@ void Canvas::DrawTrajectories()
     if(!drawnTrajectories || maps.trajectories.isNull())
     {
         maps.trajectories = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.trajectories.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.trajectories.setMask(bitmap);
         maps.trajectories.fill(Qt::transparent);
         drawnTrajectories = 0;
     }
@@ -1386,9 +1386,9 @@ void Canvas::DrawTimeseries()
     if(!drawnTimeseries || maps.timeseries.isNull())
     {
         maps.timeseries = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.timeseries.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.timeseries.setMask(bitmap);
         maps.timeseries.fill(Qt::transparent);
         drawnTimeseries = 0;
     }
@@ -1697,9 +1697,9 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
     if(maps.reward.isNull())
     {
         maps.reward = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.reward.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.reward.setMask(bitmap);
         maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }
@@ -1733,9 +1733,9 @@ void Canvas::PaintGaussian(QPointF position, double variance)
     if(maps.reward.isNull())
     {
         maps.reward = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.reward.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.reward.setMask(bitmap);
         maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }
@@ -1780,9 +1780,9 @@ void Canvas::PaintGradient(QPointF position)
     if(maps.reward.isNull())
     {
         maps.reward = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.reward.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.reward.setMask(bitmap);
         maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }

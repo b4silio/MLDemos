@@ -79,9 +79,9 @@ public:
 		int h = canvas->height();
 
         canvas->maps.info = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        canvas->maps.info.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //canvas->maps.info.setMask(bitmap);
         canvas->maps.info.fill(Qt::transparent);
         QPainter painter(&canvas->maps.info);
         if(!canvas->canvasType) DrawInfo(canvas, painter, classifier);
@@ -126,9 +126,9 @@ public:
 		int h = canvas->height();
 		{
 			QPixmap modelPixmap(w, h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			modelPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //modelPixmap.setMask(bitmap);
 			modelPixmap.fill(Qt::transparent);
 			QPainter painter(&modelPixmap);
             if(!canvas->canvasType) DrawModel(canvas, painter, clusterer);
@@ -137,9 +137,9 @@ public:
 
 		{
 			QPixmap infoPixmap(w, h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			infoPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //infoPixmap.setMask(bitmap);
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
             if(!canvas->canvasType) DrawInfo(canvas, painter, clusterer);
@@ -185,9 +185,9 @@ public:
 		{
 			canvas->maps.confidence = QPixmap(w,h);
 			canvas->maps.model = QPixmap(w,h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			canvas->maps.model.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //canvas->maps.model.setMask(bitmap);
 			canvas->maps.model.fill(Qt::transparent);
             QPainter painter(&canvas->maps.model);
             if(!canvas->canvasType) DrawModel(canvas, painter, regressor);
@@ -195,9 +195,9 @@ public:
 
 		{
 			QPixmap infoPixmap(w, h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			infoPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //infoPixmap.setMask(bitmap);
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
             if(!canvas->canvasType) DrawInfo(canvas, painter, regressor);
@@ -244,9 +244,9 @@ public:
 
 		{
             QPixmap modelPixmap(w, h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            modelPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //modelPixmap.setMask(bitmap);
             modelPixmap.fill(Qt::transparent);
 
             QPainter painter(&modelPixmap);
@@ -256,9 +256,9 @@ public:
 
 		{
 			QPixmap infoPixmap(w, h);
-			QBitmap bitmap(w,h);
-			bitmap.clear();
-			infoPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //infoPixmap.setMask(bitmap);
 			infoPixmap.fill(Qt::transparent);
 
 			QPainter painter(&infoPixmap);
@@ -352,9 +352,9 @@ public:
 
         {
             canvas->maps.model = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            canvas->maps.model.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //canvas->maps.model.setMask(bitmap);
             canvas->maps.model.fill(Qt::transparent);
             QPainter painter(&canvas->maps.model);
             if(!canvas->canvasType) DrawModel(canvas, painter, reinforcement);
@@ -362,9 +362,9 @@ public:
 
         {
             canvas->maps.info = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            canvas->maps.info.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //canvas->maps.info.setMask(bitmap);
             canvas->maps.info.fill(Qt::transparent);
             QPainter painter(&canvas->maps.info);
             if(!canvas->canvasType) DrawInfo(canvas, painter, reinforcement);
@@ -408,9 +408,9 @@ public:
         int h = canvas->height();
         {
             QPixmap modelPixmap(w, h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            modelPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //modelPixmap.setMask(bitmap);
             modelPixmap.fill(Qt::transparent);
             QPainter painter(&modelPixmap);
             DrawModel(canvas, painter, projector);
@@ -419,9 +419,9 @@ public:
 
         {
             QPixmap infoPixmap(w, h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            infoPixmap.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //infoPixmap.setMask(bitmap);
             infoPixmap.fill(Qt::transparent);
             QPainter painter(&infoPixmap);
             DrawInfo(canvas, painter, projector);

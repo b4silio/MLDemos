@@ -288,9 +288,9 @@ void KPCAProjection::DrawContours(int index)
         int w = contourPixmaps[1].width();
         int h = contourPixmaps[1].height();
         QPixmap bigPixmap(gridX*w, gridX*h);
-        QBitmap bitmap(bigPixmap.width(), bigPixmap.height());
-        bitmap.clear();
-        bigPixmap.setMask(bitmap);
+        //QBitmap bitmap(bigPixmap.width(), bigPixmap.height());
+        //bitmap.clear();
+        //bigPixmap.setMask(bitmap);
         bigPixmap.fill(Qt::transparent);
         QPainter painter(&bigPixmap);
         for(int i=1; i<=contours->dimSpin->maximum(); i++)
@@ -450,8 +450,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     }
 
     QPixmap pixmap(params->eigenGraph->size());
-    QBitmap bitmap(params->eigenGraph->size());
-    pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter eigenPainter(&pixmap);
     DrawEigenvals(eigenPainter, eigenvalues, true);

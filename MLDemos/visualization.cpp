@@ -802,8 +802,9 @@ void Visualization::GenerateIndividualPlot()
 
     // and we set the size of the pixmap
     QPixmap pixmap(mapW, mapH);
-    QBitmap bitmap(mapW, mapH);
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(mapW, mapH);
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -1589,8 +1590,9 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
     /*
     pixmap.fill(Qt::white);
     */
-    QBitmap bitmap(w*perItemCount + pad*2, h+pad*1.5);
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(w*perItemCount + pad*2, h+pad*1.5);
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
 
@@ -2125,8 +2127,9 @@ QPixmap Visualization::GetStarPixmap(int inputType, int dim, int classCount, int
     }
 
     QPixmap pixmap(w, h+pad*1.5);
-    QBitmap bitmap(w, h+pad*1.5);
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(w, h+pad*1.5);
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -2255,8 +2258,9 @@ QPixmap Visualization::GetRadialPixmap(std::map<int,std::vector< std::pair<fvec,
     }
 
     QPixmap pixmap(w, h+pad*1.5);
-    QBitmap bitmap(w, h+pad*1.5);
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(w, h+pad*1.5);
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);

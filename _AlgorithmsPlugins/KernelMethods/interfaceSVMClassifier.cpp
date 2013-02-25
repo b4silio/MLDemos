@@ -107,8 +107,9 @@ void ClassSVM::DisplayARDKernel()
         ardLabel->setScaledContents(true);
     }
     QPixmap pixmap(200,200);
-    QBitmap bitmap(pixmap.width(), pixmap.height());
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(pixmap.width(), pixmap.height());
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);

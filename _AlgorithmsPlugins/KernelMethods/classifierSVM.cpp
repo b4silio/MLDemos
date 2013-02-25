@@ -586,25 +586,30 @@ const char *ClassifierSVM::GetInfoString() const
 {
     if(!svm) return NULL;
     char *text = new char[1024];
+    char text2[1024];
     sprintf(text, "%s\n", param.svm_type == NU_SVC ? "nu-SVM" : "C-SVM");
-    sprintf(text, "%sKernel: ", text);
+    sprintf(text2, "%sKernel: ", text);
     switch(param.kernel_type)
     {
     case LINEAR:
-        sprintf(text, "%s linear\n", text);
+        sprintf(text, "%s linear\n", text2);
         break;
     case POLY:
-        sprintf(text, "%s polynomial (deg: %d bias: %.3f width: %f)\n", text, param.degree, param.coef0, param.gamma);
+        sprintf(text, "%s polynomial (deg: %d bias: %.3f width: %f)\n", text2, param.degree, param.coef0, param.gamma);
         break;
     case RBF:
-        sprintf(text, "%s rbf (gamma: %f)\n", text, param.gamma);
+    case RBFWEIGH:
+        sprintf(text, "%s rbf (gamma: %f)\n", text2, param.gamma);
         break;
     case SIGMOID:
-        sprintf(text, "%s sigmoid (%f %f)\n", text, param.gamma, param.coef0);
+        sprintf(text, "%s sigmoid (%f %f)\n", text2, param.gamma, param.coef0);
+        break;
+    default:
+        strcpy(text, text2);
         break;
     }
-    sprintf(text, "%sC: %f \t nu: %f\n", text, param.C, param.nu);
-    sprintf(text, "%sSupport Vectors: %d\n", text, svm->l);
+    sprintf(text2, "%sC: %f \t nu: %f\n", text, param.C, param.nu);
+    sprintf(text, "%sSupport Vectors: %d\n", text2, svm->l);
     return text;
 }
 

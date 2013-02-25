@@ -109,11 +109,8 @@ fvec ClassifierGMM::TestMulti(const fvec &sample) const
 	if(gmms.size()==2)
 	{
 		fvec res(1);
-//        res[0] = pdf[1] - pdf[0];
         double p1 = log((double)pdf[1]);
         double p0 = log((double)pdf[0]);
-//        if(fabs(p1) < 1e-6) p1 = 0;
-//        if(fabs(p0) < 1e-6) p0 = 0;
         res[0] = (float)(p1 - p0);
         return res;
 	}

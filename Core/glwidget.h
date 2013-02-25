@@ -29,11 +29,12 @@ public:
     void clearLists();
     void killObjects();
     void generateObjects();
-    void DrawObject(GLObject &o);
-    void DrawSamples(GLObject &o);
-    void DrawParticles(GLObject &o);
-    void DrawLines(GLObject &o);
-    void DrawSurfaces(GLObject &o);
+    void FixSurfaces(GLObject &o);
+    void DrawObject(const GLObject &o) const ;
+    void DrawSamples(const GLObject &o) const ;
+    void DrawParticles(const GLObject &o) const;
+    void DrawLines(const GLObject &o) const;
+    void DrawSurfaces(const GLObject &o) const;
     void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
     static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
     {

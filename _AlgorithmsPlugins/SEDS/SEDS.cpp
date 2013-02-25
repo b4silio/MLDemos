@@ -603,8 +603,9 @@ void SEDS::PaintData(std::vector<float> data)
     int w = displayLabel->width();
     int h = displayLabel->height();
     QPixmap pm(w,h);
-    QBitmap bitmap(w,h);
-    pm.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //pm.setMask(bitmap);
     pm.fill(Qt::transparent);
     QPainter painter(&pm);
 

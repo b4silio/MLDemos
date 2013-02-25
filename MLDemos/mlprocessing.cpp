@@ -328,9 +328,9 @@ void MLDemos::Dynamize()
             testTrajectories[i] = result;
         }
         canvas->maps.model = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        canvas->maps.model.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //canvas->maps.model.setMask(bitmap);
         canvas->maps.model.fill(Qt::transparent);
 
         if(canvas->canvasType == 0) // standard canvas
@@ -852,9 +852,9 @@ void MLDemos::ClusterOptimize()
     int h = optionsCluster->graphLabel->height();
     int pad = 6;
     QPixmap pixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
 
@@ -1058,8 +1058,9 @@ void MLDemos::Maximize()
     int W = canvas->width();
     int H = canvas->height();
     canvas->maps.info = QPixmap(W, H);
-    QBitmap bitmap(canvas->width(), canvas->height());
-    canvas->maps.info.setMask(bitmap);
+    //QBitmap bitmap(canvas->width(), canvas->height());
+    //bitmap.clear();
+    //canvas->maps.info.setMask(bitmap);
     canvas->maps.info.fill(Qt::transparent);
     QPainter painter(&canvas->maps.info);
 
@@ -1184,8 +1185,9 @@ void MLDemos::Reinforce()
     int W = canvas->width();
     int H = canvas->height();
     canvas->maps.info = QPixmap(W, H);
-    QBitmap bitmap(canvas->width(), canvas->height());
-    canvas->maps.info.setMask(bitmap);
+    //QBitmap bitmap(canvas->width(), canvas->height());
+    //bitmap.clear();
+    //canvas->maps.info.setMask(bitmap);
     canvas->maps.info.fill(Qt::transparent);
     QPainter painter(&canvas->maps.info);
 
@@ -1559,9 +1561,9 @@ void MLDemos::UpdateLearnedModel()
                     testTrajectories[i] = result;
                 }
                 canvas->maps.model = QPixmap(w,h);
-                QBitmap bitmap(w,h);
-                bitmap.clear();
-                canvas->maps.model.setMask(bitmap);
+                //QBitmap bitmap(w,h);
+                //bitmap.clear();
+                //canvas->maps.model.setMask(bitmap);
                 canvas->maps.model.fill(Qt::transparent);
 
                 if(canvas->canvasType == 0) // standard canvas
@@ -1632,9 +1634,9 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
     if(!canvas || !classifier) return;
     int w = canvas->width(), h = canvas->height();
     canvas->maps.model = QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    canvas->maps.model.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //canvas->maps.model.setMask(bitmap);
     canvas->maps.model.fill(Qt::transparent);
     QPainter painter(&canvas->maps.model);
     int posClass = INT_MIN;
@@ -1647,7 +1649,6 @@ void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std:
     FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
 
     int forcedPositive = classifier->inverseMap[-1] < 0 ? -classifier->inverseMap[-1]-1 : -1;
-    qDebug() << "forced Positive" << forcedPositive;
 
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);

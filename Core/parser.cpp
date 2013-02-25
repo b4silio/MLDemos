@@ -61,7 +61,30 @@ void CSVRow::readNextRow(std::istream& str)
     std::string line;
     std::getline(str,line);
 
-    // we try using commas, semi-colons and tabs
+    // we need to parse blocks with "", which might contain our separator
+    size_t found = line.find_first_of("\"");
+    if ( found != std::string::npos )
+    {
+        bool bInside = true;
+        size_t start = found;
+        size_t stop = 0;
+        found = line.find_first_of("\"", found+1);
+        while( found != std::string::npos ) {
+            if ( bInside ) {
+                stop = found;
+                size_t sep = line.find_first_of(separator[0], start);
+                while(sep < stop && sep != std::string::npos)
+                {
+                    line[sep] = '_'; // we replace the offending character
+                    sep = line.find_first_of(separator[0], sep+1);
+                }
+            } else {
+                start = found;
+            }
+            bInside = !bInside;
+            found = line.find_first_of("\"", found+1);
+        }
+    }
 
     // convert to stream
     std::stringstream lineStream(line);
@@ -73,8 +96,8 @@ void CSVRow::readNextRow(std::istream& str)
     {
         std::string test = cell;
         std::remove(test.begin(), test.end(), ' ');
-        if(test.empty()) continue;
-        m_data.push_back(cell);
+        if(test.empty()) m_data.push_back("?");
+        else m_data.push_back(cell);
     }
 }
 

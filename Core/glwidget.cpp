@@ -43,9 +43,11 @@ void checkGL()
 }
 
 GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers),parent), canvas(canvas), zoomFactor(ZoomZero), mutex(new QMutex())
-    //    : QGLWidget(QGLFormat(QGL::SampleBuffers|QGL::AlphaChannel),parent), canvas(canvas), zoomFactor(ZoomZero)
+    : QGLWidget(QGLFormat(QGL::SampleBuffers|QGL::AlphaChannel),parent)
 {
+    this->canvas = canvas;
+    this->zoomFactor = ZoomZero;
+    mutex = new QMutex();
     bDisplaySamples=bDisplayLines=bDisplaySurfaces=bDisplayTransparency=bDisplayBlurry=true;
     bRotateCamera=false;
     makeCurrent();
@@ -59,17 +61,16 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
         QGLFramebufferObjectFormat format;
         format.setSamples(8);
         format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
-
         render_fbo = new QGLFramebufferObject(width, height, format);
         texture_fbo = new QGLFramebufferObject(width, height);
+        light_fbo = new QGLFramebufferObject(width,height, format);
+        lightBlur_fbo = new QGLFramebufferObject(width,height);
     } else {
         render_fbo = new QGLFramebufferObject(width*2, height*2);
         texture_fbo = render_fbo;
+        light_fbo = new QGLFramebufferObject(width,height);
+        lightBlur_fbo = light_fbo;
     }
-    QGLFramebufferObjectFormat format;
-    format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
-    light_fbo = new QGLFramebufferObject(width,height, format);
-    lightBlur_fbo = new QGLFramebufferObject(width,height);
     xRot = yRot = zRot = 0;
     xPos = yPos = zPos = 0.f;
 
@@ -442,7 +443,7 @@ void GLWidget::generateObjects()
     }
 }
 
-void GLWidget::DrawObject(GLObject &o)
+void GLWidget::DrawObject(const GLObject &o) const
 {
     if(!o.vertices.size()) return;
     if(bDisplaySamples && o.objectType.contains("Samples")) DrawSamples(o);
@@ -451,7 +452,7 @@ void GLWidget::DrawObject(GLObject &o)
     else if(bDisplayLines && o.objectType.contains("Particles")) DrawParticles(o);
 }
 
-void GLWidget::DrawParticles(GLObject &o)
+void GLWidget::DrawParticles(const GLObject &o) const
 {
     QString style = o.style.toLower();
     float pointSize = 12.f;
@@ -469,7 +470,7 @@ void GLWidget::DrawParticles(GLObject &o)
         }
     }
 
-    QGLShaderProgram *program = shaders["Samples"];
+    QGLShaderProgram *program = shaders.at("Samples");
     program->bind();
     program->enableAttributeArray(0);
     program->enableAttributeArray(1);
@@ -500,7 +501,7 @@ void GLWidget::DrawParticles(GLObject &o)
     program->release();
 }
 
-void GLWidget::DrawSamples(GLObject &o)
+void GLWidget::DrawSamples(const GLObject &o) const
 {
     QString style = o.style.toLower();
     float pointSize = 12.f;
@@ -518,7 +519,7 @@ void GLWidget::DrawSamples(GLObject &o)
         }
     }
 
-    QGLShaderProgram *program = bDisplayShadows ? shaders["SamplesShadow"] : shaders["Samples"];
+    QGLShaderProgram *program = bDisplayShadows ? shaders.at("SamplesShadow") : shaders.at("Samples");
     program->bind();
     checkGL();
     program->enableAttributeArray(0);
@@ -596,7 +597,7 @@ void GLWidget::DrawSamples(GLObject &o)
     program->release();
 }
 
-void GLWidget::DrawLines(GLObject &o)
+void GLWidget::DrawLines(const GLObject &o) const
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
@@ -805,10 +806,9 @@ void RecomputeNormals(GLObject &o)
     }
 }
 
-void GLWidget::DrawSurfaces(GLObject &o)
+void GLWidget::FixSurfaces(GLObject &o)
 {
-    QString style = o.style.toLower();
-    QStringList params = style.split(",");
+    if(!o.objectType.contains("Surfaces")) return;
     if(o.normals.size() != o.vertices.size()) // we need to recompute the normals
     {
         qDebug() << "recomputing normals";
@@ -831,6 +831,12 @@ void GLWidget::DrawSurfaces(GLObject &o)
         RecomputeBarycentric(o);
         qDebug() << "Done.";
     }
+}
+
+void GLWidget::DrawSurfaces(const GLObject &o) const
+{
+    QString style = o.style.toLower();
+    QStringList params = style.split(",");
 
     float specularity = 0.7f;
     float shininess = 8.f;
@@ -886,7 +892,6 @@ void GLWidget::DrawSurfaces(GLObject &o)
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE | GL_SPECULAR);
 
-    qDebug() << "enabling lights" << lights.size();
     // setup lights
     FOR(i, lights.size())
     {
@@ -930,7 +935,7 @@ void GLWidget::DrawSurfaces(GLObject &o)
                 lights[2].position[1],
                 lights[2].position[2],
                 lights[2].position[3]);
-        QGLShaderProgram *program = shaders["SmoothTransparent"];
+        QGLShaderProgram *program = shaders.at("SmoothTransparent");
         program->bind();
         program->setUniformValue("mvMatrix", mvMatrix);
         program->setUniformValue("mvpMatrix", mvpMatrix);
@@ -1083,6 +1088,7 @@ void GLWidget::paintGL()
     mutex->lock();
     killObjects();
     generateObjects();
+    FOR(i, objects.size()) FixSurfaces(objects[i]);
 
     modelViewMatrix.setToIdentity();
     modelViewMatrix.rotate(xRot / 16.0, 1.0, 0.0, 0.0);
@@ -1369,8 +1375,7 @@ void GLWidget::paintGL()
 
     if (render_fbo != texture_fbo) {
         QRect rect(0, 0, render_fbo->width(), render_fbo->height());
-        QGLFramebufferObject::blitFramebuffer(texture_fbo, rect,
-                                              render_fbo, rect);
+        QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
     }
 
     QGLShaderProgram *program = shaders["RenderFBO"];
@@ -1472,9 +1477,9 @@ void GLWidget::RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::ve
     program->setUniformValue("bVertical", 1);
     program->setUniformValue("amount", 7);
     QRect rect(0, 0, light_fbo->width(), light_fbo->height());
-    QGLFramebufferObject::blitFramebuffer(lightBlur_fbo, rect, light_fbo, rect);
+    if (light_fbo != lightBlur_fbo) QGLFramebufferObject::blitFramebuffer(lightBlur_fbo, rect, light_fbo, rect);
     RenderFBO(lightBlur_fbo, program);
-    QGLFramebufferObject::blitFramebuffer(lightBlur_fbo, rect, light_fbo, rect);
+    if (light_fbo != lightBlur_fbo) QGLFramebufferObject::blitFramebuffer(lightBlur_fbo, rect, light_fbo, rect);
     program->setUniformValue("bVertical", 0);
     RenderFBO(lightBlur_fbo, program);
     program->release();
@@ -1546,13 +1551,13 @@ void GLWidget::zoom(int delta)
     {
         zoomFactor *= 1.1;
     }
-    qDebug() << "zoomFactor" << zoomFactor;
     resizeGL(width, height);
     repaint();
 }
 
 void GLWidget::resizeGL(int width, int height)
 {
+    mutex->lock();
     this->width = width;
     this->height = height;
 
@@ -1577,26 +1582,27 @@ void GLWidget::resizeGL(int width, int height)
     perspectiveMatrix.translate(0,0,-40);
     if(width != render_fbo->width() && height != render_fbo->height())
     {
-        if(render_fbo->isBound())render_fbo->release();
-        //if(texture_fbo && texture_fbo != render_fbo) delete texture_fbo;
+        if(render_fbo->isBound()) render_fbo->release();
         delete render_fbo;
         delete light_fbo;
-        delete lightBlur_fbo;
         if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
+            delete lightBlur_fbo;
+            delete texture_fbo;
             QGLFramebufferObjectFormat format;
             format.setSamples(64);
             format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
             render_fbo = new QGLFramebufferObject(width, height, format);
             texture_fbo = new QGLFramebufferObject(width, height);
+            light_fbo = new QGLFramebufferObject(width,height, format);
+            lightBlur_fbo = new QGLFramebufferObject(width,height);
         } else {
             render_fbo = new QGLFramebufferObject(width*2, height*2);
             texture_fbo = render_fbo;
+            light_fbo = new QGLFramebufferObject(width,height);
+            lightBlur_fbo = lightBlur_fbo;
         }
-        QGLFramebufferObjectFormat format;
-        format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
-        light_fbo = new QGLFramebufferObject(width,height, format);
-        lightBlur_fbo = new QGLFramebufferObject(width,height);
     }
+    mutex->unlock();
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
