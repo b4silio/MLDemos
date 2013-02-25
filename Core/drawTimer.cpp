@@ -878,12 +878,28 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample, std::vector<Clas
     return c;
 }
 
+inline void fromCanvas(fvec &sample, const float x, const float y,
+                       const int height, const int width,
+                       const float zxh, const float zyh,
+                       int xIndex, int yIndex, const fvec &center){
+    sample = center;
+    sample[xIndex] += (x - width*0.5f)*zxh;
+    sample[yIndex] += (-y + height*0.5f)*zyh;
+}
+
 bool DrawTimer::TestFast(int start, int stop)
 {
     if(stop < 0 || stop > w*h) stop = w*h;
     mutex->lock();
     int dim=canvas->data->GetDimCount();
     vector<Obstacle> obstacles = canvas->data->GetObstacles();
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int cheight = canvas->height();
+    int cwidth = canvas->width();
+    float zxh = 1.f / (canvas->zoom*canvas->zooms[xIndex]*cheight);
+    float zyh = 1.f / (canvas->zoom*canvas->zooms[yIndex]*cheight);
+    fvec center = canvas->center;
     mutex->unlock();
     if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
     fvec sample(dim);
@@ -894,7 +910,7 @@ bool DrawTimer::TestFast(int start, int stop)
         int y = perm[i]/w;
         if(x >= bigMap.width() || y >= bigMap.height()) continue;
         drawMutex.unlock();
-        sample = canvas->fromCanvas(x,y);
+        fromCanvas(sample, x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center);
         fvec val(dim);
         float v;
         QMutexLocker lock(mutex);

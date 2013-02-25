@@ -23,6 +23,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QDebug>
 #include <iostream>
 #include <fstream>
+//#include "sse_mathfun.h"
+#include <QElapsedTimer>
 
 using namespace std;
 
@@ -509,6 +511,82 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
     }
     //FOR(j, labels.size()) qDebug() << "label:" << j << labels[j];
 
+    /*
+    // we test the exp and exp_ps and fast_exp functions as well as their error
+    double gamma = svm->param.gamma;
+    QElapsedTimer timer;
+    qint64 timer1, timer2, timer3, timer4;
+    double sum1=0, sum2=0, sum3=0, sum4=0;
+    timer.start();
+    FOR(i, samples.size())
+    {
+        FOR(j, samples.size())
+        {
+            FOR(d, dim)
+            {
+                double K = exp(-(samples.at(i).at(d)-samples.at(j).at(d))*(samples.at(i).at(d)-samples.at(j).at(d))*gamma);
+                sum1 += K;
+            }
+        }
+    }
+    timer1 = timer.nsecsElapsed();
+    timer.restart();
+    FOR(i, samples.size())
+    {
+        FOR(j, samples.size())
+        {
+            FOR(d, dim)
+            {
+                double K = expf(-(samples.at(i).at(d)-samples.at(j).at(d))*(samples.at(i).at(d)-samples.at(j).at(d))*gamma);
+                sum2 += K;
+            }
+        }
+    }
+    timer2 = timer.nsecsElapsed();
+    timer.restart();
+    long int counter = 0;
+    V4SF value, expv;
+    FOR(i, samples.size())
+    {
+        FOR(j, samples.size())
+        {
+            FOR(d, dim)
+            {
+                double diff = -(samples.at(i).at(d)-samples.at(j).at(d))*(samples.at(i).at(d)-samples.at(j).at(d))*gamma;
+                value.f[counter] = diff;
+                if(counter == 3)
+                {
+                    expv.v = exp_ps(value.v);
+                    sum3 += expv.f[0];
+                    sum3 += expv.f[1];
+                    sum3 += expv.f[2];
+                    sum3 += expv.f[3];
+                    counter = 0;
+                }
+                else ++counter;
+            }
+        }
+    }
+    timer3 = timer.nsecsElapsed();
+
+    timer.restart();
+    FOR(i, samples.size())
+    {
+        FOR(j, samples.size())
+        {
+            FOR(d, dim)
+            {
+                double K = fast_exp(-(samples.at(i).at(d)-samples.at(j).at(d))*(samples.at(i).at(d)-samples.at(j).at(d))*gamma);
+                sum4 += K;
+            }
+        }
+    }
+    timer4 = timer.nsecsElapsed();
+    qDebug() << "exp     \t" << timer1 << "nsec";
+    qDebug() << "expf    \t" << timer2 << "nsec (" << int(100.f*(timer1/(float)timer2-1)) << "% )" << "\terror" << int((sum2 - sum1)/sum1*100000.f)/1000.f << "%";
+    qDebug() << "exp_ps  \t" << timer3 << "nsec (" << int(100.f*(timer1/(float)timer3-1)) << "% )" << "\terror" << int((sum3 - sum1)/sum1*100000.f)/1000.f << "%";
+    qDebug() << "fast_exp\t" << timer4 << "nsec (" << int(100.f*(timer1/(float)timer4-1)) << "% )" << "\terror" << int((sum4 - sum1)/sum1*100000.f)/1000.f << "%";
+    */
 }
 
 float ClassifierSVM::Test( const fvec &sample ) const

@@ -26,6 +26,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+fvec pdfMulti;
+fvec pdfSingle(1);
+
 ClassifierGMM::ClassifierGMM()
 	: nbClusters(2), covarianceType(2), initType(1)
 {
@@ -100,30 +103,28 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 		gmms[i]->init(data[i], s.size(), initType);
 		gmms[i]->em(data[i], s.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
 	}
+    pdfMulti.resize(gmms.size());
 }
 
 fvec ClassifierGMM::TestMulti(const fvec &sample) const
 {
-	fvec pdf(gmms.size());
-	FOR(i, gmms.size()) pdf[i] = gmms[i]->pdf((float*)&sample[0]);
+    FOR(i, gmms.size()) pdfMulti[i] = gmms[i]->pdf((float*)&sample[0]);
 	if(gmms.size()==2)
 	{
-		fvec res(1);
-        double p1 = log((double)pdf[1]);
-        double p0 = log((double)pdf[0]);
-        res[0] = (float)(p1 - p0);
-        return res;
+        float p1 = logf(pdfMulti[1]);
+        float p0 = logf(pdfMulti[0]);
+        pdfSingle[0] = (p1 - p0);
+        return pdfSingle;
 	}
 
-    float xmin=-100.f, xmax=100.f; // we clamp the value between these two
-	float sum = 0;
-	FOR(i, pdf.size())
+    float xmin=-1000.f, xmax=1000.f; // we clamp the value between these two
+    FOR(i, pdfMulti.size())
 	{
-        float value = log(pdf[i]);
+        float value = logf(pdfMulti[i]);
         value = (min(xmax,max(xmin, value)) - xmin) / (xmax);
-        pdf[i] = value;
+        pdfMulti[i] = value;
 	}
-	return pdf;
+    return pdfMulti;
 }
 
 float ClassifierGMM::Test( const fvec &sample) const

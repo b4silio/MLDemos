@@ -39,7 +39,7 @@ struct gaussian{
   struct smat * covar; /* covariance matrix */ 
   struct smat * covar_cholesky; /* cache for cholesky decomp of covar */ 
   struct smat * icovar_cholesky; /* cholesky matrix with inverse diagonal */
-  _fgmm_real nfactor; /* cache for determinant of covar */ 
+  _fgmm_real nfactor; /* cache for 1. / determinant of covar */
 };   
 
 /** compute the probability density at vector value 
@@ -50,20 +50,10 @@ _minline _fgmm_real gaussian_pdf(struct gaussian* g, const _fgmm_real* x)
   _fgmm_real dist2;
   _fgmm_real dist = smat_sesq(g->icovar_cholesky,g->mean,x);
   dist *= .5;
-  
-  dist2 =  expf(-dist)/g->nfactor;
-  //dist = 0.2;
-  // returning zero here would give weird results for EM 
-  /* if( isnan(dist2))
-    {
-      printf("NaN gaussian pdf .. ");
-      printf(" %e %e \n ", dist, g->nfactor);
-      }*/
-  if(dist2 == 0)
-    dist2 = FLT_MIN;
+  dist2 =  expf(-dist)*g->nfactor;
+  if(dist2 == 0) dist2 = FLT_MIN;
   return dist2;
-};
-
+}
 
 /** alloc memory for the gaussian 
     and init it to zero with identity covariance matrix

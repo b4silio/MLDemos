@@ -232,10 +232,19 @@ void DataImporter::SendData()
     emit(SetData(data.first, data.second, vector<ipair>(), false));
     QStringList dimensionNames = headers;
     int classColumn = gui->classColumnSpin->value()-1;
+
+    sort(excludeIndices.begin(), excludeIndices.end(), greater<int>());
+    FOR(i, excludeIndices.size())
+    {
+        if(excludeIndices[i] == classColumn) continue;
+        dimensionNames.erase(dimensionNames.begin()+excludeIndices[i]);
+        if(categorical.count(excludeIndices[i])) categorical.erase(excludeIndices[i]);
+    }
     if(dimensionNames.size() && !gui->classIgnoreCheck->isChecked())
     {
         if(classColumn < 0 || classColumn == dimensionNames.size()-1) dimensionNames.pop_back();
         else dimensionNames.erase(dimensionNames.begin() + classColumn);
+        if(categorical.count(classColumn)) categorical.erase(classColumn);
     }
     emit(SetDimensionNames(dimensionNames));
     emit(SetClassNames(classNames));

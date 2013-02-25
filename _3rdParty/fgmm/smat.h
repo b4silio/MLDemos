@@ -57,8 +57,6 @@ struct smat {
   int _size; /* actual size of the data pointer dim * (dim+1) /2 */
 };
 
-
-
 /**
  * allocate memory for smat if *mat == NULL 
  * and zero the matrix in all cases 

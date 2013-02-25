@@ -149,7 +149,7 @@ fvec ReinforcementPower::Update()
                 fvec randSample = newSample;
                 if(bSingleDim)
                 {
-                    randSample[d] + RandN(0.f, variance);
+                    randSample[d] += RandN(0.f, variance);
                     while(randSample[d] < 0) randSample[d] += 2*M_PI;
                     while(randSample[d] > 2*M_PI) randSample[d] -= 2*M_PI;
                 }
