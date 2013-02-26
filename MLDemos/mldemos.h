@@ -147,6 +147,7 @@ private:
 	QList<QString> compareOptions;
 	CompareAlgorithms *compare;
     std::map< QString , std::vector<QWidget*> > algoWidgets;
+    QList<QPluginLoader*> pluginLoaders;
     void AddPlugin(ClassifierInterface *iClassifier, const char *method);
 	void AddPlugin(ClustererInterface *iCluster, const char *method);
 	void AddPlugin(RegressorInterface *iRegress, const char *method);

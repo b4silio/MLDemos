@@ -42,6 +42,10 @@ void checkGL()
     }
 }
 
+GLuint *GLWidget::textureNames = 0;
+
+unsigned char **GLWidget::textureData = 0;
+
 GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers|QGL::AlphaChannel),parent)
 {
@@ -91,6 +95,8 @@ GLWidget::~GLWidget()
 {
     makeCurrent();
     mutex->lock();
+    if(textureNames) glDeleteTextures(2, textureNames);
+    //KILL(textureNames);
     objects.clear();
     objectAlive.clear();
     if(textureData){
@@ -118,7 +124,6 @@ GLWidget::~GLWidget()
         DEL(lightBlur_fbo);
         DEL(texture_fbo);
     }
-    KILL(textureNames);
 
     DEL(mutex);
 }
@@ -188,6 +193,7 @@ void GLWidget::killObjects()
 
 void GLWidget::initializeGL()
 {
+    //if(!textureNames) textureNames = new GLuint[textureCount];
     textureData = new unsigned char*[textureCount];
     // first we generate the samples sprite (a circle with a black c)
     FOR(i, textureCount)
@@ -1676,16 +1682,11 @@ void GLWidget::resizeEvent(QResizeEvent *event)
     resizeGL(event->size().width(), event->size().height());
 }
 
-void GLWidget::normalizeAngle(int *angle)
+void GLWidget::normalizeAngle(int &angle)
 {
-    while (*angle < 0)
-        *angle += 360 * 16;
-    while (*angle > 360 * 16)
-        *angle -= 360 * 16;
+    while (angle < 0) angle += 360 * 16;
+    while (angle > 360 * 16) angle -= 360 * 16;
 }
-
-GLuint *GLWidget::textureNames = new GLuint[textureCount];
-unsigned char **GLWidget::textureData = 0;
 
 void GLWidget::LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader)
 {
@@ -1764,7 +1765,7 @@ void GLWidget::setZPosition(float pos)
 
 void GLWidget::setXRotation(int angle)
 {
-    normalizeAngle(&angle);
+    normalizeAngle(angle);
     if (angle != xRot) {
         xRot = angle;
         emit xRotationChanged(angle);
@@ -1774,7 +1775,7 @@ void GLWidget::setXRotation(int angle)
 
 void GLWidget::setYRotation(int angle)
 {
-    normalizeAngle(&angle);
+    normalizeAngle(angle);
     if (angle != yRot) {
         yRot = angle;
         emit yRotationChanged(angle);
@@ -1784,7 +1785,7 @@ void GLWidget::setYRotation(int angle)
 
 void GLWidget::setZRotation(int angle)
 {
-    normalizeAngle(&angle);
+    normalizeAngle(angle);
     if (angle != zRot) {
         zRot = angle;
         emit zRotationChanged(angle);

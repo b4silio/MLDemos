@@ -80,7 +80,7 @@ protected:
     void timerEvent(QTimerEvent *);
 
 private:
-    void normalizeAngle(int *angle);
+    void normalizeAngle(int &angle);
     void RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program);
     void RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects);
 

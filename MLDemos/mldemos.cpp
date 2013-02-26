@@ -71,27 +71,10 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     ui.actionImportData->setShortcut(QKeySequence(tr("Ctrl+I")));
 
     initDialogs();
-    initToolBars();
-    initPlugins();
 
-    glw = new GLWidget(canvas);
-    vis = new Visualization(canvas);
-    dataEdit = new DatasetEditor(canvas);
-    drawTimer = new DrawTimer(canvas, &mutex);
-    drawTimer->glw = glw;
-    drawTimer->classifier = &classifier;
-    drawTimer->regressor = &regressor;
-    drawTimer->dynamical = &dynamical;
-    drawTimer->clusterer = &clusterer;
-    drawTimer->maximizer = &maximizer;
-    drawTimer->reinforcement = &reinforcement;
-    drawTimer->reinforcementProblem = &reinforcementProblem;
-    drawTimer->classifierMulti = &classifierMulti;
-    connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
-    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
-    connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
-    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
-    connect(dataEdit, SIGNAL(DataEdited()), this, SLOT(DataEdited()));
+    initToolBars();
+
+    initPlugins();
 
     LoadLayoutOptions();
     SetTextFontSize();
@@ -578,15 +561,37 @@ void MLDemos::initDialogs()
     connect(canvas, SIGNAL(CanvasMoveEvent()), this, SLOT(CanvasMoveEvent()));
     //connect(canvas, SIGNAL(ZoomChanged()), this, SLOT(ZoomChanged()));
 
-    gridSearch = new GridSearch(canvas);
     import = new DataImporter();
-    generator = new DataGenerator(canvas);
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
     connect(import, SIGNAL(SetCategorical(std::map<int,std::vector<std::string> >)), this, SLOT(SetCategorical(std::map<int,std::vector<std::string> >)));
+
+    gridSearch = new GridSearch(canvas);
+    generator = new DataGenerator(canvas);
     connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
+
+    glw = new GLWidget(canvas);
+    vis = new Visualization(canvas);
+
+    dataEdit = new DatasetEditor(canvas);
+    connect(dataEdit, SIGNAL(DataEdited()), this, SLOT(DataEdited()));
+
+    drawTimer = new DrawTimer(canvas, &mutex);
+    drawTimer->glw = glw;
+    drawTimer->classifier = &classifier;
+    drawTimer->regressor = &regressor;
+    drawTimer->dynamical = &dynamical;
+    drawTimer->clusterer = &clusterer;
+    drawTimer->maximizer = &maximizer;
+    drawTimer->reinforcement = &reinforcement;
+    drawTimer->reinforcementProblem = &reinforcementProblem;
+    drawTimer->classifierMulti = &classifierMulti;
+    connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
+    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
+    connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
+    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
 }
 
 void MLDemos::initPlugins()
@@ -627,10 +632,11 @@ void MLDemos::initPlugins()
     }
     foreach (QString fileName, pluginsDir.entryList(QDir::Files))
     {
-        QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-        QObject *plugin = loader.instance();
+        QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+        QObject *plugin = pluginLoader->instance();
         if (plugin)
         {
+            pluginLoaders.push_back(pluginLoader);
             qDebug() << "loading " << fileName;
             // check type of plugin
             CollectionInterface *iCollection = qobject_cast<CollectionInterface *>(plugin);
@@ -708,7 +714,10 @@ void MLDemos::initPlugins()
             }
         }
         else
-            qDebug() << loader.errorString();
+        {
+            qDebug() << pluginLoader->errorString();
+            delete pluginLoader;
+        }
     }
 }
 
@@ -976,15 +985,9 @@ MLDemos::~MLDemos()
         if(inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
     }
     SaveLayoutOptions();
-    FOR(i, classifiers.size()) DEL(classifiers[i]);
-    FOR(i, clusterers.size()) DEL(clusterers[i]);
-    FOR(i, projectors.size()) DEL(projectors[i]);
-    FOR(i, regressors.size()) DEL(regressors[i]);
-    FOR(i, maximizers.size()) DEL(maximizers[i]);
-    FOR(i, reinforcements.size()) DEL(reinforcements[i]);
-    FOR(i, dynamicals.size()) DEL(dynamicals[i]);
-    FOR(i, avoiders.size()) DEL(avoiders[i]);
-    FOR(i, inputoutputs.size()) DEL(inputoutputs[i]);
+    DEL(glw);
+    DEL(vis);
+    FOR(i, pluginLoaders.size()) pluginLoaders.at(i)->unload();
     DEL(optionsClassify);
     DEL(optionsRegress);
     DEL(optionsCluster);
@@ -1018,8 +1021,6 @@ MLDemos::~MLDemos()
     DEL(compareWidget);
     DEL(drawTimer);
     DEL(gridSearch);
-    DEL(glw);
-    DEL(vis);
     DEL(import);
     DEL(generator);
     DEL(dataEdit);
