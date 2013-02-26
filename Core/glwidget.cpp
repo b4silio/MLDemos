@@ -11,6 +11,7 @@
 #include "glUtils.h"
 
 #define ZoomZero 0.0125f
+
 using namespace std;
 
 bool bDisplayShadows = false;
@@ -42,6 +43,13 @@ void checkGL()
     }
 }
 
+#ifdef WIN32
+#define GLActiveTexture glf.glActiveTexture
+QGLFunctions GLWidget::glf;
+#else
+    #define GLActiveTexture glActiveTexture
+#endif
+
 GLuint *GLWidget::textureNames = 0;
 
 unsigned char **GLWidget::textureData = 0;
@@ -56,7 +64,7 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     bRotateCamera=false;
     makeCurrent();
 #ifdef WIN32
-    initializeGLFunctions(this->context());
+    glf.initializeGLFunctions(this->context());
 #endif
     width = 800;
     height = 600;
@@ -172,6 +180,7 @@ void GLWidget::killObjects()
 #ifdef WIN32
         qDebug() << "killing object " << killList[i] << "->" << objects[killList[i]].objectType;
         //objects.erase(objects.begin() + killList[i]);
+        //objectAlive.erase(objectAlive.begin() + killList[i]);
         objectAlive[killList[i]] = false;
         GLObject &o = objects[killList[i]];
         o.vertices.clear();
@@ -279,7 +288,7 @@ void GLWidget::initializeGL()
     textureNames = new GLuint[textureCount];
     glGenTextures(textureCount, textureNames); // 0: samples, 1: wide circles
     glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
+    GLActiveTexture(GL_TEXTURE0);
 
     FOR(i, textureCount)
     {
@@ -584,7 +593,7 @@ void GLWidget::DrawSamples(const GLObject &o) const
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glActiveTexture(GL_TEXTURE0);
+    GLActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_POINT_SPRITE);
     if(o.style.contains("rings")) glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[1]);
@@ -598,12 +607,12 @@ void GLWidget::DrawSamples(const GLObject &o) const
         glEnable(GL_LIGHTING);
         program->setUniformValue("lightMvpMatrix", lightMvpMatrix);
         program->setUniformValue("lightMvMatrix", lightMvMatrix);
-        glActiveTexture(GL_TEXTURE1);
+        GLActiveTexture(GL_TEXTURE1);
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, light_fbo->texture());
         program->setUniformValue("shadow_texture", 1);
         program->setUniformValue("pointSize", pointSize);
-        glActiveTexture(GL_TEXTURE0);
+        GLActiveTexture(GL_TEXTURE0);
     }
 
     glEnable(GL_PROGRAM_POINT_SIZE_EXT);

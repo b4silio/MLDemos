@@ -13,13 +13,13 @@ class QMatrix4x4;
 class QGLShaderProgram;
 class QGLShader;
 
-#ifdef WIN32
-class GLWidget : public QGLWidget, protected QGLFunctions
-#else
 class GLWidget : public QGLWidget
-#endif
 {
     Q_OBJECT
+
+#ifdef WIN32
+static QGLFunctions glf;
+#endif
 
 public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
