@@ -146,7 +146,6 @@ void GLWidget::SetObject(int index, GLObject &o)
 void GLWidget::clearLists()
 {
     mutex->lock();
-    qDebug() << "clearing lists" << objects.size();
     FOR(i, drawSampleLists.size())
     {
         glDeleteLists(drawSampleLists[i], 1);
@@ -272,8 +271,13 @@ void GLWidget::initializeGL()
             }
         }
     }
-
-    glGenTextures(2, textureNames); // 0: samples, 1: wide circles
+    if(textureNames)
+    {
+        glDeleteTextures(textureCount, textureNames);
+        DEL(textureNames);
+    }
+    textureNames = new GLuint[textureCount];
+    glGenTextures(textureCount, textureNames); // 0: samples, 1: wide circles
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
 
@@ -1102,7 +1106,6 @@ void GLWidget::paintGL()
 {
     if(!canvas) return;
     mutex->lock();
-    qDebug() << "paintGL" << objects.size() << (intptr_t)(void *)render_fbo << (intptr_t)(void *)texture_fbo;
     killObjects();
     generateObjects();
     FOR(i, objects.size()) FixSurfaces(objects[i]);
@@ -1123,7 +1126,6 @@ void GLWidget::paintGL()
     modelViewMatrix.rotate(yRot / 16.0, 0.0, 1.0, 0.0);
     modelViewMatrix.rotate(zRot / 16.0, 0.0, 0.0, 1.0);
     modelViewMatrix.translate(xPos, yPos, zPos);
-    bEmpty = true;
 
     bool bHasReward = false;
     if(bEmpty)
@@ -1633,7 +1635,6 @@ void GLWidget::resizeGL(int width, int height)
             lightBlur_fbo = lightBlur_fbo;
         }
     }
-    qDebug() << "resizing viewport" << objects.size() << (intptr_t)(void *)render_fbo << (intptr_t)(void *)texture_fbo;
     mutex->unlock();
 }
 
