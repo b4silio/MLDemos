@@ -93,8 +93,10 @@ GLWidget::~GLWidget()
     mutex->lock();
     objects.clear();
     objectAlive.clear();
-    FOR(i, textureCount) delete [] textureData[i];
-    delete [] textureData;
+    if(textureData){
+        FOR(i, textureCount) delete [] textureData[i];
+        delete [] textureData;
+    }
     textureData = 0;
     mutex->unlock();
     FORIT(shaders, QString, QGLShaderProgram*)
@@ -110,13 +112,13 @@ GLWidget::~GLWidget()
         delete program;
     }
     shaders.clear();
-    delete render_fbo;
-    delete light_fbo;
+    DEL(render_fbo);
+    DEL(light_fbo);
     if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
-        delete lightBlur_fbo;
-        delete texture_fbo;
+        DEL(lightBlur_fbo);
+        DEL(texture_fbo);
     }
-    delete [] textureNames;
+    KILL(textureNames);
 
     DEL(mutex);
 }

@@ -46,6 +46,7 @@ ClustDBSCAN::~ClustDBSCAN()
 {
     delete params;
     delete graphzoom;
+    delete zoomWidget;
 }
 
 // Paint the graph on the new windows and show it. User may also click on the button to refresh the plot.

@@ -74,12 +74,12 @@ private:
     *actionClearData, *actionClearModel, *actionClearAll, *actionScreenshot,
     *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
-    QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
+    QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
     QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *projectWidget;
     QWidget *compareWidget;
 
-    QNamedWindow *rocWidget, *crossvalidWidget;
+    QNamedWindow *rocWidget;
 
 	Ui::MLDemosClass ui;
 	Ui::viewOptionDialog *displayOptions;
@@ -145,7 +145,6 @@ private:
     QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
 	QList<QString> compareOptions;
-	QLabel *compareDisplay;
 	CompareAlgorithms *compare;
     std::map< QString , std::vector<QWidget*> > algoWidgets;
     void AddPlugin(ClassifierInterface *iClassifier, const char *method);

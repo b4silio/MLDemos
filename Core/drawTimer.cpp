@@ -394,7 +394,7 @@ void DrawTimer::Refine()
     else
     {
         int count = (w*h) / refineMax;
-        int start = count * (refineLevel-1);
+        int start = max(0,count * (refineLevel-1));
         int stop = count * refineLevel;
         if(refineLevel == refineMax) stop = w*h; // we want to be sure we paint everything in the end
 

@@ -47,7 +47,6 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
       projector(0),
       bIsRocNew(true),
       bIsCrossNew(true),
-      compareDisplay(0),
       compare(0),
       trajectory(ipair(-1,-1)),
       bNewObstacle(false),
@@ -354,7 +353,7 @@ void MLDemos::initDialogs()
     inputDimensions = new Ui::InputDimensions();
 
     displayOptions->setupUi(displayDialog = new QDialog());
-    aboutPanel->setupUi(about = new QDialog());
+    aboutPanel->setupUi(aboutDialog = new QDialog());
     showStats->setupUi(statsDialog = new QDialog());
     manualSelection->setupUi(manualSelectDialog = new QDialog());
     inputDimensions->setupUi(inputDimensionsDialog = new QDialog());
@@ -738,7 +737,7 @@ void MLDemos::SetTextFontSize()
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     children = statsDialog->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
-    children = about->findChildren<QWidget*>();
+    children = aboutDialog->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     children = manualSelectDialog->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
@@ -826,19 +825,19 @@ bool IsChildOf(QObject *child, QObject *parent)
 
 void MLDemos::FocusChanged(QWidget *old, QWidget *now)
 {
-    if(drawContext1Widget->isVisible())
+    if(drawContext1Widget && drawContext1Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext1Widget)) HideContextMenus();
     }
-    if(drawContext2Widget->isVisible())
+    if(drawContext2Widget && drawContext2Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext2Widget)) HideContextMenus();
     }
-    if(drawContext3Widget->isVisible())
+    if(drawContext3Widget && drawContext3Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext3Widget)) HideContextMenus();
     }
-    if(drawContext4Widget->isVisible())
+    if(drawContext4Widget && drawContext4Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext4Widget)) HideContextMenus();
     }
@@ -977,42 +976,44 @@ MLDemos::~MLDemos()
         if(inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
     }
     SaveLayoutOptions();
-    delete aboutPanel;
-    delete optionsClassify;
-    delete optionsRegress;
-    delete optionsCluster;
-    delete optionsDynamic;
-    delete optionsMaximize;
-    delete optionsReinforcement;
-    delete optionsProject;
-    delete optionsCompare;
-    delete drawToolbar;
-    delete drawToolbarContext1;
-    delete drawToolbarContext2;
-    delete drawToolbarContext3;
-    delete drawToolbarContext4;
-    delete drawToolbarWidget;
-    delete drawContext1Widget;
-    delete drawContext2Widget;
-    delete drawContext3Widget;
-    delete drawContext4Widget;
-    delete displayOptions;
-    delete algorithmOptions;
-    delete generator;
-    delete inputDimensions;
-    delete manualSelection;
-    delete showStats;
-    canvas->hide();
-    delete canvas;
-    FOR(i, classifiers.size()) delete classifiers[i];
-    FOR(i, clusterers.size()) delete clusterers[i];
-    FOR(i, projectors.size()) delete projectors[i];
-    FOR(i, regressors.size()) delete regressors[i];
-    FOR(i, maximizers.size()) delete maximizers[i];
-    FOR(i, reinforcements.size()) delete reinforcements[i];
-    FOR(i, dynamicals.size()) delete dynamicals[i];
-    FOR(i, avoiders.size()) delete avoiders[i];
-    FOR(i, inputoutputs.size()) delete inputoutputs[i];
+    FOR(i, classifiers.size()) DEL(classifiers[i]);
+    FOR(i, clusterers.size()) DEL(clusterers[i]);
+    FOR(i, projectors.size()) DEL(projectors[i]);
+    FOR(i, regressors.size()) DEL(regressors[i]);
+    FOR(i, maximizers.size()) DEL(maximizers[i]);
+    FOR(i, reinforcements.size()) DEL(reinforcements[i]);
+    FOR(i, dynamicals.size()) DEL(dynamicals[i]);
+    FOR(i, avoiders.size()) DEL(avoiders[i]);
+    FOR(i, inputoutputs.size()) DEL(inputoutputs[i]);
+    DEL(optionsClassify);
+    DEL(optionsRegress);
+    DEL(optionsCluster);
+    DEL(optionsDynamic);
+    DEL(optionsMaximize);
+    DEL(optionsReinforcement);
+    DEL(optionsProject);
+    DEL(optionsCompare);
+    DEL(drawToolbarWidget);
+    DEL(drawContext1Widget);
+    DEL(drawContext2Widget);
+    DEL(drawContext3Widget);
+    DEL(drawContext4Widget);
+    DEL(displayDialog);
+    DEL(aboutDialog);
+    DEL(statsDialog);
+    DEL(manualSelectDialog);
+    DEL(inputDimensionsDialog);
+    DEL(algorithmWidget);
+    DEL(compareWidget);
+    DEL(drawTimer);
+    DEL(gridSearch);
+    DEL(glw);
+    DEL(vis);
+    DEL(import);
+    DEL(generator);
+    DEL(dataEdit);
+    DEL(compare);
+    DEL(canvas);
 }
 
 void MLDemos::closeEvent(QCloseEvent *event)
@@ -1222,7 +1223,6 @@ void MLDemos::CompareClear()
 {
     optionsCompare->algoList->clear();
     compareOptions.clear();
-    if(compareDisplay) compareDisplay->hide();
 }
 
 void MLDemos::CompareRemove()
@@ -1332,7 +1332,7 @@ void MLDemos::ShowStatsDialog()
 
 void MLDemos::ShowAbout()
 {
-    about->show();
+    aboutDialog->show();
 }
 
 void MLDemos::ManualSelection()
