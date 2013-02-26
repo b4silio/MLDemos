@@ -32,7 +32,8 @@ KPCAProjection::KPCAProjection()
 KPCAProjection::~KPCAProjection()
 {
     delete params;
-    if(contourWidget) delete contours;
+    DEL(contours);
+    DEL(contourWidget);
 }
 
 // virtual functions to manage the algorithm creation
