@@ -18,6 +18,13 @@ CCAProjection::CCAProjection()
     connect(params->undockButton2, SIGNAL(clicked()), this, SLOT(Undock2()));
 }
 
+CCAProjection::~CCAProjection()
+{
+    delete params;
+    DEL(table1);
+    DEL(table2);
+}
+
 // virtual functions to manage the algorithm creation
 Projector *CCAProjection::GetProjector()
 {

@@ -62,9 +62,9 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
         format.setSamples(8);
         format.setAttachment(QGLFramebufferObject::CombinedDepthStencil);
         render_fbo = new QGLFramebufferObject(width, height, format);
-        texture_fbo = new QGLFramebufferObject(width, height);
+        texture_fbo = new QGLFramebufferObject(width, height, format);
         light_fbo = new QGLFramebufferObject(width,height, format);
-        lightBlur_fbo = new QGLFramebufferObject(width,height);
+        lightBlur_fbo = new QGLFramebufferObject(width,height, format);
     } else {
         render_fbo = new QGLFramebufferObject(width*2, height*2);
         texture_fbo = render_fbo;
@@ -80,17 +80,45 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
 
 void GLWidget::timerEvent(QTimerEvent *)
 {
-    if(bRotateCamera) setYRotation(yRot + 3.f);
-    repaint();
+    if(bRotateCamera)
+    {
+        setYRotation(yRot + 3.f);
+        repaint();
+    }
 }
 
 GLWidget::~GLWidget()
 {
     makeCurrent();
-    clearLists();
+    mutex->lock();
+    objects.clear();
+    objectAlive.clear();
     FOR(i, textureCount) delete [] textureData[i];
     delete [] textureData;
     textureData = 0;
+    mutex->unlock();
+    FORIT(shaders, QString, QGLShaderProgram*)
+    {
+        QGLShaderProgram *program = it->second;
+        if(!program) continue;
+        QList<QGLShader*> shaderList = program->shaders();
+        program->removeAllShaders();
+        FOR(i, shaderList.size())
+        {
+            delete shaderList.at(i);
+        }
+        delete program;
+    }
+    shaders.clear();
+    delete render_fbo;
+    delete light_fbo;
+    if (QGLFramebufferObject::hasOpenGLFramebufferBlit()) {
+        delete lightBlur_fbo;
+        delete texture_fbo;
+    }
+    delete [] textureNames;
+
+    DEL(mutex);
 }
 
 void GLWidget::AddObject(GLObject &o)
@@ -102,13 +130,16 @@ void GLWidget::AddObject(GLObject &o)
 void GLWidget::SetObject(int index, GLObject &o)
 {
     if (index < 0 || index > objects.size()) return;
+    mutex->lock();
     objects[index] = o;
     objectAlive[index] = true;
+    mutex->unlock();
 }
 
 void GLWidget::clearLists()
 {
     mutex->lock();
+    qDebug() << "clearing lists" << objects.size();
     FOR(i, drawSampleLists.size())
     {
         glDeleteLists(drawSampleLists[i], 1);
@@ -338,7 +369,8 @@ void GLWidget::generateObjects()
     // we generate the canvas samples
     GLObject oSamples;
     oSamples.objectType = "Samples,Canvas";
-    FOR(i, canvas->data->GetCount())
+    int dataCount = canvas->data->GetCount();
+    FOR(i, dataCount)
     {
         fvec sample = canvas->data->GetSample(i);
         if(canvas->data->GetFlag(i) == _TRAJ) continue; // we don't want to draw trajectories
@@ -382,20 +414,23 @@ void GLWidget::generateObjects()
             objectAlive.erase(objectAlive.begin() + i);
             i--;
         }
-        else if(!bReplacedSamples && objects[i].objectType.contains("Samples,Canvas"))
+        else if(dataCount && !bReplacedSamples && objects[i].objectType.contains("Samples,Canvas"))
         {
             objects[i] = oSamples;
             objectAlive[i] = true;
             bReplacedSamples = true;
         }
     }
-    if(!bReplacedSamples)
+    if(!bReplacedSamples && dataCount)
     {
         objects.push_back(oSamples);
         objectAlive.push_back(true);
     }
-    objects.insert(objects.end(),oTrajs.begin(),oTrajs.end());
-    objectAlive.resize(objects.size(), true);
+    if(oTrajs.size())
+    {
+        objects.insert(objects.end(),oTrajs.begin(),oTrajs.end());
+        objectAlive.resize(objects.size(), true);
+    }
 
     if(!canvas->maps.reward.isNull())
     {
@@ -521,78 +556,51 @@ void GLWidget::DrawSamples(const GLObject &o) const
 
     QGLShaderProgram *program = bDisplayShadows ? shaders.at("SamplesShadow") : shaders.at("Samples");
     program->bind();
-    checkGL();
     program->enableAttributeArray(0);
-    checkGL();
     program->enableAttributeArray(1);
-    checkGL();
-    program->setAttributeArray(0, o.vertices.constData());
-    checkGL();
-    program->setAttributeArray(1, o.colors.constData());
-    checkGL();
+    program->setAttributeArray(0, o.vertices.data());
+    program->setAttributeArray(1, o.colors.data());
+    //program->setAttributeArray(0, o.vertices.constData());
+    //program->setAttributeArray(1, o.colors.constData());
     program->setUniformValue("matrix", modelViewProjectionMatrix);
-    checkGL();
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
-    checkGL();
     glDisable(GL_LIGHTING);
-    checkGL();
     glEnable(GL_DEPTH_TEST);
-    checkGL();
     glDepthMask(GL_TRUE);
-    checkGL();
     glEnable(GL_BLEND);
-    checkGL();
     glEnable(GL_ALPHA_TEST);
-    checkGL();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    checkGL();
 
     glActiveTexture(GL_TEXTURE0);
-    checkGL();
     glEnable(GL_TEXTURE_2D);
-    checkGL();
     glEnable(GL_POINT_SPRITE);
-    checkGL();
     if(o.style.contains("rings")) glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[1]);
     else glBindTexture(GL_TEXTURE_2D, GLWidget::textureNames[0]);
-    checkGL();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    checkGL();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    checkGL();
     program->setUniformValue("color_texture", 0);
-    checkGL();
 
     if(bDisplayShadows)
     {
         glEnable(GL_LIGHTING);
-        checkGL();
         program->setUniformValue("lightMvpMatrix", lightMvpMatrix);
         program->setUniformValue("lightMvMatrix", lightMvMatrix);
         glActiveTexture(GL_TEXTURE1);
-        checkGL();
         glEnable(GL_TEXTURE_2D);
-        checkGL();
         glBindTexture(GL_TEXTURE_2D, light_fbo->texture());
-        checkGL();
         program->setUniformValue("shadow_texture", 1);
         program->setUniformValue("pointSize", pointSize);
         glActiveTexture(GL_TEXTURE0);
-        checkGL();
     }
 
     glEnable(GL_PROGRAM_POINT_SIZE_EXT);
-    checkGL();
     glPointSize(pointSize);
-    checkGL();
 
     // we actually draw stuff!
     glDrawArrays(GL_POINTS,0,o.vertices.size());
-    checkGL();
 
     glPopAttrib();
-    checkGL();
 
     program->release();
 }
@@ -1086,18 +1094,31 @@ void GLWidget::paintGL()
 {
     if(!canvas) return;
     mutex->lock();
+    qDebug() << "paintGL" << objects.size() << (intptr_t)(void *)render_fbo << (intptr_t)(void *)texture_fbo;
     killObjects();
     generateObjects();
     FOR(i, objects.size()) FixSurfaces(objects[i]);
-
+    bool bEmpty = !canvas->bDisplayGrid;
+    if(bEmpty)
+    {
+        FOR(i, objects.size())
+        {
+            if(objects[i].vertices.size())
+            {
+                bEmpty = false;
+                break;
+            }
+        }
+    }
     modelViewMatrix.setToIdentity();
     modelViewMatrix.rotate(xRot / 16.0, 1.0, 0.0, 0.0);
     modelViewMatrix.rotate(yRot / 16.0, 0.0, 1.0, 0.0);
     modelViewMatrix.rotate(zRot / 16.0, 0.0, 0.0, 1.0);
     modelViewMatrix.translate(xPos, yPos, zPos);
+    bEmpty = true;
 
     bool bHasReward = false;
-    if(!objects.size())
+    if(bEmpty)
     {
         glClearColor(1,1,1,1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1262,11 +1283,14 @@ void GLWidget::paintGL()
             program->setUniformValue("bVertical", 1);
             program->setUniformValue("amount", blurAmount);
             QRect rect(0, 0, render_fbo->width(), render_fbo->height());
-            QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
-            RenderFBO(texture_fbo, program);
-            QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
-            program->setUniformValue("bVertical", 0);
-            RenderFBO(texture_fbo, program);
+            if(texture_fbo)
+            {
+                if(texture_fbo != render_fbo) QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
+                RenderFBO(texture_fbo, program);
+                if(texture_fbo != render_fbo) QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
+                program->setUniformValue("bVertical", 0);
+                RenderFBO(texture_fbo, program);
+            }
             program->release();
 
             glDisable(GL_STENCIL_TEST);
@@ -1373,7 +1397,7 @@ void GLWidget::paintGL()
     glPopMatrix();
     render_fbo->release();
 
-    if (render_fbo != texture_fbo) {
+    if (render_fbo && texture_fbo && render_fbo != texture_fbo) {
         QRect rect(0, 0, render_fbo->width(), render_fbo->height());
         QGLFramebufferObject::blitFramebuffer(texture_fbo, rect, render_fbo, rect);
     }
@@ -1517,10 +1541,9 @@ void GLWidget::RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program)
     program->setUniformValue("texture", 0);
     GLfloat fbo_vertices[] = {
         -1, -1,
-        1, -1,
+         1, -1,
         -1,  1,
-        1,  1,
-    };
+         1,  1};
     program->enableAttributeArray(0);
     program->setAttributeArray(0,fbo_vertices,2);
 
@@ -1602,6 +1625,7 @@ void GLWidget::resizeGL(int width, int height)
             lightBlur_fbo = lightBlur_fbo;
         }
     }
+    qDebug() << "resizing viewport" << objects.size() << (intptr_t)(void *)render_fbo << (intptr_t)(void *)texture_fbo;
     mutex->unlock();
 }
 

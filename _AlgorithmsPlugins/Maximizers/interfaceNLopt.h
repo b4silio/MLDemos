@@ -33,6 +33,7 @@ private:
     Ui::ParametersNLopt *params;
 public:
     MaximizeInterfaceNLopt();
+    ~MaximizeInterfaceNLopt();
     Maximizer *GetMaximizer();
 
     QString GetName(){return QString("Gradient Free");}

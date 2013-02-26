@@ -42,6 +42,12 @@ ClustDBSCAN::ClustDBSCAN()
         connect(params->typeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(typeChanged(int)));
 }
 
+ClustDBSCAN::~ClustDBSCAN()
+{
+    delete params;
+    delete graphzoom;
+}
+
 // Paint the graph on the new windows and show it. User may also click on the button to refresh the plot.
 void ClustDBSCAN::showZoom()
 {

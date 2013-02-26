@@ -31,6 +31,11 @@ RegrLowess::RegrLowess()
 	params->setupUi(widget = new QWidget());
 }
 
+RegrLowess::~RegrLowess()
+{
+    delete params;
+}
+
 void RegrLowess::SetParams(Regressor *regressor)
 {
     if(!regressor) return;

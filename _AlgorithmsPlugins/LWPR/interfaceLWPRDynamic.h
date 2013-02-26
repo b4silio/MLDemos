@@ -33,6 +33,7 @@ private:
 	Ui::ParametersLWPRDynamic *params;
 public:
 	DynamicLWPR();
+    ~DynamicLWPR();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);

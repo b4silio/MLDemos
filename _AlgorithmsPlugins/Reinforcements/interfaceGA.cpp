@@ -33,6 +33,11 @@ ReinforcementInterfaceGA::ReinforcementInterfaceGA()
 	params->setupUi(widget = new QWidget());
 }
 
+ReinforcementInterfaceGA::~ReinforcementInterfaceGA()
+{
+    delete params;
+}
+
 void ReinforcementInterfaceGA::SetParams(Reinforcement *reinforcement)
 {
     if(!reinforcement) return;

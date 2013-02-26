@@ -31,10 +31,16 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-ClustFlame::ClustFlame() {
+ClustFlame::ClustFlame()
+{
     // we initialize the hyperparameter widget
     params = new Ui::ParametersFlame();
 	params->setupUi(widget = new QWidget());
+}
+
+ClustFlame::~ClustFlame()
+{
+    delete params;
 }
 
 void ClustFlame::SetParams(Clusterer *clusterer)

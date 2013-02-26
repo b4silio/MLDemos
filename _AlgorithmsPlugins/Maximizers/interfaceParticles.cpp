@@ -32,6 +32,11 @@ MaximizeInterfaceParticles::MaximizeInterfaceParticles()
 	params->setupUi(widget = new QWidget());
 }
 
+MaximizeInterfaceParticles::~MaximizeInterfaceParticles()
+{
+    delete params;
+}
+
 void MaximizeInterfaceParticles::SetParams(Maximizer *maximizer)
 {
 	if(!maximizer) return;

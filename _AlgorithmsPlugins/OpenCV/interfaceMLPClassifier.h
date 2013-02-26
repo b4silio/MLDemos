@@ -33,6 +33,7 @@ private:
 	Ui::ParametersMLP *params;
 public:
 	ClassMLP();
+    ~ClassMLP();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier){}

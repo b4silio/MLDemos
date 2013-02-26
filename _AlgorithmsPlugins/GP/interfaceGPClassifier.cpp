@@ -33,6 +33,11 @@ ClassGP::ClassGP()
     params->setupUi(widget = new QWidget());
 }
 
+ClassGP::~ClassGP()
+{
+    delete params;
+}
+
 void ClassGP::SetParams(Classifier *classifier)
 {
     if(!classifier) return;

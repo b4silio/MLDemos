@@ -32,6 +32,11 @@ RegrSVM::RegrSVM()
     ChangeOptions();
 }
 
+RegrSVM::~RegrSVM()
+{
+    delete params;
+}
+
 void RegrSVM::ChangeOptions()
 {
     params->svmCLabel->setText("C");

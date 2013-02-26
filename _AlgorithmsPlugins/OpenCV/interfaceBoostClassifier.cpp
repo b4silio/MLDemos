@@ -32,6 +32,11 @@ ClassBoost::ClassBoost()
     OptionsChanged();
 }
 
+ClassBoost::~ClassBoost()
+{
+    delete params;
+}
+
 void ClassBoost::OptionsChanged()
 {
     params->svmCountLabel->setVisible(false);

@@ -33,6 +33,7 @@ private:
 	Ui::ParametersGMMClust *params;
 public:
 	ClustGMM();
+    ~ClustGMM();
 	// virtual functions to manage the algorithm creation
 	Clusterer *GetClusterer();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer);

@@ -32,6 +32,11 @@ DynamicSVM::DynamicSVM()
     ChangeOptions();
 }
 
+DynamicSVM::~DynamicSVM()
+{
+    delete params;
+}
+
 void DynamicSVM::ChangeOptions()
 {
     params->svmCLabel->setText("C");

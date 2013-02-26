@@ -34,6 +34,7 @@ ClassTrees::ClassTrees()
 
 ClassTrees::~ClassTrees()
 {
+    delete params;
     DEL(displayLabel);
 }
 

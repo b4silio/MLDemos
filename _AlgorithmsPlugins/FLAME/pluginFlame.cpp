@@ -35,4 +35,3 @@ PluginFlame::PluginFlame()
 
 Q_EXPORT_PLUGIN2(mld_Flame, PluginFlame)
 
-

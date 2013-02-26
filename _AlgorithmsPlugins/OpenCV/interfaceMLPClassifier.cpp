@@ -29,6 +29,11 @@ ClassMLP::ClassMLP()
 	params->setupUi(widget = new QWidget());
 }
 
+ClassMLP::~ClassMLP()
+{
+    delete params;
+}
+
 void ClassMLP::SetParams(Classifier *classifier)
 {
 	if(!classifier) return;

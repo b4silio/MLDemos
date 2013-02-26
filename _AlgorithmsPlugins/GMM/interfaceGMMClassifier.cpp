@@ -34,6 +34,11 @@ ClassGMM::ClassGMM()
     params->setupUi(widget = new QWidget());
 }
 
+ClassGMM::~ClassGMM()
+{
+    delete params;
+}
+
 void ClassGMM::SetParams(Classifier *classifier)
 {
     if(!classifier) return;

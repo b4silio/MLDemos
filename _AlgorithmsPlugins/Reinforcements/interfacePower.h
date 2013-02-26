@@ -33,6 +33,7 @@ private:
     Ui::ParametersPower *params;
 public:
     ReinforcementInterfacePower();
+    ~ReinforcementInterfacePower();
 	// virtual functions to manage the algorithm creation
     Reinforcement *GetReinforcement();
 

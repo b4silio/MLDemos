@@ -33,6 +33,7 @@ private:
 	Ui::ParametersGA *params;
 public:
     ReinforcementInterfaceGA();
+    ~ReinforcementInterfaceGA();
 	// virtual functions to manage the algorithm creation
     Reinforcement *GetReinforcement();
 

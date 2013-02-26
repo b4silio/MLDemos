@@ -32,6 +32,11 @@ RegrGMM::RegrGMM()
 	params->setupUi(widget = new QWidget());
 }
 
+RegrGMM::~RegrGMM()
+{
+    delete params;
+}
+
 void RegrGMM::SetParams(Regressor *regressor)
 {
 	if(!regressor) return;

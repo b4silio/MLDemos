@@ -31,6 +31,11 @@ ClassKNN::ClassKNN()
     ChangeOptions();
 }
 
+ClassKNN::~ClassKNN()
+{
+    delete params;
+}
+
 void ClassKNN::ChangeOptions()
 {
     params->knnNormSpin->setVisible(params->knnNormCombo->currentIndex() == 2);

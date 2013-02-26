@@ -60,6 +60,7 @@ Visualization::Visualization(Canvas *canvas, QWidget *parent) :
 
 Visualization::~Visualization()
 {
+    delete spacer;
     delete ui;
 }
 

@@ -32,6 +32,11 @@ DynamicASVM::DynamicASVM()
     params->setupUi(widget = new QWidget());
 }
 
+DynamicASVM::~DynamicASVM()
+{
+    delete params;
+}
+
 void DynamicASVM::SetParams(Dynamical *dynamical)
 {
     if(!dynamical) return;

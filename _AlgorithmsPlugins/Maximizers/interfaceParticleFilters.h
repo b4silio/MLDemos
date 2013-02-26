@@ -33,6 +33,7 @@ private:
     Ui::ParametersParticleFilters *params;
 public:
     MaximizeInterfaceParticleFilters();
+    ~MaximizeInterfaceParticleFilters();
 	// virtual functions to manage the algorithm creation
 	Maximizer *GetMaximizer();
 

@@ -36,6 +36,11 @@ ClassMVM::ClassMVM()
     ChangeOptions();
 }
 
+ClassMVM::~ClassMVM()
+{
+    delete params;
+}
+
 void ClassMVM::SelectAlpha(int index)
 {
     if(!params->samplesCombo->count()) return;

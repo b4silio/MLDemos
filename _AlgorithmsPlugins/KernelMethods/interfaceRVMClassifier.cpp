@@ -32,6 +32,11 @@ ClassRVM::ClassRVM()
     ChangeOptions();
 }
 
+ClassRVM::~ClassRVM()
+{
+    delete params;
+}
+
 void ClassRVM::ChangeOptions()
 {
     int C = params->svmCSpin->value();

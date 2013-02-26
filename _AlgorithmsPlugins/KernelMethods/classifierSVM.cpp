@@ -507,7 +507,6 @@ void ClassifierSVM::Train(std::vector< fvec > samples, ivec labels)
     FOR(i, classCount)
     {
         classes[i] = svm->label[i];
-        qDebug() << "label" << i << svm->label[i];
     }
     //FOR(j, labels.size()) qDebug() << "label:" << j << labels[j];
 

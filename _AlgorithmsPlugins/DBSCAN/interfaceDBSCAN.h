@@ -57,6 +57,7 @@ public:
       Constructor, it instantiates the widget and parameter panel
       */
     ClustDBSCAN();
+    ~ClustDBSCAN();
 
     /*!
       The function called by the main program to obtain the clusterer.

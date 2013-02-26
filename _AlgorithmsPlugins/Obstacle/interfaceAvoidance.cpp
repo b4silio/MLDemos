@@ -28,6 +28,11 @@ PluginAvoid::PluginAvoid()
 {
 }
 
+PluginAvoid::~PluginAvoid()
+{
+    delete widget;
+}
+
 void PluginAvoid::SetParams(ObstacleAvoidance *avoid)
 {
 	if(!avoid) return;

@@ -12,6 +12,12 @@ PCAProjection::PCAProjection()
     ChangeOptions();
 }
 
+PCAProjection::~PCAProjection()
+{
+    delete params;
+    if(eigenWidget) delete eigenWidget;
+}
+
 void PCAProjection::ChangeOptions()
 {
     bool bRange = params->useRangeCheck->isChecked();

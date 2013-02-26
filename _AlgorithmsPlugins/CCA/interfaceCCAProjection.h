@@ -17,6 +17,7 @@ private:
     QWidget *table1, *table2;
 public:
     CCAProjection();
+    ~CCAProjection();
     // virtual functions to manage the algorithm creation
     Projector *GetProjector();
     void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector);

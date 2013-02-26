@@ -36,6 +36,12 @@ ClassSVM::ClassSVM()
     ChangeOptions();
 }
 
+ClassSVM::~ClassSVM()
+{
+    delete params;
+    DEL(ardLabel);
+}
+
 void ClassSVM::ChangeOptions()
 {
     int C = params->svmCSpin->value();
@@ -514,6 +520,7 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     o.objectType = "Samples";
     o.style = "rings,pointsize:24";
     vector<fvec> svs;
+    int dim = canvas->data->GetDimCount();
     if(dynamic_cast<ClassifierPegasos*>(classifier))
     {
         // we want to draw the support vectors
@@ -521,7 +528,6 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     }
     else if(dynamic_cast<ClassifierSVM*>(classifier))
     {
-        int dim = canvas->data->GetDimCount();
         // we want to draw the support vectors
         svm_model *svm = dynamic_cast<ClassifierSVM*>(classifier)->GetModel();
         if(svm)
@@ -536,7 +542,7 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     }
     FOR(i, svs.size())
     {
-        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd],svs[i][zInd]));
+        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd], zInd>=0 && zInd<dim ? svs[i][zInd] : 0));
         o.colors.append(QVector4D(0,0,0,1));
     }
     glw->mutex->lock();

@@ -33,7 +33,8 @@ private:
     Ui::ParametersDP *params;
 public:
     ReinforcementInterfaceDP();
-	// virtual functions to manage the algorithm creation
+    ~ReinforcementInterfaceDP();
+    // virtual functions to manage the algorithm creation
     Reinforcement *GetReinforcement();
 
 	// virtual functions to manage the GUI and I/O

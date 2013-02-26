@@ -37,6 +37,7 @@ private:
     QStringList ardNames;
 public:
     ClassSVM();
+    ~ClassSVM();
     // virtual functions to manage the algorithm creation
     Classifier *GetClassifier();
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);

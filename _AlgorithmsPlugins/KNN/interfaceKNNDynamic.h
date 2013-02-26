@@ -33,6 +33,7 @@ private:
 	Ui::ParametersKNNDynamic *params;
 public:
 	DynamicKNN();
+    ~DynamicKNN();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
     void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}

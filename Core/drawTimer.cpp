@@ -64,6 +64,11 @@ void DrawTimer::Clear()
 {
     refineLevel = 0;
     maximumVisitedCount = 0;
+    if(!perm || w != canvas->width() || h != canvas->height())
+    {
+        KILL(perm);
+        perm = randPerm(w*h);
+    }
     w = canvas->width();
     h = canvas->height();
     drawMutex.lock();
@@ -71,8 +76,6 @@ void DrawTimer::Clear()
     bigMap.fill(0xffffff);
     modelMap = QImage(QSize(w,h), QImage::Format_ARGB32);
     modelMap.fill(qRgba(255, 255, 255, 0));
-    KILL(perm);
-    perm = randPerm(w*h);
     drawMutex.unlock();
     /*
     glw->mutex->lock();
@@ -903,6 +906,7 @@ bool DrawTimer::TestFast(int start, int stop)
     mutex->unlock();
     if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
     fvec sample(dim);
+    if(!perm) perm = randPerm(w*h);
     for (int i=start; i<stop; i++)
     {
         drawMutex.lock();
@@ -912,7 +916,6 @@ bool DrawTimer::TestFast(int start, int stop)
         drawMutex.unlock();
         fromCanvas(sample, x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center);
         fvec val(dim);
-        float v;
         QMutexLocker lock(mutex);
         if((*classifier))
         {

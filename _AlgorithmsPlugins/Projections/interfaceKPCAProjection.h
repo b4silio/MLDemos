@@ -16,7 +16,6 @@ private:
     Ui::paramsKPCA *params;
     Ui::ContourWidget *contours;
     QWidget *widget, *contourWidget;
-    QLabel *contourLabel;
     std::vector<fvec> contourSamples;
     ivec contourSampleLabels;
     std::map<int,QPixmap> contourPixmaps;
@@ -29,6 +28,7 @@ private:
 
 public:
     KPCAProjection();
+    ~KPCAProjection();
     // virtual functions to manage the algorithm creation
     Projector *GetProjector();
     void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector);

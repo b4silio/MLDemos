@@ -33,6 +33,11 @@ ReinforcementInterfacePower::ReinforcementInterfacePower()
     ChangeOptions();
 }
 
+ReinforcementInterfacePower::~ReinforcementInterfacePower()
+{
+    delete params;
+}
+
 void ReinforcementInterfacePower::ChangeOptions()
 {
 }

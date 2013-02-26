@@ -33,6 +33,11 @@ RegrGPR::RegrGPR()
     ChangeOptions();
 }
 
+RegrGPR::~RegrGPR()
+{
+    delete params;
+}
+
 void RegrGPR::ChangeOptions()
 {
     bool bSparse = params->sparseCheck->isChecked();

@@ -32,8 +32,9 @@ private:
 	QWidget *widget;
 	Ui::ParametersGMM *params;
 public:
-	ClassGMM();
-	// virtual functions to manage the algorithm creation
+    ClassGMM();
+    ~ClassGMM();
+    // virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
     void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier);

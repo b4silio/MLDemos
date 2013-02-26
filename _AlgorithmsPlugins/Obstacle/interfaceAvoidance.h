@@ -31,6 +31,7 @@ private:
 	QWidget *widget;
 public:
 	PluginAvoid();
+    ~PluginAvoid();
 	// virtual functions to manage the algorithm creation
 	ObstacleAvoidance  *GetObstacleAvoidance();
 

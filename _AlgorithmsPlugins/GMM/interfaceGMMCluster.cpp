@@ -32,6 +32,11 @@ ClustGMM::ClustGMM()
 	params->setupUi(widget = new QWidget());
 }
 
+ClustGMM::~ClustGMM()
+{
+    delete params;
+}
+
 void ClustGMM::SetParams(Clusterer *clusterer)
 {
 	if(!clusterer) return;

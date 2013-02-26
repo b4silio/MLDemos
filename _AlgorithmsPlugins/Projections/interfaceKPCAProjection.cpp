@@ -9,7 +9,7 @@
 using namespace std;
 
 KPCAProjection::KPCAProjection()
-    : widget(new QWidget()), contourLabel(0), pcaPointer(0), contourWidget(new QWidget()),
+    : widget(new QWidget()), pcaPointer(0), contourWidget(new QWidget()),
       xIndex(0), yIndex(1)
 {
     params = new Ui::paramsKPCA();
@@ -27,6 +27,12 @@ KPCAProjection::KPCAProjection()
     connect(contours->spinX1, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
     connect(contours->spinX2, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
     connect(contours->spinZoom, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
+}
+
+KPCAProjection::~KPCAProjection()
+{
+    delete params;
+    if(contourWidget) delete contours;
 }
 
 // virtual functions to manage the algorithm creation

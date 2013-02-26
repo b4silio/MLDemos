@@ -31,6 +31,11 @@ DynamicKNN::DynamicKNN()
     ChangeOptions();
 }
 
+DynamicKNN::~DynamicKNN()
+{
+    delete params;
+}
+
 void DynamicKNN::ChangeOptions()
 {
     params->knnNormSpin->setVisible(params->knnNormCombo->currentIndex() == 2);

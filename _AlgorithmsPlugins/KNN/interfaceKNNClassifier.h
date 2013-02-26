@@ -33,6 +33,7 @@ private:
 	Ui::ParametersKNN *params;
 public:
 	ClassKNN();
+    ~ClassKNN();
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier){}

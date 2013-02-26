@@ -11,6 +11,12 @@ SammonProjection::SammonProjection()
     params->setupUi(widget);
 }
 
+SammonProjection::~SammonProjection()
+{
+    delete params;
+}
+
+
 // virtual functions to manage the algorithm creation
 Projector *SammonProjection::GetProjector()
 {

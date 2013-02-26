@@ -31,6 +31,11 @@ RegrRVM::RegrRVM()
     ChangeOptions();
 }
 
+RegrRVM::~RegrRVM()
+{
+    delete params;
+}
+
 void RegrRVM::ChangeOptions()
 {
     switch(params->kernelTypeCombo->currentIndex())

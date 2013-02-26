@@ -14,6 +14,7 @@ private:
     QWidget *widget;
 public:
     ICAProjection();
+    ~ICAProjection();
     // virtual functions to manage the algorithm creation
     Projector *GetProjector();
     void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector);

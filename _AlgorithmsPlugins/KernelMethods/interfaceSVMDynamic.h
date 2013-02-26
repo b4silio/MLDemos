@@ -33,6 +33,7 @@ private:
 	Ui::ParametersDynamic *params;
 public:
 	DynamicSVM();
+    ~DynamicSVM();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);

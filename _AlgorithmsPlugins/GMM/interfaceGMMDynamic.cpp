@@ -30,6 +30,11 @@ DynamicGMM::DynamicGMM()
 	params->setupUi(widget = new QWidget());
 }
 
+DynamicGMM::~DynamicGMM()
+{
+    delete params;
+}
+
 void DynamicGMM::SetParams(Dynamical *dynamical)
 {
 	if(!dynamical) return;

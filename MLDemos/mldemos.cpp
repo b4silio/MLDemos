@@ -977,19 +977,42 @@ MLDemos::~MLDemos()
         if(inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
     }
     SaveLayoutOptions();
+    delete aboutPanel;
     delete optionsClassify;
     delete optionsRegress;
     delete optionsCluster;
     delete optionsDynamic;
     delete optionsMaximize;
     delete optionsReinforcement;
+    delete optionsProject;
+    delete optionsCompare;
     delete drawToolbar;
     delete drawToolbarContext1;
     delete drawToolbarContext2;
+    delete drawToolbarContext3;
+    delete drawToolbarContext4;
+    delete drawToolbarWidget;
+    delete drawContext1Widget;
+    delete drawContext2Widget;
+    delete drawContext3Widget;
+    delete drawContext4Widget;
     delete displayOptions;
+    delete algorithmOptions;
     delete generator;
+    delete inputDimensions;
+    delete manualSelection;
+    delete showStats;
     canvas->hide();
     delete canvas;
+    FOR(i, classifiers.size()) delete classifiers[i];
+    FOR(i, clusterers.size()) delete clusterers[i];
+    FOR(i, projectors.size()) delete projectors[i];
+    FOR(i, regressors.size()) delete regressors[i];
+    FOR(i, maximizers.size()) delete maximizers[i];
+    FOR(i, reinforcements.size()) delete reinforcements[i];
+    FOR(i, dynamicals.size()) delete dynamicals[i];
+    FOR(i, avoiders.size()) delete avoiders[i];
+    FOR(i, inputoutputs.size()) delete inputoutputs[i];
 }
 
 void MLDemos::closeEvent(QCloseEvent *event)

@@ -40,6 +40,7 @@ public:
       Constructor, it instantiates the widget and parameter panel
       */
     ClassGP();
+    ~ClassGP();
 
     /*!
       The function called by the main program to obtain the classifier.

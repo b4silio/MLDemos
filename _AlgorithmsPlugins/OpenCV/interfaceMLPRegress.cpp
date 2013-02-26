@@ -29,6 +29,11 @@ RegrMLP::RegrMLP()
 	params->setupUi(widget = new QWidget());
 }
 
+RegrMLP::~RegrMLP()
+{
+    delete params;
+}
+
 void RegrMLP::SetParams(Regressor *regressor)
 {
 	if(!regressor) return;

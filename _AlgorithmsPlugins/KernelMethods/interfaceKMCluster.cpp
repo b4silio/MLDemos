@@ -37,6 +37,11 @@ ClustKM::ClustKM()
     ChangeOptions();
 }
 
+ClustKM::~ClustKM()
+{
+    delete params;
+}
+
 void ClustKM::ChangeOptions()
 {
     int method = params->kmeansMethodCombo->currentIndex();
