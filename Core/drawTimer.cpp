@@ -64,14 +64,16 @@ void DrawTimer::Clear()
 {
     refineLevel = 0;
     maximumVisitedCount = 0;
-    if(!perm || w != canvas->width() || h != canvas->height())
-    {
-        KILL(perm);
-        perm = randPerm(w*h);
-    }
+    //if(!perm || w != canvas->width() || h != canvas->height())
+    //{
+    //    KILL(perm);
+    //    perm = randPerm(w*h);
+    //}
     w = canvas->width();
     h = canvas->height();
     drawMutex.lock();
+    KILL(perm);
+    perm = randPerm(w*h);
     bigMap = QImage(QSize(w,h), QImage::Format_ARGB32);
     bigMap.fill(0xffffff);
     modelMap = QImage(QSize(w,h), QImage::Format_ARGB32);
@@ -394,7 +396,7 @@ void DrawTimer::Refine()
     else
     {
         int count = (w*h) / refineMax;
-        int start = max(0,count * (refineLevel-1));
+        int start = count * (refineLevel-1);
         int stop = count * refineLevel;
         if(refineLevel == refineMax) stop = w*h; // we want to be sure we paint everything in the end
 
@@ -906,10 +908,10 @@ bool DrawTimer::TestFast(int start, int stop)
     mutex->unlock();
     if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
     fvec sample(dim);
-    if(!perm) perm = randPerm(w*h);
     for (int i=start; i<stop; i++)
     {
         drawMutex.lock();
+        if(!perm) perm = randPerm(w*h);
         int x = perm[i]%w;
         int y = perm[i]/w;
         if(x >= bigMap.width() || y >= bigMap.height())
