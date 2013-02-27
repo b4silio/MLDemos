@@ -74,15 +74,16 @@ fvec ClustererGMM::Test( const fVec &sample)
 
 float ClustererGMM::GetLogLikelihood(std::vector<fvec> samples)
 {
-    fvec weights(dim);
+    float *weights = new float[nbClusters];
     float logLik = 0;
     FOR(i, samples.size())
     {
-        gmm->pdf(&samples[i][0], &weights[0]);
+        gmm->pdf(&samples[i][0], weights);
         float likelihood = 0;
         FOR(j, nbClusters) likelihood += weights[j];
         logLik += logf(likelihood);
     }
+    delete [] weights;
     return logLik;
 }
 
