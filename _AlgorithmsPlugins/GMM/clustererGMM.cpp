@@ -30,7 +30,7 @@ ClustererGMM::~ClustererGMM()
 void ClustererGMM::Train(std::vector< fvec > samples)
 {
 	if(!samples.size()) return;
-	int dim = samples[0].size();
+    dim = samples[0].size();
 	DEL(gmm);
 	gmm = new Gmm(nbClusters, dim);
 	KILL(data);
@@ -72,6 +72,35 @@ fvec ClustererGMM::Test( const fVec &sample)
 	return res;
 }
 
+float ClustererGMM::GetLogLikelihood(std::vector<fvec> samples)
+{
+    fvec weights(dim);
+    float logLik = 0;
+    FOR(i, samples.size())
+    {
+        gmm->pdf(&samples[i][0], &weights[0]);
+        float likelihood = 0;
+        FOR(j, nbClusters) likelihood += weights[j];
+        logLik += logf(likelihood);
+    }
+    return logLik;
+}
+
+float ClustererGMM::GetParameterCount()
+{
+    switch ( covarianceType ) {
+    case 0: // spherical
+        return nbClusters*(dim+1);
+        break;
+    case 1: // diagonal
+        return nbClusters*(2*dim);
+        break;
+    case 2: // full
+        return nbClusters*(dim + dim*(dim+1)/2);
+        break;
+    }
+    return nbClusters;
+}
 
 void ClustererGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 {

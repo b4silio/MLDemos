@@ -912,7 +912,11 @@ bool DrawTimer::TestFast(int start, int stop)
         drawMutex.lock();
         int x = perm[i]%w;
         int y = perm[i]/w;
-        if(x >= bigMap.width() || y >= bigMap.height()) continue;
+        if(x >= bigMap.width() || y >= bigMap.height())
+        {
+            drawMutex.unlock();
+            continue;
+        }
         drawMutex.unlock();
         fromCanvas(sample, x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center);
         fvec val(dim);

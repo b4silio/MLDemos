@@ -41,6 +41,25 @@ public:
     virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
     virtual const char *GetInfoString(){ return NULL; }
     virtual void SetNbClusters(int count){ nbClusters = count; }
+    virtual float GetLogLikelihood(std::vector<fvec> samples){
+        float loglik = 0;
+        if(!samples.size()) return 0;
+        fvec means(dim);
+        FOR ( i, samples.size() ) {
+            FOR ( d, dim ) means[d] += samples[i][d];
+        }
+        FOR ( i, samples.size() ) {
+            fvec scores = Test(samples[i]);
+            float rss = 0;
+            FOR ( k, nbClusters ) {
+                fvec diff = samples[i]-means[k];
+                rss += diff*diff*scores[k];
+            }
+            loglik += logf(rss);
+        }
+        return loglik;
+    }
+    virtual float GetParameterCount(){return nbClusters*dim;}
 };
 
 #endif // _CLUSTERING_H_
