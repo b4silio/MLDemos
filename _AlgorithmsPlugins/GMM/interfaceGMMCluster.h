@@ -23,14 +23,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <interfaces.h>
 #include "clustererGMM.h"
 #include "ui_paramsGMMcluster.h"
+#include "marginalwidget.h"
 
 class ClustGMM : public QObject, public ClustererInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ClustererInterface)
 private:
-	QWidget *widget;
 	Ui::ParametersGMMClust *params;
+    QWidget *widget;
+    MarginalWidget *marginalWidget;
+
 public:
 	ClustGMM();
     ~ClustGMM();
@@ -56,6 +59,8 @@ public:
                                  std::vector<QString> &parameterTypes,
                                  std::vector< std::vector<QString> > &parameterValues);
 
+ public slots:
+     void ShowMarginals();
 };
 
 #endif // _INTERFACEGMMCLUSTER_H_

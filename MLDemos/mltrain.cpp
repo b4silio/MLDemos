@@ -74,7 +74,6 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, in
         if((!bHasPositive || !bHasNegative) && !classifier->SingleClass()) return false;
         binaryClassMap[negative] = -1;
         binaryInverseMap[-1] = negative;
-        qDebug() << "negative class" << negative;
     }
     else
     {

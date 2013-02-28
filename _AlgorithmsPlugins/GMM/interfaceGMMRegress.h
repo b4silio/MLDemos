@@ -23,14 +23,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <interfaces.h>
 #include "regressorGMR.h"
 #include "ui_paramsGMMregr.h"
+#include "marginalwidget.h"
 
 class RegrGMM : public QObject, public RegressorInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(RegressorInterface)
 private:
-	QWidget *widget;
 	Ui::ParametersGMMRegr *params;
+    QWidget *widget;
+    MarginalWidget *marginalWidget;
+
 public:
 	RegrGMM();
     ~RegrGMM();
@@ -56,6 +59,9 @@ public:
     void GetParameterList(std::vector<QString> &parameterNames,
                                  std::vector<QString> &parameterTypes,
                                  std::vector< std::vector<QString> > &parameterValues);
+
+ public slots:
+     void ShowMarginals();
 };
 
 #endif // _INTERFACEGMMREGRESS_H_

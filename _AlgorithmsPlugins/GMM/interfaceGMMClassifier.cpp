@@ -32,11 +32,14 @@ ClassGMM::ClassGMM()
 {
     params = new Ui::ParametersGMM();
     params->setupUi(widget = new QWidget());
+    marginalWidget = new MarginalWidget();
+    connect(params->marginalsButton, SIGNAL(clicked()), this, SLOT(ShowMarginals()));
 }
 
 ClassGMM::~ClassGMM()
 {
     delete params;
+    delete marginalWidget;
 }
 
 void ClassGMM::SetParams(Classifier *classifier)
@@ -64,8 +67,8 @@ void ClassGMM::SetParams(Classifier *classifier, fvec parameters)
 }
 
 void ClassGMM::GetParameterList(std::vector<QString> &parameterNames,
-                             std::vector<QString> &parameterTypes,
-                             std::vector< std::vector<QString> > &parameterValues)
+                                std::vector<QString> &parameterTypes,
+                                std::vector< std::vector<QString> > &parameterValues)
 {
     parameterNames.clear();
     parameterTypes.clear();
@@ -87,6 +90,11 @@ void ClassGMM::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("Random");
     parameterValues.back().push_back("Uniform");
     parameterValues.back().push_back("K-Means");
+}
+
+void ClassGMM::ShowMarginals()
+{
+    marginalWidget->Show();
 }
 
 QString ClassGMM::GetAlgoString()
@@ -143,10 +151,8 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
     float mean[2];
     float sigma[3];
     painter.setBrush(Qt::NoBrush);
-    FOR(g, gmms.size())
-    {
-        FOR(i, gmms[g]->nstates)
-        {
+    FOR ( g, gmms.size() ) {
+        FOR ( i, gmms[g]->nstates ) {
             float* bigSigma = new float[dim*dim];
             float* bigMean = new float[dim];
             gmms[g]->getCovariance(i, bigSigma);
@@ -166,13 +172,77 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
             QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
             QColor color = classifier->inverseMap.size() == 2 ?
                         SampleColor[classifier->inverseMap[-1]==g ? 0 : 1] :
-                        SampleColor[classifier->inverseMap[g]%SampleColorCnt];
+                                                                    SampleColor[classifier->inverseMap[g]%SampleColorCnt];
             painter.setPen(QPen(Qt::black, 12));
             painter.drawEllipse(point, 6, 6);
             painter.setPen(QPen(color,4));
             painter.drawEllipse(point, 6, 6);
         }
     }
+
+    vector<fvec> samples = canvas->data->GetSamples();
+    fvec minv (dim, FLT_MAX);
+    fvec maxv (dim, -FLT_MAX);
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            minv[d] = min(minv[d], samples[i][d]);
+            maxv[d] = max(maxv[d], samples[i][d]);
+        }
+    }
+    fvec diff = maxv-minv;
+    minv -= diff/4;
+    maxv += diff/4;
+    std::vector<fvec> limits(dim);
+    FOR(d, dim)
+    {
+        fvec pair(2);
+        pair[0] = minv[d];
+        pair[1] = maxv[d];
+        limits[d] = pair;
+    }
+
+    std::vector< std::vector<fvec> > marginals(gmms.size());
+    std::vector< std::vector< std::vector<fvec> > > marginalGmm(gmms.size());
+
+    float* bigSigma = new float[dim*dim];
+    float* bigMean = new float[dim];
+    FOR ( g, gmms.size() )
+    {
+        Gmm* gmm = gmms[g];
+        marginals[g].resize(dim);
+        marginalGmm[g].resize(dim);
+        FOR ( d, dim )
+        {
+            int steps = 200;
+            marginals[g][d].resize(steps,0);
+            marginalGmm[g][d].resize(steps);
+            FOR ( j, steps )
+            {
+                float likelihood = 0;
+                float s = j/(float)(steps)*(maxv[d]-minv[d]) + minv[d];
+                marginalGmm[g][d][j].resize(gmm->nstates);
+                FOR ( i, gmm->nstates ) {
+                    gmm->getCovariance(i, bigSigma);
+                    gmm->getMean(i, bigMean);
+                    float mu = bigMean[d];
+                    float sigma = bigSigma[d + d*dim];
+                    float prior = gmm->getPrior(i);
+
+                    float diff = s-mu;
+                    float lik = 1./(sqrtf(2*M_PI*sigma))*expf(-(diff*diff)*0.5/sigma);
+                    likelihood += lik*prior;
+                    marginalGmm[g][d][j][i] = max(0.f,lik*prior);
+                }
+                marginals[g][d][j] = likelihood;
+            }
+        }
+    }
+    delete [] bigSigma;
+    delete [] bigMean;
+    marginalWidget->SetDimensions(dim, canvas->dimNames);
+    marginalWidget->SetClassMarginals(marginals, marginalGmm, limits);
 }
 
 void DrawGaussian(float *mean, float *sigma, float rad, int plane)
@@ -293,7 +363,7 @@ void ClassGMM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
         }
     }
 
-   /*
+    /*
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_POINT_SPRITE);

@@ -10,7 +10,8 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += paramsGMM.ui paramsGMMcluster.ui paramsGMMregr.ui paramsGMMdynamic.ui
+FORMS += paramsGMM.ui paramsGMMcluster.ui paramsGMMregr.ui paramsGMMdynamic.ui \
+    marginalWidget.ui
 HEADERS +=	\
 			canvas.h \
 			datasetManager.h \
@@ -24,7 +25,8 @@ HEADERS +=	\
 			interfaceGMMCluster.h \
 			interfaceGMMRegress.h \
 			interfaceGMMDynamic.h \
-			pluginGMM.h
+			pluginGMM.h \
+    marginalwidget.h
 
 SOURCES += 	\
 			classifierGMM.cpp \
@@ -35,7 +37,8 @@ SOURCES += 	\
 			interfaceGMMCluster.cpp \
 			interfaceGMMRegress.cpp \
 			interfaceGMMDynamic.cpp \
-			pluginGMM.cpp
+			pluginGMM.cpp \
+    marginalwidget.cpp
 
 ###########################
 # Dependencies            #
