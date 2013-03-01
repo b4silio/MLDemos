@@ -45,12 +45,12 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("drawGeometry", drawToolbarWidget->saveGeometry());
     settings.setValue("displayGeometry", displayDialog->saveGeometry());
     settings.setValue("statsGeometry", statsDialog->saveGeometry());
-    settings.setValue("compareGeometry", compareWidget->saveGeometry());
+    settings.setValue("compareGeometry", compare->paramsWidget->saveGeometry());
     settings.setValue("generatorGeometry", generator->saveGeometry());
 
     settings.setValue("algoTab", algorithmOptions->tabWidget->currentIndex());
     settings.setValue("ShowAlgoOptions", algorithmWidget->isVisible());
-    settings.setValue("ShowCompare", compareWidget->isVisible());
+    settings.setValue("ShowCompare", compare->paramsWidget->isVisible());
     settings.setValue("ShowDrawOptions", drawToolbarWidget->isVisible());
     settings.setValue("ShowDisplayOptions", displayDialog->isVisible());
     settings.setValue("ShowStatsOptions", statsDialog->isVisible());
@@ -127,11 +127,6 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("colorCheck", optionsDynamic->colorCheck->isChecked());
     settings.endGroup();
 
-    settings.beginGroup("compareOptions");
-    settings.setValue("foldCount", optionsCompare->foldCountSpin->value());
-    settings.setValue("trainRatio", optionsCompare->traintestRatioCombo->currentIndex());
-    settings.endGroup();
-
     settings.beginGroup("clusterOptions");
     settings.setValue("tab", optionsCluster->algoList->currentIndex());
     settings.setValue("trainRatio", optionsCluster->trainRatioCombo->currentIndex());
@@ -169,6 +164,11 @@ void MLDemos::SaveLayoutOptions()
 
     settings.beginGroup("statsOptions");
     settings.setValue("tab", showStats->tabWidget->currentIndex());
+    settings.endGroup();
+
+    settings.beginGroup("compareOptions");
+    settings.setValue("foldCount", compare->params->foldCountSpin->value());
+    settings.setValue("trainRatio", compare->params->traintestRatioCombo->currentIndex());
     settings.endGroup();
 
     settings.beginGroup("generatorOptions");
@@ -245,7 +245,7 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("drawGeometry")) drawToolbarWidget->restoreGeometry(settings.value("drawGeometry").toByteArray());
     if(settings.contains("displayGeometry")) displayDialog->restoreGeometry(settings.value("displayGeometry").toByteArray());
     if(settings.contains("statsGeometry")) statsDialog->restoreGeometry(settings.value("statsGeometry").toByteArray());
-    if(settings.contains("compareGeometry")) compareWidget->restoreGeometry(settings.value("compareGeometry").toByteArray());
+    if(settings.contains("compareGeometry")) compare->paramsWidget->restoreGeometry(settings.value("compareGeometry").toByteArray());
     if(settings.contains("generatorGeometry")) generator->restoreGeometry(settings.value("generatorGeometry").toByteArray());
 #ifdef MACX // ugly hack to avoid resizing problems on the mac
     if(height() < 400) resize(width(),400);
@@ -254,7 +254,7 @@ void MLDemos::LoadLayoutOptions()
 
     if(settings.contains("algoTab")) algorithmOptions->tabWidget->setCurrentIndex(settings.value("algoTab").toInt());
     if(settings.contains("ShowAlgoOptions")) algorithmWidget->setVisible(settings.value("ShowAlgoOptions").toBool());
-    if(settings.contains("ShowCompare")) compareWidget->setVisible(settings.value("ShowCompare").toBool());
+    if(settings.contains("ShowCompare")) compare->paramsWidget->setVisible(settings.value("ShowCompare").toBool());
     if(settings.contains("ShowDrawOptions")) drawToolbarWidget->setVisible(settings.value("ShowDrawOptions").toBool());
     if(settings.contains("ShowDisplayOptions")) displayDialog->setVisible(settings.value("ShowDisplayOptions").toBool());
     if(settings.contains("ShowStatsOptions")) statsDialog->setVisible(settings.value("ShowStatsOptions").toBool());
@@ -265,7 +265,7 @@ void MLDemos::LoadLayoutOptions()
     settings.endGroup();
 
     actionAlgorithms->setChecked(algorithmWidget->isVisible());
-    actionCompare->setChecked(compareWidget->isVisible());
+    actionCompare->setChecked(compare->paramsWidget->isVisible());
     actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
     actionDisplayOptions->setChecked(displayDialog->isVisible());
     actionShowStats->setChecked(statsDialog->isVisible());
@@ -340,11 +340,6 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("colorCheck")) optionsDynamic->colorCheck->setChecked(settings.value("colorCheck").toBool());
     settings.endGroup();
 
-    settings.beginGroup("compareOptions");
-    if(settings.contains("foldCount")) optionsCompare->foldCountSpin->setValue(settings.value("foldCount").toFloat());
-    if(settings.contains("trainRatio")) optionsCompare->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
-    settings.endGroup();
-
     settings.beginGroup("clusterOptions");
     if(settings.contains("tab")) optionsCluster->algoList->setCurrentIndex(settings.value("tab").toInt());
     if(settings.contains("trainRatio")) optionsCluster->trainRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
@@ -382,6 +377,11 @@ void MLDemos::LoadLayoutOptions()
 
     settings.beginGroup("statsOptions");
     if(settings.contains("tab")) showStats->tabWidget->setCurrentIndex(settings.value("tab").toInt());
+    settings.endGroup();
+
+    settings.beginGroup("compareOptions");
+    if(settings.contains("foldCount")) compare->params->foldCountSpin->setValue(settings.value("foldCount").toFloat());
+    if(settings.contains("trainRatio")) compare->params->traintestRatioCombo->setCurrentIndex(settings.value("trainRatio").toInt());
     settings.endGroup();
 
     settings.beginGroup("generatorOptions");

@@ -74,7 +74,8 @@ HEADERS += basicMath.h \
     datagenerator.h \
     gridsearch.h \
     visualization.h \
-    dataseteditor.h
+    dataseteditor.h \
+    algorithmmanager.h
 
 SOURCES += \
 	main.cpp \
@@ -87,7 +88,8 @@ SOURCES += \
     datagenerator.cpp \
     gridsearch.cpp \
     visualization.cpp \
-    dataseteditor.cpp
+    dataseteditor.cpp \
+    algorithmmanager.cpp
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \

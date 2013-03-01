@@ -189,6 +189,7 @@ public:
     std::vector< fvec > GetSamples() const {return samples;}
     std::vector< fvec > GetSamples(const u32 count, const dsmFlags flag=_UNUSED, const dsmFlags replaceWith=_TRAIN);
     std::vector< fvec > GetSampleDims(const ivec inputDims, const int outputDim=-1) const ;
+    std::vector< fvec > GetSampleDims(const std::vector<fvec> samples, const ivec inputDims, const int outputDim=-1) const ;
     void SetSample(const int index, const fvec sample);
     void SetSamples(const std::vector<fvec> samples){this->samples = samples;}
 

@@ -78,7 +78,7 @@ void ProjectorPCA::DrawEigenvals(QPainter &painter)
         if(eigval == eigval)
         {
             accumulator += eigval / maxEigVal;
-            qDebug() << "accumulator: " << accumulator << accumulator/maxAccumulator;
+            //qDebug() << "accumulator: " << accumulator << accumulator/maxAccumulator;
             QPointF point2 = QPointF(dim==1 ? w/2 : i * (w-2*pad) / (dim-1) + pad+(!i?1:0), (int)(accumulator/maxAccumulator * (h-2*pad)));
             painter.drawLine(point, point2);
             point = point2;

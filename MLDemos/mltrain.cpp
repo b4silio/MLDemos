@@ -35,10 +35,15 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex)
+bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex, std::vector<fvec> samples, ivec labels)
 {
     if(!classifier) return false;
-    ivec labels = canvas->data->GetLabels();
+    if(!labels.size()) labels = canvas->data->GetLabels();
+    ivec inputDims = GetInputDimensions();
+    if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims);
+    else samples = canvas->data->GetSampleDims(samples, inputDims);
+    sourceDims = inputDims;
+
     ivec newLabels;
     std::map<int,int> binaryClassMap, binaryInverseMap;
     int classCount = DatasetManager::GetClassCount(labels);
@@ -82,10 +87,6 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, in
     }
     classifier->rocdata.clear();
     classifier->roclabels.clear();
-
-    ivec inputDims = GetInputDimensions();
-    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
-    sourceDims = inputDims;
 
     vector<fvec> trainSamples, testSamples;
     ivec trainLabels, testLabels;
@@ -442,9 +443,10 @@ bool MLDemos::Train(Classifier *classifier, float trainRatio, bvec trainList, in
     return true;
 }
 
-void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList)
+void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList, std::vector<fvec> samples, ivec labels)
 {
     if(!regressor || !canvas->data->GetCount()) return;
+
     ivec inputDims = GetInputDimensions();
     int outputIndexInList = -1;
     if(inputDims.size()==1 && inputDims[0] == outputDim) return; // we dont have enough dimensions for training
@@ -455,8 +457,10 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
     }
     sourceDims = inputDims;
 
-    vector<fvec> samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
-    ivec labels = canvas->data->GetLabels();
+    if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
+    else samples = canvas->data->GetSampleDims(samples, inputDims, outputIndexInList == -1 ? outputDim : -1);
+    if(!labels.size()) labels = canvas->data->GetLabels();
+
     if(!samples.size()) return;
     int dim = samples[0].size();
     if(dim < 2) return;
@@ -471,7 +475,6 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
         FOR(i, samples.size())
         {
             fvec sample = samples[i];
-            int dim = sample.size();
             fvec res = regressor->Test(sample);
             float error = fabs(res[0] - sample.back());
             trainErrors.push_back(error);
@@ -526,7 +529,6 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
         FOR(i, trainCnt)
         {
             fvec sample = trainSamples[i];
-            int dim = sample.size();
             fvec res = regressor->Test(sample);
             float error = fabs(res[0] - sample.back());
             trainErrors.push_back(error);
@@ -534,7 +536,6 @@ void MLDemos::Train(Regressor *regressor, int outputDim, float trainRatio, bvec 
         FOR(i, testCnt)
         {
             fvec sample = testSamples[i];
-            int dim = sample.size();
             fvec res = regressor->Test(sample);
             float error = fabs(res[0] - sample.back());
             testErrors.push_back(error);
@@ -578,10 +579,11 @@ fvec MLDemos::Train(Dynamical *dynamical)
     return Test(dynamical, trajectories, trajLabels);
 }
 
-void MLDemos::Train(Clusterer *clusterer, float trainRatio, bvec trainList, float *testFMeasures)
+void MLDemos::Train(Clusterer *clusterer, float trainRatio, bvec trainList, float *testFMeasures, std::vector<fvec> samples, ivec labels)
 {
     if(!clusterer) return;
-    vector<fvec> samples = canvas->data->GetSamples();
+    if(!samples.size()) samples = canvas->data->GetSamples();
+    if(!labels.size()) labels = canvas->data->GetLabels();
     if(trainList.size())
     {
         vector<fvec> trainSamples;
@@ -611,7 +613,6 @@ void MLDemos::Train(Clusterer *clusterer, float trainRatio, bvec trainList, floa
 
     if(!testFMeasures) return;
     // we compute the f-measures for each class
-    ivec labels = canvas->data->GetLabels();
     map<int,int> classcounts;
     int cnt = 0;
     FOR(i, labels.size()) if(!classcounts.count(labels[i])) classcounts[labels[i]] = cnt++;
@@ -909,7 +910,7 @@ fvec MLDemos::Test(Dynamical *dynamical, vector< vector<fvec> > trajectories, iv
 void MLDemos::Compare()
 {
     if(!canvas) return;
-    if(!compareOptions.size()) return;
+    if(!compare->compareOptions.size()) return;
 
     QMutexLocker lock(&mutex);
     drawTimer->Stop();
@@ -923,20 +924,63 @@ void MLDemos::Compare()
     DEL(maximizer);
     DEL(projector);
     // we start parsing the algorithm list
-    int folds = optionsCompare->foldCountSpin->value();
+    int folds = compare->params->foldCountSpin->value();
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
-    int ratioIndex = optionsCompare->traintestRatioCombo->currentIndex();
+    int ratioIndex = compare->params->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
-    //int positive = optionsCompare->positiveSpin->value();
-    int positive = 1;
+    bvec trainList;
+    // we get the list of samples that are checked
+
+    vector<fvec> samples;
+    ivec labels;
+    int datasetOption = compare->params->datasetCombo->currentIndex();
+    switch(datasetOption)
+    {
+    default:
+    case 0:
+        break;
+    case 1:
+        samples = compare->datasetA;
+        labels = compare->labelsA;
+        samples.insert(samples.end(), compare->datasetB.begin(), compare->datasetB.end());
+        labels.insert(labels.end(), compare->labelsB.begin(), compare->labelsB.end());
+        trainList.clear();
+        break;
+    case 2:
+        samples = compare->datasetA;
+        labels = compare->labelsA;
+        trainList.clear();
+        break;
+    case 3:
+        samples = compare->datasetB;
+        labels = compare->labelsB;
+        trainList.clear();
+        break;
+    case 4:
+        samples = compare->datasetA;
+        labels = compare->labelsA;
+        samples.insert(samples.end(), compare->datasetB.begin(), compare->datasetB.end());
+        labels.insert(labels.end(), compare->labelsB.begin(), compare->labelsB.end());
+        trainList = bvec(samples.size(), false);
+        FOR (i, compare->datasetA.size()) trainList[i] = true;
+        break;
+    case 5:
+        samples = compare->datasetB;
+        labels = compare->labelsB;
+        samples.insert(samples.end(), compare->datasetA.begin(), compare->datasetA.end());
+        labels.insert(labels.end(), compare->labelsA.begin(), compare->labelsA.end());
+        trainList = bvec(samples.size(), false);
+        FOR (i, compare->datasetB.size()) trainList[i] = true;
+        break;
+    }
 
     compare->Clear();
 
-    QProgressDialog progress("Comparing Algorithms", "cancel", 0, folds*compareOptions.size());
+    QProgressDialog progress("Comparing Algorithms", "cancel", 0, folds*compare->compareOptions.size());
     progress.show();
-    FOR(i, compareOptions.size())
+    FOR(i, compare->compareOptions.size())
     {
-        QString string = compareOptions[i];
+        QString string = compare->compareOptions[i];
         QTextStream stream(&string);
         QString line = stream.readLine();
         QString paramString = stream.readAll();
@@ -1001,21 +1045,18 @@ void MLDemos::Compare()
             QString algoName = classifiers[tab]->GetAlgoString();
             fvec fmeasureTrain, fmeasureTest, errorTrain, errorTest, precisionTrain, precisionTest, recallTrain, recallTest;
 
-            bvec trainList;
-            if(optionsClassify->manualTrainButton->isChecked())
-            {
-                // we get the list of samples that are checked
-                trainList = GetManualSelection();
-            }
-
             map<int,int> classes;
             FOR(j, canvas->data->GetLabels().size()) classes[canvas->data->GetLabels()[j]]++;
+
+            if (!samples.size() && optionsClassify->manualTrainButton->isChecked()) {
+                trainList = GetManualSelection();
+            }
 
             FOR(f, folds)
             {
                 classifier = classifiers[tab]->GetClassifier();
                 if(!classifier) continue;
-                Train(classifier, trainRatio, trainList);
+                Train(classifier, trainRatio, trainList, -1, samples, labels);
                 bool bMulti = classifier->IsMultiClass() && DatasetManager::GetClassCount(canvas->data->GetLabels()) > 2;
                 if(classifier->rocdata.size()>0)
                 {
@@ -1025,7 +1066,6 @@ void MLDemos::Compare()
                         fmeasureTrain.push_back(res[0]);
                         precisionTrain.push_back(res[1]);
                         recallTrain.push_back(res[2]);
-                        //qDebug() << "training" << res[0] << res[1] << res[2];
                     }
                     else
                     {
@@ -1033,7 +1073,6 @@ void MLDemos::Compare()
                         std::vector<f32pair> rocdata = classifier->rocdata[0];
                         FOR(j, rocdata.size())
                         {
-                            //qDebug() << "rocdata: " << j << rocdata[j].first << rocdata[j].second;
                             if(rocdata[j].first != rocdata[j].second)
                             {
                                 if(classes.size() > 2) errors++;
@@ -1122,7 +1161,7 @@ void MLDemos::Compare()
             QStringList s = line.split(":");
             int tab = s[1].toInt();
             if(tab >= regressors.size() || !regressors[tab]) continue;
-            int outputDim = optionsCompare->outputDimCombo->currentIndex();
+            int outputDim = compare->params->outputDimCombo->currentIndex();
             QTextStream paramStream(&paramString);
             QString paramName;
             float paramValue;
@@ -1132,10 +1171,8 @@ void MLDemos::Compare()
                 paramStream >> paramValue;
                 regressors[tab]->LoadParams(paramName, paramValue);
             }
-            bvec trainList;
-            if(optionsRegress->manualTrainButton->isChecked())
-            {
-                // we get the list of samples that are checked
+
+            if (!samples.size() && optionsRegress->manualTrainButton->isChecked()) {
                 trainList = GetManualSelection();
             }
 

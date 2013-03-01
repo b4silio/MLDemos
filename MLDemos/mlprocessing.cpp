@@ -1241,6 +1241,8 @@ void MLDemos::Project()
         projectors[tab]->DrawGL(canvas, glw, projector);
         if(canvas->data->GetDimCount() == 3) Draw3DProjector(glw, projector);
     }
+    optionsProject->reprojectButton->setEnabled(true);
+    optionsProject->revertButton->setEnabled(true);
     canvas->repaint();
     UpdateInfo();
 }
@@ -1327,6 +1329,8 @@ void MLDemos::ProjectRevert()
     canvas->maps.model = QPixmap();
     canvas->maps.confidence = QPixmap();
     if(optionsProject->fitCheck->isChecked()) canvas->FitToData();
+    optionsProject->reprojectButton->setEnabled(false);
+    optionsProject->revertButton->setEnabled(false);
     CanvasTypeChanged();
     CanvasOptionsChanged();
     ResetPositiveClass();
@@ -1351,7 +1355,6 @@ void MLDemos::ExportAnimation()
 {
     if(!canvas->data->GetSamples().size()) return;
 }
-
 
 void MLDemos::UpdateLearnedModel()
 {

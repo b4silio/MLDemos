@@ -4,8 +4,10 @@
 #include <public.h>
 #include <mymaths.h>
 #include <drawUtils.h>
+#include <canvas.h>
 #include <QLabel>
 #include "ui_compare.h"
+#include "ui_optsCompare.h"
 
 class CompareAlgorithms : public QObject
 {
@@ -16,21 +18,40 @@ class CompareAlgorithms : public QObject
 	Ui::CompareDisplay *compareDisplay;
 	QLabel *display;
 	QPixmap pixmap;
-public:
-    QWidget *compareWidget;
+    Canvas *canvas;
 
 public:
-    CompareAlgorithms(QWidget *parent=0);
+    QWidget *compareWidget, *paramsWidget;
+    Ui::optionsCompare *params;
+    QList<QString> compareOptions;
+    std::vector<fvec> datasetA;
+    std::vector<fvec> datasetB;
+    ivec labelsA;
+    ivec labelsB;
+
+public:
+    CompareAlgorithms(Canvas *canvas);
 	~CompareAlgorithms();
 	void AddResults(fvec results, QString name, QString algorithm);
 	void Show();
 	void Clear();
     void SetActiveResult(int index);
-    QPixmap &Display(){return pixmap;}
     QString ToString();
+    void Add(QString parameterData, QString displayString);
+
+    bool eventFilter(QObject *obj, QEvent *event);
 
 public slots:
 	void Update();
+    void CompareScreenshot();
+    void CompareClear();
+    void CompareRemove();
+    void CompareSave();
+    void CompareLoad();
+    void CompareSetTrain();
+    void CompareSetTest();
+    void CompareResetTrain();
+    void CompareResetTest();
 };
 
 #endif // _COMPARE_H_

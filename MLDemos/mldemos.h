@@ -35,7 +35,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_optsReinforcement.h"
 #include "ui_optsDynamic.h"
 #include "ui_optsProject.h"
-#include "ui_optsCompare.h"
 #include "ui_statisticsDialog.h"
 #include "ui_drawingTools.h"
 #include "ui_drawingToolsContext1.h"
@@ -63,6 +62,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gridsearch.h"
 #include "glwidget.h"
 #include "visualization.h"
+#include "algorithmmanager.h"
 
 class MLDemos : public QMainWindow
 {
@@ -77,7 +77,6 @@ private:
     QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
     QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *projectWidget;
-    QWidget *compareWidget;
 
     QNamedWindow *rocWidget;
 
@@ -93,7 +92,6 @@ private:
 	Ui::optionsDynamicWidget *optionsDynamic;
     Ui::optionsProjectWidget *optionsProject;
     Ui::optionsReinforcementWidget *optionsReinforcement;
-	Ui::optionsCompare *optionsCompare;
 	Ui::DrawingToolbar *drawToolbar;
     Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
@@ -111,6 +109,7 @@ private:
     GridSearch *gridSearch;
     GLWidget *glw;
     Visualization *vis;
+    AlgorithmManager *algo;
     DataImporter *import;
     DataGenerator *generator;
     DatasetEditor *dataEdit;
@@ -121,10 +120,11 @@ private:
     QString lastTrainingInfo;
 
 	void closeEvent(QCloseEvent *event);
-    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1);
-    void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
+    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1,
+               std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
+    void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec(), std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
 	fvec Train(Dynamical *dynamical);
-    void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0);
+    void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0, std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
     void Train(Maximizer *maximizer);
     void Train(Reinforcement *reinforcement);
     void Train(Projector *projector, bvec trainList = bvec());
@@ -144,7 +144,6 @@ private:
     QList<ProjectorInterface*> projectors;
     QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
-	QList<QString> compareOptions;
 	CompareAlgorithms *compare;
     std::map< QString , std::vector<QWidget*> > algoWidgets;
     QList<QPluginLoader*> pluginLoaders;
@@ -172,7 +171,6 @@ private:
 
     std::vector<bool> GetManualSelection();
     ivec GetInputDimensions();
-    void UpdateInfo();
 	void SetCrossValidationInfo();
 	bool bIsRocNew;
 	bool bIsCrossNew;
@@ -217,8 +215,11 @@ public slots:
 	void QueryMaximizer(std::vector<fvec> samples);
     void QueryProjector(std::vector<fvec> samples);
     void DataEdited();
+    void UpdateInfo();
+    void CanvasTypeChanged();
+    void CanvasOptionsChanged();
+    void Trained();
 
-private slots:
 	void ShowAbout();
 	void ShowAlgorithmOptions();
 	void ShowOptionCompare();
@@ -259,7 +260,6 @@ private slots:
     void ProjectReproject();
     void Avoidance();
 	void Compare();
-	void CompareScreenshot();
     void AddData();
     void Clear();
     void ClearData();
@@ -322,10 +322,6 @@ private slots:
 	void GradientButton();
 	void BenchmarkButton();
 	void CompareAdd();
-	void CompareClear();
-	void CompareRemove();
-    void CanvasTypeChanged();
-    void CanvasOptionsChanged();
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);

@@ -714,7 +714,7 @@ void Canvas::DrawLegend(QPainter &painter)
         QFontMetrics fm = painter.fontMetrics();
         for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
         {
-			QString className = GetClassString(it->first);
+            QString className = GetClassString(it->first);
             QRect rect = fm.boundingRect(className);
             rectWidth = max(rectWidth, rect.width());
         }
@@ -729,7 +729,7 @@ void Canvas::DrawLegend(QPainter &painter)
             int label = it->first;
             QPointF point(x, y);
             drawSample(painter, point, 10, label);
-			QString className = GetClassString(label);
+            QString className = GetClassString(label);
             painter.drawText(x + 8, point.y()+3, className);
             //painter.drawText(QRect(x + 4, point.y()-10, 70, 20), Qt::AlignLeft + Qt::AlignCenter, className);
             y += 20;
@@ -768,7 +768,7 @@ void Canvas::DrawAxes(QPainter &painter)
     painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
     // we draw the grid lines
     int minGridWidth = 32;
-    if(data->IsCategorical(xIndex))
+    if(!data->bProjected && data->IsCategorical(xIndex))
     {
         int cnt = data->categorical[xIndex].size();
         FOR(i, cnt)
@@ -781,8 +781,13 @@ void Canvas::DrawAxes(QPainter &painter)
     else
     {
         int cnt = 0;
-        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult) cnt++;
-        if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
+        if ( bounding.width() < 0 ) {
+            for(float x = (int)(bounding.x()/mult)*mult; x > bounding.x() + bounding.width(); x -= mult) cnt++;
+        } else {
+            for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult) cnt++;
+        }
+        if(!cnt) mult = minGridWidth/(float)w;
+        else if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
         for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
         {
             float canvasX = toCanvasCoords(x,0).x();
@@ -792,7 +797,7 @@ void Canvas::DrawAxes(QPainter &painter)
     }
     painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
 
-    if(data->IsCategorical(yIndex))
+    if(!data->bProjected && data->IsCategorical(yIndex))
     {
         int cnt = data->categorical[yIndex].size();
         FOR(i, cnt)
@@ -805,7 +810,12 @@ void Canvas::DrawAxes(QPainter &painter)
     else
     {
         int cnt = 0;
-        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult) cnt++;
+        if ( bounding.width() < 0 ) {
+            for(float y = (int)(bounding.y()/mult)*mult; y > bounding.y() + bounding.height(); y -= mult) cnt++;
+        } else {
+            for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult) cnt++;
+        }
+        if(!cnt) mult = minGridWidth/(float)w;
         if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
         for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
         {
@@ -816,7 +826,7 @@ void Canvas::DrawAxes(QPainter &painter)
     }
     // we draw the tick values
     painter.setPen(QPen(Qt::black, 0.5));
-    if(data->IsCategorical(xIndex))
+    if(!data->bProjected && data->IsCategorical(xIndex))
     {
         int cnt = data->categorical[xIndex].size();
         FOR(i, cnt)
@@ -850,7 +860,7 @@ void Canvas::DrawAxes(QPainter &painter)
     }
     // we now have the measure of the ticks, we can draw this
     painter.setPen(QPen(Qt::black, 0.5));
-    if(data->IsCategorical(yIndex))
+    if(!data->bProjected && data->IsCategorical(yIndex))
     {
         int cnt = data->categorical[yIndex].size();
         FOR(i, cnt)
@@ -1207,20 +1217,20 @@ void Canvas::DrawTrajectories(QPainter &painter)
         case 0: // do nothing
             break;
         case 1: // uniform resampling
-        {
-            if(i < sequences.size()-1 || !bDrawing)
             {
-                trajectory = interpolate(trajectory, trajectoryResampleCount);
+                if(i < sequences.size()-1 || !bDrawing)
+                {
+                    trajectory = interpolate(trajectory, trajectoryResampleCount);
+                }
             }
-        }
             break;
         case 2: // spline resampling
-        {
-            if(i < sequences.size()-1 || !bDrawing)
             {
-                trajectory = interpolateSpline(trajectory, trajectoryResampleCount);
+                if(i < sequences.size()-1 || !bDrawing)
+                {
+                    trajectory = interpolateSpline(trajectory, trajectoryResampleCount);
+                }
             }
-        }
             break;
         }
         trajectories.push_back(trajectory);
@@ -1649,32 +1659,27 @@ ivec Canvas::SelectSamples(QPointF center, float radius , fvec *weights)
 bool Canvas::DeleteData( QPointF center, float radius )
 {
     bool anythingDeleted = false;
-    FOR(i, data->GetCount())
-    {
+    FOR (i, data->GetCount()) {
         QPointF dataPoint = toCanvasCoords(data->GetSample(i));
         QPointF point = this->mapToParent(QPoint(dataPoint.x(), dataPoint.y()));
         point -= center;
-        if(sqrt(point.x()*point.x() + point.y()*point.y()) < radius)
-        {
+        if (sqrt(point.x()*point.x() + point.y()*point.y()) < radius) {
             anythingDeleted = true;
             data->RemoveSample(i);
             i--;
         }
     }
-    FOR(i, data->GetObstacles().size())
-    {
+    FOR (i, data->GetObstacles().size()) {
         QPointF obstaclePoint= toCanvasCoords(data->GetObstacle(i).center);
         QPointF point = this->mapToParent(QPoint(obstaclePoint.x(), obstaclePoint.y()));
         point -= center;
-        if(sqrt(point.x()*point.x() + point.y()*point.y()) < radius)
-        {
+        if (sqrt(point.x()*point.x() + point.y()*point.y()) < radius) {
             anythingDeleted = true;
             data->RemoveObstacle(i);
             i--;
         }
     }
-    FOR(i, targets.size())
-    {
+    FOR (i, targets.size()) {
         QPointF targetPoint= toCanvasCoords(targets[i]);
         QPointF point = this->mapToParent(QPoint(targetPoint.x(), targetPoint.y()));
         point -= center;
@@ -1694,8 +1699,7 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
 {
     int w = width();
     int h = height();
-    if(maps.reward.isNull())
-    {
+    if (maps.reward.isNull()) {
         maps.reward = QPixmap(w,h);
         //QBitmap bitmap(w,h);
         //bitmap.clear();
@@ -1709,13 +1713,10 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
 
     QPointF center = toCanvasCoords(sample);
     QRadialGradient gradient( center, radius*.75);
-    if(shift > 0)
-    {
+    if (shift > 0) {
         gradient.setColorAt(0, QColor(255,0,0,shift*255));
         gradient.setColorAt(1, QColor(255,0,0,0));
-    }
-    else
-    {
+    } else {
         gradient.setColorAt(0, QColor(255,255,255,-shift*255));
         gradient.setColorAt(1, QColor(255,255,255,0));
     }
@@ -1730,8 +1731,7 @@ void Canvas::PaintGaussian(QPointF position, double variance)
 {
     int w = width();
     int h = height();
-    if(maps.reward.isNull())
-    {
+    if (maps.reward.isNull()) {
         maps.reward = QPixmap(w,h);
         //QBitmap bitmap(w,h);
         //bitmap.clear();
@@ -1749,11 +1749,9 @@ void Canvas::PaintGaussian(QPointF position, double variance)
     float value;
     float minVal = 1e30, maxVal = -1e30;
     qDebug() << "gaussian dropped at position " << position;
-    FOR(i, w)
-    {
+    FOR (i, w) {
         point.x = i/(float)w;
-        FOR(j, h)
-        {
+        FOR (j, h) {
             point.y = j/(float)h;
             value = (pos - point).lengthSquared();
             value = expf(-0.5*value*invSigma);
@@ -1803,10 +1801,9 @@ void Canvas::PaintGradient(QPointF position)
 QString Canvas::GetClassString(int classNumber)
 {
     QString className = QString("Class %1").arg(classNumber);
-    if(classNames.count(classNumber))
-    {
+    if (classNames.count(classNumber)) {
         QString name = classNames[classNumber];
-        if(name.length() < 3) name = "Class " + name;
+        if (name.length() < 3) name = "Class " + name;
         return name;
     }
     return className;
@@ -1818,45 +1815,45 @@ QRgb Canvas::GetColorMapValue(float value, int colorscheme=2)
     switch(colorscheme)
     {
     case 0:
-    {
-        r = value;
-        g = 0;
-        b = 0;
-    }
+        {
+            r = value;
+            g = 0;
+            b = 0;
+        }
         break;
     case 1: // autumn
-    {
-        r = value;
-        g = value*0.6;
-        b = value*0.2;
-    }
+        {
+            r = value;
+            g = value*0.6;
+            b = value*0.2;
+        }
         break;
     case 2: // jet
-    {
-        float Red = 0, Green = 0, Blue = 0;
+        {
+            float Red = 0, Green = 0, Blue = 0;
 
-        if (value < 0.5f) Red = value * 2;
-        else Red = (1.0f - value) * 2;
+            if (value < 0.5f) Red = value * 2;
+            else Red = (1.0f - value) * 2;
 
-        if (value >= 0.3f && value < 0.8f) Green = (value - 0.3f) * 2;
-        else if (value < 0.3f) Green = (0.3f - value) * 2;
-        else Green = (1.3f - value) * 2;
+            if (value >= 0.3f && value < 0.8f) Green = (value - 0.3f) * 2;
+            else if (value < 0.3f) Green = (0.3f - value) * 2;
+            else Green = (1.3f - value) * 2;
 
-        if (value >= 0.5f) Blue = (value - 0.5f) * 2;
-        else Blue = (0.5f - value) * 2;
+            if (value >= 0.5f) Blue = (value - 0.5f) * 2;
+            else Blue = (0.5f - value) * 2;
 
-        r = Red;
-        g = Green;
-        b = Blue;
-    }
-    break;
+            r = Red;
+            g = Green;
+            b = Blue;
+        }
+        break;
     case 3: // grayscale
-    {
-        r = value;
-        g = value;
-        b = value;
-    }
-    break;
+        {
+            r = value;
+            g = value;
+            b = value;
+        }
+        break;
     }
     return qRgb(r*255,g*255,b*255);
 }

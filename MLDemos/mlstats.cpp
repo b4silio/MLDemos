@@ -190,6 +190,12 @@ void MLDemos::SetCrossValidationInfo()
     //    showStats->crossvalidImage->setPixmap(boxplot);
 }
 
+void MLDemos::Trained()
+{
+    bIsRocNew = true;
+    bIsCrossNew = true;
+    SetROCInfo();
+}
 
 void MLDemos::UpdateInfo()
 {

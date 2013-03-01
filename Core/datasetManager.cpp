@@ -354,49 +354,77 @@ fvec DatasetManager::GetSampleDim(const int index, const ivec inputDims, const i
 
 std::vector< fvec > DatasetManager::GetSampleDims(const ivec inputDims, const int outputDim) const
 {
-    if(!inputDims.size()) return samples;
+    if ( !inputDims.size() ) return samples;
 
     vector<fvec> newSamples = samples;
     int newDim = inputDims.size();
-    if(outputDim == -1)
-    {
-        FOR(i, samples.size())
-        {
+    if ( outputDim == -1 ) {
+        FOR ( i, samples.size() ) {
             fvec newSample(newDim);
-            FOR(d, inputDims.size())
-            {
+            FOR ( d, inputDims.size() ) {
                 newSample[d] = samples[i][inputDims[d]];
             }
             newSamples[i] = newSample;
         }
-    }
-    else
-    {
+    } else {
         int outputIndex = -1;
-        FOR(d, inputDims.size())
-        {
-            if(outputDim == inputDims[d])
-            {
+        FOR ( d, inputDims.size() ) {
+            if ( outputDim == inputDims[d] ) {
                 newDim--;
                 break;
             }
         }
-        FOR(i, samples.size())
-        {
+        FOR ( i, samples.size() ) {
             fvec newSample(newDim);
-            if(outputIndex == -1)
-            {
-                FOR(d, newDim-1)
-                {
+            if ( outputIndex == -1 ) {
+                FOR ( d, newDim-1 ) {
                     newSample[d] = samples[i][inputDims[d]];
                 }
                 newSample[newDim-1] = samples[i][outputDim];
+            } else {
+                FOR ( d, newDim ) {
+                    if ( d == outputIndex ) newSample[newDim-1] = samples[i][inputDims[d]];
+                    else newSample[d<outputIndex?d:d-1] = samples[i][inputDims[d]];
+                }
             }
-            else
-            {
-                FOR(d, newDim)
-                {
-                    if(d == outputIndex) newSample[newDim-1] = samples[i][inputDims[d]];
+            newSamples[i] = newSample;
+        }
+    }
+    return newSamples;
+}
+
+std::vector< fvec > DatasetManager::GetSampleDims(const std::vector<fvec> samples, const ivec inputDims, const int outputDim) const
+{
+    if(!inputDims.size()) return samples;
+
+    vector<fvec> newSamples = samples;
+    int newDim = inputDims.size();
+    if ( outputDim == -1 ) {
+        FOR ( i, samples.size() ) {
+            fvec newSample(newDim);
+            FOR ( d, inputDims.size() ) {
+                newSample[d] = samples[i][inputDims[d]];
+            }
+            newSamples[i] = newSample;
+        }
+    } else {
+        int outputIndex = -1;
+        FOR ( d, inputDims.size() ) {
+            if ( outputDim == inputDims[d] ) {
+                newDim--;
+                break;
+            }
+        }
+        FOR ( i, samples.size() ) {
+            fvec newSample(newDim);
+            if ( outputIndex == -1 ) {
+                FOR ( d, newDim-1 ) {
+                    newSample[d] = samples[i][inputDims[d]];
+                }
+                newSample[newDim-1] = samples[i][outputDim];
+            } else {
+                FOR ( d, newDim ) {
+                    if ( d == outputIndex ) newSample[newDim-1] = samples[i][inputDims[d]];
                     else newSample[d<outputIndex?d:d-1] = samples[i][inputDims[d]];
                 }
             }

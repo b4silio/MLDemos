@@ -3,27 +3,62 @@
 
 using namespace std;
 
-CompareAlgorithms::CompareAlgorithms(QWidget *parent)
-	: display(0)
+CompareAlgorithms::CompareAlgorithms(Canvas *canvas)
+    : display(0), canvas(canvas)
 {
+    params = new Ui::optionsCompare();
+    params->setupUi(paramsWidget = new QWidget());
+
 	compareDisplay = new Ui::CompareDisplay();
-    compareDisplay->setupUi(compareWidget = new QWidget(parent));
-	if(!parent) compareWidget->setWindowTitle("Comparison Results");
-	else
-	{
-		parent->layout()->setContentsMargins(12,0,0,0);
-		parent->layout()->setSpacing(0);
-		parent->layout()->addWidget(compareWidget);
-		compareWidget->layout()->setContentsMargins(0,0,0,0);
-	}
-	display = compareDisplay->display;
+    compareDisplay->setupUi(compareWidget = new QWidget(params->resultWidget));
+    paramsWidget->setWindowTitle("Comparison Results");
+
+    if (!params->resultWidget->layout() ) {
+        params->resultWidget->setLayout(new QHBoxLayout());
+    }
+    params->resultWidget->layout()->setContentsMargins(12,0,0,0);
+    params->resultWidget->layout()->setSpacing(0);
+    params->resultWidget->layout()->addWidget(compareWidget);
+    compareWidget->layout()->setContentsMargins(0,0,0,0);
+
+    display = compareDisplay->display;
 	connect(compareDisplay->resultCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
 	connect(compareDisplay->displayTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(Update()));
+
+    params->datasetADisplay->setScaledContents(true);
+    params->datasetBDisplay->setScaledContents(true);
+    params->datasetADisplay->installEventFilter(this);
+    params->datasetBDisplay->installEventFilter(this);
+
+    connect(params->screenshotButton, SIGNAL(clicked()), this, SLOT(CompareScreenshot()));
+    connect(params->clearButton, SIGNAL(clicked()), this, SLOT(CompareClear()));
+    connect(params->removeButton, SIGNAL(clicked()), this, SLOT(CompareRemove()));
+    connect(params->saveButton, SIGNAL(clicked()), this, SLOT(CompareSave()));
+    connect(params->loadButton, SIGNAL(clicked()), this, SLOT(CompareLoad()));
+    connect(params->datasetAButton, SIGNAL(clicked()), this, SLOT(CompareSetTrain()));
+    connect(params->datasetBButton, SIGNAL(clicked()), this, SLOT(CompareSetTest()));
+
 }
 
 CompareAlgorithms::~CompareAlgorithms()
 {
 	DEL(compareDisplay);
+    DEL(compareWidget);
+    DEL(params);
+    DEL(paramsWidget);
+}
+
+bool CompareAlgorithms::eventFilter(QObject *obj, QEvent *event)
+{
+    if (params &&  obj == params->datasetADisplay && event->type() == QEvent::MouseButtonDblClick) {
+        CompareResetTrain();
+        return true;
+    }
+    if (params && obj == params->datasetBDisplay && event->type() == QEvent::MouseButtonDblClick) {
+        CompareResetTest();
+        return true;
+    }
+    return QObject::eventFilter(obj, event);;
 }
 
 void CompareAlgorithms::Clear()
@@ -136,9 +171,169 @@ QString CompareAlgorithms::ToString()
     return text;
 }
 
-
 void CompareAlgorithms::Show()
 {
 	Update();
-	compareWidget->show();
+    paramsWidget->show();
+}
+
+void CompareAlgorithms::Add(QString parameterData, QString displayString)
+{
+    params->algoList->addItem(displayString);
+    compareOptions.push_back(parameterData);
+}
+
+void CompareAlgorithms::CompareScreenshot()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setImage(pixmap.toImage());
+    clipboard->setText(ToString());
+}
+
+void CompareAlgorithms::CompareClear()
+{
+    params->algoList->clear();
+    compareOptions.clear();
+}
+
+void CompareAlgorithms::CompareRemove()
+{
+    int offset = 0;
+    FOR (i, params->algoList->count()) {
+        if (params->algoList->item(i)->isSelected()) {
+            compareOptions.removeAt(i-offset);
+            offset++;
+        }
+    }
+    QList<QListWidgetItem *> selected = params->algoList->selectedItems();
+    FOR (i, selected.size()) delete selected[i];
+    if (params->algoList->count()) params->algoList->item(0)->setSelected(true);
+}
+
+void CompareAlgorithms::CompareSave()
+{
+    QString filename = QFileDialog::getSaveFileName(0, "Save Compare List", QString(), tr("Compare List (*.mlcomp)"));
+    if (!filename.endsWith(".mlcomp")) filename += QString(".mlcomp");
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Cannot open file for saving";
+        return;
+    }
+    QTextStream out(&file);
+    FOR (i, compareOptions.size()) {
+        out << compareOptions[i] << "[STOP]\n";
+        out << params->algoList->item(i)->text() << "\n";
+    }
+    file.close();
+    qDebug() << "Compare list saved successfully";
+}
+
+void CompareAlgorithms::CompareLoad()
+{
+    QString filename = QFileDialog::getOpenFileName(0, "Load Compare List", QString(), tr("Compare List (*.mlcomp)"));
+    if (!filename.endsWith(".mlcomp")) filename += QString(".mlcomp");
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Cannot open file for loading";
+        return;
+    }
+    params->algoList->clear();
+    compareOptions.clear();
+    QTextStream in(&file);
+    QString parameterString = "";
+    while (!in.atEnd()) {
+        QString text = in.readLine();
+        if (text.endsWith("[STOP]")) {
+            compareOptions.push_back(parameterString);
+            parameterString = "";
+            QString textString = in.readLine();
+            params->algoList->addItem(textString);
+        } else {
+            parameterString += text + "\n";
+        }
+    }
+    file.close();
+    qDebug() << "Compare list loaded successfully";
+}
+
+void CompareAlgorithms::CompareSetTrain()
+{
+    datasetA = canvas->data->GetSamples();
+    labelsA = canvas->data->GetLabels();
+    int xIndex=canvas->xIndex, yIndex=canvas->yIndex;
+    int s=50;
+    QPixmap pixmap(s,s);
+    if (!datasetA.size()) {
+        pixmap.fill(Qt::transparent);
+        params->datasetADisplay->setPixmap(pixmap);
+        return;
+    }
+    pixmap.fill(Qt::white);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    float minx=FLT_MAX, miny=FLT_MAX, maxx=-FLT_MAX, maxy=-FLT_MAX;
+    FOR (i, datasetA.size()) {
+        minx = min(minx,datasetA[i][xIndex]);
+        maxx = max(maxx,datasetA[i][xIndex]);
+        miny = min(miny,datasetA[i][yIndex]);
+        maxy = max(maxy,datasetA[i][yIndex]);
+    }
+    FOR (i, datasetA.size()) {
+        float x = (datasetA[i][xIndex]-minx)/(maxx-minx)*(s-4);
+        float y = (datasetA[i][yIndex]-miny)/(maxy-miny)*(s-4);
+        painter.setBrush(SampleColor[labelsA[i]%SampleColorCnt]);
+        painter.drawEllipse(QPointF(x+2,y+2), 2, 2);
+    }
+    params->datasetADisplay->setPixmap(pixmap);
+}
+
+void CompareAlgorithms::CompareSetTest()
+{
+    datasetB = canvas->data->GetSamples();
+    labelsB = canvas->data->GetLabels();
+    int xIndex=canvas->xIndex, yIndex=canvas->yIndex;
+    int s=50;
+    QPixmap pixmap(s,s);
+    if (!datasetB.size()) {
+        pixmap.fill(Qt::transparent);
+        params->datasetBDisplay->setPixmap(pixmap);
+        return;
+    }
+    pixmap.fill(Qt::white);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    float minx=FLT_MAX, miny=FLT_MAX, maxx=-FLT_MAX, maxy=-FLT_MAX;
+    FOR (i, datasetB.size()) {
+        minx = min(minx,datasetB[i][xIndex]);
+        maxx = max(maxx,datasetB[i][xIndex]);
+        miny = min(miny,datasetB[i][yIndex]);
+        maxy = max(maxy,datasetB[i][yIndex]);
+    }
+    FOR (i, datasetB.size()) {
+        float x = (datasetB[i][xIndex]-minx)/(maxx-minx)*(s-4);
+        float y = (datasetB[i][yIndex]-miny)/(maxy-miny)*(s-4);
+        painter.setBrush(SampleColor[labelsB[i]%SampleColorCnt]);
+        painter.drawEllipse(QPointF(x+2,y+2), 2, 2);
+    }
+    params->datasetBDisplay->setPixmap(pixmap);
+}
+
+void CompareAlgorithms::CompareResetTrain()
+{
+    datasetA.clear();
+    labelsA.clear();
+    QPixmap pixmap(50,50);
+    pixmap.fill(Qt::transparent);
+    params->datasetADisplay->setPixmap(pixmap);
+    params->datasetADisplay->setText("click\nto\nreset");
+}
+
+void CompareAlgorithms::CompareResetTest()
+{
+    datasetB.clear();
+    labelsB.clear();
+    QPixmap pixmap(50,50);
+    pixmap.fill(Qt::transparent);
+    params->datasetBDisplay->setPixmap(pixmap);
+    params->datasetBDisplay->setText("click\nto\nreset");
 }
