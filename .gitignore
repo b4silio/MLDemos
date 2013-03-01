@@ -9,6 +9,7 @@ website
 */ValgrindOut.xml
 pluginsDebug/*
 plugins/*
+/mldemos
 
 # osx noise
 .DS_Store
@@ -27,7 +28,7 @@ Makefile*
 *.depend
 
 # xcode noise
-build/*
+build/
 *.mode1
 *.mode1v3
 *.mode2v3

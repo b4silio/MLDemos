@@ -27,7 +27,7 @@
      </property>
      <widget class="QWidget" name="algoTab">
       <attribute name="title">
-       <string>Help and Informations</string>
+       <string>Help and Information</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <property name="margin">

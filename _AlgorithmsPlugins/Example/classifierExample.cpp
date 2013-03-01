@@ -112,7 +112,7 @@ const char *ClassifierExample::GetInfoString()
     char *text = new char[1024];
     sprintf(text, "My Classifier Example\n");
     sprintf(text, "%s\n", text);
-    sprintf(text, "%sTraining informations:\n", text);
+    sprintf(text, "%sTraining information:\n", text);
 
     // here you can fill in whatever information you want
     for(map<int,fvec>::iterator it=centers.begin(); it != centers.end(); it++)
