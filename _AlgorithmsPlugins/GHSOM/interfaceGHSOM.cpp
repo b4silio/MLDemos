@@ -16,6 +16,11 @@ GHSOMProjector::GHSOMProjector()
     ChangeOptions();
 }
 
+GHSOMProjector::~GHSOMProjector()
+{
+    delete params;
+}
+
 // virtual functions to manage the algorithm creation
 Projector *GHSOMProjector::GetProjector()
 {

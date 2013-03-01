@@ -33,6 +33,7 @@ private:
 	Ui::ParametersMLPDynamic *params;
 public:
 	DynamicMLP();
+    ~DynamicMLP();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
     void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical){}

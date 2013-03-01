@@ -28,9 +28,18 @@ ClassSVM::ClassSVM()
 {
     params = new Ui::Parameters();
     params->setupUi(widget = new QWidget());
+    ardLabel = 0;
     connect(params->svmTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
     connect(params->kernelTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
+    connect(params->optimizeCheck, SIGNAL(clicked()), this, SLOT(ChangeOptions()));
+    connect(params->kernelButton, SIGNAL(clicked()), this, SLOT(DisplayARDKernel()));
     ChangeOptions();
+}
+
+ClassSVM::~ClassSVM()
+{
+    delete params;
+    DEL(ardLabel);
 }
 
 void ClassSVM::ChangeOptions()
@@ -93,6 +102,58 @@ void ClassSVM::ChangeOptions()
         params->labelWidth->setVisible(true);
         break;
     }
+    params->kernelButton->setVisible(params->optimizeCheck->isChecked());
+}
+
+void ClassSVM::DisplayARDKernel()
+{
+    if(!ardLabel)
+    {
+        ardLabel = new QLabel();
+        ardLabel->setScaledContents(true);
+    }
+    QPixmap pixmap(200,200);
+    //QBitmap bitmap(pixmap.width(), pixmap.height());
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    if(ardKernel.size())
+    {
+        QPointF center(pixmap.width()/2,pixmap.height()/2);
+
+        int dim = ardKernel.size();
+        float maxVal = -FLT_MAX;
+        FOR(d, dim) maxVal = max(maxVal, ardKernel[d]);
+        float maxRadius = pixmap.width()/2*0.75;
+        painter.setPen(QPen(Qt::black,0.5));
+        FOR(d, dim)
+        {
+            float angle = d*2*M_PI/dim;
+            float radius = pixmap.width()/2*0.8;
+            QPointF point(cosf(angle)*radius, sinf(angle)*radius);
+            painter.drawLine(center, center + point);
+        }
+        QPolygonF poly;
+        FOR(d, dim+1)
+        {
+            float value = ardKernel[d%dim];
+            float angle = d*2*M_PI/dim;
+            float radius = value/maxVal*maxRadius;
+            QPointF point(cosf(angle)*radius, sinf(angle)*radius);
+            poly << center + point;
+        }
+        painter.setBrush(Qt::red);
+        painter.setPen(Qt::NoPen);
+        painter.setOpacity(0.3);
+        painter.drawPolygon(poly);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(Qt::red,2));
+        painter.drawPolygon(poly);
+    }
+    ardLabel->setPixmap(pixmap);
+    ardLabel->show();
 }
 
 QString ClassSVM::GetAlgoString()
@@ -233,7 +294,7 @@ void ClassSVM::SetParams(Classifier *classifier, fvec parameters)
         svmC = parameters.size() > 0 ? parameters[0] : 1;
         maxSV = parameters.size() > 1 ? parameters[1] : 0;
         kernelType = parameters.size() > 2 ? parameters[2] : 0;
-        kernelGamma = parameters.size() > 3 ? parameters[3] : 0;
+        kernelGamma = parameters.size() > 3 ? parameters[3] : 0.1;
         kernelDegree = parameters.size() > 4 ? parameters[4] : 0;
     }
     else
@@ -241,7 +302,7 @@ void ClassSVM::SetParams(Classifier *classifier, fvec parameters)
         svmType = parameters.size() > 0 ? parameters[0] : 0;
         svmC = parameters.size() > 1 ? parameters[1] : 1;
         kernelType = parameters.size() > 2 ? parameters[2] : 0;
-        kernelGamma = parameters.size() > 3 ? parameters[3] : 0;
+        kernelGamma = parameters.size() > 3 ? parameters[3] : 0.1;
         kernelDegree = parameters.size() > 4 ? parameters[4] : 0;
         bOptimize = parameters.size() > 5 ? parameters[5] : 0;
     }
@@ -277,7 +338,7 @@ void ClassSVM::SetParams(Classifier *classifier, fvec parameters)
             break;
         }
         svm->param.C = svm->param.nu = svmC;
-        svm->param.gamma = 1 / kernelGamma;
+        svm->param.gamma = 1. / kernelGamma;
         svm->param.coef0 = 0;
         svm->param.degree = kernelDegree;
         svm->bOptimize = bOptimize;
@@ -368,11 +429,15 @@ Classifier *ClassSVM::GetClassifier()
         break;
     }
     SetParams(classifier);
+    ardKernel.clear();
+    ardNames.clear();
     return classifier;
 }
 
 void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
+    ardKernel.clear();
+    ardNames.clear();
     painter.setRenderHint(QPainter::Antialiasing);
 
     if(dynamic_cast<ClassifierPegasos*>(classifier))
@@ -380,9 +445,20 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
         // we want to draw the support vectors
         vector<fvec> sv = dynamic_cast<ClassifierPegasos*>(classifier)->GetSVs();
         int radius = 9;
+        int dim = canvas->data->GetDimCount();
         FOR(i, sv.size())
         {
-            QPointF point = canvas->toCanvasCoords(sv[i]);
+            fvec sample = sv[i];
+            if(canvas->sourceDims.size())
+            {
+                fvec newSample(dim, 0);
+                FOR(d, canvas->sourceDims.size())
+                {
+                    newSample[canvas->sourceDims[d]] = sample[d];
+                }
+                sample = newSample;
+            }
+            QPointF point = canvas->toCanvasCoords(sample);
             painter.setPen(QPen(Qt::black,6));
             painter.drawEllipse(point, radius, radius);
             painter.setPen(QPen(Qt::white,4));
@@ -392,20 +468,30 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
     else if(dynamic_cast<ClassifierSVM*>(classifier))
     {
         int dim = canvas->data->GetDimCount();
-        int xIndex = canvas->xIndex, yIndex = canvas->yIndex;
         // we want to draw the support vectors
         svm_model *svm = dynamic_cast<ClassifierSVM*>(classifier)->GetModel();
         if(svm)
         {
-            f32 sv[2];
+            if(svm->param.kernel_type == RBFWEIGH)
+            {
+                ardKernel.resize(svm->param.kernel_dim,1.f);
+                FOR(d, svm->param.kernel_dim) ardKernel[d] = svm->param.kernel_weight[d];
+                ardNames = canvas->dimNames;
+                if(ardLabel && ardLabel->isVisible()) DisplayARDKernel();
+            }
+            fvec sample(dim,0);
             FOR(i, svm->l)
             {
-                FOR(j, 2)
+                if(canvas->sourceDims.size())
                 {
-                    sv[j] = (f32)svm->SV[i][j].value;
+                    FOR(d, canvas->sourceDims.size()) sample[canvas->sourceDims[d]] = svm->SV[i][d].value;
+                }
+                else
+                {
+                    FOR(d, dim) sample[d] = (f32)svm->SV[i][d].value;
                 }
                 int radius = 9;
-                QPointF point = canvas->toCanvasCoords(sv[xIndex], sv[yIndex]);
+                QPointF point = canvas->toCanvasCoords(sample);
                 if(abs((*svm->sv_coef)[i]) == svm->param.C)
                 {
                     painter.setPen(QPen(Qt::black, 6));
@@ -425,78 +511,6 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
     }
 }
 
-void ClassSVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-    int posClass = 1;
-    bool bUseMinMax = false;
-
-    float resMin = FLT_MAX;
-    float resMax = -FLT_MAX;
-    if(bUseMinMax)
-    {
-        // TODO: get the min and max for all samples
-        std::vector<fvec> samples = canvas->data->GetSamples();
-        FOR(i, samples.size())
-        {
-            float val = classifier->Test(samples[i]);
-            if(val > resMax) resMax = val;
-            if(val < resMin) resMin = val;
-        }
-        if(resMin == resMax) resMin -= 3;
-    }
-
-    bool bNegatives = dynamic_cast<ClassifierPegasos*>(classifier);
-
-    // we draw the samples
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    map<int,int>& classes = classifier->classes;
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec sample = canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        fvec res = classifier->TestMulti(sample);
-        if(res.size() == 1)
-        {
-            float response = res[0];
-            if(response > 0)
-            {
-                if(bNegatives)
-                {
-                    if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-                    else Canvas::drawCross(painter, point, 6, 2);
-                }
-                else
-                {
-                    if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
-                    else Canvas::drawCross(painter, point, 6, 2);
-                }
-            }
-            else
-            {
-                if(bNegatives)
-                {
-                    if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-                    else Canvas::drawCross(painter, point, 6, 0);
-                }
-                else
-                {
-                    if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
-                    else Canvas::drawCross(painter, point, 6, 0);
-                }
-            }
-        }
-        else
-        {
-            int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-            int resp = classifier->inverseMap[max];
-            if(label == resp) Canvas::drawSample(painter, point, 9, label);
-            else Canvas::drawCross(painter, point, 6, resp);
-        }
-    }
-}
-
 void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
 {
     int xInd = canvas->xIndex;
@@ -506,6 +520,7 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     o.objectType = "Samples";
     o.style = "rings,pointsize:24";
     vector<fvec> svs;
+    int dim = canvas->data->GetDimCount();
     if(dynamic_cast<ClassifierPegasos*>(classifier))
     {
         // we want to draw the support vectors
@@ -513,7 +528,6 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     }
     else if(dynamic_cast<ClassifierSVM*>(classifier))
     {
-        int dim = canvas->data->GetDimCount();
         // we want to draw the support vectors
         svm_model *svm = dynamic_cast<ClassifierSVM*>(classifier)->GetModel();
         if(svm)
@@ -528,11 +542,11 @@ void ClassSVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     }
     FOR(i, svs.size())
     {
-        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd],svs[i][zInd]));
+        o.vertices.append(QVector3D(svs[i][xInd],svs[i][yInd], zInd>=0 && zInd<dim ? svs[i][zInd] : 0));
         o.colors.append(QVector4D(0,0,0,1));
     }
     glw->mutex->lock();
-    glw->objects.push_back(o);
+    glw->AddObject(o);
     glw->mutex->unlock();
 }
 

@@ -179,7 +179,7 @@ void ClassifierTrees::Train( std::vector< fvec > samples, ivec labels )
     }
 }
 
-int ClassifierTrees::GetTreeDepth(const CvDTreeNode *node)
+int ClassifierTrees::GetTreeDepth(const CvDTreeNode *node) const
 {
     if(!node) return -1;
     if(!node->left && !node->right) return node->depth;
@@ -188,7 +188,7 @@ int ClassifierTrees::GetTreeDepth(const CvDTreeNode *node)
     return max(right, left);
 }
 
-void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft)
+void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft) const
 {
     if(node == NULL)
     {
@@ -204,7 +204,7 @@ void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft)
     int radius = 5;
     const CvDTreeNode *nodeL = node->left;
     const CvDTreeNode *nodeR = node->right;
-    int classId = inverseMap[node->class_idx];
+    int classId = inverseMap.at(node->class_idx);
 
     treePainter->setPen(QPen(Qt::black,2));
     treePainter->setBrush(SampleColor[classId%SampleColorCnt]);
@@ -231,7 +231,7 @@ void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft)
     PrintNode(nodeR, x+shift, false);
 }
 
-void ClassifierTrees::PrintTree(CvForestTree *tree, int count=0)
+void ClassifierTrees::PrintTree(CvForestTree *tree, int count=0) const
 {
     int W = treePixmap.width() / treeCount;
     int rootX = W*(count + 0.5f);
@@ -240,7 +240,7 @@ void ClassifierTrees::PrintTree(CvForestTree *tree, int count=0)
     fflush(stdout);
 }
 
-fvec ClassifierTrees::GetImportance()
+fvec ClassifierTrees::GetImportance() const
 {
     Mat varImportance = tree->getVarImportance();
     fvec importance(varImportance.cols);
@@ -251,7 +251,7 @@ fvec ClassifierTrees::GetImportance()
     return importance;
 }
 
-fvec ClassifierTrees::TestMulti(const fvec &sample)
+fvec ClassifierTrees::TestMulti(const fvec &sample) const
 {
     float c = Test(sample);
     if(classMap.size() == 2)
@@ -265,13 +265,12 @@ fvec ClassifierTrees::TestMulti(const fvec &sample)
     return res;
 }
 
-float ClassifierTrees::Test( const fvec &sample)
+float ClassifierTrees::Test( const fvec &sample) const
 {
     if (tree == NULL){
         printf( "Classification error: no classifier learned. \n" ); fflush(stdout);
         return 0.0;
     }
-    dim = sample.size();
     float *sample_ = new float[dim];
     FOR(d, dim) sample_[d] = sample[d];
     Mat test_sample = Mat(1, dim, CV_32FC1, sample_);
@@ -293,34 +292,9 @@ void ClassifierTrees::SetParams(bool bBalanceClasses,
     this->accuracyTolerance = accuracyTolerance;
 }
 
-const char *ClassifierTrees::GetInfoString()
+const char *ClassifierTrees::GetInfoString() const
 {
 	char *text = new char[1024];
     sprintf(text, "Decision Trees\n");
-    /*
-	sprintf(text, "%sLearners Count: %d\n", text, weakCount);
-	sprintf(text, "%sLearners Type: ", text);
-	switch(weakType)
-	{
-    case 0:
-        sprintf(text, "%sDecision Stumps\n", text);
-        break;
-    case 1:
-        sprintf(text, "%sRandom Projections\n", text);
-        break;
-    case 2:
-		sprintf(text, "%sRandom Rectangles\n", text);
-		break;
-    case 3:
-        sprintf(text, "%sRandom Circles\n", text);
-        break;
-    case 4:
-        sprintf(text, "%sRandom GMM\n", text);
-        break;
-    case 5:
-        sprintf(text, "%sRandom SVM %d\n", text, svmCount);
-        break;
-    }
-    */
 	return text;
 }

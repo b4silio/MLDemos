@@ -77,6 +77,10 @@ struct svm_parameter
 	double p;				/* for EPSILON_SVR */
 	int shrinking;			/* use the shrinking heuristics */
 	int probability;		/* do probability estimates */
+
+    svm_parameter() : kernel_weight(0), weight_label(0), weight(0), kernel_dim(0), nr_weight(0){}
+    svm_parameter& operator= (const svm_parameter &param);
+
 };
 
 //

@@ -33,6 +33,11 @@ MaximizeInterfaceGA::MaximizeInterfaceGA()
 	params->setupUi(widget = new QWidget());
 }
 
+MaximizeInterfaceGA::~MaximizeInterfaceGA()
+{
+    delete params;
+}
+
 void MaximizeInterfaceGA::SetParams(Maximizer *maximizer)
 {
 	if(!maximizer) return;

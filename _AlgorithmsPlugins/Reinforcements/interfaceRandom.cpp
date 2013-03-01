@@ -33,6 +33,11 @@ ReinforcementInterfaceRandom::ReinforcementInterfaceRandom()
     ChangeOptions();
 }
 
+ReinforcementInterfaceRandom::~ReinforcementInterfaceRandom()
+{
+    delete params;
+}
+
 void ReinforcementInterfaceRandom::ChangeOptions()
 {
 }

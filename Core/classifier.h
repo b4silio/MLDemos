@@ -52,22 +52,22 @@ public:
 		rocdata.push_back(std::vector<f32pair>());
 		roclabels.push_back("training");
 		roclabels.push_back("testing");
-	};
+    };
 
     virtual ~Classifier(){}
-    std::vector <fvec> GetSamples(){return samples;}
+    std::vector <fvec> GetSamples() const {return samples;}
 
     virtual void Train(std::vector< fvec > samples, ivec labels){}
-    virtual fvec TestMulti(const fvec &sample){ return fvec(1,Test(sample));}
-    virtual float Test(const fvec &sample){ return 0; }
-    virtual float Test(const fVec &sample){ if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
-    virtual const char *GetInfoString(){return NULL;}
-    virtual void SaveModel(std::string filename){}
-    virtual bool LoadModel(std::string filename){return false;}
-    bool SingleClass(){return bSingleClass;}
-    bool UsesDrawTimer(){return bUsesDrawTimer;}
-    bool IsMultiClass(){return bMultiClass;}
-    int Dim(){return dim;}
+    virtual fvec TestMulti(const fvec &sample) const { return fvec(1,Test(sample));}
+    virtual float Test(const fvec &sample) const { return 0; }
+    virtual float Test(const fVec &sample) const { if(dim==2) return Test((fvec)sample); fvec s = (fvec)sample; s.resize(dim,0); return Test(s);}
+    virtual const char *GetInfoString() const {return NULL;}
+    virtual void SaveModel(const std::string filename) const {}
+    virtual bool LoadModel(const std::string filename){return false;}
+    bool SingleClass() const {return bSingleClass;}
+    bool UsesDrawTimer() const {return bUsesDrawTimer;}
+    bool IsMultiClass() const {return bMultiClass;}
+    int Dim() const {return dim;}
 };
 
 #endif // _CLASSIFIER_H_

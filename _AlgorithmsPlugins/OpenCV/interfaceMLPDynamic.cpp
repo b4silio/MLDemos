@@ -29,6 +29,11 @@ DynamicMLP::DynamicMLP()
 	params->setupUi(widget = new QWidget());
 }
 
+DynamicMLP::~DynamicMLP()
+{
+    delete params;
+}
+
 void DynamicMLP::SetParams(Dynamical *dynamical)
 {
 	if(!dynamical) return;

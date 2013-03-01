@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-	QString filename = "";
+    QString filename = "";
     if(argc > 1) filename = QString(argv[1]);
     MLDemos w(filename);
     w.show();

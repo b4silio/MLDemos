@@ -128,12 +128,13 @@ void invert_covar(struct gaussian* g)
   if(g->nfactor <= FLT_MIN)
     {
       // almost non invertible gaussian :: lets add some noise
-      g->nfactor = FLT_MIN;
+      g->nfactor = 1.f / FLT_MIN;
       smat_add_diagonal(g->covar, 1.);
       //printf("determinant :: %e\n", det);
       invert_covar(g);
       //exit(0);
     }
+  else g->nfactor = 1. / g->nfactor;
 }
 
 void gaussian_init(struct gaussian * g,int dim)

@@ -26,6 +26,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+fvec pdfMulti;
+fvec pdfSingle(1);
+
 ClassifierGMM::ClassifierGMM()
 	: nbClusters(2), covarianceType(2), initType(1)
 {
@@ -49,7 +52,23 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 
     int cnt=0;
     FOR(i, labels.size()) if(!classMap.count(labels[i])) classMap[labels[i]] = cnt++;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
+    bool bBinary = classMap.size() == 2;
+    if(bBinary)
+    {
+        int positive = INT_MIN;
+        int negative;
+        FOR(i, labels.size()) positive = max(positive, labels[i]);
+        FORIT(classMap, int, int)
+        {
+            if(it->first != positive)
+            {
+                negative = it->first;
+                break;
+            }
+        }
+        classMap[negative] = -1;
+    }
+    FORIT(classMap, int, int) inverseMap[it->second] = it->first;
     ivec newLabels(labels.size());
     FOR(i, labels.size()) newLabels[i] = classMap[labels[i]];
 
@@ -84,36 +103,31 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 		gmms[i]->init(data[i], s.size(), initType);
 		gmms[i]->em(data[i], s.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
 	}
+    pdfMulti.resize(gmms.size());
 }
 
-fvec ClassifierGMM::TestMulti(const fvec &sample)
+fvec ClassifierGMM::TestMulti(const fvec &sample) const
 {
-	fvec pdf(gmms.size());
-	FOR(i, gmms.size()) pdf[i] = gmms[i]->pdf((float*)&sample[0]);
+    FOR(i, gmms.size()) pdfMulti[i] = gmms[i]->pdf((float*)&sample[0]);
 	if(gmms.size()==2)
 	{
-		fvec res(1);
-//        res[0] = pdf[1] - pdf[0];
-        double p1 = log((double)pdf[1]);
-        double p0 = log((double)pdf[0]);
-//        if(fabs(p1) < 1e-6) p1 = 0;
-//        if(fabs(p0) < 1e-6) p0 = 0;
-        res[0] = (float)(p1 - p0);
-        return res;
+        float p1 = logf(pdfMulti[1]);
+        float p0 = logf(pdfMulti[0]);
+        pdfSingle[0] = (p1 - p0);
+        return pdfSingle;
 	}
 
-    float xmin=-100.f, xmax=100.f; // we clamp the value between these two
-	float sum = 0;
-	FOR(i, pdf.size())
+    float xmin=-1000.f, xmax=1000.f; // we clamp the value between these two
+    FOR(i, pdfMulti.size())
 	{
-        float value = log(pdf[i]);
+        float value = logf(pdfMulti[i]);
         value = (min(xmax,max(xmin, value)) - xmin) / (xmax);
-        pdf[i] = value;
+        pdfMulti[i] = value;
 	}
-	return pdf;
+    return pdfMulti;
 }
 
-float ClassifierGMM::Test( const fvec &sample)
+float ClassifierGMM::Test( const fvec &sample) const
 {
 	fvec pdf = TestMulti(sample);
 	if(pdf.size() < 2) return 0;
@@ -121,7 +135,7 @@ float ClassifierGMM::Test( const fvec &sample)
 	return res;
 }
 
-float ClassifierGMM::Test( const fVec &_sample)
+float ClassifierGMM::Test( const fVec &_sample) const
 {
 	if(!gmms.size()) return 0;
 	fVec sample = _sample;
@@ -142,7 +156,7 @@ void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
 	this->initType = initType;
 }
 
-const char *ClassifierGMM::GetInfoString()
+const char *ClassifierGMM::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "GMM\n");
@@ -181,7 +195,7 @@ void ClassifierGMM::Update()
 
 }
 
-void ClassifierGMM::SaveModel(std::string filename)
+void ClassifierGMM::SaveModel(const std::string filename) const
 {
     std::cout << "saving GMM model";
     if(!gmms.size())
@@ -202,12 +216,12 @@ void ClassifierGMM::SaveModel(std::string filename)
     int classCount = gmms.size();
     file << dim << " " << classCount << endl;
 
-    for(map<int,int>::iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
+    for(map<int,int>::const_iterator it=inverseMap.begin(); it != inverseMap.end(); it++)
     {
         file << it->first << " " << it->second << " ";
     }
     file << endl;
-    for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++)
+    for(map<int,int>::const_iterator it=classMap.begin(); it != classMap.end(); it++)
     {
         file << it->first << " " << it->second << " ";
     }
@@ -252,7 +266,7 @@ void ClassifierGMM::SaveModel(std::string filename)
     file.close();
 }
 
-bool ClassifierGMM::LoadModel(std::string filename)
+bool ClassifierGMM::LoadModel(const string filename)
 {
     std::cout << "loading GMM model: " << filename;
 

@@ -13,24 +13,28 @@ class QMatrix4x4;
 class QGLShaderProgram;
 class QGLShader;
 
-#ifdef WIN32
-class GLWidget : public QGLWidget, protected QGLFunctions
-#else
 class GLWidget : public QGLWidget
-#endif
 {
     Q_OBJECT
+
+#ifdef WIN32
+static QGLFunctions glf;
+#endif
 
 public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
+    void AddObject(GLObject &o);
+    void SetObject(int index, GLObject &o);
     void clearLists();
+    void killObjects();
     void generateObjects();
-    void DrawObject(GLObject &o);
-    void DrawSamples(GLObject &o);
-    void DrawParticles(GLObject &o);
-    void DrawLines(GLObject &o);
-    void DrawSurfaces(GLObject &o);
+    void FixSurfaces(GLObject &o);
+    void DrawObject(const GLObject &o) const ;
+    void DrawSamples(const GLObject &o) const ;
+    void DrawParticles(const GLObject &o) const;
+    void DrawLines(const GLObject &o) const;
+    void DrawSurfaces(const GLObject &o) const;
     void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
     static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
     {
@@ -76,8 +80,9 @@ protected:
     void timerEvent(QTimerEvent *);
 
 private:
-    void normalizeAngle(int *angle);
+    void normalizeAngle(int &angle);
     void RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program);
+    void RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects);
 
     QMatrix4x4 perspectiveMatrix;
     QMatrix4x4 modelViewMatrix;
@@ -101,6 +106,8 @@ public:
     std::vector<GLuint> drawLists;
     std::map<GLuint, fvec> drawSampleListCenters;
     std::vector<GLObject> objects;
+    std::vector<bool> objectAlive;
+    ivec killList;
     std::vector<GLLight> lights;
     bool bDisplaySamples, bDisplayLines, bDisplaySurfaces, bDisplayTransparency, bDisplayBlurry;
     bool bRotateCamera;
@@ -116,6 +123,7 @@ public:
 
     QGLFramebufferObject *render_fbo;
     QGLFramebufferObject *texture_fbo;
+    QGLFramebufferObject *light_fbo;
 };
 
 #endif

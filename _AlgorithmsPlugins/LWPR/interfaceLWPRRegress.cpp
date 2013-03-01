@@ -30,6 +30,11 @@ RegrLWPR::RegrLWPR()
 	params->setupUi(widget = new QWidget());
 }
 
+RegrLWPR::~RegrLWPR()
+{
+    delete params;
+}
+
 void RegrLWPR::SetParams(Regressor *regressor)
 {
 	if(!regressor) return;

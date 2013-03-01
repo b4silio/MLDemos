@@ -19,6 +19,19 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef _ROC_H_
 #define _ROC_H_
 
+struct floatPair
+{
+    union
+    {
+        float _[2];
+        struct{
+            float first;
+            float second;
+        };
+    };
+    floatPair(float a, float b) : first(a), second(b) {}
+};
+
 typedef std::pair<float, float> f32pair;
 typedef std::vector<f32pair> rocData;
 

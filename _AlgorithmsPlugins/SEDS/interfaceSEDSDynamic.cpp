@@ -32,6 +32,11 @@ DynamicSEDS::DynamicSEDS()
     connect(params->sedsConstraintCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
 }
 
+DynamicSEDS::~DynamicSEDS()
+{
+    delete params;
+}
+
 void DynamicSEDS::OptionsChanged()
 {
 	int constraintCriterion = params->sedsConstraintCombo->currentIndex();

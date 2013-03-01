@@ -33,6 +33,7 @@ private:
     Ui::ParametersRVMRegr *params;
 public:
     RegrRVM();
+    ~RegrRVM();
 	// virtual functions to manage the algorithm creation
 	Regressor *GetRegressor();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor);

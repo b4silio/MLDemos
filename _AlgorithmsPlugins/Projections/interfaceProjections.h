@@ -42,7 +42,6 @@ public:
 	// virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
-	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
     void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier){}
 
     bool UsesDrawTimer(){return classifier->UsesDrawTimer();}

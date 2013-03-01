@@ -45,10 +45,10 @@ public:
 	ClassifierBoost();
 	~ClassifierBoost();
 	void Train(std::vector< fvec > samples, ivec labels);
-    float Test(const fvec &sample);
-    float Test(const fvec &sample, fvec *responses);
-    fvec GetErrorWeights(){return errorWeights;}
-    const char *GetInfoString();
+    float Test(const fvec &sample) const ;
+    float Test(const fvec &sample, fvec *responses) const ;
+    fvec GetErrorWeights() const {return errorWeights;}
+    const char *GetInfoString() const ;
     void SetParams(u32 weakCount, int weakType, int boostType, int svmCount);
     void InitLearners(fvec xMin, fvec xMax);
 };

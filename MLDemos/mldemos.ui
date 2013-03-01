@@ -71,7 +71,7 @@
     </item>
     <item>
      <widget class="QWidget" name="canvasControlsWidget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1,2">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,2">
        <property name="topMargin">
         <number>0</number>
        </property>
@@ -82,7 +82,7 @@
         <widget class="QComboBox" name="canvasTypeCombo">
          <item>
           <property name="text">
-           <string>Standard</string>
+           <string>2D | Edit View</string>
           </property>
          </item>
          <item>
@@ -92,59 +92,14 @@
          </item>
          <item>
           <property name="text">
-           <string>Scatterplots</string>
+           <string>Visualizations</string>
           </property>
          </item>
-         <item>
-          <property name="text">
-           <string>Parallel Coords</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Radial Graph</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Andrews Plots</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Bubble Plots</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSlider" name="canvasZoomSlider">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksAbove</enum>
-         </property>
-         <property name="tickInterval">
-          <number>5</number>
-         </property>
         </widget>
        </item>
        <item>
         <widget class="QWidget" name="canvasAxesWidget" native="true">
-         <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1,0,1">
+         <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0,0">
           <property name="horizontalSpacing">
            <number>-1</number>
           </property>
@@ -154,45 +109,18 @@
           <property name="margin">
            <number>0</number>
           </property>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="canvasX1Spin">
+          <item row="1" column="5">
+           <widget class="QSpinBox" name="canvasX3Spin">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
              </font>
             </property>
             <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QSpinBox" name="canvasX2Spin">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="minimum">
-             <number>1</number>
+             <number>0</number>
             </property>
             <property name="value">
-             <number>2</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="canvasX1Label">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>x</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             <number>3</number>
             </property>
            </widget>
           </item>
@@ -226,18 +154,45 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="5">
-           <widget class="QSpinBox" name="canvasX3Spin">
+          <item row="1" column="3">
+           <widget class="QSpinBox" name="canvasX2Spin">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
              </font>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>1</number>
             </property>
             <property name="value">
-             <number>3</number>
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="canvasX1Spin">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="canvasX1Label">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>x</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -323,7 +278,7 @@
     <addaction name="actionGenerate_Data"/>
     <addaction name="actionClearModel"/>
     <addaction name="actionClearData"/>
-    <addaction name="actionShift_Dimensions"/>
+    <addaction name="actionEditDataset"/>
     <addaction name="separator"/>
     <addaction name="menuDisplay_Options"/>
    </widget>
@@ -528,9 +483,9 @@
     <string>Data (csv, txt)</string>
    </property>
   </action>
-  <action name="actionShift_Dimensions">
+  <action name="actionEditDataset">
    <property name="text">
-    <string>Shift Dimensions</string>
+    <string>Edit Dataset</string>
    </property>
    <property name="toolTip">
     <string>Shift dimensions by one dimension to the right</string>

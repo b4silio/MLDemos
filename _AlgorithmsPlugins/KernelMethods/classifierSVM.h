@@ -40,12 +40,15 @@ public:
 	~ClassifierSVM();
 	void Train(std::vector< fvec > samples, ivec labels);
     void Optimize(svm_problem *problem);
-    float Test(const fvec &sample);
-	float Test(const fVec &sample);
-	fvec TestMulti(const fvec &sample);
-    const char *GetInfoString();
+    void OptimizeGradient(svm_problem *problem);
+    float Test(const fvec &sample) const ;
+    float Test(const fVec &sample) const ;
+    fvec TestMulti(const fvec &sample) const ;
+    const char *GetInfoString() const ;
 	void SetParams(int svmType, float svmC, u32 kernelType, float kernelParam);
     svm_model *GetModel(){return svm;}
+    void SaveModel(std::string filename) const ;
+    bool LoadModel(std::string filename);
 };
 
 #endif // _CLASSIFIER_SVM_H_

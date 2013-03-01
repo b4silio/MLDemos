@@ -61,7 +61,30 @@ void CSVRow::readNextRow(std::istream& str)
     std::string line;
     std::getline(str,line);
 
-    // we try using commas, semi-colons and tabs
+    // we need to parse blocks with "", which might contain our separator
+    size_t found = line.find_first_of("\"");
+    if ( found != std::string::npos )
+    {
+        bool bInside = true;
+        size_t start = found;
+        size_t stop = 0;
+        found = line.find_first_of("\"", found+1);
+        while( found != std::string::npos ) {
+            if ( bInside ) {
+                stop = found;
+                size_t sep = line.find_first_of(separator[0], start);
+                while(sep < stop && sep != std::string::npos)
+                {
+                    line[sep] = '_'; // we replace the offending character
+                    sep = line.find_first_of(separator[0], sep+1);
+                }
+            } else {
+                start = found;
+            }
+            bInside = !bInside;
+            found = line.find_first_of("\"", found+1);
+        }
+    }
 
     // convert to stream
     std::stringstream lineStream(line);
@@ -73,8 +96,8 @@ void CSVRow::readNextRow(std::istream& str)
     {
         std::string test = cell;
         std::remove(test.begin(), test.end(), ' ');
-        if(test.empty()) continue;
-        m_data.push_back(cell);
+        if(test.empty()) m_data.push_back("?");
+        else m_data.push_back(cell);
     }
 }
 
@@ -329,6 +352,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
     int dim = data[0].size();
     if(outputLabelColumn != -1) outputLabelColumn = min(dim-1, outputLabelColumn);
     classNames.clear();
+    categorical.clear();
     vector< map<string,int> > labelMaps(dim);
     ivec labelCounters(dim,0);
     pair<map<string,int>::iterator,bool> ret;
@@ -364,13 +388,58 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
             }
         }
     }
+    FOR(j, dim)
+    {
+        if(j == outputLabelColumn) continue;
+        bool bNumerical = true;
+        FORIT(labelMaps[j], string, int)
+        {
+            bool ok;
+            QString(it->first.c_str()).toFloat(&ok);
+            if(!ok && it->first != "?")
+            {
+                bNumerical = false;
+                break;
+            }
+        }
+        if(bNumerical) continue;
+        int itemCount = 0;
+        FORIT(labelMaps[j], string, int)
+        {
+            itemCount = max(itemCount, it->second);
+        }
+        itemCount++;
+        vector<string> cat(itemCount);
+        FORIT(labelMaps[j], string, int)
+        {
+            int index = it->second;
+            cat[index] = it->first;
+        }
+        categorical[ j>outputLabelColumn ? j-1 : j ] = cat;
+    }
 
     if(labelMaps[outputLabelColumn].size() && outputLabelColumn != -1)
     {
-        for(map<string,int>::iterator it=labelMaps[outputLabelColumn].begin(); it!=labelMaps[outputLabelColumn].end(); it++)
+        bool bNumerical = true;
+        FORIT(labelMaps[outputLabelColumn], string, int)
         {
-            classNames[it->second] = QString(it->first.c_str());
+            bool ok;
+            QString(it->first.c_str()).toFloat(&ok);
+            if(!ok && it->first != "?")
+            {
+                bNumerical = false;
+                break;
+            }
         }
+        if(!bNumerical)
+        {
+            FORIT(labelMaps[outputLabelColumn], string, int)
+            {
+                classNames[it->second] = QString(it->first.c_str());
+                //else classNames[it->second] = QString("Class %1").arg(QString(it->first.c_str()).toFloat());
+            }
+        }
+        else classNames.clear();
     }
     if(outputLabelColumn == -1)
     {

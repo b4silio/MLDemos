@@ -168,7 +168,7 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
         DrawRewards();
         if(!maps.reward.isNull())
         {
-            painter.setBackgroundMode(Qt::TransparentMode);
+            painter.setBackgroundMode(Qt::OpaqueMode);
             painter.drawPixmap(geometry(), maps.reward);
         }
         if(bSvg)
@@ -220,9 +220,9 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
             int w = width();
             int h = height();
             maps.model = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.model.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.model.setMask(bitmap);
             maps.model.fill(Qt::transparent);
             QPainter painter(&maps.model);
             DrawSampleColors(painter);
@@ -284,9 +284,9 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             int w = width();
             int h = height();
             maps.samples = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.samples.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.samples.setMask(bitmap);
             maps.samples.fill(Qt::transparent);
             Expose::DrawData(maps.samples, data->GetSamples(), data->GetLabels(), data->GetFlags(), type, data->bProjected, dimNames, bounds);
         }
@@ -300,9 +300,9 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             int w = width();
             int h = height();
             maps.trajectories = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.trajectories.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.trajectories.setMask(bitmap);
             maps.trajectories.fill(Qt::transparent);
             Expose::DrawTrajectories(maps.trajectories, data->GetTrajectories(trajectoryResampleType, trajectoryResampleCount, trajectoryCenterType, 0.1, true), data->GetLabels(), type, 0, bounds);
         }
@@ -316,9 +316,9 @@ void Canvas::PaintMultivariate(QPainter &painter, int type)
             int w = width();
             int h = height();
             maps.model = QPixmap(w,h);
-            QBitmap bitmap(w,h);
-            bitmap.clear();
-            maps.model.setMask(bitmap);
+            //QBitmap bitmap(w,h);
+            //bitmap.clear();
+            //maps.model.setMask(bitmap);
             maps.model.fill(Qt::transparent);
             Expose::DrawData(maps.model, data->GetSamples(), sampleColors, data->GetFlags(), type, data->bProjected, true, dimNames);
         }
@@ -351,9 +351,9 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.samples.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         Expose::DrawVariableData(maps.samples, data->GetSamples(), data->GetLabels(), type, params, data->bProjected);
     }
@@ -365,9 +365,9 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
         int w = width();
         int h = height();
         maps.trajectories = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.trajectories.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.trajectories.setMask(bitmap);
         maps.trajectories.fill(Qt::transparent);
     }
     painter.setBackgroundMode(Qt::TransparentMode);
@@ -378,9 +378,9 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
         int w = width();
         int h = height();
         maps.model = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.model.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.model.setMask(bitmap);
         maps.model.fill(Qt::transparent);
         Expose::DrawVariableData(maps.model, data->GetSamples(), sampleColors, type, params, data->bProjected);
     }
@@ -393,7 +393,8 @@ void Canvas::paintEvent(QPaintEvent *event)
     if(bDrawing) return;
     bDrawing = true;
     QPainter painter(this);
-    if(!canvasType) PaintStandard(painter);
+    if(!canvasType) PaintStandard(painter); // we only draw if we're actually on the canvas
+    /*
     else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3d, so we take out 2
     else
     {
@@ -403,6 +404,7 @@ void Canvas::paintEvent(QPaintEvent *event)
         params.push_back(zIndex);
         PaintVariable(painter, canvasType-6, params);
     }
+    */
     bDrawing = false;
 }
 
@@ -764,33 +766,115 @@ void Canvas::DrawAxes(QPainter &painter)
     painter.setBrush(Qt::NoBrush);
     painter.setFont(QFont("Lucida Grande", 9));
     painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
-    for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+    // we draw the grid lines
+    int minGridWidth = 32;
+    if(data->IsCategorical(xIndex))
     {
-        float canvasX = toCanvasCoords(x,0).x();
-        if(canvasX < 0 || canvasX > w) continue;
-        painter.drawLine(canvasX, 0, canvasX, h);
+        int cnt = data->categorical[xIndex].size();
+        FOR(i, cnt)
+        {
+            float canvasX = toCanvasCoords(i,0).x();
+            if(canvasX < 0 || canvasX > w) continue;
+            painter.drawLine(canvasX, 0, canvasX, h);
+        }
+    }
+    else
+    {
+        int cnt = 0;
+        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult) cnt++;
+        if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
+        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+        {
+            float canvasX = toCanvasCoords(x,0).x();
+            if(canvasX < 0 || canvasX > w) continue;
+            painter.drawLine(canvasX, 0, canvasX, h);
+        }
     }
     painter.setPen(QPen(Qt::black, 0.5, Qt::DotLine));
-    for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+
+    if(data->IsCategorical(yIndex))
     {
-        float canvasY = toCanvasCoords(0,y).y();
-        if(canvasY < 0 || canvasY > w) continue;
-        painter.drawLine(0, canvasY, w, canvasY);
+        int cnt = data->categorical[yIndex].size();
+        FOR(i, cnt)
+        {
+            float canvasY = toCanvasCoords(0,i).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            painter.drawLine(0, canvasY, w, canvasY);
+        }
     }
-    painter.setPen(QPen(Qt::black, 0.5));
-    for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+    else
     {
-        float canvasX = toCanvasCoords(x,0).x();
-        if(canvasX < 0 || canvasX > w) continue;
-        painter.drawText(canvasX, h-5, QString("%1").arg((int)(x/mult)*mult));
+        int cnt = 0;
+        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult) cnt++;
+        if(w/cnt < minGridWidth) mult *= (float)minGridWidth*cnt/w;
+        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+        {
+            float canvasY = toCanvasCoords(0,y).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            painter.drawLine(0, canvasY, w, canvasY);
+        }
+    }
+    // we draw the tick values
+    painter.setPen(QPen(Qt::black, 0.5));
+    if(data->IsCategorical(xIndex))
+    {
+        int cnt = data->categorical[xIndex].size();
+        FOR(i, cnt)
+        {
+            string name = data->GetCategorical(xIndex, i);
+            float canvasX = toCanvasCoords(i,0).x();
+            if(canvasX < 0 || canvasX > w) continue;
+            painter.drawText(canvasX, h-5, QString(name.c_str()));
+        }
+    }
+    else
+    {
+        float gridW = 0;
+        for(float x = (int)(bounding.x()/mult)*mult; x < bounding.x() + bounding.width(); x += mult)
+        {
+            float canvasX = toCanvasCoords(x,0).x();
+            if(gridW == 0)
+            {
+                float x2 = toCanvasCoords(x + mult, 0).x();
+                gridW = x2 - canvasX;
+            }
+            if(canvasX < 0 || canvasX > w) continue;
+            float val = (int)(x/mult)*mult;
+            QString s;
+            if(mult >= 1) s = QString("%1").arg(val, 0, 'f', 0);
+            else if(mult >= 0.1) s = QString("%1").arg(val, 0, 'f', 1);
+            else if(mult >= 0.01) s = QString("%1").arg(val, 0, 'f', 2);
+            else s = QString("%1").arg(val);
+            painter.drawText(canvasX, h-15, max((float)minGridWidth,gridW), 10, Qt::AlignLeft | Qt::AlignBottom, s);
+        }
     }
     // we now have the measure of the ticks, we can draw this
     painter.setPen(QPen(Qt::black, 0.5));
-    for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+    if(data->IsCategorical(yIndex))
     {
-        float canvasY = toCanvasCoords(0,y).y();
-        if(canvasY < 0 || canvasY > w) continue;
-        painter.drawText(2, canvasY, QString("%1").arg((int)(y/mult)*mult));
+        int cnt = data->categorical[yIndex].size();
+        FOR(i, cnt)
+        {
+            string name = data->GetCategorical(yIndex, i);
+            float canvasY = toCanvasCoords(0,i).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            painter.drawText(2, canvasY, QString(name.c_str()));
+        }
+    }
+    else
+    {
+        for(float y = (int)(bounding.y()/mult)*mult; y < bounding.y() + bounding.height(); y += mult)
+        {
+            float canvasY = toCanvasCoords(0,y).y();
+            if(canvasY < 0 || canvasY > w) continue;
+            float val = (int)(y/mult)*mult;
+            QString s;
+            if(mult >= 1) s = QString("%1").arg(val, 0, 'f', 0);
+            else if(mult >= 0.1) s = QString("%1").arg(val, 0, 'f', 1);
+            else if(mult >= 0.01) s = QString("%1").arg(val, 0, 'f', 2);
+            else s = QString("%1").arg(val);
+            painter.drawText(2, canvasY, s);
+        }
     }
 
     // we get the dimension names
@@ -818,9 +902,9 @@ void Canvas::RedrawAxes()
     int w = width();
     int h = height();
     maps.grid = QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    maps.grid.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //maps.grid.setMask(bitmap);
     maps.grid.fill(Qt::transparent);
 
     QPainter painter(&maps.grid);
@@ -865,9 +949,9 @@ void Canvas::DrawSamples()
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.samples.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
         return;
@@ -880,9 +964,9 @@ void Canvas::DrawSamples()
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.samples.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
         //maps.model = QPixmap(w,h);
@@ -993,9 +1077,9 @@ void Canvas::DrawObstacles()
     int w = width();
     int h = height();
     maps.obstacles = QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    maps.obstacles.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //maps.obstacles.setMask(bitmap);
     maps.obstacles.fill(Qt::transparent);
 
     QPainter painter(&maps.obstacles);
@@ -1008,9 +1092,9 @@ void Canvas::DrawRewards()
     int w = width();
     int h = height();
     maps.reward= QPixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    maps.reward.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //maps.reward.setMask(bitmap);
     maps.reward.fill(Qt::transparent);
 
     if(!data->GetReward()->rewards) return;
@@ -1176,9 +1260,9 @@ void Canvas::DrawTrajectories()
     if(!count || (!data->GetSequences().size() && (data->GetFlag(count-1) != _TRAJ)))
     {
         maps.trajectories = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.trajectories.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.trajectories.setMask(bitmap);
         maps.trajectories.fill(Qt::transparent);
         drawnTrajectories = 0;
     }
@@ -1204,9 +1288,9 @@ void Canvas::DrawTrajectories()
     if(!drawnTrajectories || maps.trajectories.isNull())
     {
         maps.trajectories = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.trajectories.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.trajectories.setMask(bitmap);
         maps.trajectories.fill(Qt::transparent);
         drawnTrajectories = 0;
     }
@@ -1223,10 +1307,10 @@ void Canvas::DrawTrajectories()
     vector< vector<fvec> > trajectories = data->GetTrajectories(trajectoryResampleType, trajectoryResampleCount, trajectoryCenterType, 0.1, true);
     if(bDrawing)
     {
-        vector<fvec> trajectory;
+        vector<fvec> trajectory(sequences.back().second-sequences.back().first);
         for(int i=sequences.back().first; i<sequences.back().second; i++)
         {
-            trajectory.push_back(data->GetSample(i));
+            trajectory[i-sequences.back().first] = data->GetSample(i);
         }
         if(trajectory.size()) trajectories.push_back(trajectory);
     }
@@ -1302,9 +1386,9 @@ void Canvas::DrawTimeseries()
     if(!drawnTimeseries || maps.timeseries.isNull())
     {
         maps.timeseries = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.timeseries.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.timeseries.setMask(bitmap);
         maps.timeseries.fill(Qt::transparent);
         drawnTimeseries = 0;
     }
@@ -1613,9 +1697,9 @@ void Canvas::PaintReward(fvec sample, float radius, float shift)
     if(maps.reward.isNull())
     {
         maps.reward = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.reward.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.reward.setMask(bitmap);
         maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }
@@ -1649,9 +1733,9 @@ void Canvas::PaintGaussian(QPointF position, double variance)
     if(maps.reward.isNull())
     {
         maps.reward = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.reward.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.reward.setMask(bitmap);
         maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }
@@ -1696,9 +1780,9 @@ void Canvas::PaintGradient(QPointF position)
     if(maps.reward.isNull())
     {
         maps.reward = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        maps.reward.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //maps.reward.setMask(bitmap);
         maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }

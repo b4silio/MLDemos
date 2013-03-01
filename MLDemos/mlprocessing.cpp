@@ -49,7 +49,10 @@ void MLDemos::Classify()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -63,7 +66,6 @@ void MLDemos::Classify()
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
     int ratioIndex = optionsClassify->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
-    int positive = optionsClassify->positiveSpin->value();
     vector<bool> trainList;
     if(optionsClassify->manualTrainButton->isChecked())
     {
@@ -71,31 +73,32 @@ void MLDemos::Classify()
         trainList = GetManualSelection();
     }
 
-    bool trained = Train(classifier, positive, trainRatio, trainList);
+    int positiveIndex = optionsClassify->binaryCheck->isChecked() ? optionsClassify->positiveSpin->value() : -1;
+    bool trained = Train(classifier, trainRatio, trainList, positiveIndex);
     if(trained)
     {
         classifiers[tab]->Draw(canvas, classifier);
+        DrawClassifiedSamples(canvas, classifier, classifierMulti);
         glw->clearLists();
         if(canvas->canvasType == 1)
         {
             classifiers[tab]->DrawGL(canvas, glw, classifier);
-            if(canvas->data->GetDimCount() == 3) Draw3DClassifier(glw, classifier);
+            if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
         }
 
         UpdateInfo();
-        qDebug() << "using draw timer" << classifier->UsesDrawTimer();
         if(drawTimer && classifier->UsesDrawTimer())
         {
-            drawTimer->classifier = &this->classifier;
             drawTimer->start(QThread::NormalPriority);
         }
         if(canvas->canvasType) CanvasOptionsChanged();
         // we fill in the canvas sampleColors
-        vector<fvec> samples = canvas->data->GetSamples();
+        ivec inputDims = GetInputDimensions();
+        vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
         canvas->sampleColors.resize(samples.size());
         FOR(i, samples.size())
         {
-            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i]);
+            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i], &classifierMulti);
         }
         if(canvas->canvasType)
         {
@@ -156,7 +159,10 @@ void MLDemos::Regression()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -267,7 +273,10 @@ void MLDemos::Dynamize()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -319,9 +328,9 @@ void MLDemos::Dynamize()
             testTrajectories[i] = result;
         }
         canvas->maps.model = QPixmap(w,h);
-        QBitmap bitmap(w,h);
-        bitmap.clear();
-        canvas->maps.model.setMask(bitmap);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //canvas->maps.model.setMask(bitmap);
         canvas->maps.model.fill(Qt::transparent);
 
         if(canvas->canvasType == 0) // standard canvas
@@ -389,57 +398,10 @@ void MLDemos::Avoidance()
     drawTimer->start(QThread::NormalPriority);
 }
 
-fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores, float ratio = 1.f)
+float ClusterFMeasure(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores, float ratio = 1.f)
 {
-    fvec results(4, 0);
-    results[0] = drand48();
-    if(!samples.size() || !scores.size()) return results;
-    int dim = samples[0].size();
+    if(!samples.size() || !scores.size()) return 0;
     int nbClusters = scores[0].size();
-    int count = samples.size();
-    // compute bic
-    double loglik = 0;
-
-    vector<fvec> means(nbClusters);
-    FOR(k, nbClusters)
-    {
-        means[k] = fvec(dim, 0);
-        float contrib = 0;
-        FOR(i, count)
-        {
-            contrib += scores[i][k];
-            means[k] += samples[i]*scores[i][k];
-        }
-        means[k] /= contrib;
-    }
-
-    float log_lik=0;
-    float like;
-    float *pxi = new float[nbClusters];
-    int data_i=0;
-    int state_i;
-
-    fvec loglikes(nbClusters);
-    FOR(k, nbClusters)
-    {
-        float rss = 0;
-        double contrib = 0;
-        FOR(i, count)
-        {
-            contrib += scores[i][k];
-            if(contrib==0) continue;
-            fvec diff = samples[i]-means[k];
-            rss += diff*diff*scores[i][k];
-        }
-        loglikes[k] = rss;
-    }
-    FOR(k, nbClusters) loglik += loglikes[k];
-    //loglik /= nbClusters;
-
-    results[0] = loglik; // RSS
-    results[1] = log(count)*nbClusters + loglik; // BIC
-    results[2] = 2*nbClusters + loglik; // AIC
-
 
     // we compute the f-measures for each class
     map<int,int> classcounts;
@@ -504,9 +466,7 @@ fvec ClusterMetrics(std::vector<fvec> samples, ivec labels, std::vector<fvec> sc
     FOR(k, nbClusters) if(clusterScores[k] == 0) classAndClusterCount++; // we have an empty cluster!
     fmeasure /= classAndClusterCount;
 
-    results[3] = -fmeasure; // F-Measure
-
-    return results;
+    return -fmeasure;
 }
 
 
@@ -518,7 +478,10 @@ void MLDemos::Cluster()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -551,13 +514,19 @@ void MLDemos::Cluster()
         if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
     }
 
-
     // we compute the stats on the clusters (f-measure, bic etc)
 
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
+    float logLikelihood = clusterer->GetLogLikelihood(samples);
+    float BIC = -2*logLikelihood + logf(samples.size())*clusterer->GetParameterCount(); // BIC
+    float AIC = -2*logLikelihood + 2*clusterer->GetParameterCount(); // AIC
+
+    int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
+    float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
+    float f1ratio = f1ratios[f1ratioIndex];
     vector<fvec> clusterScores(samples.size());
-    FOR(i, canvas->data->GetCount())
+    FOR(i, samples.size())
     {
         fvec result = clusterer->Test(samples[i]);
         if(clusterer->NbClusters()==1) clusterScores[i] = result;
@@ -568,22 +537,18 @@ void MLDemos::Cluster()
             res[result[0]] = 1.f;
         }
     }
-
-    int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
-    float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
-    float f1ratio = f1ratios[f1ratioIndex];
-
-    fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores, f1ratio);
+    float F1 = ClusterFMeasure(samples, labels, clusterScores, f1ratio);
 
     optionsCluster->resultList->clear();
-    optionsCluster->resultList->addItem(QString("rss: %1").arg(clusterMetrics[0], 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("bic: %1").arg(clusterMetrics[1], 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("aic: %1").arg(clusterMetrics[2], 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("f1: %1").arg(clusterMetrics[3], 0, 'f', 2));
-    FOR(i, clusterMetrics.size())
-    {
-        optionsCluster->resultList->item(i)->setForeground(i ? SampleColor[i%SampleColorCnt] : Qt::gray);
-    }
+    optionsCluster->resultList->addItem(QString("lik: %1").arg(logLikelihood, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("bic: %1").arg(BIC, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("aic: %1").arg(AIC, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("f1: %1").arg(F1, 0, 'f', 2));
+
+    optionsCluster->resultList->item(0)->setForeground(Qt::gray);
+    optionsCluster->resultList->item(1)->setForeground(SampleColor[1]);
+    optionsCluster->resultList->item(2)->setForeground(SampleColor[2]);
+    optionsCluster->resultList->item(3)->setForeground(SampleColor[3]);
 
     // we fill in the canvas sampleColors for the alternative display types
     canvas->sampleColors.resize(samples.size());
@@ -630,7 +595,10 @@ void MLDemos::ClusterTest()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -734,7 +702,10 @@ void MLDemos::ClusterOptimize()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -780,35 +751,26 @@ void MLDemos::ClusterOptimize()
             Train(clusterer, trainRatio, trainList, &testError);
             testErrors[k-startCount][j] = testError;
 
-            int folds = 10;
-            fvec metricMeans(resultList.size());
-            ivec foldCount(resultList.size());
-            FOR(f, folds)
+            vector<fvec> clusterScores(samples.size());
+            FOR(i, samples.size())
             {
-                vector<fvec> clusterScores(samples.size());
-                FOR(i, canvas->data->GetCount())
-                {
-                    fvec result = clusterer->Test(samples[i]);
-                    if(clusterer->NbClusters()==1) clusterScores[i] = result;
-                    else if(result.size()>1) clusterScores[i] = result;
-                    else if(result.size())
-                    {
-                        fvec res(clusterer->NbClusters(),0);
-                        res[result[0]] = 1.f;
-                    }
-                }
-                fvec clusterMetrics = ClusterMetrics(samples, labels, clusterScores, ratio);
-                FOR(d, clusterMetrics.size())
-                {
-                    if(clusterMetrics[d] != clusterMetrics[d]) continue; // not a number
-                    metricMeans[d] += clusterMetrics[d];
-                    foldCount[d]++;
-                }
+                fvec result = clusterer->Test(samples[i]);
+                if(clusterer->NbClusters()==1) clusterScores[i] = result;
+                else if(result.size()>1) clusterScores[i] = result;
             }
-            FOR(d, metricMeans.size()) metricMeans[d] /= foldCount[d];
-            FOR(i, metricMeans.size())
+
+            fvec clusterMetrics(4);
+
+            float logLikelihood = clusterer->GetLogLikelihood(samples);
+            float BIC = -2*logLikelihood + k*logf(samples.size())*clusterer->GetParameterCount(); // BIC
+            float AIC = -2*logLikelihood + 2*clusterer->GetParameterCount(); // AIC
+            clusterMetrics[0] = logLikelihood;
+            clusterMetrics[1] = BIC;
+            clusterMetrics[2] = AIC;
+            clusterMetrics[3] = ClusterFMeasure(samples, labels, clusterScores, ratio);
+            FOR(i, clusterMetrics.size())
             {
-                resultList[i][j].push_back(metricMeans[i]);
+                resultList[i][j].push_back(clusterMetrics[i]);
             }
         }
         kCounts.push_back(k);
@@ -834,9 +796,9 @@ void MLDemos::ClusterOptimize()
     int h = optionsCluster->graphLabel->height();
     int pad = 6;
     QPixmap pixmap(w,h);
-    QBitmap bitmap(w,h);
-    bitmap.clear();
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
 
@@ -1017,7 +979,10 @@ void MLDemos::Maximize()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1037,8 +1002,9 @@ void MLDemos::Maximize()
     int W = canvas->width();
     int H = canvas->height();
     canvas->maps.info = QPixmap(W, H);
-    QBitmap bitmap(canvas->width(), canvas->height());
-    canvas->maps.info.setMask(bitmap);
+    //QBitmap bitmap(canvas->width(), canvas->height());
+    //bitmap.clear();
+    //canvas->maps.info.setMask(bitmap);
     canvas->maps.info.fill(Qt::transparent);
     QPainter painter(&canvas->maps.info);
 
@@ -1084,10 +1050,10 @@ void MLDemos::Maximize()
 
     FOR(i, glw->objects.size())
     {
+        if(!glw->objectAlive[i]) continue;
         if(glw->objects[i].objectType.contains("Maximization"))
         {
-            glw->objects.erase(glw->objects.begin() + i);
-            i--;
+            glw->killList.push_back(i);
         }
     }
 
@@ -1123,7 +1089,10 @@ void MLDemos::Reinforce()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1160,8 +1129,9 @@ void MLDemos::Reinforce()
     int W = canvas->width();
     int H = canvas->height();
     canvas->maps.info = QPixmap(W, H);
-    QBitmap bitmap(canvas->width(), canvas->height());
-    canvas->maps.info.setMask(bitmap);
+    //QBitmap bitmap(canvas->width(), canvas->height());
+    //bitmap.clear();
+    //canvas->maps.info.setMask(bitmap);
     canvas->maps.info.fill(Qt::transparent);
     QPainter painter(&canvas->maps.info);
 
@@ -1221,7 +1191,10 @@ void MLDemos::Project()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1281,7 +1254,10 @@ void MLDemos::ProjectManifold()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1335,7 +1311,10 @@ void MLDemos::ProjectRevert()
     DEL(clusterer);
     DEL(regressor);
     DEL(dynamical);
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
@@ -1388,12 +1367,13 @@ void MLDemos::UpdateLearnedModel()
             if(canvas->canvasType == 1)
             {
                 classifiers[tabUsedForTraining]->DrawGL(canvas, glw, classifier);
-                if(canvas->data->GetDimCount() == 3) Draw3DClassifier(glw, classifier);
+                if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
             }
         }
         else
         {
             classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            DrawClassifiedSamples(canvas, classifier, classifierMulti);
             if(classifier->UsesDrawTimer() && !drawTimer->isRunning())
             {
                 drawTimer->start(QThread::NormalPriority);
@@ -1525,9 +1505,9 @@ void MLDemos::UpdateLearnedModel()
                     testTrajectories[i] = result;
                 }
                 canvas->maps.model = QPixmap(w,h);
-                QBitmap bitmap(w,h);
-                bitmap.clear();
-                canvas->maps.model.setMask(bitmap);
+                //QBitmap bitmap(w,h);
+                //bitmap.clear();
+                //canvas->maps.model.setMask(bitmap);
                 canvas->maps.model.fill(Qt::transparent);
 
                 if(canvas->canvasType == 0) // standard canvas
@@ -1591,4 +1571,83 @@ void MLDemos::UpdateLearnedModel()
         else projectors[tabUsedForTraining]->Draw(canvas, projector);
     }
     UpdateInfo();
+}
+
+void MLDemos::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti)
+{
+    if(!canvas || !classifier) return;
+    int w = canvas->width(), h = canvas->height();
+    canvas->maps.model = QPixmap(w,h);
+    //QBitmap bitmap(w,h);
+    //bitmap.clear();
+    //canvas->maps.model.setMask(bitmap);
+    canvas->maps.model.fill(Qt::transparent);
+    QPainter painter(&canvas->maps.model);
+    int posClass = INT_MIN;
+    FORIT(classifier->classMap, int, int)
+    {
+        posClass = max(posClass, it->first);
+    }
+
+    QString s;
+    FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
+
+    int forcedPositive = classifier->inverseMap[-1] < 0 ? -classifier->inverseMap[-1]-1 : -1;
+
+    // we draw the samples
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    FOR(i, canvas->data->GetCount())
+    {
+        fvec sample = sourceDims.size() ? canvas->data->GetSampleDim(i, sourceDims) : canvas->data->GetSample(i);
+        int label = canvas->data->GetLabel(i);
+        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
+        fvec res;
+        if(classifier->IsMultiClass()) res = classifier->TestMulti(sample);
+        else if(classifierMulti.size())
+        {
+            FOR(c, classifierMulti.size())
+            {
+                res.push_back(classifierMulti[c]->Test(sample));
+            }
+        }
+        else res.push_back(classifier->Test(sample));
+        if(res.size()==1)
+        {
+            float response = res[0];
+            if(forcedPositive != -1) // we forced binary classification
+            {
+                if(response > 0)
+                {
+                    if(label == forcedPositive) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(label != forcedPositive) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
+            }
+            else
+            {
+                if(response > 0)
+                {
+                    if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                }
+                else
+                {
+                    if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
+            }
+        }
+        else
+        {
+            int max = 0;
+            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+            int resp = classifier->inverseMap[max];
+            if(label == resp) Canvas::drawSample(painter, point, 9, label);
+            else Canvas::drawCross(painter, point, 6, label);
+        }
+    }
 }

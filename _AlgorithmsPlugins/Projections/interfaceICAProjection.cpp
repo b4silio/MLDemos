@@ -10,6 +10,11 @@ ICAProjection::ICAProjection()
     params->setupUi(widget);
 }
 
+ICAProjection::~ICAProjection()
+{
+    delete params;
+}
+
 // virtual functions to manage the algorithm creation
 Projector *ICAProjection::GetProjector()
 {

@@ -33,7 +33,8 @@ private:
     Ui::ParametersRandom *params;
 public:
     ReinforcementInterfaceRandom();
-	// virtual functions to manage the algorithm creation
+    ~ReinforcementInterfaceRandom();
+    // virtual functions to manage the algorithm creation
     Reinforcement *GetReinforcement();
 
 	// virtual functions to manage the GUI and I/O

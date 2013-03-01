@@ -37,12 +37,12 @@ public:
 	ClassifierGMM();
 	~ClassifierGMM();
 	void Train(std::vector< fvec > samples, ivec labels);
-	float Test(const fvec &sample);
-	float Test(const fVec &sample);
-	fvec TestMulti(const fvec &sample);
-    const char *GetInfoString();
-    void SaveModel(std::string filename);
-    bool LoadModel(std::string filename);
+    float Test(const fvec &sample) const ;
+    float Test(const fVec &sample) const ;
+    fvec TestMulti(const fvec &sample) const ;
+    const char *GetInfoString() const ;
+    void SaveModel(const std::string filename) const ;
+    bool LoadModel(const std::string filename);
 
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
 	void Update();

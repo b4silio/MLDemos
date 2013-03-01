@@ -38,6 +38,7 @@ private:
     ivec labels;
 public:
     ClassMVM();
+    ~ClassMVM();
     // virtual functions to manage the algorithm creation
     Classifier *GetClassifier();
     void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);

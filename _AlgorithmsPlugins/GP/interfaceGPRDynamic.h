@@ -26,39 +26,40 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 class DynamicGPR : public QObject, public DynamicalInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(DynamicalInterface)
+    Q_OBJECT
+    Q_INTERFACES(DynamicalInterface)
 private:
-	QWidget *widget;
-        Ui::ParametersGPRDynamic* params;
+    QWidget *widget;
+    Ui::ParametersGPRDynamic* params;
 public:
-        DynamicGPR();
-	// virtual functions to manage the algorithm creation
-	Dynamical *GetDynamical();
-	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
-	void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+    DynamicGPR();
+    ~DynamicGPR();
+    // virtual functions to manage the algorithm creation
+    Dynamical *GetDynamical();
+    void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
+    void DrawModel(Canvas *canvas, QPainter &painter, Dynamical *dynamical);
     void DrawGL(Canvas *canvas, GLWidget *glw, Dynamical *dynamical){}
 
-	// virtual functions to manage the GUI and I/O
-        QString GetName(){return QString("Gaussian Process Regression");}
-        QString GetAlgoString(){return GetName();}
-        QString GetInfoFile(){return "kernelDynamic.html";}
-        bool UsesDrawTimer(){return true;}
-        QWidget *GetParameterWidget(){return widget;}
-	void SetParams(Dynamical *dynamical);
-	void SaveOptions(QSettings &settings);
-	bool LoadOptions(QSettings &settings);
-	void SaveParams(QTextStream &stream);
-	bool LoadParams(QString name, float value);
+    // virtual functions to manage the GUI and I/O
+    QString GetName(){return QString("Gaussian Process Regression");}
+    QString GetAlgoString(){return GetName();}
+    QString GetInfoFile(){return "kernelDynamic.html";}
+    bool UsesDrawTimer(){return true;}
+    QWidget *GetParameterWidget(){return widget;}
+    void SetParams(Dynamical *dynamical);
+    void SaveOptions(QSettings &settings);
+    bool LoadOptions(QSettings &settings);
+    void SaveParams(QTextStream &stream);
+    bool LoadParams(QString name, float value);
 
     void SetParams(Dynamical *dynamical, fvec parameters);
     fvec GetParams();
     void GetParameterList(std::vector<QString> &parameterNames,
-                                 std::vector<QString> &parameterTypes,
-                                 std::vector< std::vector<QString> > &parameterValues);
+                          std::vector<QString> &parameterTypes,
+                          std::vector< std::vector<QString> > &parameterValues);
 
 public slots:
-	void ChangeOptions();
+    void ChangeOptions();
 };
 
 #endif // _INTERFACEGPRRDYNAMIC_H_

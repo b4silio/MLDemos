@@ -33,6 +33,7 @@ private:
 	Ui::ParametersMaximizers *params;
 public:
 	MaximizeBasic();
+    ~MaximizeBasic();
 	// virtual functions to manage the algorithm creation
 	Maximizer *GetMaximizer();
 

@@ -59,7 +59,7 @@ public:
 	void Maximization();
     void Reinforce();
 	void Stop();
-    static QColor GetColor(Classifier *classifier, fvec sample);
+    static QColor GetColor(Classifier *classifier, fvec sample, std::vector<Classifier*> *classifierMulti=0, ivec sourceDims=ivec());
 
 	Classifier **classifier;
 	Regressor **regressor;
@@ -68,6 +68,7 @@ public:
     Maximizer **maximizer;
     Reinforcement **reinforcement;
     ReinforcementProblem *reinforcementProblem;
+    std::vector<Classifier*> *classifierMulti;
 
 	QMutex *mutex, drawMutex;
     GLWidget *glw;

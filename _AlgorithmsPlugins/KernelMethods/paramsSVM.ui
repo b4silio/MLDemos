@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>158</height>
+    <height>144</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -219,7 +219,7 @@ RBF and Polynomial only</string>
   </widget>
   <widget class="QSpinBox" name="maxSVSpin">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -331,7 +331,7 @@ Pegasos: lambda, accuracy-generalization tradeoff parameter </string>
     <rect>
      <x>50</x>
      <y>120</y>
-     <width>100</width>
+     <width>110</width>
      <height>20</height>
     </rect>
    </property>
@@ -342,6 +342,24 @@ Pegasos: lambda, accuracy-generalization tradeoff parameter </string>
    </property>
    <property name="text">
     <string>Optimize Kernel</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="kernelButton">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>120</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Kernel Widths</string>
    </property>
   </widget>
  </widget>

@@ -1,4 +1,5 @@
 #include <public.h>
+#include <basicMath.h>
 #include <mymaths.h>
 #include <basicMath.h>
 #include "expose.h"
@@ -97,9 +98,9 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
                 if(!bLearned) map.fill(Qt::white);
                 else
                 {
-                    QBitmap bitmap(map.size());
-                    bitmap.clear();
-                    map.setMask(bitmap);
+                    //QBitmap bitmap(map.size());
+                    //bitmap.clear();
+                    //map.setMask(bitmap);
                     map.fill(Qt::transparent);
                 }
                 QPainter painter(&map);
@@ -388,9 +389,9 @@ void Expose::DrawTrajectories(QPixmap& pixmap, vector< vector<fvec> > trajectori
                 QPixmap map(mapW + 2*pad,mapH + 2*pad);
                 int smallW = map.width() - 2*pad, smallH = map.height() - 2*pad;
 
-                QBitmap bitmap(map.size());
-                bitmap.clear();
-                map.setMask(bitmap);
+                //QBitmap bitmap(map.size());
+                //bitmap.clear();
+                //map.setMask(bitmap);
                 map.fill(Qt::transparent);
 
                 QPainter painter(&map);

@@ -33,6 +33,11 @@ ReinforcementInterfaceDP::ReinforcementInterfaceDP()
     ChangeOptions();
 }
 
+ReinforcementInterfaceDP::~ReinforcementInterfaceDP()
+{
+    delete params;
+}
+
 void ReinforcementInterfaceDP::ChangeOptions()
 {
 }

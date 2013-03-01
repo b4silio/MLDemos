@@ -48,7 +48,7 @@ ClassifierRVM::~ClassifierRVM()
     }
 }
 
-const char *ClassifierRVM::GetInfoString()
+const char *ClassifierRVM::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "Relevance Vector Machine\n");
@@ -101,7 +101,7 @@ void ClassifierRVM::Train(std::vector< fvec > samples, ivec labels)
     }
 }
 
-float ClassifierRVM::Test( const fvec &_sample )
+float ClassifierRVM::Test( const fvec &_sample ) const
 {
 #define TESTCASE(a) case a:{return TestDim<a>(_sample);}
     switch(dim)
@@ -122,7 +122,7 @@ float ClassifierRVM::Test( const fvec &_sample )
     }
 }
 
-std::vector<fvec> ClassifierRVM::GetSVs()
+std::vector<fvec> ClassifierRVM::GetSVs() const
 {
 #define SVCASE(a) case a:{return GetSVsDim<a>();}
     switch(dim)
@@ -214,7 +214,7 @@ void ClassifierRVM::TrainDim(std::vector< fvec > _samples, ivec _labels)
 }
 
 template <int N>
-float ClassifierRVM::TestDim(const fvec &_sample)
+float ClassifierRVM::TestDim(const fvec &_sample) const
 {
     float estimate = 0.f;
 
@@ -246,7 +246,7 @@ float ClassifierRVM::TestDim(const fvec &_sample)
 }
 
 template <int N>
-std::vector<fvec> ClassifierRVM::GetSVsDim()
+std::vector<fvec> ClassifierRVM::GetSVsDim() const
 {
     std::vector<fvec> SVs;
     switch(kernelTypeTrained)

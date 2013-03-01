@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>158</height>
+    <height>141</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QSpinBox" name="gmmCount">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>30</y>
+     <x>180</x>
+     <y>10</y>
      <width>41</width>
      <height>21</height>
     </rect>
@@ -43,8 +43,8 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>30</y>
+     <x>60</x>
+     <y>10</y>
      <width>111</width>
      <height>21</height>
     </rect>
@@ -61,8 +61,8 @@
   <widget class="QComboBox" name="gmmCovarianceCombo">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>100</y>
+     <x>50</x>
+     <y>70</y>
      <width>91</width>
      <height>21</height>
     </rect>
@@ -97,8 +97,8 @@
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>80</y>
+     <x>160</x>
+     <y>50</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -115,8 +115,8 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>78</y>
+     <x>50</x>
+     <y>48</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -133,8 +133,8 @@
   <widget class="QComboBox" name="gmmInitCombo">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>100</y>
+     <x>160</x>
+     <y>70</y>
      <width>91</width>
      <height>21</height>
     </rect>
@@ -168,6 +168,24 @@ K-Means: perform K-Means and assign means and variance to each mixture</string>
      <string>K-Means</string>
     </property>
    </item>
+  </widget>
+  <widget class="QPushButton" name="marginalsButton">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>100</y>
+     <width>90</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Marginals</string>
+   </property>
   </widget>
  </widget>
  <resources/>

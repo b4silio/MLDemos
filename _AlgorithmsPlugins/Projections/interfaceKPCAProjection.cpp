@@ -9,7 +9,7 @@
 using namespace std;
 
 KPCAProjection::KPCAProjection()
-    : widget(new QWidget()), contourLabel(0), pcaPointer(0), contourWidget(new QWidget()),
+    : widget(new QWidget()), pcaPointer(0), contourWidget(new QWidget()),
       xIndex(0), yIndex(1)
 {
     params = new Ui::paramsKPCA();
@@ -27,6 +27,13 @@ KPCAProjection::KPCAProjection()
     connect(contours->spinX1, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
     connect(contours->spinX2, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
     connect(contours->spinZoom, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
+}
+
+KPCAProjection::~KPCAProjection()
+{
+    delete params;
+    DEL(contours);
+    DEL(contourWidget);
 }
 
 // virtual functions to manage the algorithm creation
@@ -288,9 +295,9 @@ void KPCAProjection::DrawContours(int index)
         int w = contourPixmaps[1].width();
         int h = contourPixmaps[1].height();
         QPixmap bigPixmap(gridX*w, gridX*h);
-        QBitmap bitmap(bigPixmap.width(), bigPixmap.height());
-        bitmap.clear();
-        bigPixmap.setMask(bitmap);
+        //QBitmap bitmap(bigPixmap.width(), bigPixmap.height());
+        //bitmap.clear();
+        //bigPixmap.setMask(bitmap);
         bigPixmap.fill(Qt::transparent);
         QPainter painter(&bigPixmap);
         for(int i=1; i<=contours->dimSpin->maximum(); i++)
@@ -324,7 +331,7 @@ void DrawEigenvals(QPainter &painter, fvec eigs, bool bSkipFirstEigenvector)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    int rectW = (w-2*pad) / (dim-1) - 2;
+    int rectW = (w-2*pad) / dim - 2;
     FOR(i, dim)
     {
         float eigval = eigs[i];
@@ -431,7 +438,7 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     }
     sort(eigenvalues.begin(), eigenvalues.end(), std::greater<float>());
     eigenvalues.resize(params->dimCountSpin->value());
-    FOR(i, eigenvalues.size()) qDebug() << "eigs" << i << eigenvalues[i];
+    //FOR(i, eigenvalues.size()) qDebug() << "eigs" << i << eigenvalues[i];
 
     float accumulator = 0;
     float maxEigVal = 0;
@@ -450,8 +457,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
     }
 
     QPixmap pixmap(params->eigenGraph->size());
-    QBitmap bitmap(params->eigenGraph->size());
-    pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter eigenPainter(&pixmap);
     DrawEigenvals(eigenPainter, eigenvalues, true);

@@ -89,43 +89,43 @@ public:
 	 *
 	 * @param sample
 	 */
-	float Test(const fvec &sample);
+    float Test(const fvec &sample) const ;
 	/**
 	 * @brief Get the algorithm information and statistics to be displayed in the main interface
 	 *
 	 */
-    const char *GetInfoString();
+    const char *GetInfoString() const ;
 	/**
 	 * @brief Project the input sample into local space
 	 *
 	 * @param sample
 	 */
-	fvec Project(const fvec &sample);
+    fvec Project(const fvec &sample) const ;
 	/**
 	 * @brief Set the algorithm parameters from the ui
 	 *
 	 * @param linearType
 	 */
-	void SetParams(u32 linearType);
+    void SetParams( const u32 linearType);
 	/**
 	 * @brief Get the current mean for the positive or negative class
 	 *
 	 * @param positive
 	 * @return fvec
 	 */
-    fvec GetMean(bool positive=true){return positive ? meanPos : meanNeg;}
+    fvec GetMean(const bool positive=true) const {return positive ? meanPos : meanNeg;}
 	/**
 	 * @brief
 	 *
 	 * @return fVec
 	 */
-    fVec GetW(){return W;}
+    fVec GetW() const {return W;}
 	/**
 	 * @brief
 	 *
 	 * @return int
 	 */
-    int GetType(){return linearType;}
+    int GetType() const {return linearType;}
 };
 
 #endif // _CLASSIFIER_LINEAR_H_

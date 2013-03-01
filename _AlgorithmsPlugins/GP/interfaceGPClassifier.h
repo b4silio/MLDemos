@@ -40,17 +40,13 @@ public:
       Constructor, it instantiates the widget and parameter panel
       */
     ClassGP();
+    ~ClassGP();
 
     /*!
       The function called by the main program to obtain the classifier.
       It should generate the classifier and set its parameter to match the user choice.
       */
     Classifier *GetClassifier();
-
-    /*!
-      The function called by the main program to draw the learned model (e.g. the classified samples)
-      */
-    void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 
     /*!
       The function called by the main program to draw the model information

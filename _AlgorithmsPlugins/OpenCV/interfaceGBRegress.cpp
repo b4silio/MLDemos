@@ -25,9 +25,13 @@ using namespace std;
 
 RegrGB::RegrGB()
 {
-        params = new Ui::ParametersGBRegress();
-	params->setupUi(widget = new QWidget());
+    params = new Ui::ParametersGBRegress();
+    params->setupUi(widget = new QWidget());
+}
 
+RegrGB::~RegrGB()
+{
+    delete params;
 }
 
 void RegrGB::SetParams(Regressor *regressor)
@@ -65,8 +69,8 @@ void RegrGB::SetParams(Regressor *regressor, fvec parameters)
 }
 
 void RegrGB::GetParameterList(std::vector<QString> &parameterNames,
-                             std::vector<QString> &parameterTypes,
-                             std::vector< std::vector<QString> > &parameterValues)
+                              std::vector<QString> &parameterTypes,
+                              std::vector< std::vector<QString> > &parameterValues)
 {
     parameterNames.clear();
     parameterTypes.clear();
@@ -102,74 +106,74 @@ QString RegrGB::GetAlgoString()
 Regressor *RegrGB::GetRegressor()
 {
     RegressorGB *regressor = new RegressorGB();
-	SetParams(regressor);
-	return regressor;
+    SetParams(regressor);
+    return regressor;
 }
 
 void RegrGB::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-	canvas->maps.confidence = QPixmap();
+    canvas->maps.confidence = QPixmap();
 }
 
 void RegrGB::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
-	if(!regressor || !canvas) return;
-	painter.setRenderHint(QPainter::Antialiasing, true);
+    if(!regressor || !canvas) return;
+    painter.setRenderHint(QPainter::Antialiasing, true);
     int xIndex = canvas->xIndex;
 
     int w = canvas->width();
     fvec sample = canvas->toSampleCoords(0,0);
     int dim = sample.size();
     if(dim > 2) return;
-	int steps = w;
-	QPointF oldPoint(-FLT_MAX,-FLT_MAX);
-	FOR(x, steps)
-	{
+    int steps = w;
+    QPointF oldPoint(-FLT_MAX,-FLT_MAX);
+    FOR(x, steps)
+    {
         sample = canvas->toSampleCoords(x,0);
-		fvec res = regressor->Test(sample);
+        fvec res = regressor->Test(sample);
         if(res[0] != res[0]) continue; // NaN!
         QPointF point = canvas->toCanvasCoords(sample[xIndex], res[0]);
-		if(x)
-		{
-			painter.setPen(QPen(Qt::black, 1));
-			painter.drawLine(point, oldPoint);
-		}
-		oldPoint = point;
-	}
+        if(x)
+        {
+            painter.setPen(QPen(Qt::black, 1));
+            painter.drawLine(point, oldPoint);
+        }
+        oldPoint = point;
+    }
 }
 
 void RegrGB::SaveOptions(QSettings &settings)
 {
-       // HH we save to the system registry each parameter value
-        settings.setValue("boostIters", params->boostIters->value());
-        settings.setValue("boostLossType", params->boostLossType->currentIndex());
-        settings.setValue("boostTreeDepths", params->boostTreeDepths->value());
+    // HH we save to the system registry each parameter value
+    settings.setValue("boostIters", params->boostIters->value());
+    settings.setValue("boostLossType", params->boostLossType->currentIndex());
+    settings.setValue("boostTreeDepths", params->boostTreeDepths->value());
 }
 
 bool RegrGB::LoadOptions(QSettings &settings)
 {
-        // HH we load the parameters from the registry so that when we launch the program we keep all values
-        if(settings.contains("boostIters")) params->boostIters->setValue(settings.value("boostIters").toInt());
-        if(settings.contains("boostLossType")) params->boostLossType->setCurrentIndex(settings.value("boostLossType").toInt());
-        if(settings.contains("boostTreeDepths")) params->boostTreeDepths->setValue(settings.value("boostTreeDepths").toInt());
-        return true;
+    // HH we load the parameters from the registry so that when we launch the program we keep all values
+    if(settings.contains("boostIters")) params->boostIters->setValue(settings.value("boostIters").toInt());
+    if(settings.contains("boostLossType")) params->boostLossType->setCurrentIndex(settings.value("boostLossType").toInt());
+    if(settings.contains("boostTreeDepths")) params->boostTreeDepths->setValue(settings.value("boostTreeDepths").toInt());
+    return true;
 }
 
 
 void RegrGB::SaveParams(QTextStream &file)
 {
-        // HH same as above but for files/string saving
-        file << "regressionOptions" << ":" << "boostIters" << " " << params->boostIters->value() << "\n";
-        file << "regressionOptions" << ":" << "boostLossType" << " " << params->boostLossType->currentIndex() << "\n";
-        file << "regressionOptions" << ":" << "boostTreeDepths" << " " << params->boostTreeDepths->value() << "\n";
+    // HH same as above but for files/string saving
+    file << "regressionOptions" << ":" << "boostIters" << " " << params->boostIters->value() << "\n";
+    file << "regressionOptions" << ":" << "boostLossType" << " " << params->boostLossType->currentIndex() << "\n";
+    file << "regressionOptions" << ":" << "boostTreeDepths" << " " << params->boostTreeDepths->value() << "\n";
 }
 
 bool RegrGB::LoadParams(QString name, float value)
 {
-        // HH
-        if(name.endsWith("boostIters")) params->boostIters->setValue((int)value);
-        if(name.endsWith("boostLossType")) params->boostLossType->setCurrentIndex((int)value);
-        if(name.endsWith("boostTreeDepths")) params->boostTreeDepths->setValue((int)value);
-        return true;
+    // HH
+    if(name.endsWith("boostIters")) params->boostIters->setValue((int)value);
+    if(name.endsWith("boostLossType")) params->boostLossType->setCurrentIndex((int)value);
+    if(name.endsWith("boostTreeDepths")) params->boostTreeDepths->setValue((int)value);
+    return true;
 }
 

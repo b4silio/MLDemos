@@ -12,6 +12,12 @@ PCAProjection::PCAProjection()
     ChangeOptions();
 }
 
+PCAProjection::~PCAProjection()
+{
+    delete params;
+    if(eigenWidget) delete eigenWidget;
+}
+
 void PCAProjection::ChangeOptions()
 {
     bool bRange = params->useRangeCheck->isChecked();
@@ -51,9 +57,9 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
     ProjectorPCA *pca = dynamic_cast<ProjectorPCA*>(projector);
     if(!pca) return;
     QPixmap pixmap(params->eigenGraph->width(), params->eigenGraph->height());
-    QBitmap bitmap(pixmap.width(), pixmap.height());
-    bitmap.clear();
-    pixmap.setMask(bitmap);
+    //QBitmap bitmap(pixmap.width(), pixmap.height());
+    //bitmap.clear();
+    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter eigenPainter(&pixmap);
     pca->DrawEigenvals(eigenPainter);

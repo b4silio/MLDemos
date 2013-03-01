@@ -33,6 +33,7 @@ private:
 	Ui::ParametersGMMDynamic *params;
 public:
 	DynamicGMM();
+    ~DynamicGMM();
 	// virtual functions to manage the algorithm creation
 	Dynamical *GetDynamical();
 	void DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamical);

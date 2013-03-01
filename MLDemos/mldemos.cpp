@@ -36,8 +36,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     : QMainWindow(parent, flags),
-      canvas(0),
-      glw(0),
+      canvas(0),glw(0),vis(0),
       gridSearch(0),
       classifier(0),
       regressor(0),
@@ -48,7 +47,6 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
       projector(0),
       bIsRocNew(true),
       bIsCrossNew(true),
-      compareDisplay(0),
       compare(0),
       trajectory(ipair(-1,-1)),
       bNewObstacle(false),
@@ -62,7 +60,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
     connect(ui.actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
-    connect(ui.actionShift_Dimensions, SIGNAL(triggered()), this, SLOT(ShiftDimensions()));
+    connect(ui.actionEditDataset, SIGNAL(triggered()), this, SLOT(ShowDataEditor()));
     connect(ui.actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
     connect(ui.actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
@@ -73,23 +71,10 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     ui.actionImportData->setShortcut(QKeySequence(tr("Ctrl+I")));
 
     initDialogs();
-    initToolBars();
-    initPlugins();
 
-    glw = new GLWidget(canvas);
-    drawTimer = new DrawTimer(canvas, &mutex);
-    drawTimer->glw = glw;
-    drawTimer->classifier = &classifier;
-    drawTimer->regressor = &regressor;
-    drawTimer->dynamical = &dynamical;
-    drawTimer->clusterer = &clusterer;
-    drawTimer->maximizer = &maximizer;
-    drawTimer->reinforcement = &reinforcement;
-    drawTimer->reinforcementProblem = &reinforcementProblem;
-    connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
-    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
-    connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
-    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
+    initToolBars();
+
+    initPlugins();
 
     LoadLayoutOptions();
     SetTextFontSize();
@@ -167,7 +152,11 @@ void MLDemos::initToolBars()
 
     actionClearData = new QAction(QIcon(":/MLDemos/icons/cleardata.png"), tr("Clear Data"), this);
     actionClearData->setShortcut(QKeySequence(tr("X")));
-    actionClearData->setStatusTip(tr("Clear all data"));
+    actionClearData->setStatusTip(tr("Clear data (Keep models)"));
+
+    actionClearAll = new QAction(QIcon(":/MLDemos/icons/clearall.png"), tr("Clear All"), this);
+    actionClearAll->setShortcut(QKeySequence(tr("X")));
+    actionClearAll->setStatusTip(tr("Clear data and model"));
 
     actionScreenshot = new QAction(QIcon(":/MLDemos/icons/screenshot.png"), tr("Save Screenshot"), this);
     actionScreenshot->setShortcut(QKeySequence(tr("Alt+S")));
@@ -191,6 +180,7 @@ void MLDemos::initToolBars()
     connect(actionGridsearch, SIGNAL(triggered()), this, SLOT(ShowGridSearch()));
     connect(generator, SIGNAL(finished(int)), this, SLOT(HideAddData()));
     connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
+    connect(actionClearAll, SIGNAL(triggered()), this, SLOT(ClearAll()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
     connect(actionScreenshot, SIGNAL(triggered()), this, SLOT(Screenshot()));
     connect(actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
@@ -223,6 +213,7 @@ void MLDemos::initToolBars()
     toolBar->addSeparator();
     toolBar->addAction(actionClearModel);
     toolBar->addAction(actionClearData);
+    toolBar->addAction(actionClearAll);
     toolBar->addSeparator();
     toolBar->addAction(actionDrawSamples);
     toolBar->addAction(actionAddData);
@@ -236,7 +227,6 @@ void MLDemos::initToolBars()
     connect(ui.actionShow_Toolbar, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.actionSmall_Icons, SIGNAL(triggered()), this, SLOT(ShowToolbar()));
     connect(ui.canvasTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(CanvasTypeChanged()));
-    connect(ui.canvasZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(CanvasOptionsChanged()));
     connect(ui.canvasX1Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
     connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
     connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
@@ -286,6 +276,10 @@ void MLDemos::initToolBars()
     drawToolbar->moveButton->setIcon(QIcon(":/MLDemos/icons/move.png"));
     drawToolbar->moveButton->setIconSize(iconSize);
     drawToolbar->moveButton->setText("");
+    drawToolbar->moveClassButton->setAutoExclusive(true);
+    drawToolbar->moveClassButton->setIcon(QIcon(":/MLDemos/icons/move-class.png"));
+    drawToolbar->moveClassButton->setIconSize(iconSize);
+    drawToolbar->moveClassButton->setText("");
     drawToolbar->extrudeButton->setAutoExclusive(true);
     drawToolbar->extrudeButton->setIcon(QIcon(":/MLDemos/icons/extrude.png"));
     drawToolbar->extrudeButton->setIconSize(iconSize);
@@ -342,7 +336,7 @@ void MLDemos::initDialogs()
     inputDimensions = new Ui::InputDimensions();
 
     displayOptions->setupUi(displayDialog = new QDialog());
-    aboutPanel->setupUi(about = new QDialog());
+    aboutPanel->setupUi(aboutDialog = new QDialog());
     showStats->setupUi(statsDialog = new QDialog());
     manualSelection->setupUi(manualSelectDialog = new QDialog());
     inputDimensions->setupUi(inputDimensionsDialog = new QDialog());
@@ -567,14 +561,37 @@ void MLDemos::initDialogs()
     connect(canvas, SIGNAL(CanvasMoveEvent()), this, SLOT(CanvasMoveEvent()));
     //connect(canvas, SIGNAL(ZoomChanged()), this, SLOT(ZoomChanged()));
 
-    gridSearch = new GridSearch(canvas);
     import = new DataImporter();
-    generator = new DataGenerator(canvas);
     connect(import, import->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
     connect(import, import->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(import, SIGNAL(SetDimensionNames(QStringList)), this, SLOT(SetDimensionNames(QStringList)));
     connect(import, SIGNAL(SetClassNames(std::map<int,QString>)), this, SLOT(SetClassNames(std::map<int,QString>)));
+    connect(import, SIGNAL(SetCategorical(std::map<int,std::vector<std::string> >)), this, SLOT(SetCategorical(std::map<int,std::vector<std::string> >)));
+
+    gridSearch = new GridSearch(canvas);
+    generator = new DataGenerator(canvas);
     connect(generator->ui->addButton, SIGNAL(clicked()), this, SLOT(AddData()));
+
+    glw = new GLWidget(canvas);
+    vis = new Visualization(canvas);
+
+    dataEdit = new DatasetEditor(canvas);
+    connect(dataEdit, SIGNAL(DataEdited()), this, SLOT(DataEdited()));
+
+    drawTimer = new DrawTimer(canvas, &mutex);
+    drawTimer->glw = glw;
+    drawTimer->classifier = &classifier;
+    drawTimer->regressor = &regressor;
+    drawTimer->dynamical = &dynamical;
+    drawTimer->clusterer = &clusterer;
+    drawTimer->maximizer = &maximizer;
+    drawTimer->reinforcement = &reinforcement;
+    drawTimer->reinforcementProblem = &reinforcementProblem;
+    drawTimer->classifierMulti = &classifierMulti;
+    connect(drawTimer, SIGNAL(MapReady(QImage)), canvas, SLOT(SetConfidenceMap(QImage)));
+    connect(drawTimer, SIGNAL(ModelReady(QImage)), canvas, SLOT(SetModelImage(QImage)));
+    connect(drawTimer, SIGNAL(CurveReady()), this, SLOT(SetROCInfo()));
+    connect(drawTimer, SIGNAL(AnimationReady(QImage)), canvas, SLOT(SetAnimationImage(QImage)));
 }
 
 void MLDemos::initPlugins()
@@ -615,10 +632,11 @@ void MLDemos::initPlugins()
     }
     foreach (QString fileName, pluginsDir.entryList(QDir::Files))
     {
-        QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-        QObject *plugin = loader.instance();
+        QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+        QObject *plugin = pluginLoader->instance();
         if (plugin)
         {
+            pluginLoaders.push_back(pluginLoader);
             qDebug() << "loading " << fileName;
             // check type of plugin
             CollectionInterface *iCollection = qobject_cast<CollectionInterface *>(plugin);
@@ -696,7 +714,10 @@ void MLDemos::initPlugins()
             }
         }
         else
-            qDebug() << loader.errorString();
+        {
+            qDebug() << pluginLoader->errorString();
+            delete pluginLoader;
+        }
     }
 }
 
@@ -725,7 +746,7 @@ void MLDemos::SetTextFontSize()
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     children = statsDialog->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
-    children = about->findChildren<QWidget*>();
+    children = aboutDialog->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
     children = manualSelectDialog->findChildren<QWidget*>();
     FOR(i, children.size()) if(children[i]) children[i]->setFont(font);
@@ -813,19 +834,19 @@ bool IsChildOf(QObject *child, QObject *parent)
 
 void MLDemos::FocusChanged(QWidget *old, QWidget *now)
 {
-    if(drawContext1Widget->isVisible())
+    if(drawContext1Widget && drawContext1Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext1Widget)) HideContextMenus();
     }
-    if(drawContext2Widget->isVisible())
+    if(drawContext2Widget && drawContext2Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext2Widget)) HideContextMenus();
     }
-    if(drawContext3Widget->isVisible())
+    if(drawContext3Widget && drawContext3Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext3Widget)) HideContextMenus();
     }
-    if(drawContext4Widget->isVisible())
+    if(drawContext4Widget && drawContext4Widget->isVisible())
     {
         if(!IsChildOf(now, drawContext4Widget)) HideContextMenus();
     }
@@ -964,19 +985,47 @@ MLDemos::~MLDemos()
         if(inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
     }
     SaveLayoutOptions();
-    delete optionsClassify;
-    delete optionsRegress;
-    delete optionsCluster;
-    delete optionsDynamic;
-    delete optionsMaximize;
-    delete optionsReinforcement;
-    delete drawToolbar;
-    delete drawToolbarContext1;
-    delete drawToolbarContext2;
-    delete displayOptions;
-    delete generator;
-    canvas->hide();
-    delete canvas;
+    DEL(glw);
+    DEL(vis);
+    FOR(i, pluginLoaders.size()) pluginLoaders.at(i)->unload();
+    DEL(optionsClassify);
+    DEL(optionsRegress);
+    DEL(optionsCluster);
+    DEL(optionsDynamic);
+    DEL(optionsMaximize);
+    DEL(optionsReinforcement);
+    DEL(optionsProject);
+    DEL(optionsCompare);
+    DEL(manualSelection);
+    DEL(inputDimensions);
+    DEL(showStats);
+    DEL(displayOptions);
+    DEL(drawToolbar);
+    DEL(drawToolbarWidget);
+    DEL(drawToolbarContext1);
+    DEL(drawToolbarContext2);
+    DEL(drawToolbarContext3);
+    DEL(drawToolbarContext4);
+    DEL(drawContext1Widget);
+    DEL(drawContext2Widget);
+    DEL(drawContext3Widget);
+    DEL(drawContext4Widget);
+    DEL(algorithmOptions);
+    DEL(displayDialog);
+    DEL(aboutPanel);
+    DEL(aboutDialog);
+    DEL(statsDialog);
+    DEL(manualSelectDialog);
+    DEL(inputDimensionsDialog);
+    DEL(algorithmWidget);
+    DEL(compareWidget);
+    DEL(drawTimer);
+    DEL(gridSearch);
+    DEL(import);
+    DEL(generator);
+    DEL(dataEdit);
+    DEL(compare);
+    DEL(canvas);
 }
 
 void MLDemos::closeEvent(QCloseEvent *event)
@@ -987,7 +1036,10 @@ void MLDemos::closeEvent(QCloseEvent *event)
         DEL(clusterer);
         DEL(regressor);
         DEL(dynamical);
-        DEL(classifier);
+        if(!classifierMulti.size()) DEL(classifier);
+        classifier = 0;
+        sourceDims.clear();
+        FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
         DEL(maximizer);
         DEL(reinforcement);
         DEL(projector);
@@ -1001,9 +1053,15 @@ void MLDemos::closeEvent(QCloseEvent *event)
 void MLDemos::resizeEvent( QResizeEvent *event )
 {
     if(!canvas) return;
-    if(canvas->canvasType >= 2)
+    if(canvas->canvasType == 2)
     {
-        CanvasOptionsChanged();
+        QSizePolicy policy = vis->sizePolicy();
+        policy.setHorizontalPolicy(QSizePolicy::Preferred);
+        policy.setVerticalPolicy(QSizePolicy::Preferred);
+        vis->setSizePolicy(policy);
+        vis->setMinimumSize(ui.canvasArea->size());
+        vis->resize(ui.canvasArea->size());
+        //CanvasOptionsChanged();
     }
     else if (canvas->canvasType == 1) // 3D View
     {
@@ -1177,7 +1235,6 @@ void MLDemos::CompareClear()
 {
     optionsCompare->algoList->clear();
     compareOptions.clear();
-    if(compareDisplay) compareDisplay->hide();
 }
 
 void MLDemos::CompareRemove()
@@ -1287,7 +1344,7 @@ void MLDemos::ShowStatsDialog()
 
 void MLDemos::ShowAbout()
 {
-    about->show();
+    aboutDialog->show();
 }
 
 void MLDemos::ManualSelection()
@@ -1345,13 +1402,17 @@ void MLDemos::Clear()
     drawTimer->Clear();
     QMutexLocker lock(&mutex);
     qApp->processEvents();
-    DEL(classifier);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(regressor);
     DEL(dynamical);
     DEL(clusterer);
     DEL(maximizer);
     DEL(reinforcement);
     DEL(projector);
+    sourceDims.clear();
     glw->clearLists();
     canvas->maps.confidence = QPixmap();
     canvas->maps.model = QPixmap();
@@ -1412,6 +1473,7 @@ void MLDemos::ResetPositiveClass()
     ui.canvasX2Spin->setRange(1,dimCount);
     ui.canvasX3Spin->setRange(0,dimCount);
     canvas->SetDim(ui.canvasX1Spin->value()-1,ui.canvasX2Spin->value()-1, ui.canvasX3Spin->value()-1);
+    dataEdit->Update();
     ManualSelectionUpdated();
     InputDimensionsUpdated();
 }
@@ -1428,7 +1490,23 @@ void MLDemos::ClearData()
     projectedData.clear();
     if(canvas)
     {
+        canvas->sampleColors.clear();
+        canvas->data->Clear();
+        canvas->maps.model = QPixmap();
+    }
+    UpdateInfo();
+    canvas->repaint();
+}
+
+void MLDemos::ClearAll()
+{
+    sourceData.clear();
+    sourceLabels.clear();
+    projectedData.clear();
+    if(canvas)
+    {
         canvas->dimNames.clear();
+        canvas->classNames.clear();
         canvas->sampleColors.clear();
         canvas->data->Clear();
         canvas->targets.clear();
@@ -1442,30 +1520,21 @@ void MLDemos::ClearData()
     Clear();
     ResetPositiveClass();
     FitToData();
-    ManualSelectionUpdated();
     UpdateInfo();
 }
 
-void MLDemos::ShiftDimensions()
+void MLDemos::DataEdited()
 {
-    if(canvas)
-    {
-        vector<fvec> samples = canvas->data->GetSamples();
-        if(!samples.size()) return;
-        int dim = samples[0].size();
-        if(dim < 2) return;
-        FOR(i, samples.size())
-        {
-            float tmp = samples[i][0];
-            FOR(d, dim-1)
-            {
-                samples[i][d] = samples[i][d+1];
-            }
-            samples[i][dim-1] = tmp;
-        }
-        canvas->data->SetSamples(samples);
-    }
-    DisplayOptionsChanged();
+    canvas->ResetSamples();
+    FitToData();
+    ResetPositiveClass();
+    UpdateInfo();
+    canvas->repaint();
+}
+
+void MLDemos::ShowDataEditor()
+{
+    dataEdit->show();
 }
 
 void MLDemos::AvoidOptionChanged()
@@ -1528,6 +1597,7 @@ void MLDemos::DisplayOptionsChanged()
                 if(classifier)
                 {
                     classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+                    DrawClassifiedSamples(canvas, classifier, classifierMulti);
                     if(classifier->UsesDrawTimer())
                     {
                         drawTimer->start(QThread::NormalPriority);
@@ -1575,7 +1645,15 @@ void MLDemos::DisplayOptionsChanged()
 
 void MLDemos::Display3DOptionsChanged()
 {
-    canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    if(canvas->canvasType == 0)
+    {
+        if(canvas->bDisplayGrid != displayOptions->gridCheck->isChecked())
+        {
+            canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+            canvas->repaint();
+        }
+    }
+    else canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
     if(!glw) return;
     glw->bDisplaySamples = displayOptions->check3DSamples->isChecked();
     glw->bDisplayLines = displayOptions->check3DWireframe->isChecked();
@@ -1801,6 +1879,7 @@ void MLDemos::InputDimensionsUpdated()
         inputDimensions->dimList->addItem(item);
     }
     ManualSelectionChanged();
+    vis->UpdateDims();
 }
 
 void MLDemos::InputDimensionsChanged()
@@ -1856,8 +1935,9 @@ void MLDemos::DrawCrosshair()
     {
         if(drawToolbar->dragButton->isChecked()) drawType = -1;
         if(drawToolbar->moveButton->isChecked()) drawType = -2;
-        if(drawToolbar->extrudeButton->isChecked()) drawType = -3;
-        if(drawToolbar->sprayClassButton->isChecked()) drawType = -4;
+        if(drawToolbar->moveClassButton->isChecked()) drawType = -3;
+        if(drawToolbar->extrudeButton->isChecked()) drawType = -4;
+        if(drawToolbar->sprayClassButton->isChecked()) drawType = -5;
     }
     else if(drawToolbar->tabWidget->currentIndex() == 2)
     {
@@ -1905,7 +1985,7 @@ void MLDemos::DrawCrosshair()
     case 3: // erase
     case 9: // spray 3D
     case -2: // move points
-    case -4:  // spray class
+    case -5:  // spray class
     {
         cursor.addEllipse(QPoint(0,0),size/2,size/2);
         canvas->crosshair = cursor;
@@ -1991,8 +2071,9 @@ void MLDemos::Drawing( fvec sample, int label)
     {
         if(drawToolbar->dragButton->isChecked()) drawType = -1;
         if(drawToolbar->moveButton->isChecked()) drawType = -2;
-        if(drawToolbar->extrudeButton->isChecked()) drawType = -3;
-        if(drawToolbar->sprayClassButton->isChecked()) drawType = -4;
+        if(drawToolbar->moveClassButton->isChecked()) drawType = -3;
+        if(drawToolbar->extrudeButton->isChecked()) drawType = -4;
+        if(drawToolbar->sprayClassButton->isChecked()) drawType = -5;
     }
     else if(drawToolbar->tabWidget->currentIndex() == 2)
     {
@@ -2019,6 +2100,7 @@ void MLDemos::Drawing( fvec sample, int label)
         // we don't want to draw too often
         if(drawTime.elapsed() < 50/speed) return; // msec elapsed since last drawing
         canvas->data->AddSample(sample, label);
+        if(!selectedData.size()) selectedData.push_back(0);
     }
         break;
     case 2: // spray samples
@@ -2081,6 +2163,7 @@ void MLDemos::Drawing( fvec sample, int label)
                     while(canvas->center.size() < dim) canvas->center.push_back(0.f);
                 }
             }
+            if(!selectedData.size()) selectedData.push_back(0);
         }
     }
         break;
@@ -2221,7 +2304,6 @@ void MLDemos::Drawing( fvec sample, int label)
         optionsCompare->outputDimCombo->setCurrentIndex(canvas->data->GetDimCount()-1);
         optionsRegress->outputDimCombo->setCurrentIndex(canvas->data->GetDimCount()-1);
     }
-    ManualSelectionUpdated();
     UpdateInfo();
 }
 
@@ -2246,7 +2328,26 @@ void MLDemos::Editing(int editType, fvec position, int label)
             selectionStart = position;
         }
             break;
-        case 3: // extrude points across the vertical
+        case 3: // drag multiple points of the same class
+        {
+            ivec closestSample = canvas->SelectSamples(center,-1);
+            if(closestSample.size())
+            {
+                int closest = closestSample[0];
+                int closestLabel = canvas->data->GetLabel(closest);
+                selectedData.clear();
+                selectionWeights.clear();
+                FOR(i, canvas->data->GetCount())
+                {
+                    if(canvas->data->GetLabel(i) != closestLabel) continue;
+                    selectedData.push_back(i);
+                    selectionWeights.push_back(1);
+                }
+                selectionStart = position;
+            }
+        }
+            break;
+        case 4: // extrude points across the vertical
         {
             selectionStart = position;
             selectedData = ivec(canvas->data->GetCount());
@@ -2258,7 +2359,7 @@ void MLDemos::Editing(int editType, fvec position, int label)
             FOR(i, selectedData.size()) selectionWeights[i] = canvas->data->GetSample(i)[yIndex] + drand48()*2.f - 1.f;
         }
             break;
-        case 4: // change sample labels
+        case 5: // change sample labels
         {
             int newLabel = drawToolbar->classSpin->value();
             selectedData = canvas->SelectSamples(center, radius);
@@ -2267,6 +2368,7 @@ void MLDemos::Editing(int editType, fvec position, int label)
                 canvas->data->SetLabel(selectedData[i], newLabel);
             }
             selectedData.clear();
+            canvas->sampleColors.clear();
         }
             break;
         }
@@ -2276,6 +2378,7 @@ void MLDemos::Editing(int editType, fvec position, int label)
     {
     case 1:
     case 2:
+    case 3:
     {
         FOR(i, selectedData.size())
         {
@@ -2287,11 +2390,13 @@ void MLDemos::Editing(int editType, fvec position, int label)
             }
             sample += (position - selectionStart)*weight;
             canvas->data->SetSample(selectedData[i], sample);
+            canvas->sampleColors.clear();
+            canvas->maps.model = QPixmap();
         }
         selectionStart = position;
     }
         break;
-    case 3:
+    case 4:
     {
         int yIndex = canvas->yIndex;
         float diff = (position - selectionStart)[yIndex];
@@ -2313,8 +2418,16 @@ void MLDemos::Editing(int editType, fvec position, int label)
 
 void MLDemos::DrawingStopped()
 {
+    if(selectedData.size() || (canvas->sampleColors.size() && canvas->sampleColors.size() != canvas->data->GetCount()))
+    {
+        if(classifier) DrawClassifiedSamples(canvas, classifier, classifierMulti);
+        if(clusterer) clusterers[tabUsedForTraining]->Draw(canvas, clusterer);
+        if(regressor) regressors[tabUsedForTraining]->Draw(canvas, regressor);
+        if(dynamical) dynamicals[tabUsedForTraining]->Draw(canvas, dynamical);
+    }
     selectedData.clear();
     selectionStart = fvec();
+
     if(trajectory.first != -1)
     {
         // the last point is a duplicate, we take it out
@@ -2411,6 +2524,7 @@ void MLDemos::FitToData()
         if(classifier)
         {
             classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            DrawClassifiedSamples(canvas, classifier, classifierMulti);
             if(classifier->UsesDrawTimer()) drawTimer->start(QThread::NormalPriority);
         }
         else if(regressor)
@@ -2449,6 +2563,7 @@ void MLDemos::CanvasMoveEvent()
         if(classifier)
         {
             classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            DrawClassifiedSamples(canvas, classifier, classifierMulti);
             if(classifier->UsesDrawTimer())
             {
                 drawTimer->start(QThread::NormalPriority);
@@ -2496,8 +2611,6 @@ void MLDemos::CanvasTypeChanged()
         }
     }
 
-    ui.canvasZoomSlider->setEnabled(false);
-    ui.canvasZoomSlider->hide();
     ui.canvasAxesWidget->hide();
     switch(type)
     {
@@ -2529,28 +2642,13 @@ void MLDemos::CanvasTypeChanged()
         if(canvas->data->GetDimCount() <= 2) ui.canvasX3Spin->setValue(0);
     }
         break;
-    case 2: // scatterplot
-        ui.canvasZoomSlider->show();
-        ui.canvasZoomSlider->setEnabled(true);
-        break;
-    case 3: // parallel coords
-        break;
-    case 4: // radial graph (radviz)
-        break;
-    case 5: // andrews plots
-        break;
-    case 6: // bubble plots
-        ui.canvasAxesWidget->show();
-        ui.canvasX3Spin->setEnabled(true);
-        ui.canvasX1Label->setText(bProjected ? "e1" : "x1");
-        ui.canvasX2Label->setText(bProjected ? "e2" : "x2");
-        ui.canvasX3Label->setText("size");
+    case 2: // Visualizations
         break;
     }
-    ui.canvasZoomSlider->setEnabled(type == 2); // zoom is only for scatterplots (so far)
-    if ((!glw || !glw->isVisible()) && canvas->canvasType == type) return;
+    if ((!glw || !glw->isVisible()) && (!vis || !vis->isVisible()) && canvas->canvasType == type) return;
     if(type == 1) // 3D viewport
     {
+        vis->hide();
         displayOptions->tabWidget->setCurrentIndex(1);
         canvas->Clear();
         canvas->repaint();
@@ -2566,6 +2664,7 @@ void MLDemos::CanvasTypeChanged()
             layout->setMargin(1);
             ui.canvasArea->setLayout(layout);
             ui.canvasArea->layout()->addWidget(glw);
+            ui.canvasArea->layout()->addWidget(vis);
         }
         QSizePolicy policy = glw->sizePolicy();
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
@@ -2576,14 +2675,46 @@ void MLDemos::CanvasTypeChanged()
         glw->resize(ui.canvasArea->size());
         FOR(i, glw->objects.size())
         {
+            if(!glw->objectAlive[i]) continue;
             if(glw->objects[i].objectType.contains("Reward"))
             {
-                glw->objects.erase(glw->objects.begin() + i);
-                i--;
+                glw->killList.push_back(i);
+                //glw->objects.erase(glw->objects.begin() + i);
+                //i--;
             }
         }
         glw->show();
         glw->repaint();
+    }
+    else if(type==2) // visualizations
+    {
+        glw->hide();
+        displayOptions->tabWidget->setCurrentIndex(0);
+        canvas->Clear();
+        canvas->repaint();
+        ui.canvasWidget->repaint();
+        //        ui.canvasWidget->hide();
+        if(!ui.canvasArea->layout())
+        {
+            // this is an ugly hack that forces the layout behind to be drawn as a cleared image
+            // for some reason otherwise, the canvas will only be repainted AFTER it is re-shown
+            // and it will flicker with the last image shown beforehand
+            QBoxLayout *layout = new QBoxLayout(QBoxLayout::LeftToRight);
+            layout->setContentsMargins(1,1,1,1);
+            layout->setMargin(1);
+            ui.canvasArea->setLayout(layout);
+            ui.canvasArea->layout()->addWidget(glw);
+            ui.canvasArea->layout()->addWidget(vis);
+        }
+        QSizePolicy policy = vis->sizePolicy();
+        policy.setHorizontalPolicy(QSizePolicy::Preferred);
+        policy.setVerticalPolicy(QSizePolicy::Preferred);
+        canvas->SetCanvasType(type);
+        vis->setSizePolicy(policy);
+        vis->setMinimumSize(ui.canvasArea->size());
+        vis->resize(ui.canvasArea->size());
+        vis->show();
+        vis->Update();
     }
     else
     {
@@ -2592,6 +2723,7 @@ void MLDemos::CanvasTypeChanged()
         CanvasOptionsChanged();
         canvas->ResetSamples();
         glw->hide();
+        vis->hide();
         ui.canvasWidget->show();
         ui.canvasWidget->repaint();
     }
@@ -2601,7 +2733,6 @@ void MLDemos::CanvasTypeChanged()
 
 void MLDemos::CanvasOptionsChanged()
 {
-    float zoom = 1.f + ui.canvasZoomSlider->value()/10.f;
     QSizePolicy policy = ui.canvasWidget->sizePolicy();
     int dims = canvas ? (canvas->data->GetCount() ? canvas->data->GetSample(0).size() : 2) : 2;
     int w = ui.canvasArea->width();
@@ -2623,7 +2754,7 @@ void MLDemos::CanvasOptionsChanged()
     //drawTimer->Stop();
     //drawTimer->Clear();
 
-    if(canvas->canvasType != 1 || (!bNeedsZoom && zoom == 1.f))
+    if(canvas->canvasType == 0 || !bNeedsZoom)
     {
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
         policy.setVerticalPolicy(QSizePolicy::Preferred);
@@ -2659,8 +2790,8 @@ void MLDemos::CanvasOptionsChanged()
     policy.setHorizontalPolicy(QSizePolicy::Fixed);
     policy.setVerticalPolicy(QSizePolicy::Fixed);
     ui.canvasWidget->setSizePolicy(policy);
-    ui.canvasWidget->setMinimumSize(w*zoom,h*zoom);
-    ui.canvasWidget->resize(w*zoom,h*zoom);
+    ui.canvasWidget->setMinimumSize(w,h);
+    ui.canvasWidget->resize(w,h);
     canvas->resize(ui.canvasWidget->size());
     ui.canvasArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -2671,6 +2802,7 @@ void MLDemos::CanvasOptionsChanged()
         if(classifier)
         {
             classifiers[tabUsedForTraining]->Draw(canvas, classifier);
+            DrawClassifiedSamples(canvas, classifier, classifierMulti);
         }
         else if(regressor)
         {
@@ -2723,6 +2855,13 @@ void MLDemos::Navigation( fvec sample )
     if(classifier)
     {
         float score;
+        if(sourceDims.size())
+        {
+            fvec newSample(sourceDims.size());
+            FOR(d, sourceDims.size()) newSample[d] = sample[sourceDims[d]];
+            sample = newSample;
+        }
+
         if(classifier->IsMultiClass())
         {
             fvec res = classifier->TestMulti(sample);
@@ -3016,6 +3155,7 @@ void MLDemos::ImportData(QString filename)
     import->Parse(filename);
     import->SendData();
     if(import->GetHeaders().size()) canvas->dimNames = import->GetHeaders();
+    ResetPositiveClass();
     ui.statusBar->showMessage("Data loaded successfully");
 }
 
@@ -3061,7 +3201,6 @@ void MLDemos::dropEvent(QDropEvent *event)
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");
             ResetPositiveClass();
-            ManualSelectionUpdated();
             UpdateInfo();
             canvas->repaint();
         }
@@ -3070,7 +3209,6 @@ void MLDemos::dropEvent(QDropEvent *event)
             ClearData();
             ImportData(filename);
             ResetPositiveClass();
-            ManualSelectionUpdated();
             UpdateInfo();
             canvas->repaint();
         }
@@ -3086,6 +3224,7 @@ void MLDemos::ExportSVG()
 
     DrawSVG svg(canvas, &mutex);
     svg.classifier = classifier;
+    svg.classifierMulti = classifierMulti;
     svg.regressor = regressor;
     svg.clusterer = clusterer;
     svg.dynamical = dynamical;
@@ -3267,6 +3406,7 @@ void MLDemos::SetDimensionNames(QStringList headers)
     canvas->dimNames = headers;
     ResetPositiveClass();
     CanvasOptionsChanged();
+    dataEdit->Update();
     canvas->ResetSamples();
     canvas->repaint();
 }
@@ -3276,6 +3416,17 @@ void MLDemos::SetClassNames(std::map<int,QString> classNames)
     canvas->classNames = classNames;
     ResetPositiveClass();
     CanvasOptionsChanged();
+    dataEdit->Update();
+    canvas->ResetSamples();
+    canvas->repaint();
+}
+
+void MLDemos::SetCategorical(std::map<int,std::vector<std::string> > categorical)
+{
+    canvas->data->categorical = categorical;
+    ResetPositiveClass();
+    CanvasOptionsChanged();
+    dataEdit->Update();
     canvas->ResetSamples();
     canvas->repaint();
 }
@@ -3326,7 +3477,14 @@ void MLDemos::QueryClassifier(std::vector<fvec> samples)
         results.resize(samples.size());
         FOR(i, samples.size())
         {
-            result[0] = classifier->Test(samples[i]);
+            fvec sample = samples[i];
+            if(sourceDims.size())
+            {
+                fvec newSample(sourceDims.size());
+                FOR(d, sourceDims.size()) newSample[d] = sample[sourceDims[d]];
+                sample = newSample;
+            }
+            result[0] = classifier->Test(sample);
             results[i] = result;
         }
     }

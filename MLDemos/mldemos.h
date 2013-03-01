@@ -59,8 +59,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "drawTimer.h"
 #include "dataImporter.h"
 #include "datagenerator.h"
+#include "dataseteditor.h"
 #include "gridsearch.h"
 #include "glwidget.h"
+#include "visualization.h"
 
 class MLDemos : public QMainWindow
 {
@@ -69,15 +71,15 @@ class MLDemos : public QMainWindow
 private:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
-	*actionClearData, *actionClearModel, *actionScreenshot,
+    *actionClearData, *actionClearModel, *actionClearAll, *actionScreenshot,
     *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
-    QDialog *displayDialog, *about, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
+    QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
     QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *projectWidget;
     QWidget *compareWidget;
 
-    QNamedWindow *rocWidget, *crossvalidWidget;
+    QNamedWindow *rocWidget;
 
 	Ui::MLDemosClass ui;
 	Ui::viewOptionDialog *displayOptions;
@@ -108,8 +110,10 @@ private:
 	Canvas *canvas;
     GridSearch *gridSearch;
     GLWidget *glw;
+    Visualization *vis;
     DataImporter *import;
     DataGenerator *generator;
+    DatasetEditor *dataEdit;
     ReinforcementProblem reinforcementProblem;
 	ipair trajectory;
 	Obstacle obstacle;
@@ -117,7 +121,7 @@ private:
     QString lastTrainingInfo;
 
 	void closeEvent(QCloseEvent *event);
-    bool Train(Classifier *classifier, int positive, float trainRatio=1, bvec trainList = bvec());
+    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1);
     void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec());
 	fvec Train(Dynamical *dynamical);
     void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0);
@@ -128,6 +132,7 @@ private:
     void Test(Maximizer *maximizer);
     void RewardFromMap(QImage rewardMap);
     void MapFromReward();
+    void DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti);
 
 	QList<ClassifierInterface *> classifiers;
 	QList<ClustererInterface *> clusterers;
@@ -140,9 +145,9 @@ private:
     QList<InputOutputInterface *> inputoutputs;
 	QList<bool> bInputRunning;
 	QList<QString> compareOptions;
-	QLabel *compareDisplay;
 	CompareAlgorithms *compare;
     std::map< QString , std::vector<QWidget*> > algoWidgets;
+    QList<QPluginLoader*> pluginLoaders;
     void AddPlugin(ClassifierInterface *iClassifier, const char *method);
 	void AddPlugin(ClustererInterface *iCluster, const char *method);
 	void AddPlugin(RegressorInterface *iRegress, const char *method);
@@ -183,9 +188,11 @@ public:
     Maximizer *maximizer;
     Reinforcement *reinforcement;
     Projector *projector;
+    std::vector<Classifier *> classifierMulti;
     std::vector<fvec> sourceData;
     std::vector<fvec> projectedData;
     ivec sourceLabels;
+    ivec sourceDims;
     ivec selectedData;
     fvec selectionWeights;
     fvec selectionStart;
@@ -202,12 +209,14 @@ public slots:
 	void SetTimeseries(std::vector<TimeSerie> timeseries);
     void SetDimensionNames(QStringList headers);
     void SetClassNames(std::map<int,QString> classNames);
+    void SetCategorical(std::map<int,std::vector<std::string> > categorical);
 	void QueryClassifier(std::vector<fvec> samples);
 	void QueryRegressor(std::vector<fvec> samples);
 	void QueryDynamical(std::vector<fvec> samples);
 	void QueryClusterer(std::vector<fvec> samples);
 	void QueryMaximizer(std::vector<fvec> samples);
     void QueryProjector(std::vector<fvec> samples);
+    void DataEdited();
 
 private slots:
 	void ShowAbout();
@@ -253,9 +262,10 @@ private slots:
 	void CompareScreenshot();
     void AddData();
     void Clear();
-	void ClearData();
-    void ShiftDimensions();
-	void SetROCInfo();
+    void ClearData();
+    void ClearAll();
+    void ShowDataEditor();
+    void SetROCInfo();
     void LoadClassifier();
     void SaveClassifier();
     void LoadRegressor();
@@ -316,7 +326,6 @@ private slots:
 	void CompareRemove();
     void CanvasTypeChanged();
     void CanvasOptionsChanged();
-
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);

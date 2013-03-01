@@ -48,7 +48,7 @@ ClassifierPegasos::~ClassifierPegasos()
     }
 }
 
-const char *ClassifierPegasos::GetInfoString()
+const char *ClassifierPegasos::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "pegasos SVM\n");
@@ -101,7 +101,7 @@ void ClassifierPegasos::Train(std::vector< fvec > samples, ivec labels)
     }
 }
 
-float ClassifierPegasos::Test( const fvec &_sample )
+float ClassifierPegasos::Test( const fvec &_sample ) const
 {
 #define TESTCASE(a) case a:{return TestDim<a>(_sample);}
     switch(dim)
@@ -122,7 +122,7 @@ float ClassifierPegasos::Test( const fvec &_sample )
     }
 }
 
-std::vector<fvec> ClassifierPegasos::GetSVs()
+std::vector<fvec> ClassifierPegasos::GetSVs() const
 {
 #define SVCASE(a) case a:{return GetSVsDim<a>();}
     switch(dim)
@@ -218,7 +218,7 @@ void ClassifierPegasos::TrainDim(std::vector< fvec > _samples, ivec _labels)
 }
 
 template <int N>
-float ClassifierPegasos::TestDim(const fvec &_sample)
+float ClassifierPegasos::TestDim(const fvec &_sample) const
 {
     float estimate = 0.f;
 
@@ -250,7 +250,7 @@ float ClassifierPegasos::TestDim(const fvec &_sample)
 }
 
 template <int N>
-std::vector<fvec> ClassifierPegasos::GetSVsDim()
+std::vector<fvec> ClassifierPegasos::GetSVsDim() const
 {
     std::vector<fvec> SVs;
     switch(kernelTypeTrained)

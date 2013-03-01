@@ -32,6 +32,11 @@ MaximizeInterfaceNLopt::MaximizeInterfaceNLopt()
     params->setupUi(widget = new QWidget());
 }
 
+MaximizeInterfaceNLopt::~MaximizeInterfaceNLopt()
+{
+    delete params;
+}
+
 void MaximizeInterfaceNLopt::SetParams(Maximizer *maximizer)
 {
     if(!maximizer) return;

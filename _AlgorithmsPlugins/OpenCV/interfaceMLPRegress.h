@@ -33,6 +33,7 @@ private:
 	Ui::ParametersMLPRegress *params;
 public:
 	RegrMLP();
+    ~RegrMLP();
 	// virtual functions to manage the algorithm creation
 	Regressor *GetRegressor();
     void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor){}

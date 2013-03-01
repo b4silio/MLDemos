@@ -33,6 +33,7 @@ private:
 	Ui::ParametersKNNRegress *params;
 public:
 	RegrKNN();
+    ~RegrKNN();
 	// virtual functions to manage the algorithm creation
 	Regressor *GetRegressor();
     void DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor){}

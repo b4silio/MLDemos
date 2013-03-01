@@ -32,11 +32,14 @@ class ClassSVM : public QObject, public ClassifierInterface
 private:
     QWidget *widget;
     Ui::Parameters *params;
+    QLabel *ardLabel;
+    fvec ardKernel;
+    QStringList ardNames;
 public:
     ClassSVM();
+    ~ClassSVM();
     // virtual functions to manage the algorithm creation
     Classifier *GetClassifier();
-    void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
     void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
     void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier);
 
@@ -58,6 +61,7 @@ public:
                                  std::vector< std::vector<QString> > &parameterValues);
 public slots:
     void ChangeOptions();
+    void DisplayARDKernel();
 };
 
 #endif // _INTERFACESVMCLASSIFIER_H_

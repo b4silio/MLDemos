@@ -53,13 +53,13 @@ public:
     ClassifierTrees();
     ~ClassifierTrees();
 	void Train(std::vector< fvec > samples, ivec labels);
-    float Test(const fvec &sample);
-    fvec TestMulti(const fvec &sample);
-    const char *GetInfoString();
-    fvec GetImportance();
-    void PrintTree(CvForestTree *tree, int count);
-    void PrintNode(const CvDTreeNode *node, int rootX=0, bool bLeft=true);
-    int GetTreeDepth(const CvDTreeNode *node);
+    float Test(const fvec &sample) const ;
+    fvec TestMulti(const fvec &sample) const ;
+    const char *GetInfoString() const ;
+    fvec GetImportance() const ;
+    void PrintTree(CvForestTree *tree, int count) const;
+    void PrintNode(const CvDTreeNode *node, int rootX=0, bool bLeft=true) const;
+    int GetTreeDepth(const CvDTreeNode *node) const ;
     void SetParams(bool bBalanceClasses,
                    int minSampleCount, int maxDepth, int maxTrees,
                    float accuracyTolerance);

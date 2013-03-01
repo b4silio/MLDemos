@@ -46,6 +46,7 @@ public:
       Constructor, it instantiates the widget and parameter panel
       */
     ClustFlame();
+    ~ClustFlame();
 
     /*!
       The function called by the main program to obtain the clusterer.

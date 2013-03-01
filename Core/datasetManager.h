@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include "public.h"
+#include <string.h>
 
 enum DatasetManagerFlags
 {
@@ -67,26 +68,26 @@ struct RewardMap
     ~RewardMap(){if(rewards) delete [] rewards; rewards=0;}
 	RewardMap& operator= (const RewardMap& r);
 
-    bool Empty(){return length==0;}
+    bool Empty() const {return length==0;}
 
-    void SetReward(double *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary);
+    void SetReward(const double *rewards, const ivec size, const fvec lowerBoundary, const fvec higherBoundary);
 
-    void SetReward(float *rewards, ivec size, fvec lowerBoundary, fvec higherBoundary);
+    void SetReward(const float *rewards, const ivec size, const fvec lowerBoundary, const fvec higherBoundary);
 
 	void Clear();
 
 	void Zero();
 
 	// return the value of the reward function at the coordinates provided
-	float ValueAt(fvec sample);
+    float ValueAt(fvec sample) const ;
 
-    float *GetRewardFloat();
+    float *GetRewardFloat() const ;
 
-    void SetValueAt(fvec sample, double value);
+    void SetValueAt(const fvec sample, const double value);
 
-    void ShiftValueAt(fvec sample, double shift);
+    void ShiftValueAt(const fvec sample, const double shift);
 
-    void ShiftValueAt(fvec sample, double radius, double shift);
+    void ShiftValueAt(const fvec sample, const double radius, const double shift);
 };
 
 struct TimeSerie
@@ -110,12 +111,13 @@ struct TimeSerie
 		}
 		return *this;
 	}
-	fvec& operator[] (unsigned int i){return data[i];}
-	fvec& operator() (unsigned int i){return data[i];}
-	void clear(){data.clear();timestamps.clear();}
-	size_t size(){return data.size();}
-	std::vector<fvec>::iterator begin(){return data.begin();}
-	std::vector<fvec>::iterator end(){return data.end();}
+    fvec& operator[] (const unsigned int i) {return data[i];}
+    fvec& operator() (const unsigned int i) {return data[i];}
+    const fvec& at(const unsigned int i) const {return data.at(i);}
+    void clear(){data.clear();timestamps.clear();}
+    size_t size() const {return data.size();}
+    std::vector<fvec>::iterator begin() {return data.begin();}
+    std::vector<fvec>::iterator end() {return data.end();}
 
 	TimeSerie& operator+=(const TimeSerie& t) {
 		data.insert(data.end(), t.data.begin(), t.data.end());
@@ -159,78 +161,82 @@ protected:
 
 public:
     bool bProjected;
+    std::map<int, std::vector<std::string> > categorical;
 
 public:
-	DatasetManager(int dimension = 2);
+    DatasetManager(const int dimension = 2);
 	~DatasetManager();
 
-	void Randomize(int seed=-1);
+    void Randomize(const int seed=-1);
 	void Clear();
-	double Compare(fvec sample);
+    double Compare(const fvec sample) const;
 
-	int GetSize(){return size;}
-	int GetCount(){return samples.size();}
-	int GetDimCount();
-    std::pair<fvec, fvec> GetBounds();
-	static u32 GetClassCount(ivec classes);
+    int GetSize() const {return size;}
+    int GetCount() const {return samples.size();}
+    int GetDimCount() const;
+    std::pair<fvec, fvec> GetBounds() const;
+    static u32 GetClassCount(const ivec classes);
 
 	// functions to manage samples
-	void AddSample(fvec sample, int label = 0, dsmFlags flag = _UNUSED);
-	void AddSamples(std::vector< fvec > samples, ivec newLabels=ivec(), std::vector<dsmFlags> newFlags=std::vector<dsmFlags>());
-	void AddSamples(DatasetManager &newSamples);	
-	void RemoveSample(unsigned int index);
+    void AddSample(const fvec sample, const int label = 0, const dsmFlags flag = _UNUSED);
+    void AddSamples(const std::vector< fvec > samples, const ivec newLabels=ivec(), const std::vector<dsmFlags> newFlags=std::vector<dsmFlags>());
+    void AddSamples(const DatasetManager &newSamples);
+    void RemoveSample(const unsigned int index);
     void RemoveSamples(ivec indices);
 
-    fvec GetSample(int index=0){ return (index < samples.size()) ? samples[index] : fvec(); }
-    fvec GetSampleDim(int index, ivec inputDims, int outputDim=-1);
-    std::vector< fvec > GetSamples(){return samples;}
-	std::vector< fvec > GetSamples(u32 count, dsmFlags flag=_UNUSED, dsmFlags replaceWith=_TRAIN);
-    std::vector< fvec > GetSampleDims(ivec inputDims, int outputDim=-1);
-	void SetSample(int index, fvec sample);
-    void SetSamples(std::vector<fvec> samples){this->samples = samples;}
+    fvec GetSample(const int index=0) const { return (index < samples.size()) ? samples[index] : fvec(); }
+    fvec GetSampleDim(const int index, const ivec inputDims, const int outputDim=-1) const;
+    std::vector< fvec > GetSamples() const {return samples;}
+    std::vector< fvec > GetSamples(const u32 count, const dsmFlags flag=_UNUSED, const dsmFlags replaceWith=_TRAIN);
+    std::vector< fvec > GetSampleDims(const ivec inputDims, const int outputDim=-1) const ;
+    void SetSample(const int index, const fvec sample);
+    void SetSamples(const std::vector<fvec> samples){this->samples = samples;}
 
-	int GetLabel(int index){return index < labels.size() ? labels[index] : 0;}
-	ivec GetLabels(){return labels;}
+    int GetLabel(const int index) const {return index < labels.size() ? labels[index] : 0;}
+    ivec GetLabels() const {return labels;}
 	void SetLabel(int index, int label){if(index<labels.size())labels[index] = label;}
     void SetLabels(ivec labels){this->labels = labels;}
 
-	// functions to manage sequences
-	void AddSequence(int start, int stop);
-	void AddSequence(ipair newSequence);
-	void AddSequences(std::vector< ipair > newSequences);
-	void RemoveSequence(unsigned int index);
+    std::string GetCategorical(const int dimension,const  int value) const ;
+    bool IsCategorical(const int dimension) const ;
 
-	ipair GetSequence(unsigned int index){return index < sequences.size() ? sequences[index] : ipair(-1,-1);}
-	std::vector< ipair > GetSequences(){return sequences;}
-	std::vector< std::vector<fvec> > GetTrajectories(int resampleType, int resampleCount, int centerType, float dT, int zeroEnding);
+	// functions to manage sequences
+    void AddSequence(const int start, const int stop);
+    void AddSequence(const ipair newSequence);
+    void AddSequences(const std::vector< ipair > newSequences);
+    void RemoveSequence(const unsigned int index);
+
+    ipair const GetSequence(const unsigned int index) const {return index < sequences.size() ? sequences[index] : ipair(-1,-1);}
+    std::vector< ipair > GetSequences() const {return sequences;}
+    std::vector< std::vector<fvec> > GetTrajectories(const int resampleType, const int resampleCount, const int centerType, const float dT, const int zeroEnding) const ;
 
 	// functions to manage obstacles
-	void AddObstacle(Obstacle o){obstacles.push_back(o);}
-	void AddObstacle(fvec center, fvec axes, float angle, fvec power, fvec repulsion);
-	void AddObstacles(std::vector<Obstacle> newObstacles);
-	void RemoveObstacle(unsigned int index);
-	std::vector< Obstacle > GetObstacles(){return obstacles;}
-	Obstacle GetObstacle(unsigned int index){return index < obstacles.size() ? obstacles[index] : Obstacle();}
+    void AddObstacle(const Obstacle o){obstacles.push_back(o);}
+    void AddObstacle(const fvec center, const fvec axes, const float angle, const fvec power, const fvec repulsion);
+    void AddObstacles(const std::vector<Obstacle> newObstacles);
+    void RemoveObstacle(const unsigned int index);
+    std::vector< Obstacle > GetObstacles() const {return obstacles;}
+    Obstacle GetObstacle(const unsigned int index) const {return index < obstacles.size() ? obstacles[index] : Obstacle();}
 
 	// functions to manage rewards
-	void AddReward(float *values, ivec size, fvec lowerBoundary, fvec higherBoundary);
-	RewardMap *GetReward(){return &rewards;}
+    void AddReward(const float *values, const ivec size, const fvec lowerBoundary, const fvec higherBoundary);
+    RewardMap *GetReward() {return &rewards;}
 
 	// functions to manage time series
-	void AddTimeSerie(std::string name, std::vector<fvec> data, std::vector<long int> timestamps=std::vector<long int>());
-	void AddTimeSerie(TimeSerie serie);
-	void AddTimeSeries(std::vector< TimeSerie > newTimeSeries);
-	void RemoveTimeSerie(unsigned int index);
-    std::vector<TimeSerie>& GetTimeSeries(){return series;}
+    void AddTimeSerie(const std::string name, const std::vector<fvec> data, const std::vector<long int> timestamps=std::vector<long int>());
+    void AddTimeSerie(const TimeSerie serie);
+    void AddTimeSeries(const std::vector< TimeSerie > newTimeSeries);
+    void RemoveTimeSerie(const unsigned int index);
+    std::vector<TimeSerie>& GetTimeSeries() {return series;}
 
 	// functions to manage flags
-	dsmFlags GetFlag(int index){return index < flags.size() ? flags[index] : _UNUSED;}
-	void SetFlag(int index, dsmFlags flag){if(index < flags.size()) flags[index] = flag;}
-	std::vector<dsmFlags> GetFlags(){return flags;}
-	std::vector<bool> GetFreeFlags();
+    dsmFlags GetFlag(const int index) const {return index < flags.size() ? flags[index] : _UNUSED;}
+    void SetFlag(const int index, const dsmFlags flag){if(index < flags.size()) flags[index] = flag;}
+    std::vector<dsmFlags> GetFlags() const {return flags;}
+    std::vector<bool> GetFreeFlags() const ;
 	void ResetFlags();
 
-	void Save(const char *filename);
+    void Save(const char *filename);
 	bool Load(const char *filename);
 };
 

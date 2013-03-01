@@ -31,6 +31,11 @@ ClassKNN::ClassKNN()
     ChangeOptions();
 }
 
+ClassKNN::~ClassKNN()
+{
+    delete params;
+}
+
 void ClassKNN::ChangeOptions()
 {
     params->knnNormSpin->setVisible(params->knnNormCombo->currentIndex() == 2);
@@ -98,44 +103,6 @@ Classifier *ClassKNN::GetClassifier()
 	ClassifierKNN *classifier = new ClassifierKNN();
 	SetParams(classifier);
 	return classifier;
-}
-
-void ClassKNN::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-	if(!classifier || !canvas) return;
-	int w = canvas->width();
-	int h = canvas->height();
-
-	int posClass = 1;
-	painter.setRenderHint(QPainter::Antialiasing, true);
-	FOR(i, canvas->data->GetCount())
-	{
-		fvec sample = canvas->data->GetSample(i);
-		int label = canvas->data->GetLabel(i);
-		QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-		if(classifier->IsMultiClass())
-		{
-			fvec res = classifier->TestMulti(sample);
-			int max = 0;
-			FOR(j, res.size()) if(res[max] < res[j]) max = j;
-            if(label == classifier->inverseMap[max]) Canvas::drawSample(painter, point, 9, label);
-            else Canvas::drawCross(painter, point, 6, classifier->inverseMap[max]);
-		}
-		else
-		{
-			float response = classifier->Test(sample);
-			if(response > 0)
-			{
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
-				else Canvas::drawCross(painter, point, 6, 2);
-			}
-			else
-			{
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
-				else Canvas::drawCross(painter, point, 6, 0);
-			}
-		}
-	}
 }
 
 void ClassKNN::SaveOptions(QSettings &settings)

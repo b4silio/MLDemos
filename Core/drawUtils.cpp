@@ -147,65 +147,138 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
     font.setBold(true);
     painter.setFont(font);
 
+    bool bMultiClass = false;
+    FOR(d, rocdata.size())
+    {
+        FOR(i, rocdata[d].size())
+        {
+            if(rocdata[d][i].second > 1)
+            {
+                bMultiClass = true;
+                break;
+            }
+        }
+        if(bMultiClass) break;
+    }
+
     FOR(d, rocdata.size())
     {
         int minCol = 128;
         int color = (rocdata.size() == 1) ? 255 : (255 - minCol)*(rocdata.size() - d -1)/(rocdata.size()-1) + minCol;
         color = 255 - color;
 
+        std::vector<fvec> allData;
         std::vector<f32pair> data = rocdata[d];
         if(!data.size()) continue;
-        std::sort(data.begin(), data.end());
 
-        std::vector<fvec> allData;
-        FOR(i, data.size())
+        if(bMultiClass)
         {
-            float thresh = data[i].first;
-            u32 tp = 0, fp = 0;
-            u32 fn = 0, tn = 0;
+            std::map<int,int> countPerClass;
+            std::map<int,int> truePerClass;
+            std::map<int,int> falsePerClass;
+            FOR(i, data.size())
+            {
+                countPerClass[data[i].second]++;
+                if(data[i].first != data[i].second) falsePerClass[data[i].first]++;
+                else truePerClass[data[i].first]++;
+            }
 
-            FOR(j, data.size())
+            float macroFMeasure = 0.f, microFMeasure = 0.f;
+            int microTP = 0, microFP = 0, microTN = 0, microCount = 0;
+            float microPrecision = 0.f;
+            float microRecall = 0.f;
+            FORIT(countPerClass, int, int)
             {
-                if(data[j].second == 1)
-                {
-                    if(data[j].first >= thresh) tp++;
-                    else fn++;
-                }
-                else
-                {
-                    if(data[j].first >= thresh) fp++;
-                    else tn++;
-                }
+                int c = it->first;
+                int tp = truePerClass[c];
+                int fp = falsePerClass[c];
+                int fn = countPerClass[c] - tp;
+                int tn = countPerClass[c] - fp;
+                int count = it->second;
+                microTP += tp;
+                microFP += fp;
+                microTN += tn;
+                microCount += count;
+                float precision = tp / float(tp + fp);
+                float recall = tp / float(count);
+                macroFMeasure += 2*precision*recall/(precision+recall);
             }
-            fVec val;
-            float fmeasure = 0;
-            if((fp+tn)>0 && (tp+fn)>0 && (tp+fp)>0)
-            {
-                val=fVec(fp/float(fp+tn), 1 - tp/float(tp+fn));
-                float precision = tp / float(tp+fp);
-                float recall = tp /float(tp+fn);
-                fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
-            }
+            macroFMeasure /= countPerClass.size();
+            microPrecision = microTP / float(microTP + microFP);
+            microRecall = microTP / float(microCount);
+            microFMeasure = 2*microPrecision*microRecall/(microPrecision + microRecall);
+
+            fVec val = fVec(microFP/float(microFP+microTN), 1 - microRecall);
+            float fmeasure = microFMeasure;
 
             fvec dat;
             dat.push_back(val.x);
             dat.push_back(val.y);
-            dat.push_back(data[i].first);
+            dat.push_back(0.5);
             dat.push_back(fmeasure);
             allData.push_back(dat);
+        }
+        else
+        {
+            std::sort(data.begin(), data.end());
+            FOR(i, data.size())
+            {
+                fVec val;
+                float fmeasure = 0;
+                float thresh = data[i].first;
+                u32 tp = 0, fp = 0;
+                u32 fn = 0, tn = 0;
+
+                FOR(j, data.size())
+                {
+                    if(data[j].second == 1)
+                    {
+                        if(data[j].first >= thresh) tp++;
+                        else fn++;
+                    }
+                    else
+                    {
+                        if(data[j].first >= thresh) fp++;
+                        else tn++;
+                    }
+                }
+                if((fp+tn)>0 && (tp+fn)>0 && (tp+fp)>0)
+                {
+                    val=fVec(fp/float(fp+tn), 1 - tp/float(tp+fn));
+                    float precision = tp / float(tp+fp);
+                    float recall = tp /float(tp+fn);
+                    fmeasure = tp == 0 ? 0 : 2 * (precision * recall) / (precision + recall);
+                }
+                fvec dat;
+                dat.push_back(val.x);
+                dat.push_back(val.y);
+                dat.push_back(data[i].first);
+                dat.push_back(fmeasure);
+                allData.push_back(dat);
+            }
         }
 
         painter.setPen(QPen(QColor(color,color,color), 1.f));
 
-        fVec pt1, pt2;
-        FOR(i, allData.size()-1)
+        if(allData.size() > 1)
         {
-            pt1 = fVec(allData[i][0]*size.width(), allData[i][1]*size.height());
-            pt2 = fVec(allData[i+1][0]*size.width(), allData[i+1][1]*size.height());
+            fVec pt1, pt2;
+            FOR(i, allData.size()-1)
+            {
+                pt1 = fVec(allData[i][0]*size.width(), allData[i][1]*size.height());
+                pt2 = fVec(allData[i+1][0]*size.width(), allData[i+1][1]*size.height());
+                painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
+            }
+            pt1 = fVec(0,size.width());
             painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
         }
-        pt1 = fVec(0,size.width());
-        painter.drawLine(QPointF(pt1.x+PAD, pt1.y+PAD),QPointF(pt2.x+PAD, pt2.y+PAD));
+        else if(allData.size())
+        {
+            fVec point;
+            point = fVec(allData[0][0]*size.width(), allData[0][1]*size.height());
+            painter.drawLine(QPointF(PAD, size.height()+PAD), QPointF(point.x+PAD, point.y+PAD));
+            painter.drawLine(QPointF(point.x+PAD, point.y+PAD), QPointF(size.width()+PAD, PAD));
+        }
 
         if(d < roclabels.size())
         {
@@ -232,9 +305,9 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 {
     QPixmap boxplot(size);
     if(!allData.size()) return boxplot;
-    QBitmap bitmap;
-    bitmap.clear();
-    boxplot.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //boxplot.setMask(bitmap);
     boxplot.fill(Qt::transparent);
     QPainter painter(&boxplot);
 
@@ -360,9 +433,9 @@ QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal, float min
 {
     QPixmap histogram(size);
     if(!allData.size()) return histogram;
-    QBitmap bitmap;
-    bitmap.clear();
-    histogram.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //histogram.setMask(bitmap);
     histogram.fill(Qt::transparent);
     QPainter painter(&histogram);
 
@@ -446,9 +519,9 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
 {
     QPixmap rawData(size);
     if(!allData.size()) return rawData;
-    QBitmap bitmap;
-    bitmap.clear();
-    rawData.setMask(bitmap);
+    //QBitmap bitmap;
+    //bitmap.clear();
+    //rawData.setMask(bitmap);
     rawData.fill(Qt::transparent);
     QPainter painter(&rawData);
 
@@ -564,7 +637,9 @@ void Draw3DRegressor(GLWidget *glw, Regressor *regressor)
     o.style = "smooth,transparent";
     o.style += QString(",isolines:%1").arg(zInd);
     o.style += ",blurry:3,color:1.0:1.0:1.0:0.4";
-    glw->objects.push_back(o);
+    glw->mutex->lock();
+    glw->AddObject(o);
+    glw->mutex->unlock();
 }
 
 void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
@@ -651,7 +726,7 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
 
     if(bMultiClass)
     {
-        int classCount = DatasetManager::GetClassCount(glw->canvas->data->GetLabels())+1;
+        int classCount = DatasetManager::GetClassCount(glw->canvas->data->GetLabels());
         FOR(c,classCount-1)
         {
             gridT valueGrid(0.f, steps, steps, steps);
@@ -707,7 +782,9 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
             o.style = "smooth,transparent,blurry";
             o.style += QString("color:%1:%2:%3:0.4").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
             o.style += QString(",offset:%1").arg(c*0.5f,0,'f',2);
-            glw->objects.push_back(o);
+            glw->mutex->lock();
+            glw->AddObject(o);
+            glw->mutex->unlock();
             printf("done.\n");
             fflush(stdout);
         }
@@ -752,10 +829,15 @@ void Draw3DClassifier(GLWidget *glw, Classifier *classifier)
 
         o.objectType = "Surfaces";
         o.style = "smooth,transparent,blurry:1,color:0:0:0:0.3";
-        glw->objects.push_back(o);
+        glw->mutex->lock();
+        glw->AddObject(o);
+        glw->mutex->unlock();
         printf("done.\n");
         fflush(stdout);
     }
+    delete [] minVals;
+    delete [] maxVals;
+    delete [] values;
 }
 
 void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
@@ -885,7 +967,9 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
             o.style = "smooth,transparent,blurry:1";
             o.style += QString("color:%1:%2:%3:0.3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
             o.style += QString(",offset:%1").arg((float)c,0,'f',2);
-            glw->objects.push_back(o);
+            glw->mutex->lock();
+            glw->AddObject(o);
+            glw->mutex->unlock();
             printf("done.\n");
             fflush(stdout);
         }
@@ -930,7 +1014,9 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
 
         o.objectType = "Surfaces";
         o.style = "smooth,transparent,blurry:1,color:1:1:1:0.4";
-        glw->objects.push_back(o);
+        glw->mutex->lock();
+        glw->AddObject(o);
+        glw->mutex->unlock();
         printf("done.\n");
         fflush(stdout);
     }
@@ -1614,136 +1700,16 @@ void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle)
     int oInd = -1;
     FOR(i, glw->objects.size())
     {
+        if(!glw->objectAlive[i]) continue;
         if(glw->objects[i].objectType.contains("Dynamize"))
         {
             oInd = i;
             break;
         }
     }
-    if(oInd != -1) glw->objects[oInd] = o;
-    else glw->objects.push_back(o);
+    if(oInd != -1) glw->killList.push_back(oInd);
+    glw->AddObject(o);
     glw->mutex->unlock();
-
-    qDebug() << "done.";
-    return;
-
-/*
-    int steps = 400;
-    int gridSize = 10;
-    int count = gridSize*gridSize*gridSize;
-//    int count = 1024;
-
-    // we generate a bunch of trajectories
-    qDebug() << "generating streamlines";
-    vector<Streamline> streams(count);
-    FOR(i, count)
-    {
-        int index = i;
-        int x = index % gridSize;
-        int y = (index / gridSize) % gridSize;
-        int z = index / (gridSize*gridSize);
-        sample[xInd] = (x/(float)gridSize)*diff + minv;
-        sample[yInd] = (y/(float)gridSize)*diff + minv;
-        sample[zInd] = (z/(float)gridSize)*diff + minv;
-        //FOR(d, dim) sample[d] = drand48()*diff+ minv;
-
-        Streamline s;
-        s.push_back(sample);
-        FOR(j, steps)
-        {
-            fvec res = dynamical->Test(sample);
-            if(dynamical->avoid)
-            {
-                dynamical->avoid->SetObstacles(obstacles);
-                fvec newRes = dynamical->avoid->Avoid(sample, res);
-                res = newRes;
-            }
-            sample += res*dT;
-            if(res*res < 1e-5) break;
-            s.push_back(sample);
-        }
-        streams[i] = s;
-    }
-
-    qDebug() << "clustering streamlines";
-
-    // now we "cluster" them together
-    int nbClusters = 12;
-    int maxIterations = 40;
-    ivec clusters = ClusterStreams(streams, nbClusters, maxIterations);
-    ivec counts(nbClusters,0);
-    FOR(i, nbClusters) seeds[i].resize(dim);
-    FOR(i, streams.size())
-    {
-        streams[i].cluster = clusters[i];
-        seeds[clusters[i]] += streams[i].front();
-        counts[clusters[i]]++;
-    }
-    FOR(i, nbClusters) seeds[i] /= counts[i];
-
-
-    // we add explicitly the training trajectories
-    FOR(i, trajectories.size())
-    {
-        seeds.push_back(trajectories[i][0]);
-    }
-
-    // and now we regenerate our streamlines from the seeds
-    qDebug() << "generating clustered seeds";
-    vector<Streamline> clusteredStreams(seeds.size());
-
-    qDebug() << "generating GLObjects";
-
-    int streamStyle = 1;
-    //GLObject o;
-
-    switch(streamStyle)
-    {
-    case 0: // vector field
-    {
-        o.objectType = "Dynamize,Lines";
-        o.style = "";
-    //    o.style = QString("fading:%1").arg(steps);
-        FOR(i, streams.size())
-        {
-            QColor c = SampleColor[streams[i].cluster%(SampleColorCnt-1)+1];
-            FOR(j, streams[i].length-1)
-            {
-                o.vertices.append(QVector3D(streams[i][j][xInd],streams[i][j][yInd],streams[i][j][zInd]));
-                o.vertices.append(QVector3D(streams[i][j+1][xInd],streams[i][j+1][yInd],streams[i][j+1][zInd]));
-                o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
-                o.colors.append(QVector4D(c.redF(), c.greenF(), c.blueF(),1));
-            }
-        }
-    }
-        break;
-    case 1: // tubes
-    {
-        o = DrawStreamTubes(streams);
-    }
-        break;
-    case 2: // stripes
-    {
-        o = DrawStreamRibbons(streams);
-    }
-        break;
-    }
-
-    // we replace the old vector field (if there is one) with the new one
-    glw->mutex->lock();
-    int oIndex = -1;
-    FOR(i, glw->objects.size())
-    {
-        if(glw->objects[i].objectType.contains("Dynamize"))
-        {
-            oIndex = i;
-            break;
-        }
-    }
-    if(oIndex != -1) glw->objects[oIndex] = o;
-    else glw->objects.push_back(o);
-    glw->mutex->unlock();
-    */
 }
 
 void Draw3DMaximizer(GLWidget *glw, Maximizer *maximizer){}

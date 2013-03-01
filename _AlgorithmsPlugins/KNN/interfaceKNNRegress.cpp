@@ -33,6 +33,11 @@ RegrKNN::RegrKNN()
     ChangeOptions();
 }
 
+RegrKNN::~RegrKNN()
+{
+    delete params;
+}
+
 void RegrKNN::ChangeOptions()
 {
     params->knnNormSpin->setVisible(params->knnNormCombo->currentIndex() == 2);

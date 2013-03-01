@@ -157,7 +157,7 @@ void ClassifierMVM::Train(std::vector< fvec > _samples, ivec _labels)
     b = sum / svCount;
 }
 
-float ClassifierMVM::Test( const fvec &sample )
+float ClassifierMVM::Test( const fvec &sample ) const
 {
     if(!SVs || !svCount) return 0.f;
 
@@ -172,7 +172,7 @@ float ClassifierMVM::Test( const fvec &sample )
     return estimate - b;
 }
 
-const char *ClassifierMVM::GetInfoString()
+const char *ClassifierMVM::GetInfoString() const
 {
     char *text = new char[1024];
     sprintf(text, "MVM\n");

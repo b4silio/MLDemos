@@ -32,6 +32,11 @@ DynamicGPR::DynamicGPR()
     ChangeOptions();
 }
 
+DynamicGPR::~DynamicGPR()
+{
+    delete params;
+}
+
 void DynamicGPR::ChangeOptions()
 {
     bool bSparse = params->sparseCheck->isChecked();

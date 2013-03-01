@@ -44,9 +44,9 @@ public:
 
 	ClassifierKPCA();
 	void Train(std::vector< fvec > samples, ivec labels);
-	float Test(const fvec &sample);
-	float Test(const fVec &sample);
-    const char *GetInfoString();
+    float Test(const fvec &sample) const ;
+    float Test(const fVec &sample) const ;
+    const char *GetInfoString() const ;
     void SetParams(int kernelType, int kernelDegree, float kernelGamma, float kernelOffset);
 };
 

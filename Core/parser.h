@@ -120,6 +120,7 @@ public:
     vector< vector<string> > getRawData(){return data;}
     static pair<vector<fvec>, ivec> numericFromRawData(vector< vector<string> > rawData);
     map<int,QString> getClassNames(){return classNames;}
+    map<int, vector<string> > getCategorical(){return categorical;}
 
 private:
     bool bFirstRowAsHeader;
@@ -129,6 +130,7 @@ private:
     map<int, QString> classNames;
     vector<vector<string> > data;
     vector<unsigned int> dataTypes;
+    map<int, vector<string> > categorical;
     uint8_t getBOMsize(const char* fileName);
 };
 

@@ -39,6 +39,7 @@ GridSearch::GridSearch(Canvas *canvas, QWidget *parent) :
     projector(0)
 {
     ui->setupUi(this);
+    connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(Close()));
     connect(ui->names1Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
     connect(ui->names2Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
     connect(ui->runButton, SIGNAL(clicked()), this, SLOT(Run()));
@@ -47,6 +48,7 @@ GridSearch::GridSearch(Canvas *canvas, QWidget *parent) :
     connect(ui->colorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(DisplayChanged()));
     connect(ui->resultCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(DisplayChanged()));
     ui->displayLabel->setScaledContents(true);
+    ui->colorbarLabel->setScaledContents(true);
 }
 
 GridSearch::~GridSearch()
@@ -111,6 +113,11 @@ void GridSearch::MouseMove(QMouseEvent *event)
         */
         repaint();
     }
+}
+
+void GridSearch::Close()
+{
+    this->hide();
 }
 
 void GridSearch::paintEvent(QPaintEvent *event)
@@ -229,9 +236,44 @@ void GridSearch::DisplayResults()
         if(x == xSteps) w = pixmap.width()-1;
         painter.drawLine(w, 0, w, pixmap.height());
     }
-
     ui->displayLabel->setPixmap(pixmap);
     ui->displayLabel->repaint();
+
+    int cW = ui->colorbarLabel->width();
+    int cH = ui->colorbarLabel->height();
+    int cpad = 6;
+    QPixmap colorBar(cW,cH);
+    //QBitmap bitmap(cW,cH);
+    //bitmap.clea();
+    //colorBar.setMask(bitmap);
+    colorBar.fill(Qt::transparent);
+    QPainter painterBar(&colorBar);
+    painterBar.setBrush(Qt::NoBrush);
+    FOR(i, cH-cpad*2)
+    {
+        float v = i/(float)(cH-cpad*2);
+        QRgb color = Canvas::GetColorMapValue(v, colorScheme);
+        painterBar.setPen(color);
+        painterBar.drawLine(0,cH-cpad-i,20,cH-cpad-i);
+    }
+    ySteps = 10;
+    QFont font = painterBar.font();
+    font.setPointSize(7);
+    painterBar.setFont(font);
+    painterBar.setPen(Qt::black);
+    FOR(i, ySteps+1)
+    {
+        float y = (1.f-i/(float)ySteps)*(cH-cpad*2) + cpad;
+        float v = i/(float)ySteps*(maxVal-minVal) + minVal;
+        painterBar.drawLine(0,y,2,y);
+        painterBar.drawLine(18,y,20,y);
+        painterBar.drawText(22,y+3, QString("%1").arg(v,0,'f',2));
+    }
+    painterBar.drawRect(0,cpad,20,cH-cpad*2);
+
+    ui->colorbarLabel->setPixmap(colorBar);
+    ui->colorbarLabel->repaint();
+
 }
 
 fPair GridSearch::GetParamsRange()
@@ -333,6 +375,8 @@ void GridSearch::Run()
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
     ivec binLabels = toBinary(labels);
+    ui->progressBar->setValue(0);
+    ui->progressBar->setMaximum(xSteps*ySteps);
     fvec errorMap(xSteps*ySteps);
     fvec fmeasureMap(xSteps*ySteps);
     FOR(y, ySteps)
@@ -467,6 +511,9 @@ void GridSearch::Run()
             qDebug() << "mean" << mean << "fmeasure" << effMean;
             errorMap[x+y*xSteps] = mean;
             fmeasureMap[x+y*xSteps] = effMean;
+            ui->progressBar->setValue(x+y*xSteps);
+            ui->progressBar->repaint();
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
     }
     if(classifier)
@@ -490,6 +537,7 @@ void GridSearch::Run()
     mapX = xSteps;
     mapY = ySteps;
     DisplayResults();
+    ui->progressBar->setValue(0);
     repaint();
 }
 

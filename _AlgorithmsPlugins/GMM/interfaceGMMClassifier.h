@@ -23,19 +23,21 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <interfaces.h>
 #include "classifierGMM.h"
 #include "ui_paramsGMM.h"
+#include "marginalwidget.h"
 
 class ClassGMM : public QObject, public ClassifierInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ClassifierInterface)
 private:
-	QWidget *widget;
 	Ui::ParametersGMM *params;
+    QWidget *widget;
+    MarginalWidget *marginalWidget;
 public:
-	ClassGMM();
-	// virtual functions to manage the algorithm creation
+    ClassGMM();
+    ~ClassGMM();
+    // virtual functions to manage the algorithm creation
 	Classifier *GetClassifier();
-	void DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier);
 	void DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier);
     void DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier);
 
@@ -57,6 +59,8 @@ public:
                                  std::vector<QString> &parameterTypes,
                                  std::vector< std::vector<QString> > &parameterValues);
 
+public slots:
+    void ShowMarginals();
 };
 
 #endif // _INTERFACEGMMCLASSIFIER_H_

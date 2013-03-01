@@ -11,6 +11,11 @@ LDAProjection::LDAProjection()
     params->setupUi(widget);
 }
 
+LDAProjection::~LDAProjection()
+{
+    delete params;
+}
+
 // virtual functions to manage the algorithm creation
 Projector *LDAProjection::GetProjector()
 {

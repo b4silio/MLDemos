@@ -34,6 +34,7 @@ ClassTrees::ClassTrees()
 
 ClassTrees::~ClassTrees()
 {
+    delete params;
     DEL(displayLabel);
 }
 
@@ -155,48 +156,6 @@ Classifier *ClassTrees::GetClassifier()
 	return classifier;
 }
 
-void ClassTrees::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-	if(!classifier || !canvas) return;
-	painter.setRenderHint(QPainter::Antialiasing, true);
-
-	int posClass = 1;
-
-	float resMin = FLT_MAX;
-	float resMax = -FLT_MAX;
-    std::vector<fvec> samples = canvas->data->GetSamples();
-
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec sample = canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        fvec res = classifier->TestMulti(sample);
-        if(res.size() == 1)
-        {
-            float response = res[0];
-            if(response > 0)
-            {
-                if(classifier->classMap[label] == posClass) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
-            }
-            else
-            {
-                if(classifier->classMap[label] != posClass) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
-            }
-        }
-        else
-        {
-            int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-            int resp = classifier->inverseMap[max];
-            if(label == resp) Canvas::drawSample(painter, point, 9, label);
-            else Canvas::drawCross(painter, point, 6, resp);
-        }
-    }
-}
-
 void ClassTrees::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
     if(!classifier || !canvas) return;
@@ -204,11 +163,6 @@ void ClassTrees::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classif
 
     bool bUseMinMax = false;
     bUseMinMax = true;
-
-    float resMin = FLT_MAX;
-    float resMax = -FLT_MAX;
-    std::vector<fvec> samples = canvas->data->GetSamples();
-    ivec labels = canvas->data->GetLabels();
 
     ClassifierTrees *trees = dynamic_cast<ClassifierTrees*>(classifier);
     if(!trees) return;
@@ -220,43 +174,6 @@ void ClassTrees::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classif
     {
         params->importanceList->addItem(QString("Dim %1: %2%").arg(i+1).arg(importance[i]*100, 0, 'f', 1));
     }
-
-    /*
-    fvec weights = trees->GetErrorWeights();
-    //qDebug() << "weights: ";
-    FOR(i, weights.size())
-    {
-        //qDebug() << " " << weights[i];
-        QPointF point = canvas->toCanvasCoords(boost->samples[i]);
-        float response = classifier->Test(boost->samples[i]);
-        int radius = max(3.f,min(10*tanh(weights[i]), 20.f));
-        //int radius = max(1.f,min(9*sqrtf(weights[i]), 20.f));
-        if(boost->labels[i] == 1)
-        {
-            painter.setBrush(Qt::red);
-            painter.setPen(Qt::black);
-            painter.drawEllipse(point, radius, radius);
-            if(response < 0)
-            {
-                painter.setBrush(Qt::NoBrush);
-                painter.setPen(QPen(Qt::white,2));
-                painter.drawEllipse(point, max(3,radius-2), max(3,radius-2));
-            }
-        }
-        else if(boost->labels[i] != 1)
-        {
-            painter.setBrush(Qt::white);
-            painter.setPen(Qt::black);
-            painter.drawEllipse(point, radius, radius);
-            if(response >= 0)
-            {
-                painter.setBrush(Qt::NoBrush);
-                painter.setPen(QPen(Qt::red,2));
-                painter.drawEllipse(point, max(3,radius-2), max(3,radius-2));
-            }
-        }
-    }
-    */
 }
 
 void ClassTrees::SaveOptions(QSettings &settings)

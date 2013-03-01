@@ -36,6 +36,11 @@ MaximizeBasic::MaximizeBasic()
 	connect(params->maximizeType, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeOptions()));
 }
 
+MaximizeBasic::~MaximizeBasic()
+{
+    delete params;
+}
+
 void MaximizeBasic::ChangeOptions()
 {
 	params->varianceSpin->setEnabled(false);

@@ -30,6 +30,14 @@ ClustGMM::ClustGMM()
 {
 	params = new Ui::ParametersGMMClust();
 	params->setupUi(widget = new QWidget());
+    marginalWidget = new MarginalWidget();
+    connect(params->marginalsButton, SIGNAL(clicked()), this, SLOT(ShowMarginals()));
+}
+
+ClustGMM::~ClustGMM()
+{
+    delete params;
+    delete marginalWidget;
 }
 
 void ClustGMM::SetParams(Clusterer *clusterer)
@@ -82,6 +90,11 @@ void ClustGMM::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("K-Means");
 }
 
+void ClustGMM::ShowMarginals()
+{
+    marginalWidget->Show();
+}
+
 Clusterer *ClustGMM::GetClusterer()
 {
 	ClustererGMM *clusterer = new ClustererGMM();
@@ -127,6 +140,63 @@ void ClustGMM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 		painter.setPen(QPen(color,4));
 		painter.drawEllipse(point, 8, 8);
 	}
+
+    vector<fvec> samples = canvas->data->GetSamples();
+    fvec minv (dim, FLT_MAX);
+    fvec maxv (dim, -FLT_MAX);
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            minv[d] = min(minv[d], samples[i][d]);
+            maxv[d] = max(maxv[d], samples[i][d]);
+        }
+    }
+    fvec diff = maxv-minv;
+    minv -= diff/4;
+    maxv += diff/4;
+
+    std::vector<fvec> limits(dim);
+    FOR(d, dim)
+    {
+        fvec pair(2);
+        pair[0] = minv[d];
+        pair[1] = maxv[d];
+        limits[d] = pair;
+    }
+    std::vector<fvec> marginals(dim);
+    std::vector< std::vector<fvec> > marginalGmm(dim);
+
+    float* bigSigma = new float[dim*dim];
+    float* bigMean = new float[dim];
+    FOR ( d, dim )
+    {
+        int steps = 200;
+        marginals[d].resize(steps,0);
+        marginalGmm[d].resize(steps);
+        FOR ( j, steps )
+        {
+            float likelihood = 0;
+            float s = j/(float)(steps)*(maxv[d]-minv[d]) + minv[d];
+            FOR ( i, gmm->nstates ) {
+                gmm->getCovariance(i, bigSigma);
+                gmm->getMean(i, bigMean);
+                float mu = bigMean[d];
+                float sigma = bigSigma[d + d*dim];
+                float prior = gmm->getPrior(i);
+
+                float diff = s-mu;
+                float lik = 1./(sqrtf(2*M_PI*sigma))*expf(-(diff*diff)*0.5/sigma);
+                likelihood += lik*prior;
+                marginalGmm[d][j].push_back(max(0.f,lik*prior));
+            }
+            marginals[d][j] = likelihood;
+        }
+    }
+    delete [] bigSigma;
+    delete [] bigMean;
+    marginalWidget->SetDimensions(dim, canvas->dimNames);
+    marginalWidget->SetMarginals(marginals, marginalGmm, limits);
 }
 
 void ClustGMM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
@@ -242,7 +312,8 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.objectType = "Surfaces,quads";
         o.style = "smooth,transparent";
         o.style += QString(",color:%1:%2:%3:0.5").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
-        glw->objects.push_back(o);
+        glw->mutex->lock();
+        glw->AddObject(o);
 
         verts = DrawGaussianLines(1.f, &mean[0], eigVal, eigVec);
         o.objectType = "Lines";
@@ -250,7 +321,7 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.vertices = verts.first;
         o.normals.clear();
         o.model = verts.second;
-        glw->objects.push_back(o);
+        glw->AddObject(o);
 
         verts = DrawGaussianLines(2.f, &mean[0], eigVal, eigVec);
         o.objectType = "Lines";
@@ -258,7 +329,8 @@ void ClustGMM::DrawGL(Canvas *canvas, GLWidget *glw, Clusterer *clusterer)
         o.vertices = verts.first;
         o.normals.clear();
         o.model = verts.second;
-        glw->objects.push_back(o);
+        glw->AddObject(o);
+        glw->mutex->unlock();
 
         //GLuint list = DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
         //glw->drawSampleLists.push_back(list);

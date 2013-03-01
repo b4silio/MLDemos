@@ -3,6 +3,7 @@ last-data.txt
 *.psd
 *.sln
 *.zip
+website
 
 # build/debug output
 */ValgrindOut.xml

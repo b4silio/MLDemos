@@ -33,6 +33,7 @@ private:
 	Ui::ParametersGA *params;
 public:
 	MaximizeInterfaceGA();
+    ~MaximizeInterfaceGA();
 	// virtual functions to manage the algorithm creation
 	Maximizer *GetMaximizer();
 

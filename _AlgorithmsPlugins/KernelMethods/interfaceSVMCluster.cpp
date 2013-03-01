@@ -31,6 +31,11 @@ ClustSVM::ClustSVM()
     ChangeOptions();
 }
 
+ClustSVM::~ClustSVM()
+{
+    delete params;
+}
+
 void ClustSVM::ChangeOptions()
 {
     switch(params->kernelTypeCombo->currentIndex())

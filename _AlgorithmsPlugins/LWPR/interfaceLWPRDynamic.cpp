@@ -29,6 +29,11 @@ DynamicLWPR::DynamicLWPR()
 	params->setupUi(widget = new QWidget());
 }
 
+DynamicLWPR::~DynamicLWPR()
+{
+    delete params;
+}
+
 void DynamicLWPR::SetParams(Dynamical *dynamical)
 {
 	if(!dynamical) return;

@@ -32,6 +32,11 @@ ClassRVM::ClassRVM()
     ChangeOptions();
 }
 
+ClassRVM::~ClassRVM()
+{
+    delete params;
+}
+
 void ClassRVM::ChangeOptions()
 {
     int C = params->svmCSpin->value();
@@ -177,60 +182,6 @@ void ClassRVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
     }
 }
 
-void ClassRVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-    int posClass = 1;
-    bool bUseMinMax = false;
-
-    float resMin = FLT_MAX;
-    float resMax = -FLT_MAX;
-    if(bUseMinMax)
-    {
-        // TODO: get the min and max for all samples
-        std::vector<fvec> samples = canvas->data->GetSamples();
-        FOR(i, samples.size())
-        {
-            float val = classifier->Test(samples[i]);
-            if(val > resMax) resMax = val;
-            if(val < resMin) resMin = val;
-        }
-        if(resMin == resMax) resMin -= 3;
-    }
-
-    // we draw the samples
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    map<int,int>& classes = classifier->classes;
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec sample = canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        fvec res = classifier->TestMulti(sample);
-        if(res.size() == 1)
-        {
-            float response = res[0];
-            if(response > 0)
-            {
-                if(label == posClass) Canvas::drawSample(painter, point, 9, 1);
-                else Canvas::drawCross(painter, point, 6, 2);
-            }
-            else
-            {
-                if(label != posClass) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
-            }
-        }
-        else
-        {
-            int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-            int resp = classifier->inverseMap[max];
-            if(label == resp) Canvas::drawSample(painter, point, 9, label);
-            else Canvas::drawCross(painter, point, 6, resp);
-        }
-    }
-}
-
 void ClassRVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
 {
     int xInd = canvas->xIndex;
@@ -248,7 +199,7 @@ void ClassRVM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
         o.colors.append(QVector4D(0,0,0,1));
     }
     glw->mutex->lock();
-    glw->objects.push_back(o);
+    glw->AddObject(o);
     glw->mutex->unlock();
 }
 

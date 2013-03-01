@@ -80,10 +80,10 @@
     <number>1</number>
    </property>
    <property name="minimum">
-    <double>-20.000000000000000</double>
+    <double>-999.000000000000000</double>
    </property>
    <property name="maximum">
-    <double>20.000000000000000</double>
+    <double>999.000000000000000</double>
    </property>
    <property name="singleStep">
     <double>0.500000000000000</double>
@@ -175,7 +175,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab2d">
     <attribute name="title">
@@ -216,8 +216,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>94</height>
+          <width>88</width>
+          <height>103</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">

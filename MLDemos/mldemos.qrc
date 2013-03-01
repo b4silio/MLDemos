@@ -40,5 +40,11 @@
         <file>shaders/renderFBO.fsh</file>
         <file>shaders/blurFBO.vsh</file>
         <file>shaders/blurFBO.fsh</file>
+        <file>shaders/depthSamples.vsh</file>
+        <file>shaders/depthSamples.fsh</file>
+        <file>shaders/drawSamplesShadow.vsh</file>
+        <file>shaders/drawSamplesShadow.fsh</file>
+        <file>icons/move-class.png</file>
+        <file>icons/clearall.png</file>
     </qresource>
 </RCC>

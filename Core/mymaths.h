@@ -24,6 +24,26 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <cmath>
 #include "types.h"
 
+/// See paper "A Fast, Compact Approximation of the Exponential Function".
+  /// 2x to 9x faster than exp(x)!
+  /// Can be off by about +-4% in the range -100 to 100.
+  ///
+  /// On Intel Core2 Quad Q9550, VS2008 SP1, evaluations per second:
+  ///  20035805 exp(x) with /fp:fast
+  ///  29961267 exp(x) with /fp:precise
+  ///  30386769 exp(x) with /arch:SSE2 /fp:precise
+  ///  92379955 exp(x) with /arch:SSE2 /fp:fast
+  /// 132160844 fast_exp(x) with /fp:precise
+  /// 140163862 fast_exp(x) with /fp:fast
+  /// 172233728 fast_exp(x) with /arch:SSE2 /fp:precise
+  /// 182784751 fast_exp(x) with /arch:SSE2 /fp:fast
+  inline double fast_exp(double y) {
+    double d;
+    *((int*)(&d) + 0) = 0;
+    *((int*)(&d) + 1) = (int)(1512775 * y + 1072632447);
+    return d;
+  }
+
 struct fVec
 {
 	friend std::ostream& operator<<(std::ostream& output, const fVec& v) {

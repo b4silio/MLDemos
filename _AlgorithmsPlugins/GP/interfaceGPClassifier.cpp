@@ -33,6 +33,11 @@ ClassGP::ClassGP()
     params->setupUi(widget = new QWidget());
 }
 
+ClassGP::~ClassGP()
+{
+    delete params;
+}
+
 void ClassGP::SetParams(Classifier *classifier)
 {
     if(!classifier) return;
@@ -178,60 +183,6 @@ void ClassGP::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifier
     // and we finally draw it with a radius of 10
     painter.drawEllipse(pointInCanvas, 10, 10);
 
-}
-
-void ClassGP::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
-{
-    // we want to draw the samples
-
-    // we start by making the painter paint things nicely
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    // for every point in the current dataset
-    FOR(i, canvas->data->GetCount())
-    {
-        // we get the sample
-        fvec sample = canvas->data->GetSample(i);
-        // and its label
-        int label = canvas->data->GetLabel(i);
-
-        // and we test it using the classifier (TestMulti is for multi-class classification)
-        fvec res = classifier->TestMulti(sample);
-
-        // we get the point in canvas coordinates (2D pixel by pixel) corresponding to the sample (N-dimensional in R)
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-
-        // if we only have one response it is a binary classification
-        if(res.size()==1)
-        {
-            // if the response is positive
-            if(res[0] > 0)
-            {
-                // if the sample is also positive then we draw it with the corresponding color
-                if(label == 1) Canvas::drawSample(painter, point, 9, 1);
-                // else we draw a cross
-                else Canvas::drawCross(painter, point, 6, 2);
-            }
-            // vice-versa here if the response is negative
-            else
-            {
-                if(label != 1) Canvas::drawSample(painter, point, 9, 0);
-                else Canvas::drawCross(painter, point, 6, 0);
-            }
-        }
-        // if we have multiple responses
-        else
-        {
-            // we look for the class with the maximum response
-            int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-            int resp = classifier->inverseMap[max];
-            // if it corresponds to the actual label we draw it as a circle
-            if(label == resp) Canvas::drawSample(painter, point, 9, label);
-            // otherwise we draw a cross
-            else Canvas::drawCross(painter, point, 6, label);
-        }
-    }
 }
 
 void ClassGP::SaveOptions(QSettings &settings)

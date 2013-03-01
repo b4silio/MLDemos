@@ -38,7 +38,8 @@ public:
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);
     const char *GetInfoString();
-
+    float GetLogLikelihood(std::vector<fvec> samples);
+    float GetParameterCount();
 	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
 };
 

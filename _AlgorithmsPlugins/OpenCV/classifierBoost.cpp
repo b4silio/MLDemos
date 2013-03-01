@@ -24,6 +24,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+CvMat *weakResponses=0;
+CvMat *x=0;
+int predictorsLength;
+
 ClassifierBoost::ClassifierBoost()
     : model(0), weakCount(0), scoreMultiplier(1.f), boostType(CvBoost::GENTLE)
 {
@@ -34,6 +38,7 @@ ClassifierBoost::~ClassifierBoost()
 {
 	if(model) model->clear();
 	DEL(model);
+    if(weakResponses) cvReleaseMat(&weakResponses);
 }
 
 vector<fvec> ClassifierBoost::learners;
@@ -191,6 +196,8 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
         break;
     }
     currentLearnerType = weakType;
+    if(x) cvReleaseMat(&x);
+    x = cvCreateMat(1, learners.size(), CV_32FC1);
 }
 
 void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
@@ -431,10 +438,12 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     qDebug() << "done";
 
 	CvSeq *predictors = model->get_weak_predictors();
-	int length = cvSliceLength(CV_WHOLE_SEQ, predictors);
+    predictorsLength = cvSliceLength(CV_WHOLE_SEQ, predictors);
+    if(weakResponses) cvReleaseMat(&weakResponses);
+    weakResponses = cvCreateMat(predictorsLength, 1, CV_32FC1);
     //qDebug() << "length:" << length;
 	features.clear();
-	FOR(i, length)
+    FOR(i, predictorsLength)
 	{
 		CvBoostTree *predictor = *CV_SEQ_ELEM(predictors, CvBoostTree*, i);
 		CvDTreeSplit *split = predictor->get_root()->split;
@@ -456,14 +465,14 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     }
 
     // we want to compute the error weight for each training sample
-    vector<fvec> responses(length);
-    FOR(i, length) responses[i].resize(sampleCnt);
+    vector<fvec> responses(predictorsLength);
+    FOR(i, predictorsLength) responses[i].resize(sampleCnt);
     // first we compute all the errors, for each learner
     FOR(i, sampleCnt)
     {
-        fvec response(length);
+        fvec response(predictorsLength);
         Test(samples[i], &response);
-        FOR(j, length) responses[j][i] = response[j];
+        FOR(j, predictorsLength) responses[j][i] = response[j];
     }
     // then we iterate through the learners
     errorWeights = fvec(sampleCnt,1.f);
@@ -510,17 +519,16 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 }
 
 
-float ClassifierBoost::Test( const fvec &sample )
+float ClassifierBoost::Test( const fvec &sample ) const
 {
     return Test(sample, 0);
 }
 
-float ClassifierBoost::Test( const fvec &sample, fvec *responses)
+float ClassifierBoost::Test( const fvec &sample, fvec *responses) const
 {
     if(!model) return 0;
     if(!learners.size()) return 0;
 
-    CvMat *x = cvCreateMat(1, learners.size(), CV_32FC1);
     switch(weakType)
     {
     case 0:
@@ -645,19 +653,14 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses)
     }
 
     // allocate memory for weak learner output
-    int length = cvSliceLength(CV_WHOLE_SEQ, model->get_weak_predictors());
-    CvMat *weakResponses = cvCreateMat(length, 1, CV_32FC1);
     float y = model->predict(x, NULL, weakResponses, CV_WHOLE_SEQ);
 
     if(responses != NULL)
     {
-        (*responses).resize(length);
-        FOR(i, length) (*responses)[i] = cvGet1D(weakResponses, i).val[0];
+        (*responses).resize(predictorsLength);
+        FOR(i, predictorsLength) (*responses)[i] = cvGet1D(weakResponses, i).val[0];
     }
     double score = cvSum(weakResponses).val[0] * scoreMultiplier;
-
-    cvReleaseMat(&weakResponses);
-    cvReleaseMat(&x);
     return score;
 }
 
@@ -674,7 +677,7 @@ void ClassifierBoost::SetParams( u32 weakCount, int weakType, int boostType, int
     }
 }
 
-const char *ClassifierBoost::GetInfoString()
+const char *ClassifierBoost::GetInfoString() const
 {
 	char *text = new char[1024];
 	sprintf(text, "Boosting\n");

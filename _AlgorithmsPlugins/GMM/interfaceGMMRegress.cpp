@@ -30,6 +30,14 @@ RegrGMM::RegrGMM()
 {
 	params = new Ui::ParametersGMMRegr();
 	params->setupUi(widget = new QWidget());
+    marginalWidget = new MarginalWidget();
+    connect(params->marginalsButton, SIGNAL(clicked()), this, SLOT(ShowMarginals()));
+}
+
+RegrGMM::~RegrGMM()
+{
+    delete params;
+    delete marginalWidget;
 }
 
 void RegrGMM::SetParams(Regressor *regressor)
@@ -80,6 +88,11 @@ void RegrGMM::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("Random");
     parameterValues.back().push_back("Uniform");
     parameterValues.back().push_back("K-Means");
+}
+
+void RegrGMM::ShowMarginals()
+{
+    marginalWidget->Show();
 }
 
 QString RegrGMM::GetAlgoString()
@@ -167,6 +180,63 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 		painter.setPen(QPen(Qt::white, 2));
 		painter.drawEllipse(point, 2, 2);
 	}
+
+    vector<fvec> samples = canvas->data->GetSamples();
+    fvec minv (dim, FLT_MAX);
+    fvec maxv (dim, -FLT_MAX);
+    FOR(i, samples.size())
+    {
+        FOR(d, dim)
+        {
+            minv[d] = min(minv[d], samples[i][d]);
+            maxv[d] = max(maxv[d], samples[i][d]);
+        }
+    }
+    fvec diff = maxv-minv;
+    minv -= diff/4;
+    maxv += diff/4;
+
+    std::vector<fvec> limits(dim);
+    FOR(d, dim)
+    {
+        fvec pair(2);
+        pair[0] = minv[d];
+        pair[1] = maxv[d];
+        limits[d] = pair;
+    }
+    vector<fvec> marginals(dim);
+    vector< vector<fvec> >marginalGmm(dim);
+
+    float* bigSigma = new float[dim*dim];
+    float* bigMean = new float[dim];
+    FOR ( d, dim )
+    {
+        int steps = 200;
+        marginals[d].resize(steps,0);
+        marginalGmm[d].resize(steps);
+        FOR ( j, steps )
+        {
+            float likelihood = 0;
+            float s = j/(float)(steps)*(maxv[d]-minv[d]) + minv[d];
+            FOR ( i, gmm->nstates ) {
+                gmm->getCovariance(i, bigSigma);
+                gmm->getMean(i, bigMean);
+                float mu = bigMean[d];
+                float sigma = bigSigma[d + d*dim];
+                float prior = gmm->getPrior(i);
+
+                float diff = s-mu;
+                float lik = 1./(sqrtf(2*M_PI*sigma))*expf(-(diff*diff)*0.5/sigma);
+                likelihood += lik*prior;
+                marginalGmm[d][j].push_back(max(0.f,lik*prior));
+            }
+            marginals[d][j] = likelihood;
+        }
+    }
+    delete [] bigSigma;
+    delete [] bigMean;
+    marginalWidget->SetDimensions(dim, canvas->dimNames);
+    marginalWidget->SetMarginals(marginals, marginalGmm, limits);
 }
 
 void RegrGMM::DrawConfidence(Canvas *canvas, Regressor *regressor)
