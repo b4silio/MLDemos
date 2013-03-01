@@ -18,10 +18,10 @@ INCLUDEPATH += . \
 		$${MLPATH}/_3rdParty
 
 win32{
-    CONFIG(debug){
-        LIBS += -lQtSvgd4 -lQtOpenGLd4 -lQtGuid4 -lQtCored4
-    }else{
+    CONFIG(release){
         LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
+    }else{
+        LIBS += -lQtSvgd4 -lQtOpenGLd4 -lQtGuid4 -lQtCored4
     }
 }
 CONFIG(coreLib){

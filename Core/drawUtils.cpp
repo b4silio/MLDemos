@@ -868,7 +868,6 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
     mins = center - dists*2;
     maxes = center + dists*2;
 
-    bool bMultiClass = false;
     // and now we draw a volume
     int steps = 64;
     fvec sample(dim);
@@ -967,7 +966,7 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
             QColor color = SampleColor[(c+1)%SampleColorCnt];
             o.objectType = "Surfaces";
             o.style = "smooth,transparent,blurry:1";
-            o.style += QString("color:%1:%2:%3:0.3").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
+            o.style += QString(",color:%1:%2:%3:0.4").arg(color.redF()).arg(color.greenF()).arg(color.blueF());
             o.style += QString(",offset:%1").arg((float)c,0,'f',2);
             glw->mutex->lock();
             glw->AddObject(o);
@@ -1015,7 +1014,7 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
         }
 
         o.objectType = "Surfaces";
-        o.style = "smooth,transparent,blurry:1,color:1:1:1:0.4";
+        o.style = "smooth,transparent,blurry:1,color:0:0:0:0.3";
         glw->mutex->lock();
         glw->AddObject(o);
         glw->mutex->unlock();

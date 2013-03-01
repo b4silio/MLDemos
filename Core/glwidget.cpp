@@ -182,8 +182,8 @@ void GLWidget::killObjects()
         //objects.erase(objects.begin() + killList[i]);
         //objectAlive.erase(objectAlive.begin() + killList[i]);
         objectAlive[killList[i]] = false;
-        GLObject &o = objects[killList[i]];
-        o.vertices.clear();
+        //GLObject &o = objects[killList[i]];
+        //o.vertices.clear();
         //o.barycentric.clear();
         //o.colors.clear();
         //o.normals.clear();
