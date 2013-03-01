@@ -95,8 +95,8 @@ void GLWidget::timerEvent(QTimerEvent *)
     if(bRotateCamera)
     {
         setYRotation(yRot + 3.f);
-        repaint();
     }
+    repaint();
 }
 
 GLWidget::~GLWidget()
