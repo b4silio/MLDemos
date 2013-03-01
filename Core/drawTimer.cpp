@@ -550,7 +550,6 @@ bool DrawTimer::VectorsGL(int count, int steps)
         o.style = QString("fading:%1").arg(steps);
     }
 
-    int prevCount = o.vertices.size()/(2*steps);
     FOR(i, count)
     {
         /*
@@ -578,8 +577,8 @@ bool DrawTimer::VectorsGL(int count, int steps)
             }
             mutex->unlock();
             sample += res*dT;
-            o.vertices.append(QVector3D(oldSample[xInd],oldSample[yInd],oldSample[zInd]));
-            o.vertices.append(QVector3D(sample[xInd],sample[yInd],sample[zInd]));
+            o.vertices.append(QVector3D(oldSample[xInd],oldSample[yInd], zInd >= 0 && zInd < dim ? oldSample[zInd] : 0));
+            o.vertices.append(QVector3D(sample[xInd],sample[yInd], zInd >= 0 && zInd < dim ? sample[zInd] : 0));
             oldSample = sample;
         }
     }
