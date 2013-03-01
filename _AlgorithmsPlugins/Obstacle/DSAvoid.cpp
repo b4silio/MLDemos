@@ -313,7 +313,7 @@ bool DSAvoid::Avoid(Vector &x,Vector &xd)
 	obs[i_end].Rotation.Mult(nv,nv_rotated); //obs[i_end].R*nv
     if (!b_contouring && d[0] < 0.01 && nv_rotated*xd_old < 0 && xd.Norm() < 0.05){ // Gamma(x_t) <= 1
         b_contouring = true;
-		std::cout << "contouring started ... " << "\n";
+        //std::cout << "contouring started ... " << "\n";
     }
 
     if (b_contouring){
@@ -333,7 +333,7 @@ bool DSAvoid::Avoid(Vector &x,Vector &xd)
 		obs[i_end].Rotation.Mult(vec_tmp,xd_contouring); //xd_contouring = obs[i_end].R * xd_contouring;
         if (((xd_contouring*xd > 0) && xd.Norm() > 0.05) || nv_rotated*xd_old >= 0)  { //
             b_contouring = false;
-			std::cout << "contouring stopped ... " << "\n";
+            //std::cout << "contouring stopped ... " << "\n";
         }
 
         xd = xd_contouring;

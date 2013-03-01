@@ -80,11 +80,9 @@ HEADERS += basicMath.h \
 SOURCES += \
 	main.cpp \
 	mldemos.cpp \
-    mlprocessing.cpp \
     mlstats.cpp \
 	mlsaving.cpp \
     compare.cpp \
-    mltrain.cpp \
     datagenerator.cpp \
     gridsearch.cpp \
     visualization.cpp \

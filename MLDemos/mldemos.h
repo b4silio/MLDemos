@@ -27,14 +27,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_mldemos.h"
 #include "ui_viewOptions.h"
 #include "ui_aboutDialog.h"
-#include "ui_algorithmOptions.h"
-#include "ui_optsClassify.h"
-#include "ui_optsCluster.h"
-#include "ui_optsRegress.h"
-#include "ui_optsMaximize.h"
-#include "ui_optsReinforcement.h"
-#include "ui_optsDynamic.h"
-#include "ui_optsProject.h"
 #include "ui_statisticsDialog.h"
 #include "ui_drawingTools.h"
 #include "ui_drawingToolsContext1.h"
@@ -68,15 +60,20 @@ class MLDemos : public QMainWindow
 {
 	Q_OBJECT
 
-private:
+public:
     QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
     *actionDisplayOptions, *actionShowStats, *actionAddData,
     *actionClearData, *actionClearModel, *actionClearAll, *actionScreenshot,
     *actionNew, *actionSave, *actionLoad, *actionGridsearch;
 
-    QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
+    ivec selectedData;
+    fvec selectionWeights;
+    fvec selectionStart;
+    QMutex mutex;
 
-    QWidget *algorithmWidget, *regressWidget, *dynamicWidget, *classifyWidget, *clusterWidget, *maximizeWidget, *reinforcementWidget, *projectWidget;
+private:
+
+    QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
     QNamedWindow *rocWidget;
 
@@ -84,14 +81,6 @@ private:
 	Ui::viewOptionDialog *displayOptions;
 	Ui::aboutDialog *aboutPanel;
 	Ui::statisticsDialog *showStats;
-	Ui::algorithmOptions *algorithmOptions;
-	Ui::optionsClassifyWidget *optionsClassify;
-	Ui::optionsClusterWidget *optionsCluster;
-	Ui::optionsRegressWidget *optionsRegress;
-	Ui::optionsMaximizeWidget *optionsMaximize;
-	Ui::optionsDynamicWidget *optionsDynamic;
-    Ui::optionsProjectWidget *optionsProject;
-    Ui::optionsReinforcementWidget *optionsReinforcement;
 	Ui::DrawingToolbar *drawToolbar;
     Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
@@ -119,43 +108,7 @@ private:
 	bool bNewObstacle;
     QString lastTrainingInfo;
 
-	void closeEvent(QCloseEvent *event);
-    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1,
-               std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
-    void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec(), std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
-	fvec Train(Dynamical *dynamical);
-    void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0, std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
-    void Train(Maximizer *maximizer);
-    void Train(Reinforcement *reinforcement);
-    void Train(Projector *projector, bvec trainList = bvec());
-    fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
-    void Test(Maximizer *maximizer);
-    void RewardFromMap(QImage rewardMap);
-    void MapFromReward();
-    void DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti);
-
-	QList<ClassifierInterface *> classifiers;
-	QList<ClustererInterface *> clusterers;
-	QList<RegressorInterface *> regressors;
-	QList<DynamicalInterface *> dynamicals;
-	QList<AvoidanceInterface *> avoiders;
-    QList<MaximizeInterface*> maximizers;
-    QList<ReinforcementInterface*> reinforcements;
-    QList<ProjectorInterface*> projectors;
-    QList<InputOutputInterface *> inputoutputs;
-	QList<bool> bInputRunning;
 	CompareAlgorithms *compare;
-    std::map< QString , std::vector<QWidget*> > algoWidgets;
-    QList<QPluginLoader*> pluginLoaders;
-    void AddPlugin(ClassifierInterface *iClassifier, const char *method);
-	void AddPlugin(ClustererInterface *iCluster, const char *method);
-	void AddPlugin(RegressorInterface *iRegress, const char *method);
-	void AddPlugin(DynamicalInterface *iDynamical, const char *method);
-	void AddPlugin(AvoidanceInterface *iAvoid, const char *method);
-    void AddPlugin(MaximizeInterface *iMaximize, const char *method);
-    void AddPlugin(ReinforcementInterface *iReinforcement, const char *method);
-    void AddPlugin(ProjectorInterface *iProject, const char *method);
-    void AddPlugin(InputOutputInterface *iIO);
 
 	void initDialogs();
 	void initToolBars();
@@ -178,42 +131,17 @@ public:
 	MLDemos(QString filename="", QWidget *parent = 0, Qt::WFlags flags = 0);
 	~MLDemos();
 
-	int tabUsedForTraining;
-	Classifier *classifier;
-	Regressor *regressor;
-	Dynamical *dynamical;
-	Clusterer *clusterer;
-    Maximizer *maximizer;
-    Reinforcement *reinforcement;
-    Projector *projector;
-    std::vector<Classifier *> classifierMulti;
-    std::vector<fvec> sourceData;
-    std::vector<fvec> projectedData;
-    ivec sourceLabels;
-    ivec sourceDims;
-    ivec selectedData;
-    fvec selectionWeights;
-    fvec selectionStart;
-
-    QMutex mutex;
 	void resizeEvent( QResizeEvent *event );
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
+    void closeEvent(QCloseEvent *event);
 
-signals:
-	void SendResults(std::vector<fvec> results);
 public slots:
     void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected);
 	void SetTimeseries(std::vector<TimeSerie> timeseries);
     void SetDimensionNames(QStringList headers);
     void SetClassNames(std::map<int,QString> classNames);
     void SetCategorical(std::map<int,std::vector<std::string> > categorical);
-	void QueryClassifier(std::vector<fvec> samples);
-	void QueryRegressor(std::vector<fvec> samples);
-	void QueryDynamical(std::vector<fvec> samples);
-	void QueryClusterer(std::vector<fvec> samples);
-	void QueryMaximizer(std::vector<fvec> samples);
-    void QueryProjector(std::vector<fvec> samples);
     void DataEdited();
     void UpdateInfo();
     void CanvasTypeChanged();
@@ -235,49 +163,22 @@ public slots:
     void HideStatsDialog();
 	void HideToolbar();
     void HideAddData();
-    void AvoidOptionChanged();
     void DisplayOptionsChanged();
     void Display3DOptionsChanged();
-	void ColorMapChanged();
-    void ActivateIO();
-    void ActivateImport();
-    void DisactivateIO(QObject *);
 
-    void Classify();
-	void Regression();
-    void Maximize();
-    void MaximizeContinue();
-    void Reinforce();
-    void ReinforceContinue();
-    void Dynamize();
-	void Cluster();
-	void ClusterIterate();
-    void ClusterOptimize();
-    void ClusterTest();
-    void Project();
-    void ProjectManifold();
-    void ProjectRevert();
-    void ProjectReproject();
-    void Avoidance();
-	void Compare();
     void AddData();
     void Clear();
     void ClearData();
     void ClearAll();
     void ShowDataEditor();
     void SetROCInfo();
-    void LoadClassifier();
-    void SaveClassifier();
-    void LoadRegressor();
-    void SaveRegressor();
-    void LoadDynamical();
-    void SaveDynamical();
 
 	void SaveData();
 	void LoadData();
     void ImportData();
-	void ExportOutput();
-	void ExportAnimation();
+    void RewardFromMap(QImage rewardMap);
+    void MapFromReward();
+    void ExportOutput();
 	void ExportSVG();
 	void Screenshot();
 	void ToClipboard();
@@ -293,7 +194,6 @@ public slots:
     void InputDimensions();
     void FitToData();
 	void ZoomChanged(float d);
-    void UpdateLearnedModel();
 	void CanvasMoveEvent();
 	void Navigation(fvec sample);
 	void ResetPositiveClass();
@@ -303,7 +203,6 @@ public slots:
 	void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
 	void AlgoChanged();
-    void ClusterChanged();
 	void ChangeInfoFile();
     void ManualSelectionUpdated();
     void ManualSelectionChanged();
@@ -321,7 +220,6 @@ public slots:
 	void GaussianButton();
 	void GradientButton();
 	void BenchmarkButton();
-	void CompareAdd();
 
 	void ShowContextMenuSpray(const QPoint &point);
 	void ShowContextMenuLine(const QPoint &point);

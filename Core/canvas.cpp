@@ -1036,14 +1036,13 @@ QPainterPath Canvas::DrawObstacle(Obstacle o)
         float RX = + X * cosf(angle) - Y * sinf(angle);
         float RY = + X * sinf(angle) + Y * cosf(angle);
 
-        point = QPointF(RX*(zoom*zooms[xIndex]*height()),RY*(zoom*zooms[yIndex]*height()));
-        if(theta==-PIf)
-        {
+        point = QPointF(RX*(zoom*zooms[xIndex]*height()),-RY*(zoom*zooms[yIndex]*height()));
+        if (theta==-PIf) {
             firstPoint = point;
             obstaclePath.moveTo(point);
-            continue;
+        } else {
+            obstaclePath.lineTo(point);
         }
-        obstaclePath.lineTo(point);
     }
     obstaclePath.lineTo(firstPoint);
     return obstaclePath;

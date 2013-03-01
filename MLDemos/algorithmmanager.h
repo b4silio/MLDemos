@@ -45,7 +45,7 @@ public:
 
     QMenu *menuInput_Output, *menuImport;
 
-    Ui::algorithmOptions *algorithmOptions;
+    Ui::algorithmOptions *options;
     Ui::optionsClassifyWidget *optionsClassify;
     Ui::optionsClusterWidget *optionsCluster;
     Ui::optionsRegressWidget *optionsRegress;
@@ -124,14 +124,13 @@ public:
     void Train(Projector *projector, bvec trainList = bvec());
     fvec Test(Dynamical *dynamical, std::vector< std::vector<fvec> > trajectories, ivec labels);
     void Test(Maximizer *maximizer);
-    void RewardFromMap(QImage rewardMap);
-    void MapFromReward();
     float ClusterFMeasure(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores, float ratio = 1.f);
     void DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti);
     void UpdateLearnedModel();
 
     std::vector<bool> GetManualSelection();
     ivec GetInputDimensions();
+    QStringList GetInfoFiles();
 
 signals:
     void Trained();
@@ -140,9 +139,12 @@ signals:
     void CanvasTypeChanged();
     void DisplayOptionsChanged();
     void ResetPositiveClass();
+    void SendResults(std::vector<fvec> results);
 
 public slots:
     // running the algorithms
+    void Clear();
+    void ClearData();
     void Classify();
     void Regression();
     void Maximize();
@@ -160,6 +162,7 @@ public slots:
     void ProjectReproject();
     void Avoidance();
     void Compare();
+    void CompareAdd();
 
     // saving/loading the algorithms
     void LoadClassifier();
@@ -175,6 +178,16 @@ public slots:
     void ClusterChanged();
     void SetAlgorithmWidget();
 
+    // input/output plugins
+    void ActivateIO();
+    void ActivateImport();
+    void DisactivateIO(QObject *);
+    void QueryClassifier(std::vector<fvec> samples);
+    void QueryRegressor(std::vector<fvec> samples);
+    void QueryDynamical(std::vector<fvec> samples);
+    void QueryClusterer(std::vector<fvec> samples);
+    void QueryMaximizer(std::vector<fvec> samples);
+    void QueryProjector(std::vector<fvec> samples);
 };
 
 #endif // ALGORITHMMANAGER_H

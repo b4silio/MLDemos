@@ -53,7 +53,7 @@ void MLDemos::MouseOnRoc(QMouseEvent *event)
 
 void MLDemos::ShowRoc()
 {
-    if(!classifier) return;
+    if(!algo->classifier) return;
     SetROCInfo();
     actionShowStats->setChecked(true);
     showStats->tabWidget->setCurrentWidget(showStats->rocTab);
@@ -132,16 +132,16 @@ void PaintData(std::vector<float> data, QPixmap &pm)
 void MLDemos::SetROCInfo()
 {
     QSize size(showStats->rocWidget->width(),showStats->rocWidget->height());
-    if(classifier && bIsRocNew)
+    if(algo->classifier && bIsRocNew)
     {
-        QPixmap rocImage = RocImage(classifier->rocdata, classifier->roclabels, size);
+        QPixmap rocImage = RocImage(algo->classifier->rocdata, algo->classifier->roclabels, size);
         bIsRocNew = false;
         //	rocImage.save("roc.png");
         rocWidget->ShowImage(rocImage);
     }
-    if(maximizer)
+    if(algo->maximizer)
     {
-        vector<double> history = maximizer->HistoryValue();
+        vector<double> history = algo->maximizer->HistoryValue();
         vector<float> data;data.resize(history.size());
         FOR(i, data.size()) data[i] = history[i];
         if(!data.size()) return;
@@ -155,22 +155,22 @@ void MLDemos::SetCrossValidationInfo()
 {
     if(!bIsCrossNew) return;
     std::vector<fvec> fmeasures;
-    if(classifier) fmeasures = classifier->crossval;
-    else if(regressor) fmeasures = regressor->crossval;
+    if(algo->classifier) fmeasures = algo->classifier->crossval;
+    else if(algo->regressor) fmeasures = algo->regressor->crossval;
 
     if(!fmeasures.size()) return;
     char txt[255];
     QString text;
     text += "Cross-Validation\n";
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
-    int ratioIndex = classifier ? optionsClassify->traintestRatioCombo->currentIndex() : optionsRegress->traintestRatioCombo->currentIndex();
+    int ratioIndex = algo->classifier ? algo->optionsClassify->traintestRatioCombo->currentIndex() : algo->optionsRegress->traintestRatioCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
     //	if(classifier) sprintf(txt, "%d folds\n", optionsClassify->foldCountSpin->value());
     //	else sprintf(txt, "%d folds\n", optionsRegress->foldCountSpin->value());
     text += txt;
     sprintf(txt,"%d train, %d test samples", (int)(canvas->data->GetCount()*trainRatio), canvas->data->GetCount() - (int)(canvas->data->GetCount()*trainRatio));
     text += txt + QString("\n\n");
-    text += classifier ? QString("Classification Performance:\n\n") : QString("Regression Error:\n\n");
+    text += algo->classifier ? QString("Classification Performance:\n\n") : QString("Regression Error:\n\n");
     FOR(i, fmeasures.size())
     {
         fvec meanStd = MeanStd(fmeasures[i]);
@@ -203,7 +203,7 @@ void MLDemos::UpdateInfo()
     int count = canvas->data->GetCount();
     int pcount = 0, ncount = 0;
     ivec labels = canvas->data->GetLabels();
-    int posClass = optionsClassify->positiveSpin->value();
+    int posClass = algo->optionsClassify->positiveSpin->value();
     FOR(i, labels.size())
     {
         if(labels[i] == posClass) ++pcount;
@@ -249,12 +249,12 @@ void MLDemos::UpdateInfo()
 
     QString information;
 
-    if(classifier)
+    if(algo->classifier)
     {
         information += "Classification Performance:\n" + lastTrainingInfo;
-        information += "\nClassifier: " + QString(classifier->GetInfoString());
+        information += "\nClassifier: " + QString(algo->classifier->GetInfoString());
         // we also want to generate the confusion matrix
-        if(classifier->IsMultiClass())
+        if(algo->classifier->IsMultiClass())
         {
             QObjectList children = showStats->informationWidget->children();
             FOR(i, children.size()) delete children[i];
@@ -268,11 +268,11 @@ void MLDemos::UpdateInfo()
 
             QLabel *labelTrain = 0;
             QLabel *labelTest = 0;
-            if(classifier->confusionMatrix[0].size())
+            if(algo->classifier->confusionMatrix[0].size())
             {
                 labelTrain = new QLabel();
                 confusionPixmap.fill(Qt::white);
-                map< int,map<int,int> > confusion = classifier->confusionMatrix[0];
+                map< int,map<int,int> > confusion = algo->classifier->confusionMatrix[0];
                 int classCount = 0;
                 map<int,int> maxCount;
                 for(map<int,map<int,int> >::iterator it = confusion.begin();it != confusion.end();it++)
@@ -301,11 +301,11 @@ void MLDemos::UpdateInfo()
                 showStats->informationWidget->layout()->addWidget(labelTrain);
                 labelTrain->setPixmap(confusionPixmap);
             }
-            if(classifier->confusionMatrix[1].size())
+            if(algo->classifier->confusionMatrix[1].size())
             {
                 labelTest = new QLabel();
                 confusionPixmap.fill(Qt::white);
-                map< int,map<int,int> > confusion = classifier->confusionMatrix[1];
+                map< int,map<int,int> > confusion = algo->classifier->confusionMatrix[1];
                 int classCount = 0;
                 map<int,int> maxCount;
                 for(map<int,map<int,int> >::iterator it = confusion.begin();it != confusion.end();it++)
@@ -339,14 +339,13 @@ void MLDemos::UpdateInfo()
             showStats->informationWidget->repaint();
         }
     }
-    if(regressor)  information += "\nRegressor: "  + QString(regressor->GetInfoString());
-    if(clusterer)  information += "\nClusterer: "  + QString(clusterer->GetInfoString());
-    if(dynamical)  information += "\nDynamical: "  + QString(dynamical->GetInfoString());
-    if(maximizer)  information += "\nMaximizer: "  + QString(maximizer->GetInfoString());
+    if(algo->regressor)  information += "\nRegressor: "  + QString(algo->regressor->GetInfoString());
+    if(algo->clusterer)  information += "\nClusterer: "  + QString(algo->clusterer->GetInfoString());
+    if(algo->dynamical)  information += "\nDynamical: "  + QString(algo->dynamical->GetInfoString());
+    if(algo->maximizer)  information += "\nMaximizer: "  + QString(algo->maximizer->GetInfoString());
 
     information += "\nCurrent Dataset:\n";
     information += QString("    %1 Samples\n    %2 Positives\n    %3 Negatives\n\n").arg(count).arg(pcount).arg(ncount);
-    char string[255];
     information +=    "       Min - Max          Mean  ,    Var\n";
     information += QString("    %1    %2      %3   ,   %4  %5\n").arg(sMin[0],0,'f',3).arg(sMax[0],0,'f',3).arg(sMean[0],0,'f',3).arg(sSigma[0],0,'f',3).arg(sSigma[1]);
     information += QString("    %1    %2      %3   ,   %4  %5\n").arg(sMin[1],0,'f',3).arg(sMax[1],0,'f',3).arg(sMean[1],0,'f',3).arg(sSigma[2],0,'f',3).arg(sSigma[3]);

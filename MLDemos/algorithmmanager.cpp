@@ -47,9 +47,13 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
       maximizer(0),
       reinforcement(0),
       projector(0),
-      tabUsedForTraining(0)
+      tabUsedForTraining(0),
+      menuImport(0),
+      menuInput_Output(0),
+      inputDimensions(0),
+      manualSelection(0)
 {
-    algorithmOptions = new Ui::algorithmOptions();
+    options = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
     optionsCluster = new Ui::optionsClusterWidget();
     optionsRegress = new Ui::optionsRegressWidget();
@@ -59,15 +63,15 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsProject = new Ui::optionsProjectWidget();
 
     algorithmWidget = new QWidget();
-    algorithmOptions->setupUi(algorithmWidget);
+    options->setupUi(algorithmWidget);
 
-    classifyWidget = new QWidget(algorithmOptions->tabClass);
-    clusterWidget = new QWidget(algorithmOptions->tabClust);
-    regressWidget = new QWidget(algorithmOptions->tabRegr);
-    dynamicWidget = new QWidget(algorithmOptions->tabDyn);
-    maximizeWidget = new QWidget(algorithmOptions->tabMax);
-    reinforcementWidget = new QWidget(algorithmOptions->tabReinf);
-    projectWidget = new QWidget(algorithmOptions->tabProj);
+    classifyWidget = new QWidget(options->tabClass);
+    clusterWidget = new QWidget(options->tabClust);
+    regressWidget = new QWidget(options->tabRegr);
+    dynamicWidget = new QWidget(options->tabDyn);
+    maximizeWidget = new QWidget(options->tabMax);
+    reinforcementWidget = new QWidget(options->tabReinf);
+    projectWidget = new QWidget(options->tabProj);
     optionsClassify->setupUi(classifyWidget);
     optionsCluster->setupUi(clusterWidget);
     optionsRegress->setupUi(regressWidget);
@@ -79,9 +83,9 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsClassify->classifyButton, SIGNAL(clicked()), this, SLOT(Classify()));
     connect(optionsClassify->loadButton, SIGNAL(clicked()), this, SLOT(LoadClassifier()));
     connect(optionsClassify->saveButton, SIGNAL(clicked()), this, SLOT(SaveClassifier()));
+    connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), mldemos, SLOT(ShowRoc()));
-    connect(optionsClassify->compareButton, SIGNAL(clicked()), mldemos, SLOT(CompareAdd()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
     connect(optionsClassify->inputDimButton, SIGNAL(clicked()), mldemos, SLOT(InputDimensions()));
     connect(optionsClassify->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
@@ -94,8 +98,8 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsRegress->regressionButton, SIGNAL(clicked()), this, SLOT(Regression()));
     connect(optionsRegress->loadButton, SIGNAL(clicked()), this, SLOT(LoadRegressor()));
     connect(optionsRegress->saveButton, SIGNAL(clicked()), this, SLOT(SaveRegressor()));
+    connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
-    connect(optionsRegress->compareButton, SIGNAL(clicked()), mldemos, SLOT(CompareAdd()));
     connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
     connect(optionsRegress->inputDimButton, SIGNAL(clicked()), mldemos, SLOT(InputDimensions()));
     connect(optionsRegress->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
@@ -124,8 +128,8 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsDynamic->saveButton, SIGNAL(clicked()), this, SLOT(SaveDynamical()));
     connect(optionsDynamic->obstacleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(AvoidOptionChanged()));
     connect(optionsDynamic->colorCheck, SIGNAL(clicked()), this, SLOT(ColorMapChanged()));
+    connect(optionsDynamic->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsDynamic->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
-    connect(optionsDynamic->compareButton, SIGNAL(clicked()), mldemos, SLOT(CompareAdd()));
     connect(optionsDynamic->targetButton, SIGNAL(pressed()), mldemos, SLOT(TargetButton()));
     connect(optionsDynamic->clearTargetButton, SIGNAL(clicked()), mldemos, SLOT(ClearTargets()));
     connect(optionsDynamic->centerCombo, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(ChangeActiveOptions()));
@@ -143,12 +147,12 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
 
     connect(optionsMaximize->maximizeButton, SIGNAL(clicked()), this, SLOT(Maximize()));
     connect(optionsMaximize->pauseButton, SIGNAL(clicked()), this, SLOT(MaximizeContinue()));
+    connect(optionsMaximize->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsMaximize->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
     connect(optionsMaximize->targetButton, SIGNAL(pressed()), mldemos, SLOT(TargetButton()));
     connect(optionsMaximize->gaussianButton, SIGNAL(pressed()), mldemos, SLOT(GaussianButton()));
     connect(optionsMaximize->gradientButton, SIGNAL(pressed()), mldemos, SLOT(GradientButton()));
     connect(optionsMaximize->benchmarkButton, SIGNAL(clicked()), mldemos, SLOT(BenchmarkButton()));
-    connect(optionsMaximize->compareButton, SIGNAL(clicked()), mldemos, SLOT(CompareAdd()));
     connect(optionsMaximize->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
     if (!optionsMaximize->algoWidget->layout()) {
         QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsMaximize->algoWidget);
@@ -193,15 +197,49 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsReinforcement->algoList->clear();
     optionsProject->algoList->clear();
 
-    connect(algorithmOptions->tabWidget, SIGNAL(currentChanged(int)), mldemos, SLOT(AlgoChanged()));
+    connect(options->tabWidget, SIGNAL(currentChanged(int)), mldemos, SLOT(AlgoChanged()));
 
     algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
     algorithmWidget->setFixedSize(636,220);
+
+    drawTimer->classifier = &classifier;
+    drawTimer->regressor = &regressor;
+    drawTimer->dynamical = &dynamical;
+    drawTimer->clusterer = &clusterer;
+    drawTimer->maximizer = &maximizer;
+    drawTimer->reinforcement = &reinforcement;
+    drawTimer->reinforcementProblem = &reinforcementProblem;
+    drawTimer->classifierMulti = &classifierMulti;
 }
 
 AlgorithmManager::~AlgorithmManager()
 {
+    FOR (i, inputoutputs.size()) {
+        if (inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
+    }
+    FOR (i, pluginLoaders.size()) pluginLoaders.at(i)->unload();
+    mutex->lock();
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    if (!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR (i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
+    DEL(maximizer);
+    DEL(reinforcement);
+    DEL(projector);
+    mutex->unlock();
 
+    DEL(optionsClassify);
+    DEL(optionsRegress);
+    DEL(optionsCluster);
+    DEL(optionsDynamic);
+    DEL(optionsMaximize);
+    DEL(optionsReinforcement);
+    DEL(optionsProject);
+    DEL(options);
+    DEL(algorithmWidget);
 }
 
 void AlgorithmManager::LoadPlugins()
@@ -313,6 +351,12 @@ void AlgorithmManager::LoadPlugins()
             delete pluginLoader;
         }
     }
+    if (!classifiers.size()) options->tabWidget->setTabEnabled(0,false);
+    if (!clusterers.size()) options->tabWidget->setTabEnabled(1,false);
+    if (!regressors.size()) options->tabWidget->setTabEnabled(2,false);
+    if (!projectors.size()) options->tabWidget->setTabEnabled(3,false);
+    if (!dynamicals.size()) options->tabWidget->setTabEnabled(4,false);
+    if (!maximizers.size()) options->tabWidget->setTabEnabled(5,false);
 }
 
 void AlgorithmManager::AddPlugin(InputOutputInterface *iIO)
@@ -320,8 +364,8 @@ void AlgorithmManager::AddPlugin(InputOutputInterface *iIO)
     inputoutputs.push_back(iIO);
     bInputRunning.push_back(false);
     connect(this, SIGNAL(SendResults(std::vector<fvec>)), iIO->object(), iIO->FetchResultsSlot());
-    connect(iIO->object(), iIO->SetDataSignal(), this, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
-    connect(iIO->object(), iIO->SetTimeseriesSignal(), this, SLOT(SetTimeseries(std::vector<TimeSerie>)));
+    connect(iIO->object(), iIO->SetDataSignal(), mldemos, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
+    connect(iIO->object(), iIO->SetTimeseriesSignal(), mldemos, SLOT(SetTimeseries(std::vector<TimeSerie>)));
     connect(iIO->object(), iIO->QueryClassifierSignal(), this, SLOT(QueryClassifier(std::vector<fvec>)));
     connect(iIO->object(), iIO->QueryRegressorSignal(), this, SLOT(QueryRegressor(std::vector<fvec>)));
     connect(iIO->object(), iIO->QueryDynamicalSignal(), this, SLOT(QueryDynamical(std::vector<fvec>)));
@@ -435,6 +479,95 @@ void AlgorithmManager::AddPlugin(ProjectorInterface *iProject, const char *metho
     widget->hide();
     algoWidgets["projectors"].push_back(widget);
 }
+
+
+void AlgorithmManager::QueryClassifier(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(mutex);
+    fvec result;
+    result.resize(1);
+    if (classifier && samples.size()) {
+        results.resize(samples.size());
+        FOR (i, samples.size()) {
+            fvec sample = samples[i];
+            if (sourceDims.size()) {
+                fvec newSample(sourceDims.size());
+                FOR (d, sourceDims.size()) newSample[d] = sample[sourceDims[d]];
+                sample = newSample;
+            }
+            result[0] = classifier->Test(sample);
+            results[i] = result;
+        }
+    }
+    emit SendResults(results);
+}
+
+void AlgorithmManager::QueryRegressor(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(mutex);
+    if (regressor && samples.size()) {
+        results.resize(samples.size());
+        FOR (i, samples.size()) {
+            results[i] = regressor->Test(samples[i]);
+        }
+    }
+    emit SendResults(results);
+}
+
+void AlgorithmManager::QueryDynamical(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(mutex);
+    if (dynamical && samples.size()) {
+        results.resize(samples.size());
+        FOR (i, samples.size()) {
+            results[i] = dynamical->Test(samples[i]);
+        }
+    }
+    emit SendResults(results);
+}
+
+void AlgorithmManager::QueryClusterer(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(mutex);
+    if (clusterer && samples.size()) {
+        results.resize(samples.size());
+        FOR (i, samples.size()) {
+            results[i] = clusterer->Test(samples[i]);
+        }
+    }
+    emit SendResults(results);
+}
+
+void AlgorithmManager::QueryMaximizer(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(mutex);
+    if (maximizer && samples.size()) {
+        results.resize(samples.size());
+        FOR (i, samples.size()) {
+            results[i] = maximizer->Test(samples[i]);
+        }
+    }
+    emit SendResults(results);
+}
+
+void AlgorithmManager::QueryProjector(std::vector<fvec> samples)
+{
+    std::vector<fvec> results;
+    QMutexLocker lock(mutex);
+    if (projector && samples.size()) {
+        results.resize(samples.size());
+        FOR (i, samples.size()) {
+            results[i] = projector->Project(samples[i]);
+        }
+    }
+    emit SendResults(results);
+}
+
 
 bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex, std::vector<fvec> samples, ivec labels)
 {
@@ -1352,11 +1485,13 @@ void AlgorithmManager::Compare()
         samples = compare->datasetA;
         labels = compare->labelsA;
         trainList.clear();
+        if(!samples.size()) return;
         break;
     case 3:
         samples = compare->datasetB;
         labels = compare->labelsB;
         trainList.clear();
+        if(!samples.size()) return;
         break;
     case 4:
         samples = compare->datasetA;
@@ -1441,7 +1576,6 @@ void AlgorithmManager::Compare()
             {
                 paramStream >> paramName;
                 paramStream >> paramValue;
-                qDebug() << "params:" << paramName << paramValue;
                 classifiers[tab]->LoadParams(paramName, paramValue);
             }
             QString algoName = classifiers[tab]->GetAlgoString();
@@ -1695,6 +1829,65 @@ ivec AlgorithmManager::GetInputDimensions()
         dimList[i] = inputDimensions->dimList->row(selected[i]);
     }
     return dimList;
+}
+
+QStringList AlgorithmManager::GetInfoFiles()
+{
+    QStringList infoFiles;
+    infoFiles << QString() << QString();
+    QString infoFile, mainFile;
+    if (options->tabClass->isVisible())
+    {
+        mainFile = "classification.html";
+        int tab = optionsClassify->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)classifiers.size() || !classifiers[tab]) return infoFiles;
+        infoFile = classifiers[tab]->GetInfoFile();
+    }
+    if (options->tabClust->isVisible())
+    {
+        mainFile = "clustering.html";
+        int tab = optionsCluster->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)clusterers.size() || !clusterers[tab]) return infoFiles;
+        infoFile = clusterers[tab]->GetInfoFile();
+    }
+    if (options->tabRegr->isVisible())
+    {
+        mainFile = "regression.html";
+        int tab = optionsRegress->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)regressors.size() || !regressors[tab]) return infoFiles;
+        infoFile = regressors[tab]->GetInfoFile();
+    }
+    if (options->tabDyn->isVisible())
+    {
+        mainFile = "dynamical.html";
+        int tab = optionsDynamic->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)dynamicals.size() || !dynamicals[tab]) return infoFiles;
+        infoFile = dynamicals[tab]->GetInfoFile();
+    }
+    if (options->tabMax->isVisible())
+    {
+        mainFile = "maximization.html";
+        int tab = optionsMaximize->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)maximizers.size() || !maximizers[tab]) return infoFiles;
+        infoFile = maximizers[tab]->GetInfoFile();
+    }
+    if (options->tabProj->isVisible())
+    {
+        mainFile = "projection.html";
+        int tab = optionsProject->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)projectors.size() || !projectors[tab]) return infoFiles;
+        infoFile = projectors[tab]->GetInfoFile();
+    }
+    if (options->tabReinf->isVisible())
+    {
+        mainFile = "reinforcement.html";
+        int tab = optionsReinforcement->algoList->currentIndex();
+        if (tab < 0 || tab >= (int)reinforcements.size() || !reinforcements[tab]) return infoFiles;
+        infoFile = reinforcements[tab]->GetInfoFile();
+    }
+    infoFiles[0] = infoFile;
+    infoFiles[1] = mainFile;
+    return infoFiles;
 }
 
 
@@ -3330,9 +3523,56 @@ void AlgorithmManager::ClusterChanged()
     }
 }
 
+
+void AlgorithmManager::CompareAdd()
+{
+    if (options->tabClass->isVisible())
+    {
+        int tab = optionsClassify->algoList->currentIndex();
+        QString name = classifiers[tab]->GetAlgoString();
+        QString parameterData;
+        QTextStream stream(&parameterData, QIODevice::WriteOnly);
+        stream << "Classification" << ":" << tab << "\n";
+        classifiers[tab]->SaveParams(stream);
+        compare->Add(parameterData, name);
+    }
+    if (options->tabRegr->isVisible())
+    {
+        int tab = optionsRegress->algoList->currentIndex();
+        QString name = regressors[tab]->GetAlgoString();
+        QString parameterData;
+        QTextStream stream(&parameterData, QIODevice::WriteOnly);
+        stream << "Regression" << ":" << tab << "\n";
+        regressors[tab]->SaveParams(stream);
+        compare->Add(parameterData, name);
+    }
+    if (options->tabDyn->isVisible())
+    {
+        int tab = optionsDynamic->algoList->currentIndex();
+        QString name = dynamicals[tab]->GetAlgoString();
+        QString parameterData;
+        QTextStream stream(&parameterData, QIODevice::WriteOnly);
+        stream << "Dynamical" << ":" << tab << "\n";
+        dynamicals[tab]->SaveParams(stream);
+        compare->Add(parameterData, name);
+    }
+    if (options->tabMax->isVisible())
+    {
+        int tab = optionsMaximize->algoList->currentIndex();
+        QString name = maximizers[tab]->GetAlgoString();
+        QString parameterData;
+        QTextStream stream(&parameterData, QIODevice::WriteOnly);
+        stream << "Optimization" << ":" << tab << "\n";
+        maximizers[tab]->SaveParams(stream);
+        compare->Add(parameterData, name);
+    }
+    mldemos->actionCompare->setChecked(true);
+    compare->Show();
+}
+
 void AlgorithmManager::SetAlgorithmWidget()
 {
-    if (algorithmOptions->tabClass->isVisible()) {
+    if (options->tabClass->isVisible()) {
         int index = optionsClassify->algoList->currentIndex();
         FOR (i, algoWidgets["classifiers"].size()) {
             if (i==index) algoWidgets["classifiers"][i]->show();
@@ -3340,7 +3580,7 @@ void AlgorithmManager::SetAlgorithmWidget()
         }
         if (index != -1 && index < classifiers.size()) gridSearch->SetClassifier(classifiers[index]);
     }
-    if (algorithmOptions->tabClust->isVisible()) {
+    if (options->tabClust->isVisible()) {
         int index = optionsCluster->algoList->currentIndex();
         FOR (i, algoWidgets["clusterers"].size()) {
             if (i==index) algoWidgets["clusterers"][i]->show();
@@ -3348,7 +3588,7 @@ void AlgorithmManager::SetAlgorithmWidget()
         }
         if (index != -1 && index < clusterers.size()) gridSearch->SetClusterer(clusterers[index]);
     }
-    if (algorithmOptions->tabDyn->isVisible()) {
+    if (options->tabDyn->isVisible()) {
         int index = optionsDynamic->algoList->currentIndex();
         FOR (i, algoWidgets["dynamicals"].size()) {
             if (i==index) algoWidgets["dynamicals"][i]->show();
@@ -3356,7 +3596,7 @@ void AlgorithmManager::SetAlgorithmWidget()
         }
         if (index != -1 && index < dynamicals.size()) gridSearch->SetDynamical(dynamicals[index]);
     }
-    if (algorithmOptions->tabMax->isVisible()) {
+    if (options->tabMax->isVisible()) {
         int index = optionsMaximize->algoList->currentIndex();
         FOR (i, algoWidgets["maximizers"].size()) {
             if (i==index) algoWidgets["maximizers"][i]->show();
@@ -3364,7 +3604,7 @@ void AlgorithmManager::SetAlgorithmWidget()
         }
         if (index != -1 && index < maximizers.size()) gridSearch->SetMaximizer(maximizers[index]);
     }
-    if (algorithmOptions->tabProj->isVisible()) {
+    if (options->tabProj->isVisible()) {
         int index = optionsProject->algoList->currentIndex();
         FOR (i, algoWidgets["projectors"].size()) {
             if (i==index) algoWidgets["projectors"][i]->show();
@@ -3372,7 +3612,7 @@ void AlgorithmManager::SetAlgorithmWidget()
         }
         if (index != -1 && index < projectors.size()) gridSearch->SetProjector(projectors[index]);
     }
-    if (algorithmOptions->tabRegr->isVisible()) {
+    if (options->tabRegr->isVisible()) {
         int index = optionsRegress->algoList->currentIndex();
         FOR (i, algoWidgets["regressors"].size()) {
             if (i==index) algoWidgets["regressors"][i]->show();
@@ -3380,7 +3620,7 @@ void AlgorithmManager::SetAlgorithmWidget()
         }
         if (index != -1 && index < regressors.size()) gridSearch->SetRegressor(regressors[index]);
     }
-    if (algorithmOptions->tabReinf->isVisible()) {
+    if (options->tabReinf->isVisible()) {
         int index = optionsReinforcement->algoList->currentIndex();
         FOR (i, algoWidgets["reinforcements"].size()) {
             if (i==index) algoWidgets["reinforcements"][i]->show();
@@ -3486,4 +3726,98 @@ void AlgorithmManager::SaveDynamical()
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".model")) filename += ".model";
     dynamical->SaveModel(filename.toStdString());
+}
+
+
+void AlgorithmManager::Clear()
+{
+    if (!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR (i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
+    DEL(regressor);
+    DEL(dynamical);
+    DEL(clusterer);
+    DEL(maximizer);
+    DEL(reinforcement);
+    DEL(projector);
+    optionsProject->reprojectButton->setEnabled(false);
+    optionsProject->revertButton->setEnabled(false);
+    sourceDims.clear();
+}
+
+void AlgorithmManager::ClearData()
+{
+    sourceData.clear();
+    sourceLabels.clear();
+    projectedData.clear();
+    optionsProject->reprojectButton->setEnabled(false);
+    optionsProject->revertButton->setEnabled(false);
+}
+
+
+void AlgorithmManager::ActivateIO()
+{
+    QList<QAction *> pluginActions = menuInput_Output->actions();
+    FOR (i, inputoutputs.size())
+    {
+        if (i<pluginActions.size() && inputoutputs[i] && pluginActions[i])
+        {
+            if (pluginActions[i]->isChecked())
+            {
+                bInputRunning[i] = true;
+                inputoutputs[i]->Start();
+            }
+            else if (bInputRunning[i])
+            {
+                bInputRunning[i] = false;
+                inputoutputs[i]->Stop();
+            }
+        }
+    }
+}
+
+void AlgorithmManager::ActivateImport()
+{
+    QList<QAction *> pluginActions = menuInput_Output->actions();
+    FOR (i, inputoutputs.size()) {
+        if (i<pluginActions.size() && inputoutputs[i] && pluginActions[i]) {
+            if (pluginActions[i]->isChecked()) {
+                bInputRunning[i] = true;
+                inputoutputs[i]->Start();
+            } else if (bInputRunning[i]) {
+                bInputRunning[i] = false;
+                inputoutputs[i]->Stop();
+            }
+        }
+    }
+}
+
+void AlgorithmManager::DisactivateIO(QObject *io)
+{
+    if (!io) return;
+    // first we find the right plugin
+    int pluginIndex = -1;
+    FOR (i, inputoutputs.size()) {
+        if (inputoutputs[i]->object() == io) {
+            pluginIndex = i;
+            break;
+        }
+    }
+    if (pluginIndex == -1) {
+        qDebug() << "Unable to unload plugin: ";
+        return; // something weird is going on!
+    }
+    QList<QAction *> pluginActions = menuInput_Output->actions();
+    if (pluginIndex < pluginActions.size() && pluginActions[pluginIndex]) {
+        pluginActions[pluginIndex]->setChecked(false);
+        if (bInputRunning[pluginIndex]) inputoutputs[pluginIndex]->Stop();
+        bInputRunning[pluginIndex] = false;
+    }
+    pluginActions = menuImport->actions();
+    if (pluginIndex < pluginActions.size() && pluginActions[pluginIndex]) {
+        pluginActions[pluginIndex]->setChecked(false);
+        if (bInputRunning[pluginIndex]) inputoutputs[pluginIndex]->Stop();
+        bInputRunning[pluginIndex] = false;
+    }
 }
