@@ -55,6 +55,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "glwidget.h"
 #include "visualization.h"
 #include "algorithmmanager.h"
+#include "pluginmanager.h"
 
 class MLDemos : public QMainWindow
 {
@@ -71,13 +72,13 @@ public:
     fvec selectionStart;
     QMutex mutex;
 
+    Ui::MLDemosClass ui;
 private:
 
     QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
     QNamedWindow *rocWidget;
 
-	Ui::MLDemosClass ui;
 	Ui::viewOptionDialog *displayOptions;
 	Ui::aboutDialog *aboutPanel;
 	Ui::statisticsDialog *showStats;
@@ -99,6 +100,7 @@ private:
     GLWidget *glw;
     Visualization *vis;
     AlgorithmManager *algo;
+    PluginManager *plugin;
     DataImporter *import;
     DataGenerator *generator;
     DatasetEditor *dataEdit;
