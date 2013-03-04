@@ -9,7 +9,6 @@ website
 */ValgrindOut.xml
 pluginsDebug/*
 plugins/*
-/mldemos
 
 # osx noise
 .DS_Store

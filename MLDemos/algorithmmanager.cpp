@@ -48,8 +48,6 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
       reinforcement(0),
       projector(0),
       tabUsedForTraining(0),
-      menuImport(0),
-      menuInput_Output(0),
       inputDimensions(0),
       manualSelection(0)
 {
@@ -218,6 +216,7 @@ AlgorithmManager::~AlgorithmManager()
         if (inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
     }
     FOR (i, pluginLoaders.size()) pluginLoaders.at(i)->unload();
+
     mutex->lock();
     DEL(clusterer);
     DEL(regressor);
@@ -242,244 +241,33 @@ AlgorithmManager::~AlgorithmManager()
     DEL(algorithmWidget);
 }
 
-void AlgorithmManager::LoadPlugins()
+void AlgorithmManager::SetAlgorithms(QList<ClassifierInterface *> classifiers,
+                  QList<ClustererInterface *> clusterers,
+                  QList<RegressorInterface *> regressors,
+                  QList<DynamicalInterface *> dynamicals,
+                  QList<AvoidanceInterface *> avoiders,
+                  QList<MaximizeInterface *> maximizers,
+                  QList<ReinforcementInterface *> reinforcements,
+                  QList<ProjectorInterface *> projectors,
+                  QList<InputOutputInterface *> inputoutputs)
 {
-    qDebug() << "Importing plugins";
-    QDir pluginsDir = QDir(qApp->applicationDirPath());
-    QStringList pluginFileNames;
-    QDir alternativeDir = pluginsDir;
-
-#if defined(Q_OS_WIN)
-    if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") pluginsDir.cdUp();
-#elif defined(Q_OS_MAC)
-    if (pluginsDir.dirName() == "MacOS") {
-        if (!pluginsDir.cd("plugins")) {
-            qDebug() << "looking for alternative directory";
-            pluginsDir.cdUp();
-            pluginsDir.cdUp();
-            alternativeDir = pluginsDir;
-            alternativeDir.cd("plugins");
-        }
-        pluginsDir.cdUp();
-    }
-#endif
-    bool bFoundPlugins = false;
-#if defined(DEBUG)
-    qDebug() << "looking for debug plugins";
-    bFoundPlugins = pluginsDir.cd("pluginsDebug");
-#else
-    qDebug() << "looking for release plugins";
-    bFoundPlugins = pluginsDir.cd("plugins");
-#endif
-    if (!bFoundPlugins) {
-        qDebug() << "plugins not found on: " << pluginsDir.absolutePath();
-        qDebug() << "using alternative directory: " << alternativeDir.absolutePath();
-        pluginsDir = alternativeDir;
-    }
-    foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
-        QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
-        QObject *plugin = pluginLoader->instance();
-        if (plugin) {
-            pluginLoaders.push_back(pluginLoader);
-            qDebug() << "loading " << fileName;
-            // check type of plugin
-            CollectionInterface *iCollection = qobject_cast<CollectionInterface *>(plugin);
-            if (iCollection) {
-                std::vector<ClassifierInterface*> classifierList = iCollection->GetClassifiers();
-                std::vector<ClustererInterface*> clustererList = iCollection->GetClusterers();
-                std::vector<RegressorInterface*> regressorList = iCollection->GetRegressors();
-                std::vector<DynamicalInterface*> dynamicalList = iCollection->GetDynamicals();
-                std::vector<MaximizeInterface*> maximizerList = iCollection->GetMaximizers();
-                std::vector<ReinforcementInterface*> reinforcementList = iCollection->GetReinforcements();
-                std::vector<ProjectorInterface*> projectorList = iCollection->GetProjectors();
-                FOR (i, classifierList.size()) AddPlugin(classifierList[i], SLOT(ChangeActiveOptions));
-                FOR (i, clustererList.size()) AddPlugin(clustererList[i], SLOT(ChangeActiveOptions));
-                FOR (i, regressorList.size()) AddPlugin(regressorList[i], SLOT(ChangeActiveOptions));
-                FOR (i, dynamicalList.size()) AddPlugin(dynamicalList[i], SLOT(ChangeActiveOptions));
-                FOR (i, maximizerList.size()) AddPlugin(maximizerList[i], SLOT(ChangeActiveOptions));
-                FOR (i, reinforcementList.size()) AddPlugin(reinforcementList[i], SLOT(ChangeActiveOptions));
-                FOR (i, projectorList.size()) AddPlugin(projectorList[i], SLOT(ChangeActiveOptions));
-                continue;
-            }
-            ClassifierInterface *iClassifier = qobject_cast<ClassifierInterface *>(plugin);
-            if (iClassifier) {
-                AddPlugin(iClassifier, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            ClustererInterface *iClusterer = qobject_cast<ClustererInterface *>(plugin);
-            if (iClusterer) {
-                AddPlugin(iClusterer, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            RegressorInterface *iRegressor = qobject_cast<RegressorInterface *>(plugin);
-            if (iRegressor) {
-                AddPlugin(iRegressor, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            DynamicalInterface *iDynamical = qobject_cast<DynamicalInterface *>(plugin);
-            if (iDynamical) {
-                AddPlugin(iDynamical, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            MaximizeInterface *iMaximize = qobject_cast<MaximizeInterface *>(plugin);
-            if (iMaximize) {
-                AddPlugin(iMaximize, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            ReinforcementInterface *iReinforcement = qobject_cast<ReinforcementInterface *>(plugin);
-            if (iReinforcement) {
-                AddPlugin(iReinforcement, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            ProjectorInterface *iProject = qobject_cast<ProjectorInterface *>(plugin);
-            if (iProject) {
-                AddPlugin(iProject, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-            InputOutputInterface *iIO = qobject_cast<InputOutputInterface *>(plugin);
-            if (iIO) {
-                AddPlugin(iIO);
-                continue;
-            }
-            AvoidanceInterface *iAvoid = qobject_cast<AvoidanceInterface *>(plugin);
-            if (iAvoid) {
-                AddPlugin(iAvoid, SLOT(ChangeActiveOptions()));
-                continue;
-            }
-        } else {
-            qDebug() << pluginLoader->errorString();
-            delete pluginLoader;
-        }
-    }
+    this->classifiers = classifiers;
+    this->clusterers = clusterers;
+    this->regressors = regressors;
+    this->dynamicals = dynamicals;
+    this->avoiders = avoiders;
+    this->maximizers = maximizers;
+    this->reinforcements = reinforcements;
+    this->projectors = projectors;
+    this->inputoutputs = inputoutputs;
     if (!classifiers.size()) options->tabWidget->setTabEnabled(0,false);
     if (!clusterers.size()) options->tabWidget->setTabEnabled(1,false);
     if (!regressors.size()) options->tabWidget->setTabEnabled(2,false);
     if (!projectors.size()) options->tabWidget->setTabEnabled(3,false);
     if (!dynamicals.size()) options->tabWidget->setTabEnabled(4,false);
     if (!maximizers.size()) options->tabWidget->setTabEnabled(5,false);
+    if (!reinforcements.size()) options->tabWidget->setTabEnabled(6,false);
 }
-
-void AlgorithmManager::AddPlugin(InputOutputInterface *iIO)
-{
-    inputoutputs.push_back(iIO);
-    bInputRunning.push_back(false);
-    connect(this, SIGNAL(SendResults(std::vector<fvec>)), iIO->object(), iIO->FetchResultsSlot());
-    connect(iIO->object(), iIO->SetDataSignal(), mldemos, SLOT(SetData(std::vector<fvec>, ivec, std::vector<ipair>, bool)));
-    connect(iIO->object(), iIO->SetTimeseriesSignal(), mldemos, SLOT(SetTimeseries(std::vector<TimeSerie>)));
-    connect(iIO->object(), iIO->QueryClassifierSignal(), this, SLOT(QueryClassifier(std::vector<fvec>)));
-    connect(iIO->object(), iIO->QueryRegressorSignal(), this, SLOT(QueryRegressor(std::vector<fvec>)));
-    connect(iIO->object(), iIO->QueryDynamicalSignal(), this, SLOT(QueryDynamical(std::vector<fvec>)));
-    connect(iIO->object(), iIO->QueryClustererSignal(), this, SLOT(QueryClusterer(std::vector<fvec>)));
-    connect(iIO->object(), iIO->QueryMaximizerSignal(), this, SLOT(QueryMaximizer(std::vector<fvec>)));
-    connect(iIO->object(), iIO->DoneSignal(), this, SLOT(DisactivateIO(QObject *)));
-    QString name = iIO->GetName();
-    if (menuInput_Output) {
-        QAction *pluginAction = menuInput_Output->addAction(name);
-        pluginAction->setCheckable(true);
-        pluginAction->setChecked(false);
-        connect(pluginAction,SIGNAL(toggled(bool)), this, SLOT(ActivateIO()));
-    }
-    if (menuImport) {
-        QAction *importAction = menuImport->addAction(name);
-        importAction->setCheckable(true);
-        importAction->setChecked(false);
-        connect(importAction,SIGNAL(toggled(bool)), this, SLOT(ActivateImport()));
-    }
-}
-
-void AlgorithmManager::AddPlugin(ClassifierInterface *iClassifier, const char *method)
-{
-    if (!iClassifier) return;
-    // we add the interface so we can use it to produce classifiers
-    classifiers.push_back(iClassifier);
-    // we add the classifier parameters to the gui
-    optionsClassify->algoList->addItem(iClassifier->GetName());
-    QWidget *widget = iClassifier->GetParameterWidget();
-    widget->setParent(optionsClassify->algoWidget);
-    optionsClassify->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["classifiers"].push_back(widget);
-}
-
-void AlgorithmManager::AddPlugin(ClustererInterface *iCluster, const char *method)
-{
-    if (!iCluster) return;
-    clusterers.push_back(iCluster);
-    optionsCluster->algoList->addItem(iCluster->GetName());
-    QWidget *widget = iCluster->GetParameterWidget();
-    widget->setParent(optionsCluster->algoWidget);
-    optionsCluster->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["clusterers"].push_back(widget);
-}
-
-void AlgorithmManager::AddPlugin(RegressorInterface *iRegress, const char *method)
-{
-    if (!iRegress) return;
-    regressors.push_back(iRegress);
-    optionsRegress->algoList->addItem(iRegress->GetName());
-    QWidget *widget = iRegress->GetParameterWidget();
-    widget->setParent(optionsRegress->algoWidget);
-    optionsRegress->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["regressors"].push_back(widget);
-}
-
-void AlgorithmManager::AddPlugin(DynamicalInterface *iDynamical, const char *method)
-{
-    if (!iDynamical) return;
-    dynamicals.push_back(iDynamical);
-    optionsDynamic->algoList->addItem(iDynamical->GetName());
-    QWidget *widget = iDynamical->GetParameterWidget();
-    widget->setParent(optionsDynamic->algoWidget);
-    optionsDynamic->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["dynamicals"].push_back(widget);
-}
-
-void AlgorithmManager::AddPlugin(AvoidanceInterface *iAvoid, const char *method)
-{
-    if (!iAvoid) return;
-    avoiders.push_back(iAvoid);
-    optionsDynamic->obstacleCombo->addItem(iAvoid->GetName());
-}
-
-void AlgorithmManager::AddPlugin(MaximizeInterface *iMaximizer, const char *method)
-{
-    if (!iMaximizer) return;
-    maximizers.push_back(iMaximizer);
-    optionsMaximize->algoList->addItem(iMaximizer->GetName());
-    QWidget *widget = iMaximizer->GetParameterWidget();
-    widget->setParent(optionsMaximize->algoWidget);
-    optionsMaximize->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["maximizers"].push_back(widget);
-}
-
-void AlgorithmManager::AddPlugin(ReinforcementInterface *iReinforcement, const char *method)
-{
-    if (!iReinforcement) return;
-    reinforcements.push_back(iReinforcement);
-    optionsReinforcement->algoList->addItem(iReinforcement->GetName());
-    QWidget *widget = iReinforcement->GetParameterWidget();
-    widget->setParent(optionsReinforcement->algoWidget);
-    optionsReinforcement->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["reinforcements"].push_back(widget);
-}
-
-void AlgorithmManager::AddPlugin(ProjectorInterface *iProject, const char *method)
-{
-    if (!iProject) return;
-    projectors.push_back(iProject);
-    optionsProject->algoList->addItem(iProject->GetName());
-    QWidget *widget = iProject->GetParameterWidget();
-    widget->setParent(optionsProject->algoWidget);
-    optionsProject->algoWidget->layout()->addWidget(widget);
-    widget->hide();
-    algoWidgets["projectors"].push_back(widget);
-}
-
 
 void AlgorithmManager::QueryClassifier(std::vector<fvec> samples)
 {
@@ -3728,7 +3516,6 @@ void AlgorithmManager::SaveDynamical()
     dynamical->SaveModel(filename.toStdString());
 }
 
-
 void AlgorithmManager::Clear()
 {
     if (!classifierMulti.size()) DEL(classifier);
@@ -3753,71 +3540,4 @@ void AlgorithmManager::ClearData()
     projectedData.clear();
     optionsProject->reprojectButton->setEnabled(false);
     optionsProject->revertButton->setEnabled(false);
-}
-
-
-void AlgorithmManager::ActivateIO()
-{
-    QList<QAction *> pluginActions = menuInput_Output->actions();
-    FOR (i, inputoutputs.size())
-    {
-        if (i<pluginActions.size() && inputoutputs[i] && pluginActions[i])
-        {
-            if (pluginActions[i]->isChecked())
-            {
-                bInputRunning[i] = true;
-                inputoutputs[i]->Start();
-            }
-            else if (bInputRunning[i])
-            {
-                bInputRunning[i] = false;
-                inputoutputs[i]->Stop();
-            }
-        }
-    }
-}
-
-void AlgorithmManager::ActivateImport()
-{
-    QList<QAction *> pluginActions = menuInput_Output->actions();
-    FOR (i, inputoutputs.size()) {
-        if (i<pluginActions.size() && inputoutputs[i] && pluginActions[i]) {
-            if (pluginActions[i]->isChecked()) {
-                bInputRunning[i] = true;
-                inputoutputs[i]->Start();
-            } else if (bInputRunning[i]) {
-                bInputRunning[i] = false;
-                inputoutputs[i]->Stop();
-            }
-        }
-    }
-}
-
-void AlgorithmManager::DisactivateIO(QObject *io)
-{
-    if (!io) return;
-    // first we find the right plugin
-    int pluginIndex = -1;
-    FOR (i, inputoutputs.size()) {
-        if (inputoutputs[i]->object() == io) {
-            pluginIndex = i;
-            break;
-        }
-    }
-    if (pluginIndex == -1) {
-        qDebug() << "Unable to unload plugin: ";
-        return; // something weird is going on!
-    }
-    QList<QAction *> pluginActions = menuInput_Output->actions();
-    if (pluginIndex < pluginActions.size() && pluginActions[pluginIndex]) {
-        pluginActions[pluginIndex]->setChecked(false);
-        if (bInputRunning[pluginIndex]) inputoutputs[pluginIndex]->Stop();
-        bInputRunning[pluginIndex] = false;
-    }
-    pluginActions = menuImport->actions();
-    if (pluginIndex < pluginActions.size() && pluginActions[pluginIndex]) {
-        pluginActions[pluginIndex]->setChecked(false);
-        if (bInputRunning[pluginIndex]) inputoutputs[pluginIndex]->Stop();
-        bInputRunning[pluginIndex] = false;
-    }
 }

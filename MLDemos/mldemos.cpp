@@ -65,7 +65,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
     initDialogs();
     initToolBars();
 
-    algo->LoadPlugins();
+    plugin->LoadPlugins();
 
     LoadLayoutOptions();
     SetTextFontSize();
@@ -377,10 +377,9 @@ void MLDemos::initDialogs()
     drawTimer = new DrawTimer(canvas, &mutex);
     drawTimer->glw = glw;
     algo = new AlgorithmManager(this, canvas, glw, &mutex, drawTimer, compare, gridSearch);
-    algo->menuImport = ui.menuImport;
-    algo->menuInput_Output= ui.menuInput_Output;
     algo->inputDimensions = inputDimensions;
     algo->manualSelection = manualSelection;
+    plugin = new PluginManager(this, algo);
 
     connect(generator, SIGNAL(finished(int)), this, SLOT(HideAddData()));
 

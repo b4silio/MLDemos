@@ -36,6 +36,7 @@ HEADERS +=	\
             interfaceRVMClassifier.h \
             interfaceRVMRegress.h \
             interfaceKMCluster.h \
+            dlibTypes.h \
             pluginKernel.h
 SOURCES += 	\
 			svm.cpp \
