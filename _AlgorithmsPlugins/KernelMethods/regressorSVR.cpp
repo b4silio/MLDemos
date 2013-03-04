@@ -91,6 +91,7 @@ struct OptData
 
 double getSVRObjectiveFunction(const svm_model *svm, const double *x, const svm_problem *problem)
 {
+    QString gammaString;
     svm_parameter param = svm->param;
     switch(param.kernel_type)
     {
@@ -110,17 +111,17 @@ double getSVRObjectiveFunction(const svm_model *svm, const double *x, const svm_
         break;
     case RBFWEIGH:
     {
-        param.gamma = 1. / x[0];
         FOR(i, param.kernel_dim)
         {
-            param.kernel_weight[i] = x[i+1];
+            param.kernel_weight[i] = x[i];
+            gammaString += QString("%1 ").arg(1./x[i]);
         }
     }
         break;
     }
     svm_model *newSVM = svm_train(problem, &param);
     double value = svm_get_dual_objective_function(newSVM);
-    qDebug() << "value:" << value << "gamma:" << 1. / param.gamma;
+    qDebug() << "value:" << value << "gamma:" << 1. / param.gamma << "->" << gammaString;
     delete newSVM;
     return value;
 }
@@ -152,6 +153,14 @@ void RegressorSVR::Optimize(svm_problem *problem)
     OptData *data = new OptData;
     data->svm = svm;
     data->problem = problem;
+    if(svm->param.kernel_type == RBF)
+    {
+        svm->param.kernel_type = RBFWEIGH;
+        svm->param.kernel_weight = new double[dim];
+        FOR(d, dim) svm->param.kernel_weight[d] = svm->param.gamma;
+        svm->param.gamma = 1.f;
+        svm->param.kernel_dim = dim;
+    }
 
     int optDim = 1;
     switch(svm->param.kernel_type)
@@ -163,12 +172,12 @@ void RegressorSVR::Optimize(svm_problem *problem)
         optDim = 1;
         break;
     case RBFWEIGH:
-        optDim = dim + 1;
+        optDim = dim;
         break;
     }
 
-    //nlopt::opt opt(nlopt::LN_AUGLAG, optDim);
-    nlopt::opt opt(nlopt::LN_COBYLA, optDim);
+    nlopt::opt opt(nlopt::LN_AUGLAG, optDim);
+    //nlopt::opt opt(nlopt::LN_COBYLA, optDim);
     //nlopt::opt opt(nlopt::LN_NELDERMEAD, optDim);
     //nlopt::opt opt(nlopt::LN_NEWUOA, optDim);
     //nlopt::opt opt(nlopt::LN_PRAXIS, optDim);
@@ -177,7 +186,7 @@ void RegressorSVR::Optimize(svm_problem *problem)
 
     opt.set_max_objective(svrObjectiveFunction, (void*)data);
 
-    opt.set_maxeval(100);
+    opt.set_maxeval(200);
     vector<double> lowerBounds(optDim, 0.001);
     opt.set_xtol_abs(0.001);
 
@@ -201,10 +210,9 @@ void RegressorSVR::Optimize(svm_problem *problem)
         break;
     case RBFWEIGH:
     {
-        x[0] = 1. / svm->param.gamma;
         FOR(i, svm->param.kernel_dim)
         {
-            x[i+1] = svm->param.kernel_weight[i];
+            x[i] = svm->param.kernel_weight[i];
         }
     }
         break;
@@ -232,10 +240,9 @@ void RegressorSVR::Optimize(svm_problem *problem)
             break;
         case RBFWEIGH:
         {
-            param.gamma = 1. / xOpt[0];
             FOR(i, param.kernel_dim)
             {
-                param.kernel_weight[i] = xOpt[i+1];
+                param.kernel_weight[i] = xOpt[i];
             }
         }
             break;
