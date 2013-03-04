@@ -42,7 +42,7 @@ ClassifierRVM::~ClassifierRVM()
         KILLCASE(11);
         KILLCASE(12);
         default:
-            KillDim<2>();
+            KillDim<0>();
             return;
         }
     }
@@ -74,7 +74,6 @@ void ClassifierRVM::Train(std::vector< fvec > samples, ivec labels)
 {
     if(!samples.size()) return;
     dim = samples[0].size();
-    if(dim > 12) dim = 12;
 
     classMap.clear();
     int cnt=0;
@@ -96,7 +95,7 @@ void ClassifierRVM::Train(std::vector< fvec > samples, ivec labels)
     TRAINCASE(11);
     TRAINCASE(12);
     default:
-        TrainDim<2>(samples, labels);
+        TrainDim<0>(samples, labels);
         return;
     }
 }
@@ -118,7 +117,7 @@ float ClassifierRVM::Test( const fvec &_sample ) const
     TESTCASE(11);
     TESTCASE(12);
     default:
-        return TestDim<2>(_sample);
+        return TestDim<0>(_sample);
     }
 }
 
@@ -139,7 +138,7 @@ std::vector<fvec> ClassifierRVM::GetSVs() const
     SVCASE(11);
     SVCASE(12);
     default:
-        return GetSVsDim<2>();
+        return GetSVsDim<0>();
     }
 }
 
@@ -167,7 +166,7 @@ void ClassifierRVM::TrainDim(std::vector< fvec > _samples, ivec _labels)
 {
     std::vector<sampletype> samples;
     std::vector<double> labels;
-    sampletype samp;
+    sampletype samp(dim);
     FOR(i, _samples.size()) { FOR(d, dim) samp(d) = _samples[i][d]; samples.push_back(samp); }
     KillDim<N>();
 
@@ -218,7 +217,7 @@ float ClassifierRVM::TestDim(const fvec &_sample) const
 {
     float estimate = 0.f;
 
-    sampletype sample;
+    sampletype sample(dim);
     FOR(d,dim) sample(d) = _sample[d];
     if(!decFunction) return estimate;
     switch(kernelTypeTrained)
@@ -256,9 +255,8 @@ std::vector<fvec> ClassifierRVM::GetSVsDim() const
 
         FOR(i, (*(linfunc*)decFunction).basis_vectors.nr())
         {
-            fvec sv;
-            sv.push_back((*(linfunc*)decFunction).basis_vectors(i)(0));
-            sv.push_back((*(linfunc*)decFunction).basis_vectors(i)(1));
+            fvec sv(dim);
+            FOR(d, dim) sv[d] = (*(linfunc*)decFunction).basis_vectors(i)(d);
             SVs.push_back(sv);
         }
     }
@@ -268,9 +266,8 @@ std::vector<fvec> ClassifierRVM::GetSVsDim() const
 
         FOR(i, (*(polfunc*)decFunction).basis_vectors.nr())
         {
-            fvec sv;
-            sv.push_back((*(polfunc*)decFunction).basis_vectors(i)(0));
-            sv.push_back((*(polfunc*)decFunction).basis_vectors(i)(1));
+            fvec sv(dim);
+            FOR(d, dim) sv[d] = (*(polfunc*)decFunction).basis_vectors(i)(d);
             SVs.push_back(sv);
         }
     }
@@ -280,9 +277,8 @@ std::vector<fvec> ClassifierRVM::GetSVsDim() const
 
         FOR(i, (*(rbffunc*)decFunction).basis_vectors.nr())
         {
-            fvec sv;
-            sv.push_back((*(rbffunc*)decFunction).basis_vectors(i)(0));
-            sv.push_back((*(rbffunc*)decFunction).basis_vectors(i)(1));
+            fvec sv(dim);
+            FOR(d, dim) sv[d] = (*(rbffunc*)decFunction).basis_vectors(i)(d);
             SVs.push_back(sv);
         }
     }
