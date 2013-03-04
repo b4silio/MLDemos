@@ -137,8 +137,13 @@ std::vector<fvec> RegressorRVM::GetSVs()
 	{
 		FOR(i, linFunc.basis_vectors.nr())
 		{
-            fvec sv(dim,0);
+            fvec sv(dim+1,0);
             FOR(d, dim)  sv[d] = linFunc.basis_vectors(i)(d);
+            if(outputDim != -1 && outputDim < dim)
+            {
+                sv[dim] = sv[outputDim];
+                sv[outputDim] = 0;
+            }
 			SVs.push_back(sv);
 		}
 	}
@@ -146,18 +151,28 @@ std::vector<fvec> RegressorRVM::GetSVs()
 	{
 		FOR(i, polFunc.basis_vectors.nr())
 		{
-            fvec sv(dim,0);
+            fvec sv(dim+1,0);
             FOR(d, dim)  sv[d] = polFunc.basis_vectors(i)(d);
-			SVs.push_back(sv);
+            if(outputDim != -1 && outputDim < dim)
+            {
+                sv[dim] = sv[outputDim];
+                sv[outputDim] = 0;
+            }
+            SVs.push_back(sv);
 		}
 	}
 	else if(kernelType == 2)
 	{
 		FOR(i, rbfFunc.basis_vectors.nr())
 		{
-            fvec sv(dim,0.5);
+            fvec sv(dim+1,0);
             FOR(d, dim)  sv[d] = rbfFunc.basis_vectors(i)(d);
-			SVs.push_back(sv);
+            if(outputDim != -1 && outputDim < dim)
+            {
+                sv[dim] = sv[outputDim];
+                sv[outputDim] = 0;
+            }
+            SVs.push_back(sv);
 		}
 	}
 
