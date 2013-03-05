@@ -12,7 +12,7 @@ Core.file = Core/Core.pro
 3rdParty.file = _3rdParty/3rdParty.pro
 MLDemos.file = MLDemos/MLDemos.pro
 MLDemos.depends = Core
-MLScript.file = mlscript/mlscript.pro
+MLScript.file = MLScript/MLScript.pro
 MLScript.depends = Core
 
 # algorithm plugins
