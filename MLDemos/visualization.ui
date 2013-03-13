@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
+    <width>527</width>
     <height>397</height>
    </rect>
   </property>
@@ -78,7 +78,7 @@
             </font>
            </property>
            <property name="currentIndex">
-            <number>7</number>
+            <number>0</number>
            </property>
            <item>
             <property name="text">
@@ -113,6 +113,11 @@
            <item>
             <property name="text">
              <string>Distribution: Correlations</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Distribution: Sample Distances</string>
             </property>
            </item>
            <item>
@@ -288,7 +293,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>520</width>
+        <width>525</width>
         <height>249</height>
        </rect>
       </property>

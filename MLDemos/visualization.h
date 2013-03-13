@@ -25,6 +25,7 @@ private:
     void GenerateSplatterPlot();
     void GenerateIndividualPlot();
     void GenerateCorrelationPlot();
+    void GenerateSampleDistancePlot();
     void GenerateDensityPlot();
     QPixmap GetGraphPixmap(int type, int inputType, int dim, int classCount, int index, int w, int h,
                            std::map<int,std::vector< std::pair<fvec,fvec> > > classGraphData,

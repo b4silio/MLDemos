@@ -27,6 +27,55 @@ KPCAProjection::KPCAProjection()
     connect(contours->spinX1, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
     connect(contours->spinX2, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
     connect(contours->spinZoom, SIGNAL(valueChanged(int)), this, SLOT(ContoursChanged()));
+
+    contours->plotLabel->installEventFilter(this);
+}
+
+bool KPCAProjection::eventFilter(QObject *obj, QEvent *event)
+{
+    if(obj == contours->plotLabel)
+    {
+        if(event->type() == QEvent::MouseButtonRelease)
+        {
+            int displayType = contours->displayCombo->currentIndex();
+            if(displayType != 0) return QObject::eventFilter(obj, event);
+            int index = contours->dimSpin->value();
+            contours->plotLabel->setPixmap(contourPixmaps[index]);
+        }
+        else if(event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent *e = static_cast<QMouseEvent *>(event);
+            int displayType = contours->displayCombo->currentIndex();
+            int index = contours->dimSpin->value();
+            QImage image = contourPixmaps[index].toImage();
+            if(displayType != 0 || e->x() < 0 || e->y() < 0 || e->x() >= image.width() || e->y() >= image.height()) return QObject::eventFilter(obj, event);
+            int limit = qRed(image.pixel(e->x(), e->y()));
+            // we get the neighboring pixels
+            if(e->y() < image.height()-2)
+            {
+                int l2 = qRed(image.pixel(e->x(), e->y()+1));
+                int l3 = qRed(image.pixel(e->x(), e->y()+2));
+                if(abs(l2 - limit) > 5 || abs(l3 - limit) > 5) return QObject::eventFilter(obj, event);
+            }
+            if(limit <= 0 || limit >= 255) return QObject::eventFilter(obj, event);
+            FOR(x, image.width())
+            {
+                FOR(y, image.height())
+                {
+                    QRgb p = image.pixel(x,y);
+                    int red = qRed(p);
+                    if(red == 0 || red == 255) continue;
+                    int gray = qRed(p);
+                    if(gray > limit) image.setPixel(x,y,qRgb(0,0,255));
+                }
+            }
+            contours->plotLabel->setPixmap(QPixmap::fromImage(image));
+            contours->plotLabel->repaint();
+            // we need to get the color of the map
+            return true;
+        }
+    }
+    return QObject::eventFilter(obj, event);
 }
 
 KPCAProjection::~KPCAProjection()
@@ -159,7 +208,6 @@ void KPCAProjection::ChangeOptions()
         params->param1Label->setText("Scale");
         params->param2Label->setText("Offset");
         break;
-
     }
 }
 
@@ -241,11 +289,10 @@ void KPCAProjection::GetContoursPixmap(int index)
     FOR(i, contourSamples.size())
     {
         fvec &sample = contourSamples[i];
-        //qDebug() << "drawing sample at " << sample[0] << sample[1];
-        float x = (sample[xIndex]-zxmin)/(zxmax-zxmin)*wmo;
-        float y = (sample[yIndex]-zymin)/(zymax-zymin)*hmo;
-        x = (x)*W/wmo;
-        y = (y)*H/hmo;
+        float x = (sample[xIndex]-zxmin)/(zxmax-zxmin);
+        float y = (sample[yIndex]-zymin)/(zymax-zymin);
+        x = (x + 1.f/w)*W;
+        y = (y + 1.f/w)*H;
         Canvas::drawSample(painter, QPointF(x,y), 10, contourSampleLabels[i]);
     }
 

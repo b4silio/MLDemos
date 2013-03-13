@@ -35,6 +35,8 @@ public:
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
     void DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector){}
 
+    bool eventFilter(QObject *obj, QEvent *event);
+
     // virtual functions to manage the GUI and I/O
     QString GetName(){return QString("Kernel PCA");}
     QString GetAlgoString();

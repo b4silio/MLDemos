@@ -119,7 +119,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
             QPainterPath path;
             for(int p=0; p<points.size(); p++)
             {
-                QPointF point(points[p].x*W/wmo, points[p].y*H/hmo);
+                QPointF point(points[p].x*W/(w-2), points[p].y*H/(h-2));
                 if(p)
                 {
                     path.lineTo(point);

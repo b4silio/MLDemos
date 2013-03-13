@@ -7,13 +7,13 @@
 TEMPLATE = subdirs
 # the main software
 CONFIG += ordered
-SUBDIRS = Core 3rdParty MLDemos MLScript
+SUBDIRS = Core 3rdParty MLDemos MLScripting
 Core.file = Core/Core.pro
 3rdParty.file = _3rdParty/3rdParty.pro
 MLDemos.file = MLDemos/MLDemos.pro
 MLDemos.depends = Core
-MLScript.file = MLScript/MLScript.pro
-MLScript.depends = Core
+MLScripting.file = MLScripting/MLScripting.pro
+MLScripting.depends = Core
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins

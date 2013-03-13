@@ -146,7 +146,13 @@ public:
         for (int i=0; i<data.cols();i++)
             for (int j=i; j <data.cols(); j++)
             {
-                double value = (data.col(i) - data.col(j)).transpose() * (data.col(i) - data.col(j));
+                double value = 0;
+                for (int d=0; d<data.rows(); d++)
+                {
+                    double v = data(d,i) - data(d,j);
+                    value += v*v;
+                }
+                //double value = (data.col(i) - data.col(j)).transpose() * (data.col(i) - data.col(j));
                 _kernel(i,j) = exp(-value*gamma);
                 _kernel(j,i) = _kernel(i,j);
             }
@@ -157,7 +163,13 @@ public:
         for (int i=0; i<data.cols();i++)
             for (int j=0; j <source.cols(); j++)
             {
-                double value = (data.col(i) - source.col(j)).transpose() * (data.col(i) - source.col(j));
+                double value = 0;
+                for (int d=0; d<data.rows(); d++)
+                {
+                    double v = data(d,i) - source(d,j);
+                    value += v*v;
+                }
+                //double value = (data.col(i) - source.col(j)).transpose() * (data.col(i) - source.col(j));
                 _kernel(i,j) = exp(-value*gamma);
             }
     }

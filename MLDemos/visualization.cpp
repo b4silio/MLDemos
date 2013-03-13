@@ -178,7 +178,9 @@ void Visualization::OptionsChanged()
         ui->flavorCombo->blockSignals(false);
         break;
         */
-    case 7: // distribution: density
+    case 7: // distribution: sample distances
+        break;
+    case 8: // distribution: density
         if(ui->inputCombo->itemText(1) != "Combined")
         {
             int i = ui->inputCombo->currentIndex();
@@ -249,7 +251,10 @@ void Visualization::Update()
         GenerateSplatterPlot();
         break;
         */
-    case 7: // distribution: density
+    case 7:
+        GenerateSampleDistancePlot();
+        break;
+    case 8: // distribution: density
         GenerateDensityPlot();
         break;
     }
@@ -1076,6 +1081,65 @@ void Visualization::GenerateCorrelationPlot()
     displayPixmap = pixmap;
     ui->display->setMinimumSize(displayPixmap.size());
     ui->display->setMaximumSize(displayPixmap.size());
+}
+
+void Visualization::GenerateSampleDistancePlot()
+{
+    std::vector<fvec> samples = data->GetSamples();
+    ivec labels = data->GetLabels();
+    if(!samples.size()) return;
+    int dim = samples[0].size();
+    if(!dim) return;
+    int count = samples.size();
+
+    // we need to make a big fat matrix with all the sample distances
+    float *D = new float[count*count];
+    float maxD = 0;
+    FOR(i, count)
+    {
+        D[i*count + i] = 0;
+        FOR(j, i)
+        {
+            float distance = 0;
+            FOR(d, dim)
+            {
+                float dist = samples[i][d]-samples[j][d];
+                distance += dist*dist;
+            }
+            distance = sqrtf(distance);
+            maxD = max(maxD, distance);
+            D[i*count + j] = distance;
+            D[j*count + i] = distance;
+        }
+    }
+
+    int pad = 30;
+    int mapW = (ui->scrollArea->width()-12) - pad*2, mapH = (ui->scrollArea->height()-12) - pad*2;
+
+    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QPixmap pixmap = QPixmap(ui->scrollArea->width()-2, ui->scrollArea->height()-2);
+    pixmap.fill(Qt::transparent);
+
+    QImage image(count,count, QImage::Format_RGB32);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QFont font = painter.font();
+    font.setPointSize(9);
+    painter.setFont(font);
+
+    FOR(i, count)
+    {
+        FOR(j, count)
+        {
+            float dist = D[i*count + j];
+            image.setPixel(i,j,qRgb(dist/maxD*255,dist/maxD*255,dist/maxD*255));
+        }
+    }
+    painter.drawPixmap(pad,pad,QPixmap::fromImage(image).scaled(QSize(mapW, mapH), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+
+    delete [] D;
+    displayPixmap = pixmap;
 }
 
 void Visualization::GenerateDensityPlot()

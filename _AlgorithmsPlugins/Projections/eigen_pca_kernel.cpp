@@ -228,6 +228,7 @@ MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
                 results(j,i) += K(j,w) * eigenVectors(w,pi[i].second); // permutation indices
     }
 
+    /*
     MatrixXd sqrtE = MatrixXd::Zero(dimSpace, dimSpace);
     for (unsigned int i = 0; i < dimSpace; i++)
     {
@@ -241,6 +242,7 @@ MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
             //            results(i,j) *= 1.0;
         }
     }
+    */
 
     // get the final data projection
     //results = (sqrtE * results.transpose()).transpose();
