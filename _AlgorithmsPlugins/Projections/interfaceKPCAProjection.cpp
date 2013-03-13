@@ -45,6 +45,7 @@ bool KPCAProjection::eventFilter(QObject *obj, QEvent *event)
         else if(event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress)
         {
             QMouseEvent *e = static_cast<QMouseEvent *>(event);
+            bool bLowerThan = e->buttons() == Qt::LeftButton;
             int displayType = contours->displayCombo->currentIndex();
             int index = contours->dimSpin->value();
             QImage image = contourPixmaps[index].toImage();
@@ -64,9 +65,10 @@ bool KPCAProjection::eventFilter(QObject *obj, QEvent *event)
                 {
                     QRgb p = image.pixel(x,y);
                     int red = qRed(p);
-                    if(red == 0 || red == 255) continue;
+                    if(red >= 255) continue;
                     int gray = qRed(p);
-                    if(gray > limit) image.setPixel(x,y,qRgb(0,0,255));
+                    if(bLowerThan && gray > limit) image.setPixel(x,y,qRgb(0,0,255));
+                    else if(!bLowerThan && gray < limit) image.setPixel(x,y,qRgb(0,255,0));
                 }
             }
             contours->plotLabel->setPixmap(QPixmap::fromImage(image));
