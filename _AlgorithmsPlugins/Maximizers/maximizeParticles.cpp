@@ -72,7 +72,7 @@ void MaximizeParticles::Draw(QPainter &painter)
     {
         fvec sample = particles[i];
         QPointF point(sample[0]*w, sample[1]*h);
-        int radius = 2 + weights[i]*5;
+        int radius = 6 + weights[i]*5;
         painter.setBrush(Qt::green);
         painter.drawEllipse(point, radius, radius);
     }
@@ -125,11 +125,30 @@ fvec MaximizeParticles::Test( const fvec &sample)
         // first we guess the next pose for each particle
         particles[i] += RandN(dim, 0, variance*variance);
         // we compute the weights
-        weights[i] = weights[i] *(1-decay) + GetValue(particles[i])*decay;
+        //weights[i] = weights[i] *(1-decay) + GetValue(particles[i])*decay;
+        weights[i] = weights[i] * GetValue(particles[i]);
         totalWeights += weights[i];
         evaluations++;
         visited.push_back(particles[i]);
     }
+
+    /*
+    // we normalize the weights
+    float mean = 0;
+    float sigma = 0;
+    FOR(i, weights.size())
+    {
+        weights[i] /= totalWeights;
+        mean += weights[i];
+    }
+    mean /= weights.size();
+    FOR(i, weights.size())
+    {
+        sigma += (weights[i]-mean)*(weights[i]-mean);
+    }
+    sigma /= weights.size();
+    qDebug() << "mean" << mean << "sigma" << sigma;
+    */
 
     // we sort the particles by weight
     vector< pair<double, u32> > fits;
@@ -145,6 +164,7 @@ fvec MaximizeParticles::Test( const fvec &sample)
     vector<fvec> newParticles;
     fvec newWeights;
     fvec newSample(dim);
+
     FOR(i, fits.size())
     {
         if(i < keepers*fits.size())
@@ -171,7 +191,6 @@ fvec MaximizeParticles::Test( const fvec &sample)
                 {
                     newParticles.push_back(particles[index]);
                     newWeights.push_back(1.f/particleCount);
-                    //newWeights.push_back(weights[index]);
                     break;
                 }
             }
@@ -189,9 +208,6 @@ fvec MaximizeParticles::Test( const fvec &sample)
         float decay = 0.1;
         variance = variance*(1-decay) + (1 - maximumValue*maximumValue)*0.1*decay;
     }
-
-    history.push_back(maximum);
-    historyValue.push_back(maximumValue);
 
     // we normalize probabilities by weight value
     double weightSum = 0;
@@ -214,10 +230,27 @@ fvec MaximizeParticles::Test( const fvec &sample)
         for (j=0; j<probs.size() && r > probs[j]; j++);
         u32 index = j<probs.size() ? j : 0;
         newParticles.push_back(particles[index]);
+        //newParticles.push_back(particles[index] + RandN(dim, 0, variance*variance));
         newWeights.push_back(weights[index]);
     }
     particles = newParticles;
     weights = newWeights;
+
+    /*
+    // we find the current maximum
+    maximumValue = 0;
+    FOR(i, particleCount)
+    {
+        if(maximumValue < weights[i])
+        {
+            maximumValue = weights[i];
+            maximum = particles[i];
+        }
+    }
+    */
+
+    history.push_back(maximum);
+    historyValue.push_back(maximumValue);
 
     // if particles have gone wild we resample them
     float degeneracyThreshold = 0.000000001;

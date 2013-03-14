@@ -18,6 +18,7 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include <public.h>
+#include <basicMath.h>
 #include "clustererKKM.h"
 
 using namespace std;
@@ -121,20 +122,36 @@ template <int N>
 void ClustererKKM::TrainDim(std::vector< fvec > _samples)
 {
 //    if(nbClusters < 2) nbClusters = 2; // we can't have less than 2 clusters
-    std::vector<sampletype> samples;
+    std::vector<sampletype> samples(_samples.size());
     sampletype samp;
-    FOR(i, _samples.size()) { FOR(d, dim) samp(d) = _samples[i][d]; samples.push_back(samp); }
+    FOR(i, _samples.size()) {
+        FOR(d, dim) samp(d) = _samples[i][d];
+        samples[i] = samp;
+    }
+    bool kPlusPlus = false;
+
     std::vector<sampletype> initial_centers;
+    if(!kPlusPlus)
+    {
+        initial_centers.resize(nbClusters);
+        u32 *perm = randPerm(_samples.size());
+        FOR(i, nbClusters) initial_centers[i] = samples[perm[i]];
+        KILL(perm);
+    }
     KillDim<N>();
 
     switch(kernelType)
     {
     case 0:
     {
-        kcentroid<linkernel> cen = kcentroid<linkernel>(linkernel(),0.001, maxVectors);
+        kcentroid<linkernel> cen = kcentroid<linkernel>(linkernel(), 0.001, maxVectors);
         kkmeans<linkernel> *fun = new kkmeans<linkernel>(cen);
         fun->set_number_of_centers(nbClusters);
-        pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+        if(kPlusPlus)
+        {
+            pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+            nbClusters = initial_centers.size();
+        }
         fun->train(samples,initial_centers);
         decFunction = (void *)fun;
         kernelTypeTrained = 0;
@@ -145,7 +162,11 @@ void ClustererKKM::TrainDim(std::vector< fvec > _samples)
         kcentroid<polkernel> cen = kcentroid<polkernel>(polkernel(1,1,kernelDegree),0.001, maxVectors);
         kkmeans<polkernel> *fun = new kkmeans<polkernel>(cen);
         fun->set_number_of_centers(nbClusters);
-        pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+        if(kPlusPlus)
+        {
+            pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+            nbClusters = initial_centers.size();
+        }
         fun->train(samples,initial_centers);
         decFunction = (void *)fun;
         kernelTypeTrained = 1;
@@ -156,7 +177,11 @@ void ClustererKKM::TrainDim(std::vector< fvec > _samples)
         kcentroid<rbfkernel> cen = kcentroid<rbfkernel>(rbfkernel(1./kernelGamma),0.001, maxVectors);
         kkmeans<rbfkernel> *fun = new kkmeans<rbfkernel>(cen);
         fun->set_number_of_centers(nbClusters);
-        pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+        if(kPlusPlus)
+        {
+            pick_initial_centers(nbClusters, initial_centers, samples, fun->get_kernel());
+            nbClusters = initial_centers.size();
+        }
         fun->train(samples,initial_centers);
         decFunction = (void *)fun;
         kernelTypeTrained = 2;
@@ -224,14 +249,13 @@ fvec ClustererKKM::TestDim(const fvec &_sample)
     }
         break;
     }
-    /*
+
     FOR(i, nbClusters)
     {
         res[i] /= sum;
     }
-    */
 //    res[index] *= 1.2f;
-    FOR(i, nbClusters) res[i] = 0;
+//    FOR(i, nbClusters) res[i] = 0;
     res[index] = 1;
     return res;
 }

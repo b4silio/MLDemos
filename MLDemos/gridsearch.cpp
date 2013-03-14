@@ -73,6 +73,7 @@ void GridSearch::DisplayChanged()
 
 ivec toBinary(ivec labels)
 {
+    if(!labels.size()) return labels;
     ivec newLabels(labels.size(), 1);
     map<int,int> class2labels;
     int cnt=0;
@@ -377,8 +378,42 @@ void GridSearch::Run()
     ivec binLabels = toBinary(labels);
     ui->progressBar->setValue(0);
     ui->progressBar->setMaximum(xSteps*ySteps);
-    fvec errorMap(xSteps*ySteps);
-    fvec fmeasureMap(xSteps*ySteps);
+    int w = 0;
+    int h = 0;
+
+
+    float *rewardData = 0;
+    if(maximizer)
+    {
+        if(canvas->maps.reward.isNull()) return;
+        QImage rewardImage = canvas->maps.reward.toImage();
+        QRgb *pixels = (QRgb*) rewardImage.bits();
+        w = rewardImage.width();
+        h = rewardImage.height();
+
+        rewardData = new float[w*h];
+        float maxData = 0;
+        FOR(i, w*h)
+        {
+            rewardData[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+            maxData = max(maxData, rewardData[i]);
+        }
+        if(maxData > 0)
+        {
+            FOR(i, w*h) rewardData[i] /= maxData; // we ensure that the data is normalized
+        }
+        ivec size;
+        size.push_back(w);
+        size.push_back(h);
+        fvec low(2,0.f);
+        fvec high(2,1.f);
+        canvas->data->GetReward()->SetReward(rewardData, size, low, high);
+    }
+
+    u32 *perm = randPerm(samples.size());
+    fvec measure1Map(xSteps*ySteps);
+    fvec measure2Map(xSteps*ySteps);
+    fvec measure3Map(xSteps*ySteps);
     FOR(y, ySteps)
     {
         FOR(x, xSteps)
@@ -386,7 +421,6 @@ void GridSearch::Run()
             if(!bNone1) params[xIndex] = x / (float) (xSteps-1) * (xMax - xMin) + xMin;
             if(!bNone2) params[yIndex] = y / (float) (ySteps-1) * (yMax - yMin) + yMin;
             int trainCount = (int)(trainRatio * samples.size());
-            u32 *perm = randPerm(samples.size());
             vector<fvec> trainSamples(trainCount);
             ivec trainLabels(trainCount);
             ivec trainBinLabels(trainCount);
@@ -395,6 +429,7 @@ void GridSearch::Run()
             ivec testBinLabels(samples.size()-trainCount);
             fvec measure1(folds, 0);
             fvec measure2(folds, 0);
+            fvec measure3(folds, 0);
             FOR(f, folds)
             {
                 int foldOffset = (f*samples.size()/folds);
@@ -491,40 +526,88 @@ void GridSearch::Run()
                     }
                     error /= testSamples.size();
                     measure1[f] = error;
+                    delete r;
                 }
                 else if(dynamical);
                 else if(avoider);
-                else if(maximizer);
+                else if(maximizer)
+                {
+                    fvec startingPoint(2);
+                    if(canvas->targets.size())
+                    {
+                        startingPoint = canvas->targets.back();
+                        QPointF starting = canvas->toCanvasCoords(startingPoint);
+                        startingPoint[0] = starting.x()/w;
+                        startingPoint[1] = starting.y()/h;
+                    }
+                    else
+                    {
+                        startingPoint[0] = drand48();
+                        startingPoint[1] = drand48();
+                    }
+                    Maximizer *m = maximizer->GetMaximizer();
+                    maximizer->SetParams(m, params);
+                    m->maxAge = 500;
+                    m->stopValue = 0.99;
+                    //data = canvas->data->GetReward()->GetRewardFloat();
+                    m->Train(rewardData, fVec(w,h), startingPoint);
+                    m->age = 0;
+                    // and now we test for a while
+                    do
+                    {
+                        m->Test(m->Maximum());
+                        m->age++;
+                    }
+                    while(m->age < m->maxAge && m->MaximumValue() < m->stopValue);
+                    int iterations = m->age;
+                    float maxVal = m->MaximumValue();
+                    float evals = m->Evaluations();
+                    measure1[f] = iterations;
+                    measure2[f] = maxVal;
+                    measure3[f] = evals;
+                    delete m;
+                }
                 else if(reinforcement);
                 else if(projector);
             }
-            KILL(perm);
             // now we fill the error map
-            float mean = 0, effMean = 0;
+            float measure1Mean = 0, measure2Mean = 0, measure3Mean = 0;
             FOR(f, folds)
             {
-                mean += measure1[f];
-                effMean += measure2[f];
+                measure1Mean += measure1[f];
+                measure2Mean += measure2[f];
+                measure3Mean += measure3[f];
             }
-            mean /= folds;
-            effMean /= folds;
-            qDebug() << "mean" << mean << "fmeasure" << effMean;
-            errorMap[x+y*xSteps] = mean;
-            fmeasureMap[x+y*xSteps] = effMean;
+            measure1Mean /= folds;
+            measure2Mean /= folds;
+            measure3Mean /= folds;
+            //qDebug() << "mean" << mean << "fmeasure" << effMean;
+            measure1Map[x+y*xSteps] = measure1Mean;
+            measure2Map[x+y*xSteps] = measure2Mean;
+            measure3Map[x+y*xSteps] = measure3Mean;
             ui->progressBar->setValue(x+y*xSteps);
             ui->progressBar->repaint();
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
     }
+    KILL(perm);
+    KILL(rewardData);
+
     if(classifier)
     {
-        mapList["Error"] = errorMap;
-        mapList["FMeasure"] = fmeasureMap;
-        map = errorMap;
+        mapList["Error"] = measure1Map;
+        mapList["FMeasure"] = measure2Map;
+        map = measure1Map;
     }
     else if(regressor)
     {
-        mapList["Error"] = errorMap;
+        mapList["Error"] = measure1Map;
+    }
+    else if(maximizer)
+    {
+        mapList["Iterations"] = measure1Map;
+        mapList["End Value"] = measure2Map;
+        mapList["Evaluations"] = measure3Map;
     }
     bool bSig = ui->resultCombo->blockSignals(true);
     ui->resultCombo->clear();
