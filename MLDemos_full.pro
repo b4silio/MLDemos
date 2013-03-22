@@ -7,7 +7,7 @@
 TEMPLATE = subdirs
 # the main software
 CONFIG += ordered
-SUBDIRS = Core 3rdParty MLDemos MLScripting
+SUBDIRS = Core 3rdParty MLDemos
 Core.file = Core/Core.pro
 3rdParty.file = _3rdParty/3rdParty.pro
 MLDemos.file = MLDemos/MLDemos.pro
