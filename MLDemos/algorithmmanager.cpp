@@ -2285,9 +2285,8 @@ void AlgorithmManager::ClusterTest()
 
 
     emit UpdateInfo();
-    mldemos->showStats->infoText->text()
+    QString infoText = mldemos->showStats->infoText->text();
 
-    QString infoText = showStats->infoText->text();
     infoText += "\nClustering as Classifier\nF-Measures:\n";
 
     float mean=0, stdev=0;
@@ -2298,9 +2297,9 @@ void AlgorithmManager::ClusterTest()
     stdev = sqrtf(stdev);
     infoText += QString("%1 clusters: %2 (+- %3)\n").arg(clusterer->NbClusters()).arg(mean, 0, 'f', 3).arg(stdev, 0, 'f', 3);
 
-    showStats->infoText->setText(infoText);
-    showStats->tabWidget->setCurrentIndex(1); // we show the info panel
-    statsDialog->show();
+    mldemos->showStats->infoText->setText(infoText);
+    mldemos->showStats->tabWidget->setCurrentIndex(1); // we show the info panel
+    mldemos->statsDialog->show();
 
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);

@@ -76,9 +76,9 @@ public:
     Ui::statisticsDialog *showStats;
     Ui::ManualSelection* manualSelection;
     Ui::InputDimensions* inputDimensions;
-private:
-
     QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
+
+private:
 
     QNamedWindow *rocWidget;
 
