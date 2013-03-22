@@ -2285,7 +2285,8 @@ void AlgorithmManager::ClusterTest()
 
 
     emit UpdateInfo();
-    /*
+    mldemos->showStats->infoText->text()
+
     QString infoText = showStats->infoText->text();
     infoText += "\nClustering as Classifier\nF-Measures:\n";
 
@@ -2300,7 +2301,6 @@ void AlgorithmManager::ClusterTest()
     showStats->infoText->setText(infoText);
     showStats->tabWidget->setCurrentIndex(1); // we show the info panel
     statsDialog->show();
-    */
 
     drawTimer->clusterer= &this->clusterer;
     drawTimer->start(QThread::NormalPriority);

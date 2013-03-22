@@ -25,6 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interfaceRVMClassifier.h"
 #include "interfaceRVMRegress.h"
 #include "interfaceKMCluster.h"
+#include "interfaceMRVMClassifier.h"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ PluginKernel::PluginKernel()
     regressors.push_back(new RegrRVM());
     dynamicals.push_back(new DynamicSVM());
     classifiers.push_back(new ClassMVM());
+    classifiers.push_back(new ClassMRVM());
 }
 
 #ifndef PLUGIN_CLUSTER

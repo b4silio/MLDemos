@@ -2974,7 +2974,11 @@ double svm_predict(const svm_model *model, const svm_node *x)
         double *dec_values = new double[nr_class*(nr_class-1)/2];
 		svm_predict_values(model, x, dec_values);
 		double decision = dec_values[0];
-
+        if (nr_class == 2)
+        {
+            delete [] dec_values;
+            return (model->label[0] == 1 ? decision : -decision);
+        }
         int *vote = new int[nr_class];
 		for(i=0;i<nr_class;i++)
 			vote[i] = 0;
@@ -2994,13 +2998,6 @@ double svm_predict(const svm_model *model, const svm_node *x)
 				vote_max_idx = i;
         delete [] vote;
         delete [] dec_values;
-		if (nr_class == 2)
-		{
-			if(model->param.svm_type == C_SVC)
-				return (model->label[0] == 1 ? decision : -decision);
-			else if (model->param.svm_type == NU_SVC)
-				return (model->label[0] == 1 ? decision : -decision);
-		}
 		return model->label[vote_max_idx];
 	}
 }
