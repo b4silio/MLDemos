@@ -36,4 +36,4 @@ PluginProjections::PluginProjections()
     projectors.push_back(new SammonProjection());
 }
 
-Q_EXPORT_PLUGIN2(mld_Projections, PluginProjections)
+//Q_EXPORT_PLUGIN2(mld_Projections, PluginProjections)

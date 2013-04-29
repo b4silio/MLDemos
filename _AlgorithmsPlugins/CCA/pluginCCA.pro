@@ -44,3 +44,6 @@ HEADERS +=  liblinear/linear.h \
             liblinear/blasp.h \
             liblinear/blas.h
 
+OTHER_FILES += \
+    plugin.json
+

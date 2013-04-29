@@ -26,7 +26,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class PluginAvoid : public QObject, public AvoidanceInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(AvoidanceInterface)
+    Q_PLUGIN_METADATA(IID "PluginAvoid" FILE "plugin.json")
+    Q_INTERFACES(AvoidanceInterface)
 private:
 	QWidget *widget;
 public:

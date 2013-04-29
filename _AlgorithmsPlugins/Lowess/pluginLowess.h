@@ -30,7 +30,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class PluginLowess : public QObject, public CollectionInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(CollectionInterface)
+    Q_PLUGIN_METADATA(IID "PluginLowess" FILE "plugin.json")
+    Q_INTERFACES(CollectionInterface)
 public:
     PluginLowess();
     QString GetName(){return "Lowess Algorithm";}

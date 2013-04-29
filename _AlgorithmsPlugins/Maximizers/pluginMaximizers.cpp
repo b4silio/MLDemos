@@ -35,5 +35,5 @@ PluginMaximizer::PluginMaximizer()
 }
 
 #ifndef PLUGIN_MAXIMIZE
-Q_EXPORT_PLUGIN2(mld_Maximizer, PluginMaximizer)
+//Q_EXPORT_PLUGIN2(mld_Maximizer, PluginMaximizer)
 #endif

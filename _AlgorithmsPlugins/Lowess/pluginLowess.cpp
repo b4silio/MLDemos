@@ -26,4 +26,4 @@ PluginLowess::PluginLowess()
     regressors.push_back(new RegrLowess());
 }
 
-Q_EXPORT_PLUGIN2(mld_Lowess, PluginLowess)
+//Q_EXPORT_PLUGIN2(mld_Lowess, PluginLowess)

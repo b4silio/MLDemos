@@ -11,6 +11,8 @@ using namespace MathLib;
 #define USEQT
 #ifdef USEQT
 #include <QtGui>
+#include <QLabel>
+#include <QMessageBox>
 #endif
 
 struct options{  //A struct containing all passed options by user

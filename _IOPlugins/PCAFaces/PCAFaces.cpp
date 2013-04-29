@@ -83,4 +83,4 @@ void PCAFaces::FetchResults(std::vector<fvec> results)
 
 }
 
-Q_EXPORT_PLUGIN2(IO_PCAFaces, PCAFaces)
+//Q_EXPORT_PLUGIN2(IO_PCAFaces, PCAFaces)

@@ -38,6 +38,6 @@ PluginOpenCV::PluginOpenCV()
 
 #ifndef PLUGIN_CLUSTER
 #ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_OpenCV, PluginOpenCV)
+//Q_EXPORT_PLUGIN2(mld_OpenCV, PluginOpenCV)
 #endif
 #endif

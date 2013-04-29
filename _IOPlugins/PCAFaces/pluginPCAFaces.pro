@@ -28,6 +28,9 @@ SOURCES += 	PCAFaces.cpp \
 			widget.cpp \
     pcaprojector.cpp
 
+OTHER_FILES += \
+    plugin.json
+
 
 
 

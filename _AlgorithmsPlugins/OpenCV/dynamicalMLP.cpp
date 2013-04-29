@@ -24,7 +24,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 DynamicalMLP::DynamicalMLP()
-: functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0)
+    : functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0), trainingType(1)
 {
 	type = DYN_MLP;
 }
@@ -91,8 +91,9 @@ void DynamicalMLP::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	mlp->create(layers, activationFunction, alpha, beta);
 
 	CvANN_MLP_TrainParams params;
-	params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.001);
-	mlp->train(trainSamples, trainOutputs, sampleWeights, 0, params);
+    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.0001);
+    params.train_method = trainingType ? CvANN_MLP_TrainParams::RPROP : CvANN_MLP_TrainParams::BACKPROP;
+    mlp->train(trainSamples, trainOutputs, sampleWeights, 0, params);
 	cvReleaseMat(&trainSamples);
 	cvReleaseMat(&trainOutputs);
 	cvReleaseMat(&sampleWeights);
@@ -142,13 +143,14 @@ fvec DynamicalMLP::Test( const fvec &sample)
 	return res;
 }
 
-void DynamicalMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta)
+void DynamicalMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType)
 {
 	this->functionType = functionType;
 	this->neuronCount = neuronCount;
 	this->layerCount = layerCount;
 	this->alpha = alpha;
 	this->beta = beta; 
+    this->trainingType = trainingType;
 }
 
 

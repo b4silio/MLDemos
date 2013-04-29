@@ -31,4 +31,4 @@ PluginGP::PluginGP()
     dynamicals.push_back(new DynamicGPR());
 }
 
-Q_EXPORT_PLUGIN2(mld_GP, PluginGP)
+//Q_EXPORT_PLUGIN2(mld_GP, PluginGP)

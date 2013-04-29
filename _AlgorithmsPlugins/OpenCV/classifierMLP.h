@@ -29,15 +29,16 @@ private:
 	u32 functionType; // 1: sigmoid, 2: gaussian
 	u32 neuronCount;
 	u32 layerCount;
+    u32 trainingType; // 0: Backprop, 1: RPROP
 	float alpha, beta;
 	CvANN_MLP *mlp;
 public:
-    ClassifierMLP() : functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0){}
+    ClassifierMLP() : functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0), trainingType(1){}
 	~ClassifierMLP();
 	void Train(std::vector< fvec > samples, ivec labels);
     float Test( const fvec &sample) const ;
     const char *GetInfoString() const ;
-	void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta);
+    void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType);
 };
 
 #endif // _CLASSIFIER_MLP_H_

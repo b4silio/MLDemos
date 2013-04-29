@@ -33,5 +33,5 @@ PluginReinforcement::PluginReinforcement()
 }
 
 #ifndef PLUGIN_MAXIMIZE
-Q_EXPORT_PLUGIN2(mld_Reinforcement, PluginReinforcement)
+//Q_EXPORT_PLUGIN2(mld_Reinforcement, PluginReinforcement)
 #endif

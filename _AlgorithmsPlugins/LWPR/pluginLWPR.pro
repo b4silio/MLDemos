@@ -42,3 +42,6 @@ HEADERS += \
 	lwpr/lwpr_mem.h \
 	lwpr/lwpr_xml.h
 
+OTHER_FILES += \
+    plugin.json
+

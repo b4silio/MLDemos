@@ -50,3 +50,6 @@ HEADERS +=	\
 	fgmm/gaussian.h \
 	fgmm/regression.h \
 	fgmm/smat.h
+
+OTHER_FILES += \
+    plugin.json

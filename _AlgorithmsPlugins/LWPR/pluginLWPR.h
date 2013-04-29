@@ -25,11 +25,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class PluginLWPR : public QObject, public CollectionInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(CollectionInterface)
+    Q_PLUGIN_METADATA(IID "PluginLWPR" FILE "plugin.json")
+    Q_INTERFACES(CollectionInterface)
 public:
 	PluginLWPR();
 
-	QString GetName(){return "LWPR collection";};
+    QString GetName(){return "LWPR collection";}
 };
 
 #endif // _PLUGINLWPR_H_

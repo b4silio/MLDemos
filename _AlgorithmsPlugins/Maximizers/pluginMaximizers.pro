@@ -82,3 +82,6 @@ HEADERS +=	\
 	newmat11/newmatrm.h \
 	newmat11/precisio.h \
 	newmat11/solution.h
+
+OTHER_FILES += \
+    plugin.json

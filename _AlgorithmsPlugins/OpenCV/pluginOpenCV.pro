@@ -47,3 +47,6 @@ SOURCES += 	\
             interfaceTreesClassifier.cpp \
             pluginOpenCV.cpp
 #}
+
+OTHER_FILES += \
+    plugin.json

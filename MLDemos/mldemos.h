@@ -19,7 +19,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
+#include <QtWidgets>
 #include <QTime>
 #include <QResizeEvent>
 #include <QMutex>
@@ -130,7 +131,7 @@ private:
 	bool bIsRocNew;
 	bool bIsCrossNew;
 public:
-	MLDemos(QString filename="", QWidget *parent = 0, Qt::WFlags flags = 0);
+    MLDemos(QString filename="", QWidget *parent = 0, Qt::WindowFlags flags = 0);
 	~MLDemos();
 
 	void resizeEvent( QResizeEvent *event );

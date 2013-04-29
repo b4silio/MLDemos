@@ -60,7 +60,7 @@ void RegressorGB::Train(std::vector< fvec > samples, ivec labels)
 
     //loss_function_type – Type of the loss function used for training (see Training the GBT model). It must be one of the following types: CvGBTrees::SQUARED_LOSS, CvGBTrees::ABSOLUTE_LOSS, CvGBTrees::HUBER_LOSS, CvGBTrees::DEVIANCE_LOSS. The first three types are used for regression problems, and the last one for classification.
     int activationFunction;
-    switch(boostLossType==1)
+    switch(boostLossType)
     {
     case 1:
         activationFunction = CvGBTrees::SQUARED_LOSS;

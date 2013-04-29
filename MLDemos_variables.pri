@@ -6,7 +6,9 @@
 ##############################
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
-QT += core gui svg opengl
+QT += svg opengl
+#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+#macx: LIBS += -framework QtWidgets
 
 DEPENDPATH += . \
 		.. \

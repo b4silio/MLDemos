@@ -8,6 +8,7 @@
 class GHSOMProjector : public QObject, public ProjectorInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "GHSOMProjector" FILE "plugin.json")
     Q_INTERFACES(ProjectorInterface)
 private:
     Ui::paramsGHSOM *params;

@@ -27,7 +27,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class DynamicSEDS : public QObject, public DynamicalInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(DynamicalInterface)
+    Q_PLUGIN_METADATA(IID "DynamicSEDS" FILE "plugin.json")
+    Q_INTERFACES(DynamicalInterface)
 private:
 	QWidget *widget;
 	Ui::ParametersSEDS *params;

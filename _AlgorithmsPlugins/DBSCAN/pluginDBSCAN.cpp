@@ -27,4 +27,4 @@ PluginDBSCAN::PluginDBSCAN()
     clusterers.push_back(new ClustDBSCAN());
 }
 
-Q_EXPORT_PLUGIN2(mld_DBSCAN, PluginDBSCAN)
+//Q_EXPORT_PLUGIN2(mld_DBSCAN, PluginDBSCAN)

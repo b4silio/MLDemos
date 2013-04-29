@@ -90,3 +90,6 @@ HEADERS +=	\
 	nlopt/bobyqa.h \
 	nlopt/auglag.h \
 	nlopt/config.h
+
+OTHER_FILES += \
+    plugin.json

@@ -47,3 +47,6 @@ HEADERS += ANN/ANN.h \
 	ANN/kd_util.h \
 	ANN/pr_queue.h \
 	ANN/pr_queue_k.h
+
+OTHER_FILES += \
+    plugin.json

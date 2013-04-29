@@ -66,12 +66,12 @@ void ClassifierMLP::Train(std::vector< fvec > samples, ivec labels)
 
 	int activationFunction = functionType == 2 ? CvANN_MLP::GAUSSIAN : functionType ? CvANN_MLP::SIGMOID_SYM : CvANN_MLP::IDENTITY;
 
-
 	mlp = new CvANN_MLP();
 	mlp->create(layers, activationFunction, alpha, beta);
 
 	CvANN_MLP_TrainParams params;
-	params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.001);
+    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 1000, 0.0001);
+    params.train_method = trainingType ? CvANN_MLP_TrainParams::RPROP : CvANN_MLP_TrainParams::BACKPROP;
 	mlp->train(trainSamples, trainLabels, sampleWeights, 0, params);
 	cvReleaseMat(&trainSamples);
 	cvReleaseMat(&trainLabels);
@@ -92,13 +92,14 @@ float ClassifierMLP::Test( const fvec &sample) const
 	return _output[0];
 }
 
-void ClassifierMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta)
+void ClassifierMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType)
 {
 	this->functionType = functionType;
 	this->neuronCount = neuronCount;
 	this->layerCount = layerCount;
 	this->alpha = alpha;
-	this->beta = beta; 
+    this->beta = beta;
+    this->trainingType = trainingType;
 }
 
 const char *ClassifierMLP::GetInfoString() const

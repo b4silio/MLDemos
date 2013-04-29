@@ -28,4 +28,4 @@ PluginLWPR::PluginLWPR()
 	dynamicals.push_back(new DynamicLWPR());
 }
 
-Q_EXPORT_PLUGIN2(mld_LWPR, PluginLWPR)
+//Q_EXPORT_PLUGIN2(mld_LWPR, PluginLWPR)

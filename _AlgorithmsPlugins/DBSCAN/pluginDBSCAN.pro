@@ -20,10 +20,10 @@ FORMS += paramsDBSCAN.ui \
     graphDBSCAN.ui
 
 HEADERS +=	\
-			canvas.h \
-			datasetManager.h \
-			mymaths.h \
-			drawUtils.h \
+    canvas.h \
+    datasetManager.h \
+    mymaths.h \
+    drawUtils.h \
     interfaceDBSCAN.h \
     distance.h \
     clustererDBSCAN.h \
@@ -34,8 +34,5 @@ SOURCES += 	\
     clustererDBSCAN.cpp \
     pluginDBSCAN.cpp
 
-###########################
-# Dependencies            #
-###########################
-# add here the dependencies to third party libraries (e.g. the one in 3rdParty)
-#HEADERS +=
+OTHER_FILES += \
+    plugin.json

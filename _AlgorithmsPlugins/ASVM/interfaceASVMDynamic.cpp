@@ -354,4 +354,4 @@ bool DynamicASVM::LoadParams(QString name, float value)
     return true;
 }
 
-Q_EXPORT_PLUGIN2(mld_ASVM, DynamicASVM)
+//Q_EXPORT_PLUGIN2(mld_ASVM, DynamicASVM)

@@ -19,7 +19,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "pluginCCA.h"
 #include "interfaceCCAProjection.h"
 
-
 using namespace std;
 
 PluginCCA::PluginCCA()
@@ -29,5 +28,5 @@ PluginCCA::PluginCCA()
 
 }
 
-Q_EXPORT_PLUGIN2(mld_CCA, PluginCCA)
+//Q_EXPORT_PLUGIN2(mld_CCA, PluginCCA)
 

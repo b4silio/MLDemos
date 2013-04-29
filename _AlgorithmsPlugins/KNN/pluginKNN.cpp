@@ -30,4 +30,4 @@ PluginKNN::PluginKNN()
 	dynamicals.push_back(new DynamicKNN());
 }
 
-Q_EXPORT_PLUGIN2(mld_KNN, PluginKNN)
+//Q_EXPORT_PLUGIN2(mld_KNN, PluginKNN)

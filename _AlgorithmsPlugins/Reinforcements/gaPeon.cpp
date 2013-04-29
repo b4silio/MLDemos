@@ -31,7 +31,7 @@ GAPeon::~GAPeon()
 GAPeon GAPeon::Random(u32 dim, int type)
 {
 	GAPeon peon(dim);
-    switch(type==0)
+    switch(type)
     {
     case 0:
         FOR(d, dim) peon.Dna()[d] = drand48()*M_PI*2;
@@ -48,7 +48,7 @@ GAPeon GAPeon::Random(u32 dim, int type)
 
 void GAPeon::Randomize()
 {
-    switch(type==0)
+    switch(type)
     {
     case 0:
         FOR(d, dim) dna[d] = drand48()*M_PI*2;

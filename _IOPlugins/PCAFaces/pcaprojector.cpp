@@ -357,7 +357,7 @@ void PCAProjector::DropImage(QDropEvent *event)
 			if (!file.open(QIODevice::ReadOnly)) continue;
 			file.close();
 			QMutexLocker lock(&imageMutex);
-			IplImage *img = cvLoadImage(filename.toAscii());
+            IplImage *img = cvLoadImage(filename.toLatin1());
 			SetImage(img);
 			bFromWebcam = false;
 			IMKILL(img);
@@ -378,7 +378,7 @@ void PCAProjector::DropDataset(QDropEvent *event)
 			QFile file(filename);
 			if (!file.open(QIODevice::ReadOnly)) return;
 			file.close();
-			sm.Load(filename.toAscii());
+            sm.Load(filename.toLatin1());
 			RefreshDataset();
 		}
 	}
@@ -395,7 +395,7 @@ void PCAProjector::LoadImage()
 	file.close();
 	
 	bFromWebcam = false;
-	IplImage *img = cvLoadImage(filename.toAscii());
+    IplImage *img = cvLoadImage(filename.toLatin1());
 	if(!img) return;
 	QMutexLocker lock(&imageMutex);
 	SetImage(img);
@@ -424,7 +424,7 @@ void PCAProjector::FromClipboard()
 			QString filename = clipboard->mimeData()->urls()[i].toLocalFile();
 			if(filename.toLower().endsWith(".png") || filename.toLower().endsWith(".jpg"))
 			{
-				IplImage *img = cvLoadImage(filename.toAscii());
+                IplImage *img = cvLoadImage(filename.toLatin1());
 				if(!img) break;
 				QMutexLocker lock(&imageMutex);
 				SetImage(img);
@@ -471,7 +471,7 @@ void PCAProjector::LoadDataset()
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly)) return;
 	file.close();
-	sm.Load(filename.toAscii().data());
+    sm.Load(filename.toLatin1().data());
 	RefreshDataset();
 }
 
@@ -484,7 +484,7 @@ void PCAProjector::SaveDataset()
 	QFile file(filename);
 	if (!file.open(QIODevice::WriteOnly)) return;
 	file.close();
-	sm.Save(filename.toAscii());
+    sm.Save(filename.toLatin1());
 }
 
 void PCAProjector::AddDataset()
@@ -496,7 +496,7 @@ void PCAProjector::AddDataset()
 	if (!file.open(QIODevice::ReadOnly)) return;
 	file.close();
 	SampleManager newSm;
-	newSm.Load(filename.toAscii());
+    newSm.Load(filename.toLatin1());
 	sm.AddSamples(newSm);
 	RefreshDataset();
 }

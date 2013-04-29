@@ -27,7 +27,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class DynamicASVM : public QObject, public DynamicalInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(DynamicalInterface)
+    Q_INTERFACES(DynamicalInterface)
+    Q_PLUGIN_METADATA(IID "DynamicASVM" FILE "plugin.json")
+
 private:
 	QWidget *widget;
     Ui::ParametersASVM *params;

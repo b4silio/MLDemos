@@ -34,7 +34,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <matio/matio.h>
 #include "optimization_test_functions.h"
 
-MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WFlags flags)
+MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       canvas(0),glw(0),vis(0),
       gridSearch(0),
@@ -2204,7 +2204,7 @@ void MLDemos::Save(QString filename)
     }
     file.close();
     if (!canvas->maps.reward.isNull()) RewardFromMap(canvas->maps.reward.toImage());
-    canvas->data->Save(filename.toAscii());
+    canvas->data->Save(filename.toLatin1());
     SaveParams(filename);
     ui.statusBar->showMessage("Data saved successfully");
 }
@@ -2227,7 +2227,7 @@ void MLDemos::Load(QString filename)
     }
     file.close();
     ClearData();
-    canvas->data->Load(filename.toAscii());
+    canvas->data->Load(filename.toLatin1());
     MapFromReward();
     LoadParams(filename);
     //    QImage reward(filename + "-reward.png");
@@ -2291,7 +2291,7 @@ void MLDemos::dropEvent(QDropEvent *event)
         if (filename.toLower().endsWith(".ml"))
         {
             ClearData();
-            canvas->data->Load(filename.toAscii());
+            canvas->data->Load(filename.toLatin1());
             MapFromReward();
             LoadParams(filename);
             ui.statusBar->showMessage("Data loaded successfully");

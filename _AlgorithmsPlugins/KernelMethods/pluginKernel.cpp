@@ -44,6 +44,6 @@ PluginKernel::PluginKernel()
 
 #ifndef PLUGIN_CLUSTER
 #ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_KernelMethods, PluginKernel)
+//Q_EXPORT_PLUGIN2(mld_KernelMethods, PluginKernel)
 #endif
 #endif

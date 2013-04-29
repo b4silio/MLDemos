@@ -33,8 +33,9 @@ using namespace std;
 
 class PluginFlame : public QObject, public CollectionInterface
 {
-        Q_OBJECT
-        Q_INTERFACES(CollectionInterface)
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "PluginFlame" FILE "plugin.json")
+    Q_INTERFACES(CollectionInterface)
 public:
     PluginFlame();
     QString GetName(){return "My Flame Algorithm";}

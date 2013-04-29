@@ -34,6 +34,6 @@ PluginGMM::PluginGMM()
 
 #ifndef PLUGIN_CLUSTER
 #ifndef PLUGIN_CLASSIFY
-Q_EXPORT_PLUGIN2(mld_GMM, PluginGMM)
+//Q_EXPORT_PLUGIN2(mld_GMM, PluginGMM)
 #endif
 #endif

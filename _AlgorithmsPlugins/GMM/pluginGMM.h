@@ -25,7 +25,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class PluginGMM : public QObject, public CollectionInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(CollectionInterface)
+    Q_PLUGIN_METADATA(IID "PluginGMM" FILE "plugin.json")
+    Q_INTERFACES(CollectionInterface)
 public:
 	PluginGMM();
     QString GetName(){return "GMM collection";}

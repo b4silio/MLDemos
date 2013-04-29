@@ -20,15 +20,15 @@ class SECovarianceFunction
 private:
     //SECOVFT * inData;
     int dim; //dimensionality of data
-    SECOVFT lengthscales[]; // float array containing the lengthscale for each dimension
+    SECOVFT *lengthscales; // float array containing the lengthscale for each dimension
     //SECOVFT * outData;
     SECOVFT sigma_n; // noise var
     SECOVFT sigma_f; //signal var
 
 
 public:  
-    SECovarianceFunction(){}
-     ~SECovarianceFunction(){}
+    SECovarianceFunction() : lengthscales(NULL){}
+    ~SECovarianceFunction(){if(lengthscales) delete [] lengthscales;}
     /**
     Set the params of the Squared Exponential Covariance Function: dimension of data, lengthscales, noise variance and a scaling constant sf.
       */

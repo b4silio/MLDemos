@@ -4,6 +4,8 @@ void SECovarianceFunction::SetParams(int d, SECOVFT l[], SECOVFT sn, SECOVFT sf)
     dim=d;
     sigma_n = sn;
     sigma_f = sf;
+    if(lengthscales) delete [] lengthscales;
+    lengthscales = new SECOVFT[dim];
     memcpy(lengthscales,l,dim*sizeof(SECOVFT));
 }
 

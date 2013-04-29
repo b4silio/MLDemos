@@ -10,15 +10,18 @@ PluginManager::~PluginManager()
 {
     FOR (i, inputoutputs.size()) {
         if (inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
+        DEL(inputoutputs[i]);
     }
-    FOR (i, pluginLoaders.size()) pluginLoaders.at(i)->unload();
+    FOR (i, pluginLoaders.size()) {
+        pluginLoaders.at(i)->unload();
+        DEL(pluginLoaders[i]);
+    }
 }
 
 void PluginManager::LoadPlugins()
 {
     qDebug() << "Importing plugins";
     QDir pluginsDir = QDir(qApp->applicationDirPath());
-    QStringList pluginFileNames;
     QDir alternativeDir = pluginsDir;
 
 #if defined(Q_OS_WIN)

@@ -28,7 +28,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class PCAFaces : public QObject, public InputOutputInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(InputOutputInterface)
+    Q_PLUGIN_METADATA(IID "PCAFaces" FILE "plugin.json")
+    Q_INTERFACES(InputOutputInterface)
 public:
 	const char* QueryClassifierSignal() {return SIGNAL(QueryClassifier(std::vector<fvec>));}
 	const char* QueryRegressorSignal() {return SIGNAL(QueryRegressor(std::vector<fvec>));}

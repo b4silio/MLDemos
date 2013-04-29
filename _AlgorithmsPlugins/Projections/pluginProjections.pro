@@ -175,3 +175,6 @@ HEADERS +=	\
     dlib/unicode.h \
     dlib/windows_magic.h \
     dlib/xml_parser.h
+
+OTHER_FILES += \
+    plugin.json

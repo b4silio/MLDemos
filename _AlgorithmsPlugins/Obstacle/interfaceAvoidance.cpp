@@ -63,4 +63,4 @@ bool PluginAvoid::LoadParams(QString name, float value)
 	return true;
 }
 
-Q_EXPORT_PLUGIN2(mld_DSAvoid, PluginAvoid)
+//Q_EXPORT_PLUGIN2(mld_DSAvoid, PluginAvoid)

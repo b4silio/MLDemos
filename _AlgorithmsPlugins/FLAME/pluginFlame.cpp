@@ -33,5 +33,5 @@ PluginFlame::PluginFlame()
     clusterers.push_back(new ClustFlame());
 }
 
-Q_EXPORT_PLUGIN2(mld_Flame, PluginFlame)
+//Q_EXPORT_PLUGIN2(mld_Flame, PluginFlame)
 

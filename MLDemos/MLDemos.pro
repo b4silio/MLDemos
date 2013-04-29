@@ -4,6 +4,7 @@
 TEMPLATE = app
 QT += opengl svg
 
+
 TARGET = mldemos
 NAME = mldemos
 MLPATH =..
@@ -39,7 +40,6 @@ FORMS += aboutDialog.ui \
 	statisticsDialog.ui \
 	viewOptions.ui \
     compare.ui \
-    expose.ui \
     manualSelection.ui \
     inputDimensions.ui \
     datagenerator.ui \

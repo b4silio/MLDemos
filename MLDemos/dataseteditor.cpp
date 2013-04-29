@@ -1,6 +1,8 @@
 #include "dataseteditor.h"
 #include "ui_dataseteditor.h"
 #include <QDebug>
+#include <QMimeData>
+#include <QDrag>
 
 using namespace std;
 

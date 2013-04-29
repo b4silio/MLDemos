@@ -44,3 +44,6 @@ SOURCES += \
     GHSOM/neuronlayer.cpp \
     GHSOM/vector.cpp
 
+OTHER_FILES += \
+    plugin.json
+

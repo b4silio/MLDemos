@@ -268,4 +268,4 @@ bool DynamicSEDS::LoadParams(QString name, float value)
 	return true;
 }
 
-Q_EXPORT_PLUGIN2(mld_SEDS, DynamicSEDS)
+//Q_EXPORT_PLUGIN2(mld_SEDS, DynamicSEDS)

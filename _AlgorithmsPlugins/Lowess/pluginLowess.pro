@@ -37,3 +37,6 @@ SOURCES += 	\
 # add here the dependencies to third party libraries (e.g. the one in 3rdParty)
 HEADERS += \
 		    ../../_3rdParty/GSL_fit/gsl_fit.h
+
+OTHER_FILES += \
+    plugin.json

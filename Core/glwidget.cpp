@@ -680,7 +680,7 @@ void GLWidget::DrawLines(const GLObject &o) const
     }
 
     glPushMatrix();
-    glMultMatrixd(o.model.constData());
+    glMultMatrixf(o.model.constData());
     if(o.objectType.contains("linestrip") || o.objectType.contains("trajectories")) glBegin(GL_LINE_STRIP);
     else glBegin(GL_LINES);
     FOR(i, o.vertices.size())

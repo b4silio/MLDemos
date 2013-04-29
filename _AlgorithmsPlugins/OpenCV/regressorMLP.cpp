@@ -22,7 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "regressorMLP.h"
 
 RegressorMLP::RegressorMLP()
-: functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0)
+: functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0), trainingType(1)
 {
 	type = REGR_MLP;
 }
@@ -83,13 +83,13 @@ void RegressorMLP::Train(std::vector< fvec > samples, ivec labels)
 
 	int activationFunction = functionType == 2 ? CvANN_MLP::GAUSSIAN : functionType ? CvANN_MLP::SIGMOID_SYM : CvANN_MLP::IDENTITY;
 
-
 	mlp = new CvANN_MLP();
 	mlp->create(layers, activationFunction, alpha, beta);
 
 	CvANN_MLP_TrainParams params;
-	params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.001);
-	mlp->train(trainSamples, trainOutputs, sampleWeights, 0, params);
+    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.0001);
+    params.train_method = trainingType ? CvANN_MLP_TrainParams::RPROP : CvANN_MLP_TrainParams::BACKPROP;
+    mlp->train(trainSamples, trainOutputs, sampleWeights, 0, params);
 	cvReleaseMat(&trainSamples);
 	cvReleaseMat(&trainOutputs);
 	cvReleaseMat(&sampleWeights);
@@ -124,12 +124,13 @@ fvec RegressorMLP::Test( const fvec &sample)
 	return res;
 }
 
-void RegressorMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta)
+void RegressorMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType)
 {
 	this->functionType = functionType;
 	this->neuronCount = neuronCount;
 	this->layerCount = layerCount;
-	this->alpha = alpha;
+    this->trainingType = trainingType;
+    this->alpha = alpha;
 	this->beta = beta; 
 }
 

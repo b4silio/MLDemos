@@ -212,11 +212,6 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
 
 AlgorithmManager::~AlgorithmManager()
 {
-    FOR (i, inputoutputs.size()) {
-        if (inputoutputs[i] && bInputRunning[i]) inputoutputs[i]->Stop();
-    }
-    FOR (i, pluginLoaders.size()) pluginLoaders.at(i)->unload();
-
     mutex->lock();
     DEL(clusterer);
     DEL(regressor);

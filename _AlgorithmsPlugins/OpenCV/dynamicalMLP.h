@@ -30,6 +30,7 @@ private:
 	u32 neuronCount;
 	u32 layerCount;
 	float alpha, beta;
+    u32 trainingType;
 	CvANN_MLP *mlp;
 public:
 	DynamicalMLP();
@@ -39,7 +40,7 @@ public:
 	fvec Test( const fvec &sample);
     const char *GetInfoString();
 
-	void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta);
+    void SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType);
 };
 
 #endif // _DYNAMICAL_MLP_H_

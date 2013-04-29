@@ -25,11 +25,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class PluginKNN : public QObject, public CollectionInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(CollectionInterface)
+    Q_PLUGIN_METADATA(IID "PluginKNN" FILE "plugin.json")
+    Q_INTERFACES(CollectionInterface)
 public:
 	PluginKNN();
 
-	QString GetName(){return "K-Nearest Neighbors Collection";};
+    QString GetName(){return "K-Nearest Neighbors Collection";}
 };
 
 #endif // _PLUGINKNN_H_

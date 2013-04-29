@@ -42,8 +42,9 @@ void RegrMLP::SetParams(Regressor *regressor)
 	int layers = params->mlpLayerSpin->value();
 	int neurons = params->mlpNeuronSpin->value();
 	int activation = params->mlpFunctionCombo->currentIndex()+1; // 1: sigmoid, 2: gaussian
+    int trainingType = params->mlpTrainCombo->currentIndex();
 
-	((RegressorMLP *)regressor)->SetParams(activation, neurons, layers, alpha, beta);
+    ((RegressorMLP *)regressor)->SetParams(activation, neurons, layers, alpha, beta, trainingType);
 }
 
 fvec RegrMLP::GetParams()
@@ -53,13 +54,15 @@ fvec RegrMLP::GetParams()
     int layers = params->mlpLayerSpin->value();
     int neurons = params->mlpNeuronSpin->value();
     int activation = params->mlpFunctionCombo->currentIndex()+1; // 1: sigmoid, 2: gaussian
+    int trainingType = params->mlpTrainCombo->currentIndex();
 
-    fvec par(5);
+    fvec par(6);
     par[0] = alpha;
     par[1] = beta;
     par[2] = layers;
     par[3] = neurons;
     par[4] = activation;
+    par[5] = trainingType;
     return par;
 }
 
@@ -71,8 +74,9 @@ void RegrMLP::SetParams(Regressor *regressor, fvec parameters)
     int layers = parameters.size() > 2 ? parameters[2] : 1;
     int neurons = parameters.size() > 3 ? parameters[3] : 1;
     int activation = parameters.size() > 4 ? parameters[4] : 0;
+    int trainingType = parameters.size() > 5 ? parameters[5] : 0;
 
-    ((RegressorMLP *)regressor)->SetParams(activation, neurons, layers, alpha, beta);
+    ((RegressorMLP *)regressor)->SetParams(activation, neurons, layers, alpha, beta, trainingType);
 }
 
 void RegrMLP::GetParameterList(std::vector<QString> &parameterNames,
@@ -87,10 +91,12 @@ void RegrMLP::GetParameterList(std::vector<QString> &parameterNames,
     parameterNames.push_back("Hidden Layers");
     parameterNames.push_back("Neurons per Layer");
     parameterNames.push_back("Activation Function");
+    parameterNames.push_back("Training Method");
     parameterTypes.push_back("Real");
     parameterTypes.push_back("Real");
     parameterTypes.push_back("Integer");
     parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
     parameterTypes.push_back("List");
     parameterValues.push_back(vector<QString>());
     parameterValues.back().push_back("0.00000001f");
@@ -107,6 +113,8 @@ void RegrMLP::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.push_back(vector<QString>());
     parameterValues.back().push_back("Hyperbolic Tangent");
     parameterValues.back().push_back("Gaussian");
+    parameterValues.back().push_back("Backpropagation");
+    parameterValues.back().push_back("RPROP");
 }
 
 QString RegrMLP::GetAlgoString()
@@ -116,9 +124,15 @@ QString RegrMLP::GetAlgoString()
 	int layers = params->mlpLayerSpin->value();
 	int neurons = params->mlpNeuronSpin->value();
 	int activation = params->mlpFunctionCombo->currentIndex()+1; // 1: sigmoid, 2: gaussian
+    int training = params->mlpTrainCombo->currentIndex();
 
-	QString algo = QString("MLP %1 %2 %3 %4 %5").arg(neurons).arg(layers).arg(activation==1 ? "S" : "G").arg(alpha).arg(beta);
-	return algo;
+    QString algo = QString("MLP %1 %2 %3 %4 %5 %6")
+            .arg(neurons)
+            .arg(layers)
+            .arg(activation==1 ? "S" : "G")
+            .arg(alpha).arg(beta)
+            .arg(training?"R" : "B");
+    return algo;
 }
 
 Regressor *RegrMLP::GetRegressor()
@@ -167,6 +181,7 @@ void RegrMLP::SaveOptions(QSettings &settings)
 	settings.setValue("mlpBeta", params->mlpBetaSpin->value());
 	settings.setValue("mlpLayer", params->mlpLayerSpin->value());
 	settings.setValue("mlpFunction", params->mlpFunctionCombo->currentIndex());
+    settings.setValue("mlpTrain", params->mlpTrainCombo->currentIndex());
 }
 
 bool RegrMLP::LoadOptions(QSettings &settings)
@@ -176,7 +191,8 @@ bool RegrMLP::LoadOptions(QSettings &settings)
 	if(settings.contains("mlpBeta")) params->mlpBetaSpin->setValue(settings.value("mlpBeta").toFloat());
 	if(settings.contains("mlpLayer")) params->mlpLayerSpin->setValue(settings.value("mlpLayer").toFloat());
 	if(settings.contains("mlpFunction")) params->mlpFunctionCombo->setCurrentIndex(settings.value("mlpFunction").toInt());
-	return true;
+    if(settings.contains("mlpTrain")) params->mlpTrainCombo->setCurrentIndex(settings.value("mlpTrain").toInt());
+    return true;
 }
 
 void RegrMLP::SaveParams(QTextStream &file)
@@ -186,6 +202,7 @@ void RegrMLP::SaveParams(QTextStream &file)
 	file << "regressionOptions" << ":" << "mlpBeta" << " " << params->mlpBetaSpin->value() << "\n";
 	file << "regressionOptions" << ":" << "mlpLayer" << " " << params->mlpLayerSpin->value() << "\n";
 	file << "regressionOptions" << ":" << "mlpFunction" << " " << params->mlpFunctionCombo->currentIndex() << "\n";
+    file << "classificationOptions" << ":" << "mlpTrain" << " " << params->mlpTrainCombo->currentIndex() << "\n";
 }
 
 bool RegrMLP::LoadParams(QString name, float value)
@@ -195,5 +212,6 @@ bool RegrMLP::LoadParams(QString name, float value)
 	if(name.endsWith("mlpBeta")) params->mlpBetaSpin->setValue(value);
 	if(name.endsWith("mlpLayer")) params->mlpLayerSpin->setValue((int)value);
 	if(name.endsWith("mlpFunction")) params->mlpFunctionCombo->setCurrentIndex((int)value);
-	return true;
+    if(name.endsWith("mlpTrain")) params->mlpTrainCombo->setCurrentIndex((int)value);
+    return true;
 }
