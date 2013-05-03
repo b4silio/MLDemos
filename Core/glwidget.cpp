@@ -59,6 +59,7 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
 {
     this->canvas = canvas;
     this->zoomFactor = ZoomZero;
+    bHiDPI = (qApp->devicePixelRatio() > 1);
     mutex = new QMutex();
     bDisplaySamples=bDisplayLines=bDisplaySurfaces=bDisplayTransparency=bDisplayBlurry=true;
     bRotateCamera=false;
@@ -574,6 +575,7 @@ void GLWidget::DrawSamples(const GLObject &o) const
             }
         }
     }
+    if(bHiDPI) pointSize *= 2;
 
     QGLShaderProgram *program = bDisplayShadows ? shaders.at("SamplesShadow") : shaders.at("Samples");
     program->bind();

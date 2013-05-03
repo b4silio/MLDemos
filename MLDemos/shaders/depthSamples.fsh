@@ -1,6 +1,5 @@
 #version 120
-
-//precision highp float;
+#extension GL_EXT_gpu_shader4 : require
 
 const float Near = 1.0;
 const float Far = 60.0;
@@ -8,11 +7,7 @@ const float Depth = 1.0 / (Far - Near);
 
 uniform sampler2D color_texture;
 
-varying float asd;
-varying float vX;
-varying float vY;
-varying float vZ;
-varying float vW;
+flat varying vec4 lvec;
 
 vec4 pack (float depth)
 {
@@ -33,14 +28,12 @@ vec4 pack (float depth)
 void main()
 {
     vec2 pos = gl_PointCoord.xy-vec2(0.5,0.5);
-	float radius = dot(pos,pos);
-    vec4 v = vec4(vX,vY,vZ,vW);
+    float radius = dot(pos,pos);
     if(radius > 0.21) discard;
-    float z = (vZ / vW);
+    float z = (lvec.z / lvec.w);
     gl_FragColor = texture2D(color_texture, gl_PointCoord.xy);
     if(gl_FragColor.a < 0.001) discard;
     gl_FragColor = vec4(z,z,z,1);
 //    gl_FragColor = pack(z);
     return;
-    float x = asd;
 }

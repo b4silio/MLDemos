@@ -111,6 +111,7 @@ public:
     std::vector<GLLight> lights;
     bool bDisplaySamples, bDisplayLines, bDisplaySurfaces, bDisplayTransparency, bDisplayBlurry;
     bool bRotateCamera;
+    bool bHiDPI;
 
     static const GLint texWidth = 128;
     static const GLint texHeight = 128;

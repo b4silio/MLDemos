@@ -48,6 +48,12 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
     ui.setupUi(this);
     setAcceptDrops(true);
 
+#ifdef QT_OPENGL_ES_2
+    qDebug() << "OpenGL ES 2";
+#else
+    qDebug() << "OpenGL 2.1";
+#endif
+
     connect(ui.actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
     connect(ui.actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
