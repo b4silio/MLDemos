@@ -60,7 +60,7 @@ const char *ClustererKKM::GetInfoString()
 		sprintf(text, "%s linear", text);
 		break;
 	case 1:
-		sprintf(text, "%s polynomial (deg: %f %f width: %f)", text, kernelDegree, kernelGamma);
+		sprintf(text, "%s polynomial (deg: %f width: %f)", text, kernelDegree, kernelGamma);
 		break;
 	case 2:
 		sprintf(text, "%s rbf (gamma: %f)", text, kernelGamma);

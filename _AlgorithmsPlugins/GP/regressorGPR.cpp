@@ -349,7 +349,7 @@ const char *RegressorGPR::GetInfoString()
         sprintf(text, "%s rbf (gamma: %f)\n", text, param1);
         break;
     case 1:
-        sprintf(text, "%s polynomial (deg: %f %f width: %f)\n", text, degree, param1);
+        sprintf(text, "%s polynomial (deg: %d width: %f)\n", text, degree, param1);
         break;
     case 2:
         sprintf(text, "%s rbf (gamma: %f)\n", text, param1);

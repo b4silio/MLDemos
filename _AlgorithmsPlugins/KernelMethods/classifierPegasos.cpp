@@ -59,14 +59,14 @@ const char *ClassifierPegasos::GetInfoString() const
 		sprintf(text, "%s linear", text);
 		break;
 	case 1:
-		sprintf(text, "%s polynomial (deg: %f %f width: %f)", text, kernelDegree, kernelParam);
+		sprintf(text, "%s polynomial (deg: %d width: %f)", text, kernelDegree, kernelParam);
 		break;
 	case 2:
 		sprintf(text, "%s rbf (gamma: %f)", text, kernelParam);
 		break;
 	}
 	sprintf(text, "%slambda: %f\n", text, lambda);
-	sprintf(text, "%sSupport Vectors: %d\n", text, GetSVs().size());
+	sprintf(text, "%sSupport Vectors: %lu\n", text, (unsigned long)GetSVs().size());
 	return text;
 }
 

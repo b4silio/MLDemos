@@ -189,7 +189,7 @@ const char *ClassifierKNN::GetInfoString() const
 	switch(metricType)
 	{
 	case 0:
-		sprintf(text, "%infinite norm\n", text);
+		sprintf(text, "%sinfinite norm\n", text);
 		break;
 	case 1:
 		sprintf(text, "%s1-norm (Manhattan)\n", text);

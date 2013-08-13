@@ -33,14 +33,14 @@ const char *RegressorRVM::GetInfoString()
 		sprintf(text, "%s linear", text);
 		break;
 	case 1:
-		sprintf(text, "%s polynomial (deg: %f %f width: %f)", text, kernelDegree, kernelParam);
+		sprintf(text, "%s polynomial (deg: %d width: %f)", text, kernelDegree, kernelParam);
 		break;
 	case 2:
 		sprintf(text, "%s rbf (gamma: %f)", text, kernelParam);
 		break;
 	}
 	sprintf(text, "%seps: %f\n", text, epsilon);
-	sprintf(text, "%sRelevant Vectors: %d\n", text, GetSVs().size());
+	sprintf(text, "%sRelevant Vectors: %lu\n", text, (unsigned long)GetSVs().size());
 	return text;
 }
 
