@@ -122,7 +122,7 @@ const char *ClustererKM::GetInfoString()
     switch(power)
     {
     case 0:
-        sprintf(text, "%infinite norm\n", text);
+        sprintf(text, "%sinfinite norm\n", text);
         break;
     case 1:
         sprintf(text, "%s1-norm (Manhattan)\n", text);
@@ -131,7 +131,7 @@ const char *ClustererKM::GetInfoString()
         sprintf(text, "%s2-norm (Euclidean)\n", text);
         break;
     default:
-        sprintf(text, "%s%.2f-norm\n", text, power);
+        sprintf(text, "%s%d-norm\n", text, power);
         break;
     }
     return text;

@@ -172,14 +172,14 @@ const char *DynamicalGPR::GetInfoString()
 		sprintf(text, "%s rbf (gamma: %f)\n", text, param1);
 		break;
 	case 1:
-		sprintf(text, "%s polynomial (deg: %f %f width: %f)\n", text, degree, param1);
+		sprintf(text, "%s polynomial (deg: %d width: %f)\n", text, degree, param1);
 		break;
 	case 2:
 		sprintf(text, "%s rbf (gamma: %f)\n", text, param1);
 		break;
 	}
 	return text;
-	sprintf(text, "%sNoise: %.3f\n", param2);
+	sprintf(text, "%sNoise: %.3f\n", text, param2);
 	sprintf(text, "%sBasis Functions: %d\n", text, GetBasisCount());
 	return text;
 }
