@@ -38,8 +38,8 @@ PluginKernel::PluginKernel()
     regressors.push_back(new RegrSVM());
     regressors.push_back(new RegrRVM());
     dynamicals.push_back(new DynamicSVM());
-    classifiers.push_back(new ClassMVM());
-    classifiers.push_back(new ClassMRVM());
+    //classifiers.push_back(new ClassMVM());
+    //classifiers.push_back(new ClassMRVM());
 }
 
 #ifndef PLUGIN_CLUSTER

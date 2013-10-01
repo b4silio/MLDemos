@@ -701,38 +701,40 @@ void Canvas::DrawLegend(QPainter &painter)
     }
     else // we draw the samples legend
     {
-        if(!data->GetCount()) return;
-        std::map<int,bool> labelList;
-        ivec labels = data->GetLabels();
-        FOR(i, labels.size())
+        if(data->GetCount())
         {
-            labelList[labels[i]] = true;
-        }
-        painter.setPen(QPen(Qt::black, 1));
-        // we need to know the size of the legend rectangle
-        int rectWidth = 0;
-        QFontMetrics fm = painter.fontMetrics();
-        for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
-        {
-            QString className = GetClassString(it->first);
-            QRect rect = fm.boundingRect(className);
-            rectWidth = max(rectWidth, rect.width());
-        }
-        rectWidth += 10; // we add the sample size;
+            std::map<int,bool> labelList;
+            ivec labels = data->GetLabels();
+            FOR(i, labels.size())
+            {
+                labelList[labels[i]] = true;
+            }
+            painter.setPen(QPen(Qt::black, 1));
+            // we need to know the size of the legend rectangle
+            int rectWidth = 0;
+            QFontMetrics fm = painter.fontMetrics();
+            FORIT(labelList, int, bool)
+            {
+                QString className = GetClassString(it->first);
+                QRect rect = fm.boundingRect(className);
+                rectWidth = max(rectWidth, rect.width());
+            }
+            rectWidth += 10; // we add the sample size;
 
-        int x = w - rectWidth - 40, y = 40;
-        painter.setRenderHint(QPainter::Antialiasing, false);
-        painter.drawRect(x-10,y-10, rectWidth+12, 20*labelList.size());
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        for(map<int,bool>::iterator it=labelList.begin(); it != labelList.end(); it++)
-        {
-            int label = it->first;
-            QPointF point(x, y);
-            drawSample(painter, point, 10, label);
-            QString className = GetClassString(label);
-            painter.drawText(x + 8, point.y()+3, className);
-            //painter.drawText(QRect(x + 4, point.y()-10, 70, 20), Qt::AlignLeft + Qt::AlignCenter, className);
-            y += 20;
+            int x = w - rectWidth - 40, y = 40;
+            painter.setRenderHint(QPainter::Antialiasing, false);
+            painter.drawRect(x-10,y-10, rectWidth+12, 20*labelList.size());
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            FORIT(labelList, int, bool)
+            {
+                int label = it->first;
+                QPointF point(x, y);
+                drawSample(painter, point, 10, label);
+                QString className = GetClassString(label);
+                painter.drawText(x + 8, point.y()+3, className);
+                //painter.drawText(QRect(x + 4, point.y()-10, 70, 20), Qt::AlignLeft + Qt::AlignCenter, className);
+                y += 20;
+            }
         }
     }
 }
@@ -743,6 +745,26 @@ void Canvas::DrawAxes(QPainter &painter)
     int h = height();
     // we find out how 'big' the space is
     QRectF bounding = canvasRect();
+
+    int pad = 20;
+    int base = h/2+10;
+    // 1D display
+    if(xIndex == yIndex)
+    {
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawLine(pad, base, w-2*pad,base);
+        painter.drawLine(pad, base-5, pad, base+5);
+        painter.drawLine(w-2*pad, base-5, w-2*pad, base+5);
+        QString xlabel = QString("Dimension %1").arg(xIndex+1);
+        if(xIndex < dimNames.size())
+        {
+            xlabel = dimNames[xIndex];
+        }
+        painter.setPen(QPen(Qt::black, 0.5));
+        painter.drawText(0, base + 30, w, 20, Qt::AlignTop | Qt::AlignHCenter, xlabel);
+        return;
+    }
+
     // we round up the size to the closest decimal
     float scale = bounding.height();
     float scaleRatio = scale / bounding.width();
@@ -992,6 +1014,7 @@ void Canvas::DrawSamples()
         int label = data->GetLabel(i);
         fvec sample = data->GetSample(i);
         QPointF point = toCanvasCoords(sample);
+        if(xIndex == yIndex) point.setY(height()/2);
         Canvas::drawSample(painter, point, (data->GetFlag(i)==_TRAJ)?5:radius, bDisplaySingle ? 0 : label);
     }
     drawnSamples = data->GetCount();
@@ -1557,17 +1580,21 @@ void Canvas::mouseMoveEvent( QMouseEvent *event )
 
     if(mouseAnchor.x() == -1) mouseAnchor = event->pos();
     // we navigate in our environment
-    if(event->modifiers() == Qt::AltModifier && event->buttons() == Qt::LeftButton)
+    if(event->modifiers() == Qt::AltModifier)
     {
-        fVec d = (fromCanvas(mouseAnchor) - fromCanvas(event->pos()));
-        qDebug() << "mouse" << event->pos() << "anchor" << mouseAnchor << "diff:" << d.x << d.y;
-        if(d.x == 0 && d.y == 0) return;
-        SetCenter(center + d);
-        mouseAnchor = event->pos();
+        if(event->buttons() == Qt::LeftButton || event->buttons() == Qt::RightButton) {
+            fVec d = (fromCanvas(mouseAnchor.x(), mouseAnchor.y()) - fromCanvas(x,y));
+            if(d.x == 0 && d.y == 0) return;
+            SetCenter(center + d);
+            mouseAnchor = event->pos();
+            bShowCrosshair = false;
+            emit CanvasMoveEvent();
+        }
         bShowCrosshair = false;
-        emit CanvasMoveEvent();
+        repaint();
         return;
     }
+    bShowCrosshair = true;
 
     if(event->buttons() != Qt::LeftButton && event->buttons() != Qt::RightButton )
     {

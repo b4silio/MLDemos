@@ -37,20 +37,22 @@ void LDAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
 {
     if(!canvas || !projector) return;
     if(canvas->canvasType) return;
+    if(canvas->data->bProjected) return;
     vector<fvec> samples = projector->source;
     vector<fvec> projected = projector->projected;
-    ivec labels = canvas->data->GetLabels();
     if(!samples.size()) return;
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    if(xIndex == yIndex) return;
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::black,0.5f));
     QPointF start(FLT_MAX, FLT_MAX), stop(-FLT_MAX, -FLT_MAX);
     FOR(i, samples.size())
     {
         projected[i] = projector->Project(samples[i]);
-        QPointF p1 = canvas->toCanvasCoords(samples[i]);
-        QPointF p2 = canvas->toCanvasCoords(projected[i]);
-        if(start.x() > p2.x()) start = p2;
-        if(stop.x() < p2.x()) stop = p2;
+        QPointF p1 = canvas->toCanvasCoords(projected[i]);
+        if(start.x() > p1.x()) start = p1;
+        if(stop.x() < p1.x()) stop = p1;
     }
     QPointF diff = stop - start;
     painter.setPen(QPen(Qt::black, 2));
@@ -62,10 +64,14 @@ void LDAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
 {
     if(!canvas || !projector) return;
     if(canvas->canvasType) return;
+    if(canvas->data->bProjected) return;
     vector<fvec> samples = projector->source;
     vector<fvec> projected = projector->projected;
     ivec labels = canvas->data->GetLabels();
     if(!samples.size()) return;
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    int h = canvas->height();
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::black,0.5f));
     FOR(i, samples.size())
@@ -73,6 +79,11 @@ void LDAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
         projected[i] = projector->Project(samples[i]);
         QPointF p1 = canvas->toCanvasCoords(samples[i]);
         QPointF p2 = canvas->toCanvasCoords(projected[i]);
+        if(xIndex == yIndex)
+        {
+            p1.setY(h/2);
+            p2.setY(h/2-40);
+        }
         painter.drawLine(p1, p2);
     }
     painter.setOpacity(0.3);
@@ -81,6 +92,10 @@ void LDAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
         painter.setBrush(SampleColor[labels[i]%SampleColorCnt]);
         painter.setPen(Qt::black);
         QPointF p1 = canvas->toCanvasCoords(samples[i]);
+        if(xIndex == yIndex)
+        {
+            p1.setY(h/2);
+        }
         painter.drawEllipse(p1, 5, 5);
     }
     painter.setPen(Qt::black);
@@ -88,6 +103,10 @@ void LDAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
     {
         painter.setBrush(SampleColor[labels[i]%SampleColorCnt]);
         QPointF p1 = canvas->toCanvasCoords(projected[i]);
+        if(xIndex == yIndex)
+        {
+            p1.setY(h/2-40);
+        }
         painter.drawEllipse(p1, 5, 5);
     }
 }

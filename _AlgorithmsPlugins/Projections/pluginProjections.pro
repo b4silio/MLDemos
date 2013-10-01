@@ -17,7 +17,9 @@ FORMS += \
     paramsKPCA.ui \
     paramsSammon.ui \
     paramsPCA.ui \
-    contourPlots.ui
+    contourPlots.ui \
+    paramsNormalize.ui \
+    paramsLLE.ui
 HEADERS +=	\
     basicOpenCV.h \
     canvas.h \
@@ -37,7 +39,11 @@ HEADERS +=	\
     projectorKPCA.h \
     projectorICA.h \
     projectorSammon.h \
-    projectorLDA.h
+    projectorLDA.h \
+    projectorNormalize.h \
+    interfaceNormalizeProjection.h \
+    projectorLLE.h \
+    interfaceLLEProjection.h
 
 SOURCES += 	\
     basicOpenCV.cpp \
@@ -55,7 +61,11 @@ SOURCES += 	\
     projectorKPCA.cpp \
     projectorICA.cpp \
     projectorSammon.cpp \
-    projectorLDA.cpp
+    projectorLDA.cpp \
+    projectorNormalize.cpp \
+    interfaceNormalizeProjection.cpp \
+    interfaceLLEProjection.cpp \
+    projectorLLE.cpp
 
 #INCLUDEPATH += /opt/local/include
 #LIBS += -llapack -lblas

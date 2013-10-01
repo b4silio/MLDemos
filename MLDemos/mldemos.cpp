@@ -2350,6 +2350,10 @@ void MLDemos::Screenshot()
         if (!img.save(filename)) ui.statusBar->showMessage("WARNING: Unable to save image");
         else ui.statusBar->showMessage("Image saved successfully");
     }
+    else if(canvas->canvasType == 2) {
+        if (!vis->SaveScreenshot(filename)) ui.statusBar->showMessage("WARNING: Unable to save image");
+        else ui.statusBar->showMessage("Image saved successfully");
+    }
     else
     {
         if (!canvas->SaveScreenshot(filename)) ui.statusBar->showMessage("WARNING: Unable to save image");
@@ -2364,6 +2368,10 @@ void MLDemos::ToClipboard()
         QImage img = glw->grabFrameBuffer();
         clipboard->setImage(img);
         clipboard->setPixmap(QPixmap::fromImage(img));
+    } else if (canvas->canvasType == 2) {
+        QPixmap pixmap = vis->GetDisplayPixmap();
+        clipboard->setPixmap(pixmap);
+        clipboard->setImage(pixmap.toImage());
     } else {
         QPixmap screenshot = canvas->GetScreenshot();
         if (screenshot.isNull()) {

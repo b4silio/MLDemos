@@ -21,7 +21,7 @@ public:
     QList<InputOutputInterface *> inputoutputs;
     QList<bool> bInputRunning;
 
-    QMenu *menuInput_Output, *menuImport;
+    //QMenu *menuInput_Output, *menuImport;
 
     QList<QPluginLoader*> pluginLoaders;
     AlgorithmManager *algo;

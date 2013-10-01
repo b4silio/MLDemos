@@ -58,8 +58,7 @@ struct fVec
     fVec(const float x=0, const float y=0) : x(x),y(y){}
     fVec(const float* v) : x(v[0]),y(v[1]){}
     fVec(const fVec& v) : x(v.x),y(v.y){}
-    fVec(fvec v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;}
-    //fVec(const fvec &v) {x=v.size()>1?v[0]:0;x=v.size()>1?v[1]:0;}
+    fVec(fvec v) {x=v.size()>1?v[0]:0;y=v.size()>1?v[1]:0;}
 	union {
 		float _[2];
 		struct {float x,y;};

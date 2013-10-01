@@ -814,7 +814,7 @@ void MLDemos::ExportOutput()
 
     if(algo->classifier || algo->clusterer || algo->regressor)
     {
-        out << "#Sample(n-dims) TrueClass ComputedValue(s)\n";
+        out << "#Sample(n-dims) Label ComputedValue(s)\n";
         vector<fvec> samples = algo->sourceDims.size() ? canvas->data->GetSampleDims(algo->sourceDims) : canvas->data->GetSamples();
         ivec labels = canvas->data->GetLabels();
         FOR(i, samples.size())
@@ -824,25 +824,24 @@ void MLDemos::ExportOutput()
             if(algo->classifier) res = algo->classifier->TestMulti(sample);
             else if (algo->clusterer) res = algo->clusterer->Test(sample);
             else if (algo->regressor) res = algo->regressor->Test(sample);
-            FOR(d, sample.size()) out << QString("%1\t").arg(sample[d]);
+            FOR(d, sample.size()) out << QString("%1,").arg(sample[d]);
             out << QString("%1\t").arg(labels[i]);
-            FOR(d, res.size()) out << QString("%1\t").arg(res[d], 0, 'f', 3);
+            FOR(d, res.size()) out << QString("%1%1").arg(res[d]).arg(d<res.size()-1?",":"");
             out << "\n";
         }
     }
     else if(algo->projector)
     {
-        out << "#Sample(n-dims) TrueClass Projected(m-dims)\n";
-        vector<fvec> samples = canvas->data->GetSamples();
-        ivec labels = canvas->data->GetLabels();
+        //out << "#Sample x (n-dims), Label, Projected x (m-dims)\n";
+        vector<fvec> samples = algo->projector->source;
+        //ivec labels = canvas->data->GetLabels();
         FOR(i, samples.size())
         {
             fvec &sample = samples[i];
-            fvec projected;
-            projected = algo->projector->Project(sample);
-            FOR(d, sample.size()) out << QString("%1\t").arg(sample[d]);
-            out << QString("%1\t").arg(labels[i]);
-            FOR(d, projected.size()) out << QString("%1\t").arg(projected[d], 0, 'f', 3);
+            fvec projected = algo->projector->Project(sample);
+            //FOR(d, sample.size()) out << QString("%1,").arg(sample[d]);
+            //out << QString("%1").arg(labels[i]);
+            FOR(d, projected.size()) out << QString("%1%2").arg(projected[d]).arg(d<projected.size()-1?",":"");
             out << "\n";
         }
     }

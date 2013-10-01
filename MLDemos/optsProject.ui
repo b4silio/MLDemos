@@ -183,10 +183,10 @@
     </font>
    </property>
    <property name="toolTip">
-    <string>Project data to 1D and display the projection in the original space</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Learn projection and display learned manifold in source space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
-    <string>Manifold to 1D</string>
+    <string>Display Manifold</string>
    </property>
   </widget>
  </widget>

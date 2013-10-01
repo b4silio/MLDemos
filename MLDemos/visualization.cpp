@@ -96,6 +96,16 @@ void Visualization::resizeEvent(QResizeEvent *event)
     Update();
 }
 
+bool Visualization::SaveScreenshot(QString filename)
+{
+    return displayPixmap.save(filename);
+}
+
+QPixmap Visualization::GetDisplayPixmap()
+{
+    return displayPixmap;
+}
+
 void Visualization::OptionsChanged()
 {
     int index = ui->typeCombo->currentIndex();
@@ -521,6 +531,7 @@ void Visualization::GenerateParallelCoords()
 void Visualization::GenerateScatterPlot(bool bCheckOnly)
 {
     std::vector<fvec> samples = data->GetSamples();
+    int bProjected = data->bProjected;
     ivec labels = data->GetLabels();
     if(!samples.size()) return;
     int dim = samples[0].size();
@@ -584,7 +595,8 @@ void Visualization::GenerateScatterPlot(bool bCheckOnly)
             painter.setPen(Qt::black);
             painter.setRenderHint(QPainter::Antialiasing, false);
             painter.drawRect(pad/2,pad/2,w+pad, h+pad);
-            painter.drawText(pad/2+1, map.height()-pad/2-1, QString("e%1 x e%2").arg(index1+1).arg(index0+1));
+            QString labelText = bProjected ? QString("e%1 x e%2").arg(index1+1).arg(index0+1) : QString("x%1 x x%2").arg(index1+1).arg(index0+1);
+            painter.drawText(pad/2+1, map.height()-pad/2-1, labelText);
             maps.push_back(map);
         }
     }

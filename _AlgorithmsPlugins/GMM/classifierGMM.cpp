@@ -130,7 +130,8 @@ fvec ClassifierGMM::TestMulti(const fvec &sample) const
 float ClassifierGMM::Test( const fvec &sample) const
 {
 	fvec pdf = TestMulti(sample);
-	if(pdf.size() < 2) return 0;
+    if(!pdf.size()) return 0;
+    if(pdf.size() < 2) return pdf[0];
 	float res = log(pdf[1]) - log(pdf[0]);
 	return res;
 }

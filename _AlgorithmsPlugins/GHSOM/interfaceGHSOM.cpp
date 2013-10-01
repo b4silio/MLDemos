@@ -324,7 +324,7 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
             FOR(i, points.size())
             {
                 fvec point = points[i];
-                QColor c = SampleColor[layerCount%SampleColorCnt];
+                QColor c = SampleColor[(layerCount+1)%SampleColorCnt];
                 GLWidget::glSample(point, c, xIndex, yIndex, zIndex);
             }
             glEnd();

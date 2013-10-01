@@ -7,18 +7,20 @@
 TEMPLATE = subdirs
 # the main software
 CONFIG += ordered
-SUBDIRS = Core 3rdParty MLDemos
+SUBDIRS = Core 3rdParty MLDemos UnitTesting
 Core.file = Core/Core.pro
 3rdParty.file = _3rdParty/3rdParty.pro
 MLDemos.file = MLDemos/MLDemos.pro
 MLDemos.depends = Core
 MLScripting.file = MLScripting/MLScripting.pro
 MLScripting.depends = Core
+UnitTesting.file = UnitTesting/UnitTesting.pro
+UnitTesting.depends = Core MLDemos
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
 #SUBDIRS += GMM
-SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME DBSCAN Lowess CCA ASVM GHSOM
+SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME DBSCAN Lowess CCA ASVM GHSOM RandomKernel MetricLearning
 #SUBDIRS += Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
@@ -39,6 +41,8 @@ DBSCAN.file = $$ALGOPATH/DBSCAN/pluginDBSCAN.pro
 HMM.file = $$ALGOPATH/HMM/pluginHMM.pro
 CCA.file = $$ALGOPATH/CCA/pluginCCA.pro
 GHSOM.file = $$ALGOPATH/GHSOM/pluginGHSOM.pro
+RandomKernel.file = $$ALGOPATH/RandomKernel/pluginRandomKernel.pro
+MetricLearning.file = $$ALGOPATH/MetricLearning/pluginMetricLearning.pro
 # still too experimental
 MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
 QTMeans.file = $$ALGOPATH/QTMeans/pluginQTMeans.pro

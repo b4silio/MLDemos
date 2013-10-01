@@ -45,6 +45,8 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event);
     void resizeEvent(QResizeEvent *event);
+    bool SaveScreenshot(QString filename);
+    QPixmap GetDisplayPixmap();
 
 public slots:
     void OptionsChanged();
