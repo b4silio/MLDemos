@@ -36,7 +36,7 @@ const char *RegressorSVR::GetInfoString()
         sprintf(text, "%s linear\n", text);
         break;
     case POLY:
-        sprintf(text, "%s polynomial (deg: %f bias: %f width: %f)\n", text, param.degree, param.coef0, param.gamma);
+        sprintf(text, "%s polynomial (deg: %d bias: %f width: %f)\n", text, param.degree, param.coef0, param.gamma);
         break;
     case RBF:
         sprintf(text, "%s rbf (gamma: %f)\n", text, param.gamma);

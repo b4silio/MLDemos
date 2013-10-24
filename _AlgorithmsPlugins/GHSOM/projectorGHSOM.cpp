@@ -73,7 +73,7 @@ void ProjectorGHSOM::Train(std::vector< fvec > samples, ivec labels)
     FOR(d, dim)
     {
         vecDescr[d] = new char[150];
-        sprintf(vecDescr[d], "dim%1", d+1);
+        sprintf(vecDescr[d], "dim%d", d+1);
     }
 
     Globals::vectorDescription = vecDescr;

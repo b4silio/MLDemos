@@ -63,21 +63,21 @@ void OutOfMemory()
 
 #define SPACE_PER_LEVEL 3
 
-void Message0(int level, char *mess) {
+void Message0(int level, const char *mess) {
   int count ;
   if (level < VERBOSITY) {
     for (count=0; count<level*SPACE_PER_LEVEL; count++) fprintf(stderr," ");
     fprintf(stderr, "%s", mess);
   }
 }
-void MessageF(int level, char *mess, double value) {
+void MessageF(int level, const char *mess, double value) {
   int count ;
   if (level < VERBOSITY) {
     for (count=0; count<level*SPACE_PER_LEVEL; count++) fprintf(stderr," ");
     fprintf(stderr, mess, value);
   }
 }
-void MessageI(int level, char *mess, int value) {
+void MessageI(int level, const char *mess, int value) {
   int count ;
   if (level < VERBOSITY) {
     for (count=0; count<level*SPACE_PER_LEVEL; count++) fprintf(stderr," ");

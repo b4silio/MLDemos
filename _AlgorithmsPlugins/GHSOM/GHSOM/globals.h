@@ -44,8 +44,8 @@ public:
 	static int EXPAND_CYCLES;
 //	static int MAX_REPRESENTING;
 	static float TAU_2;
-	static char *HTML_PREFIX;
-	static char *DATAFILE_EXTENSION;
+	static const char *HTML_PREFIX;
+	static const char *DATAFILE_EXTENSION;
 	static Data_Vector *dataItems;
 	static NeuronLayer *hfm;
 	static unsigned int randomSeed;

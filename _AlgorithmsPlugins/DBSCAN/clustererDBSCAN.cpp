@@ -149,7 +149,7 @@ const char *ClustererDBSCAN::GetInfoString()
         sprintf(text, "OPTICS WP\n\nTraining information: minPts : %d, eps: %f, depth: %f, metric: %d\n",_minPts,_eps,_depth,_metric);
     }
 
-    sprintf(text, "%sNumber of clusters: %d\n",text,_clusters.size());
+    sprintf(text, "%sNumber of clusters: %lu\n",text,(unsigned long)_clusters.size());
 
     int countN = 0;
     int countC = 0;
