@@ -605,9 +605,8 @@ void KMeansCluster::SoftKmeansClustering(std::vector<ClusterPoint> &points, vect
     // initialize the points weights
     for (int i=0; i < nbPoints; i++)
     {
-        KILL(points[i].weights);
-        points[i].weights = new float[nbClusters];
-        FOR(j, nbClusters) points[i].weights[j] = 0;
+        points[i].weights = fvec(nbClusters,0);
+        //FOR(j, nbClusters) points[i].weights[j] = 0;
     }
 
     //classify the points into clusters
@@ -683,8 +682,7 @@ void KMeansCluster::GMMClustering(std::vector<ClusterPoint> &points, vector<fvec
         u32 cnt = 0;
         for (int i=0; i < nbPoints; i++)
         {
-            KILL(points[i].weights);
-            points[i].weights = new float[nbClusters];
+            points[i].weights.resize(nbClusters);
             FOR(j, nbClusters) points[i].weights[j] = 0;
             points[i].weights[cnt++%nbClusters] = 1.f;
         }
@@ -692,13 +690,12 @@ void KMeansCluster::GMMClustering(std::vector<ClusterPoint> &points, vector<fvec
 
     if(!bEStep)
     {
-        if(points[0].weights == NULL)
+        if(points[0].weights.size() == 0)
         {
             // initialize the points weights
             for (int i=0; i < nbPoints; i++)
             {
-                KILL(points[i].weights);
-                points[i].weights = new float[nbClusters];
+                points[i].weights.resize(nbClusters);
                 FOR(j, nbClusters) points[i].weights[j] = 0;
             }
         }

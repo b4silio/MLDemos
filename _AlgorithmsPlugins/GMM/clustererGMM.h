@@ -34,6 +34,14 @@ private:
 public:
     ClustererGMM() : gmm(0), data(0), covarianceType(2), initType(1){}
     ~ClustererGMM();
+    ClustererGMM(const ClustererGMM& other) : Clusterer(other)
+    {
+        gmm = new Gmm(*(other.gmm));
+        covarianceType = other.covarianceType;
+        initType = other.initType;
+        data=0;
+    }
+    virtual ClustererGMM* clone() const { return new ClustererGMM(*this);}
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);

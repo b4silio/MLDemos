@@ -37,6 +37,13 @@ public:
 
     ClustererKM() : beta(1), bSoft(false), bGmm(false), kmeans(0), kmeansPlusPlus(true) {}
     ~ClustererKM();
+    ClustererKM(const ClustererKM& other) : beta(other.beta), bSoft(other.bSoft), bGmm(other.bGmm),
+        power(other.power), kmeansPlusPlus(other.kmeansPlusPlus)
+    {
+        if(other.kmeans)
+            kmeans = new KMeansCluster(*other.kmeans);
+    }
+    virtual ClustererKM* clone() const { return new ClustererKM(*this);}
 	void Train(std::vector< fvec > samples);
 	fvec Test( const fvec &sample);
 	fvec Test( const fVec &sample);

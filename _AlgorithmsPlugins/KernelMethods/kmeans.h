@@ -24,13 +24,12 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 struct ClusterPoint{
 	fvec point;
 	u32 cluster;
-	float *weights;
-    ClusterPoint() : point(0,0), cluster(0), weights(NULL){}
+    fvec weights;
+    ClusterPoint() : point(0,0), cluster(0){}
 	~ClusterPoint()
 	{
-		if(weights) delete [] weights;
-		weights=0;
-	};
+        weights.clear();
+    }
 };
 
 inline float SquareNorm(fvec p1, fvec p2);
@@ -59,6 +58,27 @@ private:
 public:
 	KMeansCluster(u32 cnt=1);
 	~KMeansCluster();
+    KMeansCluster(const KMeansCluster& other) : beta(other.beta), clusters(other.clusters), bSoft(other.bSoft),
+        dim(other.dim), power(other.power), plusPlus(other.plusPlus), bGMM(other.bGMM), means(other.means),
+        points(other.points), closestIndices(other.closestIndices)
+    {
+        if(other.sigma)
+        {
+            sigma = new double*[other.clusters];
+            for(int i=0;i<other.clusters;i++)
+            {
+                sigma[i] = new double[4];
+                for(int j=0;j<4;j++)
+                    sigma[i][j] = other.sigma[i][j];
+            }
+        }
+        if(other.pi)
+        {
+            pi = new double[other.clusters];
+            for(int i=0;i<other.clusters;i++)
+                pi[i] = other.pi[i];
+        }
+    }
 
     void Update(bool bFirstIteration=false);
 

@@ -35,6 +35,7 @@ public:
     void Cluster(std::vector< fvec > allsamples) {Train(allsamples);}
     void SetIterative(bool iterative){bIterative = iterative;}
     int NbClusters(){return nbClusters;}
+    virtual Clusterer* clone() const{ return new Clusterer(*this);}
 
     virtual void Train(std::vector< fvec > samples){}
     virtual fvec Test( const fvec &sample){ return fvec(); }

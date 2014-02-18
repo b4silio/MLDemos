@@ -946,16 +946,19 @@ void AlgorithmManager::Train(Clusterer *clusterer, float trainRatio, bvec trainL
         fvec result = clusterer->Test(samples[i]);
         if(clusterer->NbClusters()==1) scores[i] = result;
         else if(result.size()>1) scores[i] = result;
+        else scores[i] = fvec(nbClusters,0);
     }
 
     FOR(i, labels.size())
     {
-        labelScores[labels[i]] += 1.f;
-        if(!classScores.count(labels[i]))classScores[labels[i]].resize(nbClusters);
+        int label = labels[i];
+        labelScores[label] += 1.f;
+        if(!classScores.count(label)) classScores[label].resize(nbClusters);
         FOR(k, nbClusters)
         {
-            classScores[labels[i]][k] += scores[i][k];
-            clusterScores[k] += scores[i][k];
+            float score = k < scores[i].size() ? scores[i][k] : 0;
+            classScores[label][k] += score;
+            clusterScores[k] += score;
         }
     }
 

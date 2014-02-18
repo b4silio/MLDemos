@@ -697,6 +697,7 @@ void GLWidget::DrawLines(const GLObject &o) const
     // typedef double qreal;
     glMultMatrixf(o.model.constData());
 #endif
+
     if(o.objectType.contains("linestrip") || o.objectType.contains("trajectories")) glBegin(GL_LINE_STRIP);
     else glBegin(GL_LINES);
     FOR(i, o.vertices.size())
