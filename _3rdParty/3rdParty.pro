@@ -4,7 +4,7 @@
 TEMPLATE = lib
 NAME = 3rdParty
 MLPATH =..
-CONFIG += mainApp static
+CONFIG += mainApp static _3rdParty
 
 include($$MLPATH/MLDemos_variables.pri)
 

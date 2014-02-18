@@ -683,6 +683,7 @@ void GLWidget::DrawLines(const GLObject &o) const
 
     glPushMatrix();
 
+#include <qglobal.h>
     // qreal might be a float, need to account for that here.
     // No choice but to use the logic in Qt/qglobal.h
 #if defined(QT_COORD_TYPE)
@@ -694,9 +695,8 @@ void GLWidget::DrawLines(const GLObject &o) const
     glMultMatrixf(o.model.constData());
 #else
     // typedef double qreal;
-    glMultMatrixd(o.model.constData());
+    glMultMatrixf(o.model.constData());
 #endif
-
     if(o.objectType.contains("linestrip") || o.objectType.contains("trajectories")) glBegin(GL_LINE_STRIP);
     else glBegin(GL_LINES);
     FOR(i, o.vertices.size())

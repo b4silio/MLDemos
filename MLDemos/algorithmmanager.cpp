@@ -1385,6 +1385,17 @@ void AlgorithmManager::Compare()
                         fmeasureTrain.push_back(res[0]);
                         precisionTrain.push_back(res[1]);
                         recallTrain.push_back(res[2]);
+                        int errors = 0;
+                        std::vector<f32pair> rocdata = classifier->rocdata[0];
+                        FOR(j, rocdata.size())
+                        {
+                            if(rocdata[j].first != rocdata[j].second)
+                            {
+                                if(classes.size() > 2) errors++;
+                                else if((rocdata[j].first < 0) != rocdata[j].second) errors++;
+                            }
+                        }
+                        errorTrain.push_back(errors/(float)rocdata.size());
                     }
                     else
                     {

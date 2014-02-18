@@ -825,8 +825,8 @@ void MLDemos::ExportOutput()
             else if (algo->clusterer) res = algo->clusterer->Test(sample);
             else if (algo->regressor) res = algo->regressor->Test(sample);
             FOR(d, sample.size()) out << QString("%1,").arg(sample[d]);
-            out << QString("%1\t").arg(labels[i]);
-            FOR(d, res.size()) out << QString("%1%1").arg(res[d]).arg(d<res.size()-1?",":"");
+            out << QString("%1,").arg(labels[i]);
+            FOR(d, res.size()) out << QString("%1%2").arg(res[d]).arg(d<res.size()-1?",":"");
             out << "\n";
         }
     }

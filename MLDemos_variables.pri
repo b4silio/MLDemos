@@ -7,8 +7,32 @@
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
 QT += svg opengl
+greaterThan(QT_MAJOR_VERSION, 4) {
+	QT += widgets
+	macx: LIBS += -framework QtWidgets
+} else {
+}
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #macx: LIBS += -framework QtWidgets
+
+#################################
+#         Project Paths         #
+#################################
+CONFIG(coreLib)|CONFIG(mainApp) ROOT = ..
+else: ROOT = ../..
+
+!CONFIG(coreLib){
+	INCLUDEPATH += $$ROOT
+	INCLUDEPATH += $$ROOT/Core
+	INCLUDEPATH += $$OUT_PWD/$$ROOT/Core
+	INCLUDEPATH += $$ROOT/_3rdParty
+	INCLUDEPATH += $$OUT_PWD/$$ROOT/_3rdParty
+	LIBS += -L$$ROOT/lib
+	PRE_TARGETDEPS += $$OUT_PWD/$$ROOT/Core
+}
+
+#CONFIG(coreLib): DESTDIR=$$ROOT/lib
+#else: DESTDIR=$$ROOT/bin
 
 DEPENDPATH += . \
 		.. \
@@ -28,6 +52,7 @@ win32{
 }
 CONFIG(coreLib){
 }else{
+
     LIBS += -L$$MLPATH -L$$MLPATH/Core -lCore
 }
 LIBS += -L$$MLPATH/_3rdParty -l3rdParty
@@ -74,7 +99,7 @@ win32{
     CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
 }else:macx{
-    CONFIG(boost):BOOST = /usr/local/boost
+	CONFIG(boost):BOOST = /usr/local/include
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
 }
 
@@ -119,6 +144,7 @@ win32:CONFIG(opencv22){
 macx{
     CONFIG(opencv22){
         DEFINES += OPENCV22
+		LIBS += -L/usr/local/lib
         message("Using opencv22 or later")
         LIBS += -lopencv_core \
                 -lopencv_calib3d \

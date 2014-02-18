@@ -3,6 +3,9 @@
 #       MLDemos Bundle       #
 #                            #
 ##############################
+greaterThan(QT_MAJOR_VERSION, 4) {
+	cache();
+}
 
 TEMPLATE = subdirs
 # the main software
@@ -58,3 +61,4 @@ RandomEmitter.file = $$INPUTPATH/RandomEmitter/pluginRandomEmitter.pro
 WebImport.file = $$INPUTPATH/WebImport/pluginWebImport.pro
 CSVImport.file = $$INPUTPATH/CSVImport/pluginCSVImport.pro
 ImportTimeseries.file = $$INPUTPATH/ImportTimeseries/pluginImportTimeseries.pro
+
