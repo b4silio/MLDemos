@@ -342,7 +342,7 @@
     <rect>
      <x>330</x>
      <y>353</y>
-     <width>161</width>
+     <width>180</width>
      <height>21</height>
     </rect>
    </property>
@@ -352,7 +352,7 @@
     </font>
    </property>
    <property name="text">
-    <string>left-click: switch positive/negative</string>
+    <string>left/right-click: change class label</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_7">
@@ -370,7 +370,7 @@
     </font>
    </property>
    <property name="text">
-    <string> right-click: remove sample</string>
+    <string>ctrl+click: remove sample</string>
    </property>
   </widget>
   <widget class="QPushButton" name="webcamButton">
