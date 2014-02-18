@@ -773,6 +773,8 @@ void AlgorithmManager::Train(Regressor *regressor, int outputDim, float trainRat
         outputIndexInList = i;
         break;
     }
+    if(outputIndexInList == -1) inputDims.push_back(outputDim);
+    outputIndexInList = inputDims.size()-1;
     sourceDims = inputDims;
 
     if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
@@ -843,7 +845,6 @@ void AlgorithmManager::Train(Regressor *regressor, int outputDim, float trainRat
             }
         }
         regressor->Train(trainSamples, trainLabels);
-
         FOR(i, trainCnt)
         {
             fvec sample = trainSamples[i];
@@ -1876,9 +1877,9 @@ void AlgorithmManager::Regression()
             painter.setPen(QPen(color, 1));
             painter.drawLine(point, point2);
         }
+        canvas->repaint();
     }
     emit UpdateInfo();
-
 }
 
 void AlgorithmManager::Dynamize()

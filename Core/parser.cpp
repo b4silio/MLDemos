@@ -364,6 +364,12 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         sample.resize((outputLabelColumn==-1) ? dim : dim-1);
         FOR(j, dim)
         {
+            if(data[i].size() < dim) {
+                qDebug() << "Something is wrong with the data, exiting!";
+                vector<fvec> newSamples;
+                ivec newLabels;
+                return pair<vector<fvec>,ivec>(newSamples,newLabels);
+            }
             QString s(data[i][j].c_str());
             bool ok;
             float val = s.toFloat(&ok);

@@ -237,14 +237,22 @@ void RegrGPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     painter.setRenderHint(QPainter::Antialiasing);
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
-
     int radius = 8;
     int dim = canvas->data->GetDimCount()-1;
+    int outputDim = regressor->outputDim;
+    if(outputDim != -1 && outputDim < dim-1)
+    {
+        if(xIndex == dim-1) xIndex = outputDim;
+        else if (xIndex == outputDim) xIndex = dim-1;
+        if(yIndex == dim-1) yIndex = outputDim;
+        else if(yIndex == outputDim) yIndex = dim-1;
+    }
     painter.setBrush(Qt::NoBrush);
     painter.setPen(QPen(Qt::red,3));
     FOR(i, gpr->GetBasisCount())
     {
         fvec basis = gpr->GetBasisVector(i);
+        if(basis.size() < dim) continue; // happens when input-dimensions are being used
         fvec testBasis(dim+1);
         FOR(d, dim) testBasis[d] = basis[d];
         fvec res = gpr->Test(testBasis);
@@ -261,13 +269,17 @@ void RegrGPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 
 void RegrGPR::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-
     RegressorGPR *gpr = dynamic_cast<RegressorGPR *>(regressor);
     if(gpr && gpr->sogp)
     {
         int w = canvas->width();
         int h = canvas->height();
         int dim = canvas->data->GetDimCount()-1;
+        int basisDim = gpr->GetBasisCount() > 0 ? gpr->GetBasisVector(0).size() : -1;
+        if(dim != basisDim) { // we used part of the input dimensions
+            canvas->maps.confidence = QPixmap();
+            return;
+        }
         int outputDim = regressor->outputDim;
         int xIndex = canvas->xIndex;
         int yIndex = canvas->yIndex;
