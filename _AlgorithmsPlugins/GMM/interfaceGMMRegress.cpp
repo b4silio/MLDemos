@@ -140,9 +140,11 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 	if(!canvas || !regressor) return;
 	painter.setRenderHint(QPainter::Antialiasing);
 
-	RegressorGMR * gmr = (RegressorGMR*)regressor;
+    RegressorGMR * gmr = dynamic_cast<RegressorGMR*>(regressor);
+    if(!gmr) return;
 	Gmm *gmm = gmr->gmm;
-	int dim = canvas->data->GetCount() ? canvas->data->GetSample(0).size() : gmm->dim;
+    if(!gmm) return;
+    int dim = canvas->data->GetCount() ? canvas->data->GetSample(0).size() : gmm->dim;
     int outputDim = regressor->outputDim;
 	int xIndex = canvas->xIndex;
 	int yIndex = canvas->yIndex;

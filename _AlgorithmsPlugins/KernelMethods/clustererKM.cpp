@@ -30,7 +30,7 @@ ClustererKM::~ClustererKM()
 void ClustererKM::Train(std::vector< fvec > samples)
 {
     if(!samples.size()) return;
-    int dim = samples[0].size();
+    if(!nbClusters) nbClusters = 1;
     if(!bIterative)
     {
         DEL(kmeans);
