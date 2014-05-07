@@ -766,6 +766,15 @@ void AlgorithmManager::Train(Regressor *regressor, int outputDim, float trainRat
     if(!regressor || !canvas->data->GetCount()) return;
 
     ivec inputDims = GetInputDimensions();
+    // Bug Regression crashing --- Guillaume
+    if(inputDims.size() == 0){
+        unsigned int nbDim = canvas->data->GetDimCount();
+        inputDims.resize(nbDim);
+        FOR(i,nbDim){
+           inputDims[i]=i;
+        }
+    }
+
     int outputIndexInList = -1;
     if(inputDims.size()==1 && inputDims[0] == outputDim) return; // we dont have enough dimensions for training
     FOR(i, inputDims.size()) if(outputDim == inputDims[i])
