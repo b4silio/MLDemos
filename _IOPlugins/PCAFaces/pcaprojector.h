@@ -79,6 +79,8 @@ signals:
 		void DropImage(QDropEvent *event);
 		void DragDataset(QDragEnterEvent *event);
 		void DropDataset(QDropEvent *event);
+private slots:
+        void on_eigenButton_clicked();
 };
 
 #endif // _PCAPROJECTOR_H_

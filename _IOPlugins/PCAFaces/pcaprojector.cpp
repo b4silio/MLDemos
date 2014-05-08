@@ -27,6 +27,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QMimeData>
 #include <QUrl>
 #include <QClipboard>
+#include <QMessageBox>
 
 using namespace std;
 
@@ -97,27 +98,34 @@ void PCAProjector::timerEvent(QTimerEvent *event)
 
 void PCAProjector::DrawEigen()
 {
-	EigenFaces eig;
-	eig.Learn(sm.GetSamples(), sm.GetLabels());
-	SampleManager eigVecs;
-	eigVecs.AddSamples(eig.GetEigenVectorsImages());
-	IplImage *image = eigVecs.GetSampleImage();
-    if(!eigenVectorLabel) eigenVectorLabel = new QLabel();
-    eigenVectorLabel->setScaledContents(true);
-    eigenVectorLabel->setPixmap(QNamedWindow::toPixmap(image));
-    eigenVectorLabel->show();
+    if(sm.GetCount() >= 3){
+        EigenFaces eig;
+        eig.Learn(sm.GetSamples(), sm.GetLabels());
+        SampleManager eigVecs;
+        eigVecs.AddSamples(eig.GetEigenVectorsImages());
+        IplImage *image = eigVecs.GetSampleImage();
+        if(!eigenVectorLabel) eigenVectorLabel = new QLabel();
+        eigenVectorLabel->setScaledContents(true);
+        eigenVectorLabel->setPixmap(QNamedWindow::toPixmap(image));
+        eigenVectorLabel->show();
 
-    IplImage *eigValsImg = eig.DrawEigenVals();
-    if(!eigenValueLabel) eigenValueLabel = new QLabel();
-    eigenValueLabel->setScaledContents(true);
-    eigenValueLabel->setPixmap(QNamedWindow::toPixmap(eigValsImg));
-    eigenValueLabel->show();
+        IplImage *eigValsImg = eig.DrawEigenVals();
+        if(!eigenValueLabel) eigenValueLabel = new QLabel();
+        eigenValueLabel->setScaledContents(true);
+        eigenValueLabel->setPixmap(QNamedWindow::toPixmap(eigValsImg));
+        eigenValueLabel->show();
 
-    //cvNamedWindow("Eigen Vectors");
-    //cvShowImage("Eigen Vectors", image);
-	eigVecs.Clear();
-    IMKILL(image);
-    IMKILL(eigValsImg);
+        //cvNamedWindow("Eigen Vectors");
+        //cvShowImage("Eigen Vectors", image);
+        eigVecs.Clear();
+        IMKILL(image);
+        IMKILL(eigValsImg);
+    }else{
+        QMessageBox msgBox;
+        msgBox.setText("Load/Import data first! (at least 3 samples)");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+    }
 }
 
 pair<vector<fvec>,ivec> PCAProjector::GetData()
@@ -214,6 +222,7 @@ void PCAProjector::RefreshDataset()
 	IplImage *dataset = sm.GetSampleImage();
 	if(!dataset)
 	{
+        options->samplesLabel->setText(QString("Samples: %1").arg(sm.GetCount()));
 		cvSet(samples, CV_RGB(255,255,255));
 		samplesWindow->ShowImage(samples);
 		samplesWindow->repaint();
