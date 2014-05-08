@@ -52,13 +52,90 @@ QPixmap QNamedWindow::toPixmap(IplImage *src)
 	return pixmap;
 }
 
+IplImage *QNamedWindow::cvxCopyQImage(const QImage &qImage)
+{
+    if(qImage.isNull()) return NULL;
+
+    int w = qImage.width();
+    int h = qImage.height();
+
+    IplImage *pIplImage =     cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3); // (!ppIplImage || !CV_IS_IMAGE(*ppIplImage))?
+    if(!CV_IS_IMAGE(pIplImage)) return NULL;
+    if(pIplImage->width != w || pIplImage->height != h)
+    {
+
+        cvReleaseImage(&pIplImage);
+        pIplImage = cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3);
+
+        if(!CV_IS_IMAGE(pIplImage)){return NULL;}
+    }
+
+    pIplImage->origin = IPL_ORIGIN_TL;
+
+    int x, y;
+    for(x = 0; x < pIplImage->width; ++x)
+    {
+        for(y = 0; y < pIplImage->height; ++y)
+        {
+            QRgb rgb = qImage.pixel(x, y);
+
+            if(pIplImage->nChannels == 1)
+            {
+                cvSet2D(pIplImage, y, x, CV_RGB(qGray(rgb), 0, 0));
+            }
+            else
+            {
+                cvSet2D(pIplImage, y, x, CV_RGB(qRed(rgb), qGreen(rgb), qBlue(rgb)));
+            }
+        }
+    }
+   return pIplImage;
+}
+
+IplImage* QNamedWindow::qImage2IplImage(QImage& qImage)
+{
+  QImage qim = qImage.convertToFormat(QImage::Format_RGB888).rgbSwapped();
+
+  int width = qim.width();
+  int height = qim.height();
+
+  // Creates a iplImage with 3 channels
+  IplImage *img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
+  char * imgBuffer = img->imageData;
+  //Remove alpha channel
+  int jump = (qImage.hasAlphaChannel()) ? 4 : 3;
+
+  for (int y=0;y< img->height;y++){
+    QByteArray a((const char*)qim.scanLine(y), qim.bytesPerLine());
+    for (int i=0; i<a.size(); i+=jump){
+        imgBuffer[0] = a[i];
+        imgBuffer[1] = a[i+1];
+        imgBuffer[2] = a[i+2];
+        imgBuffer+=3;
+    }
+}
+    return img;
+}
+
+QImage QNamedWindow::IplImage2QImage(const IplImage *iplImage)
+{
+       int height = iplImage->height;
+       int width = iplImage->width;
+
+       const uchar *qImageBuffer =(const uchar*)iplImage->imageData;
+       QImage img(qImageBuffer, width, height, QImage::Format_RGB888);
+       return img.rgbSwapped();
+}
+
 IplImage *QNamedWindow::toImage( QImage image )
 {
 	if (image.isNull()) return NULL;
 	const int w = image.width();
 	const int h = image.height();
-	IplImage *img = cvCreateImage(cvSize(w, h), 8, 3);
-	uchar *pixels = image.bits();
+
+
+    IplImage *img = cvCreateImage(cvSize(w, h), 8, 3);
+    uchar *pixels = image.bits();
 	for(int i=0; i<h; i++)
 	{
 		for(int j=0; j<w; j++)
@@ -66,8 +143,8 @@ IplImage *QNamedWindow::toImage( QImage image )
 			for (int c=0; c<3; c++)
 				img->imageData[i*img->widthStep + j*3 + c] = pixels[i*w*3 + j*h*3 + c];
 		}
-	}
-	return img;
+    }
+    return img;
 }
 
 QNamedWindow::QNamedWindow(QString name, bool bResizable, QWidget *parent)
@@ -95,7 +172,11 @@ void QNamedWindow::ShowImage(IplImage *image)
 {
 	if(!image) return;
 	bRedrawing = true;
-	pixmap = toPixmap(image);
+
+   // QImage qImage = QNamedWindow::IplImage2QImage(image);
+   // pixmap = QPixmap::fromImage(qImage);
+    pixmap = toPixmap(image);
+
 	if(!bResizable) setFixedSize(pixmap.width(), pixmap.height());
 	else if (bNewImage && !isFullScreen()) resize(pixmap.width(), pixmap.height());
 	bNewImage = false;

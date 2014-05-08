@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>PCAFacesDialog</class>
  <widget class="QDialog" name="PCAFacesDialog">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>820</width>
-    <height>380</height>
+    <width>967</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,44 +27,32 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>820</width>
-    <height>380</height>
+    <width>1000</width>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>PCA Faces</string>
   </property>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>310</y>
-     <width>241</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Select a region from this image (click to select all)</string>
-   </property>
-  </widget>
   <widget class="QWidget" name="imageWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>50</y>
+     <x>61</x>
+     <y>122</y>
      <width>256</width>
-     <height>256</height>
+     <height>231</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>0</width>
-     <height>0</height>
+     <width>256</width>
+     <height>200</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>500</width>
+     <height>500</height>
     </size>
    </property>
    <property name="font">
@@ -72,12 +63,13 @@
    <property name="autoFillBackground">
     <bool>true</bool>
    </property>
+   <layout class="QGridLayout" name="gridLayout"/>
   </widget>
   <widget class="QWidget" name="dataWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>320</x>
-     <y>10</y>
+     <x>401</x>
+     <y>52</y>
      <width>380</width>
      <height>340</height>
     </rect>
@@ -91,32 +83,11 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="loadImgButton">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>10</y>
-     <width>81</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Load Image</string>
-   </property>
-   <property name="autoDefault">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QPushButton" name="addButton">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>150</y>
+     <x>337</x>
+     <y>215</y>
      <width>41</width>
      <height>51</height>
     </rect>
@@ -130,47 +101,11 @@
     <string>&gt;&gt;</string>
    </property>
   </widget>
-  <widget class="QLabel" name="samplesLabel">
-   <property name="geometry">
-    <rect>
-     <x>720</x>
-     <y>120</y>
-     <width>91</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Samples: 0</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="clipboardButton">
-   <property name="geometry">
-    <rect>
-     <x>210</x>
-     <y>10</y>
-     <width>90</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>from Clipboard</string>
-   </property>
-  </widget>
   <widget class="QSpinBox" name="spinE1">
    <property name="geometry">
     <rect>
-     <x>714</x>
-     <y>250</y>
+     <x>825</x>
+     <y>352</y>
      <width>41</width>
      <height>22</height>
     </rect>
@@ -190,8 +125,8 @@
   <widget class="QSpinBox" name="spinE2">
    <property name="geometry">
     <rect>
-     <x>774</x>
-     <y>250</y>
+     <x>885</x>
+     <y>352</y>
      <width>41</width>
      <height>22</height>
     </rect>
@@ -214,8 +149,8 @@
   <widget class="QLabel" name="spinE1label">
    <property name="geometry">
     <rect>
-     <x>714</x>
-     <y>230</y>
+     <x>821</x>
+     <y>322</y>
      <width>101</width>
      <height>21</height>
     </rect>
@@ -228,12 +163,15 @@
    <property name="text">
     <string>Eigen Vectors</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
   </widget>
   <widget class="QLabel" name="spinE2label">
    <property name="geometry">
     <rect>
-     <x>761</x>
-     <y>250</y>
+     <x>872</x>
+     <y>352</y>
      <width>16</width>
      <height>21</height>
     </rect>
@@ -250,8 +188,8 @@
   <widget class="QPushButton" name="closeButton">
    <property name="geometry">
     <rect>
-     <x>706</x>
-     <y>312</y>
+     <x>821</x>
+     <y>392</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -265,66 +203,12 @@
     <string>Close</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="clearButton">
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>80</y>
-     <width>101</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Clear Dataset</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="loadDatasetButton">
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>20</y>
-     <width>101</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Load Dataset</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="saveDatasetButton">
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>50</y>
-     <width>101</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Save Dataset</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>30</y>
-     <width>81</width>
+     <x>21</x>
+     <y>82</y>
+     <width>111</width>
      <height>21</height>
     </rect>
    </property>
@@ -334,15 +218,15 @@
     </font>
    </property>
    <property name="text">
-    <string>or drag and drop</string>
+    <string>or drag and drop:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>353</y>
-     <width>180</width>
+     <x>411</x>
+     <y>402</y>
+     <width>231</width>
      <height>21</height>
     </rect>
    </property>
@@ -355,71 +239,11 @@
     <string>left/right-click: change class label</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_7">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>353</y>
-     <width>131</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>ctrl+click: remove sample</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="webcamButton">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>111</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>from Webcam</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="default">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="eigenButton">
-   <property name="geometry">
-    <rect>
-     <x>720</x>
-     <y>150</y>
-     <width>90</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Eigenvectors</string>
-   </property>
-  </widget>
   <widget class="QSpinBox" name="eigenCountSpin">
    <property name="geometry">
     <rect>
-     <x>740</x>
-     <y>200</y>
+     <x>851</x>
+     <y>287</y>
      <width>40</width>
      <height>25</height>
     </rect>
@@ -439,9 +263,9 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>180</y>
-     <width>101</width>
+     <x>801</x>
+     <y>262</y>
+     <width>141</width>
      <height>21</height>
     </rect>
    </property>
@@ -454,6 +278,251 @@
     <string>Eigen Vectors to keep</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>411</x>
+     <y>422</y>
+     <width>166</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>ctrl+click: remove sample</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>21</x>
+     <y>22</y>
+     <width>341</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QPushButton" name="webcamButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>From Webcam</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="default">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="loadImgButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Load Image</string>
+      </property>
+      <property name="autoDefault">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="clipboardButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Loads images which have been saved via mouse left-click&lt;/p&gt;&lt;p&gt;save.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>From Clipboard</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>91</x>
+     <y>372</y>
+     <width>211</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>211</width>
+     <height>41</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Select a region from this image 
+        (click to select all)</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>821</x>
+     <y>42</y>
+     <width>102</width>
+     <height>208</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="loadDatasetButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Load Dataset</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="saveDatasetButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Save Dataset</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="clearButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Clear Dataset</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="samplesLabel">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Samples: 0</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="eigenButton">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Eigenvectors</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <zorder>imageWidget</zorder>
+  <zorder>dataWidget</zorder>
+  <zorder>loadImgButton</zorder>
+  <zorder>addButton</zorder>
+  <zorder>samplesLabel</zorder>
+  <zorder>clipboardButton</zorder>
+  <zorder>spinE1</zorder>
+  <zorder>spinE2</zorder>
+  <zorder>spinE1label</zorder>
+  <zorder>spinE2label</zorder>
+  <zorder>closeButton</zorder>
+  <zorder>clearButton</zorder>
+  <zorder>loadDatasetButton</zorder>
+  <zorder>saveDatasetButton</zorder>
+  <zorder>label_5</zorder>
+  <zorder>label_6</zorder>
+  <zorder>webcamButton</zorder>
+  <zorder>eigenButton</zorder>
+  <zorder>eigenCountSpin</zorder>
+  <zorder>label_8</zorder>
+  <zorder>label_7</zorder>
+  <zorder></zorder>
+  <zorder></zorder>
+  <zorder>label_2</zorder>
+  <zorder>imageWidget</zorder>
+  <zorder>horizontalSpacer_2</zorder>
+  <zorder>label_6</zorder>
+  <zorder>label_7</zorder>
  </widget>
  <resources/>
  <connections/>
