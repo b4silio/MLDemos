@@ -195,10 +195,14 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsReinforcement->algoList->clear();
     optionsProject->algoList->clear();
 
+    optionsCluster->algoList->setCurrentIndex(1);
+
     connect(options->tabWidget, SIGNAL(currentChanged(int)), mldemos, SLOT(AlgoChanged()));
 
     algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
-    algorithmWidget->setFixedSize(636,220);
+   // algorithmWidget->setFixedSize(636,220);
+    algorithmWidget->setFixedSize(800,430);
+
 
     drawTimer->classifier = &classifier;
     drawTimer->regressor = &regressor;
@@ -2361,7 +2365,7 @@ void AlgorithmManager::ClusterOptimize()
     int ratioIndex = optionsCluster->trainTestCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
 
-    vector<bool> trainList;
+    vector<bool> trainList; // oh
     if(optionsCluster->manualTrainButton->isChecked())
     {
         // we get the list of samples that are checked
@@ -2400,6 +2404,7 @@ void AlgorithmManager::ClusterOptimize()
             clusterMetrics[1] = BIC;
             clusterMetrics[2] = AIC;
             clusterMetrics[3] = ClusterFMeasure(samples, labels, clusterScores, ratio);
+
             FOR(i, clusterMetrics.size())
             {
                 resultList[i][j].push_back(clusterMetrics[i]);
@@ -2407,14 +2412,14 @@ void AlgorithmManager::ClusterOptimize()
         }
         kCounts.push_back(k);
     }
-
     vector<fvec> results(4);
+    double value = 0;
     FOR(i, resultList.size())
     {
         results[i].resize(resultList[i][0].size());
         FOR(k, resultList[i][0].size())
         {
-            double value = 0;
+            value = 0;
             FOR(j, crossValCount)
             {
                 value += resultList[i][j][k];
@@ -2460,6 +2465,8 @@ void AlgorithmManager::ClusterOptimize()
     }
 
     vector< pair<float,int> > bests(results.size());
+
+    qreal xpos, ypos;
     FOR(i, results.size())
     {
         QPointF old;
@@ -2473,8 +2480,12 @@ void AlgorithmManager::ClusterOptimize()
             }
             float x = k/(float)(kCounts.size()-1);
             float y = (results[i][k] - mins[i])/(maxes[i]-mins[i]);
+            if(std::isnan(y)){y=0;}
+
             //if(i == 3) y = 1.f - y; // fmeasures needs to be maximized
-            QPointF point(x*(w-2*pad)+pad, (1.f-y)*(h-2*pad));
+
+
+            QPointF point(x*(w-2*pad)+pad,(1.f-y)*(h-2*pad));
             if(k) painter.drawLine(old, point);
             old = point;
         }
@@ -3324,8 +3335,11 @@ void AlgorithmManager::ClusterChanged()
 {
     if (optionsCluster->optimizeCombo->currentIndex() == 3) { // F1
         optionsCluster->trainRatioCombo->setVisible(true);
+        optionsCluster->trainRatioF1->setVisible(true);
     } else {
         optionsCluster->trainRatioCombo->setVisible(false);
+        optionsCluster->trainRatioF1->setVisible(false);
+
     }
 }
 

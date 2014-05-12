@@ -20,6 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLUSTERING_H_
 
 #include <vector>
+#include <iostream>
 #include "mymaths.h"
 
 class Clusterer
@@ -46,15 +47,33 @@ public:
         float loglik = 0;
         if(!samples.size()) return 0;
         fvec means(dim);
+        // compute the global mean of the data
         FOR ( i, samples.size() ) {
             FOR ( d, dim ) means[d] += samples[i][d];
         }
+     //   std::cout<< " GetLogLikelihood " << std::endl;
+     //   std::cout<< " samples.size(): " << samples.size() << std::endl;
+     //   std::cout<< " means: ";
+      //  FOR(i, means.size()){
+      //      std::cout<<  means[i] << " ";
+      //  }
+      //  std::cout<<std::endl;
+
+        fvec scores(nbClusters);
+        fvec diff(dim);
+        // for every sample a score is computed
         FOR ( i, samples.size() ) {
-            fvec scores = Test(samples[i]);
+             scores = Test(samples[i]);
             float rss = 0;
             FOR ( k, nbClusters ) {
-                fvec diff = samples[i]-means[k];
+                diff = samples[i]-means;//[k]; // center the data
                 rss += diff*diff*scores[k];
+                if(std::isnan(rss)){
+                    std::cout<< " rss is NaN" << std::endl;
+                    std::cout<< " diff: (" << diff[0] << "," << diff[1] <<  ")"  << std::endl;
+                    std::cout<< " diff*diff: " << diff * diff << std::endl;
+
+                }
             }
             loglik += logf(rss);
         }
