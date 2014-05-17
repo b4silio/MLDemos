@@ -1,0 +1,4 @@
+#ifndef COMPAREWIDGET_H
+#define COMPAREWIDGET_H
+
+#endif // COMPAREWIDGET_H

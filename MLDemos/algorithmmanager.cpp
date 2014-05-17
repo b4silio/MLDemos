@@ -60,7 +60,7 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsReinforcement = new Ui::optionsReinforcementWidget();
     optionsProject = new Ui::optionsProjectWidget();
 
-    algorithmWidget = new QWidget();
+    algorithmWidget = new BaseWidget();
     options->setupUi(algorithmWidget);
 
     classifyWidget = new QWidget(options->tabClass);
@@ -78,10 +78,13 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsReinforcement->setupUi(reinforcementWidget);
     optionsProject->setupUi(projectWidget);
 
+    connect(gridSearch,SIGNAL(closed()),mldemos,SLOT(ResetGridSearchButton()));
+    connect(algorithmWidget,SIGNAL(closed()),mldemos,SLOT(RestAlgorithmOptionsButton()));
     connect(optionsClassify->classifyButton, SIGNAL(clicked()), this, SLOT(Classify()));
     connect(optionsClassify->loadButton, SIGNAL(clicked()), this, SLOT(LoadClassifier()));
     connect(optionsClassify->saveButton, SIGNAL(clicked()), this, SLOT(SaveClassifier()));
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
+    connect(compare->paramsWidget,SIGNAL(closed()),mldemos,SLOT(HideOptionCompare()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), mldemos, SLOT(ShowRoc()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
@@ -195,14 +198,10 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsReinforcement->algoList->clear();
     optionsProject->algoList->clear();
 
-    optionsCluster->algoList->setCurrentIndex(1);
-
     connect(options->tabWidget, SIGNAL(currentChanged(int)), mldemos, SLOT(AlgoChanged()));
 
     algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
-   // algorithmWidget->setFixedSize(636,220);
     algorithmWidget->setFixedSize(800,430);
-
 
     drawTimer->classifier = &classifier;
     drawTimer->regressor = &regressor;

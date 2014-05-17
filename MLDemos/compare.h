@@ -6,6 +6,7 @@
 #include <drawUtils.h>
 #include <canvas.h>
 #include <QLabel>
+#include "basewidget.h"
 #include "ui_compare.h"
 #include "ui_optsCompare.h"
 
@@ -21,7 +22,8 @@ class CompareAlgorithms : public QObject
     Canvas *canvas;
 
 public:
-    QWidget *compareWidget, *paramsWidget;
+    BaseWidget *compareWidget;
+    BaseWidget *paramsWidget;
     Ui::optionsCompare *params;
     QList<QString> compareOptions;
     std::vector<fvec> datasetA;

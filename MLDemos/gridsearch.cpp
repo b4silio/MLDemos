@@ -25,7 +25,7 @@ void GridLabel::mouseMoveEvent(QMouseEvent *event)
 }
 
 GridSearch::GridSearch(Canvas *canvas, QWidget *parent) :
-    QWidget(parent),
+    BaseWidget(parent),
     ui(new Ui::GridSearch),
     canvas(canvas),
     mapX(0),mapY(0),

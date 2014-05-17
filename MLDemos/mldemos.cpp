@@ -163,6 +163,7 @@ void MLDemos::initToolBars()
     actionShowStats->setCheckable(true);
 
     connect(actionAlgorithms, SIGNAL(triggered()), this, SLOT(ShowAlgorithmOptions()));
+    connect(actionAlgorithms,SIGNAL(triggered()),this, SLOT(HideAlgorithmOptions()));
     connect(actionCompare, SIGNAL(triggered()), this, SLOT(ShowOptionCompare()));
     connect(actionDrawSamples, SIGNAL(triggered()), this, SLOT(ShowSampleDrawing()));
     connect(actionDisplayOptions, SIGNAL(triggered()), this, SLOT(ShowOptionDisplay()));
@@ -622,10 +623,10 @@ void MLDemos::resizeEvent(QResizeEvent *event)
     CanvasMoveEvent();
 }
 
-
 void MLDemos::AlgoChanged()
 {
     if(!algo) return;
+
     algo->SetAlgorithmWidget();
 
     ChangeInfoFile();
@@ -649,8 +650,17 @@ void MLDemos::AlgoChanged()
 
 void MLDemos::ShowAlgorithmOptions()
 {
-    if (actionAlgorithms->isChecked()) algo->algorithmWidget->show();
-    else algo->algorithmWidget->hide();
+    std::cout<< "ShowAlgorithmOptions" << std::endl;
+    if (actionAlgorithms->isChecked()){
+        algo->algorithmWidget->show();
+        algo->SetAlgorithmWidget();
+    }else{ algo->algorithmWidget->hide();
+
+    }
+}
+
+void MLDemos::RestAlgorithmOptionsButton(){
+    actionAlgorithms->setChecked(false);
 }
 
 void MLDemos::ShowOptionCompare()
@@ -663,6 +673,10 @@ void MLDemos::ShowGridSearch()
 {
     if (actionGridsearch->isChecked()) gridSearch->show();
     else gridSearch->hide();
+}
+
+void MLDemos::ResetGridSearchButton(){
+    actionGridsearch->setChecked(false);
 }
 
 void MLDemos::ShowSampleDrawing()

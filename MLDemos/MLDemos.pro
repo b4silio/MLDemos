@@ -76,7 +76,8 @@ HEADERS += basicMath.h \
     visualization.h \
     dataseteditor.h \
     algorithmmanager.h \
-    pluginmanager.h
+    pluginmanager.h \
+    basewidget.h
 
 SOURCES += \
 	main.cpp \
@@ -89,7 +90,8 @@ SOURCES += \
     visualization.cpp \
     dataseteditor.cpp \
     algorithmmanager.cpp \
-    pluginmanager.cpp
+    pluginmanager.cpp \
+    basewidget.cpp
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \

@@ -153,6 +153,9 @@ public slots:
 
 	void ShowAbout();
 	void ShowAlgorithmOptions();
+
+    void RestAlgorithmOptionsButton();
+
 	void ShowOptionCompare();
 	void ShowSampleDrawing();
 	void ShowOptionDisplay();
@@ -160,6 +163,7 @@ public slots:
 	void ShowToolbar();
     void ShowAddData();
     void ShowGridSearch();
+    void ResetGridSearchButton();
     void HideSampleDrawing();
     void HideOptionDisplay();
     void HideOptionCompare();

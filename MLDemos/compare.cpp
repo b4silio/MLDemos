@@ -7,10 +7,10 @@ CompareAlgorithms::CompareAlgorithms(Canvas *canvas)
     : display(0), canvas(canvas)
 {
     params = new Ui::optionsCompare();
-    params->setupUi(paramsWidget = new QWidget());
+    params->setupUi(paramsWidget = new BaseWidget());
 
 	compareDisplay = new Ui::CompareDisplay();
-    compareDisplay->setupUi(compareWidget = new QWidget(params->resultWidget));
+    compareDisplay->setupUi(compareWidget = new BaseWidget(params->resultWidget));
     paramsWidget->setWindowTitle("Comparison Results");
 
     if (!params->resultWidget->layout() ) {

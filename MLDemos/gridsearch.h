@@ -2,6 +2,7 @@
 #define GRIDSEARCH_H
 
 #include <QWidget>
+#include "basewidget.h"
 #include <QLabel>
 #include <QList>
 #include <vector>
@@ -24,7 +25,7 @@ signals:
 };
 
 typedef std::pair< std::pair<float,float>, std::pair<float,float> > fPair;
-class GridSearch : public QWidget
+class GridSearch : public BaseWidget
 {
     Q_OBJECT
 public:

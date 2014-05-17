@@ -15,6 +15,7 @@
 #include "widget.h"
 #include "drawTimer.h"
 #include "gridsearch.h"
+#include "basewidget.h"
 
 #include "ui_algorithmOptions.h"
 #include "ui_optsClassify.h"
@@ -34,7 +35,7 @@ class AlgorithmManager : public QObject
     Q_OBJECT
 
 public:
-    QWidget *algorithmWidget;
+    BaseWidget *algorithmWidget;
     QWidget *regressWidget;
     QWidget *dynamicWidget;
     QWidget *classifyWidget;
