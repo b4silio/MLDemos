@@ -52,6 +52,10 @@ public:
     PCAProjector *projector;
 	PCAFaces();
 	~PCAFaces();
+private:
+
+    void blockButtons(bool bBlockButtons);
+
 signals:
 	void Done(QObject *);
     void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected);
@@ -66,6 +70,7 @@ public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
 	void Updating();
+    void ConcurrentUpdate();
 };
 
 #endif // _INTERFACEPCAFACES_H_

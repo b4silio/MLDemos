@@ -56,6 +56,11 @@ public:
     ~PCAProjector();
 	void timerEvent(QTimerEvent *event);
 	std::pair<std::vector<fvec>,ivec> GetData();
+    std::pair<std::vector<fvec>,ivec>* GetData2();
+
+private:
+
+    std::pair<std::vector<fvec>,ivec> data2;
 
 signals:
 	void Update();
