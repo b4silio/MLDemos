@@ -54,7 +54,15 @@ public:
 	~PCAFaces();
 private:
 
-    void blockButtons(bool bBlockButtons);
+    QFutureWatcher<void> futureWatcher;
+    void setButtons(bool bStatus);
+
+
+public slots:
+
+    void setButtonsOn();
+    void setButtonsOff();
+
 
 signals:
 	void Done(QObject *);

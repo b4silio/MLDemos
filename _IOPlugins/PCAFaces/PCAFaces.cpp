@@ -37,12 +37,24 @@ PCAFaces::~PCAFaces()
 	DEL(projector);
 }
 
-void PCAFaces::blockButtons(bool bBlockButtons){
+void PCAFaces::setButtons(bool bStatus){
+    gui->eigenButton->setEnabled(bStatus);
+    gui->eigenCountSpin->setEnabled(bStatus);
+    gui->spinE1->setEnabled(bStatus);
+    gui->spinE2->setEnabled(bStatus);
+}
 
-    gui->eigenButton->setEnabled(bBlockButtons);
-    gui->eigenCountSpin->setEnabled(bBlockButtons);
-    gui->spinE1->setEnabled(bBlockButtons);
-    gui->spinE2->setEnabled(bBlockButtons);
+void PCAFaces::setButtonsOn(){
+    setButtons(true);
+}
+
+void PCAFaces::setButtonsOff(){
+    bool bVisible = (gui->eigenCountSpin->value() == 2);
+    gui->spinE1->setVisible(bVisible);
+    gui->spinE2->setVisible(bVisible);
+    gui->spinE1label->setVisible(bVisible);
+    gui->spinE2label->setVisible(bVisible);
+    setButtons(false);
 }
 
 void PCAFaces::Start()
@@ -59,12 +71,16 @@ void PCAFaces::Start()
         qRegisterMetaType<std::vector<fvec> >("std::vector<fvec>");
 
 
-		connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
+        connect(&futureWatcher,SIGNAL(started()),this,SLOT(setButtonsOff()));
+        connect(&futureWatcher, SIGNAL(finished()), this, SLOT(setButtonsOn()));
+
+
+        connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
         connect(projector, SIGNAL(Update()), this, SLOT(ConcurrentUpdate()));
         connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
         connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
         connect(gui->eigenCountSpin, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
-        Updating();
+        ConcurrentUpdate();
 
 	}
 	guiDialog->show();
@@ -87,23 +103,19 @@ void PCAFaces::Closing()
 
 void PCAFaces::Updating()
 {
+
     if(!projector) return;
 
-        bool bVisible = (gui->eigenCountSpin->value() == 2);
-        gui->spinE1->setVisible(bVisible);
-        gui->spinE2->setVisible(bVisible);
-        gui->spinE1label->setVisible(bVisible);
-        gui->spinE2label->setVisible(bVisible);
+    pair<vector<fvec>,ivec> data = projector->GetData();
+    if(data.first.size() < 2)      return;
 
-        pair<vector<fvec>,ivec> data = projector->GetData();
-        if(data.first.size() < 2)      return;
-
-        emit(SetData(data.first, data.second, vector<ipair>(), true));
+    emit(SetData(data.first, data.second, vector<ipair>(), true));
 
 }
 
 void PCAFaces::ConcurrentUpdate(){
-    QtConcurrent::run(this,&PCAFaces::Updating);
+       QFuture<void> future = QtConcurrent::run(this,&PCAFaces::Updating);
+       futureWatcher.setFuture(future);
 }
 
 

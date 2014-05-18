@@ -56,11 +56,7 @@ public:
     ~PCAProjector();
 	void timerEvent(QTimerEvent *event);
 	std::pair<std::vector<fvec>,ivec> GetData();
-    std::pair<std::vector<fvec>,ivec>* GetData2();
 
-private:
-
-    std::pair<std::vector<fvec>,ivec> data2;
 
 signals:
 	void Update();
@@ -84,8 +80,8 @@ signals:
 		void DropImage(QDropEvent *event);
 		void DragDataset(QDragEnterEvent *event);
 		void DropDataset(QDropEvent *event);
-private slots:
-        void on_eigenButton_clicked();
+//private slots:
+       // void on_eigenButton_clicked();
 };
 
 #endif // _PCAPROJECTOR_H_

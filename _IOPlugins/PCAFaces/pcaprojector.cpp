@@ -180,10 +180,7 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
     return data;
 }
 
-pair<vector<fvec>,ivec>* PCAProjector::GetData2(){
-    data2 = GetData();
-    return &data2;
-}
+
 
 void PCAProjector::FromWebcam()
 {
