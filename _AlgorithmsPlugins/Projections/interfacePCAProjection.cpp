@@ -7,6 +7,7 @@ PCAProjection::PCAProjection()
 {
     params = new Ui::paramsPCA();
     params->setupUi(widget);
+
     connect(params->showEigenvectorButton, SIGNAL(clicked()), this, SLOT(ShowEigenVectors()));
     connect(params->useRangeCheck, SIGNAL(clicked()), this, SLOT(ChangeOptions()));
     ChangeOptions();
@@ -37,8 +38,6 @@ fvec PCAProjection::GetParams()
 {
     return fvec();
 }
-
-void PCAProjection::SetParams(Projector *projector, fvec parameters){}
 
 void PCAProjection::GetParameterList(std::vector<QString> &parameterNames,
                              std::vector<QString> &parameterTypes,
@@ -156,6 +155,7 @@ QString PCAProjection::GetAlgoString()
 
 void PCAProjection::SetParams(Projector *projector)
 {
+
     if(!projector) return;
     if(params->useRangeCheck->isChecked())
     {
@@ -170,6 +170,8 @@ void PCAProjection::SetParams(Projector *projector)
         projector->stopIndex = -1;
     }
 }
+
+void PCAProjection::SetParams(Projector *projector, fvec parameters){}
 
 void PCAProjection::SaveOptions(QSettings &settings)
 {

@@ -28,6 +28,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <qcontour.h>
+#include <assert.h>
 #include "mldemos.h"
 
 using namespace std;
@@ -353,7 +354,6 @@ void AlgorithmManager::QueryProjector(std::vector<fvec> samples)
     }
     emit SendResults(results);
 }
-
 
 bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex, std::vector<fvec> samples, ivec labels)
 {
@@ -2833,6 +2833,7 @@ void AlgorithmManager::ReinforceContinue()
 
 void AlgorithmManager::Project()
 {
+    std::cout<< "AlgorithmManager::Project()" << std::endl;
     if(!canvas || !canvas->data->GetCount()) return;
     QMutexLocker lock(mutex);
     drawTimer->Stop();
@@ -2853,6 +2854,7 @@ void AlgorithmManager::Project()
     if(tab >= projectors.size() || !projectors[tab]) return;
     projector = projectors[tab]->GetProjector();
     projectors[tab]->SetParams(projector);
+
     tabUsedForTraining = tab;
     bool bHasSource = false;
     if(sourceData.size() && sourceData.size() == canvas->data->GetCount())
@@ -3402,7 +3404,9 @@ void AlgorithmManager::SetAlgorithmWidget()
     if (options->tabClust->isVisible()) {
         int index = optionsCluster->algoList->currentIndex();
         FOR (i, algoWidgets["clusterers"].size()) {
-            if (i==index) algoWidgets["clusterers"][i]->show();
+            if (i==index){
+                algoWidgets["clusterers"][i]->show();
+            }
             else algoWidgets["clusterers"][i]->hide();
         }
         if (index != -1 && index < clusterers.size()) gridSearch->SetClusterer(clusterers[index]);
@@ -3425,8 +3429,23 @@ void AlgorithmManager::SetAlgorithmWidget()
     }
     if (options->tabProj->isVisible()) {
         int index = optionsProject->algoList->currentIndex();
+        QWidget *projection_widget=NULL;
+        QCheckBox* qCheckBox=NULL;
         FOR (i, algoWidgets["projectors"].size()) {
-            if (i==index) algoWidgets["projectors"][i]->show();
+            if (i==index){
+                projection_widget = algoWidgets["projectors"][i];
+                projection_widget->show();
+                qCheckBox = projection_widget->findChild<QCheckBox*>("useRangeCheck");
+                if(qCheckBox != NULL){
+                    QSpinBox* startRangeSpin = projection_widget->findChild<QSpinBox*>("startRangeSpin");
+                    QSpinBox* stopRangeSpin = projection_widget->findChild<QSpinBox*>("stopRangeSpin");
+                    assert(startRangeSpin != NULL);
+                    assert(stopRangeSpin != NULL);
+                    unsigned int dim = canvas->data->GetDimCount();
+                    startRangeSpin->setMaximum(dim);
+                    stopRangeSpin->setMaximum(dim);
+                }
+            }
             else algoWidgets["projectors"][i]->hide();
         }
         if (index != -1 && index < projectors.size()) gridSearch->SetProjector(projectors[index]);

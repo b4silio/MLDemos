@@ -101,7 +101,7 @@ QString CVOProjection::GetAlgoString()
     return QString("CVO");
 }
 
-void CVOProjection::SetParams( Projector* projector )
+void CVOProjection::SetParams(Projector* projector )
 {
     if( !projector ) return;
     ProjectorCVO* cvo = dynamic_cast<ProjectorCVO*>(projector);

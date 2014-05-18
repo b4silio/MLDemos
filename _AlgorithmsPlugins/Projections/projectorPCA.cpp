@@ -158,6 +158,10 @@ void ProjectorPCA::Train(std::vector< fvec > samples, ivec labels)
     if(startIndex && startIndex >= (int)dim) startIndex = dim-1;
     if(stopIndex != -1 && startIndex > stopIndex) stopIndex = startIndex;
     int pcaCount = (stopIndex != -1) ? stopIndex+1 : min((int)dim, (int)samples.size()-1);
+
+    std::cout<< "stopIndex: " << stopIndex << std::endl;
+    std::cout<< "startIndex: " << startIndex << std::endl;
+
     TrainPCA(samples, pcaCount);
     if(startIndex)
     {

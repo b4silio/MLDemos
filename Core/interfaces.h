@@ -429,6 +429,9 @@ public:
         }
         canvas->repaint();
     }
+
+protected:
+    unsigned int dim;
 };
 
 class CollectionInterface
