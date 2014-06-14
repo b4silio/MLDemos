@@ -47,15 +47,37 @@
       <property name="rightMargin">
        <number>0</number>
       </property>
-      <item row="14" column="0" colspan="2">
-       <widget class="QPushButton" name="closeButton">
+      <item row="3" column="0">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Class Column:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
           <pointsize>9</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>Close</string>
+         <string>Separators</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="classColumnSpin"/>
+      </item>
+      <item row="7" column="0">
+       <widget class="QComboBox" name="importLimitCombo">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -74,6 +96,13 @@
         </property>
        </widget>
       </item>
+      <item row="7" column="1">
+       <widget class="QSpinBox" name="importLimitSpin">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="headerCheck">
         <property name="font">
@@ -83,67 +112,6 @@
         </property>
         <property name="text">
          <string>First Row as Header</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Class Column:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0" colspan="2">
-       <widget class="QPushButton" name="dumpButton">
-        <property name="text">
-         <string>Send Data</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0" colspan="2">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="classColumnSpin"/>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QCheckBox" name="classIgnoreCheck">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Ignore Class (set to 0)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QSpinBox" name="importLimitSpin">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QComboBox" name="importLimitCombo">
-        <property name="enabled">
-         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -159,17 +127,37 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
+      <item row="8" column="0" colspan="2">
+       <widget class="QPushButton" name="dumpButton">
+        <property name="text">
+         <string>Send Data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0" colspan="2">
+       <widget class="QPushButton" name="closeButton">
         <property name="font">
          <font>
           <pointsize>9</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>Separators</string>
+         <string>Close</string>
         </property>
        </widget>
+      </item>
+      <item row="9" column="0" colspan="2">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="separatorCombo">
@@ -205,6 +193,18 @@
         </item>
        </widget>
       </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QCheckBox" name="classIgnoreCheck">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Ignore Class (set to 0)</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -221,7 +221,16 @@
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>

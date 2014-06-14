@@ -19,6 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "dataImporter.h"
 #include "ui_dataImport.h"
+#include <basicMath.h>
 
 DataImporter::DataImporter()
     : guiDialog(0), gui(0), inputParser(0), filename("")
@@ -226,6 +227,7 @@ void DataImporter::SendData()
     }
     inputParser->setFirstRowAsHeader(gui->headerCheck->isChecked());
     int nbSamples = gui->importLimitSpin->value();
+    if(gui->importLimitCombo->currentIndex() == gui->importLimitCombo->count()-1) nbSamples = -1;
     pair<vector<fvec>,ivec> data = inputParser->getData(excludeIndices, nbSamples);
     classNames = inputParser->getClassNames();
     categorical = inputParser->getCategorical();
