@@ -78,6 +78,27 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsMaximize->setupUi(maximizeWidget);
     optionsReinforcement->setupUi(reinforcementWidget);
     optionsProject->setupUi(projectWidget);
+    if(options->tabClass->layout() == NULL) options->tabClass->setLayout(new QHBoxLayout());
+    if(options->tabClust->layout() == NULL) options->tabClust->setLayout(new QHBoxLayout());
+    if(options->tabRegr->layout() == NULL) options->tabRegr->setLayout(new QHBoxLayout());
+    if(options->tabDyn->layout() == NULL) options->tabDyn->setLayout(new QHBoxLayout());
+    if(options->tabMax->layout() == NULL) options->tabMax->setLayout(new QHBoxLayout());
+    if(options->tabReinf->layout() == NULL) options->tabReinf->setLayout(new QHBoxLayout());
+    if(options->tabProj->layout() == NULL) options->tabProj->setLayout(new QHBoxLayout());
+    options->tabClass->layout()->setContentsMargins(0,0,0,0);
+    options->tabClust->layout()->setContentsMargins(0,0,0,0);
+    options->tabRegr->layout()->setContentsMargins(0,0,0,0);
+    options->tabDyn->layout()->setContentsMargins(0,0,0,0);
+    options->tabMax->layout()->setContentsMargins(0,0,0,0);
+    options->tabReinf->layout()->setContentsMargins(0,0,0,0);
+    options->tabProj->layout()->setContentsMargins(0,0,0,0);
+    options->tabClass->layout()->addWidget(classifyWidget);
+    options->tabClust->layout()->addWidget(clusterWidget);
+    options->tabRegr->layout()->addWidget(regressWidget);
+    options->tabDyn->layout()->addWidget(dynamicWidget);
+    options->tabMax->layout()->addWidget(maximizeWidget);
+    options->tabReinf->layout()->addWidget(reinforcementWidget);
+    options->tabProj->layout()->addWidget(projectWidget);
 
     connect(gridSearch,SIGNAL(closed()),mldemos,SLOT(ResetGridSearchButton()));
     connect(algorithmWidget,SIGNAL(closed()),mldemos,SLOT(RestAlgorithmOptionsButton()));
@@ -201,8 +222,8 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
 
     connect(options->tabWidget, SIGNAL(currentChanged(int)), mldemos, SLOT(AlgoChanged()));
 
-    algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
-    algorithmWidget->setFixedSize(800,430);
+    //algorithmWidget->setWindowFlags(Qt::Tool); // disappears when unfocused on the mac
+    //algorithmWidget->setFixedSize(800,430);
 
     drawTimer->classifier = &classifier;
     drawTimer->regressor = &regressor;

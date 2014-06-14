@@ -237,7 +237,7 @@ void DataImporter::SendData()
     FOR(i, excludeIndices.size())
     {
         if(excludeIndices[i] == classColumn) continue;
-        dimensionNames.erase(dimensionNames.begin()+excludeIndices[i]);
+        if(excludeIndices[i] < dimensionNames.size()) dimensionNames.erase(dimensionNames.begin()+excludeIndices[i]);
         if(categorical.count(excludeIndices[i])) categorical.erase(excludeIndices[i]);
     }
     if(dimensionNames.size() && !gui->classIgnoreCheck->isChecked())

@@ -1056,7 +1056,7 @@
     <rect>
      <x>411</x>
      <y>399</y>
-     <width>231</width>
+     <width>161</width>
      <height>21</height>
     </rect>
    </property>
@@ -1066,7 +1066,7 @@
     </font>
    </property>
    <property name="text">
-    <string>left/right-click: change class label</string>
+    <string>click: change class label</string>
    </property>
   </widget>
   <widget class="QSpinBox" name="eigenCountSpin">
@@ -1325,6 +1325,24 @@
     </item>
    </layout>
   </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>400</y>
+     <width>200</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>shift+click: change multiple class labels</string>
+   </property>
+  </widget>
   <zorder>layoutWidget</zorder>
   <zorder>dataWidget</zorder>
   <zorder>addButton</zorder>
@@ -1341,6 +1359,7 @@
   <zorder>imageWidget</zorder>
   <zorder>label_6</zorder>
   <zorder>label_7</zorder>
+  <zorder>label_9</zorder>
  </widget>
  <tabstops>
   <tabstop>clipboardButton</tabstop>

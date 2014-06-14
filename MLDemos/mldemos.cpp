@@ -646,6 +646,9 @@ void MLDemos::AlgoChanged()
             drawToolbar->sprayButton->setChecked(true);
         }
     }
+    if (!algo->options->tabClust->isVisible()) {
+        algo->options->tabWidget->resize(635,193);
+    }
 }
 
 void MLDemos::ShowAlgorithmOptions()
