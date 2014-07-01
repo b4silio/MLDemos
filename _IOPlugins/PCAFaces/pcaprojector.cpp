@@ -150,15 +150,18 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
         sourceSamples.push_back(sm.GetSample(i));
         sourceLabels.push_back(sm.GetLabel(i));
     }
-    if(sourceSamples.size() < 3) return data;
-    count = min(count, (int)sourceSamples.size()-1);
+    if(sourceSamples.size() < 4) return data;
+    count = min(count, (int)sourceSamples.size()-2);
+    e1 = min(count, e1);
+    e2 = min(count, e2);
 
     // we want at least one class to be 0, to avoid problems afterwards
     //FixLabels(sm);
     // we do the data projection here
     EigenFaces eig;
     eig.Learn(sourceSamples, sourceLabels);
-    vector<float *> projections = eig.GetProjections(max(count,max(e1,e2)+1), true);
+    int dim = max(count, max(e1, e2)+1);
+    vector<float *> projections = eig.GetProjections(dim, true);
     if(!projections.size()) return data;
     // the projections are normalized on a space 0-1, we want to add a bit of edges
     vector<fvec> samples;

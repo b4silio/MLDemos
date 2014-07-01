@@ -103,11 +103,10 @@ void PCAFaces::Closing()
 
 void PCAFaces::Updating()
 {
-
     if(!projector) return;
 
     pair<vector<fvec>,ivec> data = projector->GetData();
-    if(data.first.size() < 2)      return;
+    if(data.first.size() < 2) return;
 
     emit(SetData(data.first, data.second, vector<ipair>(), true));
 

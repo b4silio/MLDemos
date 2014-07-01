@@ -63,7 +63,6 @@ public slots:
     void setButtonsOn();
     void setButtonsOff();
 
-
 signals:
 	void Done(QObject *);
     void SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair> trajectories, bool bProjected);
