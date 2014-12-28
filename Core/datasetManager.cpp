@@ -357,7 +357,7 @@ std::vector< fvec > DatasetManager::GetSampleDims(const ivec inputDims, const in
     if ( !inputDims.size() ) return samples;
 
     vector<fvec> newSamples = samples;
-    int newDim = inputDims.size();
+    int newDim = inputDims.size()+1;
     if ( outputDim == -1 ) {
         FOR ( i, samples.size() ) {
             fvec newSample(newDim);
