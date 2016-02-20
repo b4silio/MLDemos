@@ -22,7 +22,22 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include "regressor.h"
 #include "basicOpenCV.h"
+#ifdef OPENCV3
+#define CV_ROW_SAMPLE cv::ml::ROW_SAMPLE
+class CvGBTreesParams
+{
+public:
+    CvGBTreesParams(int, int, float, float, int, bool);
+};
 
+class CvGBTrees
+{
+public:
+    enum{HUBER_LOSS, ABSOLUTE_LOSS, SQUARED_LOSS};
+    void train(CvMat*, int, CvMat*, const CvMat*,const CvMat*,const CvMat*, const CvMat*, CvGBTreesParams){}
+    float predict(CvMat*){return 0;}
+};
+#endif
 class RegressorGB : public Regressor
 {
 private:

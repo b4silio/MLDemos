@@ -154,10 +154,10 @@ inline float Distance(float *a, float *b, u32 dim, distEnum metric)
         dist = sqrtf(dist);
         break;
     case DIST_MANHATTAN:
-        FOR(i, dim) dist += (float)abs((double)a[i]-(double)b[i]);
+        FOR(i, dim) dist += (float)std::abs((double)a[i]-(double)b[i]);
         break;
     case DIST_INFINITE:
-        FOR(i, dim) dist = max(dist, (float)abs((double)a[i]-(double)b[i]));
+        FOR(i, dim) dist = max(dist, (float)std::abs((double)a[i]-(double)b[i]));
         break;
     }
     return dist;

@@ -21,15 +21,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "basicMath.h"
 #include "regressorMLP.h"
 
+using namespace cv;
+using namespace cv::ml;
+
 RegressorMLP::RegressorMLP()
-: functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0), trainingType(1)
+: functionType(1), neuronCount(2), alpha(0), beta(0), trainingType(1)
 {
 	type = REGR_MLP;
 }
 
 RegressorMLP::~RegressorMLP()
 {
-	DEL(mlp);
 }
 
 void RegressorMLP::Train(std::vector< fvec > samples, ivec labels)
@@ -47,81 +49,74 @@ void RegressorMLP::Train(std::vector< fvec > samples, ivec labels)
             samples[i][outputDim] = val;
         }
     }
-    DEL(mlp);
     dim = samples[0].size()-1;
 
-	CvMat *layers;
-	//	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
+    Mat layers;
 
-	if(!layerCount || neuronCount < 2)
-	{
-		layers = cvCreateMat(2,1,CV_32SC1);
-		cvSet1D(layers, 0, cvScalar(dim));
-		cvSet1D(layers, 1, cvScalar(1));
-	}
-	else
-	{
-		layers = cvCreateMat(2+layerCount,1,CV_32SC1);
-		cvSet1D(layers, 0, cvScalar(dim));
-		cvSet1D(layers, layerCount+1, cvScalar(1));
-		FOR(i, layerCount) cvSet1D(layers, i+1, cvScalar(neuronCount));
-	}
+    if(!layerCount || neuronCount < 2)
+    {
+        layers = Mat(1, 2, CV_32SC1 );
+        layers.at<int>(0) = dim; // input size
+        layers.at<int>(1) = 1; // outputs
+    }
+    else
+    {
+        layers = Mat(1, 2+layerCount, CV_32SC1 );
+        layers.at<int>(0) = dim; // input size
+        FOR(i, layerCount) layers.at<int>(i+1) = neuronCount;
+        layers.at<int>(2+layerCount-1) = 1; // outputs
+    }
 
 	u32 *perm = randPerm(sampleCnt);
-
-	CvMat *trainSamples = cvCreateMat(sampleCnt, dim, CV_32FC1);
-	CvMat *trainOutputs = cvCreateMat(sampleCnt, 1, CV_32FC1);
-	CvMat *sampleWeights = cvCreateMat(samples.size(), 1, CV_32FC1);
+    Mat trainSamples(sampleCnt, dim, CV_32FC1);
+    Mat trainOutputs(sampleCnt, 1, CV_32FC1);
 	FOR(i, sampleCnt)
 	{
-		FOR(j, dim) cvSetReal2D(trainSamples, i, j, samples[perm[i]][j]);
-		cvSet1D(trainOutputs, i, cvScalar(samples[perm[i]][dim]));
-		cvSet1D(sampleWeights, i, cvScalar(1));
+        FOR(d, dim) trainSamples.at<float>(i,d) = samples[perm[i]][d];
+        trainOutputs.at<float>(i) = samples[perm[i]][dim];
 	}
+    delete [] perm;
 
-	delete [] perm;
+    int activationFunction = functionType == 2 ? ANN_MLP::GAUSSIAN : functionType ? ANN_MLP::SIGMOID_SYM : ANN_MLP::IDENTITY;
 
-	int activationFunction = functionType == 2 ? CvANN_MLP::GAUSSIAN : functionType ? CvANN_MLP::SIGMOID_SYM : CvANN_MLP::IDENTITY;
-
-	mlp = new CvANN_MLP();
-	mlp->create(layers, activationFunction, alpha, beta);
-
-	CvANN_MLP_TrainParams params;
-    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.0001);
-    params.train_method = trainingType ? CvANN_MLP_TrainParams::RPROP : CvANN_MLP_TrainParams::BACKPROP;
-    mlp->train(trainSamples, trainOutputs, sampleWeights, 0, params);
-	cvReleaseMat(&trainSamples);
-	cvReleaseMat(&trainOutputs);
-	cvReleaseMat(&sampleWeights);
-	cvReleaseMat(&layers);
+    mlp = ANN_MLP::create();
+    mlp->setLayerSizes(layers);
+    mlp->setActivationFunction(activationFunction, alpha, beta);
+    mlp->setTermCriteria(cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 0.0001));
+    mlp->setTrainMethod(trainingType ? ANN_MLP::RPROP : ANN_MLP::BACKPROP);
+    if(trainingType) {
+        mlp->setRpropDWMin(0.0001);
+        mlp->setRpropDWMax(1000);
+        mlp->setRpropDW0(0.1);
+        mlp->setRpropDWPlus(1.2);
+        mlp->setRpropDWMinus(0.8);
+    }
+    Ptr<ml::TrainData> trainData = ml::TrainData::create(trainSamples, ROW_SAMPLE, trainOutputs);
+    mlp->train(trainData);
 }
 
 fvec RegressorMLP::Test( const fvec &sample)
 {
-	fvec res;
-	res.resize(2);
+    fvec res(2,0);
 	if(!mlp) return res;
-	float *_input = new float[dim];
+    Mat input = Mat(1, dim, CV_32FC1);
+    Mat output = Mat(1,1,CV_32FC1);
     if(outputDim != -1 & outputDim < sample.size())
     {
         fvec newSample = sample;
         newSample[outputDim] = sample[sample.size()-1];
         newSample[sample.size()-1] = sample[outputDim];
-        FOR(d, min(dim,(u32)sample.size())) _input[d] = newSample[d];
-        for(int d=min(dim,(u32)sample.size()); d<dim; d++) _input[d] = 0;
+        FOR(d, min(dim,(u32)sample.size())) input.at<float>(d) = newSample[d];
+        for(int d=min(dim,(u32)sample.size()); d<dim; d++) input.at<float>(d) = 0;
     }
     else
     {
-        FOR(d, min(dim,(u32)sample.size())) _input[d] = sample[d];
-        for(int d=min(dim,(u32)sample.size()); d<dim; d++) _input[d] = 0;
+        FOR(d, min(dim,(u32)sample.size())) input.at<float>(d) = sample[d];
+        for(int d=min(dim,(u32)sample.size()); d<dim; d++) input.at<float>(d) = 0;
     }
-	CvMat input = cvMat(1,dim,CV_32FC1, _input);
-	float _output[1];
-	CvMat output = cvMat(1,1,CV_32FC1, _output);
-	mlp->predict(&input, &output);
-	res[0] = _output[0];
-	delete [] _input;
-	return res;
+    float result = mlp->predict(input, output);
+    res[0] = output.at<float>(0);
+    return res;
 }
 
 void RegressorMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType)
@@ -133,7 +128,6 @@ void RegressorMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, 
     this->alpha = alpha;
 	this->beta = beta; 
 }
-
 
 const char *RegressorMLP::GetInfoString()
 {

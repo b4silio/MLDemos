@@ -21,20 +21,30 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "public.h"
 #include <vector>
-#ifdef OPENCV22
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/video/tracking.hpp>
-#include <opencv2/ml/ml.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/legacy/legacy.hpp>
-#include <opencv2/legacy/compat.hpp>
+#ifdef OPENCV3
+    // opencv includes
+    #include <opencv2/highgui.hpp>
+    #include <opencv2/imgproc.hpp>
+    #include <opencv2/features2d.hpp>
+    #include <opencv2/ml.hpp>
+    #include <opencv2/video/tracking.hpp>
+    #include <opencv2/calib3d.hpp>
+    #include <opencv2/core/core_c.h>
+    #include <opencv2/videoio.hpp>
+#elif OPENCV22
+    #include <opencv2/imgproc/imgproc.hpp>
+    #include <opencv2/features2d/features2d.hpp>
+    #include <opencv2/video/tracking.hpp>
+    #include <opencv2/ml/ml.hpp>
+    #include <opencv2/highgui/highgui.hpp>
+    #include <opencv2/legacy/legacy.hpp>
+    #include <opencv2/legacy/compat.hpp>
 #else
-#include <opencv/cv.h>
-#include <opencv/cxcore.h>
-#include <opencv/cvaux.h>
-#include <opencv/ml.h>
-#include <opencv/highgui.h>
+    #include <opencv/cv.h>
+    #include <opencv/cxcore.h>
+    #include <opencv/cvaux.h>
+    #include <opencv/ml.h>
+    #include <opencv/highgui.h>
 #endif
 
 /* computes the point corresponding to a certain angle on an input image */

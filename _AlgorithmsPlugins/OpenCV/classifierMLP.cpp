@@ -20,76 +20,74 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "public.h"
 #include "basicMath.h"
 #include "classifierMLP.h"
+#include <QDebug>
+
+using namespace cv;
+using namespace cv::ml;
 
 ClassifierMLP::~ClassifierMLP()
 {
-	DEL(mlp);
 }
 
 void ClassifierMLP::Train(std::vector< fvec > samples, ivec labels)
 {
 	u32 sampleCnt = samples.size();
 	if(!sampleCnt) return;
-	DEL(mlp);
 	dim = samples[0].size();
 
-	CvMat *layers;
-//	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
+    Mat layers;
 
 	if(!layerCount || neuronCount < 2)
 	{
-		layers = cvCreateMat(2,1,CV_32SC1);
-		cvSet1D(layers, 0, cvScalar(dim));
-		cvSet1D(layers, 1, cvScalar(1));
+        layers = Mat(1, 2, CV_32SC1 );
+        layers.at<int>(0) = dim; // input size
+        layers.at<int>(1) = 1; // outputs
 	}
 	else
 	{
-		layers = cvCreateMat(2+layerCount,1,CV_32SC1);
-		cvSet1D(layers, 0, cvScalar(dim));
-		cvSet1D(layers, layerCount+1, cvScalar(1));
-		FOR(i, layerCount) cvSet1D(layers, i+1, cvScalar(neuronCount));
+        layers = Mat(1, 2+layerCount, CV_32SC1 );
+        layers.at<int>(0) = dim; // input size
+        FOR(i, layerCount) layers.at<int>(i+1) = neuronCount;
+        layers.at<int>(2+layerCount-1) = 1; // outputs
 	}
 
 	u32 *perm = randPerm(sampleCnt);
-
-	CvMat *trainSamples = cvCreateMat(sampleCnt, dim, CV_32FC1);
-	CvMat *trainLabels = cvCreateMat(labels.size(), 1, CV_32FC1);
-	CvMat *sampleWeights = cvCreateMat(samples.size(), 1, CV_32FC1);
-	FOR(i, sampleCnt)
-	{
-		FOR(d, dim) cvSetReal2D(trainSamples, i, d, samples[perm[i]][d]);
-		cvSet1D(trainLabels, i, cvScalar(labels[perm[i]]));
-		cvSet1D(sampleWeights, i, cvScalar(1));
-	}
-
+    Mat trainSamples(sampleCnt, dim, CV_32FC1);
+    Mat trainLabels(sampleCnt, 1, CV_32FC1);
+    FOR(i, sampleCnt) {
+        FOR(d, dim) trainSamples.at<float>(i,d) = samples[perm[i]][d];
+        trainLabels.at<float>(i) = (float)labels[perm[i]];
+    }
 	delete [] perm;
 
-	int activationFunction = functionType == 2 ? CvANN_MLP::GAUSSIAN : functionType ? CvANN_MLP::SIGMOID_SYM : CvANN_MLP::IDENTITY;
-
-	mlp = new CvANN_MLP();
-	mlp->create(layers, activationFunction, alpha, beta);
-
-	CvANN_MLP_TrainParams params;
-    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 1000, 0.0001);
-    params.train_method = trainingType ? CvANN_MLP_TrainParams::RPROP : CvANN_MLP_TrainParams::BACKPROP;
-	mlp->train(trainSamples, trainLabels, sampleWeights, 0, params);
-	cvReleaseMat(&trainSamples);
-	cvReleaseMat(&trainLabels);
-	cvReleaseMat(&sampleWeights);
-	cvReleaseMat(&layers);
+    int activationFunction = functionType == 2 ? ANN_MLP::GAUSSIAN :
+                                functionType ? ANN_MLP::SIGMOID_SYM : ANN_MLP::IDENTITY;
+    mlp = ANN_MLP::create();
+    mlp->setLayerSizes(layers);
+    mlp->setActivationFunction(activationFunction, alpha, beta);
+    mlp->setTermCriteria(cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 0.0001));
+    mlp->setTrainMethod(trainingType ? ANN_MLP::RPROP : ANN_MLP::BACKPROP);
+    if(trainingType) {
+        mlp->setRpropDWMin(0.0001);
+        mlp->setRpropDWMax(1000);
+        mlp->setRpropDW0(0.1);
+        mlp->setRpropDWPlus(1.2);
+        mlp->setRpropDWMinus(0.8);
+    }
+    Ptr<ml::TrainData> trainData = ml::TrainData::create(trainSamples, ROW_SAMPLE, trainLabels);
+    mlp->train(trainData);
 }
 
 float ClassifierMLP::Test( const fvec &sample) const
 {
 	if(!mlp) return 0;
-	float *_input = new float[dim];
-	FOR(d, dim) _input[d] = sample[d];
-	CvMat input = cvMat(1,dim,CV_32FC1, _input);
-	float _output[1];
-	CvMat output = cvMat(1,1,CV_32FC1, _output);
-	mlp->predict(&input, &output);
-	delete [] _input;
-	return _output[0];
+    Mat input = Mat(1, dim, CV_32FC1);
+    Mat output = Mat(1, 1, CV_32FC1);
+    FOR(d, dim) input.at<float>(d) = sample[d];
+    float result = mlp->predict(input, output);
+    //qDebug() << "input" << input.at<float>(0) << input.at<float>(1) << "output" << result;
+    return output.at<float>(0);
+    return result;
 }
 
 void ClassifierMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType)

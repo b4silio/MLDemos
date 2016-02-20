@@ -147,7 +147,7 @@ void EigenFaces::Learn(std::vector<IplImage *> faces, std::vector<int> classes, 
 
 	calcLimit = cvTermCriteria(CV_TERMCRIT_ITER, dim, 0.0001);
 
-	cvCalcEigenObjects(trainCnt, (void *)faceArray, (void *)eigenVectors, CV_EIGOBJ_NO_CALLBACK, 0, 0, &calcLimit, avgImage, eigenValues->data.fl);
+    //cvCalcEigenObjects(trainCnt, (void *)faceArray, (void *)eigenVectors, CV_EIGOBJ_NO_CALLBACK, 0, 0, &calcLimit, avgImage, eigenValues->data.fl);
 
 	// we compute the projections for recognition purposes
 	FOR(i, projections.size()) delete [] projections[i];
@@ -155,7 +155,7 @@ void EigenFaces::Learn(std::vector<IplImage *> faces, std::vector<int> classes, 
 	FOR(i, this->classes.size())
 	{
 		float *proj = new float[dim];
-		cvEigenDecomposite(allFaces[i], dim, eigenVectors, 0, 0, avgImage, proj);
+        //cvEigenDecomposite(allFaces[i], dim, eigenVectors, 0, 0, avgImage, proj);
 		projections.push_back(proj);
 	}
 	FOR(i, trainCnt) cvReleaseImage(&faceArray[i]);
@@ -168,7 +168,7 @@ void EigenFaces::Recognize(IplImage *face)
 {
 	if(!face) return;
 	float *projected = new float[dim];
-	cvEigenDecomposite(face, dim, eigenVectors, 0, 0, avgImage, projected);
+    //cvEigenDecomposite(face, dim, eigenVectors, 0, 0, avgImage, projected);
 	int nearest = FindNearestNeighbor(projected);
 }
 

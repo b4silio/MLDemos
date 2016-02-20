@@ -26,7 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class ClassifierBoost : public Classifier
 {
 private:
-	CvBoost *model;
+    cv::Ptr<cv::ml::Boost> model;
 	u32 weakCount;
     int weakType; // 0: random projection, 1: random rectangle, 2: random circle, 3: random GMM, 4: random SVM
 	float scoreMultiplier;
@@ -51,6 +51,7 @@ public:
     const char *GetInfoString() const ;
     void SetParams(u32 weakCount, int weakType, int boostType, int svmCount);
     void InitLearners(fvec xMin, fvec xMax);
+    fvec GetFeatures(const fvec sample, const int weakType, const ivec features) const;
 };
 
 #endif // _CLASSIFIER_BOOST_H_

@@ -35,7 +35,7 @@ private:
     int maxTrees;
     float accuracyTolerance;
 
-    CvRTrees *tree;
+    cv::ml::RTrees *tree;
 
     int negativeClass;
     int maxClass;
@@ -57,9 +57,9 @@ public:
     fvec TestMulti(const fvec &sample) const ;
     const char *GetInfoString() const ;
     fvec GetImportance() const ;
-    void PrintTree(CvForestTree *tree, int count) const;
-    void PrintNode(const CvDTreeNode *node, int rootX=0, bool bLeft=true) const;
-    int GetTreeDepth(const CvDTreeNode *node) const ;
+    void PrintTree(cv::ml::DTrees *tree, int count) const;
+    void PrintNode(const cv::ml::DTrees::Node *node, int rootX=0, bool bLeft=true) const;
+    int GetTreeDepth(const cv::ml::DTrees::Node **node) const ;
     void SetParams(bool bBalanceClasses,
                    int minSampleCount, int maxDepth, int maxTrees,
                    float accuracyTolerance);

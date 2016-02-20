@@ -260,7 +260,7 @@ void BasicOpenCV::DisplayHueSatHist(IplImage* src)
     IplImage* hist_img = cvCreateImage( cvSize(h_bins*scale,s_bins*scale), 8, 3 );
     CvHistogram* hist;
     f32 max_value = 0;
-
+    /*
     cvCvtColor( src, hsv, CV_BGR2HSV );
     cvCvtPixToPlane( hsv, h_plane, s_plane, v_plane, 0 );
     hist = cvCreateHist( 2, hist_size, CV_HIST_ARRAY, ranges, 1 );
@@ -274,12 +274,11 @@ void BasicOpenCV::DisplayHueSatHist(IplImage* src)
             s32 intensity = cvRound(bin_val*255/max_value);
             cvRectangle( hist_img, cvPoint( h*scale, s*scale ),
                          cvPoint( (h+1)*scale - 1, (s+1)*scale - 1),
-                         CV_RGB(intensity,intensity,intensity), /* draw a grayscale histogram.
-													   if you have idea how to do it
-													   nicer let us know */
+                         CV_RGB(intensity,intensity,intensity),
                          CV_FILLED );
         }
     }
+    */
     cvNamedWindow( "H-S Histogram", 1 );
     cvShowImage( "H-S Histogram", hist_img );
 }

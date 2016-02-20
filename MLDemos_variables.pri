@@ -14,6 +14,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #macx: LIBS += -framework QtWidgets
+macx: QMAKE_MAC_SDK=macosx10.11
 
 #################################
 #         Project Paths         #
@@ -72,11 +73,11 @@ unix:MLBUILD = build
 # or let qmake find it out for you (linux only).
 
 win32{
-    CONFIG += opencv22
+	CONFIG += opencv22
     OPENCV_VER = 230
 }else:macx{
 #    CONFIG += opencv21
-    CONFIG += opencv22
+	CONFIG += opencv3
 }else{
     CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
 #   CONFIG += opencv22
@@ -142,22 +143,66 @@ win32:CONFIG(opencv22){
                 -lopencv_ml$$OPENCV_VER
 }
 macx{
+CONFIG(opencv3){
+		DEFINES += OPENCV3
+		LIBS += -L/usr/local/lib
+		message("Using opencv3 or later")
+		LIBS += \
+		-lopencv_adas \
+		-lopencv_aruco \
+		-lopencv_bgsegm \
+		-lopencv_bioinspired \
+		-lopencv_calib3d \
+		-lopencv_ccalib \
+		-lopencv_core \
+		-lopencv_dnn \
+		-lopencv_dpm \
+		-lopencv_face \
+		-lopencv_features2d \
+		-lopencv_flann \
+		-lopencv_highgui \
+		-lopencv_imgcodecs \
+		-lopencv_imgproc \
+		-lopencv_line_descriptor \
+		-lopencv_ml \
+		-lopencv_nonfree \
+		-lopencv_objdetect \
+		-lopencv_optflow \
+		-lopencv_photo \
+		-lopencv_reg \
+		-lopencv_rgbd \
+		-lopencv_saliency \
+		-lopencv_shape \
+		-lopencv_stereo \
+		-lopencv_stitching \
+		-lopencv_structured_light \
+		-lopencv_superres \
+		-lopencv_text \
+		-lopencv_tracking \
+		-lopencv_video \
+		-lopencv_videoio \
+		-lopencv_videostab \
+		-lopencv_xfeatures2d \
+		-lopencv_ximgproc \
+		-lopencv_xobjdetect \
+		-lopencv_xphoto
+	}
     CONFIG(opencv22){
         DEFINES += OPENCV22
 		LIBS += -L/usr/local/lib
         message("Using opencv22 or later")
-        LIBS += -lopencv_core \
-                -lopencv_calib3d \
-                -lopencv_contrib \
-                -lopencv_features2d \
-                -lopencv_flann \
-                -lopencv_gpu \
-                -lopencv_highgui \
-                -lopencv_imgproc \
-                -lopencv_legacy \
-                -lopencv_objdetect \
-                -lopencv_video \
-                -lopencv_ml
+		LIBS += -lopencv_core \
+				-lopencv_calib3d \
+				-lopencv_contrib \
+				-lopencv_features2d \
+				-lopencv_flann \
+				-lopencv_gpu \
+				-lopencv_highgui \
+				-lopencv_imgproc \
+				-lopencv_legacy \
+				-lopencv_objdetect \
+				-lopencv_video \
+				-lopencv_ml
 
     }
     CONFIG(opencv21) {

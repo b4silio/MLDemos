@@ -31,9 +31,9 @@ private:
 	u32 layerCount;
     u32 trainingType; // 0: Backprop, 1: RPROP
 	float alpha, beta;
-	CvANN_MLP *mlp;
+    cv::Ptr<cv::ml::ANN_MLP> mlp;
 public:
-    ClassifierMLP() : functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0), trainingType(1){}
+    ClassifierMLP() : functionType(1), neuronCount(2), alpha(0), beta(0), trainingType(1){}
 	~ClassifierMLP();
 	void Train(std::vector< fvec > samples, ivec labels);
     float Test( const fvec &sample) const ;

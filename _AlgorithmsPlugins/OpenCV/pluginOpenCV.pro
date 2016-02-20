@@ -17,34 +17,34 @@ HEADERS +=	\
 			datasetManager.h \
 			mymaths.h \
 			basicOpenCV.h \
-            classifierBoost.h \
-            classifierTrees.h \
+			classifierBoost.h \
+			#classifierTrees.h \
             classifierMLP.h \
 			regressorMLP.h \
             dynamicalMLP.h \
-            regressorGB.h \
+			#regressorGB.h \
             interfaceMLPClassifier.h \
 			interfaceBoostClassifier.h \
 			interfaceMLPRegress.h \
             interfaceMLPDynamic.h \
-            interfaceGBRegress.h \
-            interfaceTreesClassifier.h \
+			#interfaceGBRegress.h \
+			#interfaceTreesClassifier.h \
             pluginOpenCV.h
 
 SOURCES += 	\
 			basicOpenCV.cpp \
 			classifierBoost.cpp \
 			classifierMLP.cpp \
-            classifierTrees.cpp \
-            regressorMLP.cpp \
+			#classifierTrees.cpp \
+			regressorMLP.cpp \
 			dynamicalMLP.cpp \
-            regressorGB.cpp \
+			#regressorGB.cpp \
             interfaceMLPClassifier.cpp \
 			interfaceBoostClassifier.cpp \
 			interfaceMLPRegress.cpp \
 			interfaceMLPDynamic.cpp \
-            interfaceGBRegress.cpp \
-            interfaceTreesClassifier.cpp \
+			#interfaceGBRegress.cpp \
+			#interfaceTreesClassifier.cpp \
             pluginOpenCV.cpp
 #}
 

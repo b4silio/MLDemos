@@ -31,7 +31,7 @@ private:
 	u32 layerCount;
 	float alpha, beta;
     u32 trainingType;
-	CvANN_MLP *mlp;
+    cv::Ptr<cv::ml::ANN_MLP> mlp;
 public:
 	DynamicalMLP();
 	~DynamicalMLP();

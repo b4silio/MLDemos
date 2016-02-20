@@ -22,16 +22,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dynamicalMLP.h"
 
 using namespace std;
+using namespace cv;
+using namespace cv::ml;
 
 DynamicalMLP::DynamicalMLP()
-    : functionType(1), neuronCount(2), mlp(0), alpha(0), beta(0), trainingType(1)
+    : functionType(1), neuronCount(2), alpha(0), beta(0), trainingType(1)
 {
 	type = DYN_MLP;
 }
 
 DynamicalMLP::~DynamicalMLP()
 {
-	DEL(mlp);
 }
 
 void DynamicalMLP::Train(std::vector< std::vector<fvec> > trajectories, ivec labels)
@@ -51,53 +52,50 @@ void DynamicalMLP::Train(std::vector< std::vector<fvec> > trajectories, ivec lab
 	}
 	u32 sampleCnt = samples.size();
 	if(!sampleCnt) return;
-	DEL(mlp);
 
-	CvMat *layers;
-	//	if(neuronCount == 3) neuronCount = 2; // don't ask me why but 3 neurons mess up everything...
+    Mat layers;
 
-	if(!layerCount || neuronCount < 2)
-	{
-		layers = cvCreateMat(2,1,CV_32SC1);
-		cvSet1D(layers, 0, cvScalar(dim));
-		cvSet1D(layers, 1, cvScalar(dim));
-	}
-	else
-	{
-		layers = cvCreateMat(2+layerCount,1,CV_32SC1);
-		cvSet1D(layers, 0, cvScalar(dim));
-		cvSet1D(layers, layerCount+1, cvScalar(dim));
-		FOR(i, layerCount) cvSet1D(layers, i+1, cvScalar(neuronCount));
-	}
+    if(!layerCount || neuronCount < 2)
+    {
+        layers = Mat(1, 2, CV_32SC1 );
+        layers.at<int>(0) = dim; // input size
+        layers.at<int>(1) = 1; // outputs
+    }
+    else
+    {
+        layers = Mat(1, 2+layerCount, CV_32SC1 );
+        layers.at<int>(0) = dim; // input size
+        FOR(i, layerCount) layers.at<int>(i+1) = neuronCount;
+        layers.at<int>(2+layerCount-1) = dim; // outputs
+    }
 
 	u32 *perm = randPerm(sampleCnt);
 
-	CvMat *trainSamples = cvCreateMat(sampleCnt, dim, CV_32FC1);
-	CvMat *trainOutputs = cvCreateMat(sampleCnt, dim, CV_32FC1);
-	CvMat *sampleWeights = cvCreateMat(samples.size(), 1, CV_32FC1);
+    Mat trainSamples(sampleCnt, dim, CV_32FC1);
+    Mat trainOutputs(sampleCnt, dim, CV_32FC1);
 	FOR(i, sampleCnt)
 	{
-		FOR(j, dim) cvSetReal2D(trainSamples, i, j, samples[perm[i]][j]);
-		FOR(j,dim) cvSetReal2D(trainOutputs, i, j, samples[perm[i]][dim+j]);
-		cvSet1D(sampleWeights, i, cvScalar(1));
+        FOR(d, dim) trainSamples.at<float>(i,d) = samples[perm[i]][d];
+        FOR(d, dim) trainOutputs.at<float>(i,d) = samples[perm[i]][dim+d];
 	}
-
 	delete [] perm;
 
-	int activationFunction = functionType == 2 ? CvANN_MLP::GAUSSIAN : functionType ? CvANN_MLP::SIGMOID_SYM : CvANN_MLP::IDENTITY;
+    int activationFunction = functionType == 2 ? ANN_MLP::GAUSSIAN : functionType ? ANN_MLP::SIGMOID_SYM : ANN_MLP::IDENTITY;
 
-
-	mlp = new CvANN_MLP();
-	mlp->create(layers, activationFunction, alpha, beta);
-
-	CvANN_MLP_TrainParams params;
-    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 0.0001);
-    params.train_method = trainingType ? CvANN_MLP_TrainParams::RPROP : CvANN_MLP_TrainParams::BACKPROP;
-    mlp->train(trainSamples, trainOutputs, sampleWeights, 0, params);
-	cvReleaseMat(&trainSamples);
-	cvReleaseMat(&trainOutputs);
-	cvReleaseMat(&sampleWeights);
-	cvReleaseMat(&layers);
+    mlp = ANN_MLP::create();
+    mlp->setLayerSizes(layers);
+    mlp->setActivationFunction(activationFunction, alpha, beta);
+    mlp->setTermCriteria(cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 0.0001));
+    mlp->setTrainMethod(trainingType ? ANN_MLP::RPROP : ANN_MLP::BACKPROP);
+    if(trainingType) {
+        mlp->setRpropDWMin(0.0001);
+        mlp->setRpropDWMax(1000);
+        mlp->setRpropDW0(0.1);
+        mlp->setRpropDWPlus(1.2);
+        mlp->setRpropDWMinus(0.8);
+    }
+    Ptr<ml::TrainData> trainData = ml::TrainData::create(trainSamples, ROW_SAMPLE, trainOutputs);
+    mlp->train(trainData);
 }
 
 std::vector<fvec> DynamicalMLP::Test( const fvec &sample, const int count)
@@ -107,22 +105,18 @@ std::vector<fvec> DynamicalMLP::Test( const fvec &sample, const int count)
 	std::vector<fvec> res(count);
 	FOR(i, count) res[i].resize(dim,0);
 	if(!mlp) return res;
+    Mat input(1, dim, CV_32FC1);
+    Mat output(1,dim,CV_32FC1);
 
-	float *_input = new float[dim];
-	CvMat input = cvMat(1,dim,CV_32FC1, _input);
-	float *_output = new float[dim];
-	CvMat output = cvMat(1,dim,CV_32FC1, _output);
-	fvec velocity; velocity.resize(dim,0);
+    fvec velocity; velocity.resize(dim,0);
 	FOR(i, count)
 	{
 		res[i] = start;
 		start += velocity*dT;
-		FOR(d, dim) _input[d] = start[d];
-		mlp->predict(&input, &output);
-		FOR(d, dim) velocity[d] = _output[d];
+        FOR(d, dim) input.at<float>(d) = start[d];
+        mlp->predict(input, output);
+        FOR(d, dim) velocity[d] = output.at<float>(d);
 	}
-	delete [] _input;
-	delete [] _output;
 	return res;
 }
 
@@ -131,15 +125,11 @@ fvec DynamicalMLP::Test( const fvec &sample)
 	int dim = sample.size();
 	fvec res(2);
 	if(!mlp) return res;
-	float *_input = new float[dim];
-	FOR(d, dim) _input[d] = sample[d];
-	CvMat input = cvMat(1,dim,CV_32FC1, _input);
-	float *_output = new float[dim];
-	CvMat output = cvMat(1,dim,CV_32FC1, _output);
-	mlp->predict(&input, &output);
-	FOR(d,dim) res[d] = _output[d];
-	delete [] _input;
-	delete [] _output;
+    Mat input(1,dim, CV_32FC1);
+    Mat output(1,dim, CV_32FC1);
+    FOR(d, dim) input.at<float>(d) = sample[d];
+    mlp->predict(input, output);
+    FOR(d,dim) res[d] = output.at<float>(d);
 	return res;
 }
 

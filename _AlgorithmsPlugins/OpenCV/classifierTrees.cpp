@@ -174,12 +174,12 @@ void ClassifierTrees::Train( std::vector< fvec > samples, ivec labels )
     treePainter->setFont(font);
     FOR(i, tree->get_tree_count())
     {
-        CvForestTree *myTree = tree->get_tree(i);
+        cv::ml::DTrees *myTree = tree->get_tree(i);
         PrintTree(myTree, i);
     }
 }
 
-int ClassifierTrees::GetTreeDepth(const CvDTreeNode *node) const
+int ClassifierTrees::GetTreeDepth(const cv::ml::DTrees::Node * *node) const
 {
     if(!node) return -1;
     if(!node->left && !node->right) return node->depth;
@@ -188,7 +188,7 @@ int ClassifierTrees::GetTreeDepth(const CvDTreeNode *node) const
     return max(right, left);
 }
 
-void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft) const
+void ClassifierTrees::PrintNode(const cv::ml::DTrees::Node * *node, int rootX, bool bLeft) const
 {
     if(node == NULL)
     {
@@ -231,7 +231,7 @@ void ClassifierTrees::PrintNode(const CvDTreeNode *node, int rootX, bool bLeft) 
     PrintNode(nodeR, x+shift, false);
 }
 
-void ClassifierTrees::PrintTree(CvForestTree *tree, int count=0) const
+void ClassifierTrees::PrintTree(cv::ml::DTrees *tree, int count=0) const
 {
     int W = treePixmap.width() / treeCount;
     int rootX = W*(count + 0.5f);
