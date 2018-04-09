@@ -115,9 +115,9 @@ public:
 
     static const GLint texWidth = 128;
     static const GLint texHeight = 128;
-    static const float texHalfWidth = 64.0f;
-    static const float texHalfHeight = 64.0f;
-    static const float texRadius = texWidth*0.9;
+    static const constexpr float texHalfWidth = 64.0f;
+    static const constexpr float texHalfHeight = 64.0f;
+    static const constexpr float texRadius = texWidth*0.9;
     static const int textureCount = 2; // 0: samples, 1: wide circle
     static GLuint *textureNames;
     static unsigned char **textureData;

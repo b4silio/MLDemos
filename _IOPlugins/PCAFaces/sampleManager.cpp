@@ -292,38 +292,71 @@ void SampleManager::AddSample(IplImage *image, CvRect selection, unsigned int la
 	perm = randPerm(samples.size());
 }
 
-
-void SampleManager::AddSamples(std::vector<IplImage *>images)
+void SampleManager::AddSamples(std::vector<IplImage*> images)
 {
-	FOR(i, images.size())
-	{
-		if(images[i])
-		{
-			IplImage *sample = cvCreateImage(size, 8, 3);
-			if(images[i]->width == size.width && images[i]->height == size.height)
-			{
-				if(images[i]->nChannels == 3) cvCopy(images[i], sample);
-				else cvCvtColor(images[i], sample, CV_GRAY2BGR);
-			}
-			else
-			{
-				if(images[i]->nChannels == 3) cvResize(images[i], sample, CV_INTER_CUBIC);
-				else
-				{
-					IplImage *tmp = cvCreateImage(size, 8, 1);
-					cvResize(images[i], tmp, CV_INTER_CUBIC);
-					cvCvtColor(tmp, sample, CV_GRAY2BGR);
-					IMKILL(tmp);
-				}
-			}
-			samples.push_back(sample);
-			flags.push_back(UNUSED);
-			labels.push_back(0);
-		}
-	}
-	KILL(perm);
-	perm = randPerm(samples.size());
+    FOR(i, images.size())
+    {
+        if(images[i])
+        {
+            IplImage *sample = cvCreateImage(size, 8, 3);
+            if(images[i]->width == size.width && images[i]->height == size.height)
+            {
+                if(images[i]->nChannels == 3) cvCopy(images[i], sample);
+                else cvCvtColor(images[i], sample, CV_GRAY2BGR);
+            }
+            else
+            {
+                if(images[i]->nChannels == 3) cvResize(images[i], sample, CV_INTER_CUBIC);
+                else
+                {
+                    IplImage *tmp = cvCreateImage(size, 8, 1);
+                    cvResize(images[i], tmp, CV_INTER_CUBIC);
+                    cvCvtColor(tmp, sample, CV_GRAY2BGR);
+                    IMKILL(tmp);
+                }
+            }
+            samples.push_back(sample);
+            flags.push_back(UNUSED);
+            labels.push_back(0);
+        }
+    }
+    KILL(perm);
+    perm = randPerm(samples.size());
 }
+
+void SampleManager::AddSamples(std::vector<cv::Mat> images)
+{
+    FOR(i, images.size())
+    {
+        if(images[i].cols)
+        {
+            IplImage *sample = cvCreateImage(size, 8, 3);
+            IplImage* img = new IplImage(images[i]);
+            if(img->width == size.width && img->height == size.height)
+            {
+                if(img->nChannels == 3) cvCopy(img, sample);
+                else cvCvtColor(img, sample, CV_GRAY2BGR);
+            }
+            else
+            {
+                if(img->nChannels == 3) cvResize(img, sample, CV_INTER_CUBIC);
+                else
+                {
+                    IplImage *tmp = cvCreateImage(size, 8, 1);
+                    cvResize(img, tmp, CV_INTER_CUBIC);
+                    cvCvtColor(tmp, sample, CV_GRAY2BGR);
+                    IMKILL(tmp);
+                }
+            }
+            samples.push_back(sample);
+            flags.push_back(UNUSED);
+            labels.push_back(0);
+        }
+    }
+    KILL(perm);
+    perm = randPerm(samples.size());
+}
+
 
 void SampleManager::AddSamples(SampleManager newSamples)
 {
@@ -437,7 +470,16 @@ std::vector<IplImage *> SampleManager::GetSamples(u32 count, smFlags flag, smFla
 		}
 	}
 
-	return selected;
+    return selected;
+}
+
+std::vector<cv::Mat> SampleManager::GetSampleMats()
+{
+    std::vector<cv::Mat> mats;
+    FOR(i, samples.size()) {
+        mats.push_back(cv::cvarrToMat(samples.at(i),true));
+    }
+    return mats;
 }
 
 void SampleManager::Save(const char *filename)

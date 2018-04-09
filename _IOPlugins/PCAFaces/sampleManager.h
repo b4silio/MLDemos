@@ -75,8 +75,9 @@ public:
 
 	void AddSample(IplImage *image, unsigned int label = 0);
 	void AddSample(IplImage *image, CvRect selection, unsigned int label = 0);
-	void AddSamples(std::vector<IplImage *>images);
-	void AddSamples(SampleManager newSamples);
+    void AddSamples(std::vector<IplImage *>images);
+    void AddSamples(std::vector<cv::Mat>images);
+    void AddSamples(SampleManager newSamples);
 	void RemoveSample(unsigned int index);
 
 	int GetIndexAt(int x, int y);
@@ -87,7 +88,8 @@ public:
 
     IplImage *GetSample(unsigned int index=0){return index<samples.size() ? samples[index] : NULL;}
     std::vector<IplImage *> GetSamples(){return samples;}
-	std::vector<IplImage *> GetSamples(u32 count, smFlags flag=UNUSED, smFlags replaceWith=TRAIN);
+    std::vector<IplImage *> GetSamples(u32 count, smFlags flag=UNUSED, smFlags replaceWith=TRAIN);
+    std::vector<cv::Mat> GetSampleMats();
 
 	void ResetFlags();
     void SetFlag(unsigned int index, smFlags flag){if(index < flags.size()) flags[index] = flag;}

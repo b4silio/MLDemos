@@ -136,7 +136,7 @@ static const float erftable [] =
 /*!
  Gaussian Error Function
 */
-static float erf(const float x)
+static float fasterf(const float x)
 {
     if(x>0) return erftable[(int)(min(6.f,x)*100)];
     return -erftable[(int)(min(6.f,-x)*100)];

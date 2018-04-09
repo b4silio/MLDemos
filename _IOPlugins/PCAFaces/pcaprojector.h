@@ -30,58 +30,58 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 class PCAProjector : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	Ui::PCAFacesDialog *options;
-	EigenFaces eig;
-	IplImage *image, *display, *samples;
-	QNamedWindow *imageWindow;
-	QNamedWindow *samplesWindow;
+    Ui::PCAFacesDialog *options;
+    EigenFaces eig;
+    IplImage *image, *display, *samples;
+    QNamedWindow *imageWindow;
+    QNamedWindow *samplesWindow;
     QLabel *eigenVectorLabel, *eigenValueLabel;
-	SampleManager sm;
-	QPoint start;
-	QRect selection;
-	bool bFromWebcam;
-	CameraGrabber *grabber;
-	QMutex imageMutex;
-	int timerID;
+    SampleManager sm;
+    QPoint start;
+    QRect selection;
+    bool bFromWebcam;
+    CameraGrabber *grabber;
+    QMutex imageMutex;
+    int timerID;
 
-	void mouseCallBack(int x,int y,int flags,int params);
+    void mouseCallBack(int x,int y,int flags,int params);
 
-	void SetImage(IplImage *image);
-	void RefreshDataset();
-	void FixLabels(SampleManager &sm);
+    void SetImage(IplImage *image);
+    void RefreshDataset();
+    void FixLabels(SampleManager &sm);
 public:
     PCAProjector(Ui::PCAFacesDialog *options);
     ~PCAProjector();
-	void timerEvent(QTimerEvent *event);
-	std::pair<std::vector<fvec>,ivec> GetData();
+    void timerEvent(QTimerEvent *event);
+    std::pair<std::vector<fvec>,ivec> GetData();
 
 
 signals:
-	void Update();
-	public slots:
-		void LoadImage();
-		void FromClipboard();
-		void FromWebcam();
-		void AddImage();
-		void LoadDataset();
-		void SaveDataset();
-		void AddDataset();
-		void ClearDataset();
-		void DrawEigen();
+    void Update();
+public slots:
+    void LoadImage();
+    void FromClipboard();
+    void FromWebcam();
+    void AddImage();
+    void LoadDataset();
+    void SaveDataset();
+    void AddDataset();
+    void ClearDataset();
+    void DrawEigen();
 
-		void SelectionStart(QMouseEvent *event);
-		void SelectionStop(QMouseEvent *event);
-		void SelectionResize(QMouseEvent *event);
+    void SelectionStart(QMouseEvent *event);
+    void SelectionStop(QMouseEvent *event);
+    void SelectionResize(QMouseEvent *event);
 
-		void DatasetClick(QMouseEvent *event);
-		void DragImage(QDragEnterEvent *event);
-		void DropImage(QDropEvent *event);
-		void DragDataset(QDragEnterEvent *event);
-		void DropDataset(QDropEvent *event);
-//private slots:
-       // void on_eigenButton_clicked();
+    void DatasetClick(QMouseEvent *event);
+    void DragImage(QDragEnterEvent *event);
+    void DropImage(QDropEvent *event);
+    void DragDataset(QDragEnterEvent *event);
+    void DropDataset(QDropEvent *event);
+    //private slots:
+    // void on_eigenButton_clicked();
 };
 
 #endif // _PCAPROJECTOR_H_

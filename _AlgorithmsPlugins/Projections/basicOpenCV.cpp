@@ -252,7 +252,7 @@ void BasicOpenCV::DisplayHueSatHist(IplImage* src)
     IplImage* planes[] = { h_plane, s_plane };
     IplImage* hsv = cvCreateImage( cvGetSize(src), 8, 3 );
     u32 h_bins = 30, s_bins = 32;
-    s32 hist_size[] = {h_bins, s_bins};
+    s32 hist_size[] = {(s32)h_bins, (s32)s_bins};
     f32 h_ranges[] = { 0, 180 }; /* hue varies from 0 (~0red) to 180 (~360red again) */
     f32 s_ranges[] = { 0, 255 }; /* saturation varies from 0 (black-gray-white) to 255 (pure spectrum color) */
     f32* ranges[] = { h_ranges, s_ranges };

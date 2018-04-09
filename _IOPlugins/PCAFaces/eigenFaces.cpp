@@ -2,26 +2,20 @@
 #include "basicMath.h"
 #include "basicOpenCV.h"
 #include "eigenFaces.h"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/video/tracking.hpp>
+#include <opencv2/ml/ml.hpp>
+
 
 EigenFaces::EigenFaces()
 {
-	eigenValues = NULL;
-	eigenVectors = NULL;
-	avgImage = NULL;
-	mapImage = NULL;
 	bUseColor = false;
 }
 
 EigenFaces::~EigenFaces()
 {
-	if(eigenValues) cvReleaseMat(&eigenValues);
-    if(eigenVectors)
-    {
-        FOR(i, dim) IMKILL(eigenVectors[i]);
-    }
-	KILL(eigenVectors);
-	IMKILL(avgImage);
-	IMKILL(mapImage);
 	FOR(i, projections.size()) delete [] projections[i];
 	projections.clear();
 }
@@ -66,17 +60,39 @@ std::vector<float *> EigenFaces::GetProjections(int dim, bool bNormalized)
 	return result;
 }
 
-void EigenFaces::Learn(std::vector<IplImage *> faces, std::vector<int> classes, std::vector<bool> isTrainingData, bool bColor)
+// Create data matrix from a vector of images
+static  cv::Mat createDataMatrix(const std::vector<cv::Mat> &images, bool bColor)
 {
-	if(!faces.size() || !faces[0]) return;
+  // Allocate space for all images in one data matrix.
+  // The size of the data matrix is
+  //
+  // ( w  * h * 1|3, numImages )
+  //
+  // where,
+  //
+  // w = width of an image in the dataset.
+  // h = height of an image in the dataset.
+  // 1|3 = number of color channels.
+  // numImages = number of images in the dataset.
 
-	if(eigenVectors)
-	{
-		FOR(i, dim) IMKILL(eigenVectors[i]);
-		delete [] eigenVectors;
-		eigenVectors = NULL;
-	}
+  cv::Mat data(static_cast<int>(images.size()), images[0].rows * images[0].cols * (bColor?3:1), CV_32F);
 
+  // Turn an image into one row vector in the data matrix
+  for(unsigned int i = 0; i < images.size(); i++)
+  {
+    // Extract image as one long vector of size w x h (x 3 if color)
+    cv::Mat image = images[i].reshape(1,1);
+
+    // Copy the long vector into one row of the destm
+    image.copyTo(data.row(i));
+
+  }
+  return data;
+}
+
+void EigenFaces::Learn(std::vector<cv::Mat> faces, std::vector<int> classes, std::vector<bool> isTrainingData, bool bColor)
+{
+    if(faces.empty() || !faces[0].cols) return;
 	bUseColor = bColor;
 
 	//this->classes = classes;
@@ -92,84 +108,58 @@ void EigenFaces::Learn(std::vector<IplImage *> faces, std::vector<int> classes, 
 	}
 	if(this->classes.size() == 0) return; // no labeled data!
 
-	CvTermCriteria calcLimit;
-	CvSize res = cvGetSize(faces[0]);
-	if(bUseColor) res.width *= 3;
+    cv::Size res = faces[0].size();
 	trainCnt = this->classes.size();
-	
-	IplImage **allFaces = new IplImage *[this->classes.size()];
-	int cnt = 0;
+	    
 	FOR(i, faces.size())
 	{
+        cv::Mat& face = faces.at(i);
 		//if(classes[i] == 0) continue;
 		if(!bUseColor)
 		{
-			if(faces[i]->nChannels == 3)
-			{
-				allFaces[cnt] = cvCreateImage(res,8,1);
-				cvCvtColor(faces[i], allFaces[cnt], CV_BGR2GRAY);
-				cvEqualizeHist(allFaces[cnt], allFaces[cnt]);
+            if(face.channels() == 3) {
+                cv::Mat grayFace;
+                cv::cvtColor(face, grayFace, cv::COLOR_BGR2GRAY);
+                cv::equalizeHist(grayFace, grayFace);
+                faces[i] = grayFace;
 			}
-			else allFaces[cnt] = cvCloneImage(faces[i]);
-		}
-		else
-		{
-			allFaces[cnt] = cvCreateImage(res, 8, 1);
-			if(faces[i]->nChannels == 3)
-			{
-				FOR(j, res.width*res.height) allFaces[cnt]->imageData[j] = faces[i]->imageData[j];
-			}
-			else
-			{
-				allFaces[cnt] = cvCreateImage(res, 8, 1);
-				FOR(j, res.width*res.height) allFaces[cnt]->imageData[j] = faces[i]->imageData[j/3];
-			}
-		}
-		cnt++;
+        } else {
+            if(face.channels() == 1) {
+                cv::Mat colorFace;
+                cv::cvtColor(face, colorFace, cv::COLOR_GRAY2BGR);
+                faces[i] = colorFace;
+            }
+        }
 	}
+    cv::Mat trainingData = createDataMatrix(faces, bColor);
 
 	FOR(i, isTraining.size()) if(!isTraining[i]) trainCnt--;
 	dim = trainCnt - 1;
-	IplImage **faceArray = new IplImage *[trainCnt];
-	cnt = 0;
-	FOR(i, isTraining.size()) if(isTraining[i])
-	{
-		faceArray[cnt++] = cvCloneImage(allFaces[i]);
-	}
-	eigenVectors = new IplImage *[dim];
-	FOR(i, dim) eigenVectors[i] = cvCreateImage(res, IPL_DEPTH_32F, 1);
 
-	if(eigenValues) cvReleaseMat(&eigenValues);
-	eigenValues = cvCreateMat(1, dim, CV_32FC1);
+    pca = cv::PCA(trainingData, cv::Mat(), cv::PCA::DATA_AS_ROW, dim);
 
-	IMKILL(avgImage);
-	avgImage = cvCreateImage(res, IPL_DEPTH_32F, 1);
+    cv::Mat eigenVects = pca.eigenvectors;
+    eigenValues = pca.eigenvalues;
 
-	calcLimit = cvTermCriteria(CV_TERMCRIT_ITER, dim, 0.0001);
+    eigenVectors.clear();
+    FOR(i, eigenVects.rows) {
+        eigenVectors.push_back(eigenVects.row(i).reshape(bColor ? 3 : 1, res.height));
+    }
 
-    //cvCalcEigenObjects(trainCnt, (void *)faceArray, (void *)eigenVectors, CV_EIGOBJ_NO_CALLBACK, 0, 0, &calcLimit, avgImage, eigenValues->data.fl);
+    eigenValues = cv::Mat(1,dim,CV_32FC1);
+    avgImage = pca.mean.reshape(bColor ? 3 : 1, res.height);
 
 	// we compute the projections for recognition purposes
 	FOR(i, projections.size()) delete [] projections[i];
 	projections.clear();
 	FOR(i, this->classes.size())
 	{
-		float *proj = new float[dim];
-        //cvEigenDecomposite(allFaces[i], dim, eigenVectors, 0, 0, avgImage, proj);
+        float *proj = new float[dim];
+        cv::Mat faceAsVector = faces[i].reshape(1,1);
+        cv::Mat projection = pca.project(faceAsVector);
+        FOR(j, dim) proj[j] = projection.at<float>(j);
 		projections.push_back(proj);
 	}
-	FOR(i, trainCnt) cvReleaseImage(&faceArray[i]);
-	KILL(faceArray);
-	FOR(i, this->classes.size()) cvReleaseImage(&allFaces[i]);
-	KILL(allFaces);
-}
-
-void EigenFaces::Recognize(IplImage *face)
-{
-	if(!face) return;
-	float *projected = new float[dim];
-    //cvEigenDecomposite(face, dim, eigenVectors, 0, 0, avgImage, projected);
-	int nearest = FindNearestNeighbor(projected);
 }
 
 int EigenFaces::FindNearestNeighbor(float *candidate)
@@ -185,7 +175,7 @@ int EigenFaces::FindNearestNeighbor(float *candidate)
 		{
 			float d = candidate[i] - projections[train][i];
 			dist += d*d;
-			if(bMahalanobis) dist /= eigenValues->data.fl[i];
+            if(bMahalanobis) dist /= eigenValues.at<float>(i);
 		}
 
 		if(dist < minDist)
@@ -198,97 +188,26 @@ int EigenFaces::FindNearestNeighbor(float *candidate)
 	return nearest;
 }
 
-void eigen_on_mouse( int event, int x, int y, int flags, void* param )
-{
-	IplImage **eigenVectors = (IplImage **)(((int *)param)[0]);
-	IplImage *avgImage = (IplImage *)(((int *)param)[1]);
-	int dim = (*(int *)(((int *)param)[2]));
-	float *maxes = (float *)(((int *)param)[3]);
-	std::vector<float *> *projections = (std::vector<float *> *)(((int *)param)[4]);
-	float size = maxes[4];
-	int e1 = ((int *)param)[5];
-	int e2 = ((int *)param)[6];
-
-	IplImage *acc = cvCreateImage(cvGetSize(eigenVectors[0]), IPL_DEPTH_32F, 1);
-	cvCopy(avgImage, acc);
-	float *coords = new float[dim];
-	FOR(i, dim) coords[i] = 0;
-
-	float c1 = x / size * maxes[2] + maxes[0];
-	float c2 = y / size * maxes[3] + maxes[1];
-
-	// we find the closest point among the training samples
-	/*
-	int closest = 0;
-	float dist = FLT_MAX;
-	FOR(i, projections->size())
-	{
-		float d = sqrtf(powf(c1-projections->at(i)[e1],2) + powf(c2-projections->at(i)[e2],2));
-		if(d < dist)
-		{
-			dist = d;
-			closest = i;
-		}
-	}
-	FOR(i, dim) coords[i] = projections->at(closest)[i];
-	*/
-	coords[e1] = c1;
-	coords[e2] = c2;
-
-	FOR(i, dim-2) // dim -2 because for some reasons the last two eigenvalues are often fubared
-	{
-		cvAddWeighted(eigenVectors[i], coords[i], acc, 1, 0, acc);
-	}
-
-	IplImage *newEigen = cvCreateImage(cvGetSize(eigenVectors[0]), 8, 1);
-	cvCvtScale(acc, newEigen, 1);
-	bool bUseColor = newEigen->width != newEigen->height;
-
-	IplImage *display = cvCreateImage(cvSize(128,128), 8, bUseColor ? 3 : 1);
-	if(!bUseColor) cvResize(newEigen, display, CV_INTER_CUBIC);
-	else
-	{
-		IplImage *newEigen3 = cvCreateImage(cvSize(newEigen->width/3, newEigen->height), 8, 3);
-		FOR(i, newEigen->width*newEigen->height) newEigen3->imageData[i] = newEigen->imageData[i];
-		cvResize(newEigen3, display, CV_INTER_CUBIC);
-		IMKILL(newEigen3);
-	}
-	cvNamedWindow("eigen face");
-	cvShowImage("eigen face", display);
-	IMKILL(newEigen);
-	IMKILL(display);
-
-}
-
 int eigparams[7];
 
-std::vector<IplImage *> EigenFaces::GetEigenVectorsImages()
+std::vector<cv::Mat> EigenFaces::GetEigenVectorsImages()
 {
-	std::vector<IplImage *> result;
-	IplImage *acc = cvCreateImage(cvGetSize(eigenVectors[0]), IPL_DEPTH_32F, 1);
+    std::vector<cv::Mat> result;
+    bool bColor = eigenVectors.size() && eigenVectors[0].channels() > 1;
+    cv::Mat accumulator = cv::Mat(eigenVectors[0].size(), bColor ? CV_32FC3 : CV_32F);
+    //IplImage *acc = cvCreateImage(cvSize(eigenVectors[0].cols,eigenVectors[0].rows), IPL_DEPTH_32F, 1);
 	FOR(i, dim-2) // dim -2 because for some reasons the last two eigenvalues are often fubared
 	{
-		cvSet(acc, cvScalar(0));
-		//cvCopy(avgImage, acc);
-		cvAddWeighted(eigenVectors[i], 1, acc, 1, 0, acc);
-		cvNormalize(acc, acc, 255,0,CV_MINMAX);
+        accumulator = cv::Mat::zeros(eigenVectors[0].size(), bColor ? CV_32FC3 : CV_32F);
+        cv::addWeighted(eigenVectors[i],1,accumulator,1,0,accumulator);
+        cv::normalize(accumulator, accumulator, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+        cv::Mat newEigenVec = cv::Mat(eigenVectors[0].size(), bColor ? CV_8UC3 : CV_8UC1);
+        cv::convertScaleAbs(accumulator, newEigenVec);
 
-		IplImage *newEigen = cvCreateImage(cvGetSize(eigenVectors[0]), 8, 1);
-		cvCvtScale(acc, newEigen, 1);
-		bool bUseColor = newEigen->width != newEigen->height;
-
-		IplImage *res = cvCreateImage(cvSize(128,128), 8, bUseColor ? 3 : 1);
-		if(!bUseColor) cvResize(newEigen, res, CV_INTER_CUBIC);
-		else
-		{
-			IplImage *newEigen3 = cvCreateImage(cvSize(newEigen->width/3, newEigen->height), 8, 3);
-			FOR(i, newEigen->width*newEigen->height) newEigen3->imageData[i] = newEigen->imageData[i];
-			cvResize(newEigen3, res, CV_INTER_CUBIC);
-			IMKILL(newEigen3);
-		}
-		result.push_back(res);
+        cv::Mat larger;
+        cv::resize(newEigenVec,larger, cv::Size(128,128),0,0,cv::INTER_CUBIC);
+        result.push_back(larger);
 	}
-	IMKILL(acc);
 	return result;
 }
 
@@ -297,25 +216,21 @@ IplImage *EigenFaces::DrawEigenVals()
     IplImage *eigImage = cvCreateImage(cvSize(440,440),8,3);
 	cvSet(eigImage, CV_RGB(255,255,255));
 
-	float *eigVal = eigenValues->data.fl;
 	float maxEigVal = 0;
-    FOR(i, dim-2) if(eigVal[i] == eigVal[i]) maxEigVal += eigVal[i];
+    FOR(i, dim-2) if(!isnan(eigenValues.at<float>(i))) maxEigVal += eigenValues.at<float>(i);
 	float accumulator = 0;
     maxEigVal = max(1.f,maxEigVal);
 
 	cvDrawLine(eigImage, cvPoint(0, eigImage->height-1), cvPoint(eigImage->width, eigImage->height-1), CV_RGB(180,180,180));
 	cvDrawLine(eigImage, cvPoint(0,0), cvPoint(0, eigImage->height), CV_RGB(180,180,180));
 	CvPoint point = cvPoint(0,0);
-	printf("eigenval\tdata\n");
-	FOR(i, dim-2) // dim -2 because for some reasons the last two eigenvalues are often fubared
-	{
-        if(eigVal[i] == eigVal[i])
-        {
-            CvPoint point2 = cvPoint(i * eigImage->width / dim, eigImage->height - (int)(eigVal[i] / maxEigVal * eigImage->height));
+    FOR(i, dim-2) { // dim -2 because for some reasons the last two eigenvalues are often fubared
+        float eigVal = eigenValues.at<float>(i);
+        if(!isnan(eigVal)) {
+            CvPoint point2 = cvPoint(i * eigImage->width / dim, eigImage->height - (int)(eigVal / maxEigVal * eigImage->height));
             //cvDrawCircle(eigImage, point, 1, CV_RGB(0,0,0), -1, CV_AA);
             cvDrawLine(eigImage, point, point2, CV_RGB(0,0,0));
-            accumulator += eigVal[i] / maxEigVal;
-            printf("%d\t(%.2f) %.1f%%\n", i+1, eigVal[i], accumulator*100);
+            accumulator += eigVal / maxEigVal;
             point = point2;
         }
     }
@@ -348,111 +263,25 @@ IplImage *EigenFaces::DrawEigenVals()
     cvPutText(display, text, cvPoint(display->width/2, font.line_type), &font, CV_RGB(128,128,128));
     FOR(i, dim-2)
     {
+        float eigVal = eigenValues.at<float>(i);
+        float prevEigVal = i>0 ? eigenValues.at<float>(i-1) : 0;
+        float nextEigVal = i < max(eigenValues.cols,eigenValues.rows)-1 ? eigenValues.at<float>(i+1) : 0;
         int y = font.line_type*(i+2);
         if(y > display->height) continue;
-        if(eigVal[i] == eigVal[i])
+        if(!isnan(eigVal))
         {
-            accumulator += eigVal[i] / maxEigVal;
-            sprintf(text,"e%d: %.2f %.1f%%", i+1, eigVal[i], accumulator*100);
+            accumulator += eigVal / maxEigVal;
+            sprintf(text,"e%d: %.2f %.1f%%", i+1, eigVal, accumulator*100);
         }
-        else if(i > 0 && i < dim-3 && eigVal[i-1] == eigVal[i-1] && eigVal[i+1] == eigVal[i+1])
+        else if(i > 0 && i < dim-3 && !isnan(prevEigVal) && !isnan(nextEigVal))
         {
-            float middleEigVal = (eigVal[i-1] + eigVal[i+1])/2;
-            float newAccumulator = accumulator + eigVal[i+1]/maxEigVal;
+            float middleEigVal = (prevEigVal + nextEigVal)/2;
+            float newAccumulator = accumulator + nextEigVal/maxEigVal;
             sprintf(text,"e%d: %.2f %.1f%%", i+1, middleEigVal, newAccumulator*100);
         }
         else sprintf(text, "e%d: Numeric Error, %.1f%%", i+1, accumulator);
         cvPutText(display, text, cvPoint(display->width/2, y), &font, CV_RGB(128,128,128));
     }
     return display;
-}
-
-void EigenFaces::Draw(bool bMonochrome, int e1, int e2)
-{
-	if(!eigenValues || !eigenVectors) return;
-
-	if(e1 >= dim) e1 = dim-1;
-	if(e2 >= dim) e2 = dim-1;
-
-	// we find min and max values for each dimension
-	float minX, maxX, minY, maxY;
-	minX = minY = FLT_MAX;
-	maxX = maxY = FLT_MIN;
-	float dX, dY;
-
-	FOR(i, trainCnt)
-	{
-		if(minX > projections[i][e1]) minX = projections[i][e1];
-		if(maxX < projections[i][e1]) maxX = projections[i][e1];
-		if(minY > projections[i][e2]) minY = projections[i][e2];
-		if(maxY < projections[i][e2]) maxY = projections[i][e2];
-	}
-	dX = maxX - minX;
-	dY = maxY - minY;
-
-	int size = 512;
-	int edge = 20;
-	mapImage = cvCreateImage(cvSize(size,size), 8, 3);
-	cvZero(mapImage);
-	const int radius = 3;
-	
-	FOR(i, projections.size())
-	{
-		cvVec2 v((projections[i][e1] - minX)/dX, (projections[i][e2] - minY)/dY);
-		CvPoint point = (v*((float)size-edge*2) + cvVec2((f32)edge, (f32)edge)).to2d();
-		if(!isTraining[i])
-		{
-			cvCircle(mapImage, point, radius, CV_RGB(180,180,180),2,CV_AA);
-		}
-		cvCircle(mapImage, point, radius,
-			bMonochrome ? CV_RGB(255,255,255) : CV::color[classes[i]%CV::colorCnt],
-			1, CV_AA);
-	}
-
-	float *maxes = new float[5];
-	maxes[0] = minX; maxes[1] = minY;
-	maxes[2] = dX; maxes[3] = dY;
-	maxes[4] = (float)size;
-	CvSize *res = new CvSize;
-	(*res) = cvSize(size, size);
-	eigparams[0] = (intptr_t)((void *)eigenVectors);
-	eigparams[1] = (intptr_t)((void *)avgImage);
-	eigparams[2] = (intptr_t)((void *)&dim);
-	eigparams[3] = (intptr_t)((void *)maxes);
-	eigparams[4] = (intptr_t)((void *)&projections);
-	eigparams[5] = (intptr_t) e1;
-	eigparams[6] = (intptr_t) e2;
-
-
-	IplImage *legend = cvCreateImage(cvSize(100,100),8,3);
-	cvZero(legend);
-	cvLine(legend, cvPoint(20, 80), cvPoint(90, 80), CV_RGB(255,255,255));
-	cvLine(legend, cvPoint(20,10), cvPoint(20, 80), CV_RGB(255,255,255));
-	
-	/*
-	CvFont font;
-	cvInitFont(&font, CV_FONT_HERSHEY_PLAIN, 0.75, 0.75, 0, 1, CV_AA);
-	char text[255];
-	sprintf(text, "e%d", e1+1);
-	CvPoint point = cvPoint(legend->width-30, legend->height - font.line_type/2);
-	cvPutText(legend, text, point, &font, CV_RGB(255,255,255));
-	IplImage *tmp = CV::Rotate90(legend, 0);
-	point = cvPoint(tmp->width - 35, font.line_type);
-	sprintf(text,"e%d", e2+1);
-	cvPutText(tmp, text, point, &font, CV_RGB(255,255,255));
-	IMKILL(legend);
-	legend = CV::Rotate90(tmp, 1);
-	IMKILL(tmp);	
-
-	ROI(mapImage, cvRect(mapImage->width-legend->width, 0, legend->width, legend->height));
-	cvAddWeighted(mapImage, 1, legend, 0.6, 0, mapImage);
-	unROI(mapImage);
-	IMKILL(legend);
-	*/
-
-
-	cvNamedWindow("Principal Components");
-	cvShowImage("Principal Components", mapImage);
-	cvSetMouseCallback("Principal Components", eigen_on_mouse, (void *) &eigparams);
 }
 

@@ -105,7 +105,7 @@ void PCAProjector::DrawEigen()
 {
     if(sm.GetCount() >= 3){
         EigenFaces eig;
-        eig.Learn(sm.GetSamples(), sm.GetLabels());
+        eig.Learn(sm.GetSampleMats(), sm.GetLabels());
         SampleManager eigVecs;
         eigVecs.AddSamples(eig.GetEigenVectorsImages());
         IplImage *image = eigVecs.GetSampleImage();
@@ -142,12 +142,13 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
     int e2 = options->spinE2->value()-1;
     int count = options->eigenCountSpin->value();
 
-    vector<IplImage*>sourceSamples;
+    vector<cv::Mat> allSamples = sm.GetSampleMats();
+    vector<cv::Mat> sourceSamples;
     ivec sourceLabels;
     FOR(i, sm.GetCount())
     {
         if(sm.GetLabel(i) == 0) continue;
-        sourceSamples.push_back(sm.GetSample(i));
+        sourceSamples.push_back(allSamples[i]);
         sourceLabels.push_back(sm.GetLabel(i));
     }
     if(sourceSamples.size() < 4) return data;

@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
     
     if (readHMMFile){
         hmmFile.open(hmmInputName);
-        if(hmmFile==NULL){
+        if(!hmmFile.is_open()){
             cerr << "HMM file not found. Exiting..."<<endl;
             exit(-1);
         }
@@ -218,7 +218,7 @@ int main (int argc, char *argv[])
     
             CObsSeq *obsSeq;
             ifstream sequenceFile(sequenceName);
-            assert(sequenceFile != NULL);
+            //assert(sequenceFile != NULL);
     //	obsSeq = learnedHMM->ReadSequences(sequenceFile);
             obsSeq = new CObsSeq(obsType, sequenceFile);
             sequenceFile.close();

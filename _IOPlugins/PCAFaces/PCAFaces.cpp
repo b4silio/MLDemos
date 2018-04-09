@@ -74,7 +74,6 @@ void PCAFaces::Start()
         connect(&futureWatcher,SIGNAL(started()),this,SLOT(setButtonsOff()));
         connect(&futureWatcher, SIGNAL(finished()), this, SLOT(setButtonsOn()));
 
-
         connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
         connect(projector, SIGNAL(Update()), this, SLOT(ConcurrentUpdate()));
         connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));

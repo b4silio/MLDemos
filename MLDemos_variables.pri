@@ -32,6 +32,7 @@ else: ROOT = ../..
 	PRE_TARGETDEPS += $$OUT_PWD/$$ROOT/Core
 }
 
+
 #CONFIG(coreLib): DESTDIR=$$ROOT/lib
 #else: DESTDIR=$$ROOT/bin
 
@@ -101,7 +102,7 @@ win32{
     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
 }else:macx{
 	CONFIG(boost):BOOST = /usr/local/include
-    CONFIG(opencv22|opencv21):OPENCV = /usr/local/opencv
+    CONFIG(opencv22|opencv21):OPENCV = /usr/local/opt/opencv3
 }
 
 # PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP
@@ -144,48 +145,24 @@ win32:CONFIG(opencv22){
 }
 macx{
 CONFIG(opencv3){
-		DEFINES += OPENCV3
-		LIBS += -L/usr/local/lib
+        DEFINES += OPENCV3
+        INCLUDEPATH += $$OPENCV/include
+        LIBS += -L/usr/local/opt/opencv3/lib
+        INCLUDEPATH += /usr/local/opt/opencv3/include
+        INCLUDEPATH += /opt/local/include
+
+        #LIBS += -L/usr/local/lib
 		message("Using opencv3 or later")
 		LIBS += \
-		-lopencv_adas \
-		-lopencv_aruco \
-		-lopencv_bgsegm \
-		-lopencv_bioinspired \
-		-lopencv_calib3d \
-		-lopencv_ccalib \
-		-lopencv_core \
-		-lopencv_dnn \
-		-lopencv_dpm \
-		-lopencv_face \
-		-lopencv_features2d \
-		-lopencv_flann \
-		-lopencv_highgui \
-		-lopencv_imgcodecs \
-		-lopencv_imgproc \
-		-lopencv_line_descriptor \
-		-lopencv_ml \
-		-lopencv_nonfree \
-		-lopencv_objdetect \
-		-lopencv_optflow \
-		-lopencv_photo \
-		-lopencv_reg \
-		-lopencv_rgbd \
-		-lopencv_saliency \
-		-lopencv_shape \
-		-lopencv_stereo \
-		-lopencv_stitching \
-		-lopencv_structured_light \
-		-lopencv_superres \
-		-lopencv_text \
-		-lopencv_tracking \
-		-lopencv_video \
-		-lopencv_videoio \
-		-lopencv_videostab \
-		-lopencv_xfeatures2d \
-		-lopencv_ximgproc \
-		-lopencv_xobjdetect \
-		-lopencv_xphoto
+        -lopencv_bgsegm \
+        -lopencv_calib3d \
+        -lopencv_highgui \
+        -lopencv_imgcodecs \
+        -lopencv_imgproc \
+        -lopencv_videoio \
+        -lopencv_objdetect \
+        -lopencv_ml \
+        -lopencv_core
 	}
     CONFIG(opencv22){
         DEFINES += OPENCV22
