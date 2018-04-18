@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>240</width>
+    <width>245</width>
     <height>120</height>
    </rect>
   </property>
@@ -45,14 +45,14 @@
     <rect>
      <x>140</x>
      <y>10</y>
-     <width>80</width>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
-     <pointsize>9</pointsize>
+     <family>.SF NS Text</family>
+     <pointsize>11</pointsize>
     </font>
    </property>
    <property name="toolTip">
@@ -73,7 +73,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>.SF NS Text</family>
     </font>
    </property>
    <property name="decimals">
@@ -103,7 +103,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>.SF NS Text</family>
      <pointsize>8</pointsize>
     </font>
    </property>
@@ -125,7 +125,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>.SF NS Text</family>
      <pointsize>9</pointsize>
     </font>
    </property>
@@ -141,17 +141,18 @@
     <rect>
      <x>140</x>
      <y>40</y>
-     <width>50</width>
+     <width>90</width>
      <height>17</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>.SF NS Text</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>Grid</string>
+    <string>Show Grid</string>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -168,7 +169,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Lucida Grande</family>
+     <family>.SF NS Text</family>
     </font>
    </property>
    <property name="tabPosition">
@@ -199,6 +200,11 @@
      </property>
      <item>
       <widget class="QScrollArea" name="scrollArea_2">
+       <property name="font">
+        <font>
+         <family>.SF NS Text</family>
+        </font>
+       </property>
        <property name="frameShadow">
         <enum>QFrame::Plain</enum>
        </property>
@@ -216,19 +222,29 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>88</width>
+          <width>91</width>
           <height>103</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
           <widget class="QCheckBox" name="samplesCheck">
            <property name="font">
             <font>
-             <family>Lucida Grande</family>
+             <family>.SF NS Text</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
@@ -243,7 +259,8 @@
           <widget class="QCheckBox" name="modelCheck">
            <property name="font">
             <font>
-             <family>Lucida Grande</family>
+             <family>.SF NS Text</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
@@ -258,7 +275,8 @@
           <widget class="QCheckBox" name="infoCheck">
            <property name="font">
             <font>
-             <family>Lucida Grande</family>
+             <family>.SF NS Text</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
@@ -273,7 +291,8 @@
           <widget class="QCheckBox" name="mapCheck">
            <property name="font">
             <font>
-             <family>Lucida Grande</family>
+             <family>.SF NS Text</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
@@ -288,7 +307,8 @@
           <widget class="QCheckBox" name="legendCheck">
            <property name="font">
             <font>
-             <family>Lucida Grande</family>
+             <family>.SF NS Text</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="text">
@@ -335,7 +355,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>78</width>
+        <width>84</width>
         <height>131</height>
        </rect>
       </property>
@@ -343,7 +363,16 @@
        <property name="spacing">
         <number>-1</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -363,6 +392,7 @@
          <property name="font">
           <font>
            <family>Lucida Grande</family>
+           <pointsize>9</pointsize>
           </font>
          </property>
          <property name="text">
@@ -378,6 +408,7 @@
          <property name="font">
           <font>
            <family>Lucida Grande</family>
+           <pointsize>9</pointsize>
           </font>
          </property>
          <property name="text">
@@ -393,6 +424,7 @@
          <property name="font">
           <font>
            <family>Lucida Grande</family>
+           <pointsize>9</pointsize>
           </font>
          </property>
          <property name="text">
@@ -420,6 +452,7 @@
          <property name="font">
           <font>
            <family>Lucida Grande</family>
+           <pointsize>9</pointsize>
           </font>
          </property>
          <property name="text">
@@ -435,6 +468,7 @@
          <property name="font">
           <font>
            <family>Lucida Grande</family>
+           <pointsize>9</pointsize>
           </font>
          </property>
          <property name="text">
@@ -453,13 +487,14 @@
       <rect>
        <x>0</x>
        <y>89</y>
-       <width>83</width>
-       <height>18</height>
+       <width>90</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="font">
       <font>
        <family>Lucida Grande</family>
+       <pointsize>9</pointsize>
       </font>
      </property>
      <property name="text">

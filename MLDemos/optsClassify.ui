@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
+    <width>670</width>
     <height>207</height>
    </rect>
   </property>
@@ -48,7 +48,7 @@
        <rect>
         <x>4</x>
         <y>47</y>
-        <width>321</width>
+        <width>371</width>
         <height>141</height>
        </rect>
       </property>
@@ -226,11 +226,16 @@
      <widget class="QCheckBox" name="binaryCheck">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>20</y>
-        <width>87</width>
+        <width>100</width>
         <height>20</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
       </property>
       <property name="text">
        <string>Force Binary</string>

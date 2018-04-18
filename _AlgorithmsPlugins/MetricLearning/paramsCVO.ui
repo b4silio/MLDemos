@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
-    <height>213</height>
+    <width>333</width>
+    <height>197</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,11 @@
   <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
    <item row="2" column="1">
     <widget class="QComboBox" name="methodCombo">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
      <property name="toolTip">
       <string>Change computation method (not sure if there is any actual difference between the two)</string>
      </property>
@@ -39,6 +44,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Max steps</string>
        </property>
@@ -51,6 +61,11 @@
          <width>0</width>
          <height>20</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="minimum">
         <number>0</number>
@@ -68,6 +83,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Similar class</string>
        </property>
@@ -81,6 +101,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Dissimilar class</string>
        </property>
@@ -93,6 +118,11 @@
          <width>0</width>
          <height>20</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="minimum">
         <number>0</number>
@@ -110,6 +140,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Others</string>
        </property>
@@ -122,6 +157,11 @@
          <width>0</width>
          <height>20</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>Alpha</string>
@@ -136,6 +176,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>10</string>
        </property>
@@ -149,6 +194,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0.0001</string>
        </property>
@@ -158,6 +208,11 @@
    </item>
    <item row="1" column="1">
     <widget class="QLabel" name="title">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>CVO</string>
      </property>
@@ -178,6 +233,11 @@
    </item>
    <item row="4" column="2">
     <widget class="QPushButton" name="showMatrixBtn">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>Show learned matrix</string>
      </property>
@@ -190,6 +250,11 @@
        <width>0</width>
        <height>30</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
      </property>
      <property name="text">
       <string>Normalize data</string>

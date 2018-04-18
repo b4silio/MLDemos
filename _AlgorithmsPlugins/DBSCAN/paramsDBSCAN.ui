@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
-    <height>158</height>
+    <width>280</width>
+    <height>151</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -286,7 +286,7 @@
     <rect>
      <x>140</x>
      <y>10</y>
-     <width>150</width>
+     <width>130</width>
      <height>131</height>
     </rect>
    </property>
@@ -300,7 +300,7 @@
   <widget class="QPushButton" name="zoomButton">
    <property name="geometry">
     <rect>
-     <x>270</x>
+     <x>250</x>
      <y>0</y>
      <width>21</width>
      <height>21</height>

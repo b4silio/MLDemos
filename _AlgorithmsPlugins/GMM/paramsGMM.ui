@@ -62,7 +62,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>70</y>
+     <y>60</y>
      <width>91</width>
      <height>21</height>
     </rect>
@@ -98,7 +98,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>50</y>
+     <y>40</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -116,7 +116,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>48</y>
+     <y>38</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -134,7 +134,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>70</y>
+     <y>60</y>
      <width>91</width>
      <height>21</height>
     </rect>
@@ -172,7 +172,7 @@ K-Means: perform K-Means and assign means and variance to each mixture</string>
   <widget class="QPushButton" name="marginalsButton">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>20</x>
      <y>100</y>
      <width>90</width>
      <height>32</height>
@@ -185,6 +185,27 @@ K-Means: perform K-Means and assign means and variance to each mixture</string>
    </property>
    <property name="text">
     <string>Marginals</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="useClassPriorsCheck">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>100</y>
+     <width>160</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Force Equal Class distribution</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

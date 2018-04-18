@@ -29,10 +29,12 @@ class ClassifierGMM : public Classifier
 public:
 	std::vector<Gmm*> gmms;
 	std::vector<float*> data;
+    std::vector<float> priors;
 private:
 	u32 nbClusters;
 	u32 covarianceType;
 	u32 initType;
+    bool bUseClassPriors;
 public:
 	ClassifierGMM();
 	~ClassifierGMM();
@@ -44,7 +46,7 @@ public:
     void SaveModel(const std::string filename) const ;
     bool LoadModel(const std::string filename);
 
-	void SetParams(u32 nbClusters, u32 covarianceType, u32 initType);
+    void SetParams(u32 nbClusters, u32 covarianceType, u32 initType, bool bUseClassPriors);
 	void Update();
 };
 

@@ -34,6 +34,7 @@ ClassifierGMM::ClassifierGMM()
 {
 	bSingleClass = false;
 	bMultiClass = true;
+    bUseClassPriors = false;
 }
 
 ClassifierGMM::~ClassifierGMM()
@@ -90,18 +91,20 @@ void ClassifierGMM::Train(std::vector< fvec > samples, ivec labels)
 	FOR(i, data.size()) KILL(data[i]);
 	gmms.clear();
 	data.clear();
+    priors.clear();
     int i=0;
     for(map<int,vector<fvec> >::iterator it=sampleMap.begin(); it != sampleMap.end(); it++, i++)
 	{
         vector<fvec> &s = it->second;
 		gmms.push_back(new Gmm(nbClusters, dim));
 		data.push_back(new float[dim*s.size()]);
+        priors.push_back(s.size());
 		FOR(j, s.size())
 		{
 			FOR(d, dim) data[i][j*dim + d] = s[j][d];
 		}
 		gmms[i]->init(data[i], s.size(), initType);
-		gmms[i]->em(data[i], s.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
+        gmms[i]->em(data[i], s.size(), 1e-4, (COVARIANCE_TYPE)covarianceType);
 	}
     pdfMulti.resize(gmms.size());
 }
@@ -111,8 +114,13 @@ fvec ClassifierGMM::TestMulti(const fvec &sample) const
     FOR(i, gmms.size()) pdfMulti[i] = gmms[i]->pdf((float*)&sample[0]);
 	if(gmms.size()==2)
 	{
-        float p1 = logf(pdfMulti[1]);
-        float p0 = logf(pdfMulti[0]);
+        float prior1 = 1.f, prior0 = 1.f;
+        if(bUseClassPriors) {
+            prior1 = priors[1];
+            prior0 = priors[0];
+        }
+        float p1 = logf(pdfMulti[1]*prior1);
+        float p0 = logf(pdfMulti[0]*prior0);
         pdfSingle[0] = (p1 - p0);
         return pdfSingle;
 	}
@@ -120,6 +128,7 @@ fvec ClassifierGMM::TestMulti(const fvec &sample) const
     float xmin=-1000.f, xmax=1000.f; // we clamp the value between these two
     FOR(i, pdfMulti.size())
 	{
+        if(bUseClassPriors) pdfMulti[i] *= priors[i];
         float value = logf(pdfMulti[i]);
         value = (min(xmax,max(xmin, value)) - xmin) / (xmax);
         pdfMulti[i] = value;
@@ -150,11 +159,12 @@ float ClassifierGMM::Test( const fVec &_sample) const
 	return res;
 }
 
-void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType)
+void ClassifierGMM::SetParams(u32 nbClusters, u32 covarianceType, u32 initType, bool bUseClassPriors)
 {
 	this->nbClusters = nbClusters;
 	this->covarianceType = covarianceType;
 	this->initType = initType;
+    this->bUseClassPriors = bUseClassPriors;
 }
 
 const char *ClassifierGMM::GetInfoString() const

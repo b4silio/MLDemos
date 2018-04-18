@@ -50,10 +50,11 @@ void ClassGMM::SetParams(Classifier *classifier)
 
 fvec ClassGMM::GetParams()
 {
-    fvec par(3);
+    fvec par(4);
     par[0] = params->gmmCount->value();
     par[1] = params->gmmCovarianceCombo->currentIndex();
     par[2] = params->gmmInitCombo->currentIndex();
+    par[3] = (int)(!params->useClassPriorsCheck->isChecked());
     return par;
 }
 
@@ -63,7 +64,8 @@ void ClassGMM::SetParams(Classifier *classifier, fvec parameters)
     int clusters = parameters.size() > 0 ? parameters[0] : 1;
     int covType = parameters.size() > 1 ? parameters[1] : 0;
     int initType = parameters.size() > 2 ? parameters[2] : 0;
-    ((ClassifierGMM *)classifier)->SetParams(clusters, covType, initType);
+    bool bUseClassPriors = parameters.size() > 3 ? (parameters[3] != 0) : false;
+    ((ClassifierGMM *)classifier)->SetParams(clusters, covType, initType, bUseClassPriors);
 }
 
 void ClassGMM::GetParameterList(std::vector<QString> &parameterNames,
@@ -76,7 +78,9 @@ void ClassGMM::GetParameterList(std::vector<QString> &parameterNames,
     parameterNames.push_back("Components Count");
     parameterNames.push_back("Covariance Type");
     parameterNames.push_back("Initialization Type");
+    parameterNames.push_back("Force Equal Class Distribution");
     parameterTypes.push_back("Integer");
+    parameterTypes.push_back("List");
     parameterTypes.push_back("List");
     parameterTypes.push_back("List");
     parameterValues.push_back(vector<QString>());
@@ -90,6 +94,9 @@ void ClassGMM::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("Random");
     parameterValues.back().push_back("Uniform");
     parameterValues.back().push_back("K-Means");
+    parameterValues.push_back(vector<QString>());
+    parameterValues.back().push_back("ClassPrior");
+    parameterValues.back().push_back("EqualPrior");
 }
 
 void ClassGMM::ShowMarginals()
@@ -102,6 +109,7 @@ QString ClassGMM::GetAlgoString()
     int clusters = params->gmmCount->value();
     int covType = params->gmmCovarianceCombo->currentIndex();
     int initType = params->gmmInitCombo->currentIndex();
+    bool bUsePriors = (!params->useClassPriorsCheck->isChecked());
     QString algo = QString("GMM %1").arg(clusters);
     switch(covType)
     {
@@ -127,6 +135,7 @@ QString ClassGMM::GetAlgoString()
         algo += " K-M";
         break;
     }
+    if(bUsePriors) algo += "Equal";
     return algo;
 }
 

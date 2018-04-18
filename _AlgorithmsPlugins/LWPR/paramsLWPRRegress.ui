@@ -40,6 +40,11 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>Generation Threshold</string>
    </property>
@@ -104,6 +109,11 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="toolTip">
     <string>Initial width of Receptive Fields</string>
    </property>
@@ -131,6 +141,11 @@
      <width>81</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="toolTip">
     <string>Learning rate</string>
