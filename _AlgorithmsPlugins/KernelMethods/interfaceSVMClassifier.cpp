@@ -55,7 +55,7 @@ void ClassSVM::ChangeOptions()
     switch(params->svmTypeCombo->currentIndex())
     {
     case 0: // C-SVM
-        params->svmCSpin->setRange(0.1, 9999);
+        params->svmCSpin->setRange(0.1, 99999);
         params->svmCSpin->setSingleStep(1);
         params->svmCSpin->setDecimals(1);
         params->svmCSpin->setValue(C);
@@ -75,6 +75,7 @@ void ClassSVM::ChangeOptions()
         if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
+    params->kernelWidthSpin->setRange(0.001,9999.0);
     switch(params->kernelTypeCombo->currentIndex())
     {
     case 0: // linear
@@ -86,20 +87,24 @@ void ClassSVM::ChangeOptions()
     case 1: // poly
         params->kernelDegSpin->setVisible(true);
         params->labelDegree->setVisible(true);
-        params->kernelWidthSpin->setVisible(false);
-        params->labelWidth->setVisible(false);
+        params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Offset");
+        params->kernelWidthSpin->setRange(0.,9999.0);
         break;
     case 2: // RBF
         params->kernelDegSpin->setVisible(false);
         params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
         params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Width");
         break;
     case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
         params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
         params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Width");
         break;
     }
     params->kernelButton->setVisible(params->optimizeCheck->isChecked());
@@ -242,8 +247,12 @@ void ClassSVM::SetParams(Classifier *classifier)
             break;
         }
         svm->param.C = svm->param.nu = svmC;
-        svm->param.gamma = 1 / kernelGamma;
+        svm->param.gamma = 1.f / kernelGamma;
         svm->param.coef0 = 0;
+        if(svm->param.kernel_type == POLY) {
+            svm->param.coef0 = kernelGamma;
+            svm->param.gamma = 10.f;
+        }
         svm->param.degree = kernelDegree;
         svm->bOptimize = bOptimize;
     }

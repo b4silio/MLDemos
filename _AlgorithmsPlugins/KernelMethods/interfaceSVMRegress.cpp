@@ -70,6 +70,7 @@ void RegrSVM::ChangeOptions()
         if(params->kernelTypeCombo->count() > 3) params->kernelTypeCombo->removeItem(3);
         break;
     }
+    params->kernelWidthSpin->setRange(0.001, 9999.);
     switch(params->kernelTypeCombo->currentIndex())
     {
     case 0: // linear
@@ -81,20 +82,24 @@ void RegrSVM::ChangeOptions()
     case 1: // poly
         params->kernelDegSpin->setVisible(true);
         params->labelDegree->setVisible(true);
-        params->kernelWidthSpin->setVisible(false);
-        params->labelWidth->setVisible(false);
+        params->kernelWidthSpin->setVisible(true);
+        params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Offset");
+        params->kernelWidthSpin->setRange(0., 9999.);
         break;
     case 2: // RBF
         params->kernelDegSpin->setVisible(false);
         params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
         params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Width");
         break;
     case 3: // SIGMOID
         params->kernelDegSpin->setEnabled(false);
         params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setEnabled(true);
         params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Width");
         break;
     }
 }
@@ -153,6 +158,10 @@ void RegrSVM::SetParams(Regressor *regressor)
         svm->param.p = svmP;
         svm->param.degree = kernelDegree;
         svm->param.coef0 = 0;
+        if(svm->param.kernel_type == POLY) {
+            svm->param.coef0 = kernelGamma;
+            svm->param.gamma = 1;
+        }
         svm->bOptimize = bOptimize;
     }
 }

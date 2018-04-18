@@ -180,8 +180,7 @@ Pegasos: Online trainer for SVM</string>
     </font>
    </property>
    <property name="toolTip">
-    <string>Width of the kernel (gamma)
-RBF and Polynomial only</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;RBF:&lt;/span&gt; Width of the kernel (gamma)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Polynomial:&lt;/span&gt; offset &lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;c&lt;/span&gt; in the polynomial formula  (dot(x_i,x_j) + &lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;c&lt;/span&gt;)^p&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="decimals">
     <number>3</number>

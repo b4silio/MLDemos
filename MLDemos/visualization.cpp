@@ -118,10 +118,10 @@ void Visualization::OptionsChanged()
     ui->inputCombo->hide();
     switch(index)
     {
-    case 0: // samples: scatterplots
-        ui->zoomSlider->show();
+    case 0: // samples: parallel coordinates
         break;
-    case 1: // samples: parallel coordinates
+    case 1: // samples: scatterplots
+        ui->zoomSlider->show();
         break;
     case 2: // samples: radial graphs
         break;
@@ -231,11 +231,11 @@ void Visualization::Update()
 
     switch(index)
     {
-    case 0: // samples: scatterplots
-        GenerateScatterPlot();
-        break;
-    case 1: // samples: parallel coordinates
+    case 0: // samples: parallel coordinates
         GenerateParallelCoords();
+        break;
+    case 1: // samples: scatterplots
+        GenerateScatterPlot();
         break;
     case 2: // samples: radial graphs
         GenerateRadialGraph();

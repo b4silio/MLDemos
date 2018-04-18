@@ -49,14 +49,18 @@ void ClustSVM::ChangeOptions()
     case 1: // poly
         params->kernelDegSpin->setVisible(true);
         params->labelDegree->setVisible(true);
-        params->kernelWidthSpin->setVisible(false);
-        params->labelWidth->setVisible(false);
+        params->kernelWidthSpin->setVisible(true);
+        params->kernelWidthSpin->setRange(0, 9999);
+        params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Offset");
         break;
     case 2: // RBF
         params->kernelDegSpin->setVisible(false);
         params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
+        params->kernelWidthSpin->setRange(0.001, 9999);
         params->labelWidth->setVisible(true);
+        params->labelWidth->setText("Width");
         break;
     }
 }
@@ -96,6 +100,10 @@ void ClustSVM::SetParams(Clusterer *clusterer, fvec parameters)
     svm->param.kernel_type = kernelType;
     svm->param.gamma = 1 / kernelGamma;
     svm->param.degree = kernelDegree;
+    if(kernelType == RBF) {
+        svm->param.gamma = 1.;
+        svm->param.coef0 = kernelGamma;
+    }
 }
 
 void ClustSVM::GetParameterList(std::vector<QString> &parameterNames,
