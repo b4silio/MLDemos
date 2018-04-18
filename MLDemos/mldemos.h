@@ -173,7 +173,7 @@ public slots:
     void DisplayOptionsChanged();
     void Display3DOptionsChanged();
 
-    void AddData();
+    void AddDataFromGenerator();
     void Clear();
     void ClearData();
     void ClearAll();
@@ -197,8 +197,8 @@ public slots:
     void DimPlus();
     void DimLess();
 
-    void ManualSelection();
-    void InputDimensions();
+    void ShowManualSelection();
+    void ShowInputDimensions();
     void FitToData();
 	void ZoomChanged(float d);
 	void CanvasMoveEvent();

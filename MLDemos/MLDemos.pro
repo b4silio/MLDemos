@@ -91,7 +91,16 @@ SOURCES += \
     dataseteditor.cpp \
     algorithmmanager.cpp \
     pluginmanager.cpp \
-    basewidget.cpp
+    basewidget.cpp \
+    mldemos-data.cpp \
+    mldemos-manualselection.cpp \
+    mldemos-draw.cpp \
+    mldemos-io.cpp \
+    mldemos-canvas.cpp \
+    mldemos-contextmenus.cpp \
+    mldemos-init.cpp \
+    mldemos-optionschanged.cpp \
+    mldemos-showhide.cpp
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \

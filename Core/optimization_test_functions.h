@@ -1,4 +1,3 @@
-
 /*
 //---------------- Author: Francesco Castellini* and Annalisa Riccardi** ---------------//
 //------- Affiliation: -----------------------------------------------------------------//
@@ -25,7 +24,7 @@
 using namespace Eigen;
 using namespace std;
 
-static const double Pi() {return 3.14159265358979323846; };
+static const double Pi() {return 3.14159265358979323846; }
 
 //SINGLE OBJECTIVE OPTIMIZATION PROBLEMS (see http://www.geatbx.com/docu/fcnindex-01.html#P129_5426 for mathematical definition)
 
