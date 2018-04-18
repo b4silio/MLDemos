@@ -17,8 +17,6 @@ MLDemos.file = MLDemos/MLDemos.pro
 MLDemos.depends = Core
 MLScripting.file = MLScripting/MLScripting.pro
 MLScripting.depends = Core
-UnitTesting.file = UnitTesting/UnitTesting.pro
-UnitTesting.depends = Core MLDemos
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
