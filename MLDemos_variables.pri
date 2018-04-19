@@ -46,15 +46,15 @@ INCLUDEPATH += . \
 		$${MLPATH}/_3rdParty
 
 win32{
+    LIBS += -lopengl32
     CONFIG(release){
-        LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
+#        LIBS += -lQtSvg4 -lQtOpenGL4 -lQtGui4 -lQtCore4
     }else{
         LIBS += -lQtSvgd4 -lQtOpenGLd4 -lQtGuid4 -lQtCored4
     }
 }
 CONFIG(coreLib){
 }else{
-
     LIBS += -L$$MLPATH -L$$MLPATH/Core -lCore
 }
 LIBS += -L$$MLPATH/_3rdParty -l3rdParty
@@ -74,8 +74,8 @@ unix:MLBUILD = build
 # or let qmake find it out for you (linux only).
 
 win32{
-	CONFIG += opencv22
-    OPENCV_VER = 230
+    CONFIG += opencv3
+    OPENCV_VER = 341
 }else:macx{
 #    CONFIG += opencv21
 	CONFIG += opencv3
@@ -98,8 +98,8 @@ win32{
 # manager     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/build/x86/mingw
 
 win32{
-    CONFIG(boost):BOOST = E:/DEV/boost_1_47_0
-    CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/DEV/OpenCV2.3-GCC
+    CONFIG(boost):BOOST = C:/DEV/boost_1_66_0
+    CONFIG(opencv3)|CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/opencv/build
 }else:macx{
 	CONFIG(boost):BOOST = /usr/local/include
     CONFIG(opencv22|opencv21):OPENCV = /usr/local/opt/opencv3
@@ -128,7 +128,28 @@ win32{
 }
 
 # OPENCV
-win32:CONFIG(opencv22){
+win32{
+CONFIG(opencv3){
+    DEFINES += OPENCV3
+    INCLUDEPATH += . "$$OPENCV/include"
+    LIBS += -L"$$OPENCV/install/x86/mingw/lib"
+    LIBS += -L"$$OPENCV/install/x86/mingw/bin"
+#    INCLUDEPATH += . "$$OPENCV/build/include"
+#	LIBS += -L"$$OPENCV/build/x86/mingw/lib"
+#	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
+        LIBS += \
+        #-lopencv_bgsegm$$OPENCV_VER \
+        -lopencv_calib3d$$OPENCV_VER \
+        -lopencv_highgui$$OPENCV_VER \
+        -lopencv_imgcodecs$$OPENCV_VER \
+        -lopencv_imgproc$$OPENCV_VER \
+        -lopencv_videoio$$OPENCV_VER \
+        -lopencv_objdetect$$OPENCV_VER \
+        -lopencv_ml$$OPENCV_VER \
+        -lopencv_features2d$$OPENCV_VER \
+        -lopencv_core$$OPENCV_VER
+    }
+CONFIG(opencv22){
     DEFINES += OPENCV22
     INCLUDEPATH += . "$$OPENCV/include"
     LIBS += -L"$$OPENCV/lib"
@@ -142,6 +163,7 @@ win32:CONFIG(opencv22){
 		-lopencv_imgproc$$OPENCV_VER \
 		-lopencv_legacy$$OPENCV_VER \
                 -lopencv_ml$$OPENCV_VER
+    }
 }
 macx{
 CONFIG(opencv3){
