@@ -67,7 +67,7 @@ public:
     bool DeleteData(QPointF center, float radius);
     ivec SelectSamples(QPointF center, float radius, fvec *weights=0);
     void DrawSamples();
-	void DrawObstacles();
+    void DrawObstacles();
 	void DrawTrajectories();
 	void DrawTimeseries();
 	void DrawRewards();
@@ -156,7 +156,8 @@ public:
 	int drawnTimeseries;
 	std::vector<fvec> liveTrajectory;
 
-    void PaintCanvas(QPainter &painter, bool bSvg=false);
+    void PaintBufferedCanvas(QPainter &painter, bool bSvg=false);
+    void PaintSequentialCanvas(QPainter &painter, bool bSvg=false);
     void PaintMultivariate(QPainter &painter, int type);
     void PaintVariable(QPainter &painter, int type, fvec params);
 

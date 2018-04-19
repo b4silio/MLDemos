@@ -149,8 +149,16 @@ void Canvas::SetCanvasType(int type)
     bNewCrosshair = true;
 }
 
-void Canvas::PaintCanvas(QPainter &painter, bool bSvg)
+void Canvas::PaintBufferedCanvas(QPainter &painter, bool bSvg)
 {
+    bool bHighDPI = qApp->devicePixelRatio() > 1;
+    if(bHighDPI && data->GetSamples().size() < 250) {
+        PaintSequentialCanvas(painter, bSvg);
+        return;
+    }
+    bool bUseTimer = false;
+    QElapsedTimer timer;
+    if(bUseTimer) timer.start();;
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
     painter.fillRect(geometry(),Qt::white);
@@ -163,10 +171,6 @@ void Canvas::PaintCanvas(QPainter &painter, bool bSvg)
     }
     painter.setBackgroundMode(Qt::TransparentMode);
 
-    bool bDebug = false;
-#ifdef MACX
-    bDebug = true;
-#endif
     if(bDisplaySamples) {
         DrawRewards();
         if(!maps.reward.isNull()) {
@@ -178,20 +182,10 @@ void Canvas::PaintCanvas(QPainter &painter, bool bSvg)
             DrawSamples(painter);
             DrawObstacles(painter);
         } else {
-            QElapsedTimer nanoTimer;
-            if(bDebug) nanoTimer.start();
             DrawSamples();
-            if(bDebug) qDebug() << "t" << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Generating Samples";
-            if(bDebug) nanoTimer.start();
             painter.drawPixmap(geometry(), maps.samples);
-            if(bDebug) qDebug() << "t"  << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Drawing Pixmap" << maps.samples.size();
-            if(bDebug) nanoTimer.start();
             DrawObstacles();
-            if(bDebug) qDebug() << "t"  << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Generating ObstaclesPixmap";
-            if(bDebug) nanoTimer.start();
             painter.drawPixmap(geometry(), maps.obstacles);
-            if(bDebug) qDebug() << "t"  << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Drawing Obstacles" << maps.obstacles.size();
-            if(bDebug) nanoTimer.start();
         }
     }
     if(bDisplayTrajectories && data->GetSequences().size() > 0) {
@@ -236,7 +230,7 @@ void Canvas::PaintCanvas(QPainter &painter, bool bSvg)
         if(liveTrajectory.size()) DrawLiveTrajectory(painter);
     }
     if(bDisplayGrid) {
-        if(bSvg) {
+        if(bSvg || bHighDPI) {
             DrawAxes(painter);
         } else {
             if(maps.grid.isNull()) RedrawAxes();
@@ -246,6 +240,70 @@ void Canvas::PaintCanvas(QPainter &painter, bool bSvg)
     if(bDisplayLegend) {
         DrawLegend(painter);
     }
+    if(bUseTimer) qDebug() << timer.nsecsElapsed()/1000 << "µsec/t" << "Drawing Buffered Canvas";
+}
+
+void Canvas::PaintSequentialCanvas(QPainter &painter, bool bSvg)
+{
+    bool bUseTimer = false;
+    QElapsedTimer timer;
+    if(bUseTimer) timer.start();
+    painter.setBackgroundMode(Qt::OpaqueMode);
+    painter.setBackground(Qt::white);
+    painter.fillRect(geometry(),Qt::white);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+    if(bDisplayMap && !maps.confidence.isNull())
+    {
+        painter.drawPixmap(geometry(), maps.confidence);
+    }
+
+    bool bDebug = false;
+#ifdef MACX
+    bDebug = true;
+#endif
+    if(bDisplaySamples) {
+        if(!maps.reward.isNull()) {
+            painter.drawPixmap(geometry(), maps.reward);
+        }
+        DrawSamples(painter);
+        DrawObstacles(painter);
+    }
+    if(bDisplayTrajectories && data->GetSequences().size() > 0) {
+        DrawTrajectories(painter);
+        if(targets.size()) DrawTargets(painter);
+    }
+    if(bDisplayTimeSeries && data->GetTimeSeries().size() > 0) {
+        if(bSvg) {
+        } else {
+            DrawTimeseries();
+            painter.drawPixmap(geometry(), maps.timeseries);
+        }
+    }
+    if(!bSvg && bDisplayLearned && sampleColors.size()) {
+        DrawSampleColors(painter);
+    }
+    if(!maps.animation.isNull()) {
+        painter.drawPixmap(geometry(), maps.animation);
+    }
+    if(!bSvg && bDisplayInfo && !maps.info.isNull()) {
+        painter.drawPixmap(geometry(), maps.info);
+    }
+    if(!bSvg && bShowCrosshair) {
+        if(bNewCrosshair) emit DrawCrosshair();
+        painter.setPen(Qt::black);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawPath(crosshair.translated(mouse));
+        if(liveTrajectory.size()) DrawLiveTrajectory(painter);
+    }
+    if(bDisplayGrid) {
+        DrawAxes(painter);
+    }
+    if(bDisplayLegend) {
+        DrawLegend(painter);
+    }
+    if(bUseTimer) qDebug() << timer.nsecsElapsed()/1000 << "µsec/t" << "Drawing Sequential Canvas";
 }
 
 void Canvas::PaintMultivariate(QPainter &painter, int type)
@@ -374,7 +432,7 @@ void Canvas::paintEvent(QPaintEvent *event)
     if(canvasType != 0) return; // we only draw if we're actually on the canvas
     bDrawing = true;
     QPainter painter(this);
-    PaintCanvas(painter);
+    PaintBufferedCanvas(painter);
     bDrawing = false;
 }
 
@@ -950,7 +1008,7 @@ void Canvas::DrawSamples()
         drawnSamples = 0;
         return;
     }
-    if(drawnSamples == data->GetCount()) return;
+    if(!maps.samples.isNull() && drawnSamples == data->GetCount()) return;
     if(drawnSamples > data->GetCount()) drawnSamples = 0;
 
     if(drawnSamples==0 || maps.samples.isNull())
@@ -1407,7 +1465,12 @@ void Canvas::DrawTimeseries()
 
 void Canvas::ResizeEvent()
 {
-    if(!canvasType && (width() != parentWidget()->width() || height() != parentWidget()->height())) resize(parentWidget()->size());
+    if(canvasType != 0) return;
+    if(width() == parentWidget()->width() && height() == parentWidget()->height()) resize(parentWidget()->size());
+    drawnSamples = 0;
+    maps.samples = QPixmap();
+    maps.model = QPixmap();
+
     bNewCrosshair = true;
     if(!maps.reward.isNull())
     {
@@ -1573,7 +1636,7 @@ QPixmap Canvas::GetScreenshot()
     bShowCrosshair = false;
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
-    if(!canvasType) PaintCanvas(painter);
+    if(!canvasType) PaintBufferedCanvas(painter);
     else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3D View, so we take out 2
     else
     {

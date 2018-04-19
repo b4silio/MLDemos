@@ -131,6 +131,12 @@ public:
     ivec GetInputDimensions();
     QStringList GetInfoFiles();
 
+    void UpdateClassifier();
+    void UpdateClusterer();
+    void UpdateRegressor();
+    void UpdateDynamical();
+    void UpdateProjector();
+
 signals:
     void Trained();
     void UpdateInfo();

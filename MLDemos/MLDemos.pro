@@ -100,7 +100,18 @@ SOURCES += \
     mldemos-contextmenus.cpp \
     mldemos-init.cpp \
     mldemos-optionschanged.cpp \
-    mldemos-showhide.cpp
+    mldemos-showhide.cpp \
+    algorithmmanager-io.cpp \
+    algorithmmanager-project.cpp \
+    algorithmmanager-classify.cpp \
+    algorithmmanager-cluster.cpp \
+    algorithmmanager-regress.cpp \
+    algorithmmanager-dynamical.cpp \
+    algorithmmanager-query.cpp \
+    algorithmmanager-maximize.cpp \
+    algorithmmanager-reinforce.cpp \
+    algorithmmanager-compare.cpp \
+    algorithmmanager-data.cpp
 
 OTHER_FILES += \
     shaders/drawSamples.fsh \

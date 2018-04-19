@@ -65,7 +65,7 @@
          <x>0</x>
          <y>0</y>
          <width>634</width>
-         <height>399</height>
+         <height>398</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -80,7 +80,7 @@
     </item>
     <item>
      <widget class="QWidget" name="canvasControlsWidget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,2">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,2">
        <property name="topMargin">
         <number>0</number>
        </property>
@@ -215,6 +215,24 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="restrictDimCheck">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Restrict multi-dimensional data to visible dimensions for Classification, Clustering and Regression processing. Uncheck if you want to use more than two dimensions of the data.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;NOTE: Classification boundaries, Cluster regions, Regression lines are not visible when unchecked unless the data is strictly two-dimensional&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Restrict to Visible dims</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
