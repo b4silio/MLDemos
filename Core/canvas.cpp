@@ -149,74 +149,69 @@ void Canvas::SetCanvasType(int type)
     bNewCrosshair = true;
 }
 
-void Canvas::PaintStandard(QPainter &painter, bool bSvg)
+void Canvas::PaintCanvas(QPainter &painter, bool bSvg)
 {
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
-
     painter.fillRect(geometry(),Qt::white);
-
-    if(bDisplayMap)
-    {
-        if(!maps.confidence.isNull()) painter.drawPixmap(geometry(), maps.confidence);
-    }
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
-    if(bDisplaySamples)
+    if(bDisplayMap && !maps.confidence.isNull())
     {
+        painter.drawPixmap(geometry(), maps.confidence);
+    }
+    painter.setBackgroundMode(Qt::TransparentMode);
+
+    bool bDebug = false;
+#ifdef MACX
+    bDebug = true;
+#endif
+    if(bDisplaySamples) {
         DrawRewards();
-        if(!maps.reward.isNull())
-        {
+        if(!maps.reward.isNull()) {
             painter.setBackgroundMode(Qt::OpaqueMode);
             painter.drawPixmap(geometry(), maps.reward);
-        }
-        if(bSvg)
-        {
             painter.setBackgroundMode(Qt::TransparentMode);
+        }
+        if(bSvg) {
             DrawSamples(painter);
             DrawObstacles(painter);
-        }
-        else
-        {
+        } else {
+            QElapsedTimer nanoTimer;
+            if(bDebug) nanoTimer.start();
             DrawSamples();
-            painter.setBackgroundMode(Qt::TransparentMode);
+            if(bDebug) qDebug() << "t" << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Generating Samples";
+            if(bDebug) nanoTimer.start();
             painter.drawPixmap(geometry(), maps.samples);
+            if(bDebug) qDebug() << "t"  << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Drawing Pixmap" << maps.samples.size();
+            if(bDebug) nanoTimer.start();
             DrawObstacles();
+            if(bDebug) qDebug() << "t"  << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Generating ObstaclesPixmap";
+            if(bDebug) nanoTimer.start();
             painter.drawPixmap(geometry(), maps.obstacles);
+            if(bDebug) qDebug() << "t"  << nanoTimer.nsecsElapsed()/1000 << "µsec\t" << "Drawing Obstacles" << maps.obstacles.size();
+            if(bDebug) nanoTimer.start();
         }
     }
-    if(bDisplayTrajectories)
-    {
-        if(bSvg)
-        {
+    if(bDisplayTrajectories && data->GetSequences().size() > 0) {
+        if(bSvg) {
             DrawTrajectories(painter);
-        }
-        else
-        {
+        } else {
             DrawTrajectories();
-            painter.setBackgroundMode(Qt::TransparentMode);
             painter.drawPixmap(geometry(), maps.trajectories);
         }
         if(targets.size()) DrawTargets(painter);
     }
-    if(bDisplayTimeSeries)
-    {
-        if(bSvg)
-        {
-
-        }
-        else
-        {
+    if(bDisplayTimeSeries && data->GetTimeSeries().size() > 0) {
+        if(bSvg) {
+        } else {
             DrawTimeseries();
-            painter.setBackgroundMode(Qt::TransparentMode);
             painter.drawPixmap(geometry(), maps.timeseries);
         }
     }
-    if(!bSvg && bDisplayLearned)
-    {
-        if(maps.model.isNull())
-        {
+    if(!bSvg && bDisplayLearned && sampleColors.size()) {
+        if(maps.model.isNull()) {
             int w = width();
             int h = height();
             maps.model = QPixmap(w,h);
@@ -227,43 +222,28 @@ void Canvas::PaintStandard(QPainter &painter, bool bSvg)
             QPainter painter(&maps.model);
             DrawSampleColors(painter);
         }
-        painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPixmap(geometry(), maps.model);
     }
-    if(!maps.animation.isNull())
-    {
-        painter.setBackgroundMode(Qt::TransparentMode);
+    if(!maps.animation.isNull()) {
         painter.drawPixmap(geometry(), maps.animation);
     }
-    if(!bSvg && bDisplayInfo && !maps.info.isNull())
-    {
-        painter.setBackgroundMode(Qt::TransparentMode);
+    if(!bSvg && bDisplayInfo && !maps.info.isNull()) {
         painter.drawPixmap(geometry(), maps.info);
     }
-    if(!bSvg && bShowCrosshair)
-    {
+    if(!bSvg && bShowCrosshair) {
         if(bNewCrosshair) emit DrawCrosshair();
-        painter.setBackgroundMode(Qt::TransparentMode);
         painter.drawPath(crosshair.translated(mouse));
         if(liveTrajectory.size()) DrawLiveTrajectory(painter);
     }
-    if(bDisplayGrid)
-    {
-        if(bSvg)
-        {
-            painter.setBackgroundMode(Qt::TransparentMode);
+    if(bDisplayGrid) {
+        if(bSvg) {
             DrawAxes(painter);
-        }
-        else
-        {
+        } else {
             if(maps.grid.isNull()) RedrawAxes();
-            painter.setBackgroundMode(Qt::TransparentMode);
             painter.drawPixmap(geometry(), maps.grid);
         }
     }
-    if(bDisplayLegend)
-    {
-        painter.setBackgroundMode(Qt::TransparentMode);
+    if(bDisplayLegend) {
         DrawLegend(painter);
     }
 }
@@ -391,20 +371,10 @@ void Canvas::PaintVariable(QPainter &painter, int type, fvec params)
 void Canvas::paintEvent(QPaintEvent *event)
 {
     if(bDrawing) return;
+    if(canvasType != 0) return; // we only draw if we're actually on the canvas
     bDrawing = true;
     QPainter painter(this);
-    if(!canvasType) PaintStandard(painter); // we only draw if we're actually on the canvas
-    /*
-    else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3d, so we take out 2
-    else
-    {
-        fvec params;
-        params.push_back(xIndex);
-        params.push_back(yIndex);
-        params.push_back(zIndex);
-        PaintVariable(painter, canvasType-6, params);
-    }
-    */
+    PaintCanvas(painter);
     bDrawing = false;
 }
 
@@ -698,6 +668,7 @@ void Canvas::DrawLegend(QPainter &painter)
         }
         painter.setPen(QPen(Qt::black, 1));
         painter.drawRect(rect);
+        painter.setRenderHint(QPainter::Antialiasing, true);
     }
     else // we draw the samples legend
     {
@@ -782,8 +753,6 @@ void Canvas::DrawAxes(QPainter &painter)
     if(mult == 0) mult = 1;
 
     // we now have the measure of the ticks, we can draw this
-    painter.setBackgroundMode(Qt::TransparentMode);
-    painter.setRenderHint(QPainter::Antialiasing, true);
     //painter.setRenderHint(QPainter::TextAntialiasing);
     painter.setBrush(Qt::NoBrush);
     painter.setFont(QFont("Lucida Grande", 9));
@@ -946,8 +915,6 @@ void Canvas::RedrawAxes()
 void Canvas::DrawSamples(QPainter &painter)
 {
     int radius = 10;
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     for(int i=0; i<data->GetCount(); i++)
     {
         if(data->GetFlag(i) == _TRAJ) continue;
@@ -960,8 +927,6 @@ void Canvas::DrawSamples(QPainter &painter)
 void Canvas::DrawSampleColors(QPainter &painter)
 {
     int radius = 10;
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     for(int i=0; i<data->GetCount(); i++)
     {
         if(i >= sampleColors.size()) continue;
@@ -976,14 +941,11 @@ void Canvas::DrawSampleColors(QPainter &painter)
 void Canvas::DrawSamples()
 {
     int radius = 10;
-    if(!data->GetCount())
+    if(data->GetCount() == 0)
     {
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        //QBitmap bitmap(w,h);
-        //bitmap.clear();
-        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
         return;
@@ -991,19 +953,13 @@ void Canvas::DrawSamples()
     if(drawnSamples == data->GetCount()) return;
     if(drawnSamples > data->GetCount()) drawnSamples = 0;
 
-    if(!drawnSamples || maps.samples.isNull())
+    if(drawnSamples==0 || maps.samples.isNull())
     {
         int w = width();
         int h = height();
         maps.samples = QPixmap(w,h);
-        //QBitmap bitmap(w,h);
-        //bitmap.clear();
-        //maps.samples.setMask(bitmap);
         maps.samples.fill(Qt::transparent);
         drawnSamples = 0;
-        //maps.model = QPixmap(w,h);
-        //maps.model.setMask(bitmap);
-        //maps.model.fill(Qt::transparent);
     }
     QPainter painter(&maps.samples);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -1022,14 +978,12 @@ void Canvas::DrawSamples()
 
 void Canvas::DrawTargets(QPainter &painter)
 {
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    FOR(i, targets.size())
-    {
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::black, 1.5));
+    FOR(i, targets.size()) {
         QPointF point = toCanvasCoords(targets[i]);
         QPointF delta1 = QPointF(1,1);
         QPointF delta2 = QPointF(1,-1);
-        painter.setBrush(Qt::NoBrush);
-        painter.setPen(QPen(Qt::black, 1.5));
         int r = 8, p = 2;
         painter.drawEllipse(point,r,r);
         painter.drawLine(point+delta1*r, point+delta1*r+delta1*p);
@@ -1073,8 +1027,6 @@ QPainterPath Canvas::DrawObstacle(Obstacle o)
 
 void Canvas::DrawObstacles(QPainter &painter)
 {
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     // we draw the obstacles
     if(!data->GetObstacles().size()) return;
     QList<QPainterPath> paths;
@@ -1179,9 +1131,6 @@ void Canvas::DrawTrajectories(QPainter &painter)
             bDrawing = true;
         }
     }
-
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     vector<fvec> samples = data->GetSamples();
 
@@ -1624,7 +1573,7 @@ QPixmap Canvas::GetScreenshot()
     bShowCrosshair = false;
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setBackground(Qt::white);
-    if(!canvasType) PaintStandard(painter);
+    if(!canvasType) PaintCanvas(painter);
     else if(canvasType <= 5) PaintMultivariate(painter, canvasType-2); // 0: standard, 1: 3D View, so we take out 2
     else
     {

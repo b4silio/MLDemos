@@ -191,7 +191,8 @@ public slots:
 	void ToClipboard();
 
 	void DrawCrosshair();
-	void Drawing(fvec sample, int label);
+    void CrosshairChanged();
+    void Drawing(fvec sample, int label);
     void Editing(int editType, fvec position, int label);
 	void DrawingStopped();
     void DimPlus();

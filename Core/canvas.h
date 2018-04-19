@@ -156,7 +156,7 @@ public:
 	int drawnTimeseries;
 	std::vector<fvec> liveTrajectory;
 
-    void PaintStandard(QPainter &painter, bool bSvg=false);
+    void PaintCanvas(QPainter &painter, bool bSvg=false);
     void PaintMultivariate(QPainter &painter, int type);
     void PaintVariable(QPainter &painter, int type, fvec params);
 
@@ -178,26 +178,8 @@ signals:
 	void Navigation(fvec sample);
 
 public:
-	/*
- static QPixmap toPixmap(IplImage *src)
- {
-  QPixmap pixmap;
-  if(src->nChannels == 4)
-  {
-   pixmap = QPixmap::fromImage(QImage((const unsigned char *)src->imageData,src->width, src->height, QImage::Format_RGB32)).copy();
-  }
-  else
-  {
-   IplImage *image = cvCreateImage(cvGetSize(src),8,4);
-   cvCvtColor(src, image, src->nChannels==1 ? CV_GRAY2BGRA : CV_BGR2BGRA);
-   QImage qimg = QImage((const unsigned char *)image->imageData, image->width, image->height, QImage::Format_RGB32);
-   pixmap = QPixmap::fromImage(qimg).copy();
-   cvReleaseImage(&image);
-  }
-  return pixmap;
- }
- */
-	static void drawCross(QPainter &painter, QPointF point, float radius, int label)
+
+    static inline void drawCross(QPainter &painter, QPointF point, float radius, int label)
 	{
 		float x = point.x();
 		float y = point.y();
@@ -221,7 +203,7 @@ public:
 		painter.drawLine(QPointF(x+radius, y-radius), QPointF(x-radius, y+radius));
 	}
 
-	static void drawSample(QPainter &painter, QPointF point, float radius, int label)
+    static inline void drawSample(QPainter &painter, QPointF point, float radius, int label)
 	{
 		float x = point.x();
 		float y = point.y();
@@ -237,7 +219,6 @@ public:
         if(painter.brush().color() != color) painter.setBrush(color);
         if(painter.pen().color() != edge) painter.setPen(edge);
 		painter.drawEllipse(QRectF(x-radius/2.,y-radius/2.,radius,radius));
-
 	}
 
     static QRgb GetColorMapValue(float value, int colorscheme);

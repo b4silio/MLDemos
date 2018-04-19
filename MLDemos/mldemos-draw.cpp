@@ -489,6 +489,12 @@ void MLDemos::DrawCrosshair()
     canvas->bNewCrosshair = false;
 }
 
+void MLDemos::CrosshairChanged()
+{
+    canvas->bNewCrosshair = true;
+    DrawCrosshair();
+}
+
 
 void MLDemos::TargetButton()
 {

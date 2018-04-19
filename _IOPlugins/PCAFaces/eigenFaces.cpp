@@ -7,6 +7,7 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/video/tracking.hpp>
 #include <opencv2/ml/ml.hpp>
+#include <cmath>
 
 
 EigenFaces::EigenFaces()
@@ -217,7 +218,7 @@ IplImage *EigenFaces::DrawEigenVals()
 	cvSet(eigImage, CV_RGB(255,255,255));
 
 	float maxEigVal = 0;
-    FOR(i, dim-2) if(!isnan(eigenValues.at<float>(i))) maxEigVal += eigenValues.at<float>(i);
+    FOR(i, dim-2) if(!std::isnan(eigenValues.at<float>(i))) maxEigVal += eigenValues.at<float>(i);
 	float accumulator = 0;
     maxEigVal = max(1.f,maxEigVal);
 
@@ -226,7 +227,7 @@ IplImage *EigenFaces::DrawEigenVals()
 	CvPoint point = cvPoint(0,0);
     FOR(i, dim-2) { // dim -2 because for some reasons the last two eigenvalues are often fubared
         float eigVal = eigenValues.at<float>(i);
-        if(!isnan(eigVal)) {
+        if(!std::isnan(eigVal)) {
             CvPoint point2 = cvPoint(i * eigImage->width / dim, eigImage->height - (int)(eigVal / maxEigVal * eigImage->height));
             //cvDrawCircle(eigImage, point, 1, CV_RGB(0,0,0), -1, CV_AA);
             cvDrawLine(eigImage, point, point2, CV_RGB(0,0,0));
@@ -268,12 +269,12 @@ IplImage *EigenFaces::DrawEigenVals()
         float nextEigVal = i < max(eigenValues.cols,eigenValues.rows)-1 ? eigenValues.at<float>(i+1) : 0;
         int y = font.line_type*(i+2);
         if(y > display->height) continue;
-        if(!isnan(eigVal))
+        if(!std::isnan(eigVal))
         {
             accumulator += eigVal / maxEigVal;
             sprintf(text,"e%d: %.2f %.1f%%", i+1, eigVal, accumulator*100);
         }
-        else if(i > 0 && i < dim-3 && !isnan(prevEigVal) && !isnan(nextEigVal))
+        else if(i > 0 && i < dim-3 && !std::isnan(prevEigVal) && !std::isnan(nextEigVal))
         {
             float middleEigVal = (prevEigVal + nextEigVal)/2;
             float newAccumulator = accumulator + nextEigVal/maxEigVal;

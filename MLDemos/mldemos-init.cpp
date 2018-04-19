@@ -210,6 +210,7 @@ void MLDemos::initToolBars()
     drawToolbar->sprayClassButton->setText("");
     connect(drawToolbar->dimPlusButton, SIGNAL(clicked()), this, SLOT(DimPlus()));
     connect(drawToolbar->dimLessButton, SIGNAL(clicked()), this, SLOT(DimLess()));
+    connect(drawToolbar->radiusSpin, SIGNAL(valueChanged(double)), this, SLOT(CrosshairChanged()));
 }
 
 void MLDemos::initDialogs()
