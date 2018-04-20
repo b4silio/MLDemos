@@ -22,93 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-void AlgorithmManager::Train(Clusterer *clusterer, float trainRatio, bvec trainList, float *testFMeasures, std::vector<fvec> samples, ivec labels)
-{
-    if(!clusterer) return;
-    if(!samples.size()) samples = canvas->data->GetSamples();
-    if(!labels.size()) labels = canvas->data->GetLabels();
-    if(trainList.size())
-    {
-        vector<fvec> trainSamples;
-        FOR(i, trainList.size())
-        {
-            if(trainList[i])
-            {
-                trainSamples.push_back(samples[i]);
-            }
-        }
-        clusterer->Train(trainSamples);
-    }
-    else if(trainRatio < 1)
-    {
-        int trainCnt = samples.size()*trainRatio;
-        vector<fvec> trainSamples(trainCnt);
-        u32 *perm = randPerm(samples.size());
-        FOR(i, trainCnt)
-        {
-            trainSamples[i] = samples[perm[i]];
-        }
-        clusterer->Train(trainSamples);
-        delete [] perm;
-    }
-    else clusterer->Train(samples);
-    // we test the clusters to see how well they classify the samples
-
-    if(!testFMeasures) return;
-    // we compute the f-measures for each class
-    map<int,int> classcounts;
-    int cnt = 0;
-    FOR(i, labels.size()) if(!classcounts.count(labels[i])) classcounts[labels[i]] = cnt++;
-    int classCount = classcounts.size();
-    map<int, fvec> classScores;
-    int nbClusters = clusterer->NbClusters();
-    fvec clusterScores(nbClusters);
-    map<int,float> labelScores;
-
-    vector<fvec> scores(samples.size());
-    FOR(i, canvas->data->GetCount())
-    {
-        fvec result = clusterer->Test(samples[i]);
-        if(clusterer->NbClusters()==1) scores[i] = result;
-        else if(result.size()>1) scores[i] = result;
-        else scores[i] = fvec(nbClusters,0);
-    }
-
-    FOR(i, labels.size())
-    {
-        int label = labels[i];
-        labelScores[label] += 1.f;
-        if(!classScores.count(label)) classScores[label].resize(nbClusters);
-        FOR(k, nbClusters)
-        {
-            float score = k < scores[i].size() ? scores[i][k] : 0;
-            classScores[label][k] += score;
-            clusterScores[k] += score;
-        }
-    }
-
-    float fmeasure = 0;
-    map<int,float>::iterator it2 = labelScores.begin();
-    for(map<int,fvec>::iterator it = classScores.begin(); it != classScores.end(); it++, it2++)
-    {
-        float maxScore = -FLT_MAX;
-        FOR(k, nbClusters)
-        {
-            float precision = it->second[k] / it2->second;
-            float recall = it->second[k] / clusterScores[k];
-            float f1 = 2*precision*recall/(precision+recall);
-            maxScore = max(maxScore,f1);
-        }
-        fmeasure += maxScore;
-    }
-    int classAndClusterCount = classCount;
-    // we penalize empty clusters
-    FOR(k, nbClusters) if(clusterScores[k] == 0) classAndClusterCount++; // we have an empty cluster!
-    fmeasure /= classAndClusterCount;
-
-    *testFMeasures = fmeasure;
-}
-
 float AlgorithmManager::ClusterFMeasure(std::vector<fvec> samples, ivec labels, std::vector<fvec> scores, float ratio)
 {
     if(!samples.size() || !scores.size()) return 0;
@@ -179,7 +92,6 @@ float AlgorithmManager::ClusterFMeasure(std::vector<fvec> samples, ivec labels, 
 
     return -fmeasure;
 }
-
 
 void AlgorithmManager::Cluster()
 {
@@ -296,6 +208,7 @@ void AlgorithmManager::Cluster()
     */
 
     drawTimer->clusterer= &this->clusterer;
+    drawTimer->inputDims = GetInputDimensions();
     drawTimer->start(QThread::NormalPriority);
 }
 
@@ -403,6 +316,7 @@ void AlgorithmManager::ClusterTest()
     mldemos->statsDialog->show();
 
     drawTimer->clusterer= &this->clusterer;
+    drawTimer->inputDims = GetInputDimensions();
     drawTimer->start(QThread::NormalPriority);
     canvas->repaint();
 }
@@ -635,6 +549,7 @@ void AlgorithmManager::ClusterOptimize()
     */
 
     drawTimer->clusterer= &this->clusterer;
+    drawTimer->inputDims = GetInputDimensions();
     drawTimer->start(QThread::NormalPriority);
     canvas->repaint();
 }
@@ -691,4 +606,96 @@ void AlgorithmManager::ClusterIterate()
     canvas->repaint();
 
     emit UpdateInfo();
+}
+
+void AlgorithmManager::Train(Clusterer *clusterer, float trainRatio, bvec trainList, float *testFMeasures, std::vector<fvec> samples, ivec labels)
+{
+    if(!clusterer) return;
+    if(!labels.size()) labels = canvas->data->GetLabels();
+    ivec inputDims = GetInputDimensions();
+    if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims);
+    else samples = canvas->data->GetSampleDims(samples, inputDims);
+    sourceDims = inputDims;
+    canvas->sourceDims = inputDims;
+
+    if(trainList.size())
+    {
+        vector<fvec> trainSamples;
+        FOR(i, trainList.size())
+        {
+            if(trainList[i])
+            {
+                trainSamples.push_back(samples[i]);
+            }
+        }
+        clusterer->Train(trainSamples);
+    }
+    else if(trainRatio < 1)
+    {
+        int trainCnt = samples.size()*trainRatio;
+        vector<fvec> trainSamples(trainCnt);
+        u32 *perm = randPerm(samples.size());
+        FOR(i, trainCnt)
+        {
+            trainSamples[i] = samples[perm[i]];
+        }
+        clusterer->Train(trainSamples);
+        delete [] perm;
+    }
+    else clusterer->Train(samples);
+    // we test the clusters to see how well they classify the samples
+
+    if(!testFMeasures) return;
+    // we compute the f-measures for each class
+    map<int,int> classcounts;
+    int cnt = 0;
+    FOR(i, labels.size()) if(!classcounts.count(labels[i])) classcounts[labels[i]] = cnt++;
+    int classCount = classcounts.size();
+    map<int, fvec> classScores;
+    int nbClusters = clusterer->NbClusters();
+    fvec clusterScores(nbClusters);
+    map<int,float> labelScores;
+
+    vector<fvec> scores(samples.size());
+    FOR(i, canvas->data->GetCount())
+    {
+        fvec result = clusterer->Test(samples[i]);
+        if(clusterer->NbClusters()==1) scores[i] = result;
+        else if(result.size()>1) scores[i] = result;
+        else scores[i] = fvec(nbClusters,0);
+    }
+
+    FOR(i, labels.size())
+    {
+        int label = labels[i];
+        labelScores[label] += 1.f;
+        if(!classScores.count(label)) classScores[label].resize(nbClusters);
+        FOR(k, nbClusters)
+        {
+            float score = k < scores[i].size() ? scores[i][k] : 0;
+            classScores[label][k] += score;
+            clusterScores[k] += score;
+        }
+    }
+
+    float fmeasure = 0;
+    map<int,float>::iterator it2 = labelScores.begin();
+    for(map<int,fvec>::iterator it = classScores.begin(); it != classScores.end(); it++, it2++)
+    {
+        float maxScore = -FLT_MAX;
+        FOR(k, nbClusters)
+        {
+            float precision = it->second[k] / it2->second;
+            float recall = it->second[k] / clusterScores[k];
+            float f1 = 2*precision*recall/(precision+recall);
+            maxScore = max(maxScore,f1);
+        }
+        fmeasure += maxScore;
+    }
+    int classAndClusterCount = classCount;
+    // we penalize empty clusters
+    FOR(k, nbClusters) if(clusterScores[k] == 0) classAndClusterCount++; // we have an empty cluster!
+    fmeasure /= classAndClusterCount;
+
+    *testFMeasures = fmeasure;
 }

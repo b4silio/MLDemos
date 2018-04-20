@@ -98,8 +98,8 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(compare->paramsWidget,SIGNAL(closed()),mldemos,SLOT(HideOptionCompare()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), mldemos, SLOT(ShowRoc()));
-    connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
-    connect(optionsClassify->inputDimButton, SIGNAL(clicked()), mldemos, SLOT(InputDimensions()));
+    connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ShowManualSelection()));
+    connect(optionsClassify->inputDimButton, SIGNAL(clicked()), mldemos, SLOT(ShowInputDimensions()));
     connect(optionsClassify->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
     if (!optionsClassify->algoWidget->layout()) {
         QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsClassify->algoWidget);
@@ -112,8 +112,8 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsRegress->saveButton, SIGNAL(clicked()), this, SLOT(SaveRegressor()));
     connect(optionsRegress->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
     connect(optionsRegress->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
-    connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
-    connect(optionsRegress->inputDimButton, SIGNAL(clicked()), mldemos, SLOT(InputDimensions()));
+    connect(optionsRegress->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ShowManualSelection()));
+    connect(optionsRegress->inputDimButton, SIGNAL(clicked()), mldemos, SLOT(ShowInputDimensions()));
     connect(optionsRegress->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
     if (!optionsRegress->algoWidget->layout()) {
         QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsRegress->algoWidget);
@@ -127,7 +127,7 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsCluster->testButton, SIGNAL(clicked()), this, SLOT(ClusterTest()));
     connect(optionsCluster->optimizeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(ClusterChanged()));
     connect(optionsCluster->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
-    connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
+    connect(optionsCluster->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ShowManualSelection()));
     connect(optionsCluster->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
     if (!optionsCluster->algoWidget->layout()) {
         QHBoxLayout *horizontalLayout = new QHBoxLayout(optionsCluster->algoWidget);
@@ -191,7 +191,7 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsProject->manifoldButton, SIGNAL(clicked()), this, SLOT(ProjectManifold()));
     connect(optionsProject->revertButton, SIGNAL(clicked()), this, SLOT(ProjectRevert()));
     connect(optionsProject->reprojectButton, SIGNAL(clicked()), this, SLOT(ProjectReproject()));
-    connect(optionsProject->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ManualSelection()));
+    connect(optionsProject->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ShowManualSelection()));
     connect(optionsProject->algoList, SIGNAL(currentIndexChanged(int)), mldemos, SLOT(AlgoChanged()));
     optionsProject->reprojectButton->setEnabled(false);
     optionsProject->revertButton->setEnabled(false);
@@ -321,6 +321,7 @@ void AlgorithmManager::AvoidOptionChanged()
         mutex->unlock();
         drawTimer->Stop();
         drawTimer->Clear();
+        drawTimer->inputDims = GetInputDimensions();
         drawTimer->start(QThread::NormalPriority);
     }
 }
@@ -332,6 +333,7 @@ void AlgorithmManager::ColorMapChanged()
         drawTimer->Stop();
         drawTimer->Clear();
         drawTimer->bColorMap = optionsDynamic->colorCheck->isChecked();
+        drawTimer->inputDims = GetInputDimensions();
         drawTimer->start(QThread::NormalPriority);
     }
 }
@@ -346,6 +348,13 @@ void AlgorithmManager::ClusterChanged()
         optionsCluster->trainRatioF1->setVisible(false);
 
     }
+}
+
+void AlgorithmManager::RestrictDimChanged()
+{
+    optionsClassify->inputDimButton->setEnabled(!mldemos->ui.restrictDimCheck->isChecked());
+    optionsRegress->inputDimButton->setEnabled(!mldemos->ui.restrictDimCheck->isChecked());
+    optionsRegress->outputDimCombo->setEnabled(!mldemos->ui.restrictDimCheck->isChecked());
 }
 
 void AlgorithmManager::SetAlgorithmWidget()

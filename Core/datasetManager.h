@@ -144,17 +144,12 @@ protected:
 	int size; // the samples size (dimension)
 
 	std::vector< fvec > samples;
-
 	std::vector< ipair > sequences;
-
 	std::vector<dsmFlags> flags;
-
 	std::vector<Obstacle> obstacles;
-
 	std::vector<TimeSerie> series;
 
 	RewardMap rewards;
-
 	ivec labels;
 
 	u32 *perm;
@@ -186,7 +181,7 @@ public:
 
     fvec GetSample(const int index=0) const { return (index < samples.size()) ? samples[index] : fvec(); }
     fvec GetSampleDim(const int index, const ivec inputDims, const int outputDim=-1) const;
-    std::vector< fvec > GetSamples() const {return samples;}
+    std::vector< fvec > GetSamples() const;
     std::vector< fvec > GetSamples(const u32 count, const dsmFlags flag=_UNUSED, const dsmFlags replaceWith=_TRAIN);
     std::vector< fvec > GetSampleDims(const ivec inputDims, const int outputDim=-1) const ;
     std::vector< fvec > GetSampleDims(const std::vector<fvec> samples, const ivec inputDims, const int outputDim=-1) const ;

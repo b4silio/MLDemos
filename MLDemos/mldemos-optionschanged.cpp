@@ -36,18 +36,25 @@ void MLDemos::DisplayOptionsChanged()
     canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
     canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
     canvas->bDisplayLegend = displayOptions->legendCheck->isChecked();
-    {
-        int xIndex = ui.canvasX1Spin->value()-1;
-        int yIndex = ui.canvasX2Spin->value()-1;
-        int zIndex = ui.canvasX3Spin->value()-1;
-        canvas->SetDim(xIndex, yIndex, zIndex);
+
+    int xIndex = ui.canvasX1Spin->value()-1;
+    int yIndex = ui.canvasX2Spin->value()-1;
+    int zIndex = ui.canvasX3Spin->value()-1;
+    bool bCanvasIndicesChanged = canvas->SetDim(xIndex, yIndex, zIndex);
+    if(bCanvasIndicesChanged) {
+        if(ui.restrictDimCheck->isChecked()) {
+            Clear();
+        }
+        canvas->FitToData();
     }
+
     float zoom = displayOptions->spinZoom->value();
     if (zoom >= 0.f) zoom += 1.f;
     else zoom = 1.f / (fabs(zoom)+1.f);
     if (zoom != canvas->GetZoom()) {
         drawTimer->Stop();
         drawTimer->Clear();
+        drawTimer->inputDims = algo->GetInputDimensions();
         canvas->SetZoom(zoom);
         if (mutex.tryLock()) {
             if (!canvas->canvasType) {

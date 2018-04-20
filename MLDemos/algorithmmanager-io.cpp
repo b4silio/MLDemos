@@ -41,6 +41,7 @@ void AlgorithmManager::LoadClassifier()
         DrawClassifiedSamples(canvas, classifier, classifierMulti);
         if(drawTimer->isRunning()) drawTimer->Stop();
         drawTimer->Clear();
+        drawTimer->inputDims = GetInputDimensions();
         drawTimer->start(QThread::NormalPriority);
     }
     else DEL(classifier);
@@ -71,6 +72,7 @@ void AlgorithmManager::LoadRegressor()
         regressors[tab]->Draw(canvas, regressor);
         if(drawTimer->isRunning()) drawTimer->Stop();
         drawTimer->Clear();
+        drawTimer->inputDims = GetInputDimensions();
         drawTimer->start(QThread::NormalPriority);
     }
     else DEL(regressor);

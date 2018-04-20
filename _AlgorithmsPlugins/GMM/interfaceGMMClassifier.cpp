@@ -156,6 +156,10 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
     if(!gmms.size()) return;
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
+    if(canvas->sourceDims.size()==2){
+        xIndex = 0;
+        yIndex = 1;
+    }
     int dim = gmms[0]->dim;
     float mean[2];
     float sigma[3];
@@ -179,9 +183,8 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
             painter.setPen(QPen(Qt::black, 0.5));
             DrawEllipse(mean, sigma, 2, &painter, canvas);
             QPointF point = canvas->toCanvasCoords(mean[0],mean[1]);
-            QColor color = classifier->inverseMap.size() == 2 ?
-                        SampleColor[classifier->inverseMap[-1]==g ? 0 : 1] :
-                                                                    SampleColor[classifier->inverseMap[g]%SampleColorCnt];
+            int colorIndex = classifier->inverseMap.size() == 2 ? (classifier->inverseMap[-1]==g ? 0 : 1) : classifier->inverseMap[g];
+            QColor color = SampleColor[colorIndex % SampleColorCnt];
             painter.setPen(QPen(Qt::black, 12));
             painter.drawEllipse(point, 6, 6);
             painter.setPen(QPen(color,4));
@@ -189,7 +192,8 @@ void ClassGMM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
         }
     }
 
-    vector<fvec> samples = canvas->data->GetSamples();
+    vector<fvec> samples = canvas->data->GetSampleDims(canvas->sourceDims);
+
     fvec minv (dim, FLT_MAX);
     fvec maxv (dim, -FLT_MAX);
     FOR(i, samples.size())

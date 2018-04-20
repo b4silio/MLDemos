@@ -21,26 +21,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-void AlgorithmManager::Train(Projector *projector, bvec trainList)
-{
-    if(!projector) return;
-    if(trainList.size())
-    {
-        vector<fvec> trainSamples;
-        ivec trainLabels;
-        FOR(i, trainList.size())
-        {
-            if(trainList[i])
-            {
-                trainSamples.push_back(canvas->data->GetSample(i));
-                trainLabels.push_back(canvas->data->GetLabel(i));
-            }
-        }
-        projector->Train(trainSamples, trainLabels);
-    }
-    else projector->Train(canvas->data->GetSamples(), canvas->data->GetLabels());
-}
-
 void AlgorithmManager::Project()
 {
     std::cout<< "AlgorithmManager::Project()" << std::endl;
@@ -212,4 +192,24 @@ void AlgorithmManager::ProjectReproject()
     sourceLabels = canvas->data->GetLabels();
     mutex->unlock();
     Project();
+}
+
+void AlgorithmManager::Train(Projector *projector, bvec trainList)
+{
+    if(!projector) return;
+    if(trainList.size())
+    {
+        vector<fvec> trainSamples;
+        ivec trainLabels;
+        FOR(i, trainList.size())
+        {
+            if(trainList[i])
+            {
+                trainSamples.push_back(canvas->data->GetSample(i));
+                trainLabels.push_back(canvas->data->GetLabel(i));
+            }
+        }
+        projector->Train(trainSamples, trainLabels);
+    }
+    else projector->Train(canvas->data->GetSamples(), canvas->data->GetLabels());
 }

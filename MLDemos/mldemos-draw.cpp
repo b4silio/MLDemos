@@ -123,6 +123,7 @@ void MLDemos::Drawing(fvec sample, int label)
             if (anythingDeleted) {
                 drawTimer->Stop();
                 drawTimer->Clear();
+                drawTimer->inputDims = algo->GetInputDimensions();
                 QMutexLocker lock(&mutex);
                 if (algo->dynamical && algo->dynamical->avoid) algo->dynamical->avoid->SetObstacles(canvas->data->GetObstacles());
                 drawTimer->start(QThread::NormalPriority);
@@ -360,6 +361,7 @@ void MLDemos::DrawingStopped()
         if (algo->dynamical && algo->dynamical->avoid) {
             drawTimer->Stop();
             drawTimer->Clear();
+            drawTimer->inputDims = algo->GetInputDimensions();
             drawTimer->start(QThread::NormalPriority);
         }
     }

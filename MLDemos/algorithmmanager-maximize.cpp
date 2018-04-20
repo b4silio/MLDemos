@@ -22,65 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-void AlgorithmManager::Train(Maximizer *maximizer)
-{
-    if(!maximizer) return;
-    if(canvas->maps.reward.isNull()) return;
-    QImage rewardImage = canvas->maps.reward.toImage();
-    QRgb *pixels = (QRgb*) rewardImage.bits();
-    int w = rewardImage.width();
-    int h = rewardImage.height();
-
-    float *data = new float[w*h];
-    float maxData = 0;
-    FOR(i, w*h)
-    {
-        data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
-        maxData = max(maxData, data[i]);
-    }
-    if(maxData > 0)
-    {
-        FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
-    }
-    ivec size;
-    size.push_back(w);
-    size.push_back(h);
-    fvec low(2,0.f);
-    fvec high(2,1.f);
-    canvas->data->GetReward()->SetReward(data, size, low, high);
-    //    delete [] data;
-
-    fvec startingPoint;
-    if(canvas->targets.size())
-    {
-        startingPoint = canvas->targets.back();
-        QPointF starting = canvas->toCanvasCoords(startingPoint);
-        startingPoint[0] = starting.x()/w;
-        startingPoint[1] = starting.y()/h;
-    }
-    else
-    {
-        startingPoint.resize(2);
-        startingPoint[0] = drand48();
-        startingPoint[1] = drand48();
-    }
-    //data = canvas->data->GetReward()->GetRewardFloat();
-    maximizer->Train(data, fVec(w,h), startingPoint);
-    maximizer->age = 0;
-    delete [] data;
-}
-
-void AlgorithmManager::Test(Maximizer *maximizer)
-{
-    if(!maximizer) return;
-    do
-    {
-        fvec sample = maximizer->Test(maximizer->Maximum());
-        maximizer->age++;
-    }
-    while(maximizer->age < maximizer->maxAge && maximizer->MaximumValue() < maximizer->stopValue);
-}
-
 void AlgorithmManager::Maximize()
 {
     if(!canvas) return;
@@ -193,3 +134,61 @@ void AlgorithmManager::MaximizeContinue()
     }
 }
 
+void AlgorithmManager::Train(Maximizer *maximizer)
+{
+    if(!maximizer) return;
+    if(canvas->maps.reward.isNull()) return;
+    QImage rewardImage = canvas->maps.reward.toImage();
+    QRgb *pixels = (QRgb*) rewardImage.bits();
+    int w = rewardImage.width();
+    int h = rewardImage.height();
+
+    float *data = new float[w*h];
+    float maxData = 0;
+    FOR(i, w*h)
+    {
+        data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+        maxData = max(maxData, data[i]);
+    }
+    if(maxData > 0)
+    {
+        FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
+    }
+    ivec size;
+    size.push_back(w);
+    size.push_back(h);
+    fvec low(2,0.f);
+    fvec high(2,1.f);
+    canvas->data->GetReward()->SetReward(data, size, low, high);
+    //    delete [] data;
+
+    fvec startingPoint;
+    if(canvas->targets.size())
+    {
+        startingPoint = canvas->targets.back();
+        QPointF starting = canvas->toCanvasCoords(startingPoint);
+        startingPoint[0] = starting.x()/w;
+        startingPoint[1] = starting.y()/h;
+    }
+    else
+    {
+        startingPoint.resize(2);
+        startingPoint[0] = drand48();
+        startingPoint[1] = drand48();
+    }
+    //data = canvas->data->GetReward()->GetRewardFloat();
+    maximizer->Train(data, fVec(w,h), startingPoint);
+    maximizer->age = 0;
+    delete [] data;
+}
+
+void AlgorithmManager::Test(Maximizer *maximizer)
+{
+    if(!maximizer) return;
+    do
+    {
+        fvec sample = maximizer->Test(maximizer->Maximum());
+        maximizer->age++;
+    }
+    while(maximizer->age < maximizer->maxAge && maximizer->MaximumValue() < maximizer->stopValue);
+}

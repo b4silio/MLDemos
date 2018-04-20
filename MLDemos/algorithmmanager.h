@@ -113,8 +113,7 @@ public:
                       QList<ProjectorInterface *> projectors,
                       QList<InputOutputInterface *> inputoutputs);
 
-    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1,
-               std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
+    bool Train(Classifier *classifier, float trainRatio=1, bvec trainList = bvec(), int positiveIndex=-1, std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
     void Train(Regressor *regressor, int outputDim=-1, float trainRatio=1, bvec trainList = bvec(), std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
     fvec Train(Dynamical *dynamical);
     void Train(Clusterer *clusterer, float trainRatio=1, bvec trainList = bvec(), float *testFMeasures=0, std::vector<fvec> samples=std::vector<fvec>(), ivec labels=ivec());
@@ -181,6 +180,7 @@ public slots:
     void AvoidOptionChanged();
     void ColorMapChanged();
     void ClusterChanged();
+    void RestrictDimChanged();
     void SetAlgorithmWidget();
 
     void QueryClassifier(std::vector<fvec> samples);

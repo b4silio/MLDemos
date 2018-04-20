@@ -148,7 +148,7 @@ public:
 	float GetZoom(){return zoom;}
 	void SetCenter(fvec center);
 	fvec GetCenter(){return center;}
-    void SetDim(int xIndex, int yIndex, int zIndex=0);
+    bool SetDim(int xIndex, int yIndex, int zIndex=0);
 
 	std::map<int,fvec> centers;
 	int drawnSamples;

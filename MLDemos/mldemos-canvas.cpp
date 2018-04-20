@@ -35,6 +35,7 @@ void MLDemos::FitToData()
     displayOptions->spinZoom->blockSignals(false);
     drawTimer->Stop();
     drawTimer->Clear();
+    drawTimer->inputDims = algo->GetInputDimensions();
     if (!canvas->canvasType) {
         QMutexLocker lock(&mutex);
         if (algo->classifier) {
@@ -67,7 +68,7 @@ void MLDemos::CanvasMoveEvent()
     drawTimer->Stop();
     drawTimer->Clear();
     algo->UpdateLearnedModel();
-
+    drawTimer->inputDims = algo->GetInputDimensions();
     QMutexLocker lock(&mutex);
     if (canvas->canvasType != 1) {
         if (algo->classifier) {
@@ -239,10 +240,10 @@ void MLDemos::CanvasOptionsChanged()
         ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         canvas->SetCanvasType(canvas->canvasType);
         canvas->ResizeEvent();
-
         if (mutex.tryLock()) {
             if (algo->clusterer) {
                 algo->clusterers[algo->tabUsedForTraining]->Draw(canvas, algo->clusterer);
+                drawTimer->inputDims = algo->GetInputDimensions();
                 drawTimer->start(QThread::NormalPriority);
             } else if (algo->dynamical) {
                 algo->dynamicals[algo->tabUsedForTraining]->Draw(canvas, algo->dynamical);
@@ -276,6 +277,7 @@ void MLDemos::CanvasOptionsChanged()
         } else if (algo->maximizer) {
         } else if (algo->clusterer) {
             algo->clusterers[algo->tabUsedForTraining]->Draw(canvas, algo->clusterer);
+            drawTimer->inputDims = algo->GetInputDimensions();
             drawTimer->start(QThread::NormalPriority);
         } else if (algo->projector) {
             algo->projectors[algo->tabUsedForTraining]->Draw(canvas, algo->projector);

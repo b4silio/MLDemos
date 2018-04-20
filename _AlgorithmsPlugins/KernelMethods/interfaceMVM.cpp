@@ -321,9 +321,10 @@ void ClassMVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
     painter.setRenderHint(QPainter::Antialiasing, true);
     FOR(i, canvas->data->GetCount())
     {
-        fvec sample = canvas->data->GetSample(i);
+        fvec sample = canvas->data->GetSampleDim(i, canvas->sourceDims);
+        fvec fullSample = canvas->data->GetSample(i);
         int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
+        QPointF point = canvas->toCanvasCoords(fullSample);
         float response = classifier->Test(sample);
         if(response > 0)
         {

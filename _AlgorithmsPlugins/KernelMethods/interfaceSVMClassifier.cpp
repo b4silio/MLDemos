@@ -458,11 +458,9 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
         FOR(i, sv.size())
         {
             fvec sample = sv[i];
-            if(canvas->sourceDims.size())
-            {
+            if(canvas->sourceDims.size()) {
                 fvec newSample(dim, 0);
-                FOR(d, canvas->sourceDims.size())
-                {
+                FOR(d, canvas->sourceDims.size()) {
                     newSample[canvas->sourceDims[d]] = sample[d];
                 }
                 sample = newSample;
@@ -491,12 +489,12 @@ void ClassSVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
             fvec sample(dim,0);
             FOR(i, svm->l)
             {
-                if(canvas->sourceDims.size())
-                {
-                    FOR(d, canvas->sourceDims.size()) sample[canvas->sourceDims[d]] = svm->SV[i][d].value;
-                }
-                else
-                {
+                if(canvas->sourceDims.size()) {
+                    FOR(d, canvas->sourceDims.size()) {
+                        if(canvas->sourceDims[d] < 0 || canvas->sourceDims[d] >= dim) continue;
+                        sample[canvas->sourceDims[d]] = svm->SV[i][d].value;
+                    }
+                } else {
                     FOR(d, dim) sample[d] = (f32)svm->SV[i][d].value;
                 }
                 int radius = 9;

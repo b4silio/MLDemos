@@ -171,13 +171,14 @@ void ClustFlame::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *cluster
     FOR(i, canvas->data->GetSamples().size())
 	{
         // we get the sample
-        fvec sample = canvas->data->GetSample(i);
+        fvec sample = canvas->data->GetSampleDim(i,canvas->sourceDims);
+        fvec fullSample = canvas->data->GetSample(i);
 
         // and we test it using the clusterer
         fvec res = clusterer->Test(sample);
 
         // we get the point in canvas coordinates (2D pixel by pixel) corresponding to the sample (N-dimensional in R)
-        QPointF point = canvas->toCanvasCoords(sample);
+        QPointF point = canvas->toCanvasCoords(fullSample);
 
         // we combine together the contribution of each cluster to color the sample properly
 		float r=0,g=0,b=0;

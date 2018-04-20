@@ -18,123 +18,9 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "algorithmmanager.h"
+#include "mldemos.h"
 
 using namespace std;
-
-void AlgorithmManager::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList, std::vector<fvec> samples, ivec labels)
-{
-    if(!regressor || !canvas->data->GetCount()) return;
-
-    ivec inputDims = GetInputDimensions();
-    // Bug Regression crashing --- Guillaume
-    if(inputDims.size() == 0){
-        unsigned int nbDim = canvas->data->GetDimCount();
-        inputDims.resize(nbDim);
-        FOR(i,nbDim){
-           inputDims[i]=i;
-        }
-    }
-
-    int outputIndexInList = -1;
-    if(inputDims.size()==1 && inputDims[0] == outputDim) return; // we dont have enough dimensions for training
-    FOR(i, inputDims.size()) if(outputDim == inputDims[i])
-    {
-        outputIndexInList = i;
-        break;
-    }
-    if(outputIndexInList == -1) inputDims.push_back(outputDim);
-    outputIndexInList = inputDims.size()-1;
-    sourceDims = inputDims;
-
-    if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
-    else samples = canvas->data->GetSampleDims(samples, inputDims, outputIndexInList == -1 ? outputDim : -1);
-    if(!labels.size()) labels = canvas->data->GetLabels();
-
-    if(!samples.size()) return;
-    int dim = samples[0].size();
-    if(dim < 2) return;
-
-    regressor->SetOutputDim(outputDim);
-
-    fvec trainErrors, testErrors;
-    if(trainRatio == 1.f && !trainList.size())
-    {
-        regressor->Train(samples, labels);
-        trainErrors.clear();
-        FOR(i, samples.size())
-        {
-            fvec sample = samples[i];
-            fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample.back());
-            trainErrors.push_back(error);
-        }
-        regressor->trainErrors = trainErrors;
-        regressor->testErrors.clear();
-    }
-    else
-    {
-        int trainCnt = (int)(samples.size()*trainRatio);
-        int testCnt = samples.size() - trainCnt;
-        u32 *perm = randPerm(samples.size());
-        vector<fvec> trainSamples, testSamples;
-        ivec trainLabels, testLabels;
-        if(trainList.size())
-        {
-            FOR(i, trainList.size())
-            {
-                if(trainList[i])
-                {
-                    trainSamples.push_back(samples[i]);
-                    trainLabels.push_back(labels[i]);
-                }
-                else
-                {
-                    testSamples.push_back(samples[i]);
-                    testLabels.push_back(labels[i]);
-                }
-            }
-            trainCnt = trainSamples.size();
-            testCnt = testSamples.size();
-        }
-        else
-        {
-            trainSamples.resize(trainCnt);
-            trainLabels.resize(trainCnt);
-            testSamples.resize(testCnt);
-            testLabels.resize(testCnt);
-            FOR(i, trainCnt)
-            {
-                trainSamples[i] = samples[perm[i]];
-                trainLabels[i] = labels[perm[i]];
-            }
-            FOR(i, testCnt)
-            {
-                testSamples[i] = samples[perm[i+trainCnt]];
-                testLabels[i] = labels[perm[i+trainCnt]];
-            }
-        }
-        regressor->Train(trainSamples, trainLabels);
-        FOR(i, trainCnt)
-        {
-            fvec sample = trainSamples[i];
-            fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample.back());
-            trainErrors.push_back(error);
-        }
-        FOR(i, testCnt)
-        {
-            fvec sample = testSamples[i];
-            fvec res = regressor->Test(sample);
-            float error = fabs(res[0] - sample.back());
-            testErrors.push_back(error);
-            //qDebug() << " test error: " << i << error;
-        }
-        regressor->trainErrors = trainErrors;
-        regressor->testErrors = testErrors;
-        KILL(perm);
-    }
-    //bIsCrossNew = true;
-}
 
 void AlgorithmManager::Regression()
 {
@@ -161,6 +47,7 @@ void AlgorithmManager::Regression()
     ivec inputDims = GetInputDimensions();
     //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
     if(inputDims.size()==1 && inputDims[0] == outputDim) return;
+    if(mldemos->ui.restrictDimCheck->isChecked()) outputDim = inputDims.back();
 
     int outputIndexInList = -1;
     FOR(i, inputDims.size()) if(outputDim == inputDims[i])
@@ -170,12 +57,9 @@ void AlgorithmManager::Regression()
     }
     if(outputDim != -1)
     {
-        if(canvas->canvasType == 1)
-        {
+        if(canvas->canvasType == 1) {
             //ui.canvasX3Spin->setValue(outputDim+1);
-        }
-        else if(canvas->canvasType == 0)
-        {
+        } else if(canvas->canvasType == 0) {
             //ui.canvasX2Spin->setValue(outputDim+1);
         }
         emit DisplayOptionsChanged();
@@ -250,4 +134,106 @@ void AlgorithmManager::Regression()
         canvas->repaint();
     }
     emit UpdateInfo();
+}
+
+void AlgorithmManager::Train(Regressor *regressor, int outputDim, float trainRatio, bvec trainList, std::vector<fvec> samples, ivec labels)
+{
+    if(!regressor || !canvas->data->GetCount()) return;
+
+    ivec inputDims = GetInputDimensions();
+    // Bug Regression crashing --- Guillaume
+    if(inputDims.size() == 0){
+        unsigned int nbDim = canvas->data->GetDimCount();
+        inputDims.resize(nbDim);
+        FOR(i,nbDim){
+           inputDims[i]=i;
+        }
+    }
+
+    int outputIndexInList = -1;
+    if(inputDims.size()==1 && inputDims[0] == outputDim) return; // we dont have enough dimensions for training
+    FOR(i, inputDims.size()) {
+        if(outputDim == inputDims[i]) {
+            outputIndexInList = i;
+            break;
+        }
+    }
+    if(outputIndexInList == -1) inputDims.push_back(outputDim);
+    outputIndexInList = inputDims.size()-1;
+    sourceDims = inputDims;
+
+    if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims, outputIndexInList == -1 ? outputDim : -1);
+    else samples = canvas->data->GetSampleDims(samples, inputDims, outputIndexInList == -1 ? outputDim : -1);
+    if(!labels.size()) labels = canvas->data->GetLabels();
+
+    if(!samples.size()) return;
+    int dim = samples[0].size();
+    if(dim < 2) return;
+
+    regressor->SetOutputDim(outputDim);
+
+    fvec trainErrors, testErrors;
+    if(trainRatio == 1.f && !trainList.size()) {
+        regressor->Train(samples, labels);
+        trainErrors.clear();
+        FOR(i, samples.size())
+        {
+            fvec sample = samples[i];
+            fvec res = regressor->Test(sample);
+            float error = fabs(res[0] - sample.back());
+            trainErrors.push_back(error);
+        }
+        regressor->trainErrors = trainErrors;
+        regressor->testErrors.clear();
+    } else {
+        int trainCnt = (int)(samples.size()*trainRatio);
+        int testCnt = samples.size() - trainCnt;
+        u32 *perm = randPerm(samples.size());
+        vector<fvec> trainSamples, testSamples;
+        ivec trainLabels, testLabels;
+        if(trainList.size()) {
+            FOR(i, trainList.size()) {
+                if(trainList[i]) {
+                    trainSamples.push_back(samples[i]);
+                    trainLabels.push_back(labels[i]);
+                } else {
+                    testSamples.push_back(samples[i]);
+                    testLabels.push_back(labels[i]);
+                }
+            }
+            trainCnt = trainSamples.size();
+            testCnt = testSamples.size();
+        } else {
+            trainSamples.resize(trainCnt);
+            trainLabels.resize(trainCnt);
+            testSamples.resize(testCnt);
+            testLabels.resize(testCnt);
+            FOR(i, trainCnt) {
+                trainSamples[i] = samples[perm[i]];
+                trainLabels[i] = labels[perm[i]];
+            }
+            FOR(i, testCnt) {
+                testSamples[i] = samples[perm[i+trainCnt]];
+                testLabels[i] = labels[perm[i+trainCnt]];
+            }
+        }
+        regressor->Train(trainSamples, trainLabels);
+        FOR(i, trainCnt) {
+            fvec sample = trainSamples[i];
+            fvec res = regressor->Test(sample);
+            float error = fabs(res[0] - sample.back());
+            trainErrors.push_back(error);
+        }
+        FOR(i, testCnt) {
+            fvec sample = testSamples[i];
+            fvec res = regressor->Test(sample);
+            float error = fabs(res[0] - sample.back());
+            testErrors.push_back(error);
+            //qDebug() << " test error: " << i << error;
+        }
+        regressor->trainErrors = trainErrors;
+        regressor->testErrors = testErrors;
+        KILL(perm);
+    }
+    //bIsCrossNew = true;
 }

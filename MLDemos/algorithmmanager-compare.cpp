@@ -433,4 +433,3 @@ void AlgorithmManager::CompareAdd()
     mldemos->actionCompare->setChecked(true);
     compare->Show();
 }
-

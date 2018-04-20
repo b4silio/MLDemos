@@ -580,7 +580,7 @@ void Canvas::SetCenter(fvec center)
     //repaint();
 }
 
-void Canvas::SetDim(int xIndex, int yIndex, int zIndex)
+bool Canvas::SetDim(int xIndex, int yIndex, int zIndex)
 {
     bool bChanged = false;
     if(this->xIndex != xIndex)
@@ -605,6 +605,7 @@ void Canvas::SetDim(int xIndex, int yIndex, int zIndex)
         bNewCrosshair = true;
         //repaint();
     }
+    return bChanged;
 }
 
 void Canvas::FitToData()

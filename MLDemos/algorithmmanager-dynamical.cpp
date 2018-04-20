@@ -21,6 +21,142 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+void AlgorithmManager::Dynamize()
+{
+    if(!canvas || !canvas->data->GetCount() || !canvas->data->GetSequences().size()) return;
+    drawTimer->Stop();
+    drawTimer->Clear();
+    QMutexLocker lock(mutex);
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
+    DEL(maximizer);
+    DEL(reinforcement);
+    DEL(projector);
+    lastTrainingInfo = "";
+    if(!optionsDynamic->algoList->count()) return;
+    int tab = optionsDynamic->algoList->currentIndex();
+    if(tab >= dynamicals.size() || !dynamicals[tab]) return;
+    dynamical = dynamicals[tab]->GetDynamical();
+    tabUsedForTraining = tab;
+
+    Train(dynamical);
+    dynamicals[tab]->Draw(canvas,dynamical);
+    glw->clearLists();
+    if(canvas->canvasType == 1)
+    {
+        dynamicals[tab]->DrawGL(canvas, glw, dynamical);
+        if(canvas->data->GetDimCount() == 3)
+        {
+            int displayStyle = optionsDynamic->displayCombo->currentIndex();
+            if(displayStyle == 3) // DS animation
+            {
+            }
+            else Draw3DDynamical(glw, dynamical, displayStyle);
+        }
+    }
+
+    int w = canvas->width(), h = canvas->height();
+
+    int resampleType = optionsDynamic->resampleCombo->currentIndex();
+    int resampleCount = optionsDynamic->resampleSpin->value();
+    int centerType = optionsDynamic->centerCombo->currentIndex();
+    float dT = optionsDynamic->dtSpin->value();
+    int zeroEnding = optionsDynamic->zeroCheck->isChecked();
+    bool bColorMap = optionsDynamic->colorCheck->isChecked();
+
+    // we draw the current trajectories
+    vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
+    vector< vector<fvec> > testTrajectories;
+    int steps = 300;
+    if(trajectories.size())
+    {
+        testTrajectories.resize(trajectories.size());
+        int dim = trajectories[0][0].size() / 2;
+        FOR(i, trajectories.size())
+        {
+            fvec start(dim,0);
+            FOR(d, dim) start[d] = trajectories[i][0][d];
+            vector<fvec> result = dynamical->Test(start, steps);
+            testTrajectories[i] = result;
+        }
+        canvas->maps.model = QPixmap(w,h);
+        //QBitmap bitmap(w,h);
+        //bitmap.clear();
+        //canvas->maps.model.setMask(bitmap);
+        canvas->maps.model.fill(Qt::transparent);
+
+        if(canvas->canvasType == 0) // standard canvas
+        {
+            /*
+            QPainter painter(&canvas->maps.model);
+            painter.setRenderHint(QPainter::Antialiasing);
+            FOR(i, testTrajectories.size())
+            {
+                vector<fvec> &result = testTrajectories[i];
+                fvec oldPt = result[0];
+                int count = result.size();
+                FOR(j, count-1)
+                {
+                    fvec pt = result[j+1];
+                    painter.setPen(QPen(Qt::green, 2));
+                    painter.drawLine(canvas->toCanvasCoords(pt), canvas->toCanvasCoords(oldPt));
+                    oldPt = pt;
+                }
+                painter.setBrush(Qt::NoBrush);
+                painter.setPen(Qt::green);
+                painter.drawEllipse(canvas->toCanvasCoords(result[0]), 5, 5);
+                painter.setPen(Qt::red);
+                painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
+            }
+            */
+        }
+        else
+        {
+            //pair<fvec,fvec> bounds = canvas->data->GetBounds();
+            //Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
+        }
+    }
+
+    // the first index is "none", so we subtract 1
+    int avoidIndex = optionsDynamic->obstacleCombo->currentIndex()-1;
+    if(avoidIndex >=0 && avoidIndex < avoiders.size() && avoiders[avoidIndex])
+    {
+        DEL(dynamical->avoid);
+        dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
+    }
+    emit UpdateInfo();
+
+
+    //Draw2DDynamical(canvas, dynamical);
+    if(dynamicals[tab]->UsesDrawTimer())
+    {
+        drawTimer->bColorMap = bColorMap;
+        drawTimer->start(QThread::NormalPriority);
+    }
+}
+
+void AlgorithmManager::Avoidance()
+{
+    if(!canvas || !dynamical) return;
+    if(!optionsDynamic->obstacleCombo->count()) return;
+    drawTimer->Stop();
+    QMutexLocker lock(mutex);
+    // the first index is "none", so we subtract 1
+    int index = optionsDynamic->obstacleCombo->currentIndex()-1;
+    if(index >=0 && index >= avoiders.size() || !avoiders[index]) return;
+    DEL(dynamical->avoid);
+    dynamical->avoid = avoiders[index]->GetObstacleAvoidance();
+    emit UpdateInfo();
+
+    drawTimer->Clear();
+    drawTimer->start(QThread::NormalPriority);
+}
+
 // returns respectively the reconstruction error for the training points individually, per trajectory, and the error to target
 fvec AlgorithmManager::Train(Dynamical *dynamical)
 {
@@ -180,141 +316,5 @@ fvec AlgorithmManager::Test(Dynamical *dynamical, vector< vector<fvec> > traject
     res.push_back(errorTarget);
 
     return res;
-}
-
-void AlgorithmManager::Dynamize()
-{
-    if(!canvas || !canvas->data->GetCount() || !canvas->data->GetSequences().size()) return;
-    drawTimer->Stop();
-    drawTimer->Clear();
-    QMutexLocker lock(mutex);
-    DEL(clusterer);
-    DEL(regressor);
-    DEL(dynamical);
-    if(!classifierMulti.size()) DEL(classifier);
-    classifier = 0;
-    sourceDims.clear();
-    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
-    DEL(maximizer);
-    DEL(reinforcement);
-    DEL(projector);
-    lastTrainingInfo = "";
-    if(!optionsDynamic->algoList->count()) return;
-    int tab = optionsDynamic->algoList->currentIndex();
-    if(tab >= dynamicals.size() || !dynamicals[tab]) return;
-    dynamical = dynamicals[tab]->GetDynamical();
-    tabUsedForTraining = tab;
-
-    Train(dynamical);
-    dynamicals[tab]->Draw(canvas,dynamical);
-    glw->clearLists();
-    if(canvas->canvasType == 1)
-    {
-        dynamicals[tab]->DrawGL(canvas, glw, dynamical);
-        if(canvas->data->GetDimCount() == 3)
-        {
-            int displayStyle = optionsDynamic->displayCombo->currentIndex();
-            if(displayStyle == 3) // DS animation
-            {
-            }
-            else Draw3DDynamical(glw, dynamical, displayStyle);
-        }
-    }
-
-    int w = canvas->width(), h = canvas->height();
-
-    int resampleType = optionsDynamic->resampleCombo->currentIndex();
-    int resampleCount = optionsDynamic->resampleSpin->value();
-    int centerType = optionsDynamic->centerCombo->currentIndex();
-    float dT = optionsDynamic->dtSpin->value();
-    int zeroEnding = optionsDynamic->zeroCheck->isChecked();
-    bool bColorMap = optionsDynamic->colorCheck->isChecked();
-
-    // we draw the current trajectories
-    vector< vector<fvec> > trajectories = canvas->data->GetTrajectories(resampleType, resampleCount, centerType, dT, zeroEnding);
-    vector< vector<fvec> > testTrajectories;
-    int steps = 300;
-    if(trajectories.size())
-    {
-        testTrajectories.resize(trajectories.size());
-        int dim = trajectories[0][0].size() / 2;
-        FOR(i, trajectories.size())
-        {
-            fvec start(dim,0);
-            FOR(d, dim) start[d] = trajectories[i][0][d];
-            vector<fvec> result = dynamical->Test(start, steps);
-            testTrajectories[i] = result;
-        }
-        canvas->maps.model = QPixmap(w,h);
-        //QBitmap bitmap(w,h);
-        //bitmap.clear();
-        //canvas->maps.model.setMask(bitmap);
-        canvas->maps.model.fill(Qt::transparent);
-
-        if(canvas->canvasType == 0) // standard canvas
-        {
-            /*
-            QPainter painter(&canvas->maps.model);
-            painter.setRenderHint(QPainter::Antialiasing);
-            FOR(i, testTrajectories.size())
-            {
-                vector<fvec> &result = testTrajectories[i];
-                fvec oldPt = result[0];
-                int count = result.size();
-                FOR(j, count-1)
-                {
-                    fvec pt = result[j+1];
-                    painter.setPen(QPen(Qt::green, 2));
-                    painter.drawLine(canvas->toCanvasCoords(pt), canvas->toCanvasCoords(oldPt));
-                    oldPt = pt;
-                }
-                painter.setBrush(Qt::NoBrush);
-                painter.setPen(Qt::green);
-                painter.drawEllipse(canvas->toCanvasCoords(result[0]), 5, 5);
-                painter.setPen(Qt::red);
-                painter.drawEllipse(canvas->toCanvasCoords(result[count-1]), 5, 5);
-            }
-            */
-        }
-        else
-        {
-            //pair<fvec,fvec> bounds = canvas->data->GetBounds();
-            //Expose::DrawTrajectories(canvas->maps.model, testTrajectories, vector<QColor>(), canvas->canvasType-1, 1, bounds);
-        }
-    }
-
-    // the first index is "none", so we subtract 1
-    int avoidIndex = optionsDynamic->obstacleCombo->currentIndex()-1;
-    if(avoidIndex >=0 && avoidIndex < avoiders.size() && avoiders[avoidIndex])
-    {
-        DEL(dynamical->avoid);
-        dynamical->avoid = avoiders[avoidIndex]->GetObstacleAvoidance();
-    }
-    emit UpdateInfo();
-
-
-    //Draw2DDynamical(canvas, dynamical);
-    if(dynamicals[tab]->UsesDrawTimer())
-    {
-        drawTimer->bColorMap = bColorMap;
-        drawTimer->start(QThread::NormalPriority);
-    }
-}
-
-void AlgorithmManager::Avoidance()
-{
-    if(!canvas || !dynamical) return;
-    if(!optionsDynamic->obstacleCombo->count()) return;
-    drawTimer->Stop();
-    QMutexLocker lock(mutex);
-    // the first index is "none", so we subtract 1
-    int index = optionsDynamic->obstacleCombo->currentIndex()-1;
-    if(index >=0 && index >= avoiders.size() || !avoiders[index]) return;
-    DEL(dynamical->avoid);
-    dynamical->avoid = avoiders[index]->GetObstacleAvoidance();
-    emit UpdateInfo();
-
-    drawTimer->Clear();
-    drawTimer->start(QThread::NormalPriority);
 }
 

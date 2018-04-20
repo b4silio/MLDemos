@@ -205,8 +205,9 @@ void ClustGMM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer
 
 	FOR(i, canvas->data->GetSamples().size())
 	{
-		fvec sample = canvas->data->GetSample(i);
-		QPointF point = canvas->toCanvasCoords(sample);
+        fvec sample = canvas->data->GetSampleDim(i, canvas->sourceDims);
+        fvec fullSample = canvas->data->GetSample(i);
+        QPointF point = canvas->toCanvasCoords(fullSample);
 		fvec res = clusterer->Test(sample);
 		float r=0,g=0,b=0;
 		if(res.size() > 1)

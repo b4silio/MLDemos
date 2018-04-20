@@ -76,6 +76,7 @@ public:
 	bool bRunning;
 	bool bColorMap;
     int maximumVisitedCount;
+    ivec inputDims;
 
 	signals:
 	void MapReady(QImage image);

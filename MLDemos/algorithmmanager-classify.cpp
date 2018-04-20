@@ -22,6 +22,144 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+void AlgorithmManager::Classify()
+{
+    if(!canvas || !canvas->data->GetCount()) return;
+    drawTimer->Stop();
+    drawTimer->Clear();
+    mutex->lock();
+    DEL(clusterer);
+    DEL(regressor);
+    DEL(dynamical);
+    if(!classifierMulti.size()) DEL(classifier);
+    classifier = 0;
+    sourceDims.clear();
+    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
+    DEL(maximizer);
+    DEL(reinforcement);
+    DEL(projector);
+    lastTrainingInfo = "";
+    if(!optionsClassify->algoList->count()) return;
+    int tab = optionsClassify->algoList->currentIndex();
+    if(tab >= classifiers.size() || !classifiers[tab]) return;
+
+    classifier = classifiers[tab]->GetClassifier();
+    tabUsedForTraining = tab;
+    float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
+    int ratioIndex = optionsClassify->traintestRatioCombo->currentIndex();
+    float trainRatio = ratios[ratioIndex];
+    vector<bool> trainList;
+    if(optionsClassify->manualTrainButton->isChecked())
+    {
+        // we get the list of samples that are checked
+        trainList = GetManualSelection();
+    }
+
+    int positiveIndex = optionsClassify->binaryCheck->isChecked() ? optionsClassify->positiveSpin->value() : -1;
+    bool trained = Train(classifier, trainRatio, trainList, positiveIndex);
+    if(trained)
+    {
+        classifiers[tab]->Draw(canvas, classifier);
+        DrawClassifiedSamples(canvas, classifier, classifierMulti);
+        glw->clearLists();
+        if(canvas->canvasType == 1)
+        {
+            classifiers[tab]->DrawGL(canvas, glw, classifier);
+            if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
+        }
+
+        emit UpdateInfo();
+        if(drawTimer && classifier->UsesDrawTimer())
+        {
+            drawTimer->inputDims = GetInputDimensions();
+            drawTimer->start(QThread::NormalPriority);
+        }
+        if(canvas->canvasType) emit CanvasOptionsChanged();
+        // we fill in the canvas sampleColors
+        ivec inputDims = GetInputDimensions();
+        vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
+        canvas->sampleColors.resize(samples.size());
+        FOR(i, samples.size())
+        {
+            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i], &classifierMulti, inputDims);
+        }
+        if(canvas->canvasType)
+        {
+            canvas->maps.model = QPixmap();
+            emit CanvasOptionsChanged();
+        }
+        canvas->repaint();
+    }
+    else
+    {
+        mutex->unlock();
+        mldemos->Clear();;
+        mutex->lock();
+        emit UpdateInfo();
+    }
+    mutex->unlock();
+}
+
+void AlgorithmManager::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti)
+{
+    if(!canvas || !classifier) return;
+    int w = canvas->width(), h = canvas->height();
+    canvas->maps.model = QPixmap(w,h);
+    canvas->maps.model.fill(Qt::transparent);
+    QPainter painter(&canvas->maps.model);
+    int posClass = INT_MIN;
+    FORIT(classifier->classMap, int, int) {
+        posClass = max(posClass, it->first);
+    }
+
+    QString s;
+    FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
+
+    int forcedPositive = classifier->inverseMap[-1] < 0 ? -classifier->inverseMap[-1]-1 : -1;
+
+    // we draw the samples
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    FOR(i, canvas->data->GetCount()) {
+        fvec sample = sourceDims.size() ? canvas->data->GetSampleDim(i, sourceDims) : canvas->data->GetSample(i);
+        int label = canvas->data->GetLabel(i);
+        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
+        fvec res;
+        if(classifier->IsMultiClass()) res = classifier->TestMulti(sample);
+        else if(classifierMulti.size()) {
+            FOR(c, classifierMulti.size()) {
+                res.push_back(classifierMulti[c]->Test(sample));
+            }
+        }
+        else res.push_back(classifier->Test(sample));
+        if(res.size()==1) {
+            float response = res[0];
+            if(forcedPositive != -1) {// we forced binary classification
+                if(response > 0) {
+                    if(label == forcedPositive) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                } else {
+                    if(label != forcedPositive) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
+            } else {
+                if(response > 0) {
+                    if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
+                    else Canvas::drawCross(painter, point, 6, 2);
+                } else {
+                    if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
+                    else Canvas::drawCross(painter, point, 6, 0);
+                }
+            }
+        } else {
+            int max = 0;
+            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+            int resp = classifier->inverseMap[max];
+            if(label == resp) Canvas::drawSample(painter, point, 9, label);
+            else Canvas::drawCross(painter, point, 6, label);
+        }
+    }
+}
+
 bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trainList, int positiveIndex, std::vector<fvec> samples, ivec labels)
 {
     if(!classifier) return false;
@@ -30,6 +168,7 @@ bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trai
     if(!samples.size()) samples = canvas->data->GetSampleDims(inputDims);
     else samples = canvas->data->GetSampleDims(samples, inputDims);
     sourceDims = inputDims;
+    canvas->sourceDims = inputDims;
 
     ivec newLabels;
     std::map<int,int> binaryClassMap, binaryInverseMap;
@@ -430,144 +569,3 @@ bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trai
     //SetROCInfo();
     return true;
 }
-
-void AlgorithmManager::Classify()
-{
-    if(!canvas || !canvas->data->GetCount()) return;
-    drawTimer->Stop();
-    drawTimer->Clear();
-    mutex->lock();
-    DEL(clusterer);
-    DEL(regressor);
-    DEL(dynamical);
-    if(!classifierMulti.size()) DEL(classifier);
-    classifier = 0;
-    sourceDims.clear();
-    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
-    DEL(maximizer);
-    DEL(reinforcement);
-    DEL(projector);
-    lastTrainingInfo = "";
-    if(!optionsClassify->algoList->count()) return;
-    int tab = optionsClassify->algoList->currentIndex();
-    if(tab >= classifiers.size() || !classifiers[tab]) return;
-
-    classifier = classifiers[tab]->GetClassifier();
-    tabUsedForTraining = tab;
-    float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
-    int ratioIndex = optionsClassify->traintestRatioCombo->currentIndex();
-    float trainRatio = ratios[ratioIndex];
-    vector<bool> trainList;
-    if(optionsClassify->manualTrainButton->isChecked())
-    {
-        // we get the list of samples that are checked
-        trainList = GetManualSelection();
-    }
-
-    int positiveIndex = optionsClassify->binaryCheck->isChecked() ? optionsClassify->positiveSpin->value() : -1;
-    bool trained = Train(classifier, trainRatio, trainList, positiveIndex);
-    if(trained)
-    {
-        classifiers[tab]->Draw(canvas, classifier);
-        DrawClassifiedSamples(canvas, classifier, classifierMulti);
-        glw->clearLists();
-        if(canvas->canvasType == 1)
-        {
-            classifiers[tab]->DrawGL(canvas, glw, classifier);
-            if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
-        }
-
-        emit UpdateInfo();
-        if(drawTimer && classifier->UsesDrawTimer())
-        {
-            drawTimer->start(QThread::NormalPriority);
-        }
-        if(canvas->canvasType) emit CanvasOptionsChanged();
-        // we fill in the canvas sampleColors
-        ivec inputDims = GetInputDimensions();
-        vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
-        canvas->sampleColors.resize(samples.size());
-        FOR(i, samples.size())
-        {
-            canvas->sampleColors[i] = DrawTimer::GetColor(classifier, samples[i], &classifierMulti);
-        }
-        if(canvas->canvasType)
-        {
-            canvas->maps.model = QPixmap();
-            emit CanvasOptionsChanged();
-        }
-        canvas->repaint();
-    }
-    else
-    {
-        mutex->unlock();
-        mldemos->Clear();;
-        mutex->lock();
-        emit UpdateInfo();
-    }
-    mutex->unlock();
-}
-
-void AlgorithmManager::DrawClassifiedSamples(Canvas *canvas, Classifier *classifier, std::vector<Classifier *> classifierMulti)
-{
-    if(!canvas || !classifier) return;
-    int w = canvas->width(), h = canvas->height();
-    canvas->maps.model = QPixmap(w,h);
-    //QBitmap bitmap(w,h);
-    //bitmap.clear();
-    //canvas->maps.model.setMask(bitmap);
-    canvas->maps.model.fill(Qt::transparent);
-    QPainter painter(&canvas->maps.model);
-    int posClass = INT_MIN;
-    FORIT(classifier->classMap, int, int) {
-        posClass = max(posClass, it->first);
-    }
-
-    QString s;
-    FOR(d, sourceDims.size()) s += QString("%1 ").arg(sourceDims[d]);
-
-    int forcedPositive = classifier->inverseMap[-1] < 0 ? -classifier->inverseMap[-1]-1 : -1;
-
-    // we draw the samples
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    FOR(i, canvas->data->GetCount()) {
-        fvec sample = sourceDims.size() ? canvas->data->GetSampleDim(i, sourceDims) : canvas->data->GetSample(i);
-        int label = canvas->data->GetLabel(i);
-        QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
-        fvec res;
-        if(classifier->IsMultiClass()) res = classifier->TestMulti(sample);
-        else if(classifierMulti.size()) {
-            FOR(c, classifierMulti.size()) {
-                res.push_back(classifierMulti[c]->Test(sample));
-            }
-        }
-        else res.push_back(classifier->Test(sample));
-        if(res.size()==1) {
-            float response = res[0];
-            if(forcedPositive != -1) {// we forced binary classification
-                if(response > 0) {
-                    if(label == forcedPositive) Canvas::drawSample(painter, point, 9, 1);
-                    else Canvas::drawCross(painter, point, 6, 2);
-                } else {
-                    if(label != forcedPositive) Canvas::drawSample(painter, point, 9, 0);
-                    else Canvas::drawCross(painter, point, 6, 0);
-                }
-            } else {
-                if(response > 0) {
-                    if(label != classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 1);
-                    else Canvas::drawCross(painter, point, 6, 2);
-                } else {
-                    if(label == classifier->inverseMap[-1]) Canvas::drawSample(painter, point, 9, 0);
-                    else Canvas::drawCross(painter, point, 6, 0);
-                }
-            }
-        } else {
-            int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
-            int resp = classifier->inverseMap[max];
-            if(label == resp) Canvas::drawSample(painter, point, 9, label);
-            else Canvas::drawCross(painter, point, 6, label);
-        }
-    }
-}
-

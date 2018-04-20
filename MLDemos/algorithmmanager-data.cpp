@@ -18,6 +18,7 @@ License along with this library; if not, write to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "algorithmmanager.h"
+#include "mldemos.h"
 
 using namespace std;
 
@@ -25,7 +26,6 @@ void AlgorithmManager::Clear()
 {
     if (!classifierMulti.size()) DEL(classifier);
     classifier = 0;
-    sourceDims.clear();
     FOR (i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
     DEL(regressor);
     DEL(dynamical);
@@ -97,6 +97,15 @@ vector<bool> AlgorithmManager::GetManualSelection()
 ivec AlgorithmManager::GetInputDimensions()
 {
     if(!canvas || !canvas->data->GetCount()) return ivec();
+
+    if(mldemos->ui.restrictDimCheck->isChecked()) {
+        if(canvas->data->GetDimCount() == 2) return ivec();
+        ivec dimList(2);
+        dimList.front() = canvas->xIndex;
+        dimList.back() = canvas->yIndex;
+        return dimList;
+    }
+
     QList<QListWidgetItem*> selected = inputDimensions->dimList->selectedItems();
     if(!selected.size() || selected.size() == inputDimensions->dimList->count()) return ivec(); // if nothing is selected we use all dimensions for training
     ivec dimList(selected.size());
@@ -125,21 +134,17 @@ void AlgorithmManager::UpdateLearnedModel()
 void AlgorithmManager::UpdateClassifier()
 {
     QMutexLocker lock(mutex);
-    if(glw->isVisible())
-    {
+    if(glw->isVisible()) {
         glw->clearLists();
-        if(canvas->canvasType == 1)
-        {
+        if(canvas->canvasType == 1) {
             classifiers[tabUsedForTraining]->DrawGL(canvas, glw, classifier);
             if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
         }
-    }
-    else
-    {
+    } else {
         classifiers[tabUsedForTraining]->Draw(canvas, classifier);
         DrawClassifiedSamples(canvas, classifier, classifierMulti);
-        if(classifier->UsesDrawTimer() && !drawTimer->isRunning())
-        {
+        if(classifier->UsesDrawTimer() && !drawTimer->isRunning()) {
+            drawTimer->inputDims = GetInputDimensions();
             drawTimer->start(QThread::NormalPriority);
         }
     }
@@ -205,6 +210,7 @@ void AlgorithmManager::UpdateRegressor()
     // here we draw the errors for each sample
     int outputDim = optionsRegress->outputDimCombo->currentIndex();
     ivec inputDims = GetInputDimensions();
+    if(mldemos->ui.restrictDimCheck->isChecked()) outputDim = inputDims.back();
     //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
     if(inputDims.size()==1 && inputDims[0] == outputDim) return;
 

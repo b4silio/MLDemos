@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>333</height>
+    <width>838</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,7 +34,7 @@
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -54,7 +54,7 @@
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout" rowstretch="0,1" columnstretch="1,0,0">
       <property name="bottomMargin">
-       <number>0</number>
+       <number>12</number>
       </property>
       <item row="0" column="2">
        <widget class="QGroupBox" name="ClusterGroupBox">
@@ -70,8 +70,8 @@
         <widget class="QPushButton" name="clusterButton">
          <property name="geometry">
           <rect>
-           <x>150</x>
-           <y>30</y>
+           <x>160</x>
+           <y>23</y>
            <width>101</width>
            <height>41</height>
           </rect>
@@ -91,10 +91,10 @@
         <widget class="QPushButton" name="iterationButton">
          <property name="geometry">
           <rect>
-           <x>150</x>
-           <y>80</y>
+           <x>160</x>
+           <y>56</y>
            <width>101</width>
-           <height>41</height>
+           <height>30</height>
           </rect>
          </property>
          <property name="font">
@@ -110,9 +110,9 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>30</y>
-           <width>131</width>
-           <height>91</height>
+           <y>26</y>
+           <width>140</width>
+           <height>70</height>
           </rect>
          </property>
          <property name="font">
@@ -131,6 +131,49 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- AIC: Akaike Information Criterion&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- F1: F-Measure &lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;For all metrics except F-Measure, the lower value is the best&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="testButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>96</y>
+           <width>100</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Perform a 10-fold cross-validation using the current clustering method and display the results in the statistics panel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Compute scores</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="clearButton">
+         <property name="geometry">
+          <rect>
+           <x>176</x>
+           <y>84</y>
+           <width>66</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Clear</string>
          </property>
         </widget>
        </widget>
@@ -185,37 +228,12 @@ p, li { white-space: pre-wrap; }
         <property name="title">
          <string>Training/Testing ratio</string>
         </property>
-        <widget class="QPushButton" name="testButton">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>60</y>
-           <width>140</width>
-           <height>31</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Perform a 10-fold cross-validation using the current clustering method and display the results in the statistics panel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string>Compute clustering score</string>
-         </property>
-        </widget>
         <widget class="QLabel" name="trainLabel">
          <property name="geometry">
           <rect>
-           <x>11</x>
-           <y>26</y>
-           <width>68</width>
+           <x>30</x>
+           <y>42</y>
+           <width>60</width>
            <height>18</height>
           </rect>
          </property>
@@ -232,7 +250,7 @@ p, li { white-space: pre-wrap; }
          <property name="geometry">
           <rect>
            <x>94</x>
-           <y>28</y>
+           <y>40</y>
            <width>69</width>
            <height>24</height>
           </rect>
@@ -292,6 +310,27 @@ p, li { white-space: pre-wrap; }
            <string>100%</string>
           </property>
          </item>
+        </widget>
+        <widget class="QPushButton" name="manualTrainButton">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>70</y>
+           <width>130</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Select Training Samples</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
         </widget>
        </widget>
       </item>
@@ -1017,55 +1056,6 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
         </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="widget_2" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>588</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="manualTrainButton">
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Manual Selection</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="clearButton">
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Clear</string>
-        </property>
        </widget>
       </item>
      </layout>

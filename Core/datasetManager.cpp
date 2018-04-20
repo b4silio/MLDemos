@@ -352,12 +352,17 @@ fvec DatasetManager::GetSampleDim(const int index, const ivec inputDims, const i
     return sample;
 }
 
+std::vector<fvec> DatasetManager::GetSamples() const
+{
+    return samples;
+}
+
 std::vector< fvec > DatasetManager::GetSampleDims(const ivec inputDims, const int outputDim) const
 {
     if ( !inputDims.size() ) return samples;
 
     vector<fvec> newSamples = samples;
-    int newDim = inputDims.size()+1;
+    int newDim = inputDims.size();
     if ( outputDim == -1 ) {
         FOR ( i, samples.size() ) {
             fvec newSample(newDim);
@@ -367,9 +372,11 @@ std::vector< fvec > DatasetManager::GetSampleDims(const ivec inputDims, const in
             newSamples[i] = newSample;
         }
     } else {
+        newDim++;
         int outputIndex = -1;
         FOR ( d, inputDims.size() ) {
             if ( outputDim == inputDims[d] ) {
+                outputIndex = d;
                 newDim--;
                 break;
             }
@@ -408,9 +415,11 @@ std::vector< fvec > DatasetManager::GetSampleDims(const std::vector<fvec> sample
             newSamples[i] = newSample;
         }
     } else {
+        newDim++;
         int outputIndex = -1;
         FOR ( d, inputDims.size() ) {
             if ( outputDim == inputDims[d] ) {
+                outputIndex = d;
                 newDim--;
                 break;
             }
@@ -795,8 +804,7 @@ int DatasetManager::GetDimCount() const
 {
 	int dim = 2;
     if(samples.size()) dim = samples.at(0).size();
-    if(series.size() && series.at(0).size())
-	{
+    if(series.size() && series.at(0).size()) {
         dim = series.at(0).at(0).size()+1;
 	}
 	return dim;
@@ -834,7 +842,6 @@ bvec DatasetManager::GetFreeFlags() const
 	FOR(i, flags.size()) res.push_back(flags[i] == _UNUSED);
 	return res;
 }
-
 
 /******************************************/
 /*                                        */

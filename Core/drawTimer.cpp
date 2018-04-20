@@ -418,6 +418,7 @@ void DrawTimer::Refine()
 
         mutex->lock();
         int dim = canvas->data->GetDimCount();
+        if(inputDims.size() == 2) dim = inputDims.size();
         mutex->unlock();
 
         if(dim == 2)
@@ -885,10 +886,16 @@ QColor DrawTimer::GetColor(Classifier *classifier, fvec sample, std::vector<Clas
 inline void fromCanvas(fvec &sample, const float x, const float y,
                        const int height, const int width,
                        const float zxh, const float zyh,
-                       int xIndex, int yIndex, const fvec &center){
+                       int xIndex, int yIndex, const fvec &center, const bool bRestrictedDims)
+{
     sample = center;
-    sample[xIndex] += (x - width*0.5f)*zxh;
-    sample[yIndex] += (-y + height*0.5f)*zyh;
+    if(bRestrictedDims) {
+        sample[0] += (x - width*0.5f)*zxh;
+        sample[1] += (-y + height*0.5f)*zyh;
+    } else {
+        sample[xIndex] += (x - width*0.5f)*zxh;
+        sample[yIndex] += (-y + height*0.5f)*zyh;
+    }
 }
 
 bool DrawTimer::TestFast(int start, int stop)
@@ -899,6 +906,11 @@ bool DrawTimer::TestFast(int start, int stop)
     vector<Obstacle> obstacles = canvas->data->GetObstacles();
     int xIndex = canvas->xIndex;
     int yIndex = canvas->yIndex;
+    bool bRestrictedDims = false;
+    if(inputDims.size() == 2 && xIndex == inputDims.front() && yIndex == inputDims.back()) {
+        bRestrictedDims = true;
+        dim = 2;
+    }
     int cheight = canvas->height();
     int cwidth = canvas->width();
     float zxh = 1.f / (canvas->zoom*canvas->zooms[xIndex]*cheight);
@@ -919,7 +931,7 @@ bool DrawTimer::TestFast(int start, int stop)
             continue;
         }
         drawMutex.unlock();
-        fromCanvas(sample, x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center);
+        fromCanvas(sample, x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center, bRestrictedDims);
         fvec val(dim);
         QMutexLocker lock(mutex);
         if((*classifier))

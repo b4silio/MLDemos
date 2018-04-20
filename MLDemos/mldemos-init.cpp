@@ -142,7 +142,6 @@ void MLDemos::initToolBars()
     connect(ui.canvasX1Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
     connect(ui.canvasX2Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
     connect(ui.canvasX3Spin, SIGNAL(valueChanged(int)), this, SLOT(DisplayOptionsChanged()));
-    connect(ui.restrictDimCheck, SIGNAL(clicked(bool)), this, SLOT(Clear()));
 
     QSize iconSize(24,24);
     drawToolbar->singleButton->setIcon(QIcon(":/MLDemos/icons/brush.png"));
@@ -346,6 +345,7 @@ void MLDemos::initDialogs()
     connect(algo, SIGNAL(ResetPositiveClass()), this, SLOT(ResetPositiveClass()));
     connect(algo, SIGNAL(UpdateInfo()), this, SLOT(UpdateInfo()));
     connect(algo, SIGNAL(Trained()), this, SLOT(Trained()));
+    connect(ui.restrictDimCheck, SIGNAL(clicked(bool)), algo, SLOT(RestrictDimChanged()));
 }
 
 // this function is to set the font size of gui elements in the interface for non-osx systems

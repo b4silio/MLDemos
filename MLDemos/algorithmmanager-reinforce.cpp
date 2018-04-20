@@ -22,41 +22,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-void AlgorithmManager::Train(Reinforcement *reinforcement)
-{
-    if(!reinforcement) return;
-    if(canvas->maps.reward.isNull()) return;
-    QImage rewardImage = canvas->maps.reward.toImage();
-    QRgb *pixels = (QRgb*) rewardImage.bits();
-    int w = rewardImage.width();
-    int h = rewardImage.height();
-
-    float *data = new float[w*h];
-    float maxData = 0;
-    FOR(i, w*h)
-    {
-        data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
-        maxData = max(maxData, data[i]);
-    }
-    if(maxData > 0)
-    {
-        FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
-    }
-    ivec size;
-    size.push_back(w);
-    size.push_back(h);
-    fvec low(2,0.f);
-    fvec high(2,1.f);
-    canvas->data->GetReward()->SetReward(data, size, low, high);
-    //    delete [] data;
-
-    //data = canvas->data->GetReward()->GetRewardFloat();
-    reinforcementProblem.Initialize(data, fVec(w,h));
-    reinforcement->Initialize(&reinforcementProblem);
-    reinforcement->age = 0;
-    delete [] data;
-}
-
 void AlgorithmManager::Reinforce()
 {
     if(!canvas) return;
@@ -161,3 +126,37 @@ void AlgorithmManager::ReinforceContinue()
     }
 }
 
+void AlgorithmManager::Train(Reinforcement *reinforcement)
+{
+    if(!reinforcement) return;
+    if(canvas->maps.reward.isNull()) return;
+    QImage rewardImage = canvas->maps.reward.toImage();
+    QRgb *pixels = (QRgb*) rewardImage.bits();
+    int w = rewardImage.width();
+    int h = rewardImage.height();
+
+    float *data = new float[w*h];
+    float maxData = 0;
+    FOR(i, w*h)
+    {
+        data[i] = 1.f - qBlue(pixels[i])/255.f; // all data is in a 0-1 range
+        maxData = max(maxData, data[i]);
+    }
+    if(maxData > 0)
+    {
+        FOR(i, w*h) data[i] /= maxData; // we ensure that the data is normalized
+    }
+    ivec size;
+    size.push_back(w);
+    size.push_back(h);
+    fvec low(2,0.f);
+    fvec high(2,1.f);
+    canvas->data->GetReward()->SetReward(data, size, low, high);
+    //    delete [] data;
+
+    //data = canvas->data->GetReward()->GetRewardFloat();
+    reinforcementProblem.Initialize(data, fVec(w,h));
+    reinforcement->Initialize(&reinforcementProblem);
+    reinforcement->age = 0;
+    delete [] data;
+}
