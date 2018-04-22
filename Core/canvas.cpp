@@ -204,7 +204,7 @@ void Canvas::PaintBufferedCanvas(QPainter &painter, bool bSvg)
             painter.drawPixmap(geometry(), maps.timeseries);
         }
     }
-    if(!bSvg && bDisplayLearned && sampleColors.size()) {
+    if(!bSvg && bDisplayLearned) {
         if(maps.model.isNull()) {
             int w = width();
             int h = height();
@@ -281,8 +281,13 @@ void Canvas::PaintSequentialCanvas(QPainter &painter, bool bSvg)
             painter.drawPixmap(geometry(), maps.timeseries);
         }
     }
-    if(!bSvg && bDisplayLearned && sampleColors.size()) {
+    if(!bSvg && bDisplayLearned) {
         DrawSampleColors(painter);
+        if(!maps.model.isNull()) {
+            painter.setBackgroundMode(Qt::TransparentMode);
+            painter.drawPixmap(geometry(), maps.model);
+            painter.setBackgroundMode(Qt::OpaqueMode);
+        }
     }
     if(!maps.animation.isNull()) {
         painter.drawPixmap(geometry(), maps.animation);

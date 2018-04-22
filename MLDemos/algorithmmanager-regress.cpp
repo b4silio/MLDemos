@@ -47,7 +47,7 @@ void AlgorithmManager::Regression()
     ivec inputDims = GetInputDimensions();
     //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
     if(inputDims.size()==1 && inputDims[0] == outputDim) return;
-    if(mldemos->ui.restrictDimCheck->isChecked()) outputDim = inputDims.back();
+    if(inputDims.size() && mldemos->ui.restrictDimCheck->isChecked()) outputDim = inputDims.back();
 
     int outputIndexInList = -1;
     FOR(i, inputDims.size()) if(outputDim == inputDims[i])

@@ -210,7 +210,7 @@ void AlgorithmManager::UpdateRegressor()
     // here we draw the errors for each sample
     int outputDim = optionsRegress->outputDimCombo->currentIndex();
     ivec inputDims = GetInputDimensions();
-    if(mldemos->ui.restrictDimCheck->isChecked()) outputDim = inputDims.back();
+    if(inputDims.size() && mldemos->ui.restrictDimCheck->isChecked()) outputDim = inputDims.back();
     //ivec inputDims = optionsRegress->inputDimButton->isChecked() ? GetInputDimensions() : ivec();
     if(inputDims.size()==1 && inputDims[0] == outputDim) return;
 
