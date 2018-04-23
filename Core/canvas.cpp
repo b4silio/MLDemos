@@ -1568,7 +1568,8 @@ void Canvas::wheelEvent(QWheelEvent *event)
     if(event->modifiers() == Qt::ShiftModifier)
     {
         zooms[xIndex] += event->delta()/1000.f;
-        qDebug() << "zooms[" << xIndex << "]: " << zooms[xIndex];
+        if(zooms[xIndex] < 0.001) zooms[xIndex] == 0.001;
+        //qDebug() << "zooms[" << xIndex << "]: " << zooms[xIndex];
 
         maps.grid = QPixmap();
         maps.model = QPixmap();

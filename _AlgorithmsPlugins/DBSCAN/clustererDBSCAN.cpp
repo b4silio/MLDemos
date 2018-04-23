@@ -23,6 +23,57 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
+class MetricEuclidean
+{
+public:
+    double distance(Point a, Point b) {
+        double dist = 0;
+        FOR(i, a.size()) {
+            double d = (a[i]-b[i]);
+            dist += d*d;
+        }
+        return dist;
+    }
+};
+
+class MetricManhattan
+{
+public:
+    double distance(Point a, Point b) {
+        double dist = 0;
+        FOR(i, a.size()) {
+            float d = fabs(a[i]-b[i]);
+            dist += d;
+        }
+        return dist;
+    }
+};
+
+class MetricChebyshev
+{
+public:
+    double distance(Point a, Point b) {
+        double dist = 0;
+        FOR(i, a.size()) {
+            double d = fabs(a[i]-b[i]);
+            if(d > dist) dist = d;
+        }
+        return dist;
+    }
+};
+
+class MetricAstroid
+{
+public:
+    double distance(Point a, Point b) {
+        double dist = 0;
+        FOR(i, a.size()) {
+            double d = fabs(a[i]-b[i]);
+            dist += pow(d,2./3.f);
+        }
+        return pow(dist,3.f/2.f);
+    }
+};
 
 void ClustererDBSCAN::Train(std::vector< fvec > samples)
 {
@@ -36,45 +87,43 @@ void ClustererDBSCAN::Train(std::vector< fvec > samples)
     _reachability.resize(samples.size(), -1);
 
     // convert from fvec to Point
-    for (int j = 0; j < samples.size(); ++j)
-    {
+    for (int j = 0; j < samples.size(); ++j) {
         Point v (samples[j].size());
-        for (int i = 0; i < samples[j].size(); ++i)
-        {
+        for (int i = 0; i < samples[j].size(); ++i) {
             v(i)=samples[j][i];
         }
         pts.push_back(v);
     }
 
     // build the similarity matrix according to the selected metric
-    if(_metric == 0)
-    {
-        Metrics::Distance<Metrics::Cosine<Point> > d;
+    if(_metric == 0) {
+        MetricEuclidean d;
         computeSimilarity(d,pts);
-    }
-    else
-    {
-        Metrics::Distance<Metrics::Euclidean<Point> > d;
+    } else if (_metric == 1) {
+        MetricManhattan d;
+        computeSimilarity(d,pts);
+    } else if (_metric == 2) {
+        MetricChebyshev d;
+        computeSimilarity(d,pts);
+    } else if (_metric == 3) {
+        MetricAstroid d;
+        computeSimilarity(d,pts);
+    } else if (_metric == 4) { // dot_product
+        Metrics::Distance<Metrics::Cosine<Point> > d;
         computeSimilarity(d,pts);
     }
 
     // run clustering
 
-    if (_type>0) //OPTICS
-    {
+    if (_type>0) { //OPTICS
         run_optics(pts);
 
-        if(_type>1) //OPTICS WP
-        {
+        if(_type>1) {//OPTICS WP
             find_clusters_WF(); // old name was for "water-filling"
-        }
-        else //OPTICS default
-        {
+        } else { //OPTICS default
             find_clusters();
         }
-    }
-    else // DBSCAN
-    {
+    } else { // DBSCAN
         run_cluster(pts);
     }
 }
@@ -95,25 +144,34 @@ fvec ClustererDBSCAN::Test( const fvec &sample)
     int nearest = -1;
     double dist = INFINITY;
     double temp_d = 0;
+    float realEps = _eps;
+    if(_metric == 0) realEps = _eps*_eps;
 
     if (_type==0) //if DBSCAN we set _depth like _eps
     {
-        _depth=_eps;
+        _depth=realEps;
     }
     for (int j = 0; j < pts.size(); ++j)
     {
         // according to the selected metric
         if(_metric == 0)
         {
+            MetricEuclidean d;
+            temp_d = d.distance(v, pts[j]);
+        } else if (_metric == 1){
+            MetricManhattan d;
+            temp_d = d.distance(v, pts[j]);
+        } else if (_metric == 2){
+            MetricChebyshev d;
+            temp_d = d.distance(v, pts[j]);
+        } else if (_metric == 3){
+            MetricAstroid d;
+            temp_d = d.distance(v, pts[j]);
+        } else {
             Metrics::Distance<Metrics::Cosine<Point> > d;
             temp_d = d.distance(v, pts[j]);
         }
-        else
-        {
-            Metrics::Distance<Metrics::Euclidean<Point> > d;
-            temp_d = d.distance(v, pts[j]);
-        }
-        if (temp_d < dist && temp_d < _eps && _pointId_to_clusterId[j] > 0 && _core[j]){
+        if (temp_d < dist && temp_d < realEps && _pointId_to_clusterId[j] > 0 && _core[j]){
             dist = temp_d;
             nearest = j;
         }
@@ -123,9 +181,7 @@ fvec ClustererDBSCAN::Test( const fvec &sample)
     if (nearest > -1){
         if (dist < _depth){ // is it near enough?
             res[_pointId_to_clusterId[nearest]-1] = 1; //take the color of that cluster
-        }
-        else if (abs(dist - _eps) < _eps*0.01) //in OPTICS, we are at the border of _eps : draw a thin line, darker
-        {
+        } else if (abs(dist - realEps) < realEps*0.01) { //in OPTICS, we are at the border of _eps : draw a thin line, darker
             res[_pointId_to_clusterId[nearest]-1] = 0.5;
         }
     }
@@ -156,8 +212,8 @@ const char *ClustererDBSCAN::GetInfoString()
 
     for (int i=0;i<_noise.size();i++)
     {
-       if (_noise[i]) countN++;
-       if (_core[i]) countC++;
+        if (_noise[i]) countN++;
+        if (_core[i]) countC++;
     }
     sprintf(text, "%sNumber of core points: %d\nNumber of noise points: %d\n",text,countC,countN);
 
@@ -175,141 +231,142 @@ void ClustererDBSCAN::SetParams(float minpts, float eps, int metric, float depth
 
 void ClustererDBSCAN::run_cluster(Points samples)
 {
+    float realEps = _eps;
+    if(_metric == 0) realEps = _eps*_eps;
 
-        ClusterId cid = 1;
-        // foreach pid
-        for (PointId pid = 0; pid < samples.size(); pid++)
-        {
-                // not already visited
-                if (!_visited[pid]){
+    ClusterId cid = 1;
+    // foreach pid
+    for (PointId pid = 0; pid < samples.size(); pid++) {
+        // not already visited
+        if (!_visited[pid]){
 
-                        _visited[pid] = true;
+            _visited[pid] = true;
 
-                        // get the neighbors
-                        Neighbors ne = findNeighbors(pid, _eps);
+            // get the neighbors
+            Neighbors ne = findNeighbors(pid, realEps);
 
-                        // not enough support -> mark as noise
-                        if (ne.size() < _minPts)
+            // not enough support -> mark as noise
+            if (ne.size() < _minPts)
+            {
+                _noise[pid] = true;
+            }
+            else
+            {
+                //else it's a core point
+                _core[pid] = true;
+
+                // Add p to current cluster
+
+                CCluster c;              // a new cluster
+                c.push_back(pid);   	// assign pid to cluster
+                _pointId_to_clusterId[pid]=cid;
+
+                // go to neighbors
+                for (unsigned int i = 0; i < ne.size(); i++)
+                {
+                    PointId nPid = ne[i];
+
+                    // not already visited
+                    if (!_visited[nPid])
+                    {
+                        _visited[nPid] = true;
+
+                        // go to neighbors
+                        Neighbors ne1 = findNeighbors(nPid, realEps);
+
+                        // enough support
+                        if (ne1.size() >= _minPts)
                         {
-                                _noise[pid] = true;
+                            _core[nPid] = true;
+
+                            // join
+                            BOOST_FOREACH(Neighbors::value_type n1, ne1)
+                            {
+                                // join neighbord
+                                ne.push_back(n1);
+                            }
                         }
-                        else
-                        {
-                            //else it's a core point
-                                _core[pid] = true;
+                    }
 
-                                // Add p to current cluster
+                    // not already assigned to a cluster
+                    if (!_pointId_to_clusterId[nPid])
+                    {
+                        // add it to the current cluster
+                        c.push_back(nPid);
+                        _pointId_to_clusterId[nPid]=cid;
+                    }
+                }
+                // start a new cluster
+                _clusters.push_back(c);
+                cid++;
+            }
+        } // if (!visited
+    } // for
 
-                                CCluster c;              // a new cluster
-                                c.push_back(pid);   	// assign pid to cluster
-                                _pointId_to_clusterId[pid]=cid;
-
-                                // go to neighbors
-                                for (unsigned int i = 0; i < ne.size(); i++)
-                                {
-                                        PointId nPid = ne[i];
-
-                                        // not already visited
-                                        if (!_visited[nPid])
-                                        {
-                                                _visited[nPid] = true;
-
-                                                // go to neighbors
-                                                Neighbors ne1 = findNeighbors(nPid, _eps);
-
-                                                // enough support
-                                                if (ne1.size() >= _minPts)
-                                                {
-                                                        _core[nPid] = true;
-
-                                                        // join
-                                                        BOOST_FOREACH(Neighbors::value_type n1, ne1)
-                                                        {
-                                                                // join neighbord
-                                                                ne.push_back(n1);    
-                                                        }
-                                                }
-                                        }
-
-                                        // not already assigned to a cluster
-                                        if (!_pointId_to_clusterId[nPid])
-                                        {
-                                            // add it to the current cluster
-                                                c.push_back(nPid);
-                                                _pointId_to_clusterId[nPid]=cid;
-                                        }
-                                }
-                                // start a new cluster
-                                _clusters.push_back(c);
-                                cid++;
-                        }
-                } // if (!visited
-        } // for
-
-        nbClusters = cid;
+    nbClusters = cid;
 }
 
 
 void ClustererDBSCAN::run_optics(Points samples)
 {
-        // foreach pid
-        for (PointId pid = 0; pid < samples.size(); pid++)
-        {
-                // not already visited
-                if (!_visited[pid]){
+    // foreach pid
+    for (PointId pid = 0; pid < samples.size(); pid++)
+    {
+        // not already visited
+        if (!_visited[pid]){
 
-                        _visited[pid] = true;
+            _visited[pid] = true;
 
-                        // get the neighbors
-                        Neighbors ne = findNeighbors(pid, _eps);
-                        // add it to the ordered list
-                        _optics_list.push_back(pid);
-                        // use the multiMap as priority queue
-                        QMultiMap<double,PointId> queue;
+            // get the neighbors
+            Neighbors ne = findNeighbors(pid, _eps);
+            // add it to the ordered list
+            _optics_list.push_back(pid);
+            // use the multiMap as priority queue
+            QMultiMap<double,PointId> queue;
 
-                        double d = this->core_distance(pid,_eps);
-                        // not enough support -> mark as noise
-                        if (d < 0)
+            double d = this->core_distance(pid,_eps);
+            // not enough support -> mark as noise
+            if (d < 0)
+            {
+                _noise[pid] = true;
+            }
+            else
+            {
+                //else it is a core point
+                _core[pid] = true;
+                this->update_reachability(ne,pid,d,queue);
+
+                // go to neighbors in the good order
+                while(queue.size()>0)
+                {
+                    //take element with lowest distance from the queue
+                    PointId nPid = queue.begin().value();
+                    queue.erase(queue.begin());
+
+                    // not already visited
+                    if (!_visited[nPid])
+                    {
+                        _visited[nPid] = true;
+
+                        // go to neighbors
+                        Neighbors ne1 = findNeighbors(nPid, _eps);
+
+                        _optics_list.push_back(nPid);
+
+                        double dd = this->core_distance(nPid,_eps);
+                        // enough support
+                        if (dd >= 0)
                         {
-                                _noise[pid] = true;
-                        }
-                        else
-                        {
-                            //else it is a core point
-                                _core[pid] = true;
-                                this->update_reachability(ne,pid,d,queue);
-
-                                // go to neighbors in the good order
-                                while(queue.size()>0)
-                                {
-                                    //take element with lowest distance from the queue
-                                        PointId nPid = queue.begin().value();
-                                        queue.erase(queue.begin());
-
-                                        // not already visited
-                                        if (!_visited[nPid])
-                                        {
-                                                _visited[nPid] = true;
-
-                                                // go to neighbors
-                                                Neighbors ne1 = findNeighbors(nPid, _eps);
-
-                                                _optics_list.push_back(nPid);
-
-                                                double dd = this->core_distance(nPid,_eps);
-                                                // enough support
-                                                if (dd >= 0)
-                                                {
-                                                        _core[nPid] = true;
-                                                        this->update_reachability(ne1,nPid,dd,queue);
-
-                                                }
-                                        }
-                                }
+                            _core[nPid] = true;
+                            this->update_reachability(ne1,nPid,dd,queue);
 
                         }
-                } // if (!visited
-        } // for
+                    }
+                }
+
+            }
+        } // if (!visited
+    } // for
 
 }
 
@@ -405,7 +462,7 @@ void ClustererDBSCAN::find_clusters_WF()
 
     if (!_optics_list.empty()) {
         _reachability[_optics_list[0]] = 0; //first element is anyway reachable
-        }
+    }
 
     for (int i = 0; i < _optics_list.size(); i++)
     {
@@ -514,53 +571,51 @@ void ClustererDBSCAN::find_clusters_WF()
 // compute the core-distance
 double ClustererDBSCAN::core_distance(PointId pid,double threshold)
 {
-        QMultiMap<double,int> p;
-        for (unsigned int j=0; j < _sim.size1(); j++)
+    QMultiMap<double,int> p;
+    for (unsigned int j=0; j < _sim.size1(); j++)
+    {
+        if 	((pid != j ) && (_sim(pid, j)) < threshold)
         {
-                if 	((pid != j ) && (_sim(pid, j)) < threshold)
-                {
-                    p.insert(_sim(pid, j),j);
-                }
+            p.insert(_sim(pid, j),j);
         }
-        QList<double> k = p.keys();
-        if (k.size()<_minPts)
-        {
-            return -1;
-        }
-        else
-        {
-            return k[_minPts-1];
-        }
+    }
+    QList<double> k = p.keys();
+    if (k.size()<_minPts)
+    {
+        return -1;
+    }
+    else
+    {
+        return k[_minPts-1];
+    }
 
 }
 
 
 Neighbors ClustererDBSCAN::findNeighbors(PointId pid, double threshold)
 {
-        Neighbors ne;
+    Neighbors ne;
 
-        for (unsigned int j=0; j < _sim.size1(); j++)
-        {
-                if 	((pid != j ) && (_sim(pid, j)) < threshold)
-                {
-                        ne.push_back(j);
-                }
+    for (unsigned int j=0; j < _sim.size1(); j++) {
+        if 	((pid != j ) && (_sim(pid, j)) < threshold) {
+            ne.push_back(j);
         }
-        return ne;
+    }
+    return ne;
 }
 
 template <typename Distance_type>
 void ClustererDBSCAN::computeSimilarity(Distance_type & d,Points samples)
 {
-        unsigned int size = samples.size();
-        _sim.resize(size, size, false);
-        for (unsigned int i=0; i < size; i++)
+    unsigned int size = samples.size();
+    _sim.resize(size, size, false);
+    for (unsigned int i=0; i < size; i++)
+    {
+        for (unsigned int j=i+1; j < size; j++)
         {
-                for (unsigned int j=i+1; j < size; j++)
-                {
-                        _sim(j, i) = _sim(i, j) = d.distance(samples[i], samples[j]);
+            _sim(j, i) = _sim(i, j) = d.distance(samples[i], samples[j]);
 
-                }
         }
+    }
 }
 

@@ -44,7 +44,6 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, fl
 QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 
-
 void Draw2DDynamical(Canvas *canvas, Dynamical *dynamical);
 void Draw3DClassifier(GLWidget *glw, Classifier *classifier);
 void Draw3DRegressor(GLWidget *glw, Regressor *regressor);

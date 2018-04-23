@@ -9,26 +9,21 @@ QContour::QContour(double *values, int w, int h)
 {
     vmin = DBL_MAX;
     vmax = -DBL_MAX;
-    if(values)
-    {
-        for(int i=0; i<w; i++)
-        {
-            for(int j=0; j<h; j++)
-            {
+    if(values) {
+        for(int i=0; i<w; i++) {
+            for(int j=0; j<h; j++) {
                 double v = values[j*w+i];
                 if(vmin > v) vmin = v;
                 if(vmax < v) vmax = v;
             }
         }
     }
-    if(vmax==vmin)
-    {
+    if(vmax==vmin) {
         vmax += 0.1f;
         vmin -= 0.1f;
     }
 
-    if(vmax-vmin < 1e-10)
-    {
+    if(vmax-vmin < 1e-10) {
         double vdiff = 1e-10;
         double vcenter = (vmax-vmin)*0.5f;
         vmax = vcenter + vdiff*0.5f;

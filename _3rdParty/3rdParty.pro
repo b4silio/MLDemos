@@ -48,7 +48,8 @@ SOURCES += \
 	fgmm/gmm.cpp \
 	fgmm/gmmregression.cpp \
 	fgmm/smat.cpp \
-	fgmm/update.cpp
+	fgmm/update.cpp \
+    DBScan/meanshift.cpp
 
 HEADERS +=	\
 	MathLib/Differentiator.h \
@@ -698,6 +699,16 @@ SOURCES += \
     jacgrid/isosurface.cpp \
     jacgrid/plane.cpp \
     jacgrid/surface.cpp
+
+HEADERS += \
+    DBScan/DBSCAN.hpp \
+    DBScan/kmedoids.hpp \
+    DBScan/Meanshift.hpp \
+    DBScan/xmeans.hpp \
+    DBScan/generalized-kmeans.hpp
+
+SOURCES += \
+    DBScan/clustering_methods.cpp
 
 #unix{
 #	BOOST = /usr/local/boost_1_47_0

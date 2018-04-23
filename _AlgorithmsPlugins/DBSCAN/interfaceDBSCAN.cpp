@@ -20,7 +20,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "drawUtils.h"
 #include <QPixmap>
 #include <QBitmap>
+#include <QDebug>
 #include <QPainter>
+#include "opencvincludes.h"
 
 using namespace std;
 
@@ -36,6 +38,12 @@ ClustDBSCAN::ClustDBSCAN()
         graphzoom->setupUi(zoomWidget);
         zoomWidget->setWindowTitle("OPTICS reachability-distance plot");
         params->zoomButton->setVisible(false);
+        params->typeCombo->setVisible(false);
+        params->typeLabel->setVisible(false);
+        params->dendoLabel->setVisible(false);
+        params->depthSpin->setVisible(false);
+        //params->metricCombo->setVisible(false);
+        //params->metricLabel->setVisible(false);
 
       // connecting slots for opening the windows and changing the UI
         connect(params->zoomButton, SIGNAL(clicked()), this, SLOT(showZoom()));
@@ -70,14 +78,14 @@ void ClustDBSCAN::typeChanged(int ntype)
     {
        params->depthSpin->setVisible(false);
        params->dendoGraph->setVisible(false);
-       params->label_10->setVisible(false);
+       params->dendoLabel->setVisible(false);
        params->zoomButton->setVisible(false);
     }
     else
     {
         params->depthSpin->setVisible(true);
         params->dendoGraph->setVisible(true);
-        params->label_10->setVisible(true);
+        params->dendoLabel->setVisible(true);
     }
 }
 
@@ -88,7 +96,7 @@ void ClustDBSCAN::SetParams(Clusterer *clusterer)
 
 fvec ClustDBSCAN::GetParams()
 {
-    double minpts = params->minptsSpin->value();
+    double minNeighbours = params->minptsSpin->value()-1;
     double eps = params->epsSpin->value();
     int metric = params->metricCombo->currentIndex();
     int type = params->typeCombo->currentIndex();
@@ -96,7 +104,7 @@ fvec ClustDBSCAN::GetParams()
 
     int i=0;
     fvec par(5);
-    par[i++] = minpts;
+    par[i++] = minNeighbours;
     par[i++] = eps;
     par[i++] = metric;
     par[i++] = type;
@@ -173,51 +181,112 @@ void ClustDBSCAN::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *cluster
     ClustererDBSCAN * dbscan = dynamic_cast<ClustererDBSCAN*>(clusterer);
     if(!dbscan) return;
 
+    int w = painter.viewport().width();
+    int h = painter.viewport().height();
+
+    float xRadius = -1.f;
+    float yRadius = -1.f;
+    int xIndex = canvas->xIndex;
+    int yIndex = canvas->yIndex;
+    float eps = params->epsSpin->value();
+    int metric = params->metricCombo->currentIndex();
+
     if(dbscan->_type==0) // DBSCAN: we draw the core point with a black border
     {
+        if(dbscan->pts.empty()) return;
+
+        Point sample = dbscan->pts[0];
+        fvec pt;
+        pt.resize(sample.size(),0);
+        FOR(j, sample.size()) pt[j]=sample[j];
+        QPointF point = canvas->toCanvasCoords(pt);
+        fvec ptDiff = pt;
+        ptDiff[xIndex] += eps;
+        QPointF d = (canvas->toCanvasCoords(ptDiff) - point);
+        xRadius = sqrt(d.x()*d.x() + d.y()*d.y());
+
+        ptDiff = pt;
+        ptDiff[yIndex] += eps;
+        d = (canvas->toCanvasCoords(ptDiff) - point);
+        yRadius = sqrt(d.x()*d.x() + d.y()*d.y());
+
+        QPolygonF astroid;
+        int steps = 64;
+        FOR(i, steps+1) {
+            float theta = i/float(steps)*M_PI*2;
+            float x = xRadius*.25*(3*cos(theta) + cos(3*theta));
+            float y = yRadius*.25*(3*sin(theta) - sin(3*theta));
+            astroid << QPointF(x,y);
+        }
+
+        std::map<int,QPixmap> pixmapsMap;
+
         // for every point in the current dataset
         FOR(i, dbscan->_pointId_to_clusterId.size())
         {
-            if (dbscan->_core[i] || dbscan->_noise[i])
-            {
-                // we get the sample
-                Point sample = dbscan->pts[i];
-                // transform it again in fvec from Point...
-                fvec pt;
-                pt.resize(sample.size(),0);
-                FOR(j, sample.size())
-                {
-                    pt[j]=sample[j];
-                }
+            if (!dbscan->_core[i] && !dbscan->_noise[i]) continue;
+            int cid = dbscan->_pointId_to_clusterId[i];
+            if(!pixmapsMap.count(cid)) {
+                pixmapsMap[cid] = QPixmap(w,h);
+                pixmapsMap[cid].fill(Qt::transparent);
+            }
 
-                //... and we get the point in canvas coordinates (2D pixel by pixel) corresponding to the sample (N-dimensional in R)
-                QPointF point = canvas->toCanvasCoords(pt);
+            // we get the sample
+            Point sample = dbscan->pts[i];
+            // transform it again in fvec from Point...
+            fvec pt;
+            pt.resize(sample.size(),0);
+            FOR(j, sample.size()) {
+                pt[j]=sample[j];
+            }
 
-                if (dbscan->_core[i])
-                {
-                    // core points get a black edge
-            // set a black edge
-                    painter.setBrush(Qt::NoBrush);
-                    painter.setPen(QPen(QColor(0,0,0),2));
-            // and draw the sample itself
-                    painter.drawEllipse(point,6,6);
-                 }
-                else
-                {
-                    // noise get a grey one
-                    // set the color of the edge
-                            painter.setBrush(Qt::NoBrush);
-                            painter.setPen(QPen(Qt::gray,2));
-                    // and draw the sample itself
-                            painter.drawEllipse(point,3,3);
+            //... and we get the point in canvas coordinates (2D pixel by pixel) corresponding to the sample (N-dimensional in R)
+            QPointF point = canvas->toCanvasCoords(pt);
+
+            if (dbscan->_core[i]) {
+                // add it to the set
+                QPainter pixPainter(&pixmapsMap[cid]);
+                pixPainter.setPen(Qt::NoPen);
+                pixPainter.setBrush(Qt::white);
+                QRectF r(point.x()-xRadius, point.y()-yRadius,xRadius*2,yRadius*2);
+                if(metric == 0) {
+                    pixPainter.drawEllipse(r);
+                } else if (metric == 1) {
+                    QPolygonF poly;
+                    poly << point - QPointF(-xRadius,0);
+                    poly << point - QPointF(0,-yRadius);
+                    poly << point - QPointF(+xRadius,0);
+                    poly << point - QPointF(0,+yRadius);
+                    pixPainter.drawPolygon(poly);
+                } else if (metric == 2) {
+                    pixPainter.drawRect(r);
+                } else if (metric == 3) {
+                    pixPainter.drawPolygon(astroid.translated(point));
                 }
+             } else {
+                // dont add it
             }
         }
-    }
-    else // OPTICS: we draw the position in the ordered list
-    {
-        FOR(i, dbscan->_optics_list.size())
-            {
+        painter.setPen(QPen(Qt::black, 1, Qt::DotLine));
+
+        FORIT(pixmapsMap, int, QPixmap) {
+            cv::Mat image = QImageToCvMat(it->second.toImage());
+            cv::Mat gray, edges;
+            cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+            cv::Canny(gray, edges, 50, 100, 3);
+            std::vector<std::vector<cv::Point> > contours;
+            cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+            FOR(i, contours.size()) {
+                std::vector<cv::Point>& contour = contours.at(i);
+                QPolygonF poly;
+                FOR(j, contour.size()) {
+                    poly << QPointF(contour[j].x, contour[j].y);
+                }
+                painter.drawPolygon(poly, Qt::WindingFill);
+            }
+        }
+    } else {// OPTICS: we draw the position in the ordered list
+        FOR(i, dbscan->_optics_list.size()) {
             // we get the sample
             Point sample = dbscan->pts[dbscan->_optics_list[i]];
 
@@ -331,8 +400,7 @@ void ClustDBSCAN::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *cluste
     painter.setRenderHint(QPainter::Antialiasing);
 
     // for every point in the current dataset
-    FOR(i, dbscan->_pointId_to_clusterId.size())
-	{
+    FOR(i, dbscan->_pointId_to_clusterId.size()) {
         // we get the sample
         Point sample = dbscan->pts[i];
 
@@ -342,41 +410,38 @@ void ClustDBSCAN::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *cluste
 
         fvec pt;
         pt.resize(sample.size(),0);
-        FOR(j, sample.size())
-        {
+        FOR(j, sample.size()) {
             pt[j]=sample[j];
         }
-
         QPointF point = canvas->toCanvasCoords(pt);
 
-        // we combine together the contribution of each cluster to color the sample properly
-
-        float r = SampleColor[cid].red();
-        float g = SampleColor[cid].green();
-        float b = SampleColor[cid].blue();
-
+        if(cid > 0) {
+            // we combine together the contribution of each cluster to color the sample properly
+            painter.setBrush(SampleColor[cid%SampleColorCnt]);
+        } else {
+            // we combine together the contribution of each cluster to color the sample properly
+            painter.setBrush(Qt::gray);
+        }
         // set the color of the brush and a black edge
-		painter.setBrush(QColor(r,g,b));
-		painter.setPen(Qt::black);
+        painter.setPen(Qt::black);
         // and draw the sample itself
-		painter.drawEllipse(point,5,5);
-	}
+        painter.drawEllipse(point,5,5);
+    }
 
     // we copy the data for zoom display
     optics_list = dbscan->_optics_list;
     reachability = dbscan->_reachability;
     pointId_to_clusterId = dbscan->_pointId_to_clusterId;
 
-    // and plot the small graph
-    QPixmap pixmap(params->dendoGraph->size());
-    //QBitmap bitmap(params->dendoGraph->size());
-    //bitmap.clear();
-    //pixmap.setMask(bitmap);
-    pixmap.fill(Qt::transparent);
-    QPainter dPainter(&pixmap);
-    DrawDendogram(dPainter,false);
-    params->dendoGraph->setPixmap(pixmap);
-    params->zoomButton->setVisible(true); // now we are allowed to zoom
+    if(params->typeCombo->currentIndex()>0) {
+        // and plot the small graph
+        QPixmap pixmap(params->dendoGraph->size());
+        pixmap.fill(Qt::transparent);
+        QPainter dPainter(&pixmap);
+        DrawDendogram(dPainter,false);
+        params->dendoGraph->setPixmap(pixmap);
+        params->zoomButton->setVisible(true); // now we are allowed to zoom
+    }
 }
 
 void ClustDBSCAN::SaveOptions(QSettings &settings)
@@ -401,7 +466,7 @@ bool ClustDBSCAN::LoadOptions(QSettings &settings)
     {
         params->depthSpin->setVisible(false);
         params->dendoGraph->setVisible(false);
-        params->label_10->setVisible(false);
+        params->dendoLabel->setVisible(false);
         params->zoomButton->setVisible(false);
     }
     return true;
@@ -429,7 +494,7 @@ bool ClustDBSCAN::LoadParams(QString name, float value)
     {
         params->depthSpin->setVisible(false);
         params->dendoGraph->setVisible(false);
-        params->label_10->setVisible(false);
+        params->dendoLabel->setVisible(false);
         params->zoomButton->setVisible(false);
     }
     return true;

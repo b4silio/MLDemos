@@ -27,7 +27,8 @@ HEADERS +=	\
     interfaceDBSCAN.h \
     distance.h \
     clustererDBSCAN.h \
-    pluginDBSCAN.h
+    pluginDBSCAN.h \
+    opencvincludes.h
 
 SOURCES += 	\
     interfaceDBSCAN.cpp \

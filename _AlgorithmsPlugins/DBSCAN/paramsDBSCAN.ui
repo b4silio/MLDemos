@@ -13,12 +13,12 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="label_8">
+  <widget class="QLabel" name="minptsLabel">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>20</x>
      <y>0</y>
-     <width>41</width>
+     <width>80</width>
      <height>21</height>
     </rect>
    </property>
@@ -28,7 +28,7 @@
     </font>
    </property>
    <property name="text">
-    <string>MinPts</string>
+    <string>Min Samples</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -37,7 +37,7 @@
   <widget class="QComboBox" name="metricCombo">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>60</x>
      <y>90</y>
      <width>90</width>
      <height>21</height>
@@ -56,21 +56,31 @@
    </property>
    <item>
     <property name="text">
-     <string>Cosine</string>
+     <string>Euclidean</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Euclidean</string>
+     <string>Manhattan</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Chebyshev</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Astroid</string>
     </property>
    </item>
   </widget>
-  <widget class="QLabel" name="label_6">
+  <widget class="QLabel" name="epsLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>30</y>
-     <width>31</width>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
@@ -80,7 +90,7 @@
     </font>
    </property>
    <property name="text">
-    <string>eps</string>
+    <string>Max distance (eps)</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -89,7 +99,7 @@
   <widget class="QDoubleSpinBox" name="minptsSpin">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>100</x>
      <y>0</y>
      <width>50</width>
      <height>25</height>
@@ -113,10 +123,10 @@
     <double>1000.000000000000000</double>
    </property>
    <property name="value">
-    <double>3.000000000000000</double>
+    <double>1.000000000000000</double>
    </property>
   </widget>
-  <widget class="QLabel" name="label_7">
+  <widget class="QLabel" name="metricLabel">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -140,9 +150,9 @@
   <widget class="QDoubleSpinBox" name="epsSpin">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>100</x>
      <y>30</y>
-     <width>60</width>
+     <width>50</width>
      <height>25</height>
     </rect>
    </property>
@@ -173,7 +183,7 @@
   <widget class="QComboBox" name="typeCombo">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>60</x>
      <y>120</y>
      <width>90</width>
      <height>21</height>
@@ -206,7 +216,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QLabel" name="label_9">
+  <widget class="QLabel" name="typeLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -230,7 +240,7 @@
   <widget class="QDoubleSpinBox" name="depthSpin">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>90</x>
      <y>60</y>
      <width>60</width>
      <height>25</height>
@@ -260,12 +270,12 @@
     <double>0.100000000000000</double>
    </property>
   </widget>
-  <widget class="QLabel" name="label_10">
+  <widget class="QLabel" name="dendoLabel">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>60</y>
-     <width>41</width>
+     <width>70</width>
      <height>20</height>
     </rect>
    </property>
@@ -275,7 +285,7 @@
     </font>
    </property>
    <property name="text">
-    <string>depth</string>
+    <string>Dendo. Depth</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -284,10 +294,10 @@
   <widget class="QLabel" name="dendoGraph">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>10</y>
-     <width>130</width>
-     <height>131</height>
+     <x>160</x>
+     <y>30</y>
+     <width>110</width>
+     <height>110</height>
     </rect>
    </property>
    <property name="toolTip">
