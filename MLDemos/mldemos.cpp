@@ -143,6 +143,7 @@ void MLDemos::resizeEvent(QResizeEvent *event)
         glw->resize(ui.canvasArea->size());
     }
     canvas->ResizeEvent();
+    CanvasOptionsChanged();
 
     CanvasMoveEvent();
 }
