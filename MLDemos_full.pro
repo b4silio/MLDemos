@@ -10,9 +10,10 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 TEMPLATE = subdirs
 # the main software
 CONFIG += ordered
-SUBDIRS = Core 3rdParty MLDemos
-Core.file = Core/Core.pro
+SUBDIRS = 3rdParty Core MLDemos
 3rdParty.file = _3rdParty/3rdParty.pro
+Core.file = Core/Core.pro
+Core.depends = 3rdParty
 MLDemos.file = MLDemos/MLDemos.pro
 MLDemos.depends = Core
 MLScripting.file = MLScripting/MLScripting.pro

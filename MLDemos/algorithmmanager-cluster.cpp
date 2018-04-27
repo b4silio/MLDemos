@@ -141,9 +141,13 @@ void AlgorithmManager::Cluster()
 
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
-    float logLikelihood = clusterer->GetLogLikelihood(samples);
-    float BIC = -2*logLikelihood + logf(samples.size())*clusterer->GetParameterCount(); // BIC
-    float AIC = -2*logLikelihood + 2*clusterer->GetParameterCount(); // AIC
+    float logL = clusterer->GetLogLikelihood(samples);
+    float n = samples.size();
+    float k = clusterer->GetParameterCount();
+
+    float BIC = -2*logL + log(n)*k;
+    float AIC = -2*logL + 2*k;
+    float AICc = AIC + 2*(k*k + k)/(n-k-1);
 
     int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
     float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
@@ -163,15 +167,17 @@ void AlgorithmManager::Cluster()
     float F1 = ClusterFMeasure(samples, labels, clusterScores, f1ratio);
 
     optionsCluster->resultList->clear();
-    optionsCluster->resultList->addItem(QString("lik: %1").arg(logLikelihood, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("bic: %1").arg(BIC, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("aic: %1").arg(AIC, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("f1: %1").arg(F1, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("Lik: %1").arg(logL, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("BIC: %1").arg(BIC, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("AIC: %1").arg(AIC, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("AICc: %1").arg(AICc, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("F1: %1").arg(F1, 0, 'f', 2));
 
     optionsCluster->resultList->item(0)->setForeground(Qt::gray);
-    optionsCluster->resultList->item(1)->setForeground(SampleColor[1]);
-    optionsCluster->resultList->item(2)->setForeground(SampleColor[2]);
-    optionsCluster->resultList->item(3)->setForeground(SampleColor[3]);
+    optionsCluster->resultList->item(1)->setForeground(Qt::red);
+    optionsCluster->resultList->item(2)->setForeground(Qt::blue);
+    optionsCluster->resultList->item(3)->setForeground(Qt::magenta);
+    optionsCluster->resultList->item(4)->setForeground(QColor(255,128,0)); // orange
 
     // we fill in the canvas sampleColors for the alternative display types
     canvas->sampleColors.resize(samples.size());
@@ -324,24 +330,10 @@ void AlgorithmManager::ClusterTest()
 void AlgorithmManager::ClusterOptimize()
 {
     if(!canvas || !canvas->data->GetCount()) return;
-    drawTimer->Stop();
-    drawTimer->Clear();
     QMutexLocker lock(mutex);
-    DEL(clusterer);
-    DEL(regressor);
-    DEL(dynamical);
-    if(!classifierMulti.size()) DEL(classifier);
-    classifier = 0;
-    sourceDims.clear();
-    FOR(i,classifierMulti.size()) DEL(classifierMulti[i]); classifierMulti.clear();
-    DEL(maximizer);
-    DEL(reinforcement);
-    DEL(projector);
-    lastTrainingInfo = "";
     if(!optionsCluster->algoList->count()) return;
     int tab = optionsCluster->algoList->currentIndex();
     if(tab >= clusterers.size() || !clusterers[tab]) return;
-    clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
 
     int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
@@ -357,54 +349,54 @@ void AlgorithmManager::ClusterOptimize()
     int ratioIndex = optionsCluster->trainTestCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
 
-    vector<bool> trainList; // oh
-    if(optionsCluster->manualTrainButton->isChecked())
-    {
-        // we get the list of samples that are checked
+    vector<bool> trainList;
+    if(optionsCluster->manualTrainButton->isChecked()) {
         trainList = GetManualSelection();
     }
 
     float testError = 0;
     ivec kCounts;
-    vector< vector<fvec> > resultList(4);
+    vector< vector<fvec> > resultList(5);
     vector<fvec> testErrors(stopCount-startCount+1);
     int crossValCount = 5;
     FOR(i, resultList.size()) resultList[i].resize(crossValCount);
-    for(int k=startCount; k<=stopCount; k++)
-    {
+    for(int k=startCount; k<=stopCount; k++) {
+        Clusterer* clusterer = clusterers[tab]->GetClusterer();
         clusterer->SetNbClusters(k);
         testErrors[k-startCount].resize(crossValCount);
-        FOR(j, crossValCount)
-        {
+        FOR(j, crossValCount) {
             Train(clusterer, trainRatio, trainList, &testError);
             testErrors[k-startCount][j] = testError;
 
             vector<fvec> clusterScores(samples.size());
-            FOR(i, samples.size())
-            {
+            FOR(i, samples.size()) {
                 fvec result = clusterer->Test(samples[i]);
                 if(clusterer->NbClusters()==1) clusterScores[i] = result;
                 else if(result.size()>1) clusterScores[i] = result;
             }
 
-            fvec clusterMetrics(4);
+            fvec clusterMetrics(5);
 
-            float logLikelihood = clusterer->GetLogLikelihood(samples);
-            float BIC = -2*logLikelihood + k*logf(samples.size())*clusterer->GetParameterCount(); // BIC
-            float AIC = -2*logLikelihood + 2*clusterer->GetParameterCount(); // AIC
-            clusterMetrics[0] = logLikelihood;
+            float logL = clusterer->GetLogLikelihood(samples);
+            float n = samples.size();
+            float k = clusterer->GetParameterCount();
+            float BIC = -2*logL + k*logf(n)*k;
+            float AIC = -2*logL + 2*k;
+            float AICc = AIC + 2*(k*k+k)/(n-k-1);
+            clusterMetrics[0] = logL;
             clusterMetrics[1] = BIC;
             clusterMetrics[2] = AIC;
-            clusterMetrics[3] = ClusterFMeasure(samples, labels, clusterScores, ratio);
+            clusterMetrics[3] = AICc;
+            clusterMetrics[4] = ClusterFMeasure(samples, labels, clusterScores, ratio);
 
-            FOR(i, clusterMetrics.size())
-            {
+            FOR(i, clusterMetrics.size()) {
                 resultList[i][j].push_back(clusterMetrics[i]);
             }
         }
         kCounts.push_back(k);
+        delete clusterer;
     }
-    vector<fvec> results(4);
+    vector<fvec> results(5);
     double value = 0;
     FOR(i, resultList.size())
     {
@@ -458,11 +450,16 @@ void AlgorithmManager::ClusterOptimize()
 
     vector< pair<float,int> > bests(results.size());
 
-    qreal xpos, ypos;
+    vector<QColor> colors;
+    colors.push_back(Qt::black);
+    colors.push_back(Qt::red);
+    colors.push_back(Qt::blue);
+    colors.push_back(Qt::magenta);
+    colors.push_back(QColor(255,128,0));
     FOR(i, results.size())
     {
         QPointF old;
-        painter.setPen(QPen(i ? SampleColor[i%SampleColorCnt] : Qt::gray,2));
+        painter.setPen(QPen(colors[i%colors.size()],2));
         bests[i] = make_pair(FLT_MAX, 0);
         FOR(k, kCounts.size())
         {
@@ -476,82 +473,23 @@ void AlgorithmManager::ClusterOptimize()
 
             //if(i == 3) y = 1.f - y; // fmeasures needs to be maximized
 
-
             QPointF point(x*(w-2*pad)+pad,(1.f-y)*(h-2*pad));
             if(k) painter.drawLine(old, point);
             old = point;
         }
     }
     optionsCluster->graphLabel->setPixmap(pixmap);
+    optionsCluster->graphLabel->repaint();
 
     optionsCluster->resultList->clear();
-    optionsCluster->resultList->addItem(QString("rss: %1 (%2)").arg(bests[0].second).arg(bests[0].first, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("bic: %1 (%2)").arg(bests[1].second).arg(bests[1].first, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("aic: %1 (%2)").arg(bests[2].second).arg(bests[2].first, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("f1: %1 (%2)").arg(bests[3].second).arg(bests[3].first, 0, 'f', 2));
-    FOR(i, results.size())
-    {
-        optionsCluster->resultList->item(i)->setForeground(i ? SampleColor[i%SampleColorCnt] : Qt::gray);
+    optionsCluster->resultList->addItem(QString("RSS: %1 (%2)").arg(bests[0].second).arg(bests[0].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("BIC: %1 (%2)").arg(bests[1].second).arg(bests[1].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("AIC: %1 (%2)").arg(bests[2].second).arg(bests[2].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("AICc: %1 (%2)").arg(bests[3].second).arg(bests[3].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("F1: %1 (%2)").arg(bests[4].second).arg(bests[4].first, 0, 'f', 2));
+    FOR(i, results.size()) {
+        optionsCluster->resultList->item(i)->setForeground(colors[i%colors.size()]);
     }
-
-    int bestIndex = optionsCluster->optimizeCombo->currentIndex();
-    clusterer->SetNbClusters(bests[bestIndex].second);
-    Train(clusterer, trainRatio, trainList, &testError);
-
-    // we fill in the canvas sampleColors for the alternative display types
-    canvas->sampleColors.resize(samples.size());
-    FOR(i, samples.size())
-    {
-        fvec res = clusterer->Test(samples[i]);
-        float r=0,g=0,b=0;
-        if(res.size() > 1)
-        {
-            FOR(j, res.size())
-            {
-                r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
-                g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
-                b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
-            }
-        }
-        else if(res.size())
-        {
-            r = (1-res[0])*255 + res[0]* 255;
-            g = (1-res[0])*255;
-            b = (1-res[0])*255;
-        }
-        canvas->sampleColors[i] = QColor(r,g,b);
-    }
-    canvas->maps.model = QPixmap();
-
-    clusterers[tab]->Draw(canvas, clusterer);
-    glw->clearLists();
-    if(canvas->canvasType == 1)
-    {
-        clusterers[tab]->DrawGL(canvas, glw, clusterer);
-        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
-    }
-
-    emit UpdateInfo();
-    /*
-    QString infoText = showStats->infoText->text();
-    infoText += "\nClustering as Classifier\nF-Measures:\n";
-    FOR(i, testErrors.size())
-    {
-        float mean=0, stdev=0;
-        FOR(j, testErrors[i].size()) mean += testErrors[i][j];
-        mean /= testErrors[i].size();
-        FOR(j, testErrors[i].size()) stdev += (testErrors[i][j] - mean)*(testErrors[i][j] - mean);
-        stdev /= testErrors[i].size();
-        stdev = sqrtf(stdev);
-        infoText += QString("%1 clusters: %2 (+- %3)\n").arg(i+1).arg(mean, 0, 'f', 3).arg(stdev, 0, 'f', 3);
-    }
-    showStats->infoText->setText(infoText);
-    */
-
-    drawTimer->clusterer= &this->clusterer;
-    drawTimer->inputDims = GetInputDimensions();
-    drawTimer->start(QThread::NormalPriority);
-    canvas->repaint();
 }
 
 void AlgorithmManager::ClusterIterate()

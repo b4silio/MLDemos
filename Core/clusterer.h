@@ -47,23 +47,24 @@ public:
         float loglik = 0;
         if(!samples.size()) return 0;
         fvec means(dim);
+
         // compute the global mean of the data
         FOR ( i, samples.size() ) {
             FOR ( d, dim ) means[d] += samples[i][d];
         }
-     //   std::cout<< " GetLogLikelihood " << std::endl;
-     //   std::cout<< " samples.size(): " << samples.size() << std::endl;
-     //   std::cout<< " means: ";
-      //  FOR(i, means.size()){
-      //      std::cout<<  means[i] << " ";
-      //  }
-      //  std::cout<<std::endl;
+        FOR ( d, dim ) means[d] /= samples.size();
+
+        // compute the distribution variance
+        fvec sigmas(dim);
+        FOR ( i, samples.size() ) {
+            FOR ( d, dim ) sigmas[d] += pow(samples[i][d] - means[d],2);
+        }
 
         fvec scores(nbClusters);
         fvec diff(dim);
         // for every sample a score is computed
         FOR ( i, samples.size() ) {
-             scores = Test(samples[i]);
+            scores = Test(samples[i]);
             float rss = 0;
             FOR ( k, nbClusters ) {
                 diff = samples[i]-means;//[k]; // center the data

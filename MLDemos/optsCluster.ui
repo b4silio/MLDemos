@@ -956,6 +956,11 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <property name="text">
+                   <string>AICc</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
                    <string>F1</string>
                   </property>
                  </item>

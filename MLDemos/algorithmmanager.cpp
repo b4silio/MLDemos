@@ -19,6 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "algorithmmanager.h"
 #include "mldemos.h"
+#include <assert.h>
 
 using namespace std;
 
@@ -340,7 +341,7 @@ void AlgorithmManager::ColorMapChanged()
 
 void AlgorithmManager::ClusterChanged()
 {
-    if (optionsCluster->optimizeCombo->currentIndex() == 3) { // F1
+    if (optionsCluster->optimizeCombo->currentIndex() == 4) { // F1
         optionsCluster->trainRatioCombo->setVisible(true);
         optionsCluster->trainRatioF1->setVisible(true);
     } else {
