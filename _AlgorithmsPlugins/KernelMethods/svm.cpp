@@ -2242,17 +2242,14 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
         model->sv_coef[0] = new double[nSV];
 		int j = 0;
 		for(i=0;i<prob->l;i++)
-			if(fabs(f.alpha[i]) > 0)
-			{
+            if(fabs(f.alpha[i]) > 0) {
 				model->SV[j] = prob->x[i];
 				model->sv_coef[0][j] = f.alpha[i];
 				++j;
 			}		
 
         delete [] f.alpha;
-	}
-	else
-	{
+    } else {
 		// classification
 		int l = prob->l;
 		int nr_class;
@@ -2273,8 +2270,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
         double *weighted_C = new double[nr_class];
 		for(i=0;i<nr_class;i++)
 			weighted_C[i] = param->C;
-		for(i=0;i<param->nr_weight;i++)
-		{	
+        for(i=0;i<param->nr_weight;i++) {
 			int j;
 			for(j=0;j<nr_class;j++)
 				if(param->weight_label[i] == label[j])
@@ -2293,16 +2289,14 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
         decision_function *f = new decision_function[nr_class*(nr_class-1)/2];
 
 		double *probA=NULL,*probB=NULL;
-		if (param->probability)
-		{
+        if (param->probability) {
             probA = new double[nr_class*(nr_class-1)/2];
             probB = new double[nr_class*(nr_class-1)/2];
 		}
 
 		int p = 0;
 		for(i=0;i<nr_class;i++)
-			for(int j=i+1;j<nr_class;j++)
-			{
+            for(int j=i+1;j<nr_class;j++) {
 				svm_problem sub_prob;
 				int si = start[i], sj = start[j];
 				int ci = count[i], cj = count[j];
@@ -2310,13 +2304,11 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
                 sub_prob.x = new svm_node*[sub_prob.l];
                 sub_prob.y = new double[sub_prob.l];
 				int k;
-				for(k=0;k<ci;k++)
-				{
+                for(k=0;k<ci;k++) {
 					sub_prob.x[k] = x[si+k];
 					sub_prob.y[k] = +1;
 				}
-				for(k=0;k<cj;k++)
-				{
+                for(k=0;k<cj;k++) {
 					sub_prob.x[ci+k] = x[sj+k];
 					sub_prob.y[ci+k] = -1;
 				}

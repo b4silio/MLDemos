@@ -36,33 +36,25 @@ float AlgorithmManager::ClusterFMeasure(std::vector<fvec> samples, ivec labels, 
     fvec clusterScores(nbClusters);
     map<int,float> labelScores;
 
-    if(ratio == 1.f)
-    {
-        FOR(i, labels.size())
-        {
+    if(ratio == 1.f) {
+        FOR(i, labels.size()) {
             labelScores[labels[i]] += 1.f;
             if(!classScores.count(labels[i]))classScores[labels[i]].resize(nbClusters);
-            FOR(k, nbClusters)
-            {
+            FOR(k, nbClusters) {
                 classScores[labels[i]][k] += scores[i][k];
                 clusterScores[k] += scores[i][k];
             }
         }
-    }
-    else
-    {
+    } else {
         u32 *perm = randPerm(labels.size());
         map<int, ivec> indices;
         FOR(i, labels.size()) indices[labels[perm[i]]].push_back(perm[i]);
-        for(map<int,ivec>::iterator it = indices.begin(); it != indices.end(); it++)
-        {
+        for(map<int,ivec>::iterator it = indices.begin(); it != indices.end(); it++) {
             int labelCount = max(1,int(it->second.size()*ratio));
-            FOR(i, labelCount)
-            {
+            FOR(i, labelCount) {
                 labelScores[labels[it->second[i]]] += 1.f;
                 if(!classScores.count(labels[it->second[i]]))classScores[labels[it->second[i]]].resize(nbClusters);
-                FOR(k, nbClusters)
-                {
+                FOR(k, nbClusters) {
                     classScores[labels[it->second[i]]][k] += scores[it->second[i]][k];
                     clusterScores[k] += scores[it->second[i]][k];
                 }
@@ -73,11 +65,9 @@ float AlgorithmManager::ClusterFMeasure(std::vector<fvec> samples, ivec labels, 
 
     float fmeasure = 0;
     map<int,float>::iterator it2 = labelScores.begin();
-    for(map<int,fvec>::iterator it = classScores.begin(); it != classScores.end(); it++, it2++)
-    {
+    for(map<int,fvec>::iterator it = classScores.begin(); it != classScores.end(); it++, it2++) {
         float maxScore = -FLT_MAX;
-        FOR(k, nbClusters)
-        {
+        FOR(k, nbClusters) {
             float precision = it->second[k] / it2->second;
             float recall = it->second[k] / clusterScores[k];
             float f1 = 2*precision*recall/(precision+recall);
@@ -97,6 +87,8 @@ void AlgorithmManager::Cluster()
 {
     if(!canvas || !canvas->data->GetCount()) return;
     drawTimer->Stop();
+    drawTimer->Clear();
+
     QMutexLocker lock(mutex);
     DEL(clusterer);
     DEL(regressor);
@@ -119,32 +111,20 @@ void AlgorithmManager::Cluster()
     int ratioIndex = optionsCluster->trainTestCombo->currentIndex();
     float trainRatio = ratios[ratioIndex];
 
-    if(optionsCluster->manualTrainButton->isChecked())
-    {
+    if(optionsCluster->manualTrainButton->isChecked()) {
         // we get the list of samples that are checked
         trainList = GetManualSelection();
     }
 
     float testError;
     Train(clusterer, trainRatio, trainList, &testError);
-    drawTimer->Stop();
-    drawTimer->Clear();
-    clusterers[tab]->Draw(canvas,clusterer);
-    glw->clearLists();
-    if(canvas->canvasType == 1)
-    {
-        clusterers[tab]->DrawGL(canvas, glw, clusterer);
-        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
-    }
 
     // we compute the stats on the clusters (f-measure, bic etc)
-
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
     float logL = clusterer->GetLogLikelihood(samples);
     float n = samples.size();
     float k = clusterer->GetParameterCount();
-
     float BIC = -2*logL + log(n)*k;
     float AIC = -2*logL + 2*k;
     float AICc = AIC + 2*(k*k + k)/(n-k-1);
@@ -179,30 +159,40 @@ void AlgorithmManager::Cluster()
     optionsCluster->resultList->item(3)->setForeground(Qt::magenta);
     optionsCluster->resultList->item(4)->setForeground(QColor(255,128,0)); // orange
 
-    // we fill in the canvas sampleColors for the alternative display types
-    canvas->sampleColors.resize(samples.size());
-    FOR(i, samples.size())
+    clusterers[tab]->Draw(canvas,clusterer);
+    glw->clearLists();
+    if(canvas->canvasType == 1)
     {
-        fvec res = clusterer->Test(samples[i]);
-        float r=0,g=0,b=0;
-        if(res.size() > 1)
-        {
-            FOR(j, res.size())
-            {
-                r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
-                g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
-                b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
-            }
-        }
-        else if(res.size())
-        {
-            r = (1-res[0])*255 + res[0]* 255;
-            g = (1-res[0])*255;
-            b = (1-res[0])*255;
-        }
-        canvas->sampleColors[i] = QColor(r,g,b);
+        clusterers[tab]->DrawGL(canvas, glw, clusterer);
+        if(canvas->data->GetDimCount() == 3) Draw3DClusterer(glw, clusterer);
     }
-    canvas->maps.model = QPixmap();
+
+    // we fill in the canvas sampleColors for the alternative display types
+    if(canvas->canvasType != 0) {
+        canvas->sampleColors.resize(samples.size());
+        FOR(i, samples.size())
+        {
+            fvec res = clusterer->Test(samples[i]);
+            float r=0,g=0,b=0;
+            if(res.size() > 1)
+            {
+                FOR(j, res.size())
+                {
+                    r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+                    g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+                    b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
+                }
+            }
+            else if(res.size())
+            {
+                r = (1-res[0])*255 + res[0]* 255;
+                g = (1-res[0])*255;
+                b = (1-res[0])*255;
+            }
+            canvas->sampleColors[i] = QColor(r,g,b);
+        }
+        canvas->maps.model = QPixmap();
+    }
     canvas->repaint();
 
     emit UpdateInfo();
@@ -362,32 +352,39 @@ void AlgorithmManager::ClusterOptimize()
     FOR(i, resultList.size()) resultList[i].resize(crossValCount);
     for(int k=startCount; k<=stopCount; k++) {
         Clusterer* clusterer = clusterers[tab]->GetClusterer();
-        clusterer->SetNbClusters(k);
+        clusterer->SetClusterTestValue(k, stopCount);
         testErrors[k-startCount].resize(crossValCount);
         FOR(j, crossValCount) {
             Train(clusterer, trainRatio, trainList, &testError);
             testErrors[k-startCount][j] = testError;
 
-            vector<fvec> clusterScores(samples.size());
-            FOR(i, samples.size()) {
-                fvec result = clusterer->Test(samples[i]);
-                if(clusterer->NbClusters()==1) clusterScores[i] = result;
-                else if(result.size()>1) clusterScores[i] = result;
-            }
-
-            fvec clusterMetrics(5);
-
             float logL = clusterer->GetLogLikelihood(samples);
             float n = samples.size();
             float k = clusterer->GetParameterCount();
-            float BIC = -2*logL + k*logf(n)*k;
+            float BIC = -2*logL + log(n)*k;
             float AIC = -2*logL + 2*k;
-            float AICc = AIC + 2*(k*k+k)/(n-k-1);
+            float AICc = AIC + 2*(k*k + k)/(n-k-1);
+
+            vector<fvec> clusterScores(samples.size());
+            FOR(i, samples.size())
+            {
+                fvec result = clusterer->Test(samples[i]);
+                if(clusterer->NbClusters()==1) clusterScores[i] = result;
+                else if(result.size()>1) clusterScores[i] = result;
+                else if(result.size())
+                {
+                    fvec res(clusterer->NbClusters(),0);
+                    res[result[0]] = 1.f;
+                }
+            }
+            float f1 = ClusterFMeasure(samples, labels, clusterScores, ratio);
+
+            fvec clusterMetrics(5);
             clusterMetrics[0] = logL;
             clusterMetrics[1] = BIC;
             clusterMetrics[2] = AIC;
             clusterMetrics[3] = AICc;
-            clusterMetrics[4] = ClusterFMeasure(samples, labels, clusterScores, ratio);
+            clusterMetrics[4] = f1;
 
             FOR(i, clusterMetrics.size()) {
                 resultList[i][j].push_back(clusterMetrics[i]);

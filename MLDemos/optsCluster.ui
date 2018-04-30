@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>838</width>
+    <width>676</width>
     <height>308</height>
    </rect>
   </property>
@@ -60,7 +60,7 @@
        <widget class="QGroupBox" name="ClusterGroupBox">
         <property name="minimumSize">
          <size>
-          <width>270</width>
+          <width>230</width>
           <height>0</height>
          </size>
         </property>
@@ -70,7 +70,7 @@
         <widget class="QPushButton" name="clusterButton">
          <property name="geometry">
           <rect>
-           <x>160</x>
+           <x>124</x>
            <y>23</y>
            <width>101</width>
            <height>41</height>
@@ -91,7 +91,7 @@
         <widget class="QPushButton" name="iterationButton">
          <property name="geometry">
           <rect>
-           <x>160</x>
+           <x>124</x>
            <y>56</y>
            <width>101</width>
            <height>30</height>
@@ -111,7 +111,7 @@
           <rect>
            <x>10</x>
            <y>26</y>
-           <width>140</width>
+           <width>110</width>
            <height>70</height>
           </rect>
          </property>
@@ -161,7 +161,7 @@ p, li { white-space: pre-wrap; }
         <widget class="QPushButton" name="clearButton">
          <property name="geometry">
           <rect>
-           <x>176</x>
+           <x>140</x>
            <y>84</y>
            <width>66</width>
            <height>32</height>
@@ -183,45 +183,41 @@ p, li { white-space: pre-wrap; }
         <property name="title">
          <string>Algorithm</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QWidget" name="widget_3" native="true">
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QComboBox" name="algoList">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="currentIndex">
-               <number>-1</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QWidget" name="algoWidget" native="true"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QComboBox" name="algoList">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>200</width>
+           <height>26</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="currentIndex">
+          <number>-1</number>
+         </property>
+        </widget>
+        <widget class="QWidget" name="algoWidget" native="true">
+         <property name="geometry">
+          <rect>
+           <x>6</x>
+           <y>50</y>
+           <width>218</width>
+           <height>240</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QGroupBox" name="TestGroupBox">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>160</width>
           <height>130</height>
          </size>
         </property>
@@ -231,7 +227,7 @@ p, li { white-space: pre-wrap; }
         <widget class="QLabel" name="trainLabel">
          <property name="geometry">
           <rect>
-           <x>30</x>
+           <x>16</x>
            <y>42</y>
            <width>60</width>
            <height>18</height>
@@ -249,7 +245,7 @@ p, li { white-space: pre-wrap; }
         <widget class="QComboBox" name="trainTestCombo">
          <property name="geometry">
           <rect>
-           <x>94</x>
+           <x>80</x>
            <y>40</y>
            <width>69</width>
            <height>24</height>
@@ -314,9 +310,9 @@ p, li { white-space: pre-wrap; }
         <widget class="QPushButton" name="manualTrainButton">
          <property name="geometry">
           <rect>
-           <x>30</x>
+           <x>10</x>
            <y>70</y>
-           <width>130</width>
+           <width>140</width>
            <height>32</height>
           </rect>
          </property>

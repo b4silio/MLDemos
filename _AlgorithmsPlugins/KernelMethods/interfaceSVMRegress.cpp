@@ -371,43 +371,43 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     {
         // we want to draw the support vectors
         RegressorSVR *regr = dynamic_cast<RegressorSVR*>(regressor);
+        svm_parameter params = ((RegressorSVR *)regressor)->param;
         svm_model *svm = regr->GetModel();
         if(svm)
         {
-            float epsilon = svm->param.p;
             painter.setBrush(Qt::NoBrush);
             painter.setPen(QPen(Qt::black, 4));
             std::vector<fvec> samples = canvas->data->GetSamples();
-            int dim = canvas->data->GetDimCount();
             fvec sv(2,0);
-            FOR(i, samples.size())
-            {
-                fvec res = regr->Test(samples[i]);
-                if(fabs(samples[i][regr->outputDim] - res[0]) < epsilon) continue;
-                QPointF point = canvas->toCanvasCoords(samples[i]);
-                int radius = 9;
-                painter.drawEllipse(point, radius, radius);
-            }
-            /*
-            FOR(i, svm->l)
-            {
-                sv[0] = (f32)svm->SV[i][xIndex].value;
-                bool bFound = false;
-                FOR(j, samples.size())
+            if(params.svm_type == NU_SVR){
+                float epsilon = fabs(svm->eps[0]) - 1e-5;
+                FOR(i, samples.size())
                 {
-                    if(sv[0] == samples[j][xIndex])
-                    {
-                        sv[1] = samples[j][yIndex];
-                        bFound = true;
-                        break;
-                    }
+                    fvec res = regr->Test(samples[i]);
+                    if(fabs(samples[i][regr->outputDim] - res[0]) < epsilon) continue;
+                    QPointF point = canvas->toCanvasCoords(samples[i]);
+                    int radius = 9;
+                    painter.drawEllipse(point, radius, radius);
                 }
-                if(!bFound) qDebug() << "sv not found " << sv[0];
-                int radius = 9;
-                QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
-                painter.drawEllipse(point, radius, radius);
+            } else {
+                FOR(i, svm->l) {
+                    sv[0] = (f32)svm->SV[i][xIndex].value;
+                    bool bFound = false;
+                    FOR(j, samples.size())
+                    {
+                        if(sv[0] == samples[j][xIndex])
+                        {
+                            sv[1] = samples[j][yIndex];
+                            bFound = true;
+                            break;
+                        }
+                    }
+                    //if(!bFound) qDebug() << "sv not found " << sv[0];
+                    int radius = 9;
+                    QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
+                    painter.drawEllipse(point, radius, radius);
+                }
             }
-            */
         }
     }
 }

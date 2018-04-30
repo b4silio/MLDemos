@@ -21,10 +21,10 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include <map>
-#include "public.h"
-#include "roc.h"
-#include "types.h"
-#include "mymaths.h"
+#include <public.h>
+#include <roc.h>
+#include <types.h>
+#include <mymaths.h>
 
 class Classifier
 {

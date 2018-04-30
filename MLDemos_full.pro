@@ -22,7 +22,10 @@ MLScripting.depends = Core
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins
 #SUBDIRS += GMM
-SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR Maximizers Reinforcements OpenCV SEDS FLAME DBSCAN Lowess CCA ASVM GHSOM RandomKernel MetricLearning
+SUBDIRS += Obstacle GMM Kernel GP KNN Projections LWPR
+SUBDIRS += Maximizers Reinforcements OpenCV SEDS
+SUBDIRS += FLAME DBSCAN Lowess CCA ASVM GHSOM RandomKernel MetricLearning
+SUBDIRS += MeanShift
 #SUBDIRS += Example
 
 GMM.file = $$ALGOPATH/GMM/pluginGMM.pro
@@ -45,6 +48,7 @@ CCA.file = $$ALGOPATH/CCA/pluginCCA.pro
 GHSOM.file = $$ALGOPATH/GHSOM/pluginGHSOM.pro
 RandomKernel.file = $$ALGOPATH/RandomKernel/pluginRandomKernel.pro
 MetricLearning.file = $$ALGOPATH/MetricLearning/pluginMetricLearning.pro
+MeanShift.file = $$ALGOPATH/MeanShift/pluginMeanShift.pro
 # still too experimental
 MLR.file = $$ALGOPATH/MLR/pluginMLR.pro
 QTMeans.file = $$ALGOPATH/QTMeans/pluginQTMeans.pro

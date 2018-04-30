@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>280</width>
-    <height>151</height>
+    <width>224</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>20</x>
      <y>0</y>
-     <width>80</width>
+     <width>60</width>
      <height>21</height>
     </rect>
    </property>
@@ -37,8 +37,8 @@
   <widget class="QComboBox" name="metricCombo">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>90</y>
+     <x>90</x>
+     <y>50</y>
      <width>90</width>
      <height>21</height>
     </rect>
@@ -78,8 +78,8 @@
   <widget class="QLabel" name="epsLabel">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>30</y>
+     <x>110</x>
+     <y>0</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -99,8 +99,8 @@
   <widget class="QDoubleSpinBox" name="minptsSpin">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>0</y>
+     <x>30</x>
+     <y>20</y>
      <width>50</width>
      <height>25</height>
     </rect>
@@ -129,9 +129,9 @@
   <widget class="QLabel" name="metricLabel">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>90</y>
-     <width>41</width>
+     <x>30</x>
+     <y>50</y>
+     <width>50</width>
      <height>20</height>
     </rect>
    </property>
@@ -150,8 +150,8 @@
   <widget class="QDoubleSpinBox" name="epsSpin">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>30</y>
+     <x>130</x>
+     <y>20</y>
      <width>50</width>
      <height>25</height>
     </rect>
@@ -183,8 +183,8 @@
   <widget class="QComboBox" name="typeCombo">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>120</y>
+     <x>90</x>
+     <y>70</y>
      <width>90</width>
      <height>21</height>
     </rect>
@@ -219,9 +219,9 @@
   <widget class="QLabel" name="typeLabel">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>120</y>
-     <width>31</width>
+     <x>20</x>
+     <y>70</y>
+     <width>50</width>
      <height>20</height>
     </rect>
    </property>
@@ -241,7 +241,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>60</y>
+     <y>90</y>
      <width>60</width>
      <height>25</height>
     </rect>
@@ -273,8 +273,8 @@
   <widget class="QLabel" name="dendoLabel">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>60</y>
+     <x>10</x>
+     <y>90</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -294,10 +294,10 @@
   <widget class="QLabel" name="dendoGraph">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>30</y>
-     <width>110</width>
-     <height>110</height>
+     <x>10</x>
+     <y>120</y>
+     <width>200</width>
+     <height>70</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -310,8 +310,8 @@
   <widget class="QPushButton" name="zoomButton">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>0</y>
+     <x>190</x>
+     <y>100</y>
      <width>21</width>
      <height>21</height>
     </rect>

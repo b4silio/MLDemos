@@ -21,16 +21,16 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include <fstream>
-#include "classifier.h"
-#include "clusterer.h"
-#include "regressor.h"
-#include "dynamical.h"
-#include "maximize.h"
-#include "reinforcement.h"
-#include "projector.h"
-#include "canvas.h"
-#include "drawTimer.h"
-#include "glwidget.h"
+#include <classifier.h>
+#include <clusterer.h>
+#include <regressor.h>
+#include <dynamical.h>
+#include <maximize.h>
+#include <reinforcement.h>
+#include <projector.h>
+#include <canvas.h>
+#include <drawTimer.h>
+#include <glwidget.h>
 #include <QtPlugin>
 #include <QWidget>
 #include <QSettings>
@@ -125,15 +125,15 @@ public:
 		int w = canvas->width();
 		int h = canvas->height();
 		{
-			QPixmap modelPixmap(w, h);
+            QPixmap modelPixmap(w, h);
             //QBitmap bitmap(w,h);
             //bitmap.clear();
             //modelPixmap.setMask(bitmap);
 			modelPixmap.fill(Qt::transparent);
 			QPainter painter(&modelPixmap);
-            if(!canvas->canvasType) DrawModel(canvas, painter, clusterer);
+            if(canvas->canvasType == 0) DrawModel(canvas, painter, clusterer);
 			canvas->maps.model = modelPixmap;
-		}
+        }
 
 		{
 			QPixmap infoPixmap(w, h);
@@ -142,9 +142,9 @@ public:
             //infoPixmap.setMask(bitmap);
 			infoPixmap.fill(Qt::transparent);
 			QPainter painter(&infoPixmap);
-            if(!canvas->canvasType) DrawInfo(canvas, painter, clusterer);
+            if(canvas->canvasType == 0) DrawInfo(canvas, painter, clusterer);
 			canvas->maps.info = infoPixmap;
-		}
+        }
 		canvas->repaint();
 	}
 };

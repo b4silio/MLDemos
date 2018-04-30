@@ -45,62 +45,41 @@ ClustKM::~ClustKM()
 void ClustKM::ChangeOptions()
 {
     int method = params->kmeansMethodCombo->currentIndex();
+    int metric = params->kmeansNormCombo->currentIndex();
+    int kernel = params->kernelTypeCombo->currentIndex();
 
-    // kernel parameters
-    bool bKernel = method == 2;
-    params->kernelTypeCombo->setVisible(bKernel);
-    params->kernelDegSpin->setVisible(bKernel);
-    params->kernelWidthSpin->setVisible(bKernel);
-    params->labelKernel->setVisible(bKernel);
-    params->param1Label->setVisible(bKernel);
-    params->param2Label->setVisible(bKernel);
-
-    // soft kmean
-    bool bSoft = method == 1;
-    params->kmeansBetaSpin->setVisible(!bKernel&&bSoft);
-    params->labelBeta->setVisible(!bKernel&&bSoft);
-
-    // kmean
-    params->kmeansNormCombo->setVisible(!bKernel&&!bSoft);
-    params->labelMetric->setVisible(!bKernel&&!bSoft);
-    params->kmeansNormSpin->setVisible(!bKernel&&!bSoft&&params->kmeansNormCombo->currentIndex() == 3);
-    params->labelPower->setVisible(!bKernel&&!bSoft&&params->kmeansNormCombo->currentIndex() == 3);
-
-    params->KMeansPlusPlusCheckBox->setEnabled(!bKernel);
-
-    if(bKernel)
-    {
-        switch(params->kernelTypeCombo->currentIndex())
-        {
-        case 0: // linear
-            params->param1Label->setVisible(false);
-            params->param2Label->setVisible(false);
-            params->kernelDegSpin->setVisible(false);
-            params->kernelWidthSpin->setVisible(false);
-            break;
-        case 1: // poly
-            params->kernelDegSpin->setVisible(true);
-            params->param1Label->setVisible(true);
-            params->kernelWidthSpin->setVisible(false);
-            params->param2Label->setVisible(false);
-//            params->kernelDegSpin->setDecimals(1);
-//            params->kernelDegSpin->setRange(1,100);
-//            params->kernelDegSpin->setSingleStep(1);
-//            params->kernelWidthSpin->setRange(-999,999);
-//            params->kernelWidthSpin->setSingleStep(0.1);
-//            params->param1Label->setText("Degree");
-//            params->param2Label->setText("Offset");
-            break;
-        case 2: // RBF
-            params->kernelDegSpin->setVisible(false);
-            params->param1Label->setVisible(false);
-            params->kernelWidthSpin->setVisible(true);
-            params->param2Label->setVisible(true);
-//            params->kernelWidthSpin->setRange(0.001,999);
-//            params->kernelWidthSpin->setSingleStep(0.01);
-//            params->param2Label->setText("Width");
-            break;
-        }
+    switch(method) {
+    case 0: // K-Means
+        params->param1Label->setText("Power");
+        params->param1Label->setVisible(metric == 3);
+        params->param1Spin->setVisible(metric == 3);
+        params->param2Spin->setVisible(false);
+        params->labelCombo->setText("Metric");
+        params->KMeansPlusPlusCheckBox->setVisible(true);
+        params->kmeansMethodCombo->setVisible(true);
+        params->kmeansNormCombo->setVisible(true);
+        params->kernelTypeCombo->setVisible(false);
+        break;
+    case 1: // Soft K-Means
+        params->param1Label->setText("Beta");
+        params->param1Label->setVisible(true);
+        params->param1Spin->setVisible(false);
+        params->param2Spin->setVisible(true);
+        params->labelCombo->setText("");
+        params->KMeansPlusPlusCheckBox->setVisible(true);
+        params->kmeansNormCombo->setVisible(false);
+        params->kernelTypeCombo->setVisible(false);
+        break;
+    case 2: // Kernel K-Means
+        params->param1Label->setText(kernel == 2 ? "Width" : "Degree");
+        params->param1Label->setVisible(kernel > 0);
+        params->param1Spin->setVisible(kernel == 1);
+        params->param2Spin->setVisible(kernel == 2);
+        params->labelCombo->setText("Kernel Type");
+        params->KMeansPlusPlusCheckBox->setVisible(false);
+        params->kmeansNormCombo->setVisible(false);
+        params->kernelTypeCombo->setVisible(true);
+        break;
     }
 }
 
@@ -109,21 +88,18 @@ void ClustKM::SetParams(Clusterer *clusterer)
     if(!clusterer) return;
     int method = params->kmeansMethodCombo->currentIndex();
     int clusters = params->kmeansClusterSpin->value();
-    if(method == 2) // kernel kmeans
-    {
-        float kernelWidth = params->kernelWidthSpin->value();
-        int kernelDegree = params->kernelDegSpin->value();
+    if(method == 2) {// kernel kmeans
+        float kernelWidth = params->param2Spin->value();
+        int kernelDegree = params->param1Spin->value();
         int kernelType = params->kernelTypeCombo->currentIndex();
-        float kernelOffset = params->kernelWidthSpin->value();
+        float kernelOffset = kernelWidth;
         ClustererKKM *clust = dynamic_cast<ClustererKKM*>(clusterer);
         if(!clust) return;
         clust->SetParams(clusters, kernelType, kernelWidth, kernelDegree, kernelOffset);
-    }
-    else // kmeans, soft-kmeans
-    {
-        int power = params->kmeansNormSpin->value();
+    } else {// kmeans, soft-kmeans
+        int power = params->param1Spin->value();
         int metrictype = params->kmeansNormCombo->currentIndex();
-        float beta = params->kmeansBetaSpin->value();
+        float beta = params->param2Spin->value();
         bool kmeansPlusPlus = params->KMeansPlusPlusCheckBox->isChecked();
         if (metrictype < 3) power = metrictype;
         ClustererKM *clust = dynamic_cast<ClustererKM*>(clusterer);
@@ -141,16 +117,16 @@ fvec ClustKM::GetParams()
     {
         par[0] = params->kmeansClusterSpin->value();
         par[1] = params->kernelTypeCombo->currentIndex();
-        par[2] = params->kernelWidthSpin->value();
-        par[3] = params->kernelDegSpin->value();
-        par[4] = params->kernelWidthSpin->value();
+        par[2] = params->param2Spin->value();
+        par[3] = params->param1Spin->value();
+        par[4] = params->param2Spin->value();
     }
     else
     {
         par.resize(4);
         par[0] = params->kmeansClusterSpin->value();
-        par[1] = params->kmeansNormSpin->value();
-        par[2] = params->kmeansBetaSpin->value();
+        par[1] = params->param1Spin->value();
+        par[2] = params->param2Spin->value();
         par[3] = params->KMeansPlusPlusCheckBox->isChecked();
     }
     return par;
@@ -174,8 +150,8 @@ void ClustKM::SetParams(Clusterer *clusterer, fvec parameters)
     else
     {
         int clusters = parameters.size() > 0 ? parameters[0] : 1;
-        int power = parameters.size() > 1 ? parameters[1] : 0.1;
-        float beta = parameters.size() > 3 ? parameters[3] : 0;
+        int power = parameters.size() > 1 ? parameters[1] : 1;
+        float beta = parameters.size() > 3 ? parameters[3] : 0.1;
         bool kmeansPlusPlus = parameters.size() > 4 ? parameters[4] : 0;
         ClustererKM *clust = dynamic_cast<ClustererKM*>(clusterer);
         if(!clust) return;
@@ -426,52 +402,40 @@ void ClustKM::DrawModel(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
 
 void ClustKM::SaveOptions(QSettings &settings)
 {
-    settings.setValue("kmeansBeta", params->kmeansBetaSpin->value());
+    settings.setValue("kmeansParam1", params->param1Spin->value());
+    settings.setValue("kmeansParam2", params->param2Spin->value());
     settings.setValue("kmeansCluster", params->kmeansClusterSpin->value());
     settings.setValue("kmeansMethod", params->kmeansMethodCombo->currentIndex());
-    settings.setValue("kmeansPower", params->kmeansNormSpin->value());
-    settings.setValue("kmeansNormCombo", params->kmeansNormCombo->currentIndex());
-    settings.setValue("kernelDeg", params->kernelDegSpin->value());
     settings.setValue("kernelType", params->kernelTypeCombo->currentIndex());
-    settings.setValue("kernelWidth", params->kernelWidthSpin->value());
 }
 
 bool ClustKM::LoadOptions(QSettings &settings)
 {
-    if(settings.contains("kmeansBeta")) params->kmeansBetaSpin->setValue(settings.value("kmeansBeta").toFloat());
+    if(settings.contains("kmeansParam1")) params->param1Spin->setValue(settings.value("kmeansParam1").toFloat());
+    if(settings.contains("kmeansParam2")) params->param2Spin->setValue(settings.value("kmeansParam2").toFloat());
     if(settings.contains("kmeansCluster")) params->kmeansClusterSpin->setValue(settings.value("kmeansCluster").toFloat());
     if(settings.contains("kmeansMethod")) params->kmeansMethodCombo->setCurrentIndex(settings.value("kmeansMethod").toInt());
-    if(settings.contains("kmeansPower")) params->kmeansNormSpin->setValue(settings.value("kmeansPower").toFloat());
-    if(settings.contains("kmeansNormCombo")) params->kmeansNormCombo->setCurrentIndex(settings.value("kmeansNormCombo").toInt());
-    if(settings.contains("kernelDeg")) params->kernelDegSpin->setValue(settings.value("kernelDeg").toFloat());
     if(settings.contains("kernelType")) params->kernelTypeCombo->setCurrentIndex(settings.value("kernelType").toInt());
-    if(settings.contains("kernelWidth")) params->kernelWidthSpin->setValue(settings.value("kernelWidth").toFloat());
     ChangeOptions();
     return true;
 }
 
 void ClustKM::SaveParams(QTextStream &file)
 {
-    file << "clusterOptions" << ":" << "kmeansBeta" << " " << params->kmeansBetaSpin->value() << "\n";
+    file << "clusterOptions" << ":" << "kmeansParam1" << " " << params->param1Spin->value() << "\n";
+    file << "clusterOptions" << ":" << "kmeansParam2" << " " << params->param2Spin->value() << "\n";
     file << "clusterOptions" << ":" << "kmeansCluster" << " " << params->kmeansClusterSpin->value() << "\n";
     file << "clusterOptions" << ":" << "kmeansMethod" << " " << params->kmeansMethodCombo->currentIndex() << "\n";
-    file << "clusterOptions" << ":" << "kmeansPower" << " " << params->kmeansNormSpin->value() << "\n";
-    file << "clusterOptions" << ":" << "kmeansNormCombo" << " " << params->kmeansNormCombo->currentIndex() << "\n";
-    file << "clusterOptions" << ":" << "kernelDeg" << " " << params->kernelDegSpin->value() << "\n";
     file << "clusterOptions" << ":" << "kernelType" << " " << params->kernelTypeCombo->currentIndex() << "\n";
-    file << "clusterOptions" << ":" << "kernelWidth" << " " << params->kernelWidthSpin->value() << "\n";
 }
 
 bool ClustKM::LoadParams(QString name, float value)
 {
-    if(name.endsWith("kmeansBeta")) params->kmeansBetaSpin->setValue(value);
+    if(name.endsWith("kmeansParam1")) params->param1Spin->setValue(value);
+    if(name.endsWith("kmeansParam2")) params->param2Spin->setValue(value);
     if(name.endsWith("kmeansCluster")) params->kmeansClusterSpin->setValue((int)value);
     if(name.endsWith("kmeansMethod")) params->kmeansMethodCombo->setCurrentIndex((int)value);
-    if(name.endsWith("kmeansPower")) params->kmeansNormSpin->setValue((int)value);
-    if(name.endsWith("kmeansNormCombo")) params->kmeansNormCombo->setCurrentIndex((int)value);
-    if(name.endsWith("kernelDeg")) params->kernelDegSpin->setValue((int)value);
     if(name.endsWith("kernelType")) params->kernelTypeCombo->setCurrentIndex((int)value);
-    if(name.endsWith("kernelWidth")) params->kernelWidthSpin->setValue(value);
     ChangeOptions();
     return true;
 }

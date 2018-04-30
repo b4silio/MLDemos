@@ -20,9 +20,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _REINFORCEMENT_H_
 
 #include <vector>
-#include "public.h"
-#include "mymaths.h"
-#include "reinforcementProblem.h"
+#include <public.h>
+#include <mymaths.h>
+#include <reinforcementProblem.h>
 #include <QDebug>
 #include <QPainter>
 

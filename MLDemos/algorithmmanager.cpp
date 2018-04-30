@@ -52,6 +52,7 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsProject = new Ui::optionsProjectWidget();
 
     algorithmWidget = new BaseWidget();
+
     options->setupUi(algorithmWidget);
 
     classifyWidget = new QWidget(options->tabClass);

@@ -363,53 +363,42 @@ void DrawTimer::Animate()
 void DrawTimer::Refine()
 {
     if(refineLevel < 0) return;
-    if(refineLevel > refineMax)
-    {
+    if(refineLevel > refineMax) {
         refineLevel = -1;
         return;
     }
-    if(canvas->width() != w || canvas->height() != h)
-    {
+    if(canvas->width() != w || canvas->height() != h) {
         Clear();
         return;
     }
     bool bRefined = true;
-    if(refineLevel == 0)
-    {
+    if(refineLevel == 0) {
         Clear();
-        if(maximizer && (*maximizer) || reinforcement && (*reinforcement))
-        {
+        if(maximizer && (*maximizer) || reinforcement && (*reinforcement)) {
             refineMax = 100;
         }
-        if(dynamical && (*dynamical))
-        {
+        if(dynamical && (*dynamical)) {
             refineMax = 32;
             drawMutex.lock();
             if(bColorMap) modelMap.fill(qRgba(0,0,0,255));
             drawMutex.unlock();
-        }
-        else
-        {
+        } else {
             refineMax = 32;
         }
-    }
-    else
-    {
+    } else {
         int count = (w*h) / refineMax;
         int start = count * (refineLevel-1);
         int stop = count * refineLevel;
         if(refineLevel == refineMax) stop = w*h; // we want to be sure we paint everything in the end
 
-        if(maximizer && (*maximizer))
-        {
+        if(maximizer && (*maximizer)) {
             Maximization();
             if((*maximizer)->hasConverged()) refineLevel=refineMax+1;
             else refineLevel = 1;
             return;
         }
 
-        if(reinforcement && (*reinforcement))
-        {
+        if(reinforcement && (*reinforcement)) {
             Reinforce();
             if((*reinforcement)->hasConverged()) refineLevel=refineMax+1;
             else refineLevel = 1;
@@ -421,11 +410,9 @@ void DrawTimer::Refine()
         if(inputDims.size() == 2) dim = inputDims.size();
         mutex->unlock();
 
-        if(dim == 2)
-        {
+        if(dim == 2) {
             bRefined &= TestFast(start,stop); // we finish the current batch
-            if(dynamical && (*dynamical))
-            {
+            if(dynamical && (*dynamical)) {
                 int cnt = 10000 / refineMax;
                 int steps = 8;
                 bRefined &= VectorsFast(cnt, steps);
@@ -918,48 +905,49 @@ bool DrawTimer::TestFast(int start, int stop)
     fvec center = canvas->center;
     mutex->unlock();
     if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
-    fvec sample(dim);
-    for (int i=start; i<stop; i++)
-    {
+    fvec sampleMatrix(dim*(stop-start));
+    vector<fvec> samples(stop-start);
+    vector<int> X(stop-start);
+    vector<int> Y(stop-start);
+    FOR(i, stop-start) {
         drawMutex.lock();
         if(!perm) perm = randPerm(w*h);
-        int x = perm[i]%w;
-        int y = perm[i]/w;
+        int x = perm[i+start]%w;
+        int y = perm[i+start]/w;
         if(x >= bigMap.width() || y >= bigMap.height())
         {
             drawMutex.unlock();
             continue;
         }
         drawMutex.unlock();
-        fromCanvas(sample, x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center, bRestrictedDims);
-        fvec val(dim);
+        X[i] = x;
+        Y[i] = y;
+        fromCanvas(samples[i], x, y, cheight, cwidth, zxh, zyh, xIndex, yIndex, center, bRestrictedDims);
+    }
+
+    FOR(i, stop-start) {
+        fvec& sample = samples[i];
+        int x = X[i];
+        int y = Y[i];
+
         QMutexLocker lock(mutex);
-        if((*classifier))
-        {
+        if((*classifier)) {
             QColor c = GetColor(*classifier, sample, classifierMulti);
             drawMutex.lock();
             bigMap.setPixel(x,y,c.rgb());
             drawMutex.unlock();
-        }
-        else if(*regressor)
-        {
-            val = (*regressor)->Test(sample);
-        }
-        else if(*clusterer)
-        {
+        } else if(*regressor) {
+            fvec val = (*regressor)->Test(sample);
+        } else if(*clusterer) {
             fvec res = (*clusterer)->Test(sample);
             float r=0,g=0,b=0;
-            if(res.size() > 1)
-            {
-                FOR(i, res.size())
-                {
-                    r += SampleColor[(i+1)%SampleColorCnt].red()*res[i];
-                    g += SampleColor[(i+1)%SampleColorCnt].green()*res[i];
-                    b += SampleColor[(i+1)%SampleColorCnt].blue()*res[i];
+            if(res.size() > 1) {
+                FOR(j, res.size()) {
+                    r += SampleColor[(j+1)%SampleColorCnt].red()*res[j];
+                    g += SampleColor[(j+1)%SampleColorCnt].green()*res[j];
+                    b += SampleColor[(j+1)%SampleColorCnt].blue()*res[j];
                 }
-            }
-            else if(res.size())
-            {
+            } else if(res.size()) {
                 r = (1-res[0])*255 + res[0]* 255;
                 g = (1-res[0])*255;
                 b = (1-res[0])*255;
@@ -972,13 +960,10 @@ bool DrawTimer::TestFast(int start, int stop)
             drawMutex.lock();
             bigMap.setPixel(x,y,c.rgb());
             drawMutex.unlock();
-        }
-        else if(*dynamical && bColorMap)
-        {
+        } else if(*dynamical && bColorMap) {
             QColor color;
-            val = (*dynamical)->Test(sample);
-            if((*dynamical)->avoid)
-            {
+            fvec val = (*dynamical)->Test(sample);
+            if((*dynamical)->avoid) {
                 (*dynamical)->avoid->SetObstacles(obstacles);
                 fVec newRes = (*dynamical)->avoid->Avoid(sample, val);
                 val = newRes;
@@ -986,17 +971,14 @@ bool DrawTimer::TestFast(int start, int stop)
             float speed = sqrtf(val[0]*val[0] + val[1]*val[1]);
             speed = min(1.f,speed);
             const int colorStyle = 1;
-            if(colorStyle == 0) // velocity as colors
-            {
+            if(colorStyle == 0) {// velocity as colors
                 int hue = (int)((atan2(val[0], val[1]) / (2*M_PI) + 0.5) * 359);
                 hue = max(0, min(359,hue));
                 color = QColor::fromHsv(hue, 255, 255);
                 color.setRed(255*(1-speed) + color.red()*speed);
                 color.setGreen(255*(1-speed) + color.green()*speed);
                 color.setBlue(255*(1-speed) + color.blue()*speed);
-            }
-            else if(colorStyle == 1) // speed as color
-            {
+            } else if(colorStyle == 1) {// speed as color
                 color = QColor(Canvas::GetColorMapValue(speed, 2));
             }
             drawMutex.lock();

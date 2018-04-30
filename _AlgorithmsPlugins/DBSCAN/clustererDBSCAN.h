@@ -52,8 +52,7 @@ public:
     /**
       Constructor, instanciating everything that will be used
       */
-    ClustererDBSCAN(){
-    }
+    ClustererDBSCAN(): testCount(1), testMax(1), _eps(0.1), _minPts(1) {}
     /**
       Deconstructor, deinstanciating everything that has been instanciated
       */
@@ -67,13 +66,16 @@ public:
     /**
       The testing function, returns a vector of size nbClusters, with the contribution/weight of the point for each cluster
       */
-	fvec Test( const fvec &sample);
+    fvec Test( const fvec &sample);
+    fvec TestMany( const fvec &sampleMatrix);
 
     /**
       Information string for the Algorithm Information and Statistics panel in the main program interface.
       Here you probably will put the number of parameters, the training time or anything else
       */
     const char *GetInfoString();
+    float GetParameterCount();
+    void SetClusterTestValue(int count, int max);
 
     /**
       Function to set the algorithm hyper-parameters, called prior to the training itself
@@ -153,18 +155,14 @@ private:
     // Two points are neighbors if the distance
     // between them does not exceed threshold value.
     float _eps;
-
-    //minimum number of points
     int _minPts;
+    int testCount;
+    int testMax;
 
-    // visited vector
     std::vector<bool> _visited;
-
-
 
     // depth of the pits to identify on the plot
     float _depth;
-
     // metric to be used for compèuting the distances (0:Cosine,1:Euclidean)
     int _metric;
 };

@@ -78,6 +78,7 @@ public:
 void ClustererDBSCAN::Train(std::vector< fvec > samples)
 {
     if(!samples.size()) return; // no sample :(
+    dim = samples.front().size();
 
     // prepare the different array storing information about the clusters
     _noise.resize(samples.size(), false);
@@ -85,11 +86,13 @@ void ClustererDBSCAN::Train(std::vector< fvec > samples)
     _core.resize(samples.size(), false);
     _pointId_to_clusterId.resize(samples.size(), 0);
     _reachability.resize(samples.size(), -1);
+    pts.clear();
+    pts.reserve(samples.size());
 
     // convert from fvec to Point
     for (int j = 0; j < samples.size(); ++j) {
         Point v (samples[j].size());
-        for (int i = 0; i < samples[j].size(); ++i) {
+        for (int i = 0; i < dim; ++i) {
             v(i)=samples[j][i];
         }
         pts.push_back(v);
@@ -130,13 +133,11 @@ void ClustererDBSCAN::Train(std::vector< fvec > samples)
 
 fvec ClustererDBSCAN::Test( const fvec &sample)
 {
-    fvec res;
-    res.resize(nbClusters+1,0);
+    fvec res(nbClusters+1,0);
 
     //convert input to Point
     Point v (sample.size());
-    for (int i = 0; i < sample.size(); ++i)
-    {
+    for (int i = 0; i < sample.size(); ++i) {
         v(i)=sample[i];
     }
 
@@ -154,8 +155,7 @@ fvec ClustererDBSCAN::Test( const fvec &sample)
     for (int j = 0; j < pts.size(); ++j)
     {
         // according to the selected metric
-        if(_metric == 0)
-        {
+        if(_metric == 0) {
             MetricEuclidean d;
             temp_d = d.distance(v, pts[j]);
         } else if (_metric == 1){
@@ -171,14 +171,14 @@ fvec ClustererDBSCAN::Test( const fvec &sample)
             Metrics::Distance<Metrics::Cosine<Point> > d;
             temp_d = d.distance(v, pts[j]);
         }
-        if (temp_d < dist && temp_d < realEps && _pointId_to_clusterId[j] > 0 && _core[j]){
+        if (temp_d < dist && temp_d < realEps && _pointId_to_clusterId[j] > 0 && _core[j]) {
             dist = temp_d;
             nearest = j;
         }
     }
 
     // did we find something?
-    if (nearest > -1){
+    if (nearest > -1) {
         if (dist < _depth){ // is it near enough?
             res[_pointId_to_clusterId[nearest]-1] = 1; //take the color of that cluster
         } else if (abs(dist - realEps) < realEps*0.01) { //in OPTICS, we are at the border of _eps : draw a thin line, darker
@@ -220,6 +220,29 @@ const char *ClustererDBSCAN::GetInfoString()
     return text;
 }
 
+float ClustererDBSCAN::GetParameterCount()
+{
+    return nbClusters*dim + 1; // cluster count + 1 for epsilon
+    // this is a bad estimation, but it would not make much sense to simply sum over all points
+    /*
+    int paramCount=0;
+    FOR(i, _pointId_to_clusterId.size()) {
+        int cid = _pointId_to_clusterId[i];
+        if(cid == 0) continue;
+        paramCount += dim;
+    }
+    paramCount += 1; // epsilon
+
+    return paramCount;
+    */
+}
+
+void ClustererDBSCAN::SetClusterTestValue(int count, int max)
+{
+    testCount = count;
+    testMax = max;
+}
+
 void ClustererDBSCAN::SetParams(float minpts, float eps, int metric, float depth, int type)
 {
     _eps = eps;
@@ -232,13 +255,17 @@ void ClustererDBSCAN::SetParams(float minpts, float eps, int metric, float depth
 void ClustererDBSCAN::run_cluster(Points samples)
 {
     float realEps = _eps;
-    if(_metric == 0) realEps = _eps*_eps;
+    if(testMax > 1 ) {
+        float ratio = (testCount) / (float)testMax;
+        realEps = realEps*(1-ratio);
+    }
+    if(_metric == 0) realEps *= realEps;
 
     ClusterId cid = 1;
     // foreach pid
     for (PointId pid = 0; pid < samples.size(); pid++) {
         // not already visited
-        if (!_visited[pid]){
+        if (!_visited[pid]) {
 
             _visited[pid] = true;
 
@@ -246,12 +273,9 @@ void ClustererDBSCAN::run_cluster(Points samples)
             Neighbors ne = findNeighbors(pid, realEps);
 
             // not enough support -> mark as noise
-            if (ne.size() < _minPts)
-            {
+            if (ne.size() < _minPts) {
                 _noise[pid] = true;
-            }
-            else
-            {
+            } else {
                 //else it's a core point
                 _core[pid] = true;
 
@@ -262,13 +286,11 @@ void ClustererDBSCAN::run_cluster(Points samples)
                 _pointId_to_clusterId[pid]=cid;
 
                 // go to neighbors
-                for (unsigned int i = 0; i < ne.size(); i++)
-                {
+                for (unsigned int i = 0; i < ne.size(); i++) {
                     PointId nPid = ne[i];
 
                     // not already visited
-                    if (!_visited[nPid])
-                    {
+                    if (!_visited[nPid]) {
                         _visited[nPid] = true;
 
                         // go to neighbors
@@ -523,8 +545,6 @@ void ClustererDBSCAN::find_clusters_WF()
 
             }
         }
-
-
     }
     // and check if there is a last cluster
 
@@ -564,7 +584,7 @@ void ClustererDBSCAN::find_clusters_WF()
         }
     }
 
-    nbClusters = cid;
+    nbClusters = cid-1;
 }
 
 

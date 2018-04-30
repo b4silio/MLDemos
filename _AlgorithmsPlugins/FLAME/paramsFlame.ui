@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>304</width>
-    <height>146</height>
+    <width>214</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>55</y>
-     <width>270</width>
-     <height>45</height>
+     <y>90</y>
+     <width>190</width>
+     <height>80</height>
     </rect>
    </property>
    <property name="title">
@@ -28,7 +28,7 @@
    <widget class="QDoubleSpinBox" name="maxIterationBox">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>130</x>
       <y>20</y>
       <width>50</width>
       <height>21</height>
@@ -59,8 +59,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>19</y>
-      <width>190</width>
+      <y>20</y>
+      <width>80</width>
       <height>21</height>
      </rect>
     </property>
@@ -70,7 +70,52 @@
      </font>
     </property>
     <property name="text">
-     <string>Maximum number of iterations:</string>
+     <string>Max iterations:</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="isSeveralClassesBox">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>110</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Fuzzy Threshold</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="thresholdBox">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>50</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="maximum">
+     <double>1.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>0.050000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.800000000000000</double>
     </property>
    </widget>
   </widget>
@@ -78,9 +123,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>-6</y>
-     <width>270</width>
-     <height>65</height>
+     <y>0</y>
+     <width>190</width>
+     <height>80</height>
     </rect>
    </property>
    <property name="title">
@@ -90,7 +135,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>22</y>
+      <y>25</y>
       <width>110</width>
       <height>20</height>
      </rect>
@@ -107,8 +152,8 @@
    <widget class="QSpinBox" name="knnBox">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>20</y>
+      <x>130</x>
+      <y>23</y>
       <width>50</width>
       <height>21</height>
      </rect>
@@ -132,8 +177,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>42</y>
-      <width>110</width>
+      <y>52</y>
+      <width>50</width>
       <height>17</height>
      </rect>
     </property>
@@ -143,15 +188,15 @@
      </font>
     </property>
     <property name="text">
-     <string>KNN's metric:</string>
+     <string>Metric</string>
     </property>
    </widget>
    <widget class="QComboBox" name="metricBox">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>40</y>
-      <width>141</width>
+      <x>60</x>
+      <y>50</y>
+      <width>120</width>
       <height>21</height>
      </rect>
     </property>
@@ -203,64 +248,6 @@
       <string>Manhattan (L1 norm)</string>
      </property>
     </item>
-   </widget>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>94</y>
-     <width>270</width>
-     <height>45</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Membership to Cluster(s)</string>
-   </property>
-   <widget class="QCheckBox" name="isSeveralClassesBox">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>200</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Points in several clusters - threshold:</string>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="thresholdBox">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>20</y>
-      <width>50</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="maximum">
-     <double>1.000000000000000</double>
-    </property>
-    <property name="singleStep">
-     <double>0.050000000000000</double>
-    </property>
-    <property name="value">
-     <double>0.800000000000000</double>
-    </property>
    </widget>
   </widget>
  </widget>

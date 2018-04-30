@@ -19,8 +19,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef _DYNAMICAL_H_
 #define _DYNAMICAL_H_
 
-#include "mymaths.h"
-#include "obstacles.h"
+#include <mymaths.h>
+#include <obstacles.h>
 #include <vector>
 
 extern "C" enum {DYN_SVR, DYN_RVM, DYN_GMR, DYN_GPR, DYN_KNN, DYN_MLP, DYN_LINEAR, DYN_LWPR, DYN_KRLS, DYN_SEDS, DYN_NONE} dynamicalType;

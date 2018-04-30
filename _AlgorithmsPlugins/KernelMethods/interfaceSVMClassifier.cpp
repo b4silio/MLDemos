@@ -86,7 +86,9 @@ void ClassSVM::ChangeOptions()
         break;
     case 1: // poly
         params->kernelDegSpin->setVisible(true);
+        params->kernelDegSpin->setEnabled(true);
         params->labelDegree->setVisible(true);
+        params->kernelWidthSpin->setEnabled(true);
         params->kernelWidthSpin->setVisible(true);
         params->labelWidth->setVisible(true);
         params->labelWidth->setText("Offset");
@@ -96,6 +98,7 @@ void ClassSVM::ChangeOptions()
         params->kernelDegSpin->setVisible(false);
         params->labelDegree->setVisible(false);
         params->kernelWidthSpin->setVisible(true);
+        params->kernelWidthSpin->setEnabled(true);
         params->labelWidth->setVisible(true);
         params->labelWidth->setText("Width");
         break;

@@ -20,8 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _CLUSTERING_H_
 
 #include <vector>
-#include <iostream>
-#include "mymaths.h"
+#include <mymaths.h>
 
 class Clusterer
 {
@@ -41,45 +40,10 @@ public:
     virtual void Train(std::vector< fvec > samples){}
     virtual fvec Test( const fvec &sample){ return fvec(); }
     virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
+    virtual fvec TestMany( const fvec& sampleMatrix, const int dim, const int count);
     virtual const char *GetInfoString(){ return NULL; }
-    virtual void SetNbClusters(int count){ nbClusters = count; }
-    virtual float GetLogLikelihood(std::vector<fvec> samples){
-        float loglik = 0;
-        if(!samples.size()) return 0;
-        fvec means(dim);
-
-        // compute the global mean of the data
-        FOR ( i, samples.size() ) {
-            FOR ( d, dim ) means[d] += samples[i][d];
-        }
-        FOR ( d, dim ) means[d] /= samples.size();
-
-        // compute the distribution variance
-        fvec sigmas(dim);
-        FOR ( i, samples.size() ) {
-            FOR ( d, dim ) sigmas[d] += pow(samples[i][d] - means[d],2);
-        }
-
-        fvec scores(nbClusters);
-        fvec diff(dim);
-        // for every sample a score is computed
-        FOR ( i, samples.size() ) {
-            scores = Test(samples[i]);
-            float rss = 0;
-            FOR ( k, nbClusters ) {
-                diff = samples[i]-means;//[k]; // center the data
-                rss += diff*diff*scores[k];
-                if(std::isnan(rss)){
-                    std::cout<< " rss is NaN" << std::endl;
-                    std::cout<< " diff: (" << diff[0] << "," << diff[1] <<  ")"  << std::endl;
-                    std::cout<< " diff*diff: " << diff * diff << std::endl;
-
-                }
-            }
-            loglik += logf(rss);
-        }
-        return loglik;
-    }
+    virtual void SetClusterTestValue(int count, int max){ nbClusters = count; }
+    virtual float GetLogLikelihood(std::vector<fvec> samples);
     virtual float GetParameterCount(){return nbClusters*dim;}
 };
 

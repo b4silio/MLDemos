@@ -79,6 +79,7 @@ public:
 	void DrawLiveTrajectory(QPainter &painter);
     void DrawLegend(QPainter &painter);
     void DrawAxes(QPainter &painter);
+    void DrawAxes1D(QPainter &painter);
     void ResetSamples(){drawnSamples = 0; drawnTrajectories = 0; drawnTimeseries = 0;}
 	void FitToData();
 	void RedrawAxes();

@@ -73,6 +73,9 @@ SOURCES += \
     reinforcementProblem.cpp \
     kmeans.cpp \
     glwidget.cpp \
-    glUtils.cpp
+    glUtils.cpp \
+    clusterer.cpp \
+    canvas-drawing.cpp \
+    canvas-interaction.cpp
 
 RESOURCES +=

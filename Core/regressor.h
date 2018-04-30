@@ -20,7 +20,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define _REGRESSOR_H_
 
 #include <vector>
-#include "mymaths.h"
+#include <mymaths.h>
 
 extern "C" enum {REGR_SVR, REGR_RVM, REGR_GMR, REGR_GPR, REGR_KNN, REGR_MLP, REGR_LINEAR, REGR_LWPR, REGR_KRLS, REGR_NONE} regressorType;
 
