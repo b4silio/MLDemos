@@ -62,7 +62,7 @@ void Canvas::Clear()
 void Canvas::PaintBufferedCanvas(QPainter &painter, bool bSvg)
 {
     bool bHighDPI = qApp->devicePixelRatio() > 1;
-    if(bHighDPI && data->GetSamples().size() < 250) {
+    if(bHighDPI && data->GetSamples().size() > 0 && data->GetSamples().size() < 250) {
         PaintSequentialCanvas(painter, bSvg);
         return;
     }
@@ -105,7 +105,9 @@ void Canvas::PaintBufferedCanvas(QPainter &painter, bool bSvg)
             DrawTrajectories();
             painter.drawPixmap(geometry(), maps.trajectories);
         }
-        if(targets.size()) DrawTargets(painter);
+    }
+    if(bDisplayTrajectories && targets.size()) {
+        DrawTargets(painter);
     }
     if(bDisplayTimeSeries && data->GetTimeSeries().size() > 0) {
         if(bSvg) {

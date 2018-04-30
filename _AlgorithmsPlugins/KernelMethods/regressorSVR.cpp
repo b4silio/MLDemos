@@ -210,8 +210,7 @@ void RegressorSVR::Optimize(svm_problem *problem)
         break;
     case RBFWEIGH:
     {
-        FOR(i, svm->param.kernel_dim)
-        {
+        FOR(i, svm->param.kernel_dim) {
             x[i] = svm->param.kernel_weight[i];
         }
     }
