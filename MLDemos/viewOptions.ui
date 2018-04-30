@@ -80,13 +80,13 @@
     <number>1</number>
    </property>
    <property name="minimum">
-    <double>-999.000000000000000</double>
+    <double>-40.000000000000000</double>
    </property>
    <property name="maximum">
-    <double>999.000000000000000</double>
+    <double>25.000000000000000</double>
    </property>
    <property name="singleStep">
-    <double>0.500000000000000</double>
+    <double>0.100000000000000</double>
    </property>
    <property name="value">
     <double>0.000000000000000</double>
@@ -355,7 +355,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>88</width>
+        <width>98</width>
         <height>131</height>
        </rect>
       </property>

@@ -59,7 +59,9 @@ void MLDemos::FitToData()
 
 void MLDemos::ZoomChanged(float d)
 {
-    displayOptions->spinZoom->setValue(displayOptions->spinZoom->value()+d/4);
+    float zoom = displayOptions->spinZoom->value() + d/4;
+    zoom = zoom > 0 ? min(25.f, zoom) : max(-40.f, zoom);
+    displayOptions->spinZoom->setValue(zoom);
 }
 
 void MLDemos::CanvasMoveEvent()

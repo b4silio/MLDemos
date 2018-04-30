@@ -49,8 +49,14 @@ void MLDemos::DisplayOptionsChanged()
     }
 
     float zoom = displayOptions->spinZoom->value();
-    if (zoom >= 0.f) zoom += 1.f;
-    else zoom = 1.f / (fabs(zoom)+1.f);
+    // we want to find a smooth function to make zooming more "linear" when zooming further
+    if (zoom >= 0.f) {
+        //zoom += 1.f;
+        zoom = powf(1.5,zoom);
+    } else {
+        zoom = 1.f / (powf(1.5,fabs(zoom)));
+    }
+
     if (zoom != canvas->GetZoom()) {
         drawTimer->Stop();
         drawTimer->Clear();
