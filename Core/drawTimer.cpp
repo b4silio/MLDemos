@@ -937,7 +937,7 @@ bool DrawTimer::TestFast(int start, int stop)
             bigMap.setPixel(x,y,c.rgb());
             drawMutex.unlock();
         } else if(*regressor) {
-            fvec val = (*regressor)->Test(sample);
+            //fvec val = (*regressor)->Test(sample);
         } else if(*clusterer) {
             fvec res = (*clusterer)->Test(sample);
             float r=0,g=0,b=0;

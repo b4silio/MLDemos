@@ -649,11 +649,7 @@ namespace dlib
             kernel = k;
         }
 
-        const kernel_type& get_kernel (
-        ) const
-        {
-            return kernel;
-        }
+        const kernel_type& get_kernel () const { return kernel; }
 
         template <
             typename in_sample_vector_type,
@@ -662,7 +658,7 @@ namespace dlib
         const decision_function<kernel_type> train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& t
-        ) const
+        )
         {
             return do_train(vector_to_matrix(x), vector_to_matrix(t));
         }
@@ -689,7 +685,7 @@ namespace dlib
         const decision_function<kernel_type> do_train (
             const in_sample_vector_type& x,
             const in_scalar_vector_type& t
-        ) const
+        )
         {
 
             // make sure requires clause is not broken
@@ -738,10 +734,8 @@ namespace dlib
             matrix<scalar_type,1,0,mem_manager_type> tempv2, tempv3;
             scalar_matrix_type tempm;
 
-
             Q.set_size(x.nr());
             S.set_size(x.nr());
-
 
             bool search_all_alphas = false;
             unsigned long ticker = 0;
@@ -905,6 +899,10 @@ namespace dlib
                     final_weights.push_back(weights(active_bases(i)));
                 }
             }
+            this->beta = 1./var;
+            this->sigma = sigma;
+            this->relevantVectors = dictionary;
+            this->relevantWeights = final_weights;
 
             return decision_function<kernel_type> ( vector_to_matrix(final_weights),
                                                     -sum(vector_to_matrix(final_weights))*tau, 
@@ -977,8 +975,19 @@ namespace dlib
     // private member variables
         kernel_type kernel;
         scalar_type eps;
+        scalar_type beta;
+        scalar_matrix_type sigma;
+        std_vector_c<sample_type> relevantVectors;
+        std_vector_c<scalar_type> relevantWeights;
 
         const static scalar_type tau;
+
+    public:
+        const kernel_type& GetKernel() const {return kernel;}
+        const scalar_matrix_type& GetSigma() const {return sigma;}
+        const scalar_type& GetBeta() const {return beta;}
+        const std_vector_c<sample_type>& GetVectors() const {return relevantVectors;}
+        const std_vector_c<scalar_type>& GetWeights() const {return relevantWeights;}
 
     }; // end of class rvm_regression_trainer 
 

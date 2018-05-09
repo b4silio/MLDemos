@@ -95,16 +95,68 @@ fvec  RegressorRVM::Test( const fvec &_sample )
     reg_sample_type sample(dim);
     FOR(d, dim) sample(d) = _sample[d];
     if(outputDim != -1 && outputDim < dim) sample(outputDim) = _sample[dim];
-	switch(kernelType)
+    switch(kernelType)
 	{
 	case 0:
+    {
 		res[0] = linFunc(sample);
-		break;
+        auto beta = linTrainer.GetBeta();
+        auto sigma = linTrainer.GetSigma();
+        auto vectors = linTrainer.GetVectors();
+        auto kernel = linTrainer.GetKernel();
+        reg_sample_type phi;
+        phi.set_size(vectors.size());
+        FOR(i, vectors.size()) {
+            phi(i) = kernel(sample, vectors[i]);
+        }
+        float variance = 1.f/beta + dlib::trans(phi)*sigma*phi;
+        variance = sqrt(variance);
+
+        res[1] = variance;
+    }
+
+        break;
 	case 1:
+    {
 		res[0] = polFunc(sample);
+        auto beta = polTrainer.GetBeta();
+        auto sigma = polTrainer.GetSigma();
+        auto vectors = polTrainer.GetVectors();
+        auto kernel = polTrainer.GetKernel();
+        reg_sample_type phi;
+        phi.set_size(vectors.size());
+        FOR(i, vectors.size()) {
+            phi(i) = kernel(sample, vectors[i]);
+        }
+        float variance = 1.f/beta + dlib::trans(phi)*sigma*phi;
+        variance = sqrt(variance);
+
+        res[1] = variance;
+    }
 		break;
 	case 2:
+    {
 		res[0] = rbfFunc(sample);
+        auto beta = rbfTrainer.GetBeta();
+        auto sigma = rbfTrainer.GetSigma();
+        auto vectors = rbfTrainer.GetVectors();
+        auto kernel = rbfTrainer.GetKernel();
+        // σ2(x) = 1/β + φ(x)' * Σ * φ(x) , where
+        // β      - precision of likelihood
+        // x      - observation in test set
+        // φ(x) = [k(x,x_0), k(x,x_1),..,k(x,x_m) ]  (x_0,x_1,..., x_m - relevant vectors;
+        // k(:,:) -  rbf kernel function)
+
+        reg_sample_type phi;
+        phi.set_size(vectors.size());
+        FOR(i, vectors.size()) {
+            phi(i) = kernel(sample, vectors[i]);
+        }
+        float variance = 1./beta + dlib::trans(phi)*sigma*phi;
+        variance = sqrt(variance);
+
+        res[1] = variance;
+    }
 		break;
 	}
 	return res;

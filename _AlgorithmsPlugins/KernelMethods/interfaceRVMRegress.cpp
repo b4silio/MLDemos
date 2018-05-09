@@ -179,7 +179,63 @@ void RegrRVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 
 void RegrRVM::DrawConfidence(Canvas *canvas, Regressor *regressor)
 {
-    canvas->maps.confidence = QPixmap();
+    int w = canvas->width();
+    int h = canvas->height();
+
+    RegressorRVM *rvm = ((RegressorRVM *)regressor);
+    int outputDim = regressor->outputDim;
+    int outputIndex = (outputDim == -1 || outputDim > 1) ? 1 : outputDim;
+
+    QPixmap confidencePixmap(w,h);
+    confidencePixmap.fill(Qt::white);
+    QPainter painter(&confidencePixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath above, below, abover, belower;
+    // we draw a density map for the probability
+    fvec sample;
+    sample.resize(2,0);
+    int steps = 256;
+    for (int i=0; i < steps; i++)
+    {
+        sample = canvas->toSampleCoords(i*(float)w/steps,h/2.f);
+        int dim = sample.size();
+        if(outputDim != -1 && outputDim < dim)
+        {
+            float tmp = sample[outputDim];
+            sample[outputDim] = sample[dim-1];
+            sample[dim-1] = tmp;
+        }
+        fvec res = rvm->Test(sample);
+        float variance = res[1];
+        fvec output = sample;
+        output[outputIndex] = res[0];
+        fvec up = output;
+        up[outputIndex] += variance;
+        QPointF point = canvas->toCanvasCoords(output);
+        QPointF pointUp = canvas->toCanvasCoords(up);
+        float sigma = pointUp.y()-point.y();
+        if(i==0) {
+            above.moveTo(point + QPointF(0,sigma));
+            below.moveTo(point - QPointF(0,sigma));
+            abover.moveTo(point + QPointF(0,2*sigma));
+            belower.moveTo(point - QPointF(0,2*sigma));
+        } else {
+            above.lineTo(point + QPointF(0,sigma));
+            below.lineTo(point - QPointF(0,sigma));
+            abover.lineTo(point + QPointF(0,2*sigma));
+            belower.lineTo(point - QPointF(0,2*sigma));
+        }
+    }
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::blue, 3, Qt::DashLine));
+    painter.drawPath(above);
+    painter.drawPath(below);
+    painter.setPen(QPen(Qt::blue, 1, Qt::DotLine));
+    painter.drawPath(abover);
+    painter.drawPath(belower);
+
+    canvas->maps.confidence = confidencePixmap;
 }
 
 void RegrRVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
