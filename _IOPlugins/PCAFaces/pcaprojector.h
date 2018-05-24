@@ -24,9 +24,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "widget.h"
 #include "sampleManager.h"
 #include "eigenFaces.h"
-#include "cameraGrabber.h"
 #include <QMutex>
 #include <QMutexLocker>
+#include <opencv2/videoio.hpp>
 
 class PCAProjector : public QObject
 {
@@ -34,7 +34,8 @@ class PCAProjector : public QObject
 
     Ui::PCAFacesDialog *options;
     EigenFaces eig;
-    IplImage *image, *display, *samples;
+    cv::Mat image, display;
+    IplImage *samples;
     QNamedWindow *imageWindow;
     QNamedWindow *samplesWindow;
     QLabel *eigenVectorLabel, *eigenValueLabel;
@@ -42,13 +43,13 @@ class PCAProjector : public QObject
     QPoint start;
     QRect selection;
     bool bFromWebcam;
-    CameraGrabber *grabber;
+    cv::VideoCapture grabber;
     QMutex imageMutex;
     int timerID;
 
     void mouseCallBack(int x,int y,int flags,int params);
 
-    void SetImage(IplImage *image);
+    void SetImage(cv::Mat image);
     void RefreshDataset();
     void FixLabels(SampleManager &sm);
 public:

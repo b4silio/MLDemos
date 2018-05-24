@@ -28,19 +28,22 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QUrl>
 #include <QClipboard>
 #include <QMessageBox>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 using namespace std;
+using cv::Mat;
 
 PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
-    : options(options), image(0), display(0), samples(0), start(QPoint(-1,-1)), grabber(0), bFromWebcam(true), timerID(0)
+    : options(options), samples(0), start(QPoint(-1,-1)), grabber(0), bFromWebcam(true), timerID(0)
 {
     eigenVectorLabel = NULL;
     eigenValueLabel = NULL;
     imageWindow = new QNamedWindow("image", false, options->imageWidget);
     samplesWindow = new QNamedWindow("samples", false, options->dataWidget);
     selection = QRect(0,0,256,256);
-    image = cvCreateImage(cvSize(256,256),8,3);
-    display = cvCreateImage(cvSize(256,256),8,3);
+    image = cv::Mat(256,256,CV_8UC3);
+    display = cv::Mat(256,256,CV_8UC3);
     samples = cvCreateImage(cvSize(380,340),8,3);
     cvSet(samples, CV_RGB(255,255,255));
     connect(imageWindow, SIGNAL(MousePressEvent(QMouseEvent *)), this, SLOT(SelectionStart(QMouseEvent *)));
@@ -65,11 +68,11 @@ PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
     samplesWindow->setAcceptDrops(true);
     samplesWindow->repaint();
 
-    cvSet(image, CV_RGB(255,255,255));
+    image.setTo(cv::Scalar(255,255,255));
     imageMutex.lock();
     SetImage(image);
     imageMutex.unlock();
-    grabber = new CameraGrabber();
+    grabber.open(0);
     timerID = startTimer(1000/30); // 30fps
 }
 
@@ -78,10 +81,7 @@ PCAProjector::~PCAProjector()
     if(timerID != -1) killTimer(timerID);
     timerID = -1;
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    if(grabber) grabber->Kill();
-    DEL(grabber);
-    IMKILL(display);
-    IMKILL(image);
+    if(grabber.isOpened()) grabber.release();
     IMKILL(samples);
     DEL(imageWindow);
     DEL(samplesWindow);
@@ -93,11 +93,10 @@ void PCAProjector::timerEvent(QTimerEvent *event)
 {
     if(!bFromWebcam) return;
     imageMutex.lock();
-    IplImage *frame = 0;
-    if(grabber) grabber->GrabFrame(&frame);
+    Mat frame;
+    grabber >> frame;
     SetImage(frame);
     imageMutex.unlock();
-    IMKILL(frame);
 }
 
 
@@ -189,44 +188,40 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
     return data;
 }
 
-
-
 void PCAProjector::FromWebcam()
 {
     bFromWebcam = true;
-    if(!grabber) grabber = new CameraGrabber();
+    if(!grabber.isOpened()) grabber.open(0);
 }
 
-void PCAProjector::SetImage( IplImage *img )
+void PCAProjector::SetImage( cv::Mat img )
 {
-    if(!img)
+    if(img.empty())
     {
         // we want a blank image
-        IplImage *image = cvCreateImage(cvSize(320,240),8,3);
-        cvSet(image, CV_RGB(255,255,255));
+        image = cv::Mat(240, 320, CV_8UC3);
+        image.setTo(cv::Scalar(255,255,255));
         imageWindow->ShowImage(image);
         imageWindow->repaint();
-        IMKILL(image);
         bFromWebcam = false;
-        if(grabber) grabber->Kill();
+        if(grabber.isOpened()) grabber.release();
         return;
     }
     //float ratio = img->width / (float)img->height;
-    if(img != image)
+    if(img.cols != image.cols || img.rows != image.rows || img.channels() != image.channels())
     {
-        IMKILL(image);
-        int size = max(img->width, img->height);
-        image = cvCreateImage(cvSize(size,size), 8, 3);
-        cvSet(image, CV_RGB(255,255,255));
-        CvRect rect = cvRect((size-img->width)/2,(size-img->height)/2, img->width, img->height);
-        ROI(image, rect);
-        cvResize(img, image, CV_INTER_CUBIC); //(bug when fromClipBoard)
-        unROI(image);
+        int size = max(img.cols, img.rows);
+        image = cv::Mat(size,size, CV_8UC3);
+        image.setTo(cv::Scalar(255,255,255));
+        cv::Rect rect((size-img.cols)/2,(size-img.rows)/2, img.cols, img.rows);
+        Mat selection = image(rect);
+        cv::resize(img, selection,cv::Size(rect.width, rect.height),0,0,cv::INTER_CUBIC);
     }
-    cvResize(image, display, CV_INTER_CUBIC);
-    cvDrawRect(display, cvRect(selection.x(),selection.y(),selection.width(), selection.height()), CV_RGB(0,0,0), 3);
-    cvDrawRect(display, cvRect(selection.x(),selection.y(),selection.width(), selection.height()), CV_RGB(255,255,255), 1);
-    imageWindow->ShowImage(display);
+    cv::resize(image, display, cv::Size(display.cols, display.rows), 0, 0, cv::INTER_CUBIC);
+    cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(0,0,0),3);
+    cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(255,255,255),1);
+    IplImage displayImg(display);
+    imageWindow->ShowImage(&displayImg);
     imageWindow->repaint();
 }
 
@@ -270,9 +265,9 @@ void PCAProjector::SelectionStop(QMouseEvent *event)
     if(event->pos() == start)
     {
         selection = QRect(0,0,256,256);
-        cvResize(image, display, CV_INTER_CUBIC);
-        cvDrawRect(display, cvRect(selection.x(),selection.y(),selection.width(), selection.height()), CV_RGB(0,0,0), 3);
-        cvDrawRect(display, cvRect(selection.x(),selection.y(),selection.width(), selection.height()), CV_RGB(255,255,255), 1);
+        cv::resize(image, display, cv::Size(display.cols, display.rows), 0, 0, cv::INTER_CUBIC);
+        cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(0,0,0),3);
+        cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(255,255,255),1);
         imageWindow->ShowImage(display);
         imageWindow->repaint();
     }
@@ -289,9 +284,9 @@ void PCAProjector::SelectionResize(QMouseEvent *event)
     if(size + start.y() > 255) size = 255 - start.y();
     selection = QRect(start.x(), start.y(), size, size);
 
-    cvResize(image, display, CV_INTER_CUBIC);
-    cvDrawRect(display, cvRect(selection.x(),selection.y(),selection.width(), selection.height()), CV_RGB(0,0,0), 3);
-    cvDrawRect(display, cvRect(selection.x(),selection.y(),selection.width(), selection.height()), CV_RGB(255,255,255), 1);
+    cv::resize(image, display, cv::Size(display.cols, display.rows), 0, 0, cv::INTER_CUBIC);
+    cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(0,0,0),3);
+    cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(255,255,255),1);
     imageWindow->ShowImage(display);
     imageWindow->repaint();
 }
@@ -378,13 +373,12 @@ void PCAProjector::DropImage(QDropEvent *event)
             QFile file(filename);
             if (!file.open(QIODevice::ReadOnly)) continue;
             file.close();
-            IplImage *img = cvLoadImage(filename.toLatin1());
+            cv::Mat img = cv::imread(filename.toStdString().c_str());
             imageMutex.lock();
             SetImage(img);
             imageMutex.unlock();
             bFromWebcam = false;
-            if(grabber) grabber->Kill();
-            IMKILL(img);
+            if(grabber.isOpened()) grabber.release();
             break;
         }
     }
@@ -419,15 +413,13 @@ void PCAProjector::LoadImage()
     file.close();
 
     bFromWebcam = false;
-    if(grabber) grabber->Kill();
-    IplImage *img = cvLoadImage(filename.toLatin1());
-    if(!img) return;
+    if(grabber.isOpened()) grabber.release();
+    Mat img = cv::imread(filename.toStdString().c_str());
+    if(img.empty()) return;
     imageMutex.lock();
     SetImage(img);
     imageMutex.unlock();
     bFromWebcam = false;
-    if(grabber) grabber->Kill();
-    IMKILL(img);
 }
 
 void PCAProjector::FromClipboard()
@@ -441,14 +433,14 @@ void PCAProjector::FromClipboard()
 
             QImage image = clipboard->image();
             IplImage *img = QNamedWindow::cvxCopyQImage(image);
+            Mat imgMat = cv::cvarrToMat(img);
 
-            if(img != NULL){
+            if(!imgMat.empty()){
                 imageMutex.lock();
-                SetImage(img);
+                SetImage(imgMat);
                 imageMutex.unlock();
                 bFromWebcam = false;
-                if(grabber) grabber->Kill();
-                IMKILL(img);
+                if(grabber.isOpened()) grabber.release();
             }
         } else if (mimeData->hasUrls()) {
             FOR(i, clipboard->mimeData()->urls().length())
@@ -456,52 +448,19 @@ void PCAProjector::FromClipboard()
                 QString filename = clipboard->mimeData()->urls()[i].toLocalFile();
                 if(filename.toLower().endsWith(".png") || filename.toLower().endsWith(".jpg"))
                 {
-                    IplImage *img = cvLoadImage(filename.toLatin1());
-                    if(!img) break;
+                    Mat img = cv::imread(filename.toStdString().c_str());
+                    if(img.empty()) break;
                     imageMutex.lock();
                     SetImage(img);
                     imageMutex.unlock();
                     bFromWebcam = false;
-                    if(grabber) grabber->Kill();
-                    IMKILL(img);
+                    if(grabber.isOpened()) grabber.release();
                     break;
                 }
             }
         }else {
             std::cout<< "invalid data type" << std::endl;
         }
-
-        /*
-       * Old structure (08.05.2014)
-       *
-       *  if(!clipboard->image().isNull())
-        {
-            IplImage *img = QNamedWindow::toImage(clipboard->image());
-            IMKILL(img);
-        }
-        else if(!clipboard->pixmap().isNull())
-        {
-            IplImage *img = QNamedWindow::toImage(clipboard->pixmap().toImage());
-            IMKILL(img);
-        }
-        else if(clipboard->mimeData()->hasUrls())
-        {
-            QList<QUrl> urls = clipboard->mimeData()->urls();
-            FOR(i, clipboard->mimeData()->urls().length())
-            {
-                QString filename = clipboard->mimeData()->urls()[i].toLocalFile();
-                if(filename.toLower().endsWith(".png") || filename.toLower().endsWith(".jpg"))
-                {
-                    IplImage *img = cvLoadImage(filename.toLatin1());
-                    if(!img) break;
-                    QMutexLocker lock(&imageMutex);
-                    SetImage(img);
-                    bFromWebcam = false;
-                    IMKILL(img);
-                    break;
-                }
-            }
-        }*/
     }else{
         std::cout<< "clipboard is NULL" << std::endl;
     }
@@ -510,7 +469,7 @@ void PCAProjector::FromClipboard()
 void PCAProjector::AddImage()
 {
     CvRect rect = cvRect(selection.x(), selection.y(), selection.width(), selection.height());
-    float ratio = image->width/(float)display->width;
+    float ratio = image.cols/(float)display.cols;
     rect.x *= ratio;
     rect.y *= ratio;
     rect.width *= ratio;
@@ -528,9 +487,10 @@ void PCAProjector::AddImage()
     }
     if(rect.x < 0) rect.x = 0;
     if(rect.y < 0) rect.y = 0;
-    if(rect.x+rect.width > image->width) rect.width = image->width - rect.x;
-    if(rect.y+rect.height > image->height) rect.height= image->height - rect.y;
-    sm.AddSample(image, rect);
+    if(rect.x+rect.width > image.cols) rect.width = image.cols - rect.x;
+    if(rect.y+rect.height > image.rows) rect.height= image.rows - rect.y;
+    IplImage imageIpl(image);
+    sm.AddSample(&imageIpl, rect);
     RefreshDataset();
 }
 

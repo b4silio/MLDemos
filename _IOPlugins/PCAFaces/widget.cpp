@@ -32,6 +32,18 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "widget.h"
 
+QPixmap QNamedWindow::toPixmap(cv::Mat src)
+{
+    if(src.empty()) return QPixmap();
+
+    QPixmap pixmap;
+    if(src.channels() == 4) {
+        pixmap = QPixmap::fromImage(QImage((const unsigned char *)src.data,src.cols,src.rows, QImage::Format_RGB32)).copy();
+    } else {
+        pixmap = QPixmap::fromImage(QImage((unsigned char*) src.data, src.cols, src.rows, QImage::Format_RGB888).rgbSwapped());
+    }
+    return pixmap;
+}
 
 QPixmap QNamedWindow::toPixmap(IplImage *src)
 {
@@ -61,8 +73,7 @@ IplImage *QNamedWindow::cvxCopyQImage(const QImage &qImage)
 
     IplImage *pIplImage =     cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3); // (!ppIplImage || !CV_IS_IMAGE(*ppIplImage))?
     if(!CV_IS_IMAGE(pIplImage)) return NULL;
-    if(pIplImage->width != w || pIplImage->height != h)
-    {
+    if(pIplImage->width != w || pIplImage->height != h) {
 
         cvReleaseImage(&pIplImage);
         pIplImage = cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3);
@@ -73,18 +84,13 @@ IplImage *QNamedWindow::cvxCopyQImage(const QImage &qImage)
     pIplImage->origin = IPL_ORIGIN_TL;
 
     int x, y;
-    for(x = 0; x < pIplImage->width; ++x)
-    {
-        for(y = 0; y < pIplImage->height; ++y)
-        {
+    for(x = 0; x < pIplImage->width; ++x) {
+        for(y = 0; y < pIplImage->height; ++y) {
             QRgb rgb = qImage.pixel(x, y);
 
-            if(pIplImage->nChannels == 1)
-            {
+            if(pIplImage->nChannels == 1) {
                 cvSet2D(pIplImage, y, x, CV_RGB(qGray(rgb), 0, 0));
-            }
-            else
-            {
+            } else {
                 cvSet2D(pIplImage, y, x, CV_RGB(qRed(rgb), qGreen(rgb), qBlue(rgb)));
             }
         }
@@ -183,6 +189,21 @@ void QNamedWindow::ShowImage(IplImage *image)
 	bRedrawing = false;
 	repaint();
 	//update();
+}
+
+void QNamedWindow::ShowImage(cv::Mat image)
+{
+    if(image.empty()) return;
+    bRedrawing = true;
+
+    pixmap = toPixmap(image);
+
+    if(!bResizable) setFixedSize(pixmap.width(), pixmap.height());
+    else if (bNewImage && !isFullScreen()) resize(pixmap.width(), pixmap.height());
+    bNewImage = false;
+    bRedrawing = false;
+    repaint();
+    //update();
 }
 
 void QNamedWindow::ShowImage(QPixmap pixmap)

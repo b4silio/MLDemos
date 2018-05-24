@@ -147,7 +147,6 @@ void EigenFaces::Learn(std::vector<cv::Mat> faces, std::vector<int> classes, std
         eigenVectors.push_back(eigenVects.row(i).reshape(bColor ? 3 : 1, res.height));
     }
 
-    eigenValues = cv::Mat(1,dim,CV_32FC1);
     avgImage = pca.mean.reshape(bColor ? 3 : 1, res.height);
 
 	// we compute the projections for recognition purposes

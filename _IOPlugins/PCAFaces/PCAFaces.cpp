@@ -28,7 +28,6 @@ using namespace std;
 PCAFaces::PCAFaces()
 : projector(0), guiDialog(0)
 {
-
 }
 
 PCAFaces::~PCAFaces()
@@ -69,7 +68,6 @@ void PCAFaces::Start()
         qRegisterMetaType<std::vector<ipair> >("std::vector<ipair>");
         qRegisterMetaType<ivec>("ivec");
         qRegisterMetaType<std::vector<fvec> >("std::vector<fvec>");
-
 
         connect(&futureWatcher,SIGNAL(started()),this,SLOT(setButtonsOff()));
         connect(&futureWatcher, SIGNAL(finished()), this, SLOT(setButtonsOn()));
@@ -112,7 +110,7 @@ void PCAFaces::Updating()
 }
 
 void PCAFaces::ConcurrentUpdate(){
-       QFuture<void> future = QtConcurrent::run(this,&PCAFaces::Updating);
+       QFuture<void> future = QtConcurrent::run(this, &PCAFaces::Updating);
        futureWatcher.setFuture(future);
 }
 

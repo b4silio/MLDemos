@@ -24,6 +24,7 @@ typedef struct _IplImage IplImage;
 #include <QWidget>
 //#include <QGLWidget>
 #include <QSize>
+#include <opencv2/opencv.hpp>
 
 class QNamedWindow : public QWidget
 {
@@ -51,13 +52,15 @@ protected:
 public:
 	bool bNewImage;
 	QNamedWindow(QString name, bool bResizable = false, QWidget *parent = 0);
-	void ShowImage(IplImage *image);
-	void ShowImage(QPixmap pixmap);
+    void ShowImage(IplImage *image);
+    void ShowImage(cv::Mat image);
+    void ShowImage(QPixmap pixmap);
 	void SetMouseCallback(void (*mouseCallback)(int, int, int, int));
 	void (*mouseCallback)(int, int, int, int);
-	QPixmap Pixmap() {return pixmap;};
-	static QPixmap toPixmap(IplImage *src);
-	static IplImage *toImage(QImage image);
+    QPixmap Pixmap() {return pixmap;}
+    static QPixmap toPixmap(cv::Mat src);
+    static QPixmap toPixmap(IplImage *src);
+    static IplImage *toImage(QImage image);
 
 
     // modifed from http://opencv-extension-library.googlecode.com/svn/trunk/QtOpenCV/qcv/qcvimage.cpp

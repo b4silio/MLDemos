@@ -7,6 +7,7 @@
 #define _CAMERAGRABBER_H_
 
 #include "basicOpenCV.h"
+#include <opencv2/videoio.hpp>
 
 /*!
  *	Camera Frame Grabber, grabs images from an input webcam
@@ -14,11 +15,7 @@
 class CameraGrabber
 {
 private:
-	u32 currentFrame;
-	CvCapture *capture;
-	u32 width;
-	u32 height;
-	f32 framerate;
+    cv::VideoCapture input;
 
 public:
 	/*!
@@ -28,23 +25,10 @@ public:
 	CameraGrabber();
 
 	/*!
-		Gets the resolution of the video
-		\return returns the resolution of the video
-	*/
-	CvSize GetSize();
-
-	/*!
-		Gets the video framerate
-		\return returns the video framerate
-	*/
-	f32 GetFramerate();
-
-	/*!
 		The Grabbing function
 		\param frame the destination frame pointer
-		\index not used
 	*/
-	void GrabFrame(IplImage **frame, u32 index=0);
+    void GrabFrame(cv::Mat &image);
 
 	/*!
 		The Kill function, frees up the buffers allocated by the grabber
