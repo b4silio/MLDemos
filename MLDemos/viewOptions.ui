@@ -58,6 +58,18 @@
    <property name="toolTip">
     <string>Copy current canvas image to clipboard</string>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+border-style: ridge;
+border-width: 1px;
+border-color: gray;
+background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+}
+
+QPushButton:pressed {
+background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+}</string>
+   </property>
    <property name="text">
     <string>to Clipboard</string>
    </property>
@@ -117,9 +129,9 @@
   <widget class="QPushButton" name="zoomFitButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>200</x>
      <y>90</y>
-     <width>40</width>
+     <width>30</width>
      <height>20</height>
     </rect>
    </property>
@@ -131,6 +143,18 @@
    </property>
    <property name="toolTip">
     <string>Adjust zoom to fit all current data</string>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+border-style: ridge;
+border-width: 1px;
+border-color: gray;
+background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+}
+
+QPushButton:pressed {
+background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+}</string>
    </property>
    <property name="text">
     <string>Fit</string>
@@ -222,7 +246,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>91</width>
+          <width>89</width>
           <height>103</height>
          </rect>
         </property>
@@ -355,7 +379,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
+        <width>84</width>
         <height>131</height>
        </rect>
       </property>

@@ -52,9 +52,9 @@
   <widget class="QComboBox" name="svmTypeCombo">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>30</x>
      <y>30</y>
-     <width>71</width>
+     <width>80</width>
      <height>22</height>
     </rect>
    </property>

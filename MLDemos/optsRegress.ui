@@ -46,8 +46,8 @@
      <widget class="QComboBox" name="algoList">
       <property name="geometry">
        <rect>
-        <x>11</x>
-        <y>20</y>
+        <x>0</x>
+        <y>22</y>
         <width>190</width>
         <height>26</height>
        </rect>

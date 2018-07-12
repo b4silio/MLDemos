@@ -6,96 +6,66 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>307</width>
-    <height>130</height>
+    <width>310</width>
+    <height>158</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QDoubleSpinBox" name="paramSmoothingFac">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>5</y>
-     <width>254</width>
-     <height>120</height>
+     <x>160</x>
+     <y>10</y>
+     <width>60</width>
+     <height>24</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout" columnstretch="1,2">
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_8">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Smoothing Factor</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QDoubleSpinBox" name="paramSmoothingFac">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>This sets the proportion of data points that will 
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>This sets the proportion of data points that will 
 be used to compute each regression estimate.
 E.g. with a smoothing factor of 0.3, the regression 
 at a given point x is computed using the 0.3*N 
 nearest data points to x.</string>
-      </property>
-      <property name="decimals">
-       <number>2</number>
-      </property>
-      <property name="minimum">
-       <double>0.010000000000000</double>
-      </property>
-      <property name="maximum">
-       <double>1.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>0.010000000000000</double>
-      </property>
-      <property name="value">
-       <double>0.400000000000000</double>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_6">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="text">
-       <string>Weighting Function</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QComboBox" name="paramWeightingFunc">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Weighting function used at each point a local 
+   </property>
+   <property name="decimals">
+    <number>2</number>
+   </property>
+   <property name="minimum">
+    <double>0.010000000000000</double>
+   </property>
+   <property name="maximum">
+    <double>1.000000000000000</double>
+   </property>
+   <property name="singleStep">
+    <double>0.010000000000000</double>
+   </property>
+   <property name="value">
+    <double>0.400000000000000</double>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="paramWeightingFunc">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>44</y>
+     <width>100</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Weighting function used at each point a local 
 fitting is performed. The tricube function is the 
 standard weighting function used in the literature, 
 but any function that has smooth contact with 
@@ -103,98 +73,80 @@ zero at normalizedDistance = 1 is fine.
 The uniform weighting does not have this smooth 
 contact and therefore produces regression 
 estimates that lack local smoothness.</string>
-      </property>
-      <property name="editable">
-       <bool>false</bool>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>Tricube</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Hann</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Uniform</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_7">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Fit Type</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QComboBox" name="paramFitType">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Try a linear fit first. If your data has a strong 
+   </property>
+   <property name="editable">
+    <bool>false</bool>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Tricube</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Hann</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Uniform</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="paramFitType">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>80</y>
+     <width>100</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Try a linear fit first. If your data has a strong 
 curvature and the linear fit provides a poor fit even 
 at low smoothing factors, then use a quadratic fit.
 An alternative is to transform the input data 
 (e.g. 1/x) to straighten it before doing regression.</string>
-      </property>
-      <property name="currentIndex">
-       <number>1</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>Linear</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Quadratic</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_9">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Dimension Normalization</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QComboBox" name="paramNormType">
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>This only applies if your input data has more 
+   </property>
+   <property name="currentIndex">
+    <number>1</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Linear</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Quadratic</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="paramNormType">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>117</y>
+     <width>100</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>This only applies if your input data has more 
 than one dimension.
 
 When computing the distance to the nearest 
@@ -209,28 +161,112 @@ measure of its spread to make them comparable.
 This is usually done by dividing by the standard 
 deviation. The interquartile range (IQR) is a 
 measure of spread that is more robust to outliers.</string>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>None</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Standard Deviation</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>IQR</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-   </layout>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>None</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Standard Deviation</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>IQR</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>10</y>
+     <width>100</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Smoothing Factor</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>44</y>
+     <width>111</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="text">
+    <string>Weighting Function</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>80</y>
+     <width>61</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Fit Type</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>117</y>
+     <width>119</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Dimension Normalization</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
   </widget>
  </widget>
  <resources/>

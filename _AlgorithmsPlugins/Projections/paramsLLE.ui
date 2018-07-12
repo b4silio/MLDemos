@@ -22,6 +22,11 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Projected Dim</string>
    </property>
@@ -34,6 +39,11 @@
      <width>60</width>
      <height>27</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="minimum">
     <number>1</number>
@@ -48,8 +58,13 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
-    <string>k - NN</string>
+    <string>KNN</string>
    </property>
   </widget>
   <widget class="QSpinBox" name="knnSpin">
@@ -60,6 +75,11 @@
      <width>60</width>
      <height>27</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="minimum">
     <number>1</number>
