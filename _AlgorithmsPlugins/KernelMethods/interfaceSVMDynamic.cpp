@@ -216,7 +216,7 @@ void DynamicSVM::GetParameterList(std::vector<QString> &parameterNames,
 
 Dynamical *DynamicSVM::GetDynamical()
 {
-    int svmType = params->svmTypeCombo->currentIndex();
+    //int svmType = params->svmTypeCombo->currentIndex();
     Dynamical *dynamical = new DynamicalSVR();
     SetParams(dynamical);
     return dynamical;

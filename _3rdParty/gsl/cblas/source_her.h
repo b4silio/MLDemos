@@ -71,7 +71,7 @@
         const BASE X_imag = -conj * CONST_IMAG(X, jx);
         REAL(A, lda * i + i) += X_real * tmp_real - X_imag * tmp_imag;
         IMAG(A, lda * i + i) = 0;
-        jx += incX;
+        //jx += incX;
       }
 
       ix += incX;

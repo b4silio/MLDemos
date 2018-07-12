@@ -163,9 +163,7 @@ fvec AlgorithmManager::Train(Dynamical *dynamical)
     if(!dynamical) return fvec();
     vector<fvec> samples = canvas->data->GetSamples();
     vector<ipair> sequences = canvas->data->GetSequences();
-    ivec labels = canvas->data->GetLabels();
     if(!samples.size() || !sequences.size()) return fvec();
-    int dim = samples[0].size();
     int count = optionsDynamic->resampleSpin->value();
     int resampleType = optionsDynamic->resampleCombo->currentIndex();
     int centerType = optionsDynamic->centerCombo->currentIndex();
@@ -202,7 +200,8 @@ fvec AlgorithmManager::Test(Dynamical *dynamical, vector< vector<fvec> > traject
 
     // test each trajectory for errors
     int errorCnt=0;
-    float errorOne = 0, errorAll = 0;
+    float errorOne = 0;
+    //float errorAll = 0;
     FOR(i, trajectories.size())
     {
         vector<fvec> t = trajectories[i];
@@ -223,10 +222,10 @@ fvec AlgorithmManager::Test(Dynamical *dynamical, vector< vector<fvec> > traject
             errorCnt++;
         }
         errorOne += errorTraj;
-        errorAll += errorTraj / t.size();
+        //errorAll += errorTraj / t.size();
     }
     errorOne /= errorCnt;
-    errorAll /= trajectories.size();
+    //errorAll /= trajectories.size();
     fvec res;
     res.push_back(errorOne);
 

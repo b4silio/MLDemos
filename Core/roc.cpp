@@ -222,7 +222,7 @@ fvec GetBestFMeasure( std::vector<f32pair> data )
 		oldVal = val;
 	}
 
-	float tmax = 0;
+    //float tmax = 0;
 	float fmax = 0;
     float pmax = 0;
     float rmax = 0;
@@ -230,7 +230,7 @@ fvec GetBestFMeasure( std::vector<f32pair> data )
 	{
 		if(measures[j][3] > fmax)
 		{
-			tmax = measures[j][2];
+            //tmax = measures[j][2];
 			fmax = measures[j][3];
             pmax = measures[j][4];
             rmax = measures[j][5];
@@ -260,7 +260,6 @@ std::pair<float,float> GetMicroMacroFMeasure(std::vector<f32pair> data)
     float macroFMeasure = 0.f;
     for(std::map<int,ivec>::iterator it = perClass.begin(); it != perClass.end(); it++)
     {
-        int c = it->first;
         int count = it->second[0];
         int tp = it->second[1];
         int fp = it->second[2];
@@ -307,10 +306,8 @@ float GetAveragePrecision( std::vector<f32pair> data )
 				else tn++;
 			}
 		}
-		float t = float(tp+fp);
 		float precision = tp / float(tp+fp);
 		float recall = tp / float(tp+fn);
-		//averagePrecision += precision/t;
 		averagePrecision += precision*(oldRecall-recall);
 		oldRecall = recall;
 	}

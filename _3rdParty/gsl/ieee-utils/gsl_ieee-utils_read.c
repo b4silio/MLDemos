@@ -80,7 +80,8 @@ gsl_ieee_read_mode_string (const char * description,
 
     status = lookup_string (p, &new_precision, &new_rounding, &new_exception) ;
 
-    if (status)
+    if (status) {
+        if(p) free(p);
       GSL_ERROR ("unrecognized GSL_IEEE_MODE string.\nValid settings are:\n\n" 
                  "  single-precision double-precision extended-precision\n"
                  "  round-to-nearest round-down round-up round-to-zero\n"
@@ -91,6 +92,7 @@ gsl_ieee_read_mode_string (const char * description,
                  "separated by commas. "
                  "(e.g. GSL_IEEE_MODE=\"round-down,mask-underflow\")",
                  GSL_EINVAL) ;
+    }
 
     if (new_precision) 
       {

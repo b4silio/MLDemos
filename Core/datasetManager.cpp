@@ -268,7 +268,6 @@ double DatasetManager::Compare(const fvec sample) const
 
 	// now compute the differences
 	double minDist = 1.0;
-	u32 index = 0;
 	FOR(i, samples.size())
 	{
 		double dist = 0;
@@ -276,7 +275,6 @@ double DatasetManager::Compare(const fvec sample) const
 		dist /= size;
 		if(minDist > dist)
 		{
-			index = i;
 			minDist = dist;
 		}
 	}

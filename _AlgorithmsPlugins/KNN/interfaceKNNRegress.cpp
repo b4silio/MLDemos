@@ -120,7 +120,6 @@ void RegrKNN::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;
 	int w = canvas->width();
-	int h = canvas->height();
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
     fvec sample = canvas->toSampleCoords(0,0);

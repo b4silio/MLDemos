@@ -107,11 +107,11 @@ nlopt_result sbplx_minimize(int n, nlopt_func f, void *f_data,
 	  double normi = 0;
 	  double normdx = 0;
 	  int ns, nsubs = 0;
-	  int nevals = stop->nevals;
+      int nevals;// = stop->nevals;
 	  double fdiff, fdiff_max = 0;
 
 	  memcpy(xprev, x, n * sizeof(double));
-	  fprev = *minf;
+      //fprev = *minf;
 
 	  /* sort indices into the progress vector dx by decreasing
 	     order of magnitude |dx| */

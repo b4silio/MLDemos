@@ -36,7 +36,7 @@
       n2 = N;
       side = Side;
       uplo = Uplo;
-      trans = TransA;
+      //trans = TransA;
       trans = (TransA == CblasNoTrans) ? CblasNoTrans : CblasTrans;
     } else {
       n1 = N;

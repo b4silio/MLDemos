@@ -183,7 +183,6 @@ float BasicOpenCV::MaximizeSquare(IplImage *image, int *x, int *y, int *s)
     u32 sizeLimit = (u32)(min(image->width, image->height)*0.9);
     u32 xstep = image->width > 100 ? image->width / 100 : 1;
     u32 ystep = image->height > 100 ? image->height / 100 : 1;
-    u32 sstep = sizeLimit > 30 ? sizeLimit / 30 : 1;
 
     if(!total)
     {
@@ -212,9 +211,7 @@ float BasicOpenCV::MaximizeSquare(IplImage *image, int *x, int *y, int *s)
                 d = ysws + cx;
                 u32 csum = data[d] - data[b] - data[c] + data[a];
                 //float sum = csum*ratio - (total - csum)*(1-ratio);
-                if(total == 0) csum = 0;
-                else
-                {
+                if(total != 0) {
                     sum = csum / tsum * csum / (float)total;
                 }
                 if(sum > maxSum)
@@ -247,20 +244,20 @@ void BasicOpenCV::cvCopyFlipped(IplImage *src, IplImage *dst)
 void BasicOpenCV::DisplayHueSatHist(IplImage* src)
 {
     if(!src) return;
-    IplImage* h_plane = cvCreateImage( cvGetSize(src), 8, 1 );
-    IplImage* s_plane = cvCreateImage( cvGetSize(src), 8, 1 );
-    IplImage* v_plane = cvCreateImage( cvGetSize(src), 8, 1 );
-    IplImage* planes[] = { h_plane, s_plane };
-    IplImage* hsv = cvCreateImage( cvGetSize(src), 8, 3 );
+    //IplImage* h_plane = cvCreateImage( cvGetSize(src), 8, 1 );
+    //IplImage* s_plane = cvCreateImage( cvGetSize(src), 8, 1 );
+    //IplImage* v_plane = cvCreateImage( cvGetSize(src), 8, 1 );
+    //IplImage* planes[] = { h_plane, s_plane };
+    //IplImage* hsv = cvCreateImage( cvGetSize(src), 8, 3 );
     u32 h_bins = 30, s_bins = 32;
-    s32 hist_size[] = {(s32)h_bins, (s32)s_bins};
-    f32 h_ranges[] = { 0, 180 }; /* hue varies from 0 (~0red) to 180 (~360red again) */
-    f32 s_ranges[] = { 0, 255 }; /* saturation varies from 0 (black-gray-white) to 255 (pure spectrum color) */
-    f32* ranges[] = { h_ranges, s_ranges };
+    //s32 hist_size[] = {(s32)h_bins, (s32)s_bins};
+    //f32 h_ranges[] = { 0, 180 }; /* hue varies from 0 (~0red) to 180 (~360red again) */
+    //f32 s_ranges[] = { 0, 255 }; /* saturation varies from 0 (black-gray-white) to 255 (pure spectrum color) */
+    //f32* ranges[] = { h_ranges, s_ranges };
     s32 scale = 10;
     IplImage* hist_img = cvCreateImage( cvSize(h_bins*scale,s_bins*scale), 8, 3 );
-    CvHistogram* hist;
-    f32 max_value = 0;
+    //CvHistogram* hist;
+    //f32 max_value = 0;
 
     /*
     cvCvtColor( src, hsv, CV_BGR2HSV );
@@ -379,7 +376,6 @@ void BasicOpenCV::CreateHistogramImage(IplImage *src, IplImage *dst, int bins, i
 
     int w = dst->width;
     int h = dst->height;
-    int total = src->width*src->height;
     if(!bGrayscale)
     {
         if(bRed)

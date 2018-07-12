@@ -171,10 +171,6 @@ void Canvas::PaintSequentialCanvas(QPainter &painter, bool bSvg)
         painter.drawPixmap(geometry(), maps.confidence);
     }
 
-    bool bDebug = false;
-#ifdef MACX
-    bDebug = true;
-#endif
     if(bDisplaySamples) {
         if(!maps.reward.isNull()) {
             painter.drawPixmap(geometry(), maps.reward);
@@ -382,10 +378,6 @@ void Canvas::PaintGaussian(QPointF position, double variance)
     int h = height();
     if (maps.reward.isNull()) {
         maps.reward = QPixmap(w,h);
-        //QBitmap bitmap(w,h);
-        //bitmap.clear();
-        //maps.reward.setMask(bitmap);
-        maps.reward.fill(Qt::transparent);
         maps.reward.fill(Qt::white);
     }
 
@@ -394,7 +386,7 @@ void Canvas::PaintGaussian(QPointF position, double variance)
     fVec pos(position.x()/(float)w, position.y()/(float)h);
     fVec point;
     float invSigma = 1./(variance*variance);
-    float a = invSigma*sqrtf(2*PIf);
+    //float a = invSigma*sqrtf(2*PIf);
     float value;
     float minVal = 1e30, maxVal = -1e30;
     FOR (i, w) {
@@ -473,7 +465,7 @@ QPixmap Canvas::GetScreenshot()
 
 void Canvas::DrawLegend(QPainter &painter)
 {
-    int w = painter.viewport().width(), h = painter.viewport().height();
+    int w = painter.viewport().width();
     QFont font = painter.font();
     font.setPointSize(10);
     painter.setFont(font);
@@ -892,8 +884,6 @@ void Canvas::DrawRewards()
 
 void Canvas::DrawTrajectories(QPainter &painter)
 {
-    int w = width();
-    int h = height();
     int count = data->GetCount();
 
     bool bDrawing = false;
@@ -1084,12 +1074,8 @@ void Canvas::DrawTrajectories()
         FOR(j, count-1)
         {
             fvec pt = trajectories[i][j+1];
-            int dim = pt.size();
-            float x = pt[xIndex];
-            float y = pt[yIndex];
             painter.setPen(QPen(Qt::black, 0.5));
             QPointF point = toCanvasCoords(pt);
-            QPointF oldPoint = toCanvasCoords(oldPt);
             painter.drawLine(point, toCanvasCoords(oldPt));
             if(j<count-2) Canvas::drawSample(painter, point, 5, bDisplaySingle ? 0 : label);
             oldPt = pt;
@@ -1109,15 +1095,12 @@ void Canvas::DrawTrajectories()
 void Canvas::DrawLiveTrajectory(QPainter &painter)
 {
     if(!liveTrajectory.size() || !liveTrajectory[0].size()) return;
-    int w = width();
-    int h = height();
     fvec oldPt = liveTrajectory[0];
     int count = liveTrajectory.size();
     FOR(j, count-1)
     {
         fvec pt = liveTrajectory[j+1];
         if(!pt.size()) break;
-        int label = 1;
         if(false && bDisplayMap)
         {
             painter.setPen(QPen(Qt::white, 3));

@@ -456,8 +456,7 @@ bool DrawTimer::Vectors(int count, int steps)
     {
         QPointF samplePre(rand()/(float)RAND_MAX * w, rand()/(float)RAND_MAX * h);
         sample = canvas->toSampleCoords(samplePre);
-        float color = 255 - (rand()/(float)RAND_MAX*0.7f)*255.f;
-        color = 0;
+        float color = 0; // 255 - (rand()/(float)RAND_MAX*0.7f)*255.f;
         QPointF oldPoint = canvas->toCanvasCoords(sample);
         FOR(j, steps)
         {
@@ -747,8 +746,7 @@ bool DrawTimer::VectorsFast(int count, int steps)
     {
         QPointF samplePre(rand()/(float)RAND_MAX * w, rand()/(float)RAND_MAX * h);
         sample = canvas->toSampleCoords(samplePre);
-        float color = (rand()/(float)RAND_MAX*0.7f)*255.f;
-        color = bColorMap ? 255 : 0;
+        float color = bColorMap ? 255 : 0;
         QPointF oldPoint = canvas->toCanvasCoords(sample);
         FOR(j, steps)
         {

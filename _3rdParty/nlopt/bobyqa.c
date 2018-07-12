@@ -70,7 +70,7 @@ static void update_(int *n, int *npt, double *bmat,
 
 /*     Apply the rotations that put zeros in the KNEW-th row of ZMAT. */
 
-    jl = 1;
+    //jl = 1;
     i__2 = nptm;
     for (j = 2; j <= i__2; ++j) {
 	if ((d__1 = zmat[*knew + j * zmat_dim1], fabs(d__1)) > ztest) {
@@ -760,11 +760,11 @@ static void altmov_(int *n, int *npt, double *xpt,
     double slbd;
     int iubd;
     double vlag, subd, temp;
-    int ksav;
+    int ksav=0;
     double step, zero, curv;
     int iflag;
     double scale, csave, tempa, tempb, tempd, const__, sumin, ggfree;
-    int ibdsav;
+    int ibdsav=0;
     double dderiv, bigstp, predsq, presav, distsq, stpsav, wfixsq, wsqsav;
 
 
@@ -1177,11 +1177,11 @@ static void trsbox_(int *n, int *npt, double *xpt,
     int iact, nact;
     double angt, qred;
     int isav;
-    double temp, zero, xsav, xsum, angbd, dredg, sredg;
+    double temp, zero, xsav, xsum, angbd=0, dredg, sredg;
     int iterc;
-    double resid, delsq, ggsav, tempa, tempb, ratio, sqstp, redmax, 
-	    dredsq, redsav, onemin, gredsq, rednew;
-    int itcsav;
+    double resid, delsq, ggsav=0, tempa, tempb, ratio, sqstp, redmax,
+        dredsq, redsav, onemin, gredsq=0, rednew;
+    int itcsav=0;
     double rdprev, rdnext, stplen, stepsq;
     int itermax;
 
@@ -1259,7 +1259,7 @@ static void trsbox_(int *n, int *npt, double *xpt,
 
     iterc = 0;
     nact = 0;
-    sqstp = zero;
+    //sqstp = zero;
     i__1 = *n;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	xbdi[i__] = zero;
@@ -1512,7 +1512,7 @@ L120:
 		xbdi[i__] = one;
 		goto L100;
 	    }
-	    ratio = one;
+        //ratio = one;
 /* Computing 2nd power */
 	    d__1 = d__[i__];
 /* Computing 2nd power */
@@ -1981,7 +1981,7 @@ static nlopt_result bobyqb_(int *n, int *npt, double *x,
     int ksav;
     double gqsq, dist, sumw, sumz, diffa, diffb, diffc, hdiag;
     int kbase;
-    double alpha, delta, adelt, denom, fsave, bdtol, delsq;
+    double alpha, delta, adelt, denom=0, fsave, bdtol, delsq;
     int nresc, nfsav;
     double ratio, dnorm, vquad, pqold, tenth;
     int itest;
@@ -2087,7 +2087,7 @@ static nlopt_result bobyqb_(int *n, int *npt, double *x,
 	d__1 = xopt[i__];
 	xoptsq += d__1 * d__1;
     }
-    fsave = fval[1];
+    //fsave = fval[1];
     if (rc2 != NLOPT_SUCCESS) {
       rc = rc2;
       goto L720;

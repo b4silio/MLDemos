@@ -146,7 +146,7 @@ static void pnet_(int *nf, int *nb, double *x, int *
     /* Local variables */
     double a, b;
     int i__, n;
-    double p, r__;
+    double p=0, r__;
     int kd, ld;
     double fo, fp, po, pp, ro, rp;
     int mx, kbf;
@@ -218,9 +218,9 @@ static void pnet_(int *nf, int *nb, double *x, int *
     ires2 = 0;
     mred = 10;
     mes = 4;
-    mes1 = 2;
-    mes2 = 2;
-    mes3 = 2;
+    //mes1 = 2;
+    //mes2 = 2;
+    //mes3 = 2;
     eps = .8;
     eta0 = 1e-15;
     eta9 = 1e120;
@@ -360,7 +360,7 @@ L11040:
 
 /*     CG INITIATION */
 
-    rho = rho1;
+    //rho = rho1;
     snorm = 0.;
     luksan_mxvset__(nf, &c_b7, &s[1]);
     luksan_mxvneg__(nf, &gn[1], &gs[1]);

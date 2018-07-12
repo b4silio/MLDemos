@@ -341,8 +341,8 @@ void lwpr_xml_report_unknown(LWPR_ParserData *ud, const char *fieldname) {
 
 void lwpr_xml_start_element(void *userData, const char *name, const char **atts) {
    int M=0, N=0;
-   const char **at;
-   const char *fieldName;
+   const char **at=0;
+   const char *fieldName=0;
    int wishM,wishN;
 
    LWPR_ParserData *ud = (LWPR_ParserData *) userData;

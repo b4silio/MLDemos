@@ -29,12 +29,12 @@ void GHSOM_getTemplates()
     v3.addElement(Globals::dataItems->elementAt(0));
     v4.addElement(Globals::hfm);
     v5.addElement(&v4);
-    char *a = v1.elementAt(0);
-    float *b = v2.elementAt(0);
-    DataItem *c = v3.elementAt(0);
-    NeuronLayer *d = v4.elementAt(0);
-    NeuronLayer *e = v5.elementAt(0)->elementAt(0);
-    int x = v1.size() + v2.size() + v3.size() + v4.size() + v5.size();
+    //char *a = v1.elementAt(0);
+    //float *b = v2.elementAt(0);
+    //DataItem *c = v3.elementAt(0);
+    //NeuronLayer *d = v4.elementAt(0);
+    //NeuronLayer *e = v5.elementAt(0)->elementAt(0);
+    //int x = v1.size() + v2.size() + v3.size() + v4.size() + v5.size();
     v1.removeAllElements();
     v2.removeAllElements();
     v3.removeAllElements();

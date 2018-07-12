@@ -433,22 +433,22 @@ void KMeansCluster::KmeansClustering(std::vector<ClusterPoint> &points, vector<f
     int nbPoints = points.size();
 
     // did at least one point move from one cluster to another ?
-    bool bSomethingChanged = true;
+    //bool bSomethingChanged = true;
 
     // the kmeans loop
     //while(bSomethingChanged){
-        bSomethingChanged = false;
+        //bSomethingChanged = false;
 
         //classify the points into clusters
-        for (register int i=0; i<nbPoints; i++){
+        for (int i=0; i<nbPoints; i++){
             // compute the distance to each clusters
-            for (register int j=0;j<nbClusters;j++){
+            for (int j=0;j<nbClusters;j++){
                 distances[j] = Distance(points[i].point, means[j]);
             }
 
             // find the closest cluster
             if (points[i].cluster != FindSmallest(distances)){
-                bSomethingChanged = true;
+                //bSomethingChanged = true;
                 points[i].cluster = FindSmallest(distances);
             }
         }
@@ -524,7 +524,7 @@ void KMeansCluster::Mean(std::vector<ClusterPoint> &points, vector<fvec> &means,
     }
 
     // sum the points
-    for (register int i = 0; (u32)i<points.size(); i++){
+    for (int i = 0; (u32)i<points.size(); i++){
         means[points[i].cluster] += points[i].point;
         nbPointInCluster[points[i].cluster] += 1;
     }

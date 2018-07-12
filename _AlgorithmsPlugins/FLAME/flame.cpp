@@ -379,7 +379,7 @@ void Flame_LocalApproximation( Flame *self, int steps, float epsilon) {
         float **fuzzyships2 = (float**)calloc( n, sizeof(float*) );
         char *obtypes = self->obtypes;
         char even = 0;
-        double dev;
+        double dev = 0;
 
         k = 0;
         for(i=0; i<n; i++){
@@ -508,7 +508,6 @@ void Flame_MakeClusters( Flame *self, float thd ) {
                         for(j=0; j<C; j++){
                                 if( fuzzyships[id][j] > thd || ( j == C-1 && imax <0 ) ){
                                         imax = j;
-                                        clust = self->clusters + j;
                                         IntArray_Push( self->clusters + j, id );
                                 }
                         }

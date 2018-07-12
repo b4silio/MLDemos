@@ -233,8 +233,8 @@ bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trai
                 testLabels.push_back(newLabels[i]);
             }
         }
-        trainCnt = trainSamples.size();
-        testCnt = testSamples.size();
+        //trainCnt = trainSamples.size();
+        //testCnt = testSamples.size();
     }
     else
     {

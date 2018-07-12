@@ -191,7 +191,7 @@ void PSO::init()
 		}
 		break;
 	case 2:
-		flagInit = loadFirstGuessSolutionFromFile(dim,m_filenameInit,initMatrix);
+        /*flagInit = */loadFirstGuessSolutionFromFile(dim,m_filenameInit,initMatrix);
 		for(int i=0;i<swarmCount;i++)
 		{
 			for(int j=0;j<dim;j++)

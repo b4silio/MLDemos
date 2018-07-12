@@ -184,7 +184,7 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
             FOR(j, svmCount)
             {
                 // we generate a random alpha
-                if(j<svmCount-1) sumAlpha += (learners[i][1+(dim+1)*j] = drand48()*2.f - 1.f);
+                if((int)j<svmCount-1) sumAlpha += (learners[i][1+(dim+1)*j] = drand48()*2.f - 1.f);
                 else learners[i][1+(dim+1)*j] = -sumAlpha; // we ensure that the sum of all alphas is zero
                 // and the coordinates of the SV
                 FOR(d, dim)
@@ -212,7 +212,7 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
             case 0:// stumps
             {
                 int index = learner[0];
-                val = index < dim ? sample[index] : 0;
+                val = index < (int)dim ? sample[index] : 0;
             }
                 break;
             case 1:// random projection
@@ -299,7 +299,7 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
         FOR(j, learnerCount)
         {
             int index = learners[j][0];
-            float val = index < dim ? sample[index] : 0;
+            float val = index < (int)dim ? sample[index] : 0;
             res[j] = val;
         }
     }
@@ -434,7 +434,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     }
 
     // we need to regenerate the learners
-    if(currentLearnerType != weakType || learners.size() != learnerCount) InitLearners(xMin, xMax);
+    if(currentLearnerType != weakType || (int)learners.size() != learnerCount) InitLearners(xMin, xMax);
 
     Mat trainSamples(sampleCnt, learnerCount, CV_32FC1);
     Mat trainLabels(sampleCnt, 1, CV_32FC1);
@@ -471,7 +471,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
         float score = Test(samples[i]);
         if(score > maxScore) maxScore = score;
         if(score < minScore) minScore = score;
-        qDebug() << "score" << i << score;
+        //qDebug() << "score" << i << score;
     }
     if(minScore != maxScore)
     {
@@ -530,7 +530,7 @@ float ClassifierBoost::Test( const fvec &sample ) const
     return Test(sample, 0);
 }
 
-float ClassifierBoost::Test( const fvec &sample, fvec *responses) const
+float ClassifierBoost::Test( const fvec &sample, fvec */*responses*/) const
 {
     if(!model) return 0;
     if(!learners.size()) return 0;
@@ -541,20 +541,10 @@ float ClassifierBoost::Test( const fvec &sample, fvec *responses) const
     FOR(d, learnerCount)  input.at<float>(d) = testSample[d];
 
     Mat res;//(1,features.size(),CV_32FC1);
-    float result = model->predict(input, res, StatModel::RAW_OUTPUT);
-    return (result-0.5)*3;
-    //res.at<float>(0);
-    //y = res.at<float>(0);
-    //float y = model->predict(x, NULL, weakResponses, CV_WHOLE_SEQ);
-    /*
-    if(responses != NULL)
-    {
-        (*responses).resize(predictorsLength);
-        FOR(i, predictorsLength) (*responses)[i] = cvGet1D(weakResponses, i).val[0];
-    }
-    double score = cvSum(weakResponses).val[0] * scoreMultiplier;
-    return score;
-    */
+
+    float result = model->predict(input, res, Boost::PREDICT_SUM);
+    return result * scoreMultiplier;
+    //return result / (float)weakCount * 3;
 }
 
 void ClassifierBoost::SetParams( u32 weakCount, int weakType, int boostType, int svmCount)

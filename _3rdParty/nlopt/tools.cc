@@ -175,7 +175,7 @@ void TBox::split(RTBox B1, RTBox B2) {
 
   B1.lb=lb; B1.ub=ub;
   B2.lb=lb; B2.ub=ub;
-  w=LongestSide(&i);
+  //w=LongestSide(&i);
   ns=TList.size();
   switch (ns) {
   case 0: case 1:

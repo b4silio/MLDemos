@@ -769,15 +769,13 @@ double SEDS::Compute_J(Vector pp, Vector& dJ) //compute the objective function a
         tmp_A(i,i) = 1;
 
     double det_term;
-    double term,sum;
+    double sum;
     Vector dJ_dMu_k(d);
-    int ind_start,ind_max_col;
+    int ind_max_col;
 
     if (Options.sigma_x_opt){
-        ind_start = 0;
         ind_max_col = 2*d;
     }else{
-        ind_start = d;
         ind_max_col = d;
     }
 
@@ -1111,12 +1109,10 @@ void SEDS::Compute_Constraints(Vector &c, Matrix &dc, bool used_for_penalty){
     c.Zero();
     dc.Zero();
 
-    int ind_start,ind_max_col;
+    int ind_max_col;
     if (Options.sigma_x_opt){
-        ind_start = 0;
         ind_max_col = 2*d;
     }else{
-        ind_start = d;
         ind_max_col = d;
     }
 
@@ -1406,7 +1402,7 @@ bool SEDS::Parameters_2_GMM_Likelihood(Vector pp){ //this is used to unpack the 
     int counter_sigma = counter_mu + Options.mu_opt*K*d; //the index at which sigma should start
     int counter_C = counter_sigma + K*d*d + Options.sigma_x_opt*K*d*(d+1);
 
-    for (int k=0; k<K; k=k++){
+    for (int k=0; k<K; k++){
         //constructing Priors
         if (Options.perior_opt){
             Priors[k] = 1.0/(1.0+exp(-pp[k])); //extract the Priors from correspondng position in optimization vector
@@ -1522,7 +1518,7 @@ bool SEDS::Parameters_2_GMM_MSE(Vector pp){ //this is used to unpack the paramet
     int counter_A = counter_sigma + Options.sigma_x_opt*K*d*(d+1)/2; //the index at which A should start
     int counter_C = counter_A + K*d*d;
 
-    for (int k=0; k<K; k=k++){
+    for (int k=0; k<K; k++){
         //constructing Priors
         if (Options.perior_opt)
             Priors[k] = 1.0/(1.0+exp(-pp[k]));

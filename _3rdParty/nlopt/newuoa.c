@@ -112,7 +112,7 @@ static nlopt_result trsapp_(int *n, int *npt, double *xopt,
     int ih;
     double ds, sg;
     int iu;
-    double ss, dhd, dhs, cth, sgk, shs, sth, qadd, half, qbeg, qred, qmin,
+    double ss, dhd, dhs, cth, sgk, shs=0, sth, qadd, half, qbeg, qred, qmin,
 	     temp, qsav, qnew, zero, ggbeg, alpha, angle, reduc;
     int iterc;
     double ggsav, delsq, tempa, tempb;
@@ -1579,7 +1579,7 @@ static nlopt_result newuob_(int *n, int *npt, double *x,
     double d__1, d__2, d__3;
 
     /* Local variables */
-    double f;
+    double f=0;
     int i__, j, k, ih, nf, nh, ip, jp;
     double dx;
     int np, nfm;
@@ -1590,7 +1590,7 @@ static nlopt_result newuob_(int *n, int *npt, double *x,
     double sum, fbeg, diff, half, beta;
     int nfmm;
     double gisq;
-    int knew;
+    int knew=0;
     double temp, suma, sumb, fopt = HUGE_VAL, bsum, gqsq;
     int kopt, nptm;
     double zero, xipt, xjpt, sumz, diffa, diffb, diffc, hdiag, alpha, 

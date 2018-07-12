@@ -143,7 +143,7 @@ void ClassRSVM::SetParams(Classifier *classifier)
 fvec ClassRSVM::GetParams()
 {
     fvec par(4);
-    int nRandomType = params->randomTypeCombo->currentIndex();
+    //int nRandomType = params->randomTypeCombo->currentIndex();
     int nKernelType = params->kernelTypeCombo->currentIndex();
     float fSvmC = params->svmCSpin->value();
     float kernelGamma = params->kernelWidthSpin->value();

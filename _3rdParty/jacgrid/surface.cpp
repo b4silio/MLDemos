@@ -643,7 +643,7 @@ static inline int apply_gmask(gridT &grid, int owner,
             for (x = 0, i1 = i; x<dim[0]; x++, i1++, px += gu0)
             {
                 thisaddr = addry+i1;
-                if (*maskptr==0.0)
+                if (maskptr && *maskptr==0.0)
                 {
                     if ((i1>=0) && (i1<DIVISIONS)
                         && (j1>=0) && (j1<DIVISIONS)

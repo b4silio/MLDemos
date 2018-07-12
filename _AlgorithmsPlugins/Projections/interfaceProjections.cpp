@@ -226,7 +226,6 @@ void ClassProjections::ShowProjection()
         FOR(i, samples.size())
         {
             fvec sample = samples[i];
-            int label = labels[i];
             fvec newSample = ((ClassifierLinear *)classifier)->Project(sample);
 
             QPointF point = canvas->toCanvasCoords(newSample)/canvas->width()*w;
@@ -336,7 +335,6 @@ void ClassProjections::ShowProjection()
         FOR(i, samples.size())
         {
             fvec sample = samples[i];
-            int label = labels[i];
             fvec newSample = results[i];
 
             QPointF point = canvas->toCanvasCoords(newSample)/canvas->width()*w*0.5 + QPointF(w/4, -h*0.5);
@@ -348,7 +346,6 @@ void ClassProjections::ShowProjection()
         // draw samples
         FOR(i, samples.size())
         {
-            fvec sample = samples[i];
             int label = labels[i];
             fvec newSample = results[i];
 

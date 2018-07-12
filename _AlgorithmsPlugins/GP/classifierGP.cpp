@@ -117,14 +117,11 @@ void ClassifierGP::Train(std::vector< fvec > samples, ivec labels)
     // we don't want to train anything if we don't have data
     if(!samples.size()) return;
 
-    int mylabels[MAX_N_TRAIN];
+    int* mylabels = new int [labels.size()];
     FOR(i,labels.size()){
-        if(labels[i]>0)
-            mylabels[i] = 1;
-        else
-            mylabels[i] = -1;
+        mylabels[i] = labels[i]>0 ? 1 : -1;
     }
-    //Compute Covaraince K
+    //Compute Covariance K
     training_data = samples;
     Ntrain = (int)training_data.size();
     dim = (int)training_data[0].size();
@@ -160,7 +157,7 @@ void ClassifierGP::Train(std::vector< fvec > samples, ivec labels)
         for(int i=0;i<Ntrain;i++){
             c_pi = LogisticResponseFunction(f_mode.element(i));
     
-            c_t = (float)(mylabels[i]+1)/2;
+            c_t = (float)(i>=0 && i < labels.size() ? mylabels[i]+1 : 0)/2;
             g_logprob_yf.element(i) = c_t - c_pi;
     
             gg_logprob_yf.element(i) = c_pi*(c_pi-1);
@@ -201,6 +198,7 @@ void ClassifierGP::Train(std::vector< fvec > samples, ivec labels)
         ConvergenceObjective = new_ConvObj;
 
     }
+    delete [] mylabels;
 
     qDebug() <<"GPC finished training in "<<Niter<<" iterations.";
 

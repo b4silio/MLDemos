@@ -140,9 +140,9 @@ void MLDemos::CanvasTypeChanged()
     case 2: // Visualizations
         break;
     }
-    if ((!glw || !glw->isVisible()) && (!vis || !vis->isVisible()) && canvas->canvasType == type) return;
+    if ((!glw || !glw->isVisible()) || ((!vis || !vis->isVisible()) && canvas->canvasType == type)) return;
     if (type == 1) { // 3D viewport
-        vis->hide();
+        if(vis) vis->hide();
         displayOptions->tabWidget->setCurrentIndex(1);
         canvas->Clear();
         canvas->repaint();
@@ -190,22 +190,25 @@ void MLDemos::CanvasTypeChanged()
             ui.canvasArea->layout()->addWidget(glw);
             ui.canvasArea->layout()->addWidget(vis);
         }
-        QSizePolicy policy = vis->sizePolicy();
+        QSizePolicy policy;
+        if(vis) policy = vis->sizePolicy();
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
         policy.setVerticalPolicy(QSizePolicy::Preferred);
         canvas->SetCanvasType(type);
-        vis->setSizePolicy(policy);
-        vis->setMinimumSize(ui.canvasArea->size());
-        vis->resize(ui.canvasArea->size());
-        vis->show();
-        vis->Update();
+        if(vis) {
+            vis->setSizePolicy(policy);
+            vis->setMinimumSize(ui.canvasArea->size());
+            vis->resize(ui.canvasArea->size());
+            vis->show();
+            vis->Update();
+        }
     } else {
         displayOptions->tabWidget->setCurrentIndex(0);
         canvas->SetCanvasType(type);
         CanvasOptionsChanged();
         canvas->ResetSamples();
         glw->hide();
-        vis->hide();
+        if(vis) vis->hide();
         ui.canvasWidget->show();
         ui.canvasWidget->repaint();
     }
@@ -387,6 +390,7 @@ void MLDemos::BenchmarkButton()
         maxSpace = 2.f;
         minVal = 0;
         maxVal = 2.3504;
+        break;
     case 4: // michalewicz
         minSpace = -2;
         maxSpace = 2;
@@ -394,6 +398,7 @@ void MLDemos::BenchmarkButton()
         maxVal = 5.74;
         //		minVal = -1.03159;
         //		maxVal = 55.74;
+        break;
     }
 
     bool bSetValues = minVal == FLT_MAX;

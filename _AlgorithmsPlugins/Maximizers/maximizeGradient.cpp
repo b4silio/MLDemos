@@ -122,9 +122,6 @@ fvec MaximizeGradient::Test( const fvec &sample)
 	newSample = sample;
 	if(!sample.size()) newSample = maximum;
 
-	int xIndex = newSample[0]*w;
-	int yIndex = newSample[1]*h;
-
 	float delta = 0.003;
 	float value = GetValue(newSample);
 	evaluations++;

@@ -90,14 +90,12 @@ void Canvas::mouseReleaseEvent( QMouseEvent *event )
     int x = event->x();
     int y = event->y();
 
-    fvec sample = toSampleCoords(x,y);
+    //fvec sample = toSampleCoords(x,y);
+    //int label = 0;
+    //if(event->button()==Qt::LeftButton) label = 1;
+    //if(event->button()==Qt::RightButton) label = 0;
 
-    int label = 0;
-    if(event->button()==Qt::LeftButton) label = 1;
-    if(event->button()==Qt::RightButton) label = 0;
-
-    if(canvasType == 0)
-    {
+    if(canvasType == 0) {
         mouseAnchor = QPoint(-1,-1);
         if(x > 0 && x < width() && y>0 && y<height()) bShowCrosshair = true;
         //emit Drawing(sample, label);
@@ -270,7 +268,6 @@ bool Canvas::DeleteData( QPointF center, float radius )
             targets.erase(targets.begin() + i);
             targetAge.erase(targetAge.begin() + i);
             i--;
-            anythingDeleted = true;
         }
     }
     return anythingDeleted;

@@ -568,7 +568,7 @@ void MLDemos::SaveParams( QString filename )
     if(algo->maximizer)
     {
         int tab = algo->optionsMaximize->algoList->currentIndex();
-        double variance = algo->optionsMaximize->varianceSpin->value();
+        //double variance = algo->optionsMaximize->varianceSpin->value();
         sprintf(groupName,"maximizationOptions");
         out << groupName << ":" << "tab" << " " << algo->optionsMaximize->algoList->currentIndex() << "\n";
         out << groupName << ":" << "gaussVarianceSpin" << " " << algo->optionsMaximize->varianceSpin->value() << "\n";
@@ -583,7 +583,7 @@ void MLDemos::SaveParams( QString filename )
     if(algo->reinforcement)
     {
         int tab = algo->optionsReinforcement->algoList->currentIndex();
-        double variance = algo->optionsReinforcement->varianceSpin->value();
+        //double variance = algo->optionsReinforcement->varianceSpin->value();
         sprintf(groupName,"reinforcementOptions");
         out << groupName << ":" << "tab" << " " << algo->optionsReinforcement->algoList->currentIndex() << "\n";
         out << groupName << ":" << "gaussVarianceSpin" << " " << algo->optionsReinforcement->varianceSpin->value() << "\n";
@@ -754,7 +754,7 @@ void MLDemos::LoadParams( QString filename )
         }
         if(line.startsWith(maximGroup))
         {
-            bMaxim = true;
+            //bMaxim = true;
             algo->options->tabWidget->setCurrentWidget(algo->options->tabMax);
             if(line.endsWith("tab")) algo->optionsMaximize->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("gaussVarianceSpin")) algo->optionsMaximize->varianceSpin->setValue((double)value);
@@ -765,7 +765,7 @@ void MLDemos::LoadParams( QString filename )
         }
         if(line.startsWith(reinfGroup))
         {
-            bReinf = true;
+            //bReinf = true;
             algo->options->tabWidget->setCurrentWidget(algo->options->tabReinf);
             if(line.endsWith("tab")) algo->optionsReinforcement->algoList->setCurrentIndex(tab = (int)value);
             if(line.endsWith("gaussVarianceSpin")) algo->optionsReinforcement->varianceSpin->setValue((double)value);
@@ -797,6 +797,8 @@ void MLDemos::LoadParams( QString filename )
     if(bDyn) algo->Dynamize();
     if(bClust) algo->Cluster();
     if(bProj) algo->Project();
+    //if(bMaxim) algo->Maximize();
+    //if(bReinf) algo->Reinforce();
     actionAlgorithms->setChecked(algo->algorithmWidget->isVisible());
 }
 

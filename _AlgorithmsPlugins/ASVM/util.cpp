@@ -69,7 +69,7 @@ double getkernel(double *x1, double *x2, double lambda, const char* type, int n)
 	}
 	else
 		cout<<"\nInvalid kernel type specified in getkernel function!";
-	delete diff;
+    delete [] diff;
 	return ker_val;
 }
 
@@ -111,7 +111,7 @@ bool getfirstkernelderivative(double *x1, double *x2, double lambda, const char*
 
 		for(int i =0; i<n; i++)
 			der_val[i] = temp*diff[i];
-		delete diff;
+        delete [] diff;
 		return true;
 	}
 	else
@@ -148,7 +148,7 @@ bool getsecondkernelderivative(double *x1, double *x2, int n, double lambda, con
 					hesval[i][j] = 2*lambda*exp(-lambda*norm2(tmp1,n)) * ( 1 - 2*lambda*(tmp1[i]*tmp1[j]));
 				else
 					hesval[i][j] = 2*lambda*exp(-lambda*norm2(tmp1, n)) * (- 2*lambda*(tmp1[i]*tmp1[j]));
-		delete tmp1;
+        delete [] tmp1;
 		return true;
 	}
 	else

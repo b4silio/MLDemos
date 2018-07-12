@@ -133,6 +133,7 @@ void AlgorithmManager::UpdateLearnedModel()
 
 void AlgorithmManager::UpdateClassifier()
 {
+    if(!glw) return;
     QMutexLocker lock(mutex);
     if(glw->isVisible()) {
         glw->clearLists();
@@ -152,6 +153,7 @@ void AlgorithmManager::UpdateClassifier()
 
 void AlgorithmManager::UpdateClusterer()
 {
+    if(!glw) return;
     QMutexLocker lock(mutex);
     if(glw->isVisible())
     {
@@ -167,6 +169,7 @@ void AlgorithmManager::UpdateClusterer()
 
 void AlgorithmManager::UpdateDynamical()
 {
+    if(!glw) return;
     QMutexLocker lock(mutex);
     if(glw->isVisible()) {
         glw->clearLists();
@@ -198,6 +201,7 @@ void AlgorithmManager::UpdateDynamical()
 
 void AlgorithmManager::UpdateRegressor()
 {
+    if(!glw) return;
     QMutexLocker lock(mutex);
     glw->clearLists();
     if(canvas->canvasType == 1)
@@ -267,7 +271,7 @@ void AlgorithmManager::UpdateRegressor()
 
 void AlgorithmManager::UpdateProjector()
 {
-    if(canvas->canvasType != 0) return;
+    if(!glw || canvas->canvasType != 0) return;
     if(glw->isVisible())
     {
         glw->clearLists();

@@ -54,7 +54,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 	cvLine( img, cvPoint( center.x, center.y - d ),			\
 		cvPoint( center.x, center.y + d ), color, 1, 0 )
 
-void cvDrawRect(IplImage *img, CvRect rect, CvScalar color=CV_RGB(0,0,255), int thickness=1, int line_type=8, int shift=0);
+void cvDrawRect(IplImage *img, CvRect rect, CvScalar color=CvScalar(0,0,255), int thickness=1, int line_type=8, int shift=0);
 void cvDrawGradient(IplImage *image, CvRect rect, CvScalar color1, CvScalar color2, bool vertical=true);
 
 class BasicOpenCV

@@ -362,7 +362,7 @@ nlopt_result mlsl_minimize(int n, nlopt_func f, void *f_data,
 	       if (nlopt_stop_forced(stop)) ret = NLOPT_FORCED_STOP;
 	       else if (nlopt_stop_evals(stop)) ret = NLOPT_MAXEVAL_REACHED;
 	       else if (nlopt_stop_time(stop)) ret = NLOPT_MAXTIME_REACHED;
-	       else if (p->f < stop->minf_max) ret = NLOPT_MINF_MAX_REACHED;
+           else if (p && p->f < stop->minf_max) ret = NLOPT_MINF_MAX_REACHED;
 	       else {
 		    find_closest_pt(n, &d.pts, p);
 		    find_closest_lm(n, &d.lms, p);

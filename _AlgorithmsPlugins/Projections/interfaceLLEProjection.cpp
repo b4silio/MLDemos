@@ -366,8 +366,6 @@ void LLEProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
             points[i] = make_pair(projector->projected[i][0], i);
         }
         sort(points.begin(), points.end());
-        float minVal = points.front().first;
-        float maxVal = points.back().first;
 
         // now we go through the points and compute the back projection
         int steps = min((int)points.size(), 64);
@@ -375,7 +373,6 @@ void LLEProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
         vector<QPointF> pointList;
         FOR(i, steps)
         {
-            float val = (i+1)/(float)steps*(maxVal-minVal) + minVal;
             int nextIndex = (i+1)/(float)steps*points.size();
             fvec mean(canvas->data->GetDimCount());
             float meanVal = 0;
@@ -391,7 +388,6 @@ void LLEProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
             mean /= count;
             meanVal /= count;
             // we look for the closest point to the value in projected space
-            int closest = 0;
             float closestDist = FLT_MAX;
             FOR(p, points.size())
             {
@@ -399,7 +395,6 @@ void LLEProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
                 if(dist < closestDist)
                 {
                     closestDist = dist;
-                    closest = p;
                 }
             }
             QPointF point = canvas->toCanvasCoords(mean);
@@ -633,7 +628,7 @@ void DrawLLEEigenvals(QPainter &painter, fvec eigs)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    int rectW = (w-2*pad) / dim - 2;
+    int rectW = dim ? (w-2*pad) / dim - 2 : w-2*pad;
     FOR(i, dim)
     {
         float eigval = eigs[i];

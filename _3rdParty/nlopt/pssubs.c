@@ -96,7 +96,7 @@ void luksan_pnint1__(double *rl, double *ru, double *fl,
     double d__1, d__2;
 
     /* Local variables */
-    double a, b, c__, d__, den, dis;
+    double a, b, c__, d__, den=0, dis;
     int ntyp;
 
     *merr = 0;
@@ -394,8 +394,8 @@ L3:
 	l3 = *f - *fo <= *tols * *r__ * *po;
 	l5 = *p >= *tolp * *po || (mes2 == 2 && mode == 2);
 	l7 = mes2 <= 2 || mode != 0;
-	m1 = FALSE_;
-	m2 = FALSE_;
+    //m1 = FALSE_;
+    //m2 = FALSE_;
 	m3 = l3;
 	if (mes3 >= 1) {
 	    m1 = fabs(*p) <= fabs(*po) * .01 && *fo - *f >= fabs(*fo) * 
@@ -524,7 +524,7 @@ void luksan_pulsp3__(int *n, int *m, int *mf,
     /* Builtin functions */
 
     /* Local variables */
-    double a, b, c__, aa, bb, ah, den, par, pom;
+    double a, b, /*c__,*/ aa, bb, ah, den, par, pom;
 
     /* Parameter adjustments */
     --go;
@@ -545,7 +545,7 @@ void luksan_pulsp3__(int *n, int *m, int *mf,
     ah = luksan_mxvdot__(n, &go[1], &go[1]);
     aa = luksan_mxvdot__(m, &gr[1], &gr[1]);
     a = aa + ah * *sig;
-    c__ = -(*r__) * *po;
+    //c__ = -(*r__) * *po;
 
 /*     DETERMINATION OF THE PARAMETER SIG (SHIFT) */
 
@@ -586,7 +586,7 @@ void luksan_pulsp3__(int *n, int *m, int *mf,
 
 /*     BFGS-BASED SHIFTED BFGS UPDATE */
 
-    pom = 1.;
+    //pom = 1.;
     d__1 = -1. / bb;
     luksan_mxdcmu__(n, m, &xm[1], &d__1, &xo[1], &gr[1]);
     d__1 = sqrt(par / bb);
@@ -653,7 +653,7 @@ void luksan_pulvp3__(int *n, int *m, double *xm,
     /* Builtin functions */
 
     /* Local variables */
-    double a, b, c__, aa, bb, cc, ah, den, par, pom, zet;
+    double a, b, /*c__,*/ aa, bb, cc, ah, den, par, pom, zet;
 
     /* Parameter adjustments */
     --go;
@@ -689,7 +689,7 @@ void luksan_pulvp3__(int *n, int *m, double *xm,
     bb = luksan_mxvdot__(m, &gr[1], &xr[1]);
     cc = luksan_mxvdot__(m, &xr[1], &xr[1]);
     a = aa + ah * *sig;
-    c__ = -(*r__) * *po;
+    //c__ = -(*r__) * *po;
 
 /*     DETERMINATION OF THE PARAMETER SIG (SHIFT) */
 

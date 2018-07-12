@@ -110,8 +110,8 @@ bool jacMakeSurface(surfaceT &surf, unsigned int itype,
     last_slice = (unsigned int*)malloc(13*sizeof(unsigned int)*grid->npts[1]*grid->npts[0]);
     if (!this_slice || !last_slice)
     {
-        free(this_slice);
-        free(last_slice);
+        if(this_slice) free(this_slice);
+        if(last_slice) free(last_slice);
         surface->Resize(0, 0);
         return 0;
     }

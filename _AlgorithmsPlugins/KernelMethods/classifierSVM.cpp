@@ -348,23 +348,17 @@ void ClassifierSVM::OptimizeGradient(svm_problem *problem)
     int restarts = 0;
     FOR(it, iterations)
     {
-        //QString s1, s2;
-        double norm=0;
         FOR(d, dim)
         {
             double delta = kernelFunction(svm, d);
             deltas[d] = delta;
-            //s1 += QString("%1 ").arg(delta);
-            norm += deltas[d]*deltas[d];
         }
-        norm = sqrt(norm);
+
         // find the step size
-        //gammaStep = 2;
         double obj;
 
         // armijo's rule
         double beta = 0.5; // the decay factor for the step
-        double scale = 0.5; // the scaling for the acceptance of a step
         int gammaIter = 10;
         FOR(i, gammaIter)
         {

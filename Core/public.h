@@ -70,4 +70,8 @@ static const QColor SampleColor [22]= {
 };
 static const int SampleColorCnt = 22;
 
+#ifndef CV_RGB
+#define CV_RGB CvScalar
+#endif
+
 #endif //_PUBLIC_H_

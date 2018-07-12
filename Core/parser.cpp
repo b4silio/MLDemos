@@ -462,7 +462,7 @@ pair<vector<fvec>,ivec> CSVParser::getData(ivec excludeIndex, int maxSamples)
         {
             if(!i && bFirstRowAsHeader) continue;
             bool ok;
-            float val = QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
+            QString(data[i][outputLabelColumn].c_str()).toFloat(&ok);
             if(!ok)
             {
                 numerical = false;

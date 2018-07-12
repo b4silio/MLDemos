@@ -133,10 +133,14 @@ ANNpoint annAllocPt(int dim, ANNcoord c)		// allocate 1 point
 ANNpointArray annAllocPts(int n, int dim)		// allocate n pts in dim
 {
 	ANNpointArray pa = new ANNpoint[n];			// allocate points
+    if(n==0 || dim==0) return pa;
 	ANNpoint	  p  = new ANNcoord[n*dim];		// allocate space for coords
+    bool bUsedP = false;
 	for (int i = 0; i < n; i++) {
 		pa[i] = &(p[i*dim]);
+        bUsedP = true;
 	}
+    if(!bUsedP) delete [] p;
 	return pa;
 }
 

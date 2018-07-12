@@ -94,8 +94,6 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
     map.consolidate(); // connect all the lines
     //map.dump();
     int w = valueMap.w, h = valueMap.h;
-    int hmo = h-1;// we take out the last line as it will mess up the computations
-    int wmo = w-1;// we take out the last line as it will mess up the computations
     int W = painter.viewport().width();
     int H = painter.viewport().height();
 

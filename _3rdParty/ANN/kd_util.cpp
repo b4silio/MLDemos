@@ -128,7 +128,7 @@ ANNdist annBoxDistance(			// compute distance from point to box
 	int					dim)			// dimension of space
 {
 	register ANNdist dist = 0.0;		// sum of squared distances
-	register ANNdist t;
+    register ANNdist t=0;
 
 	for (register int d = 0; d < dim; d++) {
 		if (q[d] < lo[d]) {				// q is left of box

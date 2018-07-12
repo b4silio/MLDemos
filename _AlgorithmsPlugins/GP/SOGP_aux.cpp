@@ -48,7 +48,6 @@ double POLKernel::kernel(const ColumnVector &a, const ColumnVector &b){
 }
 //POLY
 double POLYKernel::kernel(const ColumnVector &a, const ColumnVector &b){
-    double d = a.Nrows();
     double resp=1;
     double inner = (a.t()*b).AsScalar() + offset;
     resp = pow(inner, degree);

@@ -73,8 +73,6 @@ void GATrain::NextGen()
 	population = newPop;
 	fitness = newFits;
 
-	double maxFitness = fitness[0];
-
 	meanFitness = 0;
 	u32 cnt = 0;
 	FOR(i, fitness.size())

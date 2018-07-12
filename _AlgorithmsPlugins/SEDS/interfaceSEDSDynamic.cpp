@@ -39,7 +39,7 @@ DynamicSEDS::~DynamicSEDS()
 
 void DynamicSEDS::OptionsChanged()
 {
-	int constraintCriterion = params->sedsConstraintCombo->currentIndex();
+    //int constraintCriterion = params->sedsConstraintCombo->currentIndex();
 	//params->minorIterationCount->setEnabled(constraintCriterion);
 }
 

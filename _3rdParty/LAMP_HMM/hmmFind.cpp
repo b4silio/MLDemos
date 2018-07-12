@@ -262,7 +262,7 @@ int main (int argc, char *argv[])
     stateOutput.close();
     expectedObsOutput.close();
     // Distances to each sequence in obsSeq and total distance are stored in distanceOutput file
-    double normalizedLogProb = learnedHMM->FindViterbiDistance(obsSeq, distanceOutput);
+    //double normalizedLogProb = learnedHMM->FindViterbiDistance(obsSeq, distanceOutput);
     // Store normalizedLogProb in another file for classification 
     distanceOutput.close();
     

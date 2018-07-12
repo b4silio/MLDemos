@@ -337,7 +337,7 @@ void Visualization::GenerateAndrewsPlot()
     }
 
     int pad = 20;
-    int mapW = (ui->scrollArea->width()-12) - pad*2, mapH = (ui->scrollArea->height()-12) - pad*2;
+    int mapH = (ui->scrollArea->height()-12) - pad*2;
 
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -345,8 +345,6 @@ void Visualization::GenerateAndrewsPlot()
     pixmap.fill(Qt::white);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
-    float radius = min(mapW, mapH)/3.f;
-    QPointF center(mapW*0.5f, mapH*0.5f);
     QPointF old;
     painter.setPen(Qt::black);
 
@@ -535,7 +533,6 @@ void Visualization::GenerateScatterPlot(bool bCheckOnly)
     ivec labels = data->GetLabels();
     if(!samples.size()) return;
     int dim = samples[0].size();
-    bool bEvenCount = dim%2 == 1;
     int gridX = dim;
     int gridY = dim;
 
@@ -791,14 +788,13 @@ void Visualization::GenerateIndividualPlot()
     }
 
     int mapW = ui->scrollArea->width()-24;
-    int mapH = ui->scrollArea->height()-12;
 
     // depending on how many classes/dimensions we have, we adjust the grid count
     int gridX, gridY;
     int count, perItemCount;
-    int totalCount = dim*classCount;
     switch(inputType)
     {
+    default:
     case 0: // dimension
         count = dim;
         perItemCount = classCount;
@@ -810,13 +806,12 @@ void Visualization::GenerateIndividualPlot()
     }
     if(flavorType >= 6)
     {
-        totalCount = count;
         perItemCount = 1;
     }
     gridX = max(1,min(count,(mapW/(w*perItemCount+pad*2))));
     gridY = max(1,count/gridX + (count%gridX ? 1 : 0) );
     if(mapW<(w*perItemCount+pad)*gridX) mapW = (w*perItemCount+pad)*gridX;
-    mapH = gridY*h;
+    int mapH = gridY*h;
 
     // and we set the size of the pixmap
     QPixmap pixmap(mapW, mapH);
@@ -977,7 +972,6 @@ void Visualization::GenerateCorrelationPlot()
     painter.setPen(QPen(gridLines, 1));
     painter.setOpacity(0.5f);
 
-    int optimalFontSize = font.pointSize();
     // we look for the longest dimension name
     QRectF r(0,0,w,h);
     QString longestName;
@@ -1003,7 +997,7 @@ void Visualization::GenerateCorrelationPlot()
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    optimalFontSize = font.pointSize();
+    int optimalFontSize = font.pointSize();
     if(flavorType == 2)
     {
         flags = Qt::TextDontClip|Qt::TextWordWrap;
@@ -1648,6 +1642,7 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
     int cCnt;
     switch(inputType)
     {
+    default:
     case 0:
         perItemCount = classCount;
         d = index;
@@ -1795,13 +1790,11 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
         int bottomPoint = h - (boxplot[4]-edge)/delta*res;
 
         float maxDensity = -FLT_MAX;
-        int maxDensityIndex = 0;
         FOR(i, density.size())
         {
             if(maxDensity < density[i])
             {
                 maxDensity = density[i];
-                maxDensityIndex = i;
             }
         }
         QColor color;
@@ -2055,13 +2048,11 @@ QPixmap Visualization::GetGraphPixmap(int type, int inputType, int dim, int clas
             break;
         case 4: // Violin Plots
         {
-            float oldX = 0, oldY = 0, v = 0;
-            int quartile = 0;
-
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setPen(color);
             painter.setBrush(color);
-            oldX = 0; oldY = 0; v = 0; quartile = 0;
+            float oldX = 0, oldY = 0, v = 0;
+            int quartile = 0;
             maxDensity = -FLT_MAX;
             FOR(i, density.size()) if(maxDensity < density[i]) maxDensity = density[i];
             FOR(i, density.size())
@@ -2178,6 +2169,7 @@ QPixmap Visualization::GetStarPixmap(int inputType, int dim, int classCount, int
     int cCnt;
     switch(inputType)
     {
+    default:
     case 0:
         d = index;
         cCnt = 0;
@@ -2267,6 +2259,7 @@ QPixmap Visualization::GetStarPixmap(int inputType, int dim, int classCount, int
         float minv, maxv;
         switch(inputType)
         {
+        default:
         case 0:
             minv = (dMins[d]-minminv)/(maxmaxv-minminv);
             maxv = (dMaxes[d]-minminv)/(maxmaxv-minminv);
@@ -2309,6 +2302,7 @@ QPixmap Visualization::GetRadialPixmap(std::map<int,std::vector< std::pair<fvec,
     int cCnt;
     switch(inputType)
     {
+    default:
     case 0:
         d = index;
         cCnt = 0;

@@ -161,8 +161,6 @@ Regressor *RegrRVM::GetRegressor()
 void RegrRVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
     painter.setRenderHint(QPainter::Antialiasing);
-    int xIndex = canvas->xIndex;
-    int yIndex = canvas->yIndex;
 
     vector<fvec> sv = ((RegressorRVM*)regressor)->GetSVs();
     int radius = 9;
@@ -242,7 +240,6 @@ void RegrRVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
     painter.setRenderHint(QPainter::Antialiasing, true);
     int w = canvas->width();
-    int h = canvas->height();
     int xIndex = canvas->xIndex;
     fvec sample = canvas->toSampleCoords(0,0);
     int dim = sample.size();

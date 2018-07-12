@@ -78,7 +78,6 @@ void ClassifierKPCA::Train(std::vector< fvec > samples, ivec labels)
 	this->samples = samples;
 	int count = samples.size();
 	int dim = samples[0].size();
-	int dimSpace = dim;
 
 	// we center the data
 	mean = samples[0];

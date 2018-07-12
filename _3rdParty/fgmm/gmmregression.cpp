@@ -317,29 +317,30 @@ void fgmm_regression_sampling(struct fgmm_reg * regression,
 	//float tmp[regression->output_len];
 	//float likelihood = 0;
 	_fgmm_real acc=0;
-	int state = 0;
 	struct gaussian * loc_model;
 	//  int i=0;
+    int nstates = regression->model->nstates;
 
 	_fgmm_real picker = ((_fgmm_real) rand())/RAND_MAX;
 
-	weights = (_fgmm_real *) malloc(sizeof(_fgmm_real) * regression->model->nstates);
+    weights = (_fgmm_real *) malloc(sizeof(_fgmm_real) * nstates);
 
-	for(;state<regression->model->nstates;state++)
+    for(int state=0;state<nstates;state++)
     {
 		weights[state] = gaussian_pdf(regression->subgauss[state].subgauss,inputs);
 		nf += weights[state];
     }
 
-	state = 0;
 	printf("%f %f \n",picker,acc);
-	while(picker > acc)
+    int state = 0;
+    while(picker > acc && state < nstates)
     {
-		acc += weights[state]/nf;
-		state++;
+        acc += weights[state]/nf;
+        state++;
     }
-	state--;
-	printf("rand state %d\n",state);
+    state--;
+
+    printf("rand state %d\n",state);
 	loc_model = (struct gaussian *) malloc(sizeof(struct gaussian));
 	gaussian_init(loc_model,regression->output_len);
 

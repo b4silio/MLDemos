@@ -575,7 +575,8 @@ void InitGaussianRows(double **m, int maxRow, int maxCol)
     }
   }
   for(i=1;i<=maxRow;i++){
-    diag = 1 + ((i-1)*(maxCol-1))/(maxRow-1);// index of most diagonal term; int division
+    if(maxRow-1 == 0) diag = 1;
+    else diag = 1 + ((i-1)*(maxCol-1))/(maxRow-1);// index of most diagonal term; int division
     mean = double(diag);// get a gaussian centered on diagonal
     for(k=1;k<=maxCol;k++){
       m[i][k] = 0.001 + 0.999 * GetGauss(k, mean, std);

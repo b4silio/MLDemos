@@ -186,7 +186,6 @@ VectorXd PCA::project(VectorXd &point)
 
 MatrixXd PCA::project(MatrixXd &dataPoints, unsigned int dimSpace)
 {
-    int m = dataPoints.rows();
     int n = dataPoints.cols();
 
     if(k)

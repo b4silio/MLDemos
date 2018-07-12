@@ -525,7 +525,7 @@ static nlopt_result cobylb(int *n, int *m, int *mpp,
       "cobyla: the initial value of RHO is %12.6E and PARMU is set to zero.\n",
       rho);
   }
-  temp = 1. / rho;
+  //temp = 1. / rho;
   i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
     double rhocur;
@@ -1472,7 +1472,7 @@ L130:
       tempa = vmultc[k] / temp;
       if (ratio < 0. || tempa < ratio) {
         ratio = tempa;
-        iout = k;
+        //iout = k;
       }
     }
     if (k >= 2) {

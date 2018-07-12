@@ -124,6 +124,7 @@ public:
         return m11;
       }      
     }
+    return m00;
   }
   
   inline Matrix3& GetSubMatrix3(unsigned int blockRow, unsigned int blockCol, Matrix3 &result) const

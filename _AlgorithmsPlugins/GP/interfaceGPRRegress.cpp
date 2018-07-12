@@ -93,7 +93,7 @@ fvec RegrGPR::GetParams()
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
     int capacity = params->capacitySpin->value();
-    bool bSparse = params->sparseCheck->isChecked();
+    //bool bSparse = params->sparseCheck->isChecked();
     double kernelNoise = params->noiseSpin->value();
     bool bOptimize = params->optimizeCheck->isChecked();
     bool bUseLikelihood = params->optimizeCombo->currentIndex() == 0;
@@ -236,7 +236,6 @@ void RegrGPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     if(!gpr) return;
     painter.setRenderHint(QPainter::Antialiasing);
     int xIndex = canvas->xIndex;
-    int yIndex = canvas->yIndex;
     int radius = 8;
     int dim = canvas->data->GetDimCount()-1;
     int outputDim = regressor->outputDim;
@@ -244,8 +243,6 @@ void RegrGPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     {
         if(xIndex == dim-1) xIndex = outputDim;
         else if (xIndex == outputDim) xIndex = dim-1;
-        if(yIndex == dim-1) yIndex = outputDim;
-        else if(yIndex == outputDim) yIndex = dim-1;
     }
     painter.setBrush(Qt::NoBrush);
     painter.setPen(QPen(Qt::red,3));
@@ -281,7 +278,6 @@ void RegrGPR::DrawConfidence(Canvas *canvas, Regressor *regressor)
             return;
         }
         int outputDim = regressor->outputDim;
-        int xIndex = canvas->xIndex;
         int yIndex = canvas->yIndex;
         Matrix _testout;
         ColumnVector _testin(dim);
@@ -314,7 +310,6 @@ void RegrGPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
     painter.setRenderHint(QPainter::Antialiasing, true);
     int w = canvas->width();
-    int h = canvas->height();
     int xIndex = canvas->xIndex;
     fvec sample = canvas->toSampleCoords(0,0);
     int dim = sample.size();

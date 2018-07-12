@@ -141,7 +141,6 @@ int ASVM_SMO_Solver::learn(asvmdata& input1, unsigned int tclass, asvm* svmobj)
 	x_smo = new double[M+P+N];
 	init_warm_start(copy_data);
 
-
 	dlabels = new int[M];
 	for(i=0;i<M;i++)
 
@@ -768,7 +767,8 @@ void ASVM_SMO_Solver::init_warm_start(asvmdata* copy_data)
 	prob.l = M;
 	prob.y = new double[M];
 	prob.x = new svm_node*[M];
-	svm_node* x_space = new svm_node[(N+1)*M];
+    svm_node* x_space=0;
+    if(copy_data->tar.size()) x_space = new svm_node[(N+1)*M];
 
 	unsigned int ind=0;
 	for( i=0; i<copy_data->tar.size(); i++)
@@ -809,6 +809,5 @@ void ASVM_SMO_Solver::init_warm_start(asvmdata* copy_data)
 	Bparam = model->rho[0];
 
 	cout<<"Done."<<endl;
-
 }
 

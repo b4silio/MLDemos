@@ -11,14 +11,14 @@ using namespace clustering;
 
 void Test()
 {
-    int kernel_type; // 0: Epanechnikov, 1: truncated multivariate normal
-    double kernel_bandwidth;
-    int dim;
-    double mode_tolerance;
+    int kernel_type=0; // 0: Epanechnikov, 1: truncated multivariate normal
+    double kernel_bandwidth=0;
+    int dim=0;
+    double mode_tolerance=0;
     Meanshift ms(kernel_type, kernel_bandwidth, dim, mode_tolerance);
 
-    double eps; // search space for neighbors in the range [0,1], where 0.0 is exactly self and 1.0 is entire dataset
-    int min_elems;
+    double eps=0; // search space for neighbors in the range [0,1], where 0.0 is exactly self and 1.0 is entire dataset
+    int min_elems=0;
     DBSCAN<Vector2d,Matrix2d> db(eps, min_elems);
     Matrix2d clusterData;
     db.fit(clusterData);

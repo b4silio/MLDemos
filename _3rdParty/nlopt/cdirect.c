@@ -192,7 +192,7 @@ static nlopt_result divide_rect(double *rdiv, params *p)
 	       w[isort[i]] *= THIRD;
 	       rdiv[0] = rect_diameter(n, w, p);
 	       rdiv[2] = p->age++;
-	       node = rb_tree_resort(&p->rtree, node);
+           node = rb_tree_resort(&p->rtree, node);
 	       for (k = 0; k <= 1; ++k) {
 		    double *rnew;
 		    ALLOC_RECT(rnew, L);
@@ -225,7 +225,7 @@ static nlopt_result divide_rect(double *rdiv, params *p)
 	  w[i] *= THIRD;
 	  rdiv[0] = rect_diameter(n, w, p);
 	  rdiv[2] = p->age++;
-	  node = rb_tree_resort(&p->rtree, node);
+      /*node = */rb_tree_resort(&p->rtree, node);
 	  for (k = 0; k <= 1; ++k) {
 	       double *rnew;
 	       ALLOC_RECT(rnew, L);

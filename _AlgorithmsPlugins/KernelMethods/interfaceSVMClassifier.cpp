@@ -300,7 +300,7 @@ void ClassSVM::SetParams(Classifier *classifier, fvec parameters)
     int svmType = params->svmTypeCombo->currentIndex();
     float svmC, kernelGamma;
     int maxSV, kernelType, kernelDegree;
-    bool bOptimize;
+    bool bOptimize=false;
     if(svmType == 2) // pegasos
     {
         svmC = parameters.size() > 0 ? parameters[0] : 1;

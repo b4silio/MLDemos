@@ -55,7 +55,7 @@ void ClassBoost::SetParams(Classifier *classifier)
     if(!boost) return;
     int weakCount = params->boostCountSpin->value();
     int weakType = params->boostLearnerType->currentIndex();
-    int boostType = params->boostType->currentIndex();
+    int boostType = params->boostType->currentIndex() + 1; // Discrete Boost is crashing for some reason :/
     int svmCount = params->svmCountSpin->value();
     boost->SetParams(weakCount, weakType, boostType, svmCount);
 }
@@ -114,7 +114,7 @@ void ClassBoost::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("Random Gaussians");
     parameterValues.back().push_back("Random SVM");
     parameterValues.push_back(vector<QString>());
-    parameterValues.back().push_back("Discrete");
+    //parameterValues.back().push_back("Discrete");
     parameterValues.back().push_back("Real");
     parameterValues.back().push_back("Logit");
     parameterValues.back().push_back("Gentle");
@@ -161,9 +161,6 @@ void ClassBoost::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classif
 {
     if(!classifier || !canvas) return;
     painter.setRenderHint(QPainter::Antialiasing, true);
-
-    bool bUseMinMax = false;
-    bUseMinMax = true;
 
     ClassifierBoost *boost = dynamic_cast<ClassifierBoost*>(classifier);
     if(!boost) return;

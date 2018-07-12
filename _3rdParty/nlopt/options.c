@@ -679,7 +679,7 @@ NLOPT_STDCALL nlopt_set_default_initial_step(nlopt_opt opt, const double *x)
 	  if (nlopt_isinf(step) || step == 0)
 	       step = 1;
 	  
-	  opt->dx[i] = step;
+      if(opt->dx) opt->dx[i] = step;
      }
      return NLOPT_SUCCESS;
 }

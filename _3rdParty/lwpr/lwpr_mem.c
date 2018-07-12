@@ -306,7 +306,7 @@ int lwpr_mem_alloc_ws(LWPR_Workspace *ws, int nIn) {
    ws->Pse      = storage; storage+=nIn;      
    ws->ytarget  = storage; storage+=nIn;         
    ws->yres     = storage; storage+=nIn;            
-   ws->s        = storage; storage+=nIn;            
+   ws->s        = storage; //storage+=nIn;
    
    return 1;
 }

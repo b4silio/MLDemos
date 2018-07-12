@@ -468,7 +468,7 @@ qrstep (gsl_vector * d, gsl_vector * f, gsl_matrix * U, gsl_matrix * V)
     double f0 = gsl_vector_get (f, 0);
     
     double d1 = gsl_vector_get (d, 1);
-    double f1 = gsl_vector_get (f, 1);
+    //double f1 = gsl_vector_get (f, 1);
     
     {
       double mu = trailing_eigenvalue (d, f);
@@ -479,14 +479,14 @@ qrstep (gsl_vector * d, gsl_vector * f, gsl_matrix * U, gsl_matrix * V)
     
     /* Set up the recurrence for Givens rotations on a bidiagonal matrix */
     
-    ak = 0;
+    //ak = 0;
     bk = 0;
     
     ap = d0;
     bp = f0;
     
     aq = d1;
-    bq = f1;
+    //bq = f1;
   }
 
   for (k = 0; k < n - 1; k++)
@@ -579,7 +579,7 @@ qrstep (gsl_vector * d, gsl_vector * f, gsl_matrix * U, gsl_matrix * V)
 
         gsl_vector_set (d, k, ak1);
 
-        ak = ak1;
+        //ak = ak1;
         bk = bk1;
         zk = zk1;
 

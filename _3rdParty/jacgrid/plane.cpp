@@ -156,6 +156,7 @@ void JACPlane::Contour(float threshold, VertexSender &vs)
     register unsigned int x1, y1, x2, y2;
     register unsigned int xdim1, ydim1;
     unsigned int edge_loop, edge;
+    if(!data) return;
 
     ydim1 = ydim-1;
     xdim1 = xdim-1;
@@ -215,8 +216,7 @@ void JACPlane::ContourGrid(const gridT &grid, char axis,
     float zunit[3] = {0.0, 0.0, 1.0};
     unsigned int i, j, k, index;
 
-    if (data)
-        free(data);
+    if (data) free(data);
     data = 0;
 
     switch (axis)

@@ -139,7 +139,7 @@ int *NeuronLayer::getMaxDissNeighbour(int *n){
         float currDiss = Globals::calcQE(neuronMap[n[0]][n[1]]->weights,
                                          neuronMap[n[0]+1][n[1]]->weights);
         if (currDiss >= diss) {
-            diss = currDiss;
+            //diss = currDiss;
             res[0]=n[0]+1;
             res[1]=n[1];
         }
@@ -318,7 +318,7 @@ NeuronLayer* NeuronLayer::getLayer1Map(){
     return neuronMap[0][0]->getMap();
 }
 /**  */
-void NeuronLayer::getNewWeights(int xPos, int yPos, float *UL, float *UR, float *LL, float *LR){
+void NeuronLayer::getNewWeights(unsigned int xPos, unsigned int yPos, float *UL, float *UR, float *LL, float *LR){
     float *twgt = neuronMap[xPos][yPos]->weights;
     float *nUL=NULL, *nU=NULL, *nL=NULL, *nBL=NULL, *nB=NULL, *nBR=NULL, *nUR=NULL, *nR=NULL;
     float *dUL, *dUR, *dLL, *dLR;
@@ -408,13 +408,13 @@ void NeuronLayer::getNewWeights(int xPos, int yPos, float *UL, float *UR, float 
 void NeuronLayer::train(){
     /* MQE fuer plotten ausgeben */
     char * mqename = new char[256];
-    sprintf(mqename,"%s/%s_%i_%i_%i_%i.mqe",Globals::savePath,Globals::HTML_PREFIX,gid,level,
-            superPos[0],superPos[1]);
+    sprintf(mqename,"%s/%s_%i_%i_%i_%i.mqe",Globals::savePath,Globals::HTML_PREFIX,gid,level, superPos[0],superPos[1]);
     std::ofstream *mqeFile;
     if (Globals::printMQE) {
         mqeFile = new std::ofstream(mqename);
         if (!mqeFile) {
             std::cout << "MQE file could not be opened" << std::endl;
+            delete [] mqename;
             exit(EXIT_FAILURE);
         }
     }
@@ -430,7 +430,6 @@ void NeuronLayer::train(){
     currentCycle = 0;
 
     //std::cout << "XXX  neuronlayer: train1" << std::endl;
-
 
     /** neue neighborhood */
     ini_neighbourhood = sqrt(((float)((x>y)?x:y))/(2.0*sqrt(-1.0*log(Globals::NR))));

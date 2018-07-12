@@ -201,7 +201,7 @@ int local(Trial &T, TBox &box, TBox &domain, double eps_cl, double *mgr,
 #ifdef LS_DEBUG
       cout << "Gradient small enough" << endl ;
 #endif
-      good_enough = 1 ;
+      //good_enough = 1 ;
       break ;
     }
 

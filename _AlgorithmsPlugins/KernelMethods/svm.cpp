@@ -489,7 +489,8 @@ public:
 		double upper_bound_p;
 		double upper_bound_n;
 		double r;	// for Solver_NU
-	};
+        SolutionInfo() : obj(0), rho(0), upper_bound_p(0), upper_bound_n(0), r(0) {}
+    };
 
 	void Solve(int l, const Q_Matrix& Q, const double *p_, const schar *y_,
 		   double *alpha_, double Cp, double Cn, double eps,
@@ -2181,7 +2182,7 @@ void svm_group_classes(const svm_problem *prob, int *nr_class_ret, int **label_r
 	}
 
     int *start = new int[nr_class];
-	start[0] = 0;
+    if(nr_class) start[0] = 0;
 	for(i=1;i<nr_class;i++)
 		start[i] = start[i-1]+count[i-1];
 	for(i=0;i<l;i++)
@@ -2189,7 +2190,7 @@ void svm_group_classes(const svm_problem *prob, int *nr_class_ret, int **label_r
 		perm[start[data_label[i]]] = i;
 		++start[data_label[i]];
 	}
-	start[0] = 0;
+    if(nr_class) start[0] = 0;
 	for(i=1;i<nr_class;i++)
 		start[i] = start[i-1]+count[i-1];
 
@@ -3339,7 +3340,13 @@ out:
 out2:
 		x_space[j++].index = -1;
 	}
-	if (ferror(fp) != 0 || fclose(fp) != 0) return NULL;
+    if (ferror(fp) != 0 || fclose(fp) != 0) {
+        delete [] model->rho;
+        delete [] model->label;
+        delete [] model->nSV;
+        delete model;
+        return NULL;
+    }
 
 	model->free_sv = 1;	// XXX
 	return model;
@@ -3639,7 +3646,13 @@ svm_model *svm_load_model_binary(const char *model_file_name)
 		}
 		x_space[j++].index = -1;
 	}
-	if (ferror(fp) != 0 || fclose(fp) != 0) return NULL;
+    if (ferror(fp) != 0 || fclose(fp) != 0) {
+        delete [] model->rho;
+        delete [] model->label;
+        delete [] model->nSV;
+        delete model;
+        return NULL;
+    }
 
 	model->free_sv = 1;	// XXX
 	return model;

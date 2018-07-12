@@ -40,6 +40,7 @@ void rb_tree_init(rb_tree *t, rb_compare compare) {
 
 static void destroy(rb_node *n)
 {
+    if(!n) return;
      if (n != NIL) {
 	  destroy(n->l); destroy(n->r);
 	  free(n);
@@ -48,6 +49,7 @@ static void destroy(rb_node *n)
 
 void rb_tree_destroy(rb_tree *t)
 {
+    if(!t) return;
      destroy(t->root);
      t->root = NIL;
 }

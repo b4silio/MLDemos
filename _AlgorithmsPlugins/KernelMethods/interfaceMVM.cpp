@@ -271,10 +271,6 @@ void ClassMVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
     ClassifierMVM *mvm = dynamic_cast<ClassifierMVM*>(classifier);
     if(!mvm) return;
 
-    int dim = canvas->data->GetDimCount();
-    int xIndex = canvas->xIndex, yIndex = canvas->yIndex;
-    // we want to draw the support vectors
-
     vector<fvec> samples = canvas->data->GetSamples();
     ivec labels = canvas->data->GetLabels();
     QFont font = painter.font();
@@ -300,8 +296,8 @@ void ClassMVM::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classifie
 void ClassMVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifier)
 {
     int posClass = 1;
+    /*
     bool bUseMinMax = false;
-
     float resMin = FLT_MAX;
     float resMax = -FLT_MAX;
     if(bUseMinMax)
@@ -316,6 +312,7 @@ void ClassMVM::DrawModel(Canvas *canvas, QPainter &painter, Classifier *classifi
         }
         if(resMin == resMax) resMin -= 3;
     }
+    */
 
     // we draw the samples
     painter.setRenderHint(QPainter::Antialiasing, true);

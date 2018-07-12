@@ -146,7 +146,7 @@ fvec ReinforcementRandom::Update()
 
 void ReinforcementRandom::Draw(QPainter &painter)
 {
-    int w = painter.viewport().width(), h = painter.viewport().height();
+    int h = painter.viewport().height();
     int graphW = 200, graphH = 100, graphPad = 10;
     int top = h - 10 - (graphH + 2*graphPad);
     int left = 10;

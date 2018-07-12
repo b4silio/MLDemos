@@ -231,14 +231,14 @@ void AlgorithmManager::ClusterTest()
     clusterer = clusterers[tab]->GetClusterer();
     tabUsedForTraining = tab;
 
-    int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
-    if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
+    //int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
+    //if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
     vector<fvec> samples = canvas->data->GetSamples();
-    ivec labels = canvas->data->GetLabels();
-    int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
-    float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
-    float ratio = f1ratios[f1ratioIndex];
+    //ivec labels = canvas->data->GetLabels();
+    //int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
+    //float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
+    //float ratio = f1ratios[f1ratioIndex];
 
     float ratios [] = {.1f,.25f,1.f/3.f,.5f,2.f/3.f,.75f,.9f,1.f};
     int ratioIndex = optionsCluster->trainTestCombo->currentIndex();

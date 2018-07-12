@@ -52,7 +52,7 @@ void ReinforcementPower::SetParams(int k, float variance, bool bAdaptive)
 
 void ReinforcementPower::Draw(QPainter &painter)
 {
-    int w = painter.viewport().width(), h = painter.viewport().height();
+    int h = painter.viewport().height();
     int graphW = 200, graphH = 100, graphPad = 10;
     int top = h - 10 - (graphH + 2*graphPad);
     int left = 10;
@@ -305,7 +305,7 @@ fvec ReinforcementPower::Update()
             else FOR(d, dim) newMaximum[d] = (int)(newMaximum[d])%5;
             break;
         }
-        float value = problem->GetReward(newMaximum);
+        /*float value = */problem->GetReward(newMaximum);
         maximum = best.back().second.first;
         maximumValue = best.back().first;
         history.push_back(maximum);

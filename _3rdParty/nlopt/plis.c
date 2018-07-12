@@ -122,7 +122,7 @@ static void plis_(int *nf, int *nb, double *x, int *
     /* Local variables */
     double a, b;
     int i__, k, n;
-    double p, r__;
+    double p=0, r__;
     int kd, ld;
     double fo, fp, po, pp, ro, rp;
     int kbf, mfg;
@@ -177,7 +177,7 @@ static void plis_(int *nf, int *nb, double *x, int *
     mtesf = 2;
     inits = 2;
     *iterm = 0;
-    iterd = 0;
+    //iterd = 0;
     iters = 2;
     kters = 3;
     irest = 0;
@@ -185,10 +185,10 @@ static void plis_(int *nf, int *nb, double *x, int *
     ires2 = 0;
     mred = 10;
     mes = 4;
-    mes1 = 2;
-    mes2 = 2;
-    mes3 = 2;
-    eta0 = 1e-15;
+    //mes1 = 2;
+    //mes2 = 2;
+    //mes3 = 2;
+    //eta0 = 1e-15;
     eta9 = 1e120;
     eps8 = 1.;
     eps9 = 1e-8;

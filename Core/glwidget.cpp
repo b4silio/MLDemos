@@ -469,7 +469,6 @@ void GLWidget::generateObjects()
         {
             int w = canvas->maps.reward.width();
             int h = canvas->maps.reward.height();
-            float ratio = h/(float)w;
             int xSteps = 100;
             int ySteps = h * xSteps / w;
             //int ySteps = h * xSteps / w;

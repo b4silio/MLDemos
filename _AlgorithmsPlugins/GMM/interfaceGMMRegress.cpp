@@ -148,7 +148,7 @@ void RegrGMM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     int outputDim = regressor->outputDim;
 	int xIndex = canvas->xIndex;
 	int yIndex = canvas->yIndex;
-    if(outputDim != -1 && outputDim < dim-1);
+    if(outputDim != -1 && outputDim < dim-1)
     {
         if(xIndex == dim-1) xIndex = outputDim;
         else if (xIndex == outputDim) xIndex = dim-1;
@@ -279,10 +279,7 @@ void RegrGMM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
 	if(!regressor || !canvas) return;
 	int w = canvas->width();
-	int h = canvas->height();
 	painter.setRenderHint(QPainter::Antialiasing, true);
-    int xIndex = canvas->xIndex;
-    int yIndex = canvas->yIndex;
     int outputDim = regressor->outputDim;
 
 	int steps = w;

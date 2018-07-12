@@ -126,7 +126,7 @@ void draw_recursive_tri(float *a,float *b,float *c,unsigned int div,float r)
     }
     else
     {
-        register unsigned int i;
+        unsigned int i;
         float ab[3],ac[3],bc[3];
         for (i=0; i<3; i++)
         {
@@ -148,7 +148,7 @@ void draw_recursive_tri(float *a,float *b,float *c,unsigned int div,float r)
 
 void DrawTessellatedSphere(float radius, unsigned int detail,int solid_base)
 {
-    register unsigned int i;
+    unsigned int i;
     switch (solid_base)
     {
     case rat_octahedron_solid_base:

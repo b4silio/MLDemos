@@ -1767,6 +1767,7 @@ static void transpose(const problem *prob, feature_node **x_space_ret, problem *
 // perm, length l, must be allocated before calling this subroutine
 static void group_classes(const problem *prob, int *nr_class_ret, int **label_ret, int **start_ret, int **count_ret, int *perm)
 {
+    if(!prob || !prob->l) return;
 	int l = prob->l;
 	int max_nr_class = 16;
 	int nr_class = 0;
@@ -1803,18 +1804,20 @@ static void group_classes(const problem *prob, int *nr_class_ret, int **label_re
 	}
 
 	int *start = Malloc(int,nr_class);
-	start[0] = 0;
-	for(i=1;i<nr_class;i++)
-		start[i] = start[i-1]+count[i-1];
-	for(i=0;i<l;i++)
-	{
-		perm[start[data_label[i]]] = i;
-		++start[data_label[i]];
-	}
-	start[0] = 0;
-	for(i=1;i<nr_class;i++)
-		start[i] = start[i-1]+count[i-1];
-
+    if(nr_class)
+    {
+        start[0] = 0;
+        for(i=1;i<nr_class;i++)
+            start[i] = start[i-1]+count[i-1];
+        for(i=0;i<l;i++)
+        {
+            perm[start[data_label[i]]] = i;
+            ++start[data_label[i]];
+        }
+        start[0] = 0;
+        for(i=1;i<nr_class;i++)
+            start[i] = start[i-1]+count[i-1];
+    }
 	*nr_class_ret = nr_class;
 	*label_ret = label;
 	*start_ret = start;

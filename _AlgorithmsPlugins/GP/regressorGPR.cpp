@@ -92,10 +92,12 @@ double GetLikelihood(const double *x, const Matrix &inputs, const Matrix &output
         params = new SOGPParams(&kern);
         params->s20 = oldParams.s20;
     }
-    params->capacity = oldParams.capacity;
-    sogp->setParams(*params);
+    if(params) {
+        params->capacity = oldParams.capacity;
+        sogp->setParams(*params);
+        delete params;
+    }
     sogp->addM(inputs, outputs);
-    delete params;
 
     if(bLikelihood)
     {
@@ -255,8 +257,11 @@ void RegressorGPR::Optimize(const Matrix &inputs, const Matrix &outputs)
             params = new SOGPParams(&kern);
             params->s20 = oldParams.s20;
         }
-        params->capacity = oldParams.capacity;
-        sogp->setParams(*params);
+        if(params) {
+            params->capacity = oldParams.capacity;
+            sogp->setParams(*params);
+            delete params;
+        }
         sogp->addM(inputs, outputs);
     }
     catch(std::exception e)

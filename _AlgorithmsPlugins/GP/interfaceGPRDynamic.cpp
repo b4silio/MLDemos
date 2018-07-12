@@ -87,7 +87,7 @@ fvec DynamicGPR::GetParams()
     float kernelGamma = params->kernelWidthSpin->value();
     float kernelDegree = params->kernelDegSpin->value();
     int capacity = params->capacitySpin->value();
-    bool bSparse = params->sparseCheck->isChecked();
+    //bool bSparse = params->sparseCheck->isChecked();
     double kernelNoise = params->noiseSpin->value();
     fvec par(5);
     par[0] = kernelType;

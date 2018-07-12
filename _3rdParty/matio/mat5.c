@@ -493,10 +493,10 @@ Mat_Create5(const char *matname,const char *hdr_str)
 
     version = 0x0100;
 
-    err = fwrite(mat->header,1,116,mat->fp);
-    err = fwrite(mat->subsys_offset,1,8,mat->fp);
-    err = fwrite(&version,2,1,mat->fp);
-    err = fwrite(&endian,2,1,mat->fp);
+    /*err =*/ fwrite(mat->header,1,116,mat->fp);
+    /*err =*/ fwrite(mat->subsys_offset,1,8,mat->fp);
+    /*err =*/ fwrite(&version,2,1,mat->fp);
+    /*err =*/ fwrite(&endian,2,1,mat->fp);
 
     return mat;
 }
@@ -3427,16 +3427,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadDoubleData(mat,complex_data->Im,packed_type,
+                    /*nBytes =*/ ReadDoubleData(mat,complex_data->Im,packed_type,
                                             len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -3591,16 +3591,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadSingleData(mat,complex_data->Im,
+                    /*nBytes =*/ ReadSingleData(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -3756,16 +3756,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt64Data(mat,complex_data->Im,
+                    /*nBytes =*/ ReadInt64Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -3921,16 +3921,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt64Data(mat,complex_data->Im,
+                    /*nBytes =*/ ReadInt64Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -4086,16 +4086,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt32Data(mat,complex_data->Im,
+                    /*nBytes =*/ ReadInt32Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -4249,16 +4249,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt32Data(mat,complex_data->Im,
+                    /*nBytes =*/ ReadInt32Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -4412,16 +4412,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt16Data(mat,complex_data->Im,
+                    /*nBytes =*/ ReadInt16Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -4575,16 +4575,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt16Data(mat,complex_data->Im,
+                    /*nBytes =*/ ReadInt16Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -4738,16 +4738,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt8Data(mat,complex_data->Im,
+                    /*nBytes = */ReadInt8Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -4901,16 +4901,16 @@ Read5(mat_t *mat, matvar_t *matvar)
                         (void)Mat_uint32Swap(tag);
                     packed_type = TYPE_FROM_TAG(tag[0]);
                     if ( tag[0] & 0xffff0000 ) { /* Data is in the tag */
-                        data_in_tag = 1;
-                        nBytes = (tag[0] & 0xffff0000) >> 16;
+                        //data_in_tag = 1;
+                        //nBytes = (tag[0] & 0xffff0000) >> 16;
                     } else {
-                        data_in_tag = 0;
+                        //data_in_tag = 0;
                         fread(tag+1,4,1,mat->fp);
                         if ( byteswap )
                             (void)Mat_uint32Swap(tag+1);
-                        nBytes = tag[1];
+                        //nBytes = tag[1];
                     }
-                    nBytes = ReadInt8Data(mat,complex_data->Im,
+                    /*nBytes = */ReadInt8Data(mat,complex_data->Im,
                                packed_type,len);
 #if defined(HAVE_ZLIB)
                 } else if ( matvar->compression == MAT_COMPRESSION_ZLIB ) {
@@ -5505,6 +5505,9 @@ Read5(mat_t *mat, matvar_t *matvar)
 #endif    /* HAVE_ZLIB */
                     }
                 } else {
+                    free(complex_data->Re);
+                    free(complex_data->Im);
+                    free(complex_data);
                     Mat_Critical("ReadData: Allocation of data pointer failed");
                     break;
                 }
@@ -5653,7 +5656,7 @@ int
 ReadData5(mat_t *mat,matvar_t *matvar,void *data,
     int *start,int *stride,int *edge)
 {
-    int err = 0,real_bytes;
+    int err = 0,real_bytes=0;
     mat_int32_t tag[2];
 #if defined(HAVE_ZLIB)
     z_stream z;
@@ -6722,7 +6725,7 @@ Mat_VarReadNextInfo5( mat_t *mat )
     err = fread(&data_type,4,1,mat->fp);
     if ( !err )
         return NULL;
-    err = fread(&nBytes,4,1,mat->fp);
+    /*err = */fread(&nBytes,4,1,mat->fp);
     if ( mat->byteswap ) {
         Mat_int32Swap(&data_type);
         Mat_int32Swap(&nBytes);
@@ -6922,7 +6925,7 @@ Mat_VarReadNextInfo5( mat_t *mat )
                     i = len;
                 else
                     i = len+(8-(len % 8));
-                bytesread+=fread(buf,1,i,mat->fp);
+                /*bytesread+=*/fread(buf,1,i,mat->fp);
 
                 matvar->name = malloc(len+1);
                 memcpy(matvar->name,buf,len);

@@ -207,8 +207,8 @@ std::vector<fvec> DynamicalSEDS::Test( const fvec &sample, int count)
 	fvec start = (sample - endpoint)*resizeFactor;
 	std::vector<fvec> res;
 	res.reserve(500);
-	float *sigma = new float[dim*(dim+1)/2];
-	if(!gmm) return res;
+    if(!gmm) return res;
+    float *sigma = new float[dim*(dim+1)/2];
 	fvec velocity; velocity.resize(dim,0);
 	int cnt = 0;
 	fvec diff;diff.resize(2,1);

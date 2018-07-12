@@ -30,13 +30,12 @@ bool asvmdata::loadFromFile(const char *filename)
 {
 
 	FILE *fp = fopen(filename,"r");
-	int  dum;
 	int tmpInt;
 
 	if(fp)
 	{
-		dum =fscanf(fp, "%d", &tmpInt);
-		dum=fscanf(fp, "%d", & dim);
+        fscanf(fp, "%d", &tmpInt);
+        fscanf(fp, "%d", & dim);
 
 		tar.resize(tmpInt);
 
@@ -48,12 +47,12 @@ bool asvmdata::loadFromFile(const char *filename)
 			for(unsigned int l=0; l< dim; l++)
 				tar[i].targ[l] = 0.0;
 
-			dum = fscanf(fp, "%d", &tmpInt);
+            fscanf(fp, "%d", &tmpInt);
 			tar[i].traj.resize(tmpInt);
 			for(unsigned int j=0; j< tar[i].traj.size();j++)
 			{
                 unsigned int nPoints;
-                dum=fscanf(fp, "%d", &nPoints);
+                fscanf(fp, "%d", &nPoints);
                 trajectory& traj = tar[i].traj[j];
                 traj.nPoints = nPoints;
                 traj.dim = dim;
@@ -68,7 +67,7 @@ bool asvmdata::loadFromFile(const char *filename)
 
 					for(unsigned int l=0; l< dim; l++)
 					{
-                        dum=fscanf(fp, "%lf", &( traj.coords[k][l]));
+                        fscanf(fp, "%lf", &( traj.coords[k][l]));
 					}
                     traj.y[k] = i;
 				}
@@ -473,7 +472,7 @@ void asvmdata::updateModulationKernel()
 
 	//calculating full Gs matrix
 	l=0;
-	d=0;
+    //d=0;
 	double** Gs = new double*[p];
 	for(i=0; i<p; i++)
 		Gs[i] = new double[n];
@@ -523,7 +522,7 @@ void asvmdata::updateModulationKernel()
 
 	//calculating full Hs matrix
 	l =0;
-	d =0;
+    //d =0;
 	double** Hs = new double*[m];
 	for(i=0; i<m; i++)
 		Hs[i] = new double[n];
@@ -550,11 +549,10 @@ void asvmdata::updateModulationKernel()
 
 
 	//calculating full Hss matrix
-	l =0;
-	d =0;
+    //l =0;
+    //d =0;
 	double** Hss = new double*[n];
-	for(i=0; i<n; i++)
-		Hss[i] = new double[n];
+    for(i=0; i<n; i++) Hss[i] = new double[n];
 
 	for(i=0; i<n; i++)
 		for(j=0; j<n; j++)
@@ -615,8 +613,7 @@ void asvmdata::updateModulationKernel()
 	 */
 	unsigned int matkgh_size = num_alpha + num_beta + dim;
 	matkgh = new double*[matkgh_size];
-	for( i=0; i<matkgh_size; i++)
-		matkgh[i] = new double[matkgh_size];
+    for( i=0; i<matkgh_size; i++) matkgh[i] = new double[matkgh_size];
 	/*
 	//removing unwanted rows, cols
 	for( i=0;i<num_alpha;i++)

@@ -417,9 +417,8 @@ void GHSOMProjector::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
 {
     if(!canvas || !projector) return;
     if(canvas->canvasType) return;
-    int dim = canvas->data->GetDimCount();
 
-    NeuronLayer *layer = Globals::hfm->getLayer1Map();
+    //NeuronLayer *layer = Globals::hfm->getLayer1Map();
 
     int layerCount = 0;
     for(int i=Globals::layers->size()-1; i>0; i--)

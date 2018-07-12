@@ -33,8 +33,8 @@ Matrix& Regression::HermitteSplineFit(const Matrix& inData, const Vector& inTime
   for(int i=0;i<outSize;i++){
     // Find the nearest data pair
     const REALTYPE cTime = outTimeBase.At(i);
-    int   prev, next;
-    REALTYPE prevTime, nextTime;
+    int   prev=0, next=0;
+    REALTYPE prevTime=0, nextTime=0;
     if(cTime<=startTime){
       for(int j=0;j<dataSize;j++)
         outData(i,j) = inData.At(0,j);        

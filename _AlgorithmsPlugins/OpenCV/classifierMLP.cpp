@@ -84,10 +84,8 @@ float ClassifierMLP::Test( const fvec &sample) const
     Mat input = Mat(1, dim, CV_32FC1);
     Mat output = Mat(1, 1, CV_32FC1);
     FOR(d, dim) input.at<float>(d) = sample[d];
-    float result = mlp->predict(input, output);
-    //qDebug() << "input" << input.at<float>(0) << input.at<float>(1) << "output" << result;
+    mlp->predict(input, output);
     return output.at<float>(0);
-    return result;
 }
 
 void ClassifierMLP::SetParams(u32 functionType, u32 neuronCount, u32 layerCount, f32 alpha, f32 beta, u32 trainingType)

@@ -258,7 +258,6 @@ void ClustKM::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *clusterer)
     int w = 129;
     int h = 129;
     int nbClusters = _kkmeans->NbClusters();
-    int dim = canvas->data->GetDimCount();
 
     int bMethod = 1; // 0: cluster decision function, 1: cluster weight
     if(bMethod==0)

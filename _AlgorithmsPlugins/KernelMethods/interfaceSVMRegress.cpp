@@ -392,17 +392,14 @@ void RegrSVM::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
             } else {
                 FOR(i, svm->l) {
                     sv[0] = (f32)svm->SV[i][xIndex].value;
-                    bool bFound = false;
                     FOR(j, samples.size())
                     {
                         if(sv[0] == samples[j][xIndex])
                         {
                             sv[1] = samples[j][yIndex];
-                            bFound = true;
                             break;
                         }
                     }
-                    //if(!bFound) qDebug() << "sv not found " << sv[0];
                     int radius = 9;
                     QPointF point = canvas->toCanvasCoords(sv[0],sv[1]);
                     painter.drawEllipse(point, radius, radius);
@@ -421,7 +418,6 @@ void RegrSVM::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor)
 {
     painter.setRenderHint(QPainter::Antialiasing, true);
     int w = canvas->width();
-    int h = canvas->height();
     int xIndex = canvas->xIndex;
     fvec sample = canvas->toSampleCoords(0,0);
     int dim = sample.size();

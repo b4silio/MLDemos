@@ -108,8 +108,8 @@ void MLDemos::FocusChanged(QWidget *old, QWidget *now)
 }
 void MLDemos::HideContextMenus()
 {
-    drawContext1Widget->hide();
-    drawContext2Widget->hide();
-    drawContext3Widget->hide();
-    drawContext4Widget->hide();
+    if(drawContext1Widget) drawContext1Widget->hide();
+    if(drawContext2Widget) drawContext2Widget->hide();
+    if(drawContext3Widget) drawContext3Widget->hide();
+    if(drawContext4Widget) drawContext4Widget->hide();
 }

@@ -142,7 +142,6 @@ void ProjectorCCA::Train(std::vector< fvec > samples, ivec labels)
     FOR(i,r.size())
     {
         wilks = 1;
-        chi=0;
         latent = r(i)*r(i);
         FOR(j,r.size() - i)
         {

@@ -114,7 +114,7 @@ fvec RegressorMLP::Test( const fvec &sample)
         FOR(d, min(dim,(u32)sample.size())) input.at<float>(d) = sample[d];
         for(int d=min(dim,(u32)sample.size()); d<dim; d++) input.at<float>(d) = 0;
     }
-    float result = mlp->predict(input, output);
+    mlp->predict(input, output);
     res[0] = output.at<float>(0);
     return res;
 }

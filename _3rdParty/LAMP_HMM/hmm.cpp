@@ -386,7 +386,7 @@ double CHMM::BaumWelchCore(CObs **obs, long T, double *gamma, double **xi,
 double CHMM::IterBaumWelch(CObsSeq *obsSeq, double *gamma, double **xi)
 {
 	double deltaAB, deltaA, deltaB, deltaPi, delta;
-	double logProb;
+    //double logProb;
 	int i;
 	const boolean NOLOG = FALSE;
 
@@ -396,7 +396,7 @@ double CHMM::IterBaumWelch(CObsSeq *obsSeq, double *gamma, double **xi)
 
 	for(i=1;i<=obsSeq->mNbSequences;i++){ // Loop over observation files:
 
-	    logProb = BaumWelchCore(obsSeq->mObs[i], obsSeq->mNbObs[i], gamma, xi, NOLOG);
+        /*logProb = */BaumWelchCore(obsSeq->mObs[i], obsSeq->mNbObs[i], gamma, xi, NOLOG);
 
 	}// end loop over observation files
 
@@ -485,7 +485,7 @@ double CHMM::SegmentalKMeansCore(CObs **obs, long T)
 double CHMM::IterSegmentalKMeans(CObsSeq *obsSeq)
 {
 	double deltaAB, deltaA, deltaB, deltaPi, delta;
-	double logProb;
+    //double logProb;
 	int i;
 
 	mA->StartIter();// Zero sums used to cumulate results from each sequence
@@ -494,7 +494,7 @@ double CHMM::IterSegmentalKMeans(CObsSeq *obsSeq)
 
 	for(i=1;i<=obsSeq->mNbSequences;i++){ // Loop over observation files:
 
-	    logProb = SegmentalKMeansCore(obsSeq->mObs[i], obsSeq->mNbObs[i]);
+        /*logProb = */SegmentalKMeansCore(obsSeq->mObs[i], obsSeq->mNbObs[i]);
 
 	}// end loop over observation files
 
@@ -632,8 +632,8 @@ void CHMM::PrintStatesAndExpectedObs(CObsSeq *obsSeq,
 // and sequences of expected observations 
 // corresponding to those states
 {
-	long i, j, t, T, nbSequences;
-	double logProb;
+    long i, j, t, T;
+    //double logProb;
  	int *q;// most probable state sequence
 	CObs **stateToObsMap;// list of expected observations for each state
 	CObs *expectedObs;
@@ -649,7 +649,7 @@ void CHMM::PrintStatesAndExpectedObs(CObsSeq *obsSeq,
 		bestObsFile <<"T= "<< T << endl;
 		
   		q = SetIntVector(T);// best state sequence
-		logProb = ViterbiLog(obsSeq->mObs[i], T, q);
+        /*logProb = */ViterbiLog(obsSeq->mObs[i], T, q);
 
 		for (t=1; t <= T; t++){
 			stateFile << q[t] << " ";

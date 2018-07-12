@@ -76,8 +76,6 @@ void SammonProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *p
             points[i] = make_pair(projector->projected[i][0], i);
         }
         sort(points.begin(), points.end());
-        float minVal = points.front().first;
-        float maxVal = points.back().first;
 
         // now we go through the points and compute the back projection
         int steps = min((int)points.size(), 64);
@@ -85,7 +83,7 @@ void SammonProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *p
         vector<QPointF> pointList;
         FOR(i, steps)
         {
-            float val = (i+1)/(float)steps*(maxVal-minVal) + minVal;
+            //float val = (i+1)/(float)steps*(maxVal-minVal) + minVal;
             int nextIndex = (i+1)/(float)steps*points.size();
             fvec mean(canvas->data->GetDimCount());
             float meanVal = 0;
@@ -101,7 +99,6 @@ void SammonProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *p
             mean /= count;
             meanVal /= count;
             // we look for the closest point to the value in projected space
-            int closest = 0;
             float closestDist = FLT_MAX;
             FOR(p, points.size())
             {
@@ -109,7 +106,6 @@ void SammonProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *p
                 if(dist < closestDist)
                 {
                     closestDist = dist;
-                    closest = p;
                 }
             }
             QPointF point = canvas->toCanvasCoords(mean);

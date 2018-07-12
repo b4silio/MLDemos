@@ -175,7 +175,6 @@ void RegrRGPR::DrawInfo(Canvas *canvas, QPainter &painter, Regressor *regressor)
     if(!gpr) return;
     painter.setRenderHint(QPainter::Antialiasing);
     int xIndex = canvas->xIndex;
-    int yIndex = canvas->yIndex;
 
     int radius = 8;
     int dim = canvas->data->GetDimCount()-1;
@@ -243,7 +242,6 @@ void RegrRGPR::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regressor
 {
     painter.setRenderHint(QPainter::Antialiasing, true);
     int w = canvas->width();
-    int h = canvas->height();
     int xIndex = canvas->xIndex;
     fvec sample = canvas->toSampleCoords(0,0);
     int dim = sample.size();

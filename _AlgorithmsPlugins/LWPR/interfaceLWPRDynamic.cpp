@@ -108,7 +108,6 @@ void DynamicLWPR::DrawInfo(Canvas *canvas, QPainter &painter, Dynamical *dynamic
 		var = fabs((canvas->toCanvasCoords(0,0) - canvas->toCanvasCoords(var,0)).x());
 		double centerX = rf.center()[0];
 		double centerY = rf.center()[1];
-		double radius = rf.D()[0][0];
 		QPointF slope(rf.slope()[0],rf.slope()[1]);
 		slope = slope / sqrt(slope.x()*slope.x() + slope.y()*slope.y());
 		QPointF point = canvas->toCanvasCoords(centerX, centerY);

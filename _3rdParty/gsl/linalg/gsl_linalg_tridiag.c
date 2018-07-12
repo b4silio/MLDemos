@@ -52,6 +52,10 @@ solve_tridiag(
 
   if (gamma == 0 || alpha == 0 || c == 0 || z == 0)
     {
+      if(gamma) free(gamma);
+      if(alpha) free(alpha);
+      if(c) free(c);
+      if(z) free(z);
       GSL_ERROR("failed to allocate working space", GSL_ENOMEM);
     }
   else
@@ -145,6 +149,8 @@ solve_tridiag_nonsym(
 
   if (alpha == 0 || z == 0)
     {
+      if(alpha) free(alpha);
+      if(z) free(z);
       GSL_ERROR("failed to allocate working space", GSL_ENOMEM);
     }
   else
@@ -224,6 +230,11 @@ solve_cyc_tridiag(
 
   if (delta == 0 || gamma == 0 || alpha == 0 || c == 0 || z == 0)
     {
+      if(delta) free(delta);
+      if(gamma) free(gamma);
+      if(alpha) free(alpha);
+      if(c) free(c);
+      if(z) free(z);
       GSL_ERROR("failed to allocate working space", GSL_ENOMEM);
     }
   else
@@ -342,6 +353,10 @@ int solve_cyc_tridiag_nonsym(
 
   if (alpha == 0 || zb == 0 || zu == 0 || w == 0)
     {
+      if(alpha) free(alpha);
+      if(zb) free(zb);
+      if(zu) free(zu);
+      if(w) free(w);
       GSL_ERROR("failed to allocate working space", GSL_ENOMEM);
     }
   else

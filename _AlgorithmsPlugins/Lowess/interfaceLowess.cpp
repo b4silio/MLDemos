@@ -182,7 +182,6 @@ void RegrLowess::DrawModel(Canvas *canvas, QPainter &painter, Regressor *regress
 
     // get information about the canvas (size, indices and so on)
 	int w = canvas->width();
-    int h = canvas->height();
     int outputDim = regressor->outputDim;
 
     // initialize the points and samples
@@ -268,7 +267,6 @@ void RegrLowess::DrawConfidence(Canvas *canvas, Regressor *regressor)
     maxRadius -= minRadius;
 
     int w = canvas->width();
-    int h = canvas->height();
     QColor  lineClr(Qt::black);
     QPointF pointTop = canvas->toCanvasCoords(canvas->canvasTopLeft());
     QPointF pointBot = canvas->toCanvasCoords(canvas->canvasBottomRight());

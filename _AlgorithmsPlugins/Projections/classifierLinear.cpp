@@ -265,9 +265,9 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 		fVec tmp = e1;
 		e1 = e2;
 		e2 = tmp;
-		float lambda = eigenvalue1;
-		eigenvalue1 = eigenvalue2;
-		eigenvalue2 = lambda;
+        //float lambda = eigenvalue1;
+        //eigenvalue1 = eigenvalue2;
+        //eigenvalue2 = lambda;
 	}
 
 	e1=e1.normalize();
@@ -281,7 +281,7 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 	KILL(sigma);
 
     threshold = 0;
-	bool inverted = false;
+    //bool inverted = false;
 	// we do the actual classification
 	u32 steps = 1000;
 	u32 minError = samples.size();
@@ -307,13 +307,13 @@ void ClassifierLinear::TrainPCA(std::vector< fvec > samples, const ivec &labels)
 		}
 		if(minError > min(negError, error))
 		{
-			inverted = negError > error;
+            //inverted = negError > error;
 			minError = min(negError, error);
 			threshold = thresh;
 		}
 	}
 
-	float error = minError / (f32)samples.size();
+    //float error = minError / (f32)samples.size();
 }
 
 void ClassifierLinear::TrainLDA(std::vector< fvec > samples, const ivec &labels, int LDAType)
@@ -448,8 +448,9 @@ ClassifierLinear::~ClassifierLinear()
 
 void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels )
 {
-    if(!samples.size()) return;
+    if(samples.size() == 0) return;
     u32 dim = samples[0].size();
+    if(dim == 0) return;
 	meanAll.resize(dim,0);
 	FOR(i, samples.size())
 	{
@@ -486,11 +487,9 @@ void ClassifierLinear::TrainICA(std::vector< fvec > samples, const ivec &labels 
 	FOR(i,nbsensors*nbsensors) Transf[i] /= 10;
 
     projected = vector<fvec>(samples.size());
-    FOR(i, samples.size())
-    {
-        projected[i].resize(dim);
-        FOR(d, dim)
-        {
+    FOR(i, samples.size()) {
+        projected[i].resize(nbsensors);
+        FOR(d, nbsensors) {
             projected[i][d] = Data[i*nbsensors + d];
         }
     }

@@ -251,8 +251,6 @@ void Expose::DrawData(QPixmap& pixmap, std::vector<fvec> samples, std::vector<QC
         break;
     case 3: // andrews plots
     {
-        float radius = min(mapW, mapH)/3.f;
-        QPointF center(mapW*0.5f, mapH*0.5f);
         painter.setPen(Qt::black);
 
         // f(t) = x0/sqrt(2) + x1*sin(t) + x2*cos(t) + x3*sin(2t) + x4*cos(2t) + x5*sin(3t) + x6*cos(3t) + x7*sin(4t)
@@ -371,14 +369,13 @@ void Expose::DrawTrajectories(QPixmap& pixmap, vector< vector<fvec> > trajectori
     }
 
     int pad = 20;
-    int mapW = w - pad*2, mapH = h - pad*2;
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
 
     if(type==0)
     {
-        mapW = w/gridX - pad*2;
-        mapH = h/gridX - pad*2;
+        int mapW = w/gridX - pad*2;
+        int mapH = h/gridX - pad*2;
         int radiusBase = max(4.f, 4 * sqrtf(mapW / 200.f));
 
         QList<QPixmap> maps;
@@ -479,8 +476,6 @@ void Expose::DrawVariableData(QPixmap& pixmap, std::vector<fvec> samples, std::v
     int w = pixmap.width(), h = pixmap.height();
 
     int dim = samples[0].size();
-    int gridX = dim;
-    int gridY = dim;
 
     fvec mins(dim, FLT_MAX), maxes(dim, -FLT_MIN), diffs(dim, 0);
     FOR(d, dim)
@@ -565,7 +560,7 @@ void Expose::GenerateAndrewsPlots()
     }
 
     int pad = 20;
-    int mapW = (ui->scrollArea->width()-12) - pad*2, mapH = (ui->scrollArea->height()-12) - pad*2;
+    int mapH = (ui->scrollArea->height()-12) - pad*2;
 
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -573,8 +568,6 @@ void Expose::GenerateAndrewsPlots()
     pixmap.fill(Qt::white);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
-    float radius = min(mapW, mapH)/3.f;
-    QPointF center(mapW*0.5f, mapH*0.5f);
     QPointF old;
     painter.setPen(Qt::black);
 
@@ -749,7 +742,6 @@ void Expose::GenerateScatterPlot(bool bCheckOnly)
     ivec labels = canvas->data->GetLabels();
     if(!samples.size()) return;
     int dim = samples[0].size();
-    bool bEvenCount = dim%2 == 1;
     int gridX = dim;
     int gridY = dim;
 

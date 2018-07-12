@@ -147,8 +147,8 @@ void run_isomap(float* X, int N, int D, float* Y, int no_dims, int K) {
     }
     
     // Perform centering of geodesic distance matrix
-    float* row_sums = (float*) calloc(N, sizeof(float));
-    float* col_sums = (float*) calloc(N, sizeof(float));
+    float* row_sums = N ? (float*) calloc(N, sizeof(float)) : 0;
+    float* col_sums = N ? (float*) calloc(N, sizeof(float)) : 0;
     for(int n = 0; n < N; n++) {
         for(int m = 0; m < N; m++) {
             row_sums[m] += gD[n * N + m];
@@ -166,7 +166,6 @@ void run_isomap(float* X, int N, int D, float* Y, int no_dims, int K) {
         }
     }
     
-
     MathLib::Matrix gDMatrix(N,N);
     for(int n=0; n<N; n++)
     {
@@ -205,7 +204,7 @@ void run_isomap(float* X, int N, int D, float* Y, int no_dims, int K) {
         if(comp_no[n] == max_ind) {
             int count_d = 0;
             for(int d = N - 1; d >= N - no_dims; d--) {
-                Y[n * no_dims + count_d] = gD[d * N + cur_n] * sqrt(lambda[d]);
+                Y[n * no_dims + count_d] = gD[d * N + cur_n] * sqrt((d>=0 && d<N) ? lambda[d] : 0);
                 count_d++;
             }
             cur_n++;
@@ -244,6 +243,8 @@ void run_isomap(float* X, int N, int D, float* Y, int no_dims, int K) {
 	}
     
     // Clean up memory
+    free(min_val);
+    free(max_val);
     free(DD);
     free(new_sr);
     free(new_irs);
@@ -296,7 +297,9 @@ void find_largest_connected_component(int* comp_no, int N, int* max_ind, int* ma
     for(int n = 0; n < N; n++) {
         if(comp_no[n] > no_comp) no_comp = comp_no[n];
     }
-    
+    *max_ind = 0, *max_count = 0;
+    if(no_comp == 0) return;
+
     // Compute size of each component
     int* counts = (int*) calloc(no_comp, sizeof(int));
     for(int n = 0; n < N; n++) {
@@ -304,7 +307,6 @@ void find_largest_connected_component(int* comp_no, int N, int* max_ind, int* ma
     }
     
     // Find largest component
-    *max_ind = 0, *max_count = 0;
     for(int i = 0; i < no_comp; i++) {
         if(counts[i] > *max_count) {
             *max_count = counts[i];

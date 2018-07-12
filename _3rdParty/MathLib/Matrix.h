@@ -2641,7 +2641,7 @@ public:
 
             REALTYPE *cSrc1  = _;
             REALTYPE *cSrc1o = cSrc1;
-            REALTYPE *cSrc2  = cSrc1;
+            REALTYPE *cSrc2;// = cSrc1;
             REALTYPE *cSrc2o = cSrc1;
             unsigned int colLen = column;
             while(colLen){

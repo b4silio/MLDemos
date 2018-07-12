@@ -115,7 +115,7 @@ float ClassifierKNN::Test( const fvec &sample ) const
 	FOR(i, k)
 	{
 		if(nnIdx[i] >= labels.size()) continue;
-		int label = labels[nnIdx[i]];
+        //int label = labels[nnIdx[i]];
 		//if(counts.count(label)) counts[label]++;
 		//else counts[label] = 0;
 		score += labels[nnIdx[i]];

@@ -136,11 +136,10 @@ fvec ClassMRVM::GetParams()
 void ClassMRVM::SetParams(Classifier *classifier, fvec parameters)
 {
     if(!classifier) return;
-    int svmType = params->svmTypeCombo->currentIndex();
     float svmC, kernelGamma;
     bool bOptimize;
 
-    svmType = parameters.size() > 0 ? parameters[0] : 0;
+    int svmType = parameters.size() > 0 ? parameters[0] : 0;
     svmC = parameters.size() > 1 ? parameters[1] : 1;
     kernelGamma = parameters.size() > 2 ? parameters[2] : 0.1;
     bOptimize = parameters.size() > 3 ? parameters[3] : 0;

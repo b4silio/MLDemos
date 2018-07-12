@@ -89,7 +89,7 @@ private: // Private methods
   /**  */
   void saveAsSOMLib();
   /**  */
-  void getNewWeights(int xPos, int yPos, float *UL, float *UR, float *LL, float *LR);
+  void getNewWeights(unsigned int xPos, unsigned int yPos, float *UL, float *UR, float *LL, float *LR);
 };
 
 #endif

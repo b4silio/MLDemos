@@ -182,18 +182,13 @@ void ClassifierMRVM::OptimizeGradient(svm_problem *problem)
     int restarts = 0;
     FOR(it, iterations)
     {
-        //QString s1, s2;
-        double norm=0;
         FOR(d, dim)
         {
             double delta = kernelFunctionMRVM(svm, d);
             deltas[d] = delta;
-            //s1 += QString("%1 ").arg(delta);
-            norm += deltas[d]*deltas[d];
         }
-        norm = sqrt(norm);
+
         // find the step size
-        //gammaStep = 2;
         double obj;
 
         // armijo's rule
@@ -354,7 +349,7 @@ void ClassifierMRVM::Train(std::vector< fvec > samples, ivec labels)
 
 float GetScore(MRVM *mrvm, vector<fvec> &samples, ivec &labels, bool bInvert)
 {
-    double dual = mrvm->Dual();
+    //double dual = mrvm->Dual();
     double error = 0;
     double *s = new double[mrvm->dim];
     FOR(i, samples.size())
@@ -411,8 +406,8 @@ void ClassifierMRVM::OptimizeRandomWalk(vector<fvec> samples, ivec labels)
         memcpy(mrvm.alphas, alphas, count*sizeof(double));
         if(it)
         {
-            int i = rand()%posCount;
-            int j = rand()%(count-posCount) + posCount;
+            int i = posCount ? rand()%posCount : 0;
+            int j = ((count-posCount) ? rand()%(count-posCount) : 0) + posCount;
             //FOR(i, count)
             {
                 float newBeta = mrvm.betas[i] += (drand48()-0.5)*step;

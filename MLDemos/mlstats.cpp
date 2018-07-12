@@ -34,8 +34,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-void MLDemos::MouseOnRoc(QMouseEvent *event)
+void MLDemos::MouseOnRoc(QMouseEvent */*event*/)
 {
+    /*
     int e;
     switch( event->button())
     {
@@ -46,7 +47,8 @@ void MLDemos::MouseOnRoc(QMouseEvent *event)
         e = EVENT_RBUTTONUP;
         break;
     }
-    //roc_on_mouse(e, event->x(), event->y(), 0, 0);
+    roc_on_mouse(e, event->x(), event->y(), 0, 0);
+    */
     //rocWidget->ShowImage(GetRocImage());
     //statsDialog->repaint();
 }

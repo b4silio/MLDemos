@@ -394,7 +394,6 @@ void MLDemos::DrawCrosshair()
         canvas->bNewCrosshair = false;
         return;
     }
-    int type = drawToolbarContext1->randCombo->currentIndex();
     float aX = drawToolbarContext2->spinSigmaX->value();
     float aY = drawToolbarContext2->spinSigmaY->value();
     float angle = -drawToolbarContext2->spinAngle->value()/180.f*PIf;
@@ -528,7 +527,7 @@ void MLDemos::TargetButton()
         canvas->targetAge.clear();
         canvas->repaint();
     }
-    Qt::DropAction dropAction = drag->exec();
+    drag->exec();
 }
 
 void MLDemos::ClearTargets()
@@ -559,7 +558,7 @@ void MLDemos::GaussianButton()
     painter.drawEllipse(QPoint(16,16), 1,1);
     drag->setPixmap(pixmap);
     drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
-    Qt::DropAction dropAction = drag->exec();
+    drag->exec();
 }
 
 void MLDemos::GradientButton()
@@ -580,5 +579,5 @@ void MLDemos::GradientButton()
     painter.drawLine(QPoint(29,4), QPoint(29,29));
     drag->setPixmap(pixmap);
     drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
-    Qt::DropAction dropAction = drag->exec();
+    drag->exec();
 }

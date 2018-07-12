@@ -1,6 +1,6 @@
 // Copyright (C) 2007  Davis E. King (davis@dlib.net)
 // License: Boost Software License   See LICENSE.txt for the full license.
-#ifndef DLIB_SVm_HEADER
+#ifndef DLIB_SVM_HEADER
 #define DLIB_SVM_HEADER
 
 #include "svm/svm.h"
@@ -46,6 +46,6 @@
 #include "svm/sequence_labeler.h"
 #include "svm/assignment_function.h"
 
-#endif // DLIB_SVm_HEADER
+#endif // DLIB_SVM_HEADER
 
 

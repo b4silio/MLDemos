@@ -74,17 +74,17 @@ void MaximizeSwarm::Draw(QPainter &painter)
             painter.setBrush(Qt::green);
             painter.drawEllipse(QPointF(x*w, y*h), radius, radius);
         }
-    }
 
-    // draw all the particles visited in the past
-    FOR(i, pso->evaluationHistory.size())
-    {
-        pair<int,int> sample = pso->evaluationHistory[i];
-        QPointF point(sample.first, sample.second);
-        int radius = 3;
-        painter.setBrush(Qt::NoBrush);
-        painter.setPen(Qt::black);
-        painter.drawEllipse(point, radius, radius);
+        // draw all the particles visited in the past
+        FOR(i, pso->evaluationHistory.size())
+        {
+            pair<int,int> sample = pso->evaluationHistory[i];
+            QPointF point(sample.first, sample.second);
+            int radius = 3;
+            painter.setBrush(Qt::NoBrush);
+            painter.setPen(Qt::black);
+            painter.drawEllipse(point, radius, radius);
+        }
     }
 
     painter.setPen(QPen(Qt::black, 1.5));

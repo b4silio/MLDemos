@@ -413,7 +413,6 @@ f32 SampleManager::Compare(IplImage *sample)
 
 	// now compute the differences
 	f32 minDist = 1.0f;
-	u32 index = 0;
 	IplImage *diff = cvCloneImage(s);
 	FOR(i, samples.size())
 	{
@@ -421,7 +420,6 @@ f32 SampleManager::Compare(IplImage *sample)
 		f32 dist = (f32)cvSum(diff).val[0] / (f32)(size.width*size.height) / 255.f;
 		if(minDist > dist)
 		{
-			index = i;
 			minDist = dist;
 		}
 	}
@@ -490,7 +488,7 @@ void SampleManager::Save(const char *filename)
 
 	IplImage *labelImg = cvCreateImage(size, 8, 3);
 	u32 passes = 1 + (sampleCnt+2) / (size.width*size.height*3);
-	u32 cnt = min(size.width*size.height*3, (int)sampleCnt);
+    u32 cnt;// = min(size.width*size.height*3, (int)sampleCnt);
 	cvZero(labelImg); // we want at least one empty label
 	samples.push_back(labelImg);
 	FOR(i, passes)

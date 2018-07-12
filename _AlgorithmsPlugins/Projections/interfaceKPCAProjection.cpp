@@ -339,7 +339,6 @@ void KPCAProjection::DrawContours(int index)
         }
         int gridX = std::ceil(sqrtf(maximum));
         //int gridY = std::ceil(maximum / (float)gridX);
-        int gridY = gridX;
 
         int w = contourPixmaps[1].width();
         int h = contourPixmaps[1].height();
@@ -380,7 +379,7 @@ void DrawEigenvals(QPainter &painter, fvec eigs, bool bSkipFirstEigenvector)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    int rectW = (w-2*pad) / dim - 2;
+    int rectW = dim ? (w-2*pad) / dim - 2 : w-2*pad;
     FOR(i, dim)
     {
         float eigval = eigs[i];
@@ -526,8 +525,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
             points[i] = make_pair(projector->projected[i][0], i);
         }
         sort(points.begin(), points.end());
-        float minVal = points.front().first;
-        float maxVal = points.back().first;
 
         // now we go through the points and compute the back projection
         int steps = min((int)points.size(), 64);
@@ -535,7 +532,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
         vector<QPointF> pointList;
         FOR(i, steps)
         {
-            float val = (i+1)/(float)steps*(maxVal-minVal) + minVal;
             int nextIndex = (i+1)/(float)steps*points.size();
             fvec mean(canvas->data->GetDimCount());
             float meanVal = 0;
@@ -551,7 +547,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
             mean /= count;
             meanVal /= count;
             // we look for the closest point to the value in projected space
-            int closest = 0;
             float closestDist = FLT_MAX;
             FOR(p, points.size())
             {
@@ -559,7 +554,6 @@ void KPCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
                 if(dist < closestDist)
                 {
                     closestDist = dist;
-                    closest = p;
                 }
             }
             QPointF point = canvas->toCanvasCoords(mean);

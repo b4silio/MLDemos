@@ -167,6 +167,8 @@ void Globals::addLayer(int level,NeuronLayer *nl){
     Layer_Vector *newLayer = new Layer_Vector();
     if (level>=layers->size()) {
         layers->addElement(newLayer);
+    } else {
+        delete newLayer;
     }
     layers->elementAt(level)->addElement(nl);
 }

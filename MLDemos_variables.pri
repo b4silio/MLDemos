@@ -7,13 +7,9 @@
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
 QT += svg opengl
-greaterThan(QT_MAJOR_VERSION, 4) {
-	QT += widgets
-	macx: LIBS += -framework QtWidgets
-} else {
-}
-#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-#macx: LIBS += -framework QtWidgets
+QT += widgets
+macx: LIBS += -framework QtWidgets
+
 macx: QMAKE_MAC_SDK=macosx10.11
 
 #################################
@@ -23,15 +19,14 @@ CONFIG(coreLib)|CONFIG(mainApp) ROOT = ..
 else: ROOT = ../..
 
 !CONFIG(coreLib){
-	INCLUDEPATH += $$ROOT
-	INCLUDEPATH += $$ROOT/Core
-	INCLUDEPATH += $$OUT_PWD/$$ROOT/Core
-	INCLUDEPATH += $$ROOT/_3rdParty
-	INCLUDEPATH += $$OUT_PWD/$$ROOT/_3rdParty
-	LIBS += -L$$ROOT/lib
-	PRE_TARGETDEPS += $$OUT_PWD/$$ROOT/Core
+    INCLUDEPATH += $$ROOT
+    INCLUDEPATH += $$ROOT/Core
+    INCLUDEPATH += $$OUT_PWD/$$ROOT/Core
+    INCLUDEPATH += $$ROOT/_3rdParty
+    INCLUDEPATH += $$OUT_PWD/$$ROOT/_3rdParty
+    LIBS += -L$$ROOT/lib
+    PRE_TARGETDEPS += $$OUT_PWD/$$ROOT/Core
 }
-
 
 #CONFIG(coreLib): DESTDIR=$$ROOT/lib
 #else: DESTDIR=$$ROOT/bin
@@ -77,12 +72,9 @@ win32{
     CONFIG += opencv3
     OPENCV_VER = 341
 }else:macx{
-#    CONFIG += opencv21
-	CONFIG += opencv3
+    CONFIG += opencv3
 }else{
     CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
-#   CONFIG += opencv22
-#   CONFIG += opencv21
 }
 
 # Boost
@@ -98,12 +90,16 @@ win32{
 # manager     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/build/x86/mingw
 
 win32{
-    CONFIG(boost):BOOST = C:/DEV/boost_1_66_0
-    CONFIG(opencv3)|CONFIG(opencv21)|CONFIG(opencv22):OPENCV = C:/opencv/build
+    BOOST = C:/DEV/boost_1_66_0
+    OPENCV = C:/opencv/build
 }else:macx{
-	CONFIG(boost):BOOST = /usr/local/include
-    CONFIG(opencv22|opencv21):OPENCV = /usr/local/opt/opencv3
+    BOOST = /usr/local/include
+    BREW_FFMPEG = /usr/local/Cellar/ffmpeg/4.0.1
+    BREW_OPENCV = /usr/local/Cellar/opencv3/3.4.2
+    BREW_LIBPNG = /usr/local/Cellar/libpng/1.6.34
+    BREW_PNGPP  = /usr/local/Cellar/png++/0.2.5_1
 }
+
 
 # PLEASE EDIT UNTIL HERE TO FIT YOUR NEEDS/SETUP
 
@@ -111,21 +107,6 @@ win32{
 # Autoconfiguration part #
 ##########################
 
-win32{
-	DEFINES += WIN32
-	CONFIG += WIN32
-}else:macx{
-    DEFINES += MACX
-    CONFIG += MACX
-}else:unix{
-    CONFIG += link_pkgconfig
-}
-
-win32{
-	#INCLUDEPATH += C:/DEV/glew-1.9.0/include
-	#LIBS += -LC:/DEV/glew-1.9.0/lib
-	#LIBS += -lglew32 -lglu32 -lopengl32 -lglut32win
-}
 
 # OPENCV
 win32{
@@ -159,81 +140,65 @@ CONFIG(opencv22){
 #	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
     LIBS += -lopencv_core$$OPENCV_VER \
         -lopencv_features2d$$OPENCV_VER \
-		-lopencv_highgui$$OPENCV_VER \
-		-lopencv_imgproc$$OPENCV_VER \
-		-lopencv_legacy$$OPENCV_VER \
+                -lopencv_highgui$$OPENCV_VER \
+                -lopencv_imgproc$$OPENCV_VER \
+                -lopencv_legacy$$OPENCV_VER \
                 -lopencv_ml$$OPENCV_VER
     }
 }
 macx{
-CONFIG(opencv3){
-        DEFINES += OPENCV3
-        INCLUDEPATH += $$OPENCV/include
-        LIBS += -L/usr/local/opt/opencv3/lib
-        INCLUDEPATH += /usr/local/opt/opencv3/include
-        INCLUDEPATH += /opt/local/include
+    DEFINES += OPENCV3
 
-        #LIBS += -L/usr/local/lib
-		message("Using opencv3 or later")
-		LIBS += \
-        -lopencv_bgsegm \
-        -lopencv_calib3d \
-        -lopencv_highgui \
-        -lopencv_imgcodecs \
-        -lopencv_imgproc \
-        -lopencv_videoio \
-        -lopencv_objdetect \
-        -lopencv_ml \
-        -lopencv_core
-	}
-    CONFIG(opencv22){
-        DEFINES += OPENCV22
-		LIBS += -L/usr/local/lib
-        message("Using opencv22 or later")
-		LIBS += -lopencv_core \
-				-lopencv_calib3d \
-				-lopencv_contrib \
-				-lopencv_features2d \
-				-lopencv_flann \
-				-lopencv_gpu \
-				-lopencv_highgui \
-				-lopencv_imgproc \
-				-lopencv_legacy \
-				-lopencv_objdetect \
-				-lopencv_video \
-				-lopencv_ml
+    INCLUDEPATH += $$BREW_FFMPEG/include $$BREW_OPENCV/include # $$BREW_LIBPNG/include $$BREW_PNGPP/include
+    LIBS += -L$$BREW_FFMPEG/lib -L$$BREW_OPENCV/lib # -L$$BREW_LIBPNG/lib
 
-    }
-    CONFIG(opencv21) {
-        DEFINES += OPENCV21
-        message("Using opencv21")
-        LIBS += -lcv \
-                -lcxcore \
-                -lcvaux \
-                -lml \
-                -lhighgui
-    }
+    LIBS += \
+    -lopencv_bgsegm \
+    -lopencv_calib3d \
+    -lopencv_highgui \
+    -lopencv_imgcodecs \
+    -lopencv_imgproc \
+    -lopencv_videoio \
+    -lopencv_objdetect \
+    -lopencv_ml \
+    -lopencv_core
 }else:unix{
 # some issues between qmake and pkgconfig
 # invoking pkg-config manually instead
     CONFIG(opencv22){
         PKGCONFIG += opencv
         DEFINES += OPENCV22
-        message("Using opencv22 or later")
+        #message("Using opencv22 or later")
         LIBS += $$system(pkg-config --libs opencv)
     }
     CONFIG(opencv21) {
-	PKGCONFIG += opencv
-	DEFINES += OPENCV21
-        message("Using opencv21")
+        PKGCONFIG += opencv
+        DEFINES += OPENCV21
+        #message("Using opencv21")
         LIBS += $$system(pkg-config --libs opencv)
     }
 }
 
+win32{
+    DEFINES += WIN32
+    CONFIG += WIN32
+}else:macx{
+    DEFINES += MACX
+    CONFIG += MACX
+}else:unix{
+    CONFIG += link_pkgconfig
+}
+
+#win32{
+    #INCLUDEPATH += C:/DEV/glew-1.9.0/include
+    #LIBS += -LC:/DEV/glew-1.9.0/lib
+    #LIBS += -lglew32 -lglu32 -lopengl32 -lglut32win
+#}
+
 # BOOST
 CONFIG(boost){
     DEFINES += WITHBOOST
-    message("Using boost libraries")
+    #message("Using boost libraries")
     macx|win32{
         INCLUDEPATH += "$$BOOST"
     }else:unix{
@@ -253,14 +218,6 @@ mainApp|coreLib{
 }
 CONFIG(debug, debug|release){
 	DEFINES += DEBUG
-	message("debug mode")
-#	QMAKE_CXXFLAGS += -pg
-#	QMAKE_LFLAGS += -pg
-}else{
-	message("release mode")
-#	linux-g++:QMAKE_CXXFLAGS += -O2 -march=native -pipe
-#        macx-g++:QMAKE_CXXFLAGS += -O2
-#        win32-g++:QMAKE_CXXFLAGS += -O2
 }
 
 win32{
@@ -281,12 +238,6 @@ win32{
     RCC_DIR = $${MLBUILD}
     OBJECTS_DIR = $${MLBUILD}
 }
-
-#QMAKE_CXXFLAGS += -pg
-#QMAKE_CXXFLAGS_DEBUG += -pg
-#QMAKE_LFLAGS += -pg
-#QMAKE_LFLAGS_DEBUG += -pg
-
 
 ################################
 # Turn the bloody warnings off #

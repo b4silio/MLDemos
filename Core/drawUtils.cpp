@@ -139,7 +139,6 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    int w = pixmap.width(), h = pixmap.height();
     int PAD = 16;
 
     QFont font = painter.font();
@@ -183,7 +182,8 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
                 else truePerClass[data[i].first]++;
             }
 
-            float macroFMeasure = 0.f, microFMeasure = 0.f;
+            //float macroFMeasure = 0.f;
+            float microFMeasure = 0.f;
             int microTP = 0, microFP = 0, microTN = 0, microCount = 0;
             float microPrecision = 0.f;
             float microRecall = 0.f;
@@ -192,18 +192,18 @@ QPixmap RocImage(std::vector< std::vector<f32pair> > rocdata, std::vector<const 
                 int c = it->first;
                 int tp = truePerClass[c];
                 int fp = falsePerClass[c];
-                int fn = countPerClass[c] - tp;
+                //int fn = countPerClass[c] - tp;
                 int tn = countPerClass[c] - fp;
                 int count = it->second;
                 microTP += tp;
                 microFP += fp;
                 microTN += tn;
                 microCount += count;
-                float precision = tp / float(tp + fp);
-                float recall = tp / float(count);
-                macroFMeasure += 2*precision*recall/(precision+recall);
+                //float precision = tp / float(tp + fp);
+                //float recall = tp / float(count);
+                //macroFMeasure += 2*precision*recall/(precision+recall);
             }
-            macroFMeasure /= countPerClass.size();
+            //macroFMeasure /= countPerClass.size();
             microPrecision = microTP / float(microTP + microFP);
             microRecall = microTP / float(microCount);
             microFMeasure = 2*microPrecision*microRecall/(microPrecision + microRecall);
@@ -1159,7 +1159,7 @@ void draw_recursive_tri(float *a,float *b,float *c,unsigned int div, vector<fvec
     }
     else
     {
-        register unsigned int i;
+        unsigned int i;
         float ab[3],ac[3],bc[3];
         for (i=0; i<3; i++)
         {
@@ -1601,7 +1601,7 @@ void Draw3DDynamical(GLWidget *glw, Dynamical *dynamical, int displayStyle)
     qDebug() << "computing field entropy";
     int gridSteps = 80;
     int hSteps = 20;
-    int hRatio = gridSteps/hSteps;
+    //int hRatio = gridSteps/hSteps;
     fvec H = ComputeDynamicalEntropy(dynamical, fvec(dim,minv), fvec(dim,maxv), gridSteps, hSteps);
     vector< pair<float,int> > hList(H.size());
     float hSum = 0;

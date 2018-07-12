@@ -48,7 +48,7 @@ asvm::asvm(const asvm& o)
     if(o.temp2)
     {
         temp2 = new double[dim];
-        memcpy(temp2, o.temp1, dim*sizeof(double));
+        memcpy(temp2, o.temp2, dim*sizeof(double));
     }else temp2 = 0;
     if(o.svalpha)
     {
@@ -179,7 +179,7 @@ asvm& asvm::operator=(const asvm& o)
     if(o.temp2)
     {
         temp2 = new double[dim];
-        memcpy(temp2, o.temp1, dim*sizeof(double));
+        memcpy(temp2, o.temp2, dim*sizeof(double));
     }
     if(o.svalpha)
     {

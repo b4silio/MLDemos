@@ -126,8 +126,8 @@ integer direct_dirgetlevel_(integer *pos, integer *length, integer *maxfunc, int
     length -= length_offset;
 
     /* Function Body */
-    helplower = HUGE_VAL;
-    helpgreater = 0.;
+    //helplower = HUGE_VAL;
+    //helpgreater = 0.;
     k = 1;
     if (*ifeasiblef >= 1) {
 	i__1 = *actdeep;
@@ -556,7 +556,7 @@ L40:
 /* | new side length to this lengths times the growth factor.              | */
 /* +-----------------------------------------------------------------------+ */
 	    help = direct_dirgetmaxdeep_(&i__, &length[length_offset], maxfunc, n);
-	    sidelength = thirds[help] * 2.;
+        //sidelength = thirds[help] * 2.;
 /* +-----------------------------------------------------------------------+ */
 /* | Set the Center and the upper and lower bounds of the rectangles.      | */
 /* +-----------------------------------------------------------------------+ */
@@ -878,7 +878,7 @@ L50:
     --x;
     --arrayi;
     --point;
-    f -= 3;
+    //f -= 3;
     length_dim1 = *n;
     length_offset = 1 + length_dim1;
     length -= length_offset;
@@ -1191,7 +1191,7 @@ L50:
 
     /* Function Body */
     *minf = HUGE_VAL;
-    costmin = *minf;
+    //costmin = *minf;
 /* JG 09/15/00 If Jones way of characterising rectangles is used, */
 /*             initialise thirds to reflect this. */
     if (jones == 0) {
@@ -1256,7 +1256,7 @@ L50:
     }
 /* JG 09/25/00 Remove IF */
     *minf = f[3];
-    costmin = f[3];
+    //costmin = f[3];
     *minpos = 1;
     *actdeep = 2;
     point[1] = 0;

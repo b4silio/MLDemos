@@ -279,15 +279,16 @@ void GridSearch::DisplayResults()
 
 fPair GridSearch::GetParamsRange()
 {
-    int xSteps = ui->steps1Spin->value();
-    int ySteps = ui->steps2Spin->value();
+    //int xSteps = ui->steps1Spin->value();
+    //int ySteps = ui->steps2Spin->value();
     int xIndex = ui->names1Combo->currentIndex();
     int yIndex = ui->names2Combo->currentIndex();
     bool bNone1 = xIndex == ui->names1Combo->count()-1;
     bool bNone2 = yIndex == ui->names2Combo->count()-1;
     float xMin=0, xMax=0, yMin=0, yMax=0;
-    if(bNone1) xSteps = 1; // none!
-    else
+    //if(bNone1) xSteps = 1; // none!
+    //else
+    if(!bNone1)
     {
         if(types[xIndex] == "List")
         {
@@ -298,10 +299,11 @@ fPair GridSearch::GetParamsRange()
             xMin = ui->start1Spin->value();
             xMax = ui->stop1Spin->value();
         }
-        if(types[xIndex] == "Integer") xSteps = min(xSteps, (int)(xMax-xMin)+1);
+        //if(types[xIndex] == "Integer") xSteps = min(xSteps, (int)(xMax-xMin)+1);
     }
-    if(bNone2) ySteps = 1; // none!
-    else
+    //if(bNone2) ySteps = 1; // none!
+    //else
+    if(!bNone2)
     {
         if(types[yIndex] == "List")
         {
@@ -312,10 +314,10 @@ fPair GridSearch::GetParamsRange()
             yMin = ui->start2Spin->value();
             yMax = ui->stop2Spin->value();
         }
-        if(types[yIndex] == "Integer") ySteps = min(ySteps, (int)(yMax-yMin)+1);
+        //if(types[yIndex] == "Integer") ySteps = min(ySteps, (int)(yMax-yMin)+1);
     }
-    if(xMin==xMax) xSteps = 1;
-    if(yMin==yMax) ySteps = 1;
+    //if(xMin==xMax) xSteps = 1;
+    //if(yMin==yMax) ySteps = 1;
     fPair ranges;
     ranges.first = make_pair(xMin,xMax);
     ranges.second = make_pair(yMin,yMax);
@@ -567,8 +569,10 @@ void GridSearch::Run()
                     measure3[f] = evals;
                     delete m;
                 }
-                else if(reinforcement);
-                else if(projector);
+                else if(reinforcement)
+                    ;
+                else if(projector)
+                    ;
             }
             // now we fill the error map
             float measure1Mean = 0, measure2Mean = 0, measure3Mean = 0;

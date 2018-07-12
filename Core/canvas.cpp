@@ -404,6 +404,7 @@ QRgb Canvas::GetColorMapValue(float value, int colorscheme=2)
     float r, g, b;
     switch(colorscheme)
     {
+    default:
     case 0:
         {
             r = value;
