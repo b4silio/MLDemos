@@ -512,9 +512,9 @@ void PCAProjector::SaveDataset()
     QString filename = QFileDialog::getSaveFileName(samplesWindow, tr("Save Dataset"), "", tr("Dataset Images (*.png)"));
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".png")) filename += ".png";
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly)) return;
-    file.close();
+    //QFile file(filename);
+    //if (!file.open(QIODevice::WriteOnly)) return;
+    //file.close();
     sm.Save(filename.toLatin1());
 }
 

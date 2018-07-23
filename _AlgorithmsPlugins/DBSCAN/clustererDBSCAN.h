@@ -67,7 +67,7 @@ public:
       The testing function, returns a vector of size nbClusters, with the contribution/weight of the point for each cluster
       */
     fvec Test( const fvec &sample);
-    fvec TestMany( const fvec &sampleMatrix);
+    //fvec TestMany( const fvec &sampleMatrix, const int dim, const int count);
 
     /**
       Information string for the Algorithm Information and Statistics panel in the main program interface.

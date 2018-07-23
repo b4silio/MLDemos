@@ -30,19 +30,19 @@ protected:
 	bool bIterative;
 
 public:
-    Clusterer() : dim(2), bIterative(false), nbClusters(1) {}
+    Clusterer() : dim(2), nbClusters(1), bIterative(false) {}
     virtual ~Clusterer(){}
     void Cluster(std::vector< fvec > allsamples) {Train(allsamples);}
     void SetIterative(bool iterative){bIterative = iterative;}
     int NbClusters(){return nbClusters;}
     virtual Clusterer* clone() const{ return new Clusterer(*this);}
 
-    virtual void Train(std::vector< fvec > samples){}
-    virtual fvec Test( const fvec &sample){ return fvec(); }
+    virtual void Train(std::vector< fvec > /*sample*/){}
+    virtual fvec Test( const fvec &/*sample*/){ return fvec(); }
     virtual fvec Test(const fVec &sample){ return Test((fvec)sample); }
     virtual fvec TestMany( const fvec& sampleMatrix, const int dim, const int count);
     virtual const char *GetInfoString(){ return NULL; }
-    virtual void SetClusterTestValue(int count, int max){ nbClusters = count; }
+    virtual void SetClusterTestValue(int count, int /*max*/){ nbClusters = count; }
     virtual float GetLogLikelihood(std::vector<fvec> samples);
     virtual float GetParameterCount(){return nbClusters*dim;}
 };

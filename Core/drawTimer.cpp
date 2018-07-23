@@ -21,7 +21,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QWidget>
 #include <QSize>
 #include <QPixmap>
-#include <QDebug>
 #include <QMutexLocker>
 
 #include "public.h"
@@ -31,24 +30,25 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 DrawTimer::DrawTimer(Canvas *canvas, QMutex *mutex)
-    : canvas(canvas),
-      refineLevel(0),
+    : refineLevel(0),
       refineMax(10),
+      perm(0),
+      canvas(canvas),
+      w(0), h(0),
+      dim(2),
       classifier(0),
       regressor(0),
       dynamical(0),
       clusterer(0),
       maximizer(0),
       reinforcement(0),
-      bRunning(false),
-      bPaused(false),
-      bColorMap(true),
       mutex(mutex),
       glw(0),
-      perm(0), w(0), h(0), dim(2), maximumVisitedCount(0)
-{
-
-}
+      bPaused(false),
+      bRunning(false),
+      bColorMap(true),
+      maximumVisitedCount(0)
+{}
 
 DrawTimer::~DrawTimer()
 {
@@ -374,7 +374,7 @@ void DrawTimer::Refine()
     bool bRefined = true;
     if(refineLevel == 0) {
         Clear();
-        if(maximizer && (*maximizer) || reinforcement && (*reinforcement)) {
+        if((maximizer && (*maximizer)) || (reinforcement && (*reinforcement))) {
             refineMax = 100;
         }
         if(dynamical && (*dynamical)) {
@@ -901,6 +901,12 @@ bool DrawTimer::TestFast(int start, int stop)
     float zxh = 1.f / (canvas->zoom*canvas->zooms[xIndex]*cheight);
     float zyh = 1.f / (canvas->zoom*canvas->zooms[yIndex]*cheight);
     fvec center = canvas->center;
+    if(bRestrictedDims) {
+        fvec newCenter(2,0);
+        newCenter[0] = center[xIndex];
+        newCenter[1] = center[yIndex];
+        center = newCenter;
+    }
     mutex->unlock();
     if(dim > 2) return false; // we dont want to draw multidimensional stuff, it's ... problematic
     fvec sampleMatrix(dim*(stop-start));

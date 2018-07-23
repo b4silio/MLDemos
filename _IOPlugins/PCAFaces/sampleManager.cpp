@@ -22,7 +22,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "basicOpenCV.h"
 #include "sampleManager.h"
 #include <QDebug>
-
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 
 using namespace std;
 
@@ -487,13 +488,12 @@ void SampleManager::Save(const char *filename)
 	u32 sampleCnt = samples.size();
 
 	IplImage *labelImg = cvCreateImage(size, 8, 3);
-	u32 passes = 1 + (sampleCnt+2) / (size.width*size.height*3);
-    u32 cnt;// = min(size.width*size.height*3, (int)sampleCnt);
+    u32 passes = 1 + ((sampleCnt+2) / (size.width*size.height*3));
 	cvZero(labelImg); // we want at least one empty label
 	samples.push_back(labelImg);
 	FOR(i, passes)
 	{
-		cnt = min(size.width*size.height*3, (int)sampleCnt - (int)i*size.width*size.height*3);
+        u32 cnt = min(size.width*size.height*3, (int)sampleCnt - (int)i*size.width*size.height*3);
 		labelImg = cvCreateImage(size, 8, 3);
 		cvZero(labelImg);
 		FOR(j, cnt)
@@ -508,14 +508,15 @@ void SampleManager::Save(const char *filename)
 	// we write down the size of the samples in the last pixel of the image
     cvSet2D(image,image->height-1,image->width-1,CV_RGB(255, size.height, size.width));
 
-
 	FOR(i, passes+1)
 	{
 		IMKILL(samples[samples.size()-1]);
 		samples.pop_back();
 	}
+    cv::Mat img = cv::cvarrToMat(image);
 
-	cvSaveImage(filename, image);
+    cv::imwrite(filename, img);
+    //cvSaveImage(filename, image);
 	IMKILL(image);
 }
 

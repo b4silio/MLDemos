@@ -120,7 +120,8 @@ void AlgorithmManager::Cluster()
     Train(clusterer, trainRatio, trainList, &testError);
 
     // we compute the stats on the clusters (f-measure, bic etc)
-    vector<fvec> samples = canvas->data->GetSamples();
+    ivec inputDims = GetInputDimensions();
+    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
     ivec labels = canvas->data->GetLabels();
     float logL = clusterer->GetLogLikelihood(samples);
     float n = samples.size();
@@ -234,7 +235,8 @@ void AlgorithmManager::ClusterTest()
     //int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
     //if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
-    vector<fvec> samples = canvas->data->GetSamples();
+    ivec inputDims = GetInputDimensions();
+    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
     //ivec labels = canvas->data->GetLabels();
     //int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
     //float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
@@ -329,7 +331,9 @@ void AlgorithmManager::ClusterOptimize()
     int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
     if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
-    vector<fvec> samples = canvas->data->GetSamples();
+
+    ivec inputDims = GetInputDimensions();
+    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
     ivec labels = canvas->data->GetLabels();
     int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
     float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
@@ -514,7 +518,8 @@ void AlgorithmManager::ClusterIterate()
 
 
     // we fill in the canvas sampleColors
-    vector<fvec> samples = canvas->data->GetSamples();
+    ivec inputDims = GetInputDimensions();
+    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
     canvas->sampleColors.resize(samples.size());
     FOR(i, samples.size())
     {
