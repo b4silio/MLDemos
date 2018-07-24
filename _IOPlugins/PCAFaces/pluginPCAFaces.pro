@@ -10,7 +10,8 @@ include($$MLPATH/MLDemos_variables.pri)
 ###########################
 # Source Files            #
 ###########################
-FORMS += PCAFaces.ui
+FORMS += PCAFaces.ui \
+    eigenvalues.ui
 
 HEADERS +=	PCAFaces.h \
 			sampleManager.h \

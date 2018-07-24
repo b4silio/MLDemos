@@ -28,24 +28,31 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QMutexLocker>
 #include <opencv2/videoio.hpp>
 
+namespace Ui
+{
+    class EigenVectorWidget;
+}
+
 class PCAProjector : public QObject
 {
     Q_OBJECT
 
-    Ui::PCAFacesDialog *options;
-    EigenFaces eig;
-    cv::Mat image, display;
-    IplImage *samples;
-    QNamedWindow *imageWindow;
-    QNamedWindow *samplesWindow;
-    QLabel *eigenVectorLabel, *eigenValueLabel;
-    SampleManager sm;
-    QPoint start;
-    QRect selection;
-    bool bFromWebcam;
-    cv::VideoCapture grabber;
-    QMutex imageMutex;
-    int timerID;
+    Ui::PCAFacesDialog *    options;
+    EigenFaces              eig;
+    cv::Mat                 image, display;
+    IplImage *              samples;
+    QNamedWindow *          imageWindow;
+    QNamedWindow *          samplesWindow;
+    SampleManager           sm;
+    QPoint                  start;
+    QRect                   selection;
+    bool                    bFromWebcam;
+    cv::VideoCapture        grabber;
+    QMutex                  imageMutex;
+    int                     timerID;
+    Ui::EigenVectorWidget*  eigenVecWidget;
+    QWidget*                eigenWidget;
+    QPixmap                 eigenVecPixmap, eigenValPixmap;
 
     void mouseCallBack(int x,int y,int flags,int params);
 
@@ -58,6 +65,8 @@ public:
     void timerEvent(QTimerEvent *event);
     std::pair<std::vector<fvec>,ivec> GetData();
 
+protected:
+    bool eventFilter(QObject* obj, QEvent* evt);
 
 signals:
     void Update();

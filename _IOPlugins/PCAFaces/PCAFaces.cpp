@@ -26,7 +26,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 PCAFaces::PCAFaces()
-: projector(0), guiDialog(0)
+: guiDialog(0), projector(0)
 {
 }
 

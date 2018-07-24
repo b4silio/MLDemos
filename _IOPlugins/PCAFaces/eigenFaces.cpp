@@ -165,7 +165,7 @@ void EigenFaces::Learn(std::vector<cv::Mat> faces, std::vector<int> classes, std
 int EigenFaces::FindNearestNeighbor(float *candidate)
 {
 	double minDist = DBL_MAX;
-	int train = 0, nearest = 0;
+    int nearest = 0;
 	bool bMahalanobis = true;
 
 	FOR(train, trainCnt)
@@ -209,6 +209,15 @@ std::vector<cv::Mat> EigenFaces::GetEigenVectorsImages()
         result.push_back(larger);
 	}
 	return result;
+}
+
+fvec EigenFaces::GetEigenValues()
+{
+    fvec eigens(eigenValues.rows);
+    for(int i=0; i<eigenValues.rows; i++) {
+        eigens[i] = eigenValues.at<float>(i);
+    }
+    return eigens;
 }
 
 IplImage *EigenFaces::DrawEigenVals()

@@ -23,9 +23,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 using namespace std;
 
 const CvScalar BasicOpenCV::color [22]= {
-	CV_RGB(255,255,255), CV_RGB(255,0,0), CV_RGB(0,255,0), CV_RGB(0,0,255),
-    CV_RGB(255,255,0), CV_RGB(255,0,255), CV_RGB(0,255,255),
-    CV_RGB(255,128,0), CV_RGB(255,0,128), CV_RGB(0,255,128),
+    CV_RGB(255,255,255), CV_RGB(0,0,255), CV_RGB(0,255,0), CV_RGB(255,0,0),
+    CV_RGB(0, 255,255), CV_RGB(255,0,255), CV_RGB(255,255,0),
+    CV_RGB(0,128,255), CV_RGB(255,0,128), CV_RGB(128,255,0),
     CV_RGB(128,255,0), CV_RGB(128,0,255), CV_RGB(0,128,255),
     CV_RGB(128,128,128), CV_RGB(80,80,80), CV_RGB(0,128,80),
     CV_RGB(255,80,0), CV_RGB(255,0,80), CV_RGB(0,255,80),
@@ -36,7 +36,6 @@ void cvDrawRect(IplImage *img, CvRect rect, CvScalar color, int thickness, int l
 {
     cvRectangle(img, cvPoint(rect.x, rect.y), cvPoint(rect.x+rect.width, rect.y+rect.height), color, thickness, line_type, shift);
 }
-
 
 // directions: 0=clockwise, 1: counterclockwise, 2: flip
 IplImage *BasicOpenCV::Rotate90(IplImage *src, u32 direction)

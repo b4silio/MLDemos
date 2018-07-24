@@ -78,19 +78,4 @@ using std::min;
 #define toc printf("Elapsed time is %.3f seconds.\n",((u64)(cvGetTickCount()/cvGetTickFrequency()) - tic_time)/1000000.0f)
 #define etoc ((u64)(cvGetTickCount()/cvGetTickFrequency()) - tic_time)
 
-//
-#include <string.h>
-static bool endsWith(const char *a,const char *b)
-{
-	bool yeah = true;
-	int lena = strlen(a);
-	int lenb = strlen(b);
-	for (int i=0; i<lenb; i++)
-	{
-		yeah &= a[lena - lenb + i] == b[i];
-	}
-	return yeah;
-}
-
-
 #endif // __TYPES_H__

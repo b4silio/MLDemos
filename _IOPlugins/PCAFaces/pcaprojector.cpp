@@ -30,15 +30,20 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QMessageBox>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include "ui_eigenvalues.h"
+#include <QPainter>
+#include <QBitmap>
 
 using namespace std;
 using cv::Mat;
 
 PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
-    : options(options), samples(0), start(QPoint(-1,-1)), grabber(0), bFromWebcam(true), timerID(0)
+    : options(options), samples(0), start(QPoint(-1,-1)), bFromWebcam(true), grabber(0), timerID(0), eigenVecWidget(new Ui::EigenVectorWidget()), eigenWidget(new QWidget())
 {
-    eigenVectorLabel = NULL;
-    eigenValueLabel = NULL;
+    eigenVecWidget->setupUi(eigenWidget);
+    eigenWidget->hide();
+    eigenVecWidget->eigenVecDisplay->installEventFilter(this);
+    eigenVecWidget->eigenValDisplay->installEventFilter(this);
     imageWindow = new QNamedWindow("image", false, options->imageWidget);
     samplesWindow = new QNamedWindow("samples", false, options->dataWidget);
     selection = QRect(0,0,256,256);
@@ -85,11 +90,28 @@ PCAProjector::~PCAProjector()
     IMKILL(samples);
     DEL(imageWindow);
     DEL(samplesWindow);
-    DEL(eigenVectorLabel);
-    DEL(eigenValueLabel);
+    DEL(eigenVecWidget);
+    DEL(eigenWidget);
 }
 
-void PCAProjector::timerEvent(QTimerEvent *event)
+bool PCAProjector::eventFilter(QObject* obj, QEvent* evt)
+{
+    if(evt->type() == QEvent::Paint) {
+        if(obj == eigenVecWidget->eigenVecDisplay) {
+            QPainter painter(eigenVecWidget->eigenVecDisplay);
+            if(!eigenVecPixmap.isNull()) painter.drawPixmap(eigenVecWidget->eigenVecDisplay->rect(), eigenVecPixmap, eigenVecPixmap.rect());
+            return true;
+        }
+        if(obj == eigenVecWidget->eigenValDisplay) {
+            QPainter painter(eigenVecWidget->eigenValDisplay);
+            if(!eigenValPixmap.isNull()) painter.drawPixmap(eigenVecWidget->eigenValDisplay->rect(), eigenValPixmap, eigenValPixmap.rect());
+            return true;
+        }
+    }
+    return QObject::eventFilter(obj, evt);
+}
+
+void PCAProjector::timerEvent(QTimerEvent */*event*/)
 {
     if(!bFromWebcam) return;
     imageMutex.lock();
@@ -99,7 +121,6 @@ void PCAProjector::timerEvent(QTimerEvent *event)
     imageMutex.unlock();
 }
 
-
 void PCAProjector::DrawEigen()
 {
     if(sm.GetCount() >= 3){
@@ -108,22 +129,64 @@ void PCAProjector::DrawEigen()
         SampleManager eigVecs;
         eigVecs.AddSamples(eig.GetEigenVectorsImages());
         IplImage *image = eigVecs.GetSampleImage();
-        if(!eigenVectorLabel) eigenVectorLabel = new QLabel();
-        eigenVectorLabel->setScaledContents(true);
-        eigenVectorLabel->setPixmap(QNamedWindow::toPixmap(image));
-        eigenVectorLabel->show();
-
-        IplImage *eigValsImg = eig.DrawEigenVals();
-        if(!eigenValueLabel) eigenValueLabel = new QLabel();
-        eigenValueLabel->setScaledContents(true);
-        eigenValueLabel->setPixmap(QNamedWindow::toPixmap(eigValsImg));
-        eigenValueLabel->show();
-
-        //cvNamedWindow("Eigen Vectors");
-        //cvShowImage("Eigen Vectors", image);
-        eigVecs.Clear();
+        eigenVecPixmap = QNamedWindow::toPixmap(image);
         IMKILL(image);
-        IMKILL(eigValsImg);
+        eigVecs.Clear();
+
+        fvec eigenValues = eig.GetEigenValues();
+        int w = eigenVecWidget->eigenValDisplay->width();
+        int h = eigenVecWidget->eigenValDisplay->height();
+        w = max(w, 340);
+        h = max(h, 180);
+        eigenValPixmap = QPixmap(w,h);
+        eigenValPixmap.setMask(QBitmap(eigenValPixmap.size()));
+        eigenValPixmap.fill(Qt::transparent);
+        QPainter painter(&eigenValPixmap);
+
+        double eigenSum = 0;
+        float minVal=FLT_MAX, maxVal=-FLT_MAX;
+        FOR(i, eigenValues.size()) {
+            eigenSum += (double)eigenValues.at(i);
+            minVal = min(minVal, eigenValues.at(i));
+            maxVal = max(maxVal, eigenValues.at(i));
+        }
+        QFont font = painter.font();
+        font.setPointSize(10);
+        painter.setFont(font);
+
+        int pad = painter.fontMetrics().height()+2;
+        painter.setPen(Qt::black);
+        painter.drawLine(pad,h-pad,w-pad,h-pad);
+        painter.drawLine(pad,pad,pad,h-pad);
+        QString text = "Reconstruction Error";
+        int textWidth = painter.fontMetrics().width(text);
+        painter.drawText(QRect(w - pad - textWidth,pad, textWidth, painter.fontMetrics().height()), Qt::AlignCenter, text);
+        painter.drawText(QPointF(pad, h-2), "eigenvalues -->");
+        painter.save();
+        painter.rotate(-90.);
+        painter.drawText(QPointF(-h+pad, 1+painter.fontMetrics().height()), "error -->");
+        painter.restore();
+
+        QPainterPath path;
+        FOR(i, eigenValues.size()) {
+            float x = i * (w-2*pad) / (float)eigenValues.size();
+            float value = (eigenValues.at(i) - minVal) / (maxVal-minVal);
+            float y = (1.f-value) * (h-2*pad);
+            if(!i) path.moveTo(QPointF(x+pad,y+pad));
+            else path.lineTo(QPointF(x+pad,y+pad));
+        }
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(QPen(Qt::blue, 2));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawPath(path);
+
+        eigenVecWidget->list->clear();
+        FOR(i, eigenValues.size()) {
+            eigenVecWidget->list->addItem(QString("e%1: %2%\t<-- %3").arg(i+1).arg(eigenValues.at(i)/eigenSum*100, 0, 'f', 2).arg(eigenValues.at(i)));
+        }
+
+        eigenWidget->show();
+        eigenWidget->repaint();
     }else{
         QMessageBox msgBox;
         msgBox.setText("Load/Import data first! (at least 3 samples)");
