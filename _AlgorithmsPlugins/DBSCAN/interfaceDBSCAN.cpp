@@ -201,12 +201,12 @@ void ClustDBSCAN::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *cluster
         FOR(j, sample.size()) pt[j]=sample[j];
         QPointF point = canvas->toCanvasCoords(pt);
         fvec ptDiff = pt;
-        ptDiff[xIndex] += eps;
+        ptDiff[0] += eps;
         QPointF d = (canvas->toCanvasCoords(ptDiff) - point);
         xRadius = sqrt(d.x()*d.x() + d.y()*d.y());
 
         ptDiff = pt;
-        ptDiff[yIndex] += eps;
+        ptDiff[1] += eps;
         d = (canvas->toCanvasCoords(ptDiff) - point);
         yRadius = sqrt(d.x()*d.x() + d.y()*d.y());
 
@@ -379,15 +379,11 @@ void ClustDBSCAN::DrawDendogram(QPainter &painter, bool legend) //draw the reach
     painter.setFont(font);
     painter.setPen(Qt::gray);
     painter.drawText(0,0,w,2*pad,Qt::AlignCenter, "Reachability-distance plot");
-    if(legend)  // I'm a legend
-    {
-
-        for(int i=0; i<9; i+=1)
-        {
+    if(legend) {
+        for(int i=0; i<9; i+=1){
             //use a small trick to put the ticks on the scale
             painter.drawText(0, h-(i*h) / 8, QString("_ %1").arg(i*maxVal/8.0));
         }
-
     }
 }
 

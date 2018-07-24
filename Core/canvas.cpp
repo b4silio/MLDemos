@@ -124,8 +124,12 @@ void Canvas::SetCanvasType(int type)
 QPointF Canvas::toCanvasCoords(fvec sample)
 {
     if(!sample.size()) return QPointF(0,0);
-    if(sample.size() < center.size()) sample.resize(center.size());
-    //else if(sample.size() > center.size()) center = fvec(sample.size(), 0);
+    if(sample.size() == 2 && center.size() > 2) {
+        fvec newSample = fvec(center.size(), 0);
+        newSample[xIndex] = sample[0];
+        newSample[yIndex] = sample[1];
+        sample = newSample;
+    } else if(sample.size() < center.size()) sample.resize(center.size());
     sample -= center;
     QPointF point(sample[xIndex]*(zoom*zooms[xIndex]*height()),sample[yIndex]*(zoom*zooms[yIndex]*height()));
     point += QPointF(width()/2, height()/2);
