@@ -172,6 +172,8 @@ public slots:
     void HideAddData();
     void DisplayOptionsChanged();
     void Display3DOptionsChanged();
+    void ClearPluginSelectionText();
+    void AddPluginSelectionText(QString text);
 
     void AddDataFromGenerator();
     void Clear();
@@ -183,6 +185,7 @@ public slots:
 	void SaveData();
 	void LoadData();
     void ImportData();
+    void ReloadPlugins();
     void RewardFromMap(QImage rewardMap);
     void MapFromReward();
     void ExportOutput();

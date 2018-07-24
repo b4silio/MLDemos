@@ -122,6 +122,37 @@ void MLDemos::Display3DOptionsChanged()
     glw->update();
 }
 
+void MLDemos::ClearPluginSelectionText()
+{
+    algo->optionsClassify->groupBox->setTitle("Algorithm");
+    algo->optionsCluster->groupBox->setTitle("Algorithm");
+    algo->optionsRegress->groupBox->setTitle("Algorithm");
+    algo->optionsProject->groupBox->setTitle("Algorithm");
+    algo->optionsReinforcement->groupBox->setTitle("Algorithm");
+    algo->optionsMaximize->groupBox->setTitle("Algorithm");
+    algo->optionsDynamic->groupBox->setTitle("Algorithm");
+}
+
+void MLDemos::AddPluginSelectionText(QString text)
+{
+    QString currentTitle = algo->optionsClassify->groupBox->title();
+    QString newTitle;
+    if(currentTitle == "Algorithm") newTitle = "";
+    else {
+        newTitle = currentTitle.right(currentTitle.length() - QString("Algorithm [").length());
+        newTitle.chop(QString("]").length());
+    }
+
+    newTitle = "Algorithm [" + (newTitle.isEmpty() ? "" : newTitle + "|") + text + "]";
+    algo->optionsClassify->groupBox->setTitle(newTitle);
+    algo->optionsCluster->groupBox->setTitle(newTitle);
+    algo->optionsRegress->groupBox->setTitle(newTitle);
+    algo->optionsProject->groupBox->setTitle(newTitle);
+    algo->optionsReinforcement->groupBox->setTitle(newTitle);
+    algo->optionsMaximize->groupBox->setTitle(newTitle);
+    algo->optionsDynamic->groupBox->setTitle(newTitle);
+}
+
 void MLDemos::ChangeInfoFile()
 {
     QStringList infoFiles = algo->GetInfoFiles();

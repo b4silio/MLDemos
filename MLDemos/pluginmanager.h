@@ -31,6 +31,7 @@ public:
     PluginManager(MLDemos *mldemos, AlgorithmManager *algo);
     ~PluginManager();
 
+    void ClearPlugins();
     void LoadPlugins();
     void AddPlugin(ClassifierInterface *iClassifier, const char *method);
     void AddPlugin(ClustererInterface *iCluster, const char *method);

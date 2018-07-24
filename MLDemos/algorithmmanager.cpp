@@ -257,50 +257,43 @@ QStringList AlgorithmManager::GetInfoFiles()
     QStringList infoFiles;
     infoFiles << QString() << QString();
     QString infoFile, mainFile;
-    if (options->tabClass->isVisible())
-    {
+    if (options->tabClass->isVisible()) {
         mainFile = "classification.html";
         int tab = optionsClassify->algoList->currentIndex();
         if (tab < 0 || tab >= (int)classifiers.size() || !classifiers[tab]) return infoFiles;
         infoFile = classifiers[tab]->GetInfoFile();
     }
-    if (options->tabClust->isVisible())
-    {
+    if (options->tabClust->isVisible()) {
         mainFile = "clustering.html";
         int tab = optionsCluster->algoList->currentIndex();
         if (tab < 0 || tab >= (int)clusterers.size() || !clusterers[tab]) return infoFiles;
         infoFile = clusterers[tab]->GetInfoFile();
     }
-    if (options->tabRegr->isVisible())
-    {
+    if (options->tabRegr->isVisible()) {
         mainFile = "regression.html";
         int tab = optionsRegress->algoList->currentIndex();
         if (tab < 0 || tab >= (int)regressors.size() || !regressors[tab]) return infoFiles;
         infoFile = regressors[tab]->GetInfoFile();
     }
-    if (options->tabDyn->isVisible())
-    {
+    if (options->tabDyn->isVisible()) {
         mainFile = "dynamical.html";
         int tab = optionsDynamic->algoList->currentIndex();
         if (tab < 0 || tab >= (int)dynamicals.size() || !dynamicals[tab]) return infoFiles;
         infoFile = dynamicals[tab]->GetInfoFile();
     }
-    if (options->tabMax->isVisible())
-    {
+    if (options->tabMax->isVisible()) {
         mainFile = "maximization.html";
         int tab = optionsMaximize->algoList->currentIndex();
         if (tab < 0 || tab >= (int)maximizers.size() || !maximizers[tab]) return infoFiles;
         infoFile = maximizers[tab]->GetInfoFile();
     }
-    if (options->tabProj->isVisible())
-    {
+    if (options->tabProj->isVisible()) {
         mainFile = "projection.html";
         int tab = optionsProject->algoList->currentIndex();
         if (tab < 0 || tab >= (int)projectors.size() || !projectors[tab]) return infoFiles;
         infoFile = projectors[tab]->GetInfoFile();
     }
-    if (options->tabReinf->isVisible())
-    {
+    if (options->tabReinf->isVisible()) {
         mainFile = "reinforcement.html";
         int tab = optionsReinforcement->algoList->currentIndex();
         if (tab < 0 || tab >= (int)reinforcements.size() || !reinforcements[tab]) return infoFiles;
@@ -313,8 +306,7 @@ QStringList AlgorithmManager::GetInfoFiles()
 
 void AlgorithmManager::AvoidOptionChanged()
 {
-    if (dynamical)
-    {
+    if (dynamical) {
         int avoidIndex = optionsDynamic->obstacleCombo->currentIndex();
         mutex->lock();
         if (dynamical->avoid) delete dynamical->avoid;
@@ -330,8 +322,7 @@ void AlgorithmManager::AvoidOptionChanged()
 
 void AlgorithmManager::ColorMapChanged()
 {
-    if (dynamical)
-    {
+    if (dynamical) {
         drawTimer->Stop();
         drawTimer->Clear();
         drawTimer->bColorMap = optionsDynamic->colorCheck->isChecked();
@@ -348,7 +339,6 @@ void AlgorithmManager::ClusterChanged()
     } else {
         optionsCluster->trainRatioCombo->setVisible(false);
         optionsCluster->trainRatioF1->setVisible(false);
-
     }
 }
 
@@ -357,6 +347,34 @@ void AlgorithmManager::RestrictDimChanged()
     optionsClassify->inputDimButton->setEnabled(!mldemos->ui.restrictDimCheck->isChecked());
     optionsRegress->inputDimButton->setEnabled(!mldemos->ui.restrictDimCheck->isChecked());
     optionsRegress->outputDimCombo->setEnabled(!mldemos->ui.restrictDimCheck->isChecked());
+}
+
+void AlgorithmManager::ClearAlgorithms()
+{
+    for(auto it = algoWidgets.begin(); it != algoWidgets.end(); it++) {
+        FOR(i, it->second.size()) {
+            DEL(it->second.at(i));
+        }
+    }
+    algoWidgets.clear();
+    optionsClassify->algoList->clear();
+    optionsCluster->algoList->clear();
+    optionsDynamic->algoList->clear();
+    optionsMaximize->algoList->clear();
+    optionsProject->algoList->clear();
+    optionsRegress->algoList->clear();
+    optionsReinforcement->algoList->clear();
+    classifiers.clear();
+    clusterers.clear();
+    regressors.clear();
+    dynamicals.clear();
+    avoiders.clear();
+    maximizers.clear();
+    reinforcements.clear();
+    projectors.clear();
+    inputoutputs.clear();
+    bInputRunning.clear();
+    gridSearch->SetClassifier(NULL);
 }
 
 void AlgorithmManager::SetAlgorithmWidget()

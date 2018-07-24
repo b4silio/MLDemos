@@ -182,6 +182,7 @@ public slots:
     void ClusterChanged();
     void RestrictDimChanged();
     void SetAlgorithmWidget();
+    void ClearAlgorithms();
 
     void QueryClassifier(std::vector<fvec> samples);
     void QueryRegressor(std::vector<fvec> samples);

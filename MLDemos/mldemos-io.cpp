@@ -82,6 +82,12 @@ void MLDemos::ImportData()
     import->SendData();
 }
 
+void MLDemos::ReloadPlugins()
+{
+    plugin->ClearPlugins();
+    plugin->LoadPlugins();
+}
+
 void MLDemos::ImportData(QString filename)
 {
     import->Start();

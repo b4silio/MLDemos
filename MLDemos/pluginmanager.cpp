@@ -1,9 +1,11 @@
 #include "pluginmanager.h"
 #include "mldemos.h"
+#include "pluginSelectionLists.h"
 
 PluginManager::PluginManager(MLDemos *mldemos, AlgorithmManager *algo)
     : mldemos(mldemos), algo(algo)
 {
+    InitPluginSelectionLists();
 }
 
 PluginManager::~PluginManager()
@@ -16,6 +18,32 @@ PluginManager::~PluginManager()
         pluginLoaders.at(i)->unload();
         DEL(pluginLoaders[i]);
     }
+}
+
+void PluginManager::ClearPlugins()
+{
+    qApp->blockSignals(true);
+
+    classifiers.clear();
+    clusterers.clear();
+    regressors.clear();
+    dynamicals.clear();
+    avoiders.clear();
+    maximizers.clear();
+    reinforcements.clear();
+    projectors.clear();
+    inputoutputs.clear();
+    bInputRunning.clear();
+
+    algo->ClearAlgorithms();
+
+    FOR (i, pluginLoaders.size()) {
+        pluginLoaders.at(i)->unload();
+        DEL(pluginLoaders[i]);
+    }
+    pluginLoaders.clear();
+
+    qApp->blockSignals(false);
 }
 
 void PluginManager::LoadPlugins()
@@ -51,12 +79,24 @@ void PluginManager::LoadPlugins()
         qDebug() << "using alternative directory: " << alternativeDir.absolutePath();
         pluginsDir = alternativeDir;
     }
+    QList<QAction*> pluginSelections = mldemos->ui.menuPlugin_Selection_Mode->actions();
+    QStringList pluginLists;
+    mldemos->ClearPluginSelectionText();
+    FOR(i, pluginSelections.size()) {
+        if(pluginSelections.at(i)->isChecked()) {
+            QString listName = pluginSelections.at(i)->text();
+            if(PLUGIN_SELECTION_LISTS.count(listName)) {
+                pluginLists << PLUGIN_SELECTION_LISTS.at(listName);
+                mldemos->AddPluginSelectionText(listName);
+            }
+        }
+    }
     foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
         QPluginLoader *pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = pluginLoader->instance();
         if (plugin) {
             pluginLoaders.push_back(pluginLoader);
-            qDebug() << "loading " << fileName;
+            //qDebug() << "loading " << fileName;
             // check type of plugin
             CollectionInterface *iCollection = qobject_cast<CollectionInterface *>(plugin);
             if (iCollection) {
@@ -67,57 +107,87 @@ void PluginManager::LoadPlugins()
                 std::vector<MaximizeInterface*> maximizerList = iCollection->GetMaximizers();
                 std::vector<ReinforcementInterface*> reinforcementList = iCollection->GetReinforcements();
                 std::vector<ProjectorInterface*> projectorList = iCollection->GetProjectors();
-                FOR (i, classifierList.size()) AddPlugin(classifierList[i], SLOT(ChangeActiveOptions));
-                FOR (i, clustererList.size()) AddPlugin(clustererList[i], SLOT(ChangeActiveOptions));
-                FOR (i, regressorList.size()) AddPlugin(regressorList[i], SLOT(ChangeActiveOptions));
-                FOR (i, dynamicalList.size()) AddPlugin(dynamicalList[i], SLOT(ChangeActiveOptions));
-                FOR (i, maximizerList.size()) AddPlugin(maximizerList[i], SLOT(ChangeActiveOptions));
-                FOR (i, reinforcementList.size()) AddPlugin(reinforcementList[i], SLOT(ChangeActiveOptions));
-                FOR (i, projectorList.size()) AddPlugin(projectorList[i], SLOT(ChangeActiveOptions));
+                FOR (i, classifierList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("classifier:"+classifierList.at(i)->GetName())) continue;
+                    AddPlugin(classifierList[i], SLOT(ChangeActiveOptions));
+                }
+                FOR (i, clustererList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("clusterer:"+clustererList.at(i)->GetName())) continue;
+                    AddPlugin(clustererList[i], SLOT(ChangeActiveOptions));
+                }
+                FOR (i, regressorList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("regressor:"+regressorList.at(i)->GetName())) continue;
+                    AddPlugin(regressorList[i], SLOT(ChangeActiveOptions));
+                }
+                FOR (i, dynamicalList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("dynamical:"+dynamicalList.at(i)->GetName())) continue;
+                    AddPlugin(dynamicalList[i], SLOT(ChangeActiveOptions));
+                }
+                FOR (i, maximizerList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("maximizer:"+maximizerList.at(i)->GetName())) continue;
+                    AddPlugin(maximizerList[i], SLOT(ChangeActiveOptions));
+                }
+                FOR (i, reinforcementList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("reinforcement:"+reinforcementList.at(i)->GetName())) continue;
+                    AddPlugin(reinforcementList[i], SLOT(ChangeActiveOptions));
+                }
+                FOR (i, projectorList.size()) {
+                    if(pluginLists.size() && !pluginLists.contains("projector:"+projectorList.at(i)->GetName())) continue;
+                    AddPlugin(projectorList[i], SLOT(ChangeActiveOptions));
+                }
                 continue;
             }
             ClassifierInterface *iClassifier = qobject_cast<ClassifierInterface *>(plugin);
             if (iClassifier) {
+                if(pluginLists.size() && !pluginLists.contains("classifier:"+iClassifier->GetName())) continue;
                 AddPlugin(iClassifier, SLOT(ChangeActiveOptions()));
                 continue;
             }
             ClustererInterface *iClusterer = qobject_cast<ClustererInterface *>(plugin);
             if (iClusterer) {
+                if(pluginLists.size() && !pluginLists.contains("clusterer:"+iClusterer->GetName())) continue;
                 AddPlugin(iClusterer, SLOT(ChangeActiveOptions()));
                 continue;
             }
             RegressorInterface *iRegressor = qobject_cast<RegressorInterface *>(plugin);
             if (iRegressor) {
+                if(pluginLists.size() && !pluginLists.contains("regressor:"+iRegressor->GetName())) continue;
                 AddPlugin(iRegressor, SLOT(ChangeActiveOptions()));
                 continue;
             }
             DynamicalInterface *iDynamical = qobject_cast<DynamicalInterface *>(plugin);
             if (iDynamical) {
+                if(pluginLists.size() && !pluginLists.contains("dynamical:"+iDynamical->GetName())) continue;
                 AddPlugin(iDynamical, SLOT(ChangeActiveOptions()));
                 continue;
             }
             MaximizeInterface *iMaximize = qobject_cast<MaximizeInterface *>(plugin);
             if (iMaximize) {
+                if(pluginLists.size() && !pluginLists.contains("maximiser:"+iMaximize->GetName())) continue;
                 AddPlugin(iMaximize, SLOT(ChangeActiveOptions()));
                 continue;
             }
             ReinforcementInterface *iReinforcement = qobject_cast<ReinforcementInterface *>(plugin);
             if (iReinforcement) {
+                if(pluginLists.size() && !pluginLists.contains("reinforcement:"+iReinforcement->GetName())) continue;
                 AddPlugin(iReinforcement, SLOT(ChangeActiveOptions()));
                 continue;
             }
             ProjectorInterface *iProject = qobject_cast<ProjectorInterface *>(plugin);
             if (iProject) {
+                if(pluginLists.size() && !pluginLists.contains("projector:"+iProject->GetName())) continue;
                 AddPlugin(iProject, SLOT(ChangeActiveOptions()));
                 continue;
             }
             InputOutputInterface *iIO = qobject_cast<InputOutputInterface *>(plugin);
             if (iIO) {
+                if(pluginLists.size() && !pluginLists.contains("IO:"+iIO->GetName())) continue;
                 AddPlugin(iIO);
                 continue;
             }
             AvoidanceInterface *iAvoid = qobject_cast<AvoidanceInterface *>(plugin);
             if (iAvoid) {
+                if(pluginLists.size() && !pluginLists.contains("avoid:"+iAvoid->GetName())) continue;
                 AddPlugin(iAvoid, SLOT(ChangeActiveOptions()));
                 continue;
             }

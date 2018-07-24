@@ -47,6 +47,7 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("statsGeometry", statsDialog->saveGeometry());
     settings.setValue("compareGeometry", compare->paramsWidget->saveGeometry());
     settings.setValue("generatorGeometry", generator->saveGeometry());
+    settings.setValue("pluginListsAML", ui.actionAML_Class->isChecked());
 
     settings.setValue("algoTab", algo->options->tabWidget->currentIndex());
     settings.setValue("ShowAlgoOptions", algo->algorithmWidget->isVisible());
@@ -247,6 +248,7 @@ void MLDemos::LoadLayoutOptions()
     if(settings.contains("statsGeometry")) statsDialog->restoreGeometry(settings.value("statsGeometry").toByteArray());
     if(settings.contains("compareGeometry")) compare->paramsWidget->restoreGeometry(settings.value("compareGeometry").toByteArray());
     if(settings.contains("generatorGeometry")) generator->restoreGeometry(settings.value("generatorGeometry").toByteArray());
+    if(settings.contains("pluginListsAML")) ui.actionAML_Class->setChecked(settings.value("pluginListsAML").toBool());
 #ifdef MACX // ugly hack to avoid resizing problems on the mac
     if(height() < 400) resize(width(),400);
     if(algo->algorithmWidget->height() < 220) algo->algorithmWidget->resize(636,220);

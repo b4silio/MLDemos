@@ -713,26 +713,17 @@ void GridSearch::Update()
     names.clear();
     types.clear();
     values.clear();
-    if(classifier)
-        classifier->GetParameterList(names, types, values);
-    if(clusterer)
-        clusterer->GetParameterList(names, types, values);
-    if(regressor)
-        regressor->GetParameterList(names, types, values);
-    if(dynamical)
-        dynamical->GetParameterList(names, types, values);
-    if(avoider)
-        avoider->GetParameterList(names, types, values);
-    if(maximizer)
-        maximizer->GetParameterList(names, types, values);
-    if(reinforcement)
-        reinforcement->GetParameterList(names, types, values);
-    if(projector)
-        projector->GetParameterList(names, types, values);
+    if(classifier) classifier->GetParameterList(names, types, values);
+    if(clusterer) clusterer->GetParameterList(names, types, values);
+    if(regressor) regressor->GetParameterList(names, types, values);
+    if(dynamical) dynamical->GetParameterList(names, types, values);
+    if(avoider) avoider->GetParameterList(names, types, values);
+    if(maximizer) maximizer->GetParameterList(names, types, values);
+    if(reinforcement) reinforcement->GetParameterList(names, types, values);
+    if(projector) projector->GetParameterList(names, types, values);
     ui->names1Combo->clear();
     ui->names2Combo->clear();
-    FOR(i, names.size())
-    {
+    FOR(i, names.size()) {
         ui->names1Combo->addItem(names[i]);
         ui->names2Combo->addItem(names[i]);
     }

@@ -77,6 +77,7 @@ HEADERS += basicMath.h \
     dataseteditor.h \
     algorithmmanager.h \
     pluginmanager.h \
+    pluginSelectionLists.h \
     basewidget.h
 
 SOURCES += \

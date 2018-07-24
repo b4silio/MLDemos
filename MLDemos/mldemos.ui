@@ -65,7 +65,7 @@
          <x>0</x>
          <y>0</y>
          <width>634</width>
-         <height>398</height>
+         <height>391</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -325,9 +325,16 @@
       <string>Input / Output</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuPlugin_Selection_Mode">
+     <property name="title">
+      <string>Plugin Selection Mode</string>
+     </property>
+     <addaction name="actionAML_Class"/>
+    </widget>
     <addaction name="menuInput_Output"/>
     <addaction name="separator"/>
     <addaction name="actionManage_Plugins"/>
+    <addaction name="menuPlugin_Selection_Mode"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -525,6 +532,17 @@
   <action name="actionGenerate_Data">
    <property name="text">
     <string>Generate Data</string>
+   </property>
+  </action>
+  <action name="actionAML_Class">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>AML Class</string>
    </property>
   </action>
  </widget>

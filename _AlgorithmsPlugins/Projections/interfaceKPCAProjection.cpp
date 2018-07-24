@@ -9,7 +9,7 @@
 using namespace std;
 
 KPCAProjection::KPCAProjection()
-    : widget(new QWidget()), pcaPointer(0), contourWidget(new QWidget()),
+    : widget(new QWidget()), contourWidget(new QWidget()), pcaPointer(0),
       xIndex(0), yIndex(1)
 {
     params = new Ui::paramsKPCA();
@@ -33,17 +33,13 @@ KPCAProjection::KPCAProjection()
 
 bool KPCAProjection::eventFilter(QObject *obj, QEvent *event)
 {
-    if(obj == contours->plotLabel)
-    {
-        if(event->type() == QEvent::MouseButtonRelease)
-        {
+    if(obj == contours->plotLabel) {
+        if(event->type() == QEvent::MouseButtonRelease) {
             int displayType = contours->displayCombo->currentIndex();
             if(displayType != 0) return QObject::eventFilter(obj, event);
             int index = contours->dimSpin->value();
             contours->plotLabel->setPixmap(contourPixmaps[index]);
-        }
-        else if(event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress)
-        {
+        } else if(event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress) {
             QMouseEvent *e = static_cast<QMouseEvent *>(event);
             bool bLowerThan = e->buttons() == Qt::LeftButton;
             int displayType = contours->displayCombo->currentIndex();
@@ -59,10 +55,8 @@ bool KPCAProjection::eventFilter(QObject *obj, QEvent *event)
                 if(abs(l2 - limit) > 5 || abs(l3 - limit) > 5) return QObject::eventFilter(obj, event);
             }
             if(limit <= 0 || limit >= 255) return QObject::eventFilter(obj, event);
-            FOR(x, image.width())
-            {
-                FOR(y, image.height())
-                {
+            FOR(x, image.width()) {
+                FOR(y, image.height()) {
                     QRgb p = image.pixel(x,y);
                     int red = qRed(p);
                     if(red >= 255) continue;
@@ -84,7 +78,7 @@ KPCAProjection::~KPCAProjection()
 {
     delete params;
     DEL(contours);
-    DEL(contourWidget);
+    //DEL(contourWidget);
 }
 
 // virtual functions to manage the algorithm creation

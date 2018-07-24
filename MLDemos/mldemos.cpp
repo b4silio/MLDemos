@@ -49,6 +49,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
     connect(ui.actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
     connect(ui.actionImportData, SIGNAL(triggered()), this, SLOT(ImportData()));
     connect(ui.actionExportOutput, SIGNAL(triggered()), this, SLOT(ExportOutput()));
+    connect(ui.actionAML_Class, SIGNAL(triggered()), this, SLOT(ReloadPlugins()));
     //connect(ui.actionExportAnimation, SIGNAL(triggered()), this, SLOT(ExportAnimation()));
     connect(ui.actionExport_SVG, SIGNAL(triggered()), this, SLOT(ExportSVG()));
     ui.actionImportData->setShortcut(QKeySequence(tr("Ctrl+I")));
@@ -56,11 +57,12 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
     initDialogs();
     initToolBars();
 
-    plugin->LoadPlugins();
-
     LoadLayoutOptions();
     SetTextFontSize();
     ShowToolbar();
+
+    plugin->LoadPlugins();
+
     this->show();
 
     DisplayOptionsChanged();
