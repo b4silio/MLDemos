@@ -38,12 +38,12 @@ using namespace std;
 using cv::Mat;
 
 PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
-    : options(options), samples(0), start(QPoint(-1,-1)), bFromWebcam(true), grabber(0), timerID(0), eigenVecWidget(new Ui::EigenVectorWidget()), eigenWidget(new QWidget())
+    : options(options), samples(0), start(QPoint(-1,-1)), bFromWebcam(true), grabber(0), timerID(0), eigenDisplay(new Ui::EigenVectorWidget()), eigenDisplayWidget(new QWidget())
 {
-    eigenVecWidget->setupUi(eigenWidget);
-    eigenWidget->hide();
-    eigenVecWidget->eigenVecDisplay->installEventFilter(this);
-    eigenVecWidget->eigenValDisplay->installEventFilter(this);
+    eigenDisplay->setupUi(eigenDisplayWidget);
+    eigenDisplayWidget->hide();
+    eigenDisplay->vectorsDisplay->installEventFilter(this);
+    eigenDisplay->valuesDisplay->installEventFilter(this);
     imageWindow = new QNamedWindow("image", false, options->imageWidget);
     samplesWindow = new QNamedWindow("samples", false, options->dataWidget);
     selection = QRect(0,0,256,256);
@@ -68,6 +68,8 @@ PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
     connect(options->saveDatasetButton, SIGNAL(clicked()), this, SLOT(SaveDataset()));
     connect(options->clearButton, SIGNAL(clicked()), this, SLOT(ClearDataset()));
     connect(options->eigenButton, SIGNAL(clicked()), this, SLOT(DrawEigen()));
+    connect(eigenDisplay->heatCheck, SIGNAL(clicked()), this, SLOT(DrawEigen()));
+    connect(eigenDisplay->clipboardButton, SIGNAL(clicked()), this, SLOT(ToClipboard()));
 
     imageWindow->setAcceptDrops(true);
     samplesWindow->setAcceptDrops(true);
@@ -90,21 +92,21 @@ PCAProjector::~PCAProjector()
     IMKILL(samples);
     DEL(imageWindow);
     DEL(samplesWindow);
-    DEL(eigenVecWidget);
-    DEL(eigenWidget);
+    DEL(eigenDisplay);
+    DEL(eigenDisplayWidget);
 }
 
 bool PCAProjector::eventFilter(QObject* obj, QEvent* evt)
 {
     if(evt->type() == QEvent::Paint) {
-        if(obj == eigenVecWidget->eigenVecDisplay) {
-            QPainter painter(eigenVecWidget->eigenVecDisplay);
-            if(!eigenVecPixmap.isNull()) painter.drawPixmap(eigenVecWidget->eigenVecDisplay->rect(), eigenVecPixmap, eigenVecPixmap.rect());
+        if(obj == eigenDisplay->vectorsDisplay) {
+            QPainter painter(eigenDisplay->vectorsDisplay);
+            if(!eigenVecPixmap.isNull()) painter.drawPixmap(eigenDisplay->vectorsDisplay->rect(), eigenVecPixmap, eigenVecPixmap.rect());
             return true;
         }
-        if(obj == eigenVecWidget->eigenValDisplay) {
-            QPainter painter(eigenVecWidget->eigenValDisplay);
-            if(!eigenValPixmap.isNull()) painter.drawPixmap(eigenVecWidget->eigenValDisplay->rect(), eigenValPixmap, eigenValPixmap.rect());
+        if(obj == eigenDisplay->valuesDisplay) {
+            QPainter painter(eigenDisplay->valuesDisplay);
+            if(!eigenValPixmap.isNull()) painter.drawPixmap(eigenDisplay->valuesDisplay->rect(), eigenValPixmap, eigenValPixmap.rect());
             return true;
         }
     }
@@ -127,15 +129,16 @@ void PCAProjector::DrawEigen()
         EigenFaces eig;
         eig.Learn(sm.GetSampleMats(), sm.GetLabels());
         SampleManager eigVecs;
-        eigVecs.AddSamples(eig.GetEigenVectorsImages());
+        int heatmapMode = eigenDisplay->heatCheck->checkState();
+        eigVecs.AddSamples(eig.GetEigenVectorsImages(heatmapMode));
         IplImage *image = eigVecs.GetSampleImage();
         eigenVecPixmap = QNamedWindow::toPixmap(image);
         IMKILL(image);
         eigVecs.Clear();
 
         fvec eigenValues = eig.GetEigenValues();
-        int w = eigenVecWidget->eigenValDisplay->width();
-        int h = eigenVecWidget->eigenValDisplay->height();
+        int w = eigenDisplay->valuesDisplay->width();
+        int h = eigenDisplay->valuesDisplay->height();
         w = max(w, 340);
         h = max(h, 180);
         eigenValPixmap = QPixmap(w,h);
@@ -180,19 +183,26 @@ void PCAProjector::DrawEigen()
         painter.setBrush(Qt::NoBrush);
         painter.drawPath(path);
 
-        eigenVecWidget->list->clear();
+        eigenDisplay->list->clear();
         FOR(i, eigenValues.size()) {
-            eigenVecWidget->list->addItem(QString("e%1: %2%\t<-- %3").arg(i+1).arg(eigenValues.at(i)/eigenSum*100, 0, 'f', 2).arg(eigenValues.at(i)));
+            eigenDisplay->list->addItem(QString("e%1: %2%\t<-- %3").arg(i+1).arg(eigenValues.at(i)/eigenSum*100, 0, 'f', 2).arg(eigenValues.at(i)));
         }
 
-        eigenWidget->show();
-        eigenWidget->repaint();
+        eigenDisplayWidget->show();
+        eigenDisplayWidget->repaint();
     }else{
         QMessageBox msgBox;
         msgBox.setText("Load/Import data first! (at least 3 samples)");
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
     }
+}
+
+void PCAProjector::ToClipboard()
+{
+    QClipboard* clipboard = qApp->clipboard();
+    clipboard->setPixmap(eigenVecPixmap);
+    clipboard->setImage(eigenVecPixmap.toImage());
 }
 
 pair<vector<fvec>,ivec> PCAProjector::GetData()

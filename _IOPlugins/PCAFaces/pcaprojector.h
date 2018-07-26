@@ -50,8 +50,8 @@ class PCAProjector : public QObject
     cv::VideoCapture        grabber;
     QMutex                  imageMutex;
     int                     timerID;
-    Ui::EigenVectorWidget*  eigenVecWidget;
-    QWidget*                eigenWidget;
+    Ui::EigenVectorWidget*  eigenDisplay;
+    QWidget*                eigenDisplayWidget;
     QPixmap                 eigenVecPixmap, eigenValPixmap;
 
     void mouseCallBack(int x,int y,int flags,int params);
@@ -80,6 +80,7 @@ public slots:
     void AddDataset();
     void ClearDataset();
     void DrawEigen();
+    void ToClipboard();
 
     void SelectionStart(QMouseEvent *event);
     void SelectionStop(QMouseEvent *event);

@@ -190,19 +190,58 @@ int EigenFaces::FindNearestNeighbor(float *candidate)
 
 int eigparams[7];
 
-std::vector<cv::Mat> EigenFaces::GetEigenVectorsImages()
+cv::Vec3b EigenFaces::ValueToColor(float value, bool bSimple)
+{
+    if(bSimple) {
+        value = (value-0.5f)*5.f*255.f;
+        if(value > 0) return cv::Vec3b(0, value/2, value);
+        else return cv::Vec3b(value/2,value,0);
+    } else {
+        value = (value-0.5)*4 + 0.5;
+        float a = (1-value)/0.2;
+        int X = int(a);
+        int Y = int(255*(a-X));
+        int r=0,g=0,b=0;
+        switch(X)
+        {
+            case 0: r=255;g=Y;b=0;break;
+            case 1: r=255-Y;g=255;b=0;break;
+            case 2: r=0;g=255;b=Y;break;
+            case 3: r=0;g=255-Y;b=255;break;
+            case 4: r=Y;g=0;b=255;break;
+            case 5: r=255;g=0;b=255;break;
+        }
+        return cv::Vec3b(b,g,r);
+    }
+}
+
+std::vector<cv::Mat> EigenFaces::GetEigenVectorsImages(int heatmapMode)
 {
     std::vector<cv::Mat> result;
     bool bColor = eigenVectors.size() && eigenVectors[0].channels() > 1;
     cv::Mat accumulator = cv::Mat(eigenVectors[0].size(), bColor ? CV_32FC3 : CV_32F);
-    //IplImage *acc = cvCreateImage(cvSize(eigenVectors[0].cols,eigenVectors[0].rows), IPL_DEPTH_32F, 1);
-	FOR(i, dim-2) // dim -2 because for some reasons the last two eigenvalues are often fubared
+
+    FOR(i, dim-2) // dim -2 because for some reasons the last two eigenvalues are often fubared
 	{
         accumulator = cv::Mat::zeros(eigenVectors[0].size(), bColor ? CV_32FC3 : CV_32F);
         cv::addWeighted(eigenVectors[i],1,accumulator,1,0,accumulator);
         cv::normalize(accumulator, accumulator, 0, 255, cv::NORM_MINMAX, CV_8UC1);
         cv::Mat newEigenVec = cv::Mat(eigenVectors[0].size(), bColor ? CV_8UC3 : CV_8UC1);
         cv::convertScaleAbs(accumulator, newEigenVec);
+
+        if(heatmapMode > 0) {
+            cv::Mat heatmap = cv::Mat(newEigenVec.size(), CV_8UC3);
+            FOR(j, heatmap.cols*heatmap.rows) {
+                float value;
+                if(!bColor) value = newEigenVec.at<uchar>(j) / 255.f;
+                else {
+                    cv::Vec3b c = newEigenVec.at<cv::Vec3b>(j);
+                    value = ((c[0] + c[1] + c[2]) / 3.f) / 255.f;
+                }
+                heatmap.at<cv::Vec3b>(j) = ValueToColor(value, heatmapMode == 1);
+            }
+            newEigenVec = heatmap;
+        }
 
         cv::Mat larger;
         cv::resize(newEigenVec,larger, cv::Size(128,128),0,0,cv::INTER_CUBIC);
