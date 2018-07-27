@@ -807,7 +807,7 @@ void MLDemos::LoadParams( QString filename )
 void MLDemos::ExportOutput()
 {
     if(!algo->classifier && !algo->regressor && !algo->clusterer && !algo->projector) return;
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save Output Data"), "", tr("Data (*.txt *.csv)"));
+    QString filename = QFileDialog::getSaveFileName((QWidget*)this, tr("Save Output Data"), "", tr("Data (*.txt *.csv)"));
     if(filename.isEmpty()) return;
     if(!filename.endsWith(".txt") && !filename.endsWith(".csv")) filename += ".txt";
 

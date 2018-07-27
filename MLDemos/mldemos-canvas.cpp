@@ -321,9 +321,12 @@ void MLDemos::Navigation(fvec sample)
         }
         if (algo->classifier->IsMultiClass()) {
             fvec res = algo->classifier->TestMulti(sample);
-            int max = 0;
-            FOR (i, res.size()) if (res[max] < res[i]) max = i;
-            score = algo->classifier->inverseMap[max];
+            if(res.size() == 1) score = res[0];
+            else {
+                int max = 0;
+                FOR (i, res.size()) if (res[max] < res[i]) max = i;
+                score = algo->classifier->inverseMap[max];
+            }
         } else {
             score = algo->classifier->Test(sample);
         }

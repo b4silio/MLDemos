@@ -338,7 +338,8 @@ void MLDemos::Editing(int editType, fvec position, int label)
 
 void MLDemos::DrawingStopped()
 {
-    if (selectedData.size() || (canvas->sampleColors.size() && canvas->sampleColors.size() != canvas->data->GetCount())) {
+    QMutexLocker lock(&mutex);
+    if (selectedData.size() || (canvas->sampleColors.size() && (int)canvas->sampleColors.size() != canvas->data->GetCount())) {
         if (algo->classifier) algo->DrawClassifiedSamples(canvas, algo->classifier, algo->classifierMulti);
         if (algo->clusterer) algo->clusterers[algo->tabUsedForTraining]->Draw(canvas, algo->clusterer);
         if (algo->regressor) algo->regressors[algo->tabUsedForTraining]->Draw(canvas, algo->regressor);

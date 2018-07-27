@@ -27,7 +27,6 @@ void MLDemos::ChangeActiveOptions()
 void MLDemos::DisplayOptionsChanged()
 {
     if (!canvas) return;
-
     canvas->bDisplayInfo = displayOptions->infoCheck->isChecked();
     canvas->bDisplayLearned = displayOptions->modelCheck->isChecked();
     canvas->bDisplayMap = displayOptions->mapCheck->isChecked();

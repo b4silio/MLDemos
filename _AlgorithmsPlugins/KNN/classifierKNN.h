@@ -27,17 +27,19 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 class ClassifierKNN : public Classifier
 {
 private:
-	int					nPts;					// actual number of data points
+    int k;
+    int					nPts;					// actual number of data points
 	ANNpointArray		dataPts;				// data points
 	ANNidxArray			nnIdx;					// near neighbor indices
 	ANNdistArray		dists;					// near neighbor distances
 	ANNkd_tree*			kdTree;					// search structure
 	int metricType;
 	int metricP;
-	int k;
 	std::map<int,int> counts;
+    bool bBinary;
+
 public:
-    ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2){bMultiClass = true;}
+    ClassifierKNN(): k(1), nPts(0), dataPts(0), nnIdx(0), dists(0), kdTree(0), metricType(2), metricP(2), bBinary(false) {bMultiClass = true;}
 	~ClassifierKNN();
     void Train(std::vector< fvec > samples, ivec labels);
     fvec TestMulti(const fvec &sample) const ;

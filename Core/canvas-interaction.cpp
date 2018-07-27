@@ -127,10 +127,11 @@ void Canvas::leaveEvent(QEvent *event)
 void Canvas::wheelEvent(QWheelEvent *event)
 {
     if(canvasType) return;
+    if(event->buttons() != Qt::NoButton) return;
     if(event->modifiers() == Qt::ShiftModifier)
     {
         zooms[xIndex] += event->delta()/1000.f;
-        if(zooms[xIndex] < 0.001) zooms[xIndex] == 0.001;
+        if(zooms[xIndex] < 0.001) zooms[xIndex] = 0.001;
         //qDebug() << "zooms[" << xIndex << "]: " << zooms[xIndex];
 
         maps.grid = QPixmap();

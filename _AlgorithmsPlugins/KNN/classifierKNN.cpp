@@ -21,6 +21,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "basicMath.h"
 #include "classifierKNN.h"
 #include <map>
+#include <QDebug>
 using namespace std;
 
 void ClassifierKNN::Train( std::vector< fvec > samples, ivec labels )
@@ -42,7 +43,14 @@ void ClassifierKNN::Train( std::vector< fvec > samples, ivec labels )
 	kdTree = new ANNkd_tree(dataPts, samples.size(), dim);
 
     int cnt=0;
-    FOR(i, labels.size()) if(!classMap.count(labels.at(i))) classMap[labels.at(i)] = cnt++;
+    bool bClassZero=false, bClassOne=false;
+    FOR(i, labels.size()) {
+        if(!classMap.count(labels.at(i))) classMap[labels.at(i)] = cnt++;
+        if(!bClassZero && labels[i] == 0) bClassZero = true;
+        if(!bClassOne && labels[i] == 1) bClassOne = true;
+    }
+
+    bBinary = (classMap.size() == 2 && bClassZero && bClassOne);
     for(map<int,int>::iterator it=classMap.begin(); it != classMap.end(); it++) inverseMap[it->second] = it->first;
 }
 
@@ -55,10 +63,13 @@ ClassifierKNN::~ClassifierKNN()
 fvec ClassifierKNN::TestMulti(const fvec &sample) const
 {
 	if(!samples.size()) return fvec();
-	fvec score;
 
     ivec newLabels(labels.size());
-    FOR(i, newLabels.size()) newLabels[i] = classMap.at(labels.at(i));
+    std::map<int,int> counts;
+    FOR(i, newLabels.size()) {
+        newLabels[i] = classMap.at(labels.at(i));
+        counts[newLabels[i]] = 0;
+    }
 
 	double eps = 0; // error bound
 	ANNpoint queryPt; // query point
@@ -67,32 +78,35 @@ fvec ClassifierKNN::TestMulti(const fvec &sample) const
 	ANNdistArray dists = new ANNdist[k]; // allocate near neighbor dists
 	FOR(i, sample.size()) queryPt[i] = sample[i];
 	kdTree->annkSearch(queryPt, k, nnIdx, dists, eps);
-    std::map<int,int> counts;
 	FOR(i, k)
 	{
-        if(nnIdx[i] >= newLabels.size()) continue;
+        if(nnIdx[i] >= (int)newLabels.size()) {
+            continue;
+        }
         int label = newLabels[nnIdx[i]];
-        if(!counts.count(label)) counts[label] = 0;
         counts[label]++;
 	}
 	delete [] nnIdx; // clean things up
 	delete [] dists;
 
-	FOR(i, 256)
-	{
+    fvec score;
+    if(bBinary) {
+        float res = (counts[1] - counts[0])/(float)(counts[0]+counts[1])*3;
+        score.push_back(classMap.at(0) == 0 ? res : -res);
+        return score;
+    }
+
+    FOR(i, 256) {
 		if(counts.count(i)) score.push_back(counts[i]);
 	}
 
 	float sum = 0;
-	FOR(i, score.size())
-	{
+    FOR(i, score.size()) {
 		sum += score[i];
 	}
 
-	if(sum > 0)
-	{
-		FOR(i, score.size())
-		{
+    if(sum > 0) {
+        FOR(i, score.size()) {
 			score[i] /= sum;
 		}
 	}

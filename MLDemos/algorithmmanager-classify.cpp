@@ -124,7 +124,9 @@ void AlgorithmManager::DrawClassifiedSamples(Canvas *canvas, Classifier *classif
         int label = canvas->data->GetLabel(i);
         QPointF point = canvas->toCanvasCoords(canvas->data->GetSample(i));
         fvec res;
-        if(classifier->IsMultiClass()) res = classifier->TestMulti(sample);
+        if(classifier->IsMultiClass()) {
+            res = classifier->TestMulti(sample);
+        }
         else if(classifierMulti.size()) {
             FOR(c, classifierMulti.size()) {
                 res.push_back(classifierMulti[c]->Test(sample));
@@ -356,7 +358,11 @@ bool AlgorithmManager::Train(Classifier *classifier, float trainRatio, bvec trai
             else
             {
                 int maxClass = 0;
-                for(int j=1; j<res.size(); j++) if(res[maxClass] < res[j]) maxClass = j;
+                QString text;
+                for(int j=1; j<res.size(); j++) {
+                    text += QString("%1").arg(res[j]) + "\t";
+                    if(res[maxClass] < res[j]) maxClass = j;
+                }
                 int c = classifier->inverseMap[maxClass];
                 rocData.push_back(f32pair(c, label));
                 confusionMatrix[0][label][c]++;
