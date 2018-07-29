@@ -84,6 +84,9 @@ void MLDemos::initToolBars()
     actionShowStats->setStatusTip(tr("Display Algorithm Information and Data Statistics"));
     actionShowStats->setCheckable(true);
 
+    connect(actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
+    connect(actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
+    connect(actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
     connect(actionAlgorithms, SIGNAL(triggered()), this, SLOT(ShowAlgorithmOptions()));
     connect(actionAlgorithms,SIGNAL(triggered()),this, SLOT(HideAlgorithmOptions()));
     connect(actionCompare, SIGNAL(triggered()), this, SLOT(ShowOptionCompare()));
@@ -95,18 +98,7 @@ void MLDemos::initToolBars()
     connect(actionClearAll, SIGNAL(triggered()), this, SLOT(ClearAll()));
     connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
     connect(actionScreenshot, SIGNAL(triggered()), this, SLOT(Screenshot()));
-    connect(actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
-    connect(actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
-    connect(actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
     connect(actionShowStats, SIGNAL(triggered()), this, SLOT(ShowStatsDialog()));
-
-    /*
- connect(actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));
- connect(actionClearModel, SIGNAL(triggered()), this, SLOT(Clear()));
- connect(actionNew, SIGNAL(triggered()), this, SLOT(ClearData()));
- connect(actionSave, SIGNAL(triggered()), this, SLOT(SaveData()));
- connect(actionLoad, SIGNAL(triggered()), this, SLOT(LoadData()));
- */
 
     toolBar = addToolBar("Tools");
     toolBar->setObjectName("MainToolBar");
