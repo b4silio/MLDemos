@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>585</width>
-    <height>200</height>
+    <width>310</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,42 +22,22 @@
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
    <property name="spacing">
+    <number>-1</number>
+   </property>
+   <property name="leftMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Algorithm</string>
-     </property>
-     <widget class="QComboBox" name="algoList">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>22</y>
-        <width>190</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-     </widget>
-     <widget class="QWidget" name="algoWidget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>4</x>
-        <y>47</y>
-        <width>380</width>
-        <height>141</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-   </item>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
    <item>
     <widget class="QWidget" name="widget" native="true">
      <property name="minimumSize">
@@ -66,135 +46,145 @@
        <height>140</height>
       </size>
      </property>
-     <widget class="QPushButton" name="manifoldButton">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>30</y>
-        <width>110</width>
-        <height>32</height>
-       </rect>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
       </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
+      <property name="topMargin">
+       <number>0</number>
       </property>
-      <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Learn projection and display learned manifold in source space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <property name="rightMargin">
+       <number>0</number>
       </property>
-      <property name="text">
-       <string>Display Manifold</string>
+      <property name="bottomMargin">
+       <number>0</number>
       </property>
-     </widget>
-     <widget class="QPushButton" name="projectButton">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>0</y>
-        <width>110</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Project the current source data onto the </string>
-      </property>
-      <property name="text">
-       <string>Project</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="manualTrainButton">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>110</y>
-        <width>110</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Manual Selection</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="fitCheck">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>87</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Fit window to data after Projecting or Reverting the data</string>
-      </property>
-      <property name="text">
-       <string>Auto-Fit</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="revertButton">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>80</y>
-        <width>110</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Restore source data (erases projection)</string>
-      </property>
-      <property name="text">
-       <string>Revert</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="reprojectButton">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>110</y>
-        <width>110</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>Reproject already projected data</string>
-      </property>
-      <property name="text">
-       <string>ReProject</string>
-      </property>
-     </widget>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="manifoldButton">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Learn projection and display learned manifold in source space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Display Manifold</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="projectButton">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Project the current source data onto the </string>
+        </property>
+        <property name="text">
+         <string>Project</string>
+        </property>
+        <property name="default">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="fitCheck">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Fit window to data after Projecting or Reverting the data</string>
+        </property>
+        <property name="text">
+         <string>Auto-Fit</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="revertButton">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Restore source data (erases projection)</string>
+        </property>
+        <property name="text">
+         <string>Clear (Revert)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="reprojectButton">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Reproject already projected data</string>
+        </property>
+        <property name="text">
+         <string>ReProject</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="manualTrainButton">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Manual Selection</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="algoList">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="algoWidget" native="true">
+     <property name="styleSheet">
+      <string notr="true">#algoWidget {
+background-color: rgb(220, 220, 220);
+border-style: inset;
+border-width: 1px;
+border-color: rgb(190,190,190);
+border-radius: 10px;
+}</string>
+     </property>
     </widget>
    </item>
   </layout>

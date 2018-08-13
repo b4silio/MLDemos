@@ -52,7 +52,7 @@ void AlgorithmManager::Dynamize()
         dynamicals[tab]->DrawGL(canvas, glw, dynamical);
         if(canvas->data->GetDimCount() == 3)
         {
-            int displayStyle = optionsDynamic->displayCombo->currentIndex();
+            int displayStyle = 1; //optionsDynamic->displayCombo->currentIndex();
             if(displayStyle == 3) // DS animation
             {
             }

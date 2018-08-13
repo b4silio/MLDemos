@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>304</width>
     <height>158</height>
    </rect>
   </property>
@@ -56,7 +56,7 @@ gaussian: beta*exp(-alpha*x*x)</string>
     <double>0.100000000000000</double>
    </property>
    <property name="value">
-    <double>10.000000000000000</double>
+    <double>1.000000000000000</double>
    </property>
   </widget>
   <widget class="QLabel" name="label_17">

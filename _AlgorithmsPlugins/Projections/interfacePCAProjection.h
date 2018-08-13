@@ -15,6 +15,7 @@ private:
     Ui::paramsPCA *params;
     QWidget *eigenWidget;
     QTableWidget *eigenTable;
+    QPixmap eigenPixmap;
 public:
     PCAProjection();
     ~PCAProjection();
@@ -23,6 +24,7 @@ public:
     void DrawInfo(Canvas *canvas, QPainter &painter, Projector *projector);
     void DrawModel(Canvas *canvas, QPainter &painter, Projector *projector);
     void DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector){}
+    bool eventFilter(QObject* obj, QEvent* evt);
 
     // virtual functions to manage the GUI and I/O
     QString GetName(){return QString("Principal Component Analysis");}

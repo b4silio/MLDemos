@@ -1,17 +1,18 @@
 #include "datagenerator.h"
-#include "ui_datagenerator.h"
+#include "ui_datasetgenerator.h"
 #include <QDebug>
 
 using namespace std;
 
 DataGenerator::DataGenerator(Canvas *canvas, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::DataGenerator)
+    QWidget(parent),
+    ui(new Ui::DatasetGenerator)
 {
     ui->setupUi(this);
     this->canvas = canvas;
-    //connect(ui->addButton, SIGNAL(clicked()), this, SLOT(Generate()));
+    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     connect(ui->generatorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
+    hide();
     OptionsChanged();
 }
 

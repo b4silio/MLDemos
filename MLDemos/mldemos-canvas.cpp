@@ -26,13 +26,13 @@ void MLDemos::FitToData()
     float zoom = canvas->GetZoom();
     if (zoom >= 1) zoom -= 1;
     else zoom = 1/(-zoom) - 1;
-    if (zoom == displayOptions->spinZoom->value()) {
+    if (zoom == viewOptions->spinZoom->value()) {
         DisplayOptionsChanged();
         return;
     }
-    displayOptions->spinZoom->blockSignals(true);
-    displayOptions->spinZoom->setValue(zoom);
-    displayOptions->spinZoom->blockSignals(false);
+    viewOptions->spinZoom->blockSignals(true);
+    viewOptions->spinZoom->setValue(zoom);
+    viewOptions->spinZoom->blockSignals(false);
     drawTimer->Stop();
     drawTimer->Clear();
     drawTimer->inputDims = algo->GetInputDimensions();
@@ -59,9 +59,9 @@ void MLDemos::FitToData()
 
 void MLDemos::ZoomChanged(float d)
 {
-    float zoom = displayOptions->spinZoom->value() + d/4;
+    float zoom = viewOptions->spinZoom->value() + d/4;
     zoom = zoom > 0 ? min(25.f, zoom) : max(-40.f, zoom);
-    displayOptions->spinZoom->setValue(zoom);
+    viewOptions->spinZoom->setValue(zoom);
 }
 
 void MLDemos::CanvasMoveEvent()
@@ -98,6 +98,8 @@ void MLDemos::CanvasTypeChanged()
 {
     bool bProjected = canvas->data->bProjected;
     int type = ui.canvasTypeCombo->currentIndex();
+    if (type == 1) type = 2; // we swapped 3D and Visualizations, to not have to change everything, we swap the index here
+    else if (type == 2) type = 1;
 
     if (!canvas->data->GetCount()) {
         if (type > 1 && !canvas->rewardPixmap().isNull()) { // we only have rewards
@@ -124,8 +126,8 @@ void MLDemos::CanvasTypeChanged()
             ui.canvasX3Label->setText(bProjected ? "e3" : "x3");
             // if we haven't really set the third dimension, we pick the one manually
             if (canvas->data->GetDimCount() > 2 &&
-                    ui.canvasX3Spin->value() == 0 ||
-                    ui.canvasX3Spin->value() == ui.canvasX2Spin->value()) {
+                    (ui.canvasX3Spin->value() == 0 ||
+                    ui.canvasX3Spin->value() == ui.canvasX2Spin->value())) {
                 ui.canvasX3Spin->setValue(ui.canvasX2Spin->value() == canvas->data->GetDimCount() ?
                                               canvas->data->GetDimCount()-1 : ui.canvasX2Spin->value()+1);
             }
@@ -140,32 +142,22 @@ void MLDemos::CanvasTypeChanged()
     case 2: // Visualizations
         break;
     }
-    if ((!glw || !glw->isVisible()) || ((!vis || !vis->isVisible()) && canvas->canvasType == type)) return;
+    if(canvas->canvasType == type) return;
+    //if ((!glw || !glw->isVisible()) || ((!vis || !vis->isVisible()) && canvas->canvasType == type)) return;
     if (type == 1) { // 3D viewport
         if(vis) vis->hide();
-        displayOptions->tabWidget->setCurrentIndex(1);
+        HideEditingTools();
+        ui.rightPaneWidget->show();
         canvas->Clear();
         canvas->repaint();
         ui.canvasWidget->repaint();
-        //        ui.canvasWidget->hide();
-        if (!ui.canvasArea->layout()) {
-            // this is an ugly hack that forces the layout behind to be drawn as a cleared image
-            // for some reason otherwise, the canvas will only be repainted AFTER it is re-shown
-            // and it will flicker with the last image shown beforehand
-            QBoxLayout *layout = new QBoxLayout(QBoxLayout::LeftToRight);
-            layout->setContentsMargins(1,1,1,1);
-            layout->setMargin(1);
-            ui.canvasArea->setLayout(layout);
-            ui.canvasArea->layout()->addWidget(glw);
-            ui.canvasArea->layout()->addWidget(vis);
-        }
         QSizePolicy policy = glw->sizePolicy();
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
         policy.setVerticalPolicy(QSizePolicy::Preferred);
         canvas->SetCanvasType(type);
         glw->setSizePolicy(policy);
-        glw->setMinimumSize(ui.canvasArea->size());
-        glw->resize(ui.canvasArea->size());
+        glw->setMinimumSize(ui.canvasWidget->size());
+        glw->resize(ui.canvasWidget->size());
         FOR (i, glw->objects.size()) {
             if (!glw->objectAlive[i]) continue;
             if (glw->objects[i].objectType.contains("Reward")) glw->killList.push_back(i);
@@ -173,23 +165,12 @@ void MLDemos::CanvasTypeChanged()
         glw->show();
         glw->repaint();
     } else if (type==2) { // visualizations
+        HideEditingTools();
+        ui.rightPaneWidget->hide();
         glw->hide();
-        displayOptions->tabWidget->setCurrentIndex(0);
         canvas->Clear();
         canvas->repaint();
         ui.canvasWidget->repaint();
-        //        ui.canvasWidget->hide();
-        if (!ui.canvasArea->layout()) {
-            // this is an ugly hack that forces the layout behind to be drawn as a cleared image
-            // for some reason otherwise, the canvas will only be repainted AFTER it is re-shown
-            // and it will flicker with the last image shown beforehand
-            QBoxLayout *layout = new QBoxLayout(QBoxLayout::LeftToRight);
-            layout->setContentsMargins(1,1,1,1);
-            layout->setMargin(1);
-            ui.canvasArea->setLayout(layout);
-            ui.canvasArea->layout()->addWidget(glw);
-            ui.canvasArea->layout()->addWidget(vis);
-        }
         QSizePolicy policy;
         if(vis) policy = vis->sizePolicy();
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
@@ -197,13 +178,14 @@ void MLDemos::CanvasTypeChanged()
         canvas->SetCanvasType(type);
         if(vis) {
             vis->setSizePolicy(policy);
-            vis->setMinimumSize(ui.canvasArea->size());
-            vis->resize(ui.canvasArea->size());
+            vis->setMinimumSize(ui.canvasWidget->size());
+            vis->resize(ui.canvasWidget->size());
             vis->show();
             vis->Update();
         }
     } else {
-        displayOptions->tabWidget->setCurrentIndex(0);
+        ShowEditingTools();
+        ui.rightPaneWidget->show();
         canvas->SetCanvasType(type);
         CanvasOptionsChanged();
         canvas->ResetSamples();
@@ -212,6 +194,7 @@ void MLDemos::CanvasTypeChanged()
         ui.canvasWidget->show();
         ui.canvasWidget->repaint();
     }
+    ResetMinimumWidth();
     algo->UpdateLearnedModel();
     canvas->repaint();
 }
@@ -220,8 +203,8 @@ void MLDemos::CanvasOptionsChanged()
 {
     QSizePolicy policy = ui.canvasWidget->sizePolicy();
     int dims = canvas ? (canvas->data->GetCount() ? canvas->data->GetSample(0).size() : 2) : 2;
-    int w = ui.canvasArea->width();
-    int h = ui.canvasArea->height();
+    int w = ui.canvasWidget->width();
+    int h = ui.canvasWidget->height();
     bool bNeedsZoom = false;
     if (canvas->canvasType == 1) {
         if (h/dims < 100) {
@@ -235,14 +218,7 @@ void MLDemos::CanvasOptionsChanged()
     }
 
     if (canvas->canvasType == 0 || !bNeedsZoom) {
-        policy.setHorizontalPolicy(QSizePolicy::Preferred);
-        policy.setVerticalPolicy(QSizePolicy::Preferred);
-        ui.canvasWidget->setSizePolicy(policy);
-        ui.canvasWidget->setMinimumSize(ui.canvasArea->size());
-        ui.canvasWidget->resize(ui.canvasArea->size());
         canvas->resize(ui.canvasWidget->size());
-        ui.canvasArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         canvas->SetCanvasType(canvas->canvasType);
         canvas->ResizeEvent();
         if (mutex.tryLock()) {
@@ -266,8 +242,6 @@ void MLDemos::CanvasOptionsChanged()
     ui.canvasWidget->setMinimumSize(w,h);
     ui.canvasWidget->resize(w,h);
     canvas->resize(ui.canvasWidget->size());
-    ui.canvasArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    ui.canvasArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     canvas->SetCanvasType(canvas->canvasType);
 
     if (mutex.tryLock()) {

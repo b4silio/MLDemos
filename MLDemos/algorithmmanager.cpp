@@ -20,17 +20,17 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "algorithmmanager.h"
 #include "mldemos.h"
 #include <assert.h>
+#include <QSpacerItem>
 
 using namespace std;
 
 AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *glw, QMutex *mutex, DrawTimer *drawTimer, CompareAlgorithms *compare, GridSearch *gridSearch)
-    : mldemos(mldemos),
-      canvas(canvas),
+    : canvas(canvas),
       glw(glw),
-      mutex(mutex),
-      drawTimer(drawTimer),
-      compare(compare),
-      gridSearch(gridSearch),
+      mldemos(mldemos),
+      manualSelection(0),
+      inputDimensions(0),
+      tabUsedForTraining(0),
       classifier(0),
       regressor(0),
       dynamical(0),
@@ -38,9 +38,10 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
       maximizer(0),
       reinforcement(0),
       projector(0),
-      tabUsedForTraining(0),
-      inputDimensions(0),
-      manualSelection(0)
+      mutex(mutex),
+      drawTimer(drawTimer),
+      compare(compare),
+      gridSearch(gridSearch)
 {
     options = new Ui::algorithmOptions();
     optionsClassify = new Ui::optionsClassifyWidget();
@@ -51,7 +52,10 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     optionsReinforcement = new Ui::optionsReinforcementWidget();
     optionsProject = new Ui::optionsProjectWidget();
 
-    algorithmWidget = new BaseWidget();
+    algorithmWidget = new QWidget();
+    mldemos->ui.algoOptionsWidget->layout()->addWidget(algorithmWidget);
+    mldemos->ui.algoOptionsWidget->show();
+    algorithmWidget->show();
 
     options->setupUi(algorithmWidget);
 
@@ -92,7 +96,6 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     options->tabProj->layout()->addWidget(projectWidget);
 
     connect(gridSearch,SIGNAL(closed()),mldemos,SLOT(ResetGridSearchButton()));
-    connect(algorithmWidget,SIGNAL(closed()),mldemos,SLOT(RestAlgorithmOptionsButton()));
     connect(optionsClassify->classifyButton, SIGNAL(clicked()), this, SLOT(Classify()));
     connect(optionsClassify->loadButton, SIGNAL(clicked()), this, SLOT(LoadClassifier()));
     connect(optionsClassify->saveButton, SIGNAL(clicked()), this, SLOT(SaveClassifier()));
@@ -224,6 +227,8 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     drawTimer->reinforcement = &reinforcement;
     drawTimer->reinforcementProblem = &reinforcementProblem;
     drawTimer->classifierMulti = &classifierMulti;
+
+    qDebug() << "algo visible" << algorithmWidget->isVisible();
 }
 
 AlgorithmManager::~AlgorithmManager()

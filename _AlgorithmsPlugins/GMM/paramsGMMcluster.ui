@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>224</width>
-    <height>200</height>
+    <width>304</width>
+    <height>165</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="marginalsButton">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>150</y>
+     <x>90</x>
+     <y>120</y>
      <width>120</width>
      <height>32</height>
     </rect>
@@ -34,7 +34,7 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>160</x>
      <y>0</y>
      <width>90</width>
      <height>30</height>
@@ -55,7 +55,7 @@
   <widget class="QComboBox" name="gmmCovarianceCombo">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>160</x>
      <y>30</y>
      <width>90</width>
      <height>26</height>
@@ -91,8 +91,8 @@
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>60</y>
+     <x>100</x>
+     <y>50</y>
      <width>100</width>
      <height>36</height>
     </rect>
@@ -112,8 +112,8 @@
   <widget class="QComboBox" name="gmmInitCombo">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>90</y>
+     <x>100</x>
+     <y>80</y>
      <width>100</width>
      <height>26</height>
     </rect>
@@ -151,7 +151,7 @@ K-Means: perform K-Means and assign means and variance to each mixture</string>
   <widget class="QSpinBox" name="gmmCount">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>70</x>
      <y>30</y>
      <width>50</width>
      <height>24</height>
@@ -178,7 +178,7 @@ K-Means: perform K-Means and assign means and variance to each mixture</string>
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>50</x>
      <y>0</y>
      <width>90</width>
      <height>29</height>

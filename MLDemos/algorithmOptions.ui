@@ -6,26 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>320</height>
+    <width>300</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>700</width>
-    <height>320</height>
+    <width>300</width>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>700</width>
-    <height>320</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -45,16 +45,16 @@
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>12</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
     <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>12</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>12</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
@@ -72,7 +72,7 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>13</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -82,17 +82,39 @@
        <kerning>true</kerning>
       </font>
      </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QTabBar::tab {
+height: 40px;
+width: 40px;
+border-style: ridge;
+border-width: 1px;
+border-color: gray;
+background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+}
+QTabBar::tab:selected {
+background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+}</string>
+     </property>
      <property name="tabPosition">
       <enum>QTabWidget::North</enum>
-     </property>
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <property name="iconSize">
+      <size>
+       <width>38</width>
+       <height>38</height>
+      </size>
+     </property>
      <property name="elideMode">
-      <enum>Qt::ElideRight</enum>
+      <enum>Qt::ElideMiddle</enum>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
@@ -107,7 +129,14 @@
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="tabClass">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_Classification.png</normaloff>:/MLDemos/icons/algorithm_icons_Classification.png</iconset>
+      </attribute>
       <attribute name="title">
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
        <string>Classification</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -129,7 +158,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabClust">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_Clustering.png</normaloff>:/MLDemos/icons/algorithm_icons_Clustering.png</iconset>
+      </attribute>
       <attribute name="title">
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
        <string>Clustering</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -151,7 +187,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabRegr">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_Regression.png</normaloff>:/MLDemos/icons/algorithm_icons_Regression.png</iconset>
+      </attribute>
       <attribute name="title">
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
        <string>Regression</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -173,8 +216,15 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabProj">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_Projection.png</normaloff>:/MLDemos/icons/algorithm_icons_Projection.png</iconset>
+      </attribute>
       <attribute name="title">
-       <string>Projections</string>
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Projection</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_7">
        <property name="spacing">
@@ -195,8 +245,15 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabDyn">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_DS.png</normaloff>:/MLDemos/icons/algorithm_icons_DS.png</iconset>
+      </attribute>
       <attribute name="title">
-       <string>Dynamical</string>
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Dynamical Systems</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <property name="spacing">
@@ -217,8 +274,15 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabMax">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_Maximization.png</normaloff>:/MLDemos/icons/algorithm_icons_Maximization.png</iconset>
+      </attribute>
       <attribute name="title">
-       <string>Optimization</string>
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Maximization</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
        <property name="spacing">
@@ -239,7 +303,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabReinf">
+      <attribute name="icon">
+       <iconset resource="mldemos.qrc">
+        <normaloff>:/MLDemos/icons/algorithm_icons_RL.png</normaloff>:/MLDemos/icons/algorithm_icons_RL.png</iconset>
+      </attribute>
       <attribute name="title">
+       <string/>
+      </attribute>
+      <attribute name="toolTip">
        <string>Reinforcement Learning</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -264,6 +335,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="mldemos.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -4,19 +4,19 @@
 #include <QDialog>
 #include <QMutex>
 #include <canvas.h>
-#include "ui_datagenerator.h"
+#include "ui_datasetgenerator.h"
 
 namespace Ui {
-class DataGenerator;
+class DatasetGenerator;
 }
 
-class DataGenerator : public QDialog
+class DataGenerator : public QWidget
 {
     Q_OBJECT
 private:
     Canvas *canvas;
 public:
-    Ui::DataGenerator *ui;
+    Ui::DatasetGenerator *ui;
     explicit DataGenerator(Canvas *canvas, QWidget *parent = 0);
     ~DataGenerator();
 

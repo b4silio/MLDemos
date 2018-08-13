@@ -55,10 +55,14 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
+    bool eventFilter(QObject* obj, QEvent* evt);
 
 private:
     fPair GetParamsRange();
     void DisplayResults();
+
+signals:
+    void Hiding();
 
 public slots:
     void MouseMove(QMouseEvent *);

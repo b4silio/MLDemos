@@ -7,6 +7,7 @@ PCAProjection::PCAProjection()
 {
     params = new Ui::paramsPCA();
     params->setupUi(widget);
+    params->eigenGraph->installEventFilter(this);
 
     connect(params->showEigenvectorButton, SIGNAL(clicked()), this, SLOT(ShowEigenVectors()));
     connect(params->useRangeCheck, SIGNAL(clicked()), this, SLOT(ChangeOptions()));
@@ -56,13 +57,10 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
     ProjectorPCA *pca = dynamic_cast<ProjectorPCA*>(projector);
     if(!pca) return;
     QPixmap pixmap(params->eigenGraph->width(), params->eigenGraph->height());
-    //QBitmap bitmap(pixmap.width(), pixmap.height());
-    //bitmap.clear();
-    //pixmap.setMask(bitmap);
     pixmap.fill(Qt::transparent);
     QPainter eigenPainter(&pixmap);
     pca->DrawEigenvals(eigenPainter);
-    params->eigenGraph->setPixmap(pixmap);
+    eigenPixmap = pixmap;
 
     params->eigenList->clear();
     fvec values = pca->GetEigenValues();
@@ -70,11 +68,9 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
     float maxEigVal = 0;
     FOR(i, values.size()) if(values[i] == values[i] && values[i] >= 0) maxEigVal += values[i];
 
-    FOR(i, values.size())
-    {
+    FOR(i, values.size()) {
         float eigval = values[i];
-        if(eigval == eigval && eigval >= 0)
-        {
+        if(eigval == eigval && eigval >= 0) {
             accumulator += eigval / maxEigVal;
         }
         else eigval = 0;
@@ -83,35 +79,31 @@ void PCAProjection::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proje
     vector<fvec> eigenVec = pca->GetEigenVectors();
     int dim = eigenVec.size();
     int eigenCount = eigenVec.size() ? eigenVec[0].size() : 2;
-    if(!eigenWidget)
-    {
+    if(!eigenWidget) {
         eigenWidget = new QWidget();
         QBoxLayout *layout = new QBoxLayout(QBoxLayout::LeftToRight, eigenWidget);
         eigenWidget->setWindowTitle("PCA EigenVectors");
         eigenTable = new QTableWidget(eigenCount, dim);
         layout->addWidget(eigenTable);
-    }
-    else
-    {
+    } else {
         eigenTable->setColumnCount(dim);
         eigenTable->setRowCount(eigenCount);
     }
-    FOR(i, dim)
-    {
+    FOR(i, dim) {
         if(i >= eigenVec.size()) break;
-        FOR(j, eigenCount)
-        {
+        FOR(j, eigenCount) {
             if(j >= eigenVec[i].size()) break;
             QTableWidgetItem *item = new QTableWidgetItem(QString("%1").arg(eigenVec[i][j], 0, 'f', 4));
             eigenTable->setItem(j,i, item);
         }
     }
     QStringList labels;
-    FOR(i, dim)
-    {
+    FOR(i, dim) {
         labels << QString("e%1: %2").arg(i+1).arg(values[i], 0, 'f', 3);
     }
     eigenTable->setHorizontalHeaderLabels(labels);
+    params->eigenGraph->repaint();
+
 }
 
 void PCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *projector)
@@ -145,6 +137,18 @@ void PCAProjection::DrawModel(Canvas *canvas, QPainter &painter, Projector *proj
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::black, 2));
     painter.drawLine(p1, p2);
+}
+
+bool PCAProjection::eventFilter(QObject *obj, QEvent *evt)
+{
+    if(obj == params->eigenGraph && evt->type() == QEvent::Paint){
+        if(!eigenPixmap.isNull()) {
+            QPainter painter(params->eigenGraph);
+            painter.drawPixmap(params->eigenGraph->rect(), eigenPixmap, eigenPixmap.rect());
+            return true;
+        }
+    }
+    return QObject::eventFilter(obj, evt);
 }
 
 // virtual functions to manage the GUI and I/O

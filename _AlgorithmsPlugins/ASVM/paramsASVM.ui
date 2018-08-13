@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>304</width>
     <height>149</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>186</x>
      <y>100</y>
      <width>100</width>
      <height>20</height>
@@ -43,7 +43,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>216</x>
      <y>120</y>
      <width>60</width>
      <height>20</height>
@@ -324,7 +324,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>176</x>
      <y>0</y>
      <width>120</width>
      <height>100</height>

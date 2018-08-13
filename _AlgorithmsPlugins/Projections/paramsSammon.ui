@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>192</height>
+    <width>304</width>
+    <height>106</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QLabel" name="labelStart">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>60</y>
+     <x>70</x>
+     <y>30</y>
      <width>110</width>
      <height>20</height>
     </rect>
@@ -34,8 +34,8 @@
   <widget class="QSpinBox" name="dimCountSpin">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>60</y>
+     <x>190</x>
+     <y>30</y>
      <width>40</width>
      <height>20</height>
     </rect>

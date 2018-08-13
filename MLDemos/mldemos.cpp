@@ -59,9 +59,9 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
 
     LoadLayoutOptions();
     SetTextFontSize();
-    ShowToolbar();
 
     plugin->LoadPlugins();
+    LoadAlgorithmsOptions();
 
     this->show();
 
@@ -79,6 +79,7 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
     Display3DOptionsChanged();
     ResetPositiveClass();
     algo->ClusterChanged();
+    DrawToolsChanged();
     ChangeInfoFile();
     drawTime.start();
     if (filename != "") Load(filename);
@@ -94,9 +95,9 @@ MLDemos::~MLDemos()
     DEL(manualSelection);
     DEL(inputDimensions);
     DEL(showStats);
-    DEL(displayOptions);
+    DEL(viewOptions);
     DEL(drawToolbar);
-    DEL(drawToolbarWidget);
+    //DEL(drawToolbarWidget);
     DEL(drawToolbarContext1);
     DEL(drawToolbarContext2);
     DEL(drawToolbarContext3);
@@ -133,19 +134,18 @@ void MLDemos::resizeEvent(QResizeEvent *event)
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
         policy.setVerticalPolicy(QSizePolicy::Preferred);
         vis->setSizePolicy(policy);
-        vis->setMinimumSize(ui.canvasArea->size());
-        vis->resize(ui.canvasArea->size());
+        vis->setMinimumSize(ui.canvasWidget->size());
+        vis->resize(ui.canvasWidget->size());
         //CanvasOptionsChanged();
     } else if (canvas->canvasType == 1) { // 3D View
         QSizePolicy policy = glw->sizePolicy();
         policy.setHorizontalPolicy(QSizePolicy::Preferred);
         policy.setVerticalPolicy(QSizePolicy::Preferred);
         glw->setSizePolicy(policy);
-        glw->setMinimumSize(ui.canvasArea->size());
-        glw->resize(ui.canvasArea->size());
+        glw->setMinimumSize(ui.canvasWidget->size());
+        glw->resize(ui.canvasWidget->size());
     }
     canvas->ResizeEvent();
     CanvasOptionsChanged();
-
     CanvasMoveEvent();
 }

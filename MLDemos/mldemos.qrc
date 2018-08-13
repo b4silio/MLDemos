@@ -46,5 +46,29 @@
         <file>shaders/drawSamplesShadow.fsh</file>
         <file>icons/move-class.png</file>
         <file>icons/clearall.png</file>
+        <file>icons/algorithm_icons_Classification.png</file>
+        <file>icons/algorithm_icons_Regression.png</file>
+        <file>icons/algorithm_icons_Clustering.png</file>
+        <file>icons/algorithm_icons_Projection.png</file>
+        <file>icons/algorithm_icons_Maximization.png</file>
+        <file>icons/algorithm_icons_RL.png</file>
+        <file>icons/algorithm_icons_DS.png</file>
+        <file>icons/icons_datagenerator.png</file>
+        <file>icons/icons_showSamples.png</file>
+        <file>icons/icons_showOutput.png</file>
+        <file>icons/icons_showModel.png</file>
+        <file>icons/icons_showBackground.png</file>
+        <file>icons/icons_showGrid.png</file>
+        <file>icons/icons_showLegend.png</file>
+        <file>icons/icons_saveToDisk.png</file>
+        <file>icons/icons_saveToClipboard.png</file>
+        <file>icons/icons_fitToViewport.png</file>
+        <file>icons/icons_compare.png</file>
+        <file>icons/icons_gridsearch.png</file>
+        <file>icons/icons_clearAll.png</file>
+        <file>icons/icons_clearData.png</file>
+        <file>icons/icons_clearModel.png</file>
+        <file>icons/icons_showStats.png</file>
+        <file>icons/icons_showSettings.png</file>
     </qresource>
 </RCC>

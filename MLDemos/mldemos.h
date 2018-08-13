@@ -36,6 +36,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ui_drawingToolsContext4.h"
 #include "ui_manualSelection.h"
 #include "ui_inputDimensions.h"
+#include "ui_displayoptions.h"
 
 #include "canvas.h"
 #include "classifier.h"
@@ -63,11 +64,6 @@ class MLDemos : public QMainWindow
 	Q_OBJECT
 
 public:
-    QAction *actionAlgorithms, *actionDrawSamples, *actionCompare,
-    *actionDisplayOptions, *actionShowStats, *actionAddData,
-    *actionClearData, *actionClearModel, *actionClearAll, *actionScreenshot,
-    *actionNew, *actionSave, *actionLoad, *actionGridsearch;
-
     ivec selectedData;
     fvec selectionWeights;
     fvec selectionStart;
@@ -77,22 +73,23 @@ public:
     Ui::statisticsDialog *showStats;
     Ui::ManualSelection* manualSelection;
     Ui::InputDimensions* inputDimensions;
+    Ui::DrawingToolbar *drawToolbar;
     QDialog *displayDialog, *aboutDialog, *statsDialog, *manualSelectDialog, *inputDimensionsDialog;
 
 private:
 
     QNamedWindow *rocWidget;
 
-	Ui::viewOptionDialog *displayOptions;
-	Ui::aboutDialog *aboutPanel;
-	Ui::DrawingToolbar *drawToolbar;
+    Ui::viewOptionDialog *viewOptions;
+    Ui::aboutDialog *aboutPanel;
+    Ui::DisplayOptions* displayOptions;
     Ui::DrawingToolbarContext1 *drawToolbarContext1;
 	Ui::DrawingToolbarContext2 *drawToolbarContext2;
 	Ui::DrawingToolbarContext3 *drawToolbarContext3;
 	Ui::DrawingToolbarContext4 *drawToolbarContext4;
+    QWidget *displayOptionWidget;
     QWidget *drawToolbarWidget;
 	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget, *drawContext4Widget;
-	QToolBar *toolBar;
 
 	DrawTimer *drawTimer;
 	QTime drawTime;
@@ -117,8 +114,9 @@ private:
 	void initToolBars();
 	void initPlugins();
 	void SaveLayoutOptions();
-	void LoadLayoutOptions();
-	void SetTextFontSize();
+    void LoadLayoutOptions();
+    void LoadAlgorithmsOptions();
+    void SetTextFontSize();
 	void SaveParams(QString filename);
 	void LoadParams(QString filename);
 	void Load(QString filename);
@@ -152,26 +150,23 @@ public slots:
     void Trained();
 
 	void ShowAbout();
-	void ShowAlgorithmOptions();
-
-    void RestAlgorithmOptionsButton();
-
 	void ShowOptionCompare();
-	void ShowSampleDrawing();
 	void ShowOptionDisplay();
 	void ShowStatsDialog();
-	void ShowToolbar();
-    void ShowAddData();
+    void ToggleDataGenerator();
     void ShowGridSearch();
     void ResetGridSearchButton();
-    void HideSampleDrawing();
     void HideOptionDisplay();
     void HideOptionCompare();
+    void HideGridSearch();
     void HideStatsDialog();
-	void HideToolbar();
-    void HideAddData();
+    void HideDataGenerator();
+    void ShowEditingTools();
+    void HideEditingTools();
     void DisplayOptionsChanged();
     void Display3DOptionsChanged();
+    void DrawToolsChanged();
+    void ResetMinimumWidth();
     void ClearPluginSelectionText();
     void AddPluginSelectionText(QString text);
 
@@ -190,8 +185,8 @@ public slots:
     void MapFromReward();
     void ExportOutput();
 	void ExportSVG();
-	void Screenshot();
-	void ToClipboard();
+	void ScreenshotToFile();
+	void ScreenshotToClipboard();
 
 	void DrawCrosshair();
     void CrosshairChanged();
@@ -209,7 +204,7 @@ public slots:
 	void Navigation(fvec sample);
 	void ResetPositiveClass();
 	void ChangeActiveOptions();
-	void ShowRoc();
+    void ShowRoc();
 //	void ShowCross();
 	void MouseOnRoc(QMouseEvent *event);
 	void StatsChanged();
@@ -231,15 +226,6 @@ public slots:
 	void GaussianButton();
 	void GradientButton();
 	void BenchmarkButton();
-
-	void ShowContextMenuSpray(const QPoint &point);
-	void ShowContextMenuLine(const QPoint &point);
-	void ShowContextMenuEllipse(const QPoint &point);
-	void ShowContextMenuErase(const QPoint &point);
-	void ShowContextMenuObstacle(const QPoint &point);
-	void ShowContextMenuReward(const QPoint &point);
-	void FocusChanged(QWidget *old, QWidget *now);
-	void HideContextMenus();
 };
 
 #endif // MLDEMOS_H

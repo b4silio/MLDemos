@@ -39,6 +39,7 @@ GridSearch::GridSearch(Canvas *canvas, QWidget *parent) :
     projector(0)
 {
     ui->setupUi(this);
+    installEventFilter(this);
     connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(Close()));
     connect(ui->names1Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
     connect(ui->names2Combo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
@@ -49,6 +50,7 @@ GridSearch::GridSearch(Canvas *canvas, QWidget *parent) :
     connect(ui->resultCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(DisplayChanged()));
     ui->displayLabel->setScaledContents(true);
     ui->colorbarLabel->setScaledContents(true);
+    //setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 }
 
 GridSearch::~GridSearch()
@@ -186,6 +188,16 @@ void GridSearch::paintEvent(QPaintEvent *event)
     painter.setFont(font);
     painter.drawText(rX, rY, rW, rH, Qt::AlignVCenter|Qt::AlignLeft,displayString);
     ui->displayLabel->setPixmap(newPixmap);
+}
+
+bool GridSearch::eventFilter(QObject *obj, QEvent *evt)
+{
+    if(obj == this && evt->type() == QEvent::Close) {
+        emit (Hiding());
+        evt->ignore();
+        return true;
+    }
+    return QObject::eventFilter(obj, evt);
 }
 
 void GridSearch::DisplayResults()

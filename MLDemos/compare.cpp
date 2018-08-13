@@ -1,5 +1,6 @@
 #include "compare.h"
 #include <QtGui>
+#include <QSizeGrip>
 
 using namespace std;
 
@@ -7,11 +8,19 @@ CompareAlgorithms::CompareAlgorithms(Canvas *canvas)
     : display(0), canvas(canvas)
 {
     params = new Ui::optionsCompare();
-    params->setupUi(paramsWidget = new BaseWidget());
+    params->setupUi(paramsWidget = new QWidget());
 
 	compareDisplay = new Ui::CompareDisplay();
-    compareDisplay->setupUi(compareWidget = new BaseWidget(params->resultWidget));
+    compareDisplay->setupUi(compareWidget = new QWidget(params->resultWidget));
     paramsWidget->setWindowTitle("Comparison Results");
+    /*
+    paramsWidget->setWindowFlag(Qt::CustomizeWindowHint, true);
+    paramsWidget->setWindowFlag(Qt::WindowTitleHint, true);
+    paramsWidget->setWindowFlag(Qt::WindowSystemMenuHint, true);
+    paramsWidget->setWindowFlag(Qt::WindowMaximizeButtonHint, true);
+    paramsWidget->setWindowFlag(Qt::WindowCloseButtonHint, false);
+    */
+    paramsWidget->installEventFilter(this);
 
     if (!params->resultWidget->layout() ) {
         params->resultWidget->setLayout(new QHBoxLayout());
@@ -50,6 +59,12 @@ CompareAlgorithms::~CompareAlgorithms()
 
 bool CompareAlgorithms::eventFilter(QObject *obj, QEvent *event)
 {
+    if(obj == paramsWidget && event->type() == QEvent::Close) {
+        //paramsWidget->hide();
+        emit (Hiding());
+        event->ignore();
+        return true;
+    }
     if (params &&  obj == params->datasetADisplay && event->type() == QEvent::MouseButtonDblClick) {
         CompareResetTrain();
         return true;

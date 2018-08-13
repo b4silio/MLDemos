@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>144</width>
+    <width>304</width>
     <height>129</height>
    </rect>
   </property>
@@ -64,8 +64,8 @@
   <widget class="QLabel" name="label_14">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>70</y>
+     <x>160</x>
+     <y>10</y>
      <width>81</width>
      <height>21</height>
     </rect>
@@ -82,8 +82,8 @@
   <widget class="QLabel" name="label_15">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>100</y>
+     <x>160</x>
+     <y>40</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -100,8 +100,8 @@
   <widget class="QDoubleSpinBox" name="crossSpin">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>70</y>
+     <x>240</x>
+     <y>10</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -127,8 +127,8 @@
   <widget class="QDoubleSpinBox" name="survivalSpin">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>100</y>
+     <x>240</x>
+     <y>40</y>
      <width>50</width>
      <height>20</height>
     </rect>

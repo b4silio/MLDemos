@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>153</height>
+    <width>304</width>
+    <height>116</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,9 +16,9 @@
   <widget class="QComboBox" name="boostLossType">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>150</x>
      <y>40</y>
-     <width>100</width>
+     <width>90</width>
      <height>22</height>
     </rect>
    </property>
@@ -32,26 +32,26 @@
    </property>
    <item>
     <property name="text">
-     <string>squared loss</string>
+     <string>Squared</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>absolute loss</string>
+     <string>Absolute</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>huber loss</string>
+     <string>Huber</string>
     </property>
    </item>
   </widget>
   <widget class="QLabel" name="label_13">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>60</x>
      <y>10</y>
-     <width>171</width>
+     <width>80</width>
      <height>21</height>
     </rect>
    </property>
@@ -61,15 +61,15 @@
     </font>
    </property>
    <property name="text">
-    <string>number of boosting iteration</string>
+    <string>Boost Iterations</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_19">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>60</x>
      <y>70</y>
-     <width>190</width>
+     <width>80</width>
      <height>20</height>
     </rect>
    </property>
@@ -79,15 +79,15 @@
     </font>
    </property>
    <property name="text">
-    <string>max depth of each decision tree</string>
+    <string>Max Depth</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_23">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>60</x>
      <y>40</y>
-     <width>100</width>
+     <width>80</width>
      <height>21</height>
     </rect>
    </property>
@@ -97,13 +97,13 @@
     </font>
    </property>
    <property name="text">
-    <string>loss function</string>
+    <string>Loss function</string>
    </property>
   </widget>
   <widget class="QSpinBox" name="boostTreeDepths">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>150</x>
      <y>70</y>
      <width>51</width>
      <height>21</height>
@@ -130,7 +130,7 @@
   <widget class="QSpinBox" name="boostIters">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>150</x>
      <y>10</y>
      <width>50</width>
      <height>21</height>

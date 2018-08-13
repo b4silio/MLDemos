@@ -173,7 +173,7 @@ void MLDemos::ExportSVG()
     ui.statusBar->showMessage("Vector Image saved successfully");
 }
 
-void MLDemos::Screenshot()
+void MLDemos::ScreenshotToFile()
 {
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Screenshot"), "", tr("Images (*.png *.jpg)"));
     if (filename.isEmpty()) return;
@@ -194,7 +194,7 @@ void MLDemos::Screenshot()
     }
 }
 
-void MLDemos::ToClipboard()
+void MLDemos::ScreenshotToClipboard()
 {
     QClipboard *clipboard = QApplication::clipboard();
     if (canvas->canvasType == 1) {

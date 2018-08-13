@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>214</width>
-    <height>200</height>
+    <width>304</width>
+    <height>109</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>60</x>
+     <y>20</y>
      <width>80</width>
      <height>21</height>
     </rect>
@@ -34,8 +34,8 @@
   <widget class="QDoubleSpinBox" name="kernelWidthSpin">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>10</y>
+     <x>170</x>
+     <y>20</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -64,8 +64,8 @@
   <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>50</y>
+     <x>60</x>
+     <y>60</y>
      <width>100</width>
      <height>21</height>
     </rect>
@@ -82,8 +82,8 @@
   <widget class="QDoubleSpinBox" name="mergeRadiusSpin">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>50</y>
+     <x>170</x>
+     <y>60</y>
      <width>60</width>
      <height>20</height>
     </rect>

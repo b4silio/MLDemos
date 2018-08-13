@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>224</width>
-    <height>200</height>
+    <width>304</width>
+    <height>165</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QSpinBox" name="kmeansClusterSpin">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>50</x>
      <y>20</y>
      <width>50</width>
      <height>24</height>
@@ -43,7 +43,7 @@
   <widget class="QCheckBox" name="KMeansPlusPlusCheckBox">
    <property name="geometry">
     <rect>
-     <x>80</x>
+     <x>110</x>
      <y>46</y>
      <width>142</width>
      <height>18</height>
@@ -67,7 +67,7 @@
   <widget class="QComboBox" name="kmeansMethodCombo">
    <property name="geometry">
     <rect>
-     <x>80</x>
+     <x>110</x>
      <y>20</y>
      <width>130</width>
      <height>26</height>
@@ -104,7 +104,7 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
   <widget class="QLabel" name="label_11">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>50</x>
      <y>1</y>
      <width>50</width>
      <height>16</height>
@@ -122,7 +122,7 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>120</x>
      <y>3</y>
      <width>34</width>
      <height>16</height>
@@ -140,10 +140,10 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>80</y>
+     <x>50</x>
+     <y>70</y>
      <width>115</width>
-     <height>101</height>
+     <height>90</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
@@ -272,13 +272,13 @@ Soft K-Means: K-Means with soft assignment to clusters</string>
   <widget class="QWidget" name="widget_2" native="true">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>80</y>
+     <x>170</x>
+     <y>70</y>
      <width>69</width>
-     <height>101</height>
+     <height>90</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
     <property name="leftMargin">
      <number>0</number>
     </property>

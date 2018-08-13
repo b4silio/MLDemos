@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>636</width>
-    <height>475</height>
+    <width>980</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>980</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MLDemos</string>
@@ -32,12 +38,12 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="2,0">
+   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
     <property name="spacing">
      <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>0</number>
+     <number>4</number>
     </property>
     <property name="topMargin">
      <number>0</number>
@@ -49,66 +55,59 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QScrollArea" name="canvasArea">
+     <widget class="QWidget" name="leftPaneWidget" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
+      <property name="minimumSize">
+       <size>
+        <width>68</width>
+        <height>0</height>
+       </size>
       </property>
-      <widget class="QWidget" name="canvasWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>634</width>
-         <height>391</height>
-        </rect>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2"/>
-      </widget>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+      </layout>
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="canvasControlsWidget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,2">
+     <widget class="QWidget" name="widget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
        <property name="topMargin">
+        <number>8</number>
+       </property>
+       <property name="rightMargin">
         <number>0</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
-        <widget class="QComboBox" name="canvasTypeCombo">
-         <item>
-          <property name="text">
-           <string>2D | Edit View</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>3D View</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Visualizations</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="canvasAxesWidget" native="true">
-         <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0,0">
+        <widget class="QWidget" name="displayOptionWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>32</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -121,96 +120,293 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <property name="horizontalSpacing">
-           <number>-1</number>
-          </property>
-          <property name="verticalSpacing">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="canvasWidget" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="leftMargin">
            <number>0</number>
           </property>
-          <item row="1" column="5">
-           <widget class="QSpinBox" name="canvasX3Spin">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="value">
-             <number>3</number>
-            </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="canvasControlsWidget" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,1,0">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QComboBox" name="canvasTypeCombo">
+            <item>
+             <property name="text">
+              <string>2D View</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Visualizations</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3D View</string>
+             </property>
+            </item>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="canvasX2Label">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
+          <item>
+           <widget class="QWidget" name="canvasAxesWidget" native="true">
+            <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0,0">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <property name="horizontalSpacing">
+              <number>-1</number>
+             </property>
+             <property name="verticalSpacing">
+              <number>0</number>
+             </property>
+             <item row="1" column="0">
+              <widget class="QLabel" name="canvasX1Label">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>x</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="canvasX1Spin">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="canvasX2Label">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>y</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="5">
+              <widget class="QSpinBox" name="canvasX3Spin">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="value">
+                <number>3</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QLabel" name="canvasX3Label">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>z</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QSpinBox" name="canvasX2Spin">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>2</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="status">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
-             <string>y</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             <string/>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="canvasX3Label">
+          <item>
+           <widget class="QCheckBox" name="restrictDimCheck">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>9</pointsize>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Restrict usage of algorithms to currently visible dimensions. If unchecked, algorithms will use all available dimensions (no density/boundary map will be displayed in this case).&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Ignored when data is already 2-Dimensional.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>z</string>
+             <string>Restrict to Visible Dims</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QSpinBox" name="canvasX2Spin">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="value">
-             <number>2</number>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="canvasX1Spin">
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="rightPaneWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>280</width>
+        <height>0</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="leftMargin">
+           <number>7</number>
+          </property>
+          <property name="topMargin">
+           <number>4</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="algoTypeLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+              <underline>false</underline>
+              <strikeout>false</strikeout>
+              <kerning>true</kerning>
              </font>
             </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="canvasX1Label">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(200, 200, 200);
+color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
-             <string>x</string>
+             <string>C L A S S I F I C A T I O N</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -218,37 +414,42 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="restrictDimCheck">
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Restrict data to 2D (Visible)</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="status">
+        <widget class="QWidget" name="algoOptionsWidget" native="true">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
-           <height>25</height>
+           <width>310</width>
+           <height>0</height>
           </size>
          </property>
-         <property name="text">
-          <string/>
+         <property name="maximumSize">
+          <size>
+           <width>310</width>
+           <height>16777215</height>
+          </size>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -261,7 +462,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>636</width>
+     <width>980</width>
      <height>22</height>
     </rect>
    </property>
@@ -298,20 +499,12 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <widget class="QMenu" name="menuDisplay_Options">
-     <property name="title">
-      <string>Toolbar Options</string>
-     </property>
-     <addaction name="actionShow_Toolbar"/>
-     <addaction name="actionSmall_Icons"/>
-    </widget>
     <addaction name="separator"/>
     <addaction name="actionGenerate_Data"/>
     <addaction name="actionClearModel"/>
     <addaction name="actionClearData"/>
     <addaction name="actionEditDataset"/>
     <addaction name="separator"/>
-    <addaction name="menuDisplay_Options"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="enabled">
@@ -342,15 +535,27 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuWindows">
+    <property name="title">
+     <string>Windows</string>
+    </property>
+    <addaction name="actionCompare_Algorithms"/>
+    <addaction name="actionGridsearch_Parameters"/>
+    <addaction name="actionInfo_Statistics"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuData"/>
    <addaction name="menuPlugins"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuWindows"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
    <property name="text">
     <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionExit">
@@ -367,15 +572,24 @@
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionLoad">
    <property name="text">
     <string>Load</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionClassifiers">
@@ -543,6 +757,21 @@
    </property>
    <property name="text">
     <string>AML Class</string>
+   </property>
+  </action>
+  <action name="actionCompare_Algorithms">
+   <property name="text">
+    <string>Compare Algorithms</string>
+   </property>
+  </action>
+  <action name="actionGridsearch_Parameters">
+   <property name="text">
+    <string>Gridsearch Parameters</string>
+   </property>
+  </action>
+  <action name="actionInfo_Statistics">
+   <property name="text">
+    <string>Info &amp; Statistics</string>
    </property>
   </action>
  </widget>

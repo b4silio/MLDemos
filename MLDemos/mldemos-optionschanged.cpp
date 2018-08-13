@@ -27,14 +27,14 @@ void MLDemos::ChangeActiveOptions()
 void MLDemos::DisplayOptionsChanged()
 {
     if (!canvas) return;
-    canvas->bDisplayInfo = displayOptions->infoCheck->isChecked();
-    canvas->bDisplayLearned = displayOptions->modelCheck->isChecked();
-    canvas->bDisplayMap = displayOptions->mapCheck->isChecked();
-    canvas->bDisplaySamples = displayOptions->samplesCheck->isChecked();
-    canvas->bDisplayTrajectories = displayOptions->samplesCheck->isChecked();
-    canvas->bDisplayTimeSeries = displayOptions->samplesCheck->isChecked();
-    canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
-    canvas->bDisplayLegend = displayOptions->legendCheck->isChecked();
+    canvas->bDisplayInfo = displayOptions->showModel->isChecked();
+    canvas->bDisplayLearned = displayOptions->showOutput->isChecked();
+    canvas->bDisplayMap = displayOptions->showBackground->isChecked();
+    canvas->bDisplaySamples = displayOptions->showSamples->isChecked();
+    canvas->bDisplayTrajectories = displayOptions->showSamples->isChecked();
+    canvas->bDisplayTimeSeries = displayOptions->showSamples->isChecked();
+    canvas->bDisplayGrid = displayOptions->showGrid->isChecked();
+    canvas->bDisplayLegend = displayOptions->showLegend->isChecked();
 
     int xIndex = ui.canvasX1Spin->value()-1;
     int yIndex = ui.canvasX2Spin->value()-1;
@@ -47,7 +47,7 @@ void MLDemos::DisplayOptionsChanged()
         canvas->FitToData();
     }
 
-    float zoom = displayOptions->spinZoom->value();
+    float zoom = viewOptions->spinZoom->value();
     // we want to find a smooth function to make zooming more "linear" when zooming further
     if (zoom >= 0.f) {
         //zoom += 1.f;
@@ -104,52 +104,119 @@ void MLDemos::Display3DOptionsChanged()
 {
     if (canvas->canvasType == 0)
     {
-        if (canvas->bDisplayGrid != displayOptions->gridCheck->isChecked())
+        if (canvas->bDisplayGrid != displayOptions->showGrid->isChecked())
         {
-            canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+            canvas->bDisplayGrid = displayOptions->showGrid->isChecked();
             canvas->repaint();
         }
     }
-    else canvas->bDisplayGrid = displayOptions->gridCheck->isChecked();
+    else canvas->bDisplayGrid = displayOptions->showGrid->isChecked();
     if (!glw) return;
-    glw->bDisplaySamples = displayOptions->check3DSamples->isChecked();
-    glw->bDisplayLines = displayOptions->check3DWireframe->isChecked();
-    glw->bDisplaySurfaces = displayOptions->check3DSurfaces->isChecked();
-    glw->bDisplayTransparency = displayOptions->check3DTransparency->isChecked();
-    glw->bDisplayBlurry = displayOptions->check3DBlurry->isChecked();
-    glw->bRotateCamera = displayOptions->check3DRotate->isChecked();
+    glw->bDisplaySamples = viewOptions->check3DSamples->isChecked();
+    glw->bDisplayLines = viewOptions->check3DWireframe->isChecked();
+    glw->bDisplaySurfaces = viewOptions->check3DSurfaces->isChecked();
+    glw->bDisplayTransparency = viewOptions->check3DTransparency->isChecked();
+    glw->bDisplayBlurry = viewOptions->check3DBlurry->isChecked();
+    glw->bRotateCamera = viewOptions->check3DRotate->isChecked();
     glw->update();
 }
 
+void MLDemos::DrawToolsChanged()
+{
+    QLabel* rLabel = drawToolbar->radiusLabel;
+    QDoubleSpinBox * rSpin = drawToolbar->radiusSpin;
+    QLabel* cLabel = drawToolbar->classLabel;
+    QSpinBox * cSpin = drawToolbar->classSpin;
+
+    if     (drawToolbar->singleButton->isChecked() ||
+            drawToolbar->trajectoryButton->isChecked()) {
+        rLabel->hide();
+        rSpin->hide();
+        cLabel->show();
+        cSpin->show();
+    }
+    if     (drawToolbar->sprayButton->isChecked() ||
+            drawToolbar->spray3DButton->isChecked() ||
+            drawToolbar->sprayClassButton->isChecked() ||
+            drawToolbar->paintButton->isChecked())  {
+        rLabel->show();
+        rSpin->show();
+        cLabel->show();
+        cSpin->show();
+    }
+    if(drawToolbar->eraseButton->isChecked()){
+        rLabel->show();
+        rSpin->show();
+        cLabel->hide();
+        cSpin->hide();
+    }
+    if     (drawToolbar->obstacleButton->isChecked() ||
+            drawToolbar->dragButton->isChecked() ||
+            drawToolbar->moveButton->isChecked() ||
+            drawToolbar->moveClassButton->isChecked() ||
+            drawToolbar->lineButton->isChecked() ||
+            drawToolbar->ellipseButton->isChecked() ||
+            drawToolbar->extrudeButton->isChecked() ||
+            drawToolbar->dimPlusButton->isChecked() ||
+            drawToolbar->dimLessButton->isChecked()) {
+        rLabel->hide();
+        rSpin->hide();
+        cLabel->hide();
+        cSpin->hide();
+    }
+    drawContext1Widget->hide();
+    drawContext2Widget->hide();
+    drawContext3Widget->hide();
+    drawContext4Widget->hide();
+
+    if(drawToolbar->sprayButton->isChecked()) drawContext1Widget->show();
+    if(drawToolbar->ellipseButton->isChecked()) drawContext2Widget->show();
+    if(drawToolbar->lineButton->isChecked()) drawContext2Widget->show();
+    if(drawToolbar->eraseButton->isChecked()) drawContext1Widget->show();
+    if(drawToolbar->obstacleButton->isChecked()) drawContext3Widget->show();
+    if(drawToolbar->paintButton->isChecked()) drawContext4Widget->show();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    if (rLabel->isHidden() && cLabel->isHidden()
+            && drawContext1Widget->isHidden()
+            && drawContext2Widget->isHidden()
+            && drawContext3Widget->isHidden()
+            && drawContext4Widget->isHidden()) {
+        drawToolbar->toolOptionWidget->hide();
+        ui.leftPaneWidget->setMinimumWidth(70);
+    } else {
+        drawToolbar->toolOptionWidget->show();
+        ui.leftPaneWidget->setMinimumWidth(68 + 82);
+    }
+    ResetMinimumWidth();
+}
+
+void MLDemos::ResetMinimumWidth()
+{
+    int minW = 520;
+    if(ui.leftPaneWidget->isVisible()) minW += ui.leftPaneWidget->width();
+    if(ui.rightPaneWidget->isVisible()) minW += 310;
+    setMinimumWidth(minW);
+    repaint();
+}
+
+
 void MLDemos::ClearPluginSelectionText()
 {
-    algo->optionsClassify->groupBox->setTitle("Algorithm");
-    algo->optionsCluster->groupBox->setTitle("Algorithm");
-    algo->optionsRegress->groupBox->setTitle("Algorithm");
-    algo->optionsProject->groupBox->setTitle("Algorithm");
-    algo->optionsReinforcement->groupBox->setTitle("Algorithm");
-    algo->optionsMaximize->groupBox->setTitle("Algorithm");
-    algo->optionsDynamic->groupBox->setTitle("Algorithm");
+    setWindowTitle("MLDemos");
 }
 
 void MLDemos::AddPluginSelectionText(QString text)
 {
-    QString currentTitle = algo->optionsClassify->groupBox->title();
+    QString currentTitle = windowTitle();
     QString newTitle;
-    if(currentTitle == "Algorithm") newTitle = "";
+    if(currentTitle == "MLDemos") newTitle = "";
     else {
-        newTitle = currentTitle.right(currentTitle.length() - QString("Algorithm [").length());
+        newTitle = currentTitle.right(currentTitle.length() - QString("MLDemos [").length());
         newTitle.chop(QString("]").length());
     }
 
-    newTitle = "Algorithm [" + (newTitle.isEmpty() ? "" : newTitle + "|") + text + "]";
-    algo->optionsClassify->groupBox->setTitle(newTitle);
-    algo->optionsCluster->groupBox->setTitle(newTitle);
-    algo->optionsRegress->groupBox->setTitle(newTitle);
-    algo->optionsProject->groupBox->setTitle(newTitle);
-    algo->optionsReinforcement->groupBox->setTitle(newTitle);
-    algo->optionsMaximize->groupBox->setTitle(newTitle);
-    algo->optionsDynamic->groupBox->setTitle(newTitle);
+    newTitle = "MLDemos [" + (newTitle.isEmpty() ? "" : newTitle + "|") + text + "]";
+    setWindowTitle(newTitle);
 }
 
 void MLDemos::ChangeInfoFile()
@@ -208,7 +275,6 @@ void MLDemos::AlgoChanged()
     algo->SetAlgorithmWidget();
 
     ChangeInfoFile();
-    actionAlgorithms->setChecked(algo->algorithmWidget->isVisible());
     if (algo->options->tabMax->isVisible() ||
             algo->options->tabReinf->isVisible()) {
         drawToolbar->paintButton->setChecked(true);
@@ -224,7 +290,11 @@ void MLDemos::AlgoChanged()
             drawToolbar->sprayButton->setChecked(true);
         }
     }
-    if (!algo->options->tabClust->isVisible()) {
-        algo->options->tabWidget->resize(635,193);
-    }
+    if(algo->options->tabClass->isVisible()) ui.algoTypeLabel->setText("C L A S S I F I C A T I O N");
+    if(algo->options->tabClust->isVisible()) ui.algoTypeLabel->setText("C L U S T E R I N G");
+    if(algo->options->tabRegr->isVisible()) ui.algoTypeLabel->setText("R E G R E S S I O N");
+    if(algo->options->tabProj->isVisible()) ui.algoTypeLabel->setText("P R O J E C T I O N");
+    if(algo->options->tabDyn->isVisible()) ui.algoTypeLabel->setText("D Y N A M I C A L   S Y S T E M S");
+    if(algo->options->tabMax->isVisible()) ui.algoTypeLabel->setText("M A X I M I Z A T I O N");
+    if(algo->options->tabReinf->isVisible()) ui.algoTypeLabel->setText("R E I N F O R C E M E N T   L E A R N I N G");
 }

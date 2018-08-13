@@ -57,7 +57,7 @@ void MLDemos::ShowRoc()
 {
     if(!algo->classifier) return;
     SetROCInfo();
-    actionShowStats->setChecked(true);
+    displayOptions->showStats->setChecked(true);
     showStats->tabWidget->setCurrentWidget(showStats->rocTab);
     ShowStatsDialog();
 }

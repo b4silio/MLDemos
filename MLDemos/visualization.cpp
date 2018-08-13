@@ -39,8 +39,8 @@ int DimColorCnt = 44;
 
 Visualization::Visualization(Canvas *canvas, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Visualization), spacer(0),
-    canvas(canvas), data(canvas->data)
+    ui(new Ui::Visualization),
+    canvas(canvas), data(canvas->data), spacer(0)
 {
     ui->setupUi(this);
     connect(ui->typeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(OptionsChanged()));
@@ -118,10 +118,10 @@ void Visualization::OptionsChanged()
     ui->inputCombo->hide();
     switch(index)
     {
-    case 0: // samples: parallel coordinates
-        break;
-    case 1: // samples: scatterplots
+    case 0: // samples: scatterplots
         ui->zoomSlider->show();
+        break;
+    case 1: // samples: parallel coordinates
         break;
     case 2: // samples: radial graphs
         break;
@@ -231,11 +231,11 @@ void Visualization::Update()
 
     switch(index)
     {
-    case 0: // samples: parallel coordinates
-        GenerateParallelCoords();
-        break;
-    case 1: // samples: scatterplots
+    case 0: // samples: scatterplots
         GenerateScatterPlot();
+        break;
+    case 1: // samples: parallel coordinates
+        GenerateParallelCoords();
         break;
     case 2: // samples: radial graphs
         GenerateRadialGraph();
@@ -304,7 +304,7 @@ void Visualization::UpdateDims()
     dimNames << QString("none");
     FOR(i, dimNames.size())
     {
-        if(i<dimNames.size()-1) ui->x1Combo->addItem(dimNames[i]);
+        if((int)i<dimNames.size()-1) ui->x1Combo->addItem(dimNames[i]);
         ui->x2Combo->addItem(dimNames[i]);
         ui->x3Combo->addItem(dimNames[i]);
     }
@@ -979,7 +979,7 @@ void Visualization::GenerateCorrelationPlot()
     FOR(d, dim)
     {
         QString dimName;
-        if(d < canvas->dimNames.size()) dimName = canvas->dimNames[d];
+        if((int)d < canvas->dimNames.size()) dimName = canvas->dimNames[d];
         else
         {
             if(w > 50) dimName = QString("Dimension %1").arg(d+1);
@@ -1521,7 +1521,7 @@ void Visualization::GenerateDensityPlot()
     int maxCount = 0;
     FOR(i, count)
     {
-        QString s = inputType ? (canvas->dimNames.size() > i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
+        QString s = inputType ? (canvas->dimNames.size() > (int)i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
         int y = pad + 5 + i*20;
         if(y > pad + mapH - 10) break;
         int length = painter.fontMetrics().width(s);
@@ -1542,10 +1542,10 @@ void Visualization::GenerateDensityPlot()
     painter.setRenderHints(QPainter::Antialiasing);
     FOR(i, count)
     {
-        QString s = inputType ? (canvas->dimNames.size() > i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
+        QString s = inputType ? (canvas->dimNames.size() > (int)i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
         int y = pad + 5 + i*20;
         if(y > pad + mapH - 10) break;
-        if(i == maxCount) s = "  ...";
+        if((int)i == maxCount) s = "  ...";
         painter.drawText(pad + mapW - legendW + 22, y, legendW-20, 20, Qt::AlignLeft|Qt::AlignVCenter, s);
         QColor color = inputType ? DimColor[i%DimColorCnt] : SampleColor[i%SampleColorCnt];
         painter.setBrush(color);
@@ -2514,7 +2514,6 @@ fvec Visualization::BoxPlot(fvec data)
 {
     fvec boxplot(7);
     if(!data.size()) return boxplot;
-    int pad = -16;
     int nanCount = 0;
     FOR(i, data.size()) if(data[i] != data[i]) nanCount++;
 

@@ -66,13 +66,14 @@ void AlgorithmManager::SetAlgorithms(QList<ClassifierInterface *> classifiers,
     this->reinforcements = reinforcements;
     this->projectors = projectors;
     this->inputoutputs = inputoutputs;
-    if (!classifiers.size()) options->tabWidget->setTabEnabled(0,false);
-    if (!clusterers.size()) options->tabWidget->setTabEnabled(1,false);
-    if (!regressors.size()) options->tabWidget->setTabEnabled(2,false);
-    if (!projectors.size()) options->tabWidget->setTabEnabled(3,false);
-    if (!dynamicals.size()) options->tabWidget->setTabEnabled(4,false);
-    if (!maximizers.size()) options->tabWidget->setTabEnabled(5,false);
-    if (!reinforcements.size()) options->tabWidget->setTabEnabled(6,false);
+
+    options->tabWidget->setTabEnabled(0,!classifiers.empty());
+    options->tabWidget->setTabEnabled(1,!clusterers.empty());
+    options->tabWidget->setTabEnabled(2,!regressors.empty());
+    options->tabWidget->setTabEnabled(3,!projectors.empty());
+    options->tabWidget->setTabEnabled(4,!dynamicals.empty());
+    options->tabWidget->setTabEnabled(5,!maximizers.empty());
+    options->tabWidget->setTabEnabled(6,!reinforcements.empty());
 }
 
 vector<bool> AlgorithmManager::GetManualSelection()
@@ -176,7 +177,7 @@ void AlgorithmManager::UpdateDynamical()
         if(canvas->canvasType == 1) {
             dynamicals[tabUsedForTraining]->DrawGL(canvas, glw, dynamical);
             if(canvas->data->GetDimCount() == 3) {
-                int displayStyle = optionsDynamic->displayCombo->currentIndex();
+                int displayStyle = 1;//optionsDynamic->displayCombo->currentIndex();
                 if(displayStyle < 3) Draw3DDynamical(glw, dynamical,displayStyle);
             }
         }

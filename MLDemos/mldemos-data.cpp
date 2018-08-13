@@ -212,7 +212,7 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     canvas->data->Clear();
     canvas->data->AddSamples(samples, labels);
     canvas->data->bProjected = bProjected;
-    if (bProjected) ui.status->setText("Projected Data (PCA, etc.)");
+    if (bProjected) ui.status->setText("Projected Data");
     else ui.status->setText("Raw Data");
     if (trajectories.size()) canvas->data->AddSequences(trajectories);
     FitToData();
@@ -220,8 +220,6 @@ void MLDemos::SetData(std::vector<fvec> samples, ivec labels, std::vector<ipair>
     ManualSelectionUpdated();
     algo->optionsRegress->outputDimCombo->setCurrentIndex(algo->optionsRegress->outputDimCombo->count()-1);
     CanvasOptionsChanged();
-    drawToolbar->singleButton->setChecked(true);
-    drawToolbar->singleButton->setChecked(false);
     canvas->ResetSamples();
     canvas->repaint();
 }

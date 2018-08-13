@@ -41,7 +41,6 @@ void MLDemos::SaveLayoutOptions()
     settings.beginGroup("Gui");
     settings.setValue("geometry", saveGeometry());
     settings.setValue("windowState", saveState());
-    settings.setValue("algoGeometry", algo->algorithmWidget->saveGeometry());
     settings.setValue("drawGeometry", drawToolbarWidget->saveGeometry());
     settings.setValue("displayGeometry", displayDialog->saveGeometry());
     settings.setValue("statsGeometry", statsDialog->saveGeometry());
@@ -50,9 +49,7 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("pluginListsAML", ui.actionAML_Class->isChecked());
 
     settings.setValue("algoTab", algo->options->tabWidget->currentIndex());
-    settings.setValue("ShowAlgoOptions", algo->algorithmWidget->isVisible());
     settings.setValue("ShowCompare", compare->paramsWidget->isVisible());
-    settings.setValue("ShowDrawOptions", drawToolbarWidget->isVisible());
     settings.setValue("ShowDisplayOptions", displayDialog->isVisible());
     settings.setValue("ShowStatsOptions", statsDialog->isVisible());
     settings.setValue("ShowToolbar", ui.actionShow_Toolbar->isChecked());
@@ -62,23 +59,24 @@ void MLDemos::SaveLayoutOptions()
     settings.endGroup();
 
     settings.beginGroup("displayOptions");
-    settings.setValue("infoCheck", displayOptions->infoCheck->isChecked());
-    settings.setValue("mapCheck", displayOptions->mapCheck->isChecked());
-    settings.setValue("modelCheck", displayOptions->modelCheck->isChecked());
-    settings.setValue("samplesCheck", displayOptions->samplesCheck->isChecked());
-    settings.setValue("gridCheck", displayOptions->gridCheck->isChecked());
-    settings.setValue("spinZoom", displayOptions->spinZoom->value());
-    settings.setValue("legendCheck", displayOptions->legendCheck->isChecked());
-    settings.setValue("check3DSamples", displayOptions->check3DSamples->isChecked());
-    settings.setValue("check3DWireframe", displayOptions->check3DWireframe->isChecked());
-    settings.setValue("check3DSurfaces", displayOptions->check3DSurfaces->isChecked());
-    settings.setValue("check3DTransparency", displayOptions->check3DTransparency->isChecked());
-    settings.setValue("check3DBlurry", displayOptions->check3DBlurry->isChecked());
-    settings.setValue("check3DRotate", displayOptions->check3DRotate->isChecked());
+    settings.setValue("showStats", displayOptions->showStats->isChecked());
+    settings.setValue("showBackground", displayOptions->showBackground->isChecked());
+    settings.setValue("showOutput", displayOptions->showOutput->isChecked());
+    settings.setValue("showModel", displayOptions->showModel->isChecked());
+    settings.setValue("showSamples", displayOptions->showSamples->isChecked());
+    settings.setValue("showGrid", displayOptions->showGrid->isChecked());
+    settings.setValue("spinZoom", viewOptions->spinZoom->value());
+    settings.setValue("showLegend", displayOptions->showLegend->isChecked());
+    settings.setValue("check3DSamples", viewOptions->check3DSamples->isChecked());
+    settings.setValue("check3DWireframe", viewOptions->check3DWireframe->isChecked());
+    settings.setValue("check3DSurfaces", viewOptions->check3DSurfaces->isChecked());
+    settings.setValue("check3DTransparency", viewOptions->check3DTransparency->isChecked());
+    settings.setValue("check3DBlurry", viewOptions->check3DBlurry->isChecked());
+    settings.setValue("check3DRotate", viewOptions->check3DRotate->isChecked());
     settings.endGroup();
 
     settings.beginGroup("drawingOptions");
-    settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
+    settings.setValue("randCombo", drawToolbarContext1->randCombo->currentIndex());
     settings.setValue("spinCount", drawToolbarContext1->spinCount->value());
     settings.setValue("spinSize", drawToolbar->radiusSpin->value());
     settings.setValue("spinAngle", drawToolbarContext2->spinAngle->value());
@@ -102,7 +100,7 @@ void MLDemos::SaveLayoutOptions()
     settings.setValue("trajectoryCheck", drawToolbar->trajectoryButton->isChecked());
     settings.setValue("obstacleCheck", drawToolbar->obstacleButton->isChecked());
     settings.setValue("paintCheck", drawToolbar->paintButton->isChecked());
-    settings.setValue("infoCheck", drawToolbarContext1->randCombo->currentIndex());
+    settings.setValue("showStats", drawToolbarContext1->randCombo->currentIndex());
     settings.endGroup();
 
     settings.beginGroup("classificationOptions");
@@ -242,22 +240,16 @@ void MLDemos::LoadLayoutOptions()
     settings.beginGroup("Gui");
     if(settings.contains("geometry")) restoreGeometry(settings.value("geometry").toByteArray());
     if(settings.contains("windowState")) restoreState(settings.value("windowState").toByteArray());
-    if(settings.contains("algoGeometry")) algo->algorithmWidget->restoreGeometry(settings.value("algoGeometry").toByteArray());
-    if(settings.contains("drawGeometry")) drawToolbarWidget->restoreGeometry(settings.value("drawGeometry").toByteArray());
+    //if(settings.contains("drawGeometry")) drawToolbarWidget->restoreGeometry(settings.value("drawGeometry").toByteArray());
     if(settings.contains("displayGeometry")) displayDialog->restoreGeometry(settings.value("displayGeometry").toByteArray());
     if(settings.contains("statsGeometry")) statsDialog->restoreGeometry(settings.value("statsGeometry").toByteArray());
     if(settings.contains("compareGeometry")) compare->paramsWidget->restoreGeometry(settings.value("compareGeometry").toByteArray());
     if(settings.contains("generatorGeometry")) generator->restoreGeometry(settings.value("generatorGeometry").toByteArray());
     if(settings.contains("pluginListsAML")) ui.actionAML_Class->setChecked(settings.value("pluginListsAML").toBool());
-#ifdef MACX // ugly hack to avoid resizing problems on the mac
-    if(height() < 400) resize(width(),400);
-    if(algo->algorithmWidget->height() < 220) algo->algorithmWidget->resize(636,220);
-#endif // MACX
 
     if(settings.contains("algoTab")) algo->options->tabWidget->setCurrentIndex(settings.value("algoTab").toInt());
-    if(settings.contains("ShowAlgoOptions")) algo->algorithmWidget->setVisible(settings.value("ShowAlgoOptions").toBool());
     if(settings.contains("ShowCompare")) compare->paramsWidget->setVisible(settings.value("ShowCompare").toBool());
-    if(settings.contains("ShowDrawOptions")) drawToolbarWidget->setVisible(settings.value("ShowDrawOptions").toBool());
+    //if(settings.contains("ShowDrawOptions")) ui.leftPaneWidget->setVisible(settings.value("ShowDrawOptions").toBool());
     if(settings.contains("ShowDisplayOptions")) displayDialog->setVisible(settings.value("ShowDisplayOptions").toBool());
     if(settings.contains("ShowStatsOptions")) statsDialog->setVisible(settings.value("ShowStatsOptions").toBool());
     if(settings.contains("ShowToolbar")) ui.actionShow_Toolbar->setChecked(settings.value("ShowToolbar").toBool());
@@ -266,34 +258,43 @@ void MLDemos::LoadLayoutOptions()
     //    if(settings.contains("canvasType")) ui.canvasTypeCombo->setCurrentIndex(settings.value("canvasType").toInt());
     settings.endGroup();
 
-    actionAlgorithms->setChecked(algo->algorithmWidget->isVisible());
-    actionCompare->setChecked(compare->paramsWidget->isVisible());
-    actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
-    actionDisplayOptions->setChecked(displayDialog->isVisible());
-    actionShowStats->setChecked(statsDialog->isVisible());
-    actionAddData->setChecked(generator->isVisible());
+    //actionAlgorithms->setChecked(algo->algorithmWidget->isVisible());
+    //actionCompare->setChecked(compare->paramsWidget->isVisible());
+    //actionDrawSamples->setChecked(drawToolbarWidget->isVisible());
+    drawToolbar->compareButton->setChecked(compare->paramsWidget->isVisible());
+    displayOptions->showOptions->setChecked(displayDialog->isVisible());
 
     settings.beginGroup("displayOptions");
-    if(settings.contains("infoCheck")) displayOptions->infoCheck->setChecked(settings.value("infoCheck").toBool());
-    if(settings.contains("mapCheck")) displayOptions->mapCheck->setChecked(settings.value("mapCheck").toBool());
-    if(settings.contains("modelCheck")) displayOptions->modelCheck->setChecked(settings.value("modelCheck").toBool());
-    if(settings.contains("samplesCheck")) displayOptions->samplesCheck->setChecked(settings.value("samplesCheck").toBool());
-    if(settings.contains("gridCheck")) displayOptions->gridCheck->setChecked(settings.value("gridCheck").toBool());
-    if(settings.contains("spinZoom")) displayOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
-    if(settings.contains("legendCheck")) displayOptions->legendCheck->setChecked(settings.value("legendCheck").toBool());
-    if(settings.contains("check3DSamples")) displayOptions->check3DSamples->setChecked(settings.value("check3DSamples").toBool());
-    if(settings.contains("check3DWireframe")) displayOptions->check3DWireframe->setChecked(settings.value("check3DWireframe").toBool());
-    if(settings.contains("check3DSurfaces")) displayOptions->check3DSurfaces->setChecked(settings.value("check3DSurfaces").toBool());
-    if(settings.contains("check3DTransparency")) displayOptions->check3DTransparency->setChecked(settings.value("check3DTransparency").toBool());
-    if(settings.contains("check3DBlurry")) displayOptions->check3DBlurry->setChecked(settings.value("check3DBlurry").toBool());
-    if(settings.contains("check3DRotate")) displayOptions->check3DRotate->setChecked(settings.value("check3DRotate").toBool());
+    if(settings.contains("showStats")) displayOptions->showStats->setChecked(settings.value("showStats").toBool());
+    if(settings.contains("showBackground")) displayOptions->showBackground->setChecked(settings.value("showBackground").toBool());
+    if(settings.contains("showOutput")) displayOptions->showOutput->setChecked(settings.value("showModel").toBool());
+    if(settings.contains("showModel")) displayOptions->showModel->setChecked(settings.value("showModel").toBool());
+    if(settings.contains("showSamples")) displayOptions->showSamples->setChecked(settings.value("showSamples").toBool());
+    if(settings.contains("showGrid")) displayOptions->showGrid->setChecked(settings.value("showGrid").toBool());
+    if(settings.contains("spinZoom")) viewOptions->spinZoom->setValue(settings.value("spinZoom").toFloat());
+    if(settings.contains("showLegend")) displayOptions->showLegend->setChecked(settings.value("showLegend").toBool());
+    if(settings.contains("check3DSamples")) viewOptions->check3DSamples->setChecked(settings.value("check3DSamples").toBool());
+    if(settings.contains("check3DWireframe")) viewOptions->check3DWireframe->setChecked(settings.value("check3DWireframe").toBool());
+    if(settings.contains("check3DSurfaces")) viewOptions->check3DSurfaces->setChecked(settings.value("check3DSurfaces").toBool());
+    if(settings.contains("check3DTransparency")) viewOptions->check3DTransparency->setChecked(settings.value("check3DTransparency").toBool());
+    if(settings.contains("check3DBlurry")) viewOptions->check3DBlurry->setChecked(settings.value("check3DBlurry").toBool());
+    if(settings.contains("check3DRotate")) viewOptions->check3DRotate->setChecked(settings.value("check3DRotate").toBool());
 
     //if(settings.contains("xDimIndex")) displayOptions->xDimIndex->setValue(settings.value("xDimIndex").toInt());
     //if(settings.contains("yDimIndex")) displayOptions->yDimIndex->setValue(settings.value("yDimIndex").toInt());
     settings.endGroup();
 
+}
+
+void MLDemos::LoadAlgorithmsOptions()
+{
+    QCoreApplication::setOrganizationDomain("b4silio");
+    QCoreApplication::setOrganizationName("b4silio");
+    QCoreApplication::setApplicationName("MLDemos");
+
+    QSettings settings;
     settings.beginGroup("drawingOptions");
-    if(settings.contains("infoCheck")) drawToolbarContext1->randCombo->setCurrentIndex(settings.value("infoCheck").toInt());
+    if(settings.contains("randCombo")) drawToolbarContext1->randCombo->setCurrentIndex(settings.value("randCombo").toInt());
     if(settings.contains("spinAngle")) drawToolbarContext2->spinAngle->setValue(settings.value("spinAngle").toFloat());
     if(settings.contains("spinCount")) drawToolbarContext1->spinCount->setValue(settings.value("spinCount").toFloat());
     if(settings.contains("spinSigmaX")) drawToolbarContext2->spinSigmaX->setValue(settings.value("spinSigmaX").toFloat());
@@ -801,7 +802,7 @@ void MLDemos::LoadParams( QString filename )
     if(bProj) algo->Project();
     //if(bMaxim) algo->Maximize();
     //if(bReinf) algo->Reinforce();
-    actionAlgorithms->setChecked(algo->algorithmWidget->isVisible());
+    //actionAlgorithms->setChecked(algo->algorithmWidget->isVisible());
 }
 
 void MLDemos::ExportOutput()

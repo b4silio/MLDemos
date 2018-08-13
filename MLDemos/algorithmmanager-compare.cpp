@@ -430,6 +430,6 @@ void AlgorithmManager::CompareAdd()
         maximizers[tab]->SaveParams(stream);
         compare->Add(parameterData, name);
     }
-    mldemos->actionCompare->setChecked(true);
+    mldemos->drawToolbar->compareButton->setChecked(true);
     compare->Show();
 }

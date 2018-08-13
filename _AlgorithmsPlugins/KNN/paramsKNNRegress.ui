@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>304</width>
     <height>158</height>
    </rect>
   </property>
@@ -16,8 +16,8 @@
   <widget class="QLabel" name="label_10">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>90</y>
+     <x>40</x>
+     <y>60</y>
      <width>46</width>
      <height>21</height>
     </rect>
@@ -34,8 +34,8 @@
   <widget class="QSpinBox" name="knnNormSpin">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>90</y>
+     <x>200</x>
+     <y>60</y>
      <width>41</width>
      <height>21</height>
     </rect>
@@ -61,8 +61,8 @@
   <widget class="QLabel" name="labelPower">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>90</y>
+     <x>180</x>
+     <y>60</y>
      <width>16</width>
      <height>21</height>
     </rect>
@@ -79,8 +79,8 @@
   <widget class="QLabel" name="label_11">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>40</y>
+     <x>110</x>
+     <y>10</y>
      <width>16</width>
      <height>21</height>
     </rect>
@@ -97,8 +97,8 @@
   <widget class="QSpinBox" name="knnKspin">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>40</y>
+     <x>130</x>
+     <y>10</y>
      <width>41</width>
      <height>21</height>
     </rect>
@@ -127,8 +127,8 @@ might be lower than K</string>
   <widget class="QComboBox" name="knnNormCombo">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>90</y>
+     <x>80</x>
+     <y>60</y>
      <width>81</width>
      <height>22</height>
     </rect>

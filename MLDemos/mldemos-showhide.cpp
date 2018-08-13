@@ -19,79 +19,37 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "mldemos.h"
 
-void MLDemos::ShowAlgorithmOptions()
-{
-    if (actionAlgorithms->isChecked()){
-        algo->algorithmWidget->show();
-        algo->SetAlgorithmWidget();
-    }else{ algo->algorithmWidget->hide();
-
-    }
-}
-
-void MLDemos::RestAlgorithmOptionsButton(){
-    actionAlgorithms->setChecked(false);
-}
-
 void MLDemos::ShowOptionCompare()
 {
-    if (actionCompare->isChecked()) compare->paramsWidget->show();
+    if (drawToolbar->compareButton->isChecked()) compare->paramsWidget->show();
     else compare->paramsWidget->hide();
 }
 
 void MLDemos::ShowGridSearch()
 {
-    if (actionGridsearch->isChecked()) gridSearch->show();
+    if (drawToolbar->gridsearchButton->isChecked()) gridSearch->show();
     else gridSearch->hide();
 }
 
 void MLDemos::ResetGridSearchButton(){
-    actionGridsearch->setChecked(false);
+    drawToolbar->gridsearchButton->setChecked(false);
 }
 
-void MLDemos::ShowSampleDrawing()
+void MLDemos::ToggleDataGenerator()
 {
-    if (actionDrawSamples->isChecked()) drawToolbarWidget->show();
-    else drawToolbarWidget->hide();
-}
-
-void MLDemos::ShowAddData()
-{
-    if (actionAddData->isChecked()) generator->show();
+    if (drawToolbar->datasetGeneratorButton->isChecked()) generator->show();
     else generator->hide();
-}
-
-void MLDemos::HideAddData()
-{
-    generator->hide();
-    actionAddData->setChecked(false);
 }
 
 void MLDemos::ShowOptionDisplay()
 {
-    if (actionDisplayOptions->isChecked()) displayDialog->show();
+    if (displayOptions->showOptions->isChecked()) displayDialog->show();
     else displayDialog->hide();
-}
-
-void MLDemos::ShowToolbar()
-{
-    if (ui.actionSmall_Icons->isChecked())
-    {
-        toolBar->setIconSize(QSize(32,32));
-        toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    }
-    else
-    {
-        toolBar->setIconSize(QSize(64,64));
-        toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    }
-    if (ui.actionShow_Toolbar->isChecked()) toolBar->show();
-    else toolBar->hide();
 }
 
 void MLDemos::ShowStatsDialog()
 {
-    if (actionShowStats->isChecked()) statsDialog->show();
+    if (displayOptions->showStats->isChecked()) statsDialog->show();
     else statsDialog->hide();
 }
 
@@ -110,37 +68,65 @@ void MLDemos::ShowInputDimensions()
     inputDimensionsDialog->show();
 }
 
-void MLDemos::HideSampleDrawing()
-{
-    drawToolbarWidget->hide();
-    actionDrawSamples->setChecked(false);
-}
-
 void MLDemos::HideOptionDisplay()
 {
     displayDialog->hide();
-    actionDisplayOptions->setChecked(false);
+    displayOptions->showOptions->setChecked(false);
 }
 
 void MLDemos::HideOptionCompare()
 {
     compare->paramsWidget->hide();
-    actionCompare->setChecked(false);
+    drawToolbar->compareButton->setChecked(false);
 }
 
-void MLDemos::HideToolbar()
+void MLDemos::HideGridSearch()
 {
-    toolBar->hide();
-    ui.actionShow_Toolbar->setChecked(false);
+    gridSearch->hide();
+    drawToolbar->gridsearchButton->setChecked(false);
 }
 
 void MLDemos::HideStatsDialog()
 {
     statsDialog->hide();
-    actionShowStats->setChecked(false);
+    displayOptions->showStats->setChecked(false);
+}
+
+void MLDemos::HideDataGenerator()
+{
+    generator->hide();
+    drawToolbar->datasetGeneratorButton->setChecked(false);
 }
 
 void MLDemos::ShowDataEditor()
 {
     dataEdit->show();
+}
+
+void MLDemos::ShowEditingTools()
+{
+    ui.leftPaneWidget->show();
+    displayOptions->showSamples->show();
+    displayOptions->showOutput->show();
+    displayOptions->showModel->show();
+    displayOptions->showBackground->show();
+    displayOptions->showGrid->show();
+    displayOptions->showLegend->show();
+    displayOptions->clearAll->show();
+    displayOptions->clearData->show();
+    displayOptions->fitToViewport->show();
+}
+
+void MLDemos::HideEditingTools()
+{
+    ui.leftPaneWidget->hide();
+    displayOptions->showSamples->hide();
+    displayOptions->showOutput->hide();
+    displayOptions->showModel->hide();
+    displayOptions->showBackground->hide();
+    displayOptions->showGrid->hide();
+    displayOptions->showLegend->hide();
+    displayOptions->clearAll->hide();
+    displayOptions->clearData->hide();
+    displayOptions->fitToViewport->hide();
 }

@@ -96,16 +96,16 @@
             </font>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>5</number>
            </property>
            <item>
             <property name="text">
-             <string>Samples: Parallel Coordinates</string>
+             <string>Samples: Scatterplot</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Samples: Scatterplot</string>
+             <string>Samples: Parallel Coordinates</string>
             </property>
            </item>
            <item>
@@ -321,7 +321,7 @@
         <x>0</x>
         <y>0</y>
         <width>525</width>
-        <height>249</height>
+        <height>239</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1">

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>224</width>
-    <height>200</height>
+    <width>304</width>
+    <height>193</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,10 +37,10 @@
   <widget class="QComboBox" name="metricCombo">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>50</y>
+     <x>190</x>
+     <y>20</y>
      <width>90</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -78,7 +78,7 @@
   <widget class="QLabel" name="epsLabel">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>100</x>
      <y>0</y>
      <width>90</width>
      <height>20</height>
@@ -129,9 +129,9 @@
   <widget class="QLabel" name="metricLabel">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>50</y>
-     <width>50</width>
+     <x>200</x>
+     <y>0</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
@@ -144,13 +144,13 @@
     <string>Metric</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="epsSpin">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>120</x>
      <y>20</y>
      <width>50</width>
      <height>25</height>
@@ -183,8 +183,8 @@
   <widget class="QComboBox" name="typeCombo">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>70</y>
+     <x>130</x>
+     <y>60</y>
      <width>90</width>
      <height>21</height>
     </rect>
@@ -219,8 +219,8 @@
   <widget class="QLabel" name="typeLabel">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>70</y>
+     <x>60</x>
+     <y>60</y>
      <width>50</width>
      <height>20</height>
     </rect>
@@ -240,8 +240,8 @@
   <widget class="QDoubleSpinBox" name="depthSpin">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>90</y>
+     <x>110</x>
+     <y>80</y>
      <width>60</width>
      <height>25</height>
     </rect>
@@ -273,8 +273,8 @@
   <widget class="QLabel" name="dendoLabel">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>90</y>
+     <x>30</x>
+     <y>80</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -294,8 +294,8 @@
   <widget class="QLabel" name="dendoGraph">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>120</y>
+     <x>50</x>
+     <y>110</y>
      <width>200</width>
      <height>70</height>
     </rect>
@@ -310,10 +310,10 @@
   <widget class="QPushButton" name="zoomButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>100</y>
-     <width>21</width>
-     <height>21</height>
+     <x>210</x>
+     <y>80</y>
+     <width>30</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="toolTip">

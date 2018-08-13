@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>304</width>
     <height>158</height>
    </rect>
   </property>
@@ -252,7 +252,7 @@ RBF and Polynomial only</string>
   <widget class="QListWidget" name="alphaList">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>207</x>
      <y>70</y>
      <width>90</width>
      <height>70</height>

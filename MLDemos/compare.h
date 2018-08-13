@@ -22,8 +22,8 @@ class CompareAlgorithms : public QObject
     Canvas *canvas;
 
 public:
-    BaseWidget *compareWidget;
-    BaseWidget *paramsWidget;
+    QWidget *compareWidget;
+    QWidget *paramsWidget;
     Ui::optionsCompare *params;
     QList<QString> compareOptions;
     std::vector<fvec> datasetA;
@@ -42,6 +42,9 @@ public:
     void Add(QString parameterData, QString displayString);
 
     bool eventFilter(QObject *obj, QEvent *event);
+
+signals:
+    void Hiding();
 
 public slots:
 	void Update();

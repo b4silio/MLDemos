@@ -35,7 +35,7 @@ class AlgorithmManager : public QObject
     Q_OBJECT
 
 public:
-    BaseWidget *algorithmWidget;
+    QWidget *algorithmWidget;
     QWidget *regressWidget;
     QWidget *dynamicWidget;
     QWidget *classifyWidget;

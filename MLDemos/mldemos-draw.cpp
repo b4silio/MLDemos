@@ -23,24 +23,22 @@ void MLDemos::Drawing(fvec sample, int label)
 {
     if (canvas->canvasType) return;
     int drawType = 0; // none
-    if (drawToolbar->tabWidget->currentIndex() == 0) { // drawingTab
-        if (drawToolbar->singleButton->isChecked()) drawType = 1;
-        if (drawToolbar->sprayButton->isChecked()) drawType = 2;
-        if (drawToolbar->spray3DButton->isChecked()) drawType = 9;
-        if (drawToolbar->trajectoryButton->isChecked()) drawType = 6;
-        if (drawToolbar->obstacleButton->isChecked()) drawType = 7;
-        if (drawToolbar->paintButton->isChecked()) drawType = 8;
-        if (drawToolbar->eraseButton->isChecked()) drawType = 3;
-    } else if (drawToolbar->tabWidget->currentIndex() == 1) { // editTab
-        if (drawToolbar->dragButton->isChecked()) drawType = -1;
-        if (drawToolbar->moveButton->isChecked()) drawType = -2;
-        if (drawToolbar->moveClassButton->isChecked()) drawType = -3;
-        if (drawToolbar->extrudeButton->isChecked()) drawType = -4;
-        if (drawToolbar->sprayClassButton->isChecked()) drawType = -5;
-    } else if (drawToolbar->tabWidget->currentIndex() == 2) {
-        if (drawToolbar->ellipseButton->isChecked()) drawType = 4;
-        if (drawToolbar->lineButton->isChecked()) drawType = 5;
-    }
+    if (drawToolbar->singleButton->isChecked()) drawType = 1;
+    if (drawToolbar->sprayButton->isChecked()) drawType = 2;
+    if (drawToolbar->sprayClassButton->isChecked()) drawType = -5;
+    if (drawToolbar->eraseButton->isChecked()) drawType = 3;
+
+    if (drawToolbar->spray3DButton->isChecked()) drawType = 9;
+    if (drawToolbar->paintButton->isChecked()) drawType = 8;
+    if (drawToolbar->trajectoryButton->isChecked()) drawType = 6;
+    if (drawToolbar->obstacleButton->isChecked()) drawType = 7;
+    if (drawToolbar->lineButton->isChecked()) drawType = 5;
+    if (drawToolbar->ellipseButton->isChecked()) drawType = 4;
+
+    if (drawToolbar->dragButton->isChecked()) drawType = -1;
+    if (drawToolbar->moveButton->isChecked()) drawType = -2;
+    if (drawToolbar->moveClassButton->isChecked()) drawType = -3;
+    if (drawToolbar->extrudeButton->isChecked()) drawType = -4;
     if (!drawType) return;
 
     if (drawType < 0) {
@@ -371,24 +369,20 @@ void MLDemos::DrawingStopped()
 void MLDemos::DrawCrosshair()
 {
     int drawType = 0;
-    if (drawToolbar->tabWidget->currentIndex() == 0) { // drawingTab
-        if (drawToolbar->singleButton->isChecked()) drawType = 1;
-        if (drawToolbar->sprayButton->isChecked()) drawType = 2;
-        if (drawToolbar->spray3DButton->isChecked()) drawType = 9;
-        if (drawToolbar->trajectoryButton->isChecked()) drawType = 6;
-        if (drawToolbar->obstacleButton->isChecked()) drawType = 7;
-        if (drawToolbar->paintButton->isChecked()) drawType = 8;
-        if (drawToolbar->eraseButton->isChecked()) drawType = 3;
-    } else if (drawToolbar->tabWidget->currentIndex() == 1) { // editTab
-        if (drawToolbar->dragButton->isChecked()) drawType = -1;
-        if (drawToolbar->moveButton->isChecked()) drawType = -2;
-        if (drawToolbar->moveClassButton->isChecked()) drawType = -3;
-        if (drawToolbar->extrudeButton->isChecked()) drawType = -4;
-        if (drawToolbar->sprayClassButton->isChecked()) drawType = -5;
-    } else if (drawToolbar->tabWidget->currentIndex() == 2) { // shapeTab
-        if (drawToolbar->ellipseButton->isChecked()) drawType = 4;
-        if (drawToolbar->lineButton->isChecked()) drawType = 5;
-    }
+    if (drawToolbar->singleButton->isChecked()) drawType = 1;
+    if (drawToolbar->sprayButton->isChecked()) drawType = 2;
+    if (drawToolbar->spray3DButton->isChecked()) drawType = 9;
+    if (drawToolbar->trajectoryButton->isChecked()) drawType = 6;
+    if (drawToolbar->obstacleButton->isChecked()) drawType = 7;
+    if (drawToolbar->paintButton->isChecked()) drawType = 8;
+    if (drawToolbar->eraseButton->isChecked()) drawType = 3;
+    if (drawToolbar->dragButton->isChecked()) drawType = -1;
+    if (drawToolbar->moveButton->isChecked()) drawType = -2;
+    if (drawToolbar->moveClassButton->isChecked()) drawType = -3;
+    if (drawToolbar->extrudeButton->isChecked()) drawType = -4;
+    if (drawToolbar->sprayClassButton->isChecked()) drawType = -5;
+    if (drawToolbar->ellipseButton->isChecked()) drawType = 4;
+    if (drawToolbar->lineButton->isChecked()) drawType = 5;
 
     if (!drawType || drawType == 1 || drawType == 6 || drawType == -1 || drawType == -3) {
         canvas->crosshair = QPainterPath();

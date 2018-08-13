@@ -42,10 +42,11 @@ FORMS += aboutDialog.ui \
     compare.ui \
     manualSelection.ui \
     inputDimensions.ui \
-    datagenerator.ui \
     gridsearch.ui \
     visualization.ui \
-    dataseteditor.ui
+    dataseteditor.ui \
+    datasetgenerator.ui \
+    displayoptions.ui
 
 HEADERS += basicMath.h \
     canvas.h \
@@ -98,7 +99,6 @@ SOURCES += \
     mldemos-draw.cpp \
     mldemos-io.cpp \
     mldemos-canvas.cpp \
-    mldemos-contextmenus.cpp \
     mldemos-init.cpp \
     mldemos-optionschanged.cpp \
     mldemos-showhide.cpp \

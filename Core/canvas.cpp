@@ -363,12 +363,12 @@ void Canvas::FitToData()
     center = mins + diff/2;
 
     /*
- float diffX = diff[xIndex]*1.04; // add a small margin
- float diffY = diff[yIndex]*1.04; // add a small margin
- float aspectRatio = width() / (float)height();
- diffX /= aspectRatio;
- SetZoom(min(1/diffY,1/diffX));
- */
+    float diffX = diff[xIndex]*1.04; // add a small margin
+    float diffY = diff[yIndex]*1.04; // add a small margin
+    float aspectRatio = width() / (float)height();
+    diffX /= aspectRatio;
+    SetZoom(min(1/diffY,1/diffX));
+    */
 
     zooms = fvec(dim, 1.f);
     FOR(d, dim) zooms[d] = 1.f / diff[d];
@@ -378,7 +378,7 @@ void Canvas::FitToData()
 void Canvas::ResizeEvent()
 {
     if(canvasType != 0) return;
-    if(width() == parentWidget()->width() && height() == parentWidget()->height()) resize(parentWidget()->size());
+    if(width() != parentWidget()->width() || height() != parentWidget()->height()) resize(parentWidget()->size());
     drawnSamples = 0;
     maps.samples = QPixmap();
     maps.model = QPixmap();
