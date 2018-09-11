@@ -397,6 +397,8 @@ void AlgorithmManager::ClusterOptimize()
         kCounts.push_back(k);
         delete clusterer;
     }
+    // TODO: Crash when using dbscan and testing this
+
     vector<fvec> results(5);
     double value = 0;
     FOR(i, resultList.size())

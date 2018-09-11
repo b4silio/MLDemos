@@ -76,7 +76,7 @@ fvec ClustSVM::GetParams()
     float svmNu = params->svmCSpin->value();
     int kernelType = params->kernelTypeCombo->currentIndex();
     float kernelGamma = params->kernelWidthSpin->value();
-    float kernelDegree = params->kernelDegSpin->value();
+    float kernelDegree = params->kernelDegSpin->value();        
 
     fvec par(4);
     par[0] = svmNu;
@@ -96,9 +96,28 @@ void ClustSVM::SetParams(Clusterer *clusterer, fvec parameters)
 
     ClustererSVR *svm = dynamic_cast<ClustererSVR *>(clusterer);
     if(!svm) return;
-    svm->param.nu = svmNu;
-    svm->param.kernel_type = kernelType;
-    svm->param.gamma = 1 / kernelGamma;
+    svm->param.svm_type = ONE_CLASS;
+
+    switch(kernelType)
+    {
+    case 0:
+        svm->param.kernel_type = LINEAR;
+        break;
+    case 1:
+        svm->param.kernel_type = POLY;
+        break;
+    case 2:
+        svm->param.kernel_type = RBF;
+        break;
+    case 3:
+        svm->param.kernel_type = SIGMOID;
+        break;
+    }
+
+    svm->param.C = svm->param.nu = svmNu;
+    svm->param.gamma = kernelGamma;
+    svm->param.p = 0.6;
+    svm->param.coef0 = 0;
     svm->param.degree = kernelDegree;
     if(kernelType == RBF) {
         svm->param.gamma = 1.;
