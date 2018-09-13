@@ -237,10 +237,11 @@ float ClustererDBSCAN::GetParameterCount()
     */
 }
 
-void ClustererDBSCAN::SetClusterTestValue(int count, int max)
+bool ClustererDBSCAN::SetClusterTestValue(int count, int max)
 {
     testCount = count;
     testMax = max;
+    return false;
 }
 
 void ClustererDBSCAN::SetParams(float minpts, float eps, int metric, float depth, int type)

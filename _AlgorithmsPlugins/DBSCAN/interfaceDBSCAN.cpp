@@ -119,11 +119,11 @@ void ClustDBSCAN::SetParams(Clusterer *clusterer, fvec parameters)
     if(!dbscan) return;
 
     int i=0;
-    float minpts = parameters.size() > i ? parameters[i] : 0; i++;
-    float eps = parameters.size() > i ? parameters[i] : 0; i++;
-    int metric = parameters.size() > i ? parameters[i] : 0; i++;
-    int type = parameters.size() > i ? parameters[i] : 0; i++;
-    float depth = parameters.size() > i ? parameters[i] : 0; i++;
+    float minpts = (int)parameters.size() > i ? parameters[i] : 0; i++;
+    float eps = (int)parameters.size() > i ? parameters[i] : 0; i++;
+    int metric = (int)parameters.size() > i ? parameters[i] : 0; i++;
+    int type = (int)parameters.size() > i ? parameters[i] : 0; i++;
+    float depth = (int)parameters.size() > i ? parameters[i] : 0; i++;
 
     dbscan->SetParams(minpts, eps, metric,depth,type);
 }

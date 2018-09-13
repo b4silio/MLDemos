@@ -331,7 +331,6 @@ void AlgorithmManager::ClusterOptimize()
     int startCount=optionsCluster->rangeStartSpin->value(), stopCount=optionsCluster->rangeStopSpin->value();
     if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
-
     ivec inputDims = GetInputDimensions();
     vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
     ivec labels = canvas->data->GetLabels();
@@ -356,7 +355,8 @@ void AlgorithmManager::ClusterOptimize()
     FOR(i, resultList.size()) resultList[i].resize(crossValCount);
     for(int k=startCount; k<=stopCount; k++) {
         Clusterer* clusterer = clusterers[tab]->GetClusterer();
-        clusterer->SetClusterTestValue(k, stopCount);
+        bool bIsValid = clusterer->SetClusterTestValue(k, stopCount);
+        if(!bIsValid) break;
         testErrors[k-startCount].resize(crossValCount);
         FOR(j, crossValCount) {
             Train(clusterer, trainRatio, trainList, &testError);

@@ -240,14 +240,30 @@ void GridSearch::DisplayResults()
     FOR(y, ySteps+1)
     {
         int h = y*pixmap.height()/(ySteps);
-        if(y == ySteps) h = pixmap.height()-1;
+        if((int)y == ySteps) h = pixmap.height()-1;
         painter.drawLine(0,h, pixmap.width(), h);
     }
     FOR(x, xSteps+1)
     {
         int w = x*pixmap.width()/(xSteps);
-        if(x == xSteps) w = pixmap.width()-1;
+        if((int)x == xSteps) w = pixmap.width()-1;
         painter.drawLine(w, 0, w, pixmap.height());
+    }
+    ivec minIndices;
+    if(ui->resultCombo->currentIndex() == 0) {
+        FOR(i, map.size()) { if(map[i] == minVal) minIndices.push_back(i); }
+    } else {
+        FOR(i, map.size()) { if(map[i] == maxVal) minIndices.push_back(i); }
+    }
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::red, 2));
+    if(ui->colorCombo->currentText() == "Red") painter.setPen(QPen(Qt::blue, 2));
+    FOR(i, minIndices.size()) {
+        int xIndex = minIndices.at(i) % xSteps;
+        int yIndex = minIndices.at(i) / xSteps;
+        int x = xIndex*pixmap.width()/xSteps;
+        int y = yIndex*pixmap.height()/ySteps;
+        painter.drawRect(QRectF(x, y, pixmap.width()/xSteps, pixmap.height()/ySteps));
     }
     ui->displayLabel->setPixmap(pixmap);
     ui->displayLabel->repaint();
@@ -286,7 +302,6 @@ void GridSearch::DisplayResults()
 
     ui->colorbarLabel->setPixmap(colorBar);
     ui->colorbarLabel->repaint();
-
 }
 
 fPair GridSearch::GetParamsRange()

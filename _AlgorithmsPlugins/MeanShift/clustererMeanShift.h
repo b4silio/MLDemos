@@ -39,7 +39,7 @@ public:
     fvec Test(const fvec &sample);
     const char *GetInfoString();
     void SetParams(float kernelWidth, float mergeRadius);
-    void SetClusterTestValue(int count, int max);
+    bool SetClusterTestValue(int count, int max);
 
     MeanShift* meanShift;
     std::vector<MeanShiftCluster> clusters;

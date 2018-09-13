@@ -47,10 +47,11 @@ void ClustererMeanShift::SetParams(float kernelWidth, float mergeRadius) {
     this->mergeRadius = mergeRadius;
 }
 
-void ClustererMeanShift::SetClusterTestValue(int count, int max)
+bool ClustererMeanShift::SetClusterTestValue(int count, int max)
 {
     testCount = count;
     testMax = max;
+    return true;
 }
 
 void ClustererMeanShift::Train(std::vector<fvec> samples) {
