@@ -76,6 +76,7 @@ public:
     const char *GetInfoString();
     float GetParameterCount();
     bool SetClusterTestValue(int count, int max);
+    float GetClusterTestValue();
 
     /**
       Function to set the algorithm hyper-parameters, called prior to the training itself

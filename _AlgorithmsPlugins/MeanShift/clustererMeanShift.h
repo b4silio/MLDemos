@@ -40,6 +40,7 @@ public:
     const char *GetInfoString();
     void SetParams(float kernelWidth, float mergeRadius);
     bool SetClusterTestValue(int count, int max);
+    float GetClusterTestValue();
 
     MeanShift* meanShift;
     std::vector<MeanShiftCluster> clusters;

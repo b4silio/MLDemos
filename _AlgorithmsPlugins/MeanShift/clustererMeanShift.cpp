@@ -54,14 +54,20 @@ bool ClustererMeanShift::SetClusterTestValue(int count, int max)
     return true;
 }
 
-void ClustererMeanShift::Train(std::vector<fvec> samples) {
-    if(!samples.size()) return;
-    dim = samples.front().size();
+float ClustererMeanShift::GetClusterTestValue()
+{
     float kernelW = kernelWidth;
     if(testMax > 1) {
         float ratio = (testCount) / (float)testMax;
         kernelW = kernelW*(1-ratio);
     }
+    return kernelW;
+}
+
+void ClustererMeanShift::Train(std::vector<fvec> samples) {
+    if(!samples.size()) return;
+    dim = samples.front().size();
+    float kernelW = GetClusterTestValue();
 
     DEL(meanShift);
     meanShift = new MeanShift();

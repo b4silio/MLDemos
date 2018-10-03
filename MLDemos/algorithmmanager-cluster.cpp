@@ -152,7 +152,7 @@ void AlgorithmManager::Cluster()
     optionsCluster->resultList->addItem(QString("BIC: %1").arg(BIC, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("AIC: %1").arg(AIC, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("AICc: %1").arg(AICc, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("F1: %1").arg(F1, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("F1: %1").arg(-F1, 0, 'f', 2));
 
     optionsCluster->resultList->item(0)->setForeground(Qt::gray);
     optionsCluster->resultList->item(1)->setForeground(Qt::red);
@@ -332,7 +332,7 @@ void AlgorithmManager::ClusterOptimize()
     if(startCount>stopCount) startCount ^= stopCount ^= startCount ^= stopCount;
 
     ivec inputDims = GetInputDimensions();
-    vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
+    const vector<fvec> samples = canvas->data->GetSampleDims(inputDims);
     ivec labels = canvas->data->GetLabels();
     int f1ratioIndex = optionsCluster->trainRatioCombo->currentIndex();
     float f1ratios[] = {0.01f, 0.05f, 0.1f, 0.2f, 1.f/3.f, 0.5f, 0.75f, 1.f};
@@ -355,10 +355,10 @@ void AlgorithmManager::ClusterOptimize()
     FOR(i, resultList.size()) resultList[i].resize(crossValCount);
     for(int k=startCount; k<=stopCount; k++) {
         Clusterer* clusterer = clusterers[tab]->GetClusterer();
-        bool bIsValid = clusterer->SetClusterTestValue(k, stopCount);
-        if(!bIsValid) break;
+        clusterer->SetClusterTestValue(k, stopCount);
         testErrors[k-startCount].resize(crossValCount);
         FOR(j, crossValCount) {
+            fvec clusterMetrics(5);
             Train(clusterer, trainRatio, trainList, &testError);
             testErrors[k-startCount][j] = testError;
 
@@ -378,12 +378,11 @@ void AlgorithmManager::ClusterOptimize()
                 else if(result.size())
                 {
                     fvec res(clusterer->NbClusters(),0);
-                    res[result[0]] = 1.f;
+                    result[res[0]] = 1.f;
                 }
             }
             float f1 = ClusterFMeasure(samples, labels, clusterScores, ratio);
 
-            fvec clusterMetrics(5);
             clusterMetrics[0] = logL;
             clusterMetrics[1] = BIC;
             clusterMetrics[2] = AIC;
@@ -485,11 +484,12 @@ void AlgorithmManager::ClusterOptimize()
     optionsCluster->graphLabel->repaint();
 
     optionsCluster->resultList->clear();
+    optionsCluster->resultList->addItem(QString("Best Param (Score)"));
     optionsCluster->resultList->addItem(QString("RSS: %1 (%2)").arg(bests[0].second).arg(bests[0].first, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("BIC: %1 (%2)").arg(bests[1].second).arg(bests[1].first, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("AIC: %1 (%2)").arg(bests[2].second).arg(bests[2].first, 0, 'f', 2));
     optionsCluster->resultList->addItem(QString("AICc: %1 (%2)").arg(bests[3].second).arg(bests[3].first, 0, 'f', 2));
-    optionsCluster->resultList->addItem(QString("F1: %1 (%2)").arg(bests[4].second).arg(bests[4].first, 0, 'f', 2));
+    optionsCluster->resultList->addItem(QString("F1: %1 (%2)").arg(bests[4].second).arg(-bests[4].first, 0, 'f', 2));
     FOR(i, results.size()) {
         optionsCluster->resultList->item(i)->setForeground(colors[i%colors.size()]);
     }

@@ -43,6 +43,7 @@ public:
     virtual fvec TestMany( const fvec& sampleMatrix, const int dim, const int count);
     virtual const char *GetInfoString(){ return NULL; }
     virtual bool SetClusterTestValue(int count, int /*max*/){ nbClusters = count; return true;}
+    virtual float GetClusterTestValue() {return nbClusters;}
     virtual float GetLogLikelihood(std::vector<fvec> samples);
     virtual float GetParameterCount(){return nbClusters*dim;}
 };

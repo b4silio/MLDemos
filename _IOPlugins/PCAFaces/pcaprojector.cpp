@@ -264,7 +264,7 @@ pair<vector<fvec>,ivec> PCAProjector::GetData()
 void PCAProjector::FromWebcam()
 {
     bFromWebcam = true;
-    if(!grabber.isOpened()) grabber.open(0);
+    //if(!grabber.isOpened()) grabber.open(0);
 }
 
 void PCAProjector::SetImage( cv::Mat img )
@@ -277,7 +277,7 @@ void PCAProjector::SetImage( cv::Mat img )
         imageWindow->ShowImage(image);
         imageWindow->repaint();
         bFromWebcam = false;
-        if(grabber.isOpened()) grabber.release();
+        //if(grabber.isOpened()) grabber.release();
         return;
     }
     //float ratio = img->width / (float)img->height;
@@ -451,7 +451,7 @@ void PCAProjector::DropImage(QDropEvent *event)
             SetImage(img);
             imageMutex.unlock();
             bFromWebcam = false;
-            if(grabber.isOpened()) grabber.release();
+            //if(grabber.isOpened()) grabber.release();
             break;
         }
     }
@@ -486,7 +486,7 @@ void PCAProjector::LoadImage()
     file.close();
 
     bFromWebcam = false;
-    if(grabber.isOpened()) grabber.release();
+    //if(grabber.isOpened()) grabber.release();
     Mat img = cv::imread(filename.toStdString().c_str());
     if(img.empty()) return;
     imageMutex.lock();
@@ -513,7 +513,7 @@ void PCAProjector::FromClipboard()
                 SetImage(imgMat);
                 imageMutex.unlock();
                 bFromWebcam = false;
-                if(grabber.isOpened()) grabber.release();
+                //if(grabber.isOpened()) grabber.release();
             }
         } else if (mimeData->hasUrls()) {
             FOR(i, clipboard->mimeData()->urls().length())
@@ -527,7 +527,7 @@ void PCAProjector::FromClipboard()
                     SetImage(img);
                     imageMutex.unlock();
                     bFromWebcam = false;
-                    if(grabber.isOpened()) grabber.release();
+                    //if(grabber.isOpened()) grabber.release();
                     break;
                 }
             }

@@ -77,7 +77,11 @@ void SampleManager::CreateSampleImage(IplImage **image, bool bShowLabels, float 
 		}
 		if(bShowLabels && labels[i])
 		{
-			cvRectangle((*image), cvPoint(rect.x, rect.y), cvPoint(rect.x+rect.width-1, rect.y+rect.height-1), CV::color[labels[i]%CV::colorCnt], 2, CV_AA); 
+            CvScalar color = CV::color[labels[i]%CV::colorCnt];
+#ifndef MACX
+            color = CvScalar(color.val[2],color.val[1],color.val[0]);
+#endif
+            cvRectangle((*image), cvPoint(rect.x, rect.y), cvPoint(rect.x+rect.width-1, rect.y+rect.height-1), color, 2, CV_AA);
 		}
 	}
 }

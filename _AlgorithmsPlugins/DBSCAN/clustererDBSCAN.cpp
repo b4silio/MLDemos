@@ -244,6 +244,17 @@ bool ClustererDBSCAN::SetClusterTestValue(int count, int max)
     return false;
 }
 
+float ClustererDBSCAN::GetClusterTestValue()
+{
+    float realEps = _eps;
+    if(testMax > 1 ) {
+        float ratio = (testCount) / (float)testMax;
+        realEps = realEps*(1-ratio);
+    }
+    return realEps;
+}
+
+
 void ClustererDBSCAN::SetParams(float minpts, float eps, int metric, float depth, int type)
 {
     _eps = eps;
@@ -255,11 +266,7 @@ void ClustererDBSCAN::SetParams(float minpts, float eps, int metric, float depth
 
 void ClustererDBSCAN::run_cluster(Points samples)
 {
-    float realEps = _eps;
-    if(testMax > 1 ) {
-        float ratio = (testCount) / (float)testMax;
-        realEps = realEps*(1-ratio);
-    }
+    float realEps = GetClusterTestValue();
     if(_metric == 0) realEps *= realEps;
 
     ClusterId cid = 1;
