@@ -1021,6 +1021,10 @@ void Draw3DClusterer(GLWidget *glw, Clusterer *clusterer)
         printf("done.\n");
         fflush(stdout);
     }
+
+    delete [] minVals;
+    delete [] maxVals;
+    delete [] values;
 }
 
 struct Streamline
