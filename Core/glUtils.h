@@ -84,4 +84,48 @@ extern std::pair<QVector<QVector3D>, QMatrix4x4> DrawGaussianLines(float radius,
 extern GLObject GenerateMeshGrid(fvec &gridPoints, int xSteps, fvec mins, fvec maxes, int xInd=0, int yInd=1, int zInd=2);
 extern GLObject GenerateMeshGrid(float *gridPoints, int xSteps, int ySteps, fvec mins, fvec maxes, int xInd=0, int yInd=1, int zInd=2);
 
+class GaussianRenderer: protected QOpenGLFunctions
+{
+public:
+    GaussianRenderer();
+    ~GaussianRenderer();
+
+    // Initialize the renderer (call once during setup)
+    void initialize();
+
+    // Draw a Gaussian with the specified parameters
+    void draw(float *mean, float *eigVal, float *eigVec, float prior,
+              bool wireframe, float colorRed, float colorGreen, float colorBlue);
+
+public:
+    bool bInitialised;
+
+private:
+    // Helper methods to draw spheres
+    void createSphereGeometry(float radius, int stacks, int slices);
+    void createSphereIsolines(float radius, int divisions);
+
+    // Shader programs for rendering
+    QOpenGLShaderProgram *solidSphereProgram;
+    QOpenGLShaderProgram *wireframeProgram;
+
+    // Sphere geometry (solid)
+    QOpenGLVertexArrayObject sphereVAO;
+    QOpenGLBuffer sphereVBO;
+    QOpenGLBuffer sphereIBO;
+    int sphereIndexCount;
+
+    // Sphere isolines geometry (wireframe)
+    QOpenGLVertexArrayObject isolinesVAO;
+    QOpenGLBuffer isolinesVBO;
+    int isolinesVertexCount;
+
+    // Second set of isolines (dotted)
+    QOpenGLVertexArrayObject isolines2VAO;
+    QOpenGLBuffer isolines2VBO;
+    int isolines2VertexCount;
+};
+
+
+
 #endif // GLUTILS_H

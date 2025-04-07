@@ -1,8 +1,7 @@
-// Vertex Shader (BasicLighting.vert)
-#version 330 core
+#version 120
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
+attribute vec3 position;
+attribute vec3 normal;
 
 uniform mat4 mvMatrix;
 uniform mat4 mvpMatrix;
@@ -15,7 +14,7 @@ uniform vec4 lightSpecular;
 uniform float specularity;
 uniform float shininess;
 
-out vec4 fragColor;
+varying vec4 fragColor;
 
 void main()
 {
@@ -56,28 +55,3 @@ void main()
     // Transform position
     gl_Position = mvpMatrix * vec4(position, 1.0);
 }
-
-// Fragment Shader (BasicLighting.frag)
-#version 330 core
-
-in vec4 fragColor;
-out vec4 finalColor;
-
-void main()
-{
-    finalColor = fragColor;
-}
-
-
-/*
-attribute vec4 qt_Vertex;
-attribute vec4 qt_MultiTexCoord0;
-uniform mat4 qt_ModelViewProjectionMatrix;
-varying vec4 qt_TexCoord0;
-
-void main(void)
-{
-    gl_Position = qt_ModelViewProjectionMatrix * qt_Vertex;
-    qt_TexCoord0 = qt_MultiTexCoord0;
-}
-*/

@@ -301,9 +301,10 @@ void ClassGMM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
     int zIndex = canvas->zIndex;
     if(canvas->zIndex >= dim) zIndex = -1;
 
-    ClassifierGMM * gmm = (ClassifierGMM*)classifier;
-    vector<Gmm*> gmms = gmm->gmms;
-    if(!gmms.size()) return;
+    const ClassifierGMM * gmm = static_cast<ClassifierGMM*>(classifier);
+    if(gmm == nullptr) return;
+    const vector<Gmm*> gmms = gmm->gmms;
+    if(gmms.empty()) return;
 
     float* bigSigma = new float[dim*dim];
     float* bigMean = new float[dim];
@@ -368,53 +369,17 @@ void ClassGMM::DrawGL(Canvas *canvas, GLWidget *glw, Classifier *classifier)
 
             QColor color = SampleColor[classifier->inverseMap[g]%SampleColorCnt];
 
-            GLuint list= DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
+            GLuint list = DrawGaussian(&mean[0], eigVal, eigVec, prior, false, color.redF(), color.greenF(), color.blueF());
             glw->drawSampleLists.push_back(list);
             glw->drawSampleListCenters[list] = mean;
-            list= DrawGaussian(&mean[0], eigVal, eigVec);
+            list = DrawGaussian(&mean[0], eigVal, eigVec);
             glw->drawSampleLists.push_back(list);
         }
     }
 
-    /*
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_POINT_SPRITE);
-    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glPointSize(16.0);
-    glBegin(GL_POINTS);
-    FOR(g, gmms.size())
-    {
-        FOR(i, gmms[g]->nstates)
-        {
-            gmms[g]->getMean(i, bigMean);
-
-            mean[0] = bigMean[xIndex];
-            mean[1] = bigMean[yIndex];
-            mean[2] = zIndex >= 0 ? bigMean[zIndex] : 0;
-            QColor c = SampleColor[classifier->inverseMap[g]%SampleColorCnt];
-            glColor3f(c.redF(), c.greenF(), c.blueF());
-            glVertex3f(mean[0],mean[1],mean[2]);
-        }
-    }
-    glEnd();
-    glPopAttrib();
-    */
     delete [] bigSigma;
     delete [] bigMean;
 
-    /*
-    glColor3d(0,0,0);
-    glEnable(GL_LINE_STIPPLE); // enable dashed/ dotted lines
-    glLineWidth(0.5f); // line width
-    glLineStipple (1, 0xAAAA); // dash pattern AAAA: dots
-    glBegin(GL_LINES);
-    glEnd();
-    */
 }
 
 void ClassGMM::SaveOptions(QSettings &settings)

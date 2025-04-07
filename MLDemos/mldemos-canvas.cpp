@@ -98,8 +98,6 @@ void MLDemos::CanvasTypeChanged()
 {
     bool bProjected = canvas->data->bProjected;
     int type = ui.canvasTypeCombo->currentIndex();
-    if (type == 1) type = 2; // we swapped 3D and Visualizations, to not have to change everything, we swap the index here
-    else if (type == 2) type = 1;
 
     if (!canvas->data->GetCount()) {
         if (type > 1 && !canvas->rewardPixmap().isNull()) { // we only have rewards
@@ -206,7 +204,7 @@ void MLDemos::CanvasOptionsChanged()
     int w = ui.canvasWidget->width();
     int h = ui.canvasWidget->height();
     bool bNeedsZoom = false;
-    if (canvas->canvasType == 1) {
+    if (canvas->canvasType == 1) { // 3d view
         if (h/dims < 100) {
             h = 100*dims;
             bNeedsZoom = true;

@@ -165,12 +165,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Visualizations</string>
+              <string>3D View</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>3D View</string>
+              <string>Visualizations</string>
              </property>
             </item>
            </widget>
@@ -463,7 +463,7 @@ foreground: gray;
      <x>0</x>
      <y>0</y>
      <width>980</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

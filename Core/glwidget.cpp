@@ -61,6 +61,7 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     QSurfaceFormat format;
     format.setSamples(4);
     format.setAlphaBufferSize(8);
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
     setFormat(format);
 
     this->canvas = canvas;
@@ -256,9 +257,11 @@ void GLWidget::GenTextures()
     textureNames = new GLuint[textureCount];
     glGenTextures(textureCount, textureNames); // 0: samples, 1: wide circles
 
-    /*
+    glEnable(GL_TEXTURE_2D);
+    GLActiveTexture(GL_TEXTURE0);
+
     for (int i = 0; i < textureCount; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i); // Use different texture units if needed
+        //glActiveTexture(GL_TEXTURE0 + i); // Use different texture units if needed
         glBindTexture(GL_TEXTURE_2D, textureNames[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData[i].data());
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -266,7 +269,11 @@ void GLWidget::GenTextures()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
-    */
+
+    glEnable(GL_POINT_SPRITE);
+    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
 }
 
 void GLWidget::LoadShaders()
@@ -301,6 +308,26 @@ void GLWidget::LoadShaders()
     program->bindAttributeLocation("vertex", 0);
     program->bindAttributeLocation("color", 1);
     shaders["SamplesShadow"] = program;
+    program = new QOpenGLShaderProgram();
+    program->addShaderFromSourceFile(QOpenGLShader::Vertex,":/MLDemos/shaders/BasicLighting.vert");
+    program->addShaderFromSourceFile(QOpenGLShader::Fragment,":/MLDemos/shaders/BasicLighting.frag");
+    program->bindAttributeLocation("position", 0);
+    program->bindAttributeLocation("normal", 1);
+    program->link();
+    shaders["BasicLighting"] = program;
+    program = new QOpenGLShaderProgram();
+    program->addShaderFromSourceFile(QOpenGLShader::Vertex,":/MLDemos/shaders/GaussianSphere.vert");
+    program->addShaderFromSourceFile(QOpenGLShader::Fragment,":/MLDemos/shaders/GaussianSphere.frag");
+    program->bindAttributeLocation("position", 0);
+    program->bindAttributeLocation("normal", 1);
+    program->link();
+    shaders["GaussianSphere"] = program;
+    program = new QOpenGLShaderProgram();
+    program->addShaderFromSourceFile(QOpenGLShader::Vertex,":/MLDemos/shaders/GaussianWireframe.vert");
+    program->addShaderFromSourceFile(QOpenGLShader::Fragment,":/MLDemos/shaders/GaussianWireframe.frag");
+    program->bindAttributeLocation("position", 0);
+    program->link();
+    shaders["GaussianWireframe"] = program;
 }
 
 void GLWidget::InitLights()
@@ -345,9 +372,10 @@ void GLWidget::initializeGLAlt()
 void GLWidget::initializeGL()
 {
     GenTextures();
+
+    /*
     glEnable(GL_TEXTURE_2D);
     GLActiveTexture(GL_TEXTURE0);
-
     FOR(i, textureCount)
     {
         glBindTexture(GL_TEXTURE_2D, textureNames[i]);
@@ -362,6 +390,7 @@ void GLWidget::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+*/
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
@@ -994,9 +1023,10 @@ void GLWidget::DrawSurfaces(const GLObject &o) const
     QOpenGLShaderProgram *program = nullptr;
     if(useSmooth) {
         program = shaders.at("SmoothTransparent");
+        //program = shaders.at("SmoothTransparent");
     } else {
         // Fall back to modern equivalent of the fixed function pipeline
-        program = shaders.at("RenderFBO"); // You'll need to create this shader
+        program = shaders.at("BasicLighting"); // You'll need to create this shader
     }
 
     if(program) {
@@ -1560,10 +1590,8 @@ void GLWidget::paintGL()
             }
         }
     }
-
-    // Here we draw the axes lines
     if(canvas->bDisplayGrid) DrawAxes(zoomFactor);
-    // DrawLights(lights);
+    DrawLights(lights);
 
     FOR(i, objects.size())
     {
@@ -1640,7 +1668,9 @@ void GLWidget::paintGL()
             else list.push_back(make_pair(-FLT_MAX, i));
         }
         std::sort(list.begin(), list.end());
-
+        glPushMatrix();
+        float scaleAdjustment = 2.0f / (zoomFactor/ZoomZero);
+        glScalef(scaleAdjustment, scaleAdjustment, scaleAdjustment);
         FOR(i, list.size())
         {
             glCallList(drawSampleLists[list[i].second]);
@@ -1650,6 +1680,7 @@ void GLWidget::paintGL()
         {
             glCallList(drawLists[i]);
         }
+        glPopMatrix();
     }
     glPopAttrib();
     glPopMatrix();
@@ -1701,7 +1732,6 @@ void GLWidget::RenderShadowMap(QOpenGLFramebufferObject *fbo, GLLight light, std
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     FOR(i, objects.size())
     {
-
         GLObject& o = objects[i];
         if(!o.vertices.size()) continue;
         QString style = o.style.toLower();
@@ -1946,10 +1976,7 @@ void GLWidget::LoadShader(QOpenGLShaderProgram **program_, QString vshader, QStr
     {
         program->release();
         QList<QOpenGLShader*> shaders = program->shaders();
-        FOR(i, shaders.size())
-        {
-            delete shaders.at(i);
-        }
+        FOR(i, shaders.size()) { delete shaders.at(i); }
         program->removeAllShaders();
     }
     else program = new QOpenGLShaderProgram;

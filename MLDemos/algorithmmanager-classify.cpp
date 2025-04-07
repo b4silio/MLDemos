@@ -55,6 +55,7 @@ void AlgorithmManager::Classify()
         trainList = GetManualSelection();
     }
 
+
     int positiveIndex = optionsClassify->binaryCheck->isChecked() ? optionsClassify->positiveSpin->value() : -1;
     bool trained = Train(classifier, trainRatio, trainList, positiveIndex);
     if(trained)
@@ -65,7 +66,7 @@ void AlgorithmManager::Classify()
         if(canvas->canvasType == 1)
         {
             classifiers[tab]->DrawGL(canvas, glw, classifier);
-            if(canvas->data->GetDimCount() == 3 && (sourceDims.size()==0 || sourceDims.size()==3)) Draw3DClassifier(glw, classifier);
+            if(canvas->data->GetDimCount() == 3 && sourceDims.size() <= 3) Draw3DClassifier(glw, classifier);
         }
 
         emit UpdateInfo();

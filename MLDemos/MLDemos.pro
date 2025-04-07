@@ -127,4 +127,9 @@ OTHER_FILES += \
     shaders/depthSamples.vsh \
     shaders/drawSamplesShadow.fsh \
     shaders/drawSamplesShadow.vsh \
-    shaders/BasicLighting.vert
+    shaders/BasicLighting.vert \
+    shaders/BasicLighting.frag \
+    shaders/GaussianSphere.vert \
+    shaders/GaussianSphere.frag \
+    shaders/GaussianWireframe.vert \
+    shaders/GaussianWireframe.frag

@@ -578,3 +578,310 @@ GLObject GenerateMeshGrid(float *gridPoints, int xSteps, int ySteps, fvec mins, 
     o.objectType = "Surfaces,quads";
     return o;
 }
+
+GaussianRenderer::GaussianRenderer()
+    : solidSphereProgram(nullptr), wireframeProgram(nullptr), bInitialised(false)
+{
+}
+
+GaussianRenderer::~GaussianRenderer()
+{
+    delete solidSphereProgram;
+    delete wireframeProgram;
+}
+
+void GaussianRenderer::initialize()
+{
+    // Initialize OpenGL resources
+    initializeOpenGLFunctions();
+
+    // Create shader for solid spheres
+    solidSphereProgram = new QOpenGLShaderProgram();
+    solidSphereProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/MLDemos/shaders/GaussianSphere.vert");
+    solidSphereProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/MLDemos/shaders/GaussianSphere.frag");
+    solidSphereProgram->bindAttributeLocation("position", 0);
+    solidSphereProgram->bindAttributeLocation("normal", 1);
+    solidSphereProgram->link();
+
+    // Create shader for wireframe
+    wireframeProgram = new QOpenGLShaderProgram();
+    wireframeProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/MLDemos/shaders/GaussianWireframe.vert");
+    wireframeProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/MLDemos/shaders/GaussianWireframe.frag");
+    wireframeProgram->bindAttributeLocation("position", 0);
+    wireframeProgram->link();
+
+    // Create sphere geometry
+    createSphereGeometry(1.0f, 30, 30);
+
+    // Create isolines geometry
+    createSphereIsolines(1.0f, 20);
+    bInitialised = true;
+}
+
+void GaussianRenderer::createSphereGeometry(float radius, int stacks, int slices)
+{
+    // Create arrays to hold the vertices and indices
+    QVector<GLfloat> vertices;
+    QVector<GLuint> indices;
+
+    // Generate vertices for a sphere
+    for (int i = 0; i <= stacks; ++i) {
+        float phi = M_PI * i / stacks;
+        float sinPhi = sin(phi);
+        float cosPhi = cos(phi);
+
+        for (int j = 0; j <= slices; ++j) {
+            float theta = 2.0f * M_PI * j / slices;
+            float sinTheta = sin(theta);
+            float cosTheta = cos(theta);
+
+            // Position
+            float x = radius * sinPhi * cosTheta;
+            float y = radius * sinPhi * sinTheta;
+            float z = radius * cosPhi;
+
+            // Add position
+            vertices.append(x);
+            vertices.append(y);
+            vertices.append(z);
+
+            // Add normal (same as position for a unit sphere)
+            vertices.append(sinPhi * cosTheta);
+            vertices.append(sinPhi * sinTheta);
+            vertices.append(cosPhi);
+        }
+    }
+
+    // Generate indices for triangle strips
+    for (int i = 0; i < stacks; ++i) {
+        for (int j = 0; j < slices; ++j) {
+            int current = i * (slices + 1) + j;
+            int next = current + (slices + 1);
+
+            indices.append(current);
+            indices.append(next);
+            indices.append(current + 1);
+
+            indices.append(current + 1);
+            indices.append(next);
+            indices.append(next + 1);
+        }
+    }
+
+    // Create and populate the buffer objects
+    sphereVAO.create();
+    sphereVAO.bind();
+
+    sphereVBO.create();
+    sphereVBO.bind();
+    sphereVBO.allocate(vertices.data(), vertices.size() * sizeof(GLfloat));
+
+    // Position attribute
+    solidSphereProgram->enableAttributeArray(0);
+    solidSphereProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
+
+    // Normal attribute
+    solidSphereProgram->enableAttributeArray(1);
+    solidSphereProgram->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
+
+    sphereIBO.create();
+    sphereIBO.bind();
+    sphereIBO.allocate(indices.data(), indices.size() * sizeof(GLuint));
+
+    sphereIndexCount = indices.size();
+
+    // Unbind
+    sphereVAO.release();
+}
+
+void GaussianRenderer::createSphereIsolines(float radius, int divisions)
+{
+    // Create lines for longitude (vertical circles)
+    QVector<GLfloat> verticalLines;
+    for (int i = 0; i < divisions; ++i) {
+        float theta = 2.0f * M_PI * i / divisions;
+        float cosTheta = cos(theta);
+        float sinTheta = sin(theta);
+
+        for (int j = 0; j <= 100; ++j) {
+            float phi = M_PI * j / 100;
+            float sinPhi = sin(phi);
+            float cosPhi = cos(phi);
+
+            float x = radius * sinPhi * cosTheta;
+            float y = radius * sinPhi * sinTheta;
+            float z = radius * cosPhi;
+
+            verticalLines.append(x);
+            verticalLines.append(y);
+            verticalLines.append(z);
+        }
+    }
+
+    // Create lines for latitude (horizontal circles)
+    QVector<GLfloat> horizontalLines;
+    for (int i = 1; i < divisions; ++i) {
+        float phi = M_PI * i / divisions;
+        float sinPhi = sin(phi);
+        float cosPhi = cos(phi);
+
+        for (int j = 0; j <= 100; ++j) {
+            float theta = 2.0f * M_PI * j / 100;
+            float cosTheta = cos(theta);
+            float sinTheta = sin(theta);
+
+            float x = radius * sinPhi * cosTheta;
+            float y = radius * sinPhi * sinTheta;
+            float z = radius * cosPhi;
+
+            horizontalLines.append(x);
+            horizontalLines.append(y);
+            horizontalLines.append(z);
+        }
+    }
+
+    // Set up primary isolines VAO/VBO
+    isolinesVAO.create();
+    isolinesVAO.bind();
+
+    isolinesVBO.create();
+    isolinesVBO.bind();
+    isolinesVBO.allocate(verticalLines.data(), verticalLines.size() * sizeof(GLfloat));
+
+    wireframeProgram->enableAttributeArray(0);
+    wireframeProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+
+    isolinesVertexCount = verticalLines.size() / 3;
+
+    isolinesVAO.release();
+
+    // Set up secondary isolines VAO/VBO (for dotted lines)
+    isolines2VAO.create();
+    isolines2VAO.bind();
+
+    isolines2VBO.create();
+    isolines2VBO.bind();
+    isolines2VBO.allocate(horizontalLines.data(), horizontalLines.size() * sizeof(GLfloat));
+
+    wireframeProgram->enableAttributeArray(0);
+    wireframeProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+
+    isolines2VertexCount = horizontalLines.size() / 3;
+
+    isolines2VAO.release();
+}
+
+void GaussianRenderer::draw(float *mean, float *eigVal, float *eigVec, float prior,
+                            bool wireframe, float colorRed, float colorGreen, float colorBlue)
+{
+    // Create transformation matrix from eigenvectors
+    QMatrix4x4 rotation;
+    rotation.setRow(0, QVector4D(eigVec[0], eigVec[1], eigVec[2], 0));
+    rotation.setRow(1, QVector4D(eigVec[3], eigVec[4], eigVec[5], 0));
+    rotation.setRow(2, QVector4D(eigVec[6], eigVec[7], eigVec[8], 0));
+    rotation.setRow(3, QVector4D(0, 0, 0, 1));
+
+
+    // Get the uniform locations
+    GLuint programID = 0;
+    GLint modelviewLoc = QOpenGLContext::currentContext()
+                             ->functions()
+                             ->glGetUniformLocation(programID, "modelview_matrix");
+    GLint projectionLoc = QOpenGLContext::currentContext()
+                              ->functions()
+                              ->glGetUniformLocation(programID, "projection_matrix");
+
+    // Create matrices to store the values
+    QMatrix4x4 modelview;
+    QMatrix4x4 projection;
+
+    // Now retrieve the actual matrices
+    // For Qt OpenGL, you'd typically use something like:
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    f->glGetUniformfv(programID, modelviewLoc, modelview.data());
+    f->glGetUniformfv(programID, projectionLoc, projection.data());
+
+    // Enable needed OpenGL states
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    if (!wireframe) {
+        // Draw solid gaussian spheres with varying opacity
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+
+        solidSphereProgram->bind();
+
+        int steps = 30;
+        float speed = 3.0f;
+
+        for (int d = 0; d < steps; d++) {
+            float alpha = (std::min(prior + 0.3f, 1.0f)) * (1.0f - d / (float)steps) * exp(-(d / (float)steps) * speed);
+            if (alpha < 0.01f) continue;  // Skip if nearly transparent
+
+            // Scale factor for this layer
+            float scale = 0.01f + d * 2.8f / steps;
+
+            // Set up model-view-projection matrix
+            QMatrix4x4 mvp = projection;
+            QMatrix4x4 model;
+            model.translate(mean[0], mean[1], mean[2]);
+            model = model * rotation;
+            model.scale(eigVal[0] * scale, eigVal[1] * scale, eigVal[2] * scale);
+
+            mvp = mvp * modelview * model;
+
+            // Set uniforms
+            solidSphereProgram->setUniformValue("mvpMatrix", mvp);
+            solidSphereProgram->setUniformValue("normalMatrix", model.normalMatrix());
+            solidSphereProgram->setUniformValue("color", QVector4D(colorRed, colorGreen, colorBlue, alpha));
+
+            // Draw the sphere
+            sphereVAO.bind();
+            sphereIBO.bind();
+            glDrawElements(GL_TRIANGLES, sphereIndexCount, GL_UNSIGNED_INT, nullptr);
+            sphereVAO.release();
+        }
+
+        solidSphereProgram->release();
+    } else {
+        // Draw wireframe
+        glDisable(GL_LIGHTING);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+
+        wireframeProgram->bind();
+
+        // Set up model-view-projection matrix
+        QMatrix4x4 mvp = projection;
+        QMatrix4x4 model;
+        model.translate(mean[0], mean[1], mean[2]);
+        model = model * rotation;
+        model.scale(eigVal[0], eigVal[1], eigVal[2]);
+
+        mvp = mvp * modelview * model;
+
+        // Set uniforms
+        wireframeProgram->setUniformValue("mvpMatrix", mvp);
+        wireframeProgram->setUniformValue("color", QVector4D(0, 0, 0, 1));
+
+        // Draw solid lines
+        glLineWidth(2.0f);
+        isolinesVAO.bind();
+        glDrawArrays(GL_LINE_STRIP, 0, isolinesVertexCount);
+        isolinesVAO.release();
+
+        // Draw dotted lines
+        glLineWidth(0.5f);
+        glEnable(GL_LINE_STIPPLE);
+        glLineStipple(1, 0xAAAA);
+
+        isolines2VAO.bind();
+        glDrawArrays(GL_LINE_STRIP, 0, isolines2VertexCount);
+        isolines2VAO.release();
+
+        glDisable(GL_LINE_STIPPLE);
+        wireframeProgram->release();
+    }
+}
+

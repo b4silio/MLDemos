@@ -44,6 +44,12 @@
         <file>shaders/depthSamples.fsh</file>
         <file>shaders/drawSamplesShadow.vsh</file>
         <file>shaders/drawSamplesShadow.fsh</file>
+        <file>shaders/BasicLighting.vert</file>
+        <file>shaders/BasicLighting.frag</file>
+        <file>shaders/GaussianSphere.vert</file>
+        <file>shaders/GaussianSphere.frag</file>
+        <file>shaders/GaussianWireframe.vert</file>
+        <file>shaders/GaussianWireframe.frag</file>
         <file>icons/move-class.png</file>
         <file>icons/clearall.png</file>
         <file>icons/algorithm_icons_Classification.png</file>
