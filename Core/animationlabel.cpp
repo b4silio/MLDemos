@@ -60,7 +60,7 @@ void AnimationLabel::init( const QString animationPath,
     QVBoxLayout* layout = new QVBoxLayout( this );
     // Remove the all the extra space add the movie to our layout and show it
     layout->setSpacing( 1 );
-    layout->setMargin( 1 );
+    layout->setContentsMargins( 1, 1, 1, 1);
     layout->addWidget( container );
     setLayout( layout );
     setFixedSize( s );

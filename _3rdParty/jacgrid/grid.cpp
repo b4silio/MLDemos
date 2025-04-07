@@ -7,7 +7,7 @@ bool gridT::Resize(float InitValue,
                    unsigned int dimx, unsigned int dimy, unsigned int dimz,
                    bool with_surface_fields)
 {
-    register unsigned int i;
+    unsigned int i;
     float *dataptr;
     unsigned int *ownerptr;
     unsigned int *typeptr;

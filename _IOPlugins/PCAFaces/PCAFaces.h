@@ -76,7 +76,7 @@ signals:
 public slots:
 	void FetchResults(std::vector<fvec> results);
 	void Closing();
-	void Updating();
+    void Updating();
     void ConcurrentUpdate();
 };
 

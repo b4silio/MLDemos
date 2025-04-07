@@ -21,10 +21,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "glUtils.h"
 #include "basicMath.h"
 #include <QBitmap>
-#include <QDebug>
-#include "qcontour.h"
-#include "kmeans.h"
+#include <QLabel>
+//#include "qcontour.h"
+//#include "kmeans.h"
 #include <jacgrid/jacgrid.h>
+
+#include <QDebug>
+
+
 using namespace std;
 
 #define FOUR(a) {a;a;a;a;}
@@ -419,11 +423,11 @@ QPixmap BoxPlot(std::vector<fvec> allData, QSize size, float maxVal, float minVa
         const char *format = (maxVal - minVal) > 100 ? shortFormat : longFormat;
         painter.setPen(Qt::black);
         char text[255];
-        sprintf(text, format, median);
+        snprintf(text, 255, format, median);
         painter.drawText(QPointF(hpad-8,medPoint.y()+6), QString(text));
-        sprintf(text, format, top);
+        snprintf(text, 255, format, top);
         painter.drawText(QPointF(hpad+36,topPoint.y()-6), QString(text));
-        sprintf(text, format, bottom);
+        snprintf(text, 255, format, bottom);
         painter.drawText(QPointF(hpad+36,bottomPoint.y()+12), QString(text));
     }
     return boxplot;
@@ -505,11 +509,11 @@ QPixmap Histogram(std::vector<fvec> allData, QSize size, float maxVal, float min
         const char *format = (maxVal - minVal) > 10 ? shortFormat : longFormat;
         painter.setPen(Qt::black);
         char text[255];
-        sprintf(text, format, mean);
+        snprintf(text, 255, format, mean);
         painter.drawText(QPointF(hpad-8,topPoint.y()+6), QString(text));
-        sprintf(text, format, mean+sigma);
+        snprintf(text, 255, format, mean+sigma);
         painter.drawText(QPointF(hpad+36,plusPoint.y()-6), QString(text));
-        sprintf(text, format, mean-sigma);
+        snprintf(text, 255, format, mean-sigma);
         painter.drawText(QPointF(hpad+36,minusPoint.y()+12), QString(text));
     }
     return histogram;
@@ -579,11 +583,11 @@ QPixmap RawData(std::vector<fvec> allData, QSize size, float maxVal, float minVa
         const char *format = (maxVal - minVal) > 10 ? shortFormat : longFormat;
         painter.setPen(Qt::black);
         char text[255];
-        sprintf(text, format, mean);
+        snprintf(text, 255, format, mean);
         painter.drawText(QPointF(hpad-8,topPoint.y()+6), QString(text));
-        sprintf(text, format, mean+sigma);
+        snprintf(text, 255, format, mean+sigma);
         painter.drawText(QPointF(hpad-8,plusPoint.y()-6), QString(text));
-        sprintf(text, format, mean-sigma);
+        snprintf(text, 255, format, mean-sigma);
         painter.drawText(QPointF(hpad-8,minusPoint.y()+12), QString(text));
     }
     return rawData;

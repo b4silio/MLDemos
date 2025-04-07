@@ -1,5 +1,6 @@
 #include "marginalwidget.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <QDebug>
 
 using namespace std;

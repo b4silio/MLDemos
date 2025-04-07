@@ -79,3 +79,5 @@ SOURCES += \
     canvas-interaction.cpp
 
 RESOURCES +=
+
+DISTFILES +=

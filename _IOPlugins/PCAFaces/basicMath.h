@@ -229,9 +229,9 @@ static u32 *randPerm(u32 length, s32 seed=-1)
 	else srand((u32)seed);
 
 	u32 uLength = length;
-	for (register u32 i=0; i<length; i++)
+    for (u32 i=0; i<length; i++)
 	{
-		register u32 r = ((rand()<< 7) + rand()) % uLength;
+        u32 r = ((rand()<< 7) + rand()) % uLength;
 
 		perm[i] = usable[r];
 		uLength--;

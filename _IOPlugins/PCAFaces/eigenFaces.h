@@ -24,7 +24,6 @@ public:
 	EigenFaces();
 	~EigenFaces();
     void                    Learn(std::vector<cv::Mat> faces, std::vector<int> classes, std::vector<bool> isTrainingData=std::vector<bool>(), bool bColor = true);
-    IplImage *              DrawEigenVals();
     std::vector<cv::Mat>    GetEigenVectorsImages(int heatmapMode=0);
     fvec                    GetEigenValues();
     cv::Vec3b               ValueToColor(float value, bool bSimple=false);

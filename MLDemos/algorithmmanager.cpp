@@ -100,7 +100,7 @@ AlgorithmManager::AlgorithmManager(MLDemos *mldemos, Canvas *canvas, GLWidget *g
     connect(optionsClassify->loadButton, SIGNAL(clicked()), this, SLOT(LoadClassifier()));
     connect(optionsClassify->saveButton, SIGNAL(clicked()), this, SLOT(SaveClassifier()));
     connect(optionsClassify->compareButton, SIGNAL(clicked()), this, SLOT(CompareAdd()));
-    connect(compare->paramsWidget,SIGNAL(closed()),mldemos,SLOT(HideOptionCompare()));
+    //connect(compare->paramsWidget,SIGNAL(hide()),mldemos,SLOT(HideOptionCompare()));
     connect(optionsClassify->clearButton, SIGNAL(clicked()), mldemos, SLOT(Clear()));
     connect(optionsClassify->rocButton, SIGNAL(clicked()), mldemos, SLOT(ShowRoc()));
     connect(optionsClassify->manualTrainButton, SIGNAL(clicked()), mldemos, SLOT(ShowManualSelection()));

@@ -92,10 +92,10 @@ std::vector<GLObject> MaximizeRandom::DrawGL()
             fvec &sample = history[i];
             double value = historyValue[i]*0.5;
             o.vertices.push_back(QVector3D(sample[0]*2-1, value+0.02, sample[1]*2-1));
-            o.colors.append(QVector3D(1,1,1));
+            o.colors.append(QVector4D(1,1,1,1.0));
     }
     o.vertices.push_back(QVector3D(history.back()[0]*2-1, historyValue.back()*0.5+0.02, history.back()[1]*2-1));
-    o.colors.append(QVector3D(0,1,0));
+    o.colors.append(QVector4D(0,1,0,1.0));
     objects.push_back(o);
     o = GLObject();
     o.objectType = "Lines,Maximizer,linestrip";

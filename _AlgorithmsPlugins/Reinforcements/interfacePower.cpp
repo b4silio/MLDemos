@@ -68,8 +68,8 @@ fvec ReinforcementInterfacePower::GetParams()
 void ReinforcementInterfacePower::SetParams(Reinforcement *reinforcement, fvec parameters)
 {
     int i=0;
-    double variance = parameters.size() > i ? parameters[i] : 0; i++;
-    bool bAdaptive = parameters.size() > i ? parameters[i] : 0.1;
+    double variance = parameters.size() > i ? parameters[i] : 0.1; i++;
+    bool bAdaptive = parameters.size() > i ? parameters[i] : 0;
     int k = parameters.size() > i ? parameters[i] : 10;
     ((ReinforcementPower *)reinforcement)->SetParams(k, variance, bAdaptive);
 }

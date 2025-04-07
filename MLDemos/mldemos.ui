@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>980</width>
-    <height>500</height>
+    <height>501</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -391,7 +391,6 @@
             </property>
             <property name="font">
              <font>
-              <weight>75</weight>
               <bold>true</bold>
               <underline>false</underline>
               <strikeout>false</strikeout>
@@ -399,8 +398,9 @@
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(200, 200, 200);
-color: rgb(255, 255, 255);</string>
+             <string notr="true">background-color: rgb(80,80,80);
+foreground: gray;
+</string>
             </property>
             <property name="text">
              <string>C L A S S I F I C A T I O N</string>
@@ -463,7 +463,7 @@ color: rgb(255, 255, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>980</width>
-     <height>22</height>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

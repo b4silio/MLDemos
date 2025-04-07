@@ -41,7 +41,7 @@ void ClassBoost::OptionsChanged()
 {
     params->svmCountLabel->setVisible(false);
     params->svmCountSpin->setVisible(false);
-    if(params->boostLearnerType->currentIndex() == 5) // svm
+    if(params->boostLearnerType->currentIndex() == 7)
     {
         params->svmCountLabel->setVisible(true);
         params->svmCountSpin->setVisible(true);
@@ -108,11 +108,13 @@ void ClassBoost::GetParameterList(std::vector<QString> &parameterNames,
     parameterValues.back().push_back("999999");
     parameterValues.push_back(vector<QString>());
     parameterValues.back().push_back("Decision Stump");
-    parameterValues.back().push_back("Random Projection");
-    parameterValues.back().push_back("Random Rectangle");
-    parameterValues.back().push_back("Random Circle");
-    parameterValues.back().push_back("Random Gaussians");
-    parameterValues.back().push_back("Random SVM");
+    parameterValues.back().push_back("Projection");
+    parameterValues.back().push_back("Circles");
+    parameterValues.back().push_back("Squares");
+    parameterValues.back().push_back("Diamonds");
+    parameterValues.back().push_back("Rectangles");
+    parameterValues.back().push_back("Gaussians");
+    parameterValues.back().push_back("SVMs");
     parameterValues.push_back(vector<QString>());
     //parameterValues.back().push_back("Discrete");
     parameterValues.back().push_back("Real");
@@ -122,28 +124,26 @@ void ClassBoost::GetParameterList(std::vector<QString> &parameterNames,
 
 QString ClassBoost::GetAlgoString()
 {
-	int weakCount = params->boostCountSpin->value();
+    int boostType = params->boostType->currentIndex();
+    int weakCount = params->boostCountSpin->value();
 	int weakType = params->boostLearnerType->currentIndex();
     int svmCount = params->svmCountSpin->value();
-	QString algo = QString("Boost %1").arg(weakCount);
-	switch(weakType)
-	{
-    case 0:
-        algo += " Stump";
-        break;
-    case 1:
-        algo += " Proj";
-        break;
-    case 2:
-		algo += " Rect";
-		break;
-    case 3:
-        algo += " Circ";
-        break;
-    case 4:
-        algo += " GMM";
-        break;
-    case 5:
+    QString algo;
+    switch(boostType) {
+    case 0: algo += "R-";
+    case 1: algo += "L-";
+    case 2: algo += "G-";
+    }
+    algo += QString("Boost %1").arg(weakCount);
+    switch(weakType) {
+    case 0: algo += " Stump"; break;
+    case 1: algo += " Proj"; break;
+    case 2: algo += " ◯"; break;
+    case 3: algo += " ▢"; break;
+    case 4: algo += " ♢"; break;
+    case 5: algo += " Rect"; break;
+    case 6: algo += " GMM"; break;
+    case 7:
         algo += QString(" SVM %1").arg(svmCount);
         break;
     }
@@ -166,32 +166,26 @@ void ClassBoost::DrawInfo(Canvas *canvas, QPainter &painter, Classifier *classif
     if(!boost) return;
     fvec weights = boost->GetErrorWeights();
     //qDebug() << "weights: ";
-    FOR(i, weights.size())
-    {
+    FOR(i, weights.size()) {
         //qDebug() << " " << weights[i];
         QPointF point = canvas->toCanvasCoords(boost->samples[i]);
         float response = classifier->Test(boost->samples[i]);
         int radius = max(3.f,min(10*tanh(weights[i]), 20.f));
         //int radius = max(1.f,min(9*sqrtf(weights[i]), 20.f));
-        if(boost->labels[i] == 1)
-        {
+        if(boost->labels[i] == 1) {
             painter.setBrush(Qt::red);
             painter.setPen(Qt::black);
             painter.drawEllipse(point, radius, radius);
-            if(response < 0)
-            {
+            if(response < 0) {
                 painter.setBrush(Qt::NoBrush);
                 painter.setPen(QPen(Qt::white,2));
                 painter.drawEllipse(point, max(3,radius-2), max(3,radius-2));
             }
-        }
-        else if(boost->labels[i] != 1)
-        {
+        } else if(boost->labels[i] != 1) {
             painter.setBrush(Qt::white);
             painter.setPen(Qt::black);
             painter.drawEllipse(point, radius, radius);
-            if(response >= 0)
-            {
+            if(response >= 0) {
                 painter.setBrush(Qt::NoBrush);
                 painter.setPen(QPen(Qt::red,2));
                 painter.drawEllipse(point, max(3,radius-2), max(3,radius-2));

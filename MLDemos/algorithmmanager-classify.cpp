@@ -154,7 +154,7 @@ void AlgorithmManager::DrawClassifiedSamples(Canvas *canvas, Classifier *classif
             }
         } else {
             int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+            for(int i=1; i<(int)res.size(); i++) if(res[max] < res[i]) max = i;
             int resp = classifier->inverseMap[max];
             if(label == resp) Canvas::drawSample(painter, point, 9, label);
             else Canvas::drawCross(painter, point, 6, label);

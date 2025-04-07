@@ -5,25 +5,26 @@
 #include <canvas.h>
 #include <vector>
 #include <QtOpenGL>
-#include <QGLWidget>
+#include <QtOpenGLWidgets/QOpenGLWidget>
 #include <QMatrix4x4>
 
 class QMatrix;
 class QMatrix4x4;
-class QGLShaderProgram;
-class QGLShader;
+class QOpenGLShaderProgram;
+class QOpenGLShader;
 
-class GLWidget : public QGLWidget
+class GLWidget : public QOpenGLWidget
 {
     Q_OBJECT
 
 #ifdef WIN32
-static QGLFunctions glf;
+static QOpenGLFunctions glf;
 #endif
 
 public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
     ~GLWidget();
+    void InitializeGL();
     void AddObject(GLObject &o);
     void SetObject(int index, GLObject &o);
     void clearLists();
@@ -34,23 +35,9 @@ public:
     void DrawSamples(const GLObject &o) const ;
     void DrawParticles(const GLObject &o) const;
     void DrawLines(const GLObject &o) const;
+    void DrawSurfaces_old(const GLObject &o) const;
     void DrawSurfaces(const GLObject &o) const;
-    void LoadShader(QGLShaderProgram **program_, QString vshader, QString fshader);
-    static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
-    {
-        glColor3f(c.redF(), c.greenF(), c.blueF());
-        float sX=0,sY=0,sZ=0;
-        if(xIndex >= 0) sX = sample[xIndex];
-        if(yIndex >= 0) sY = sample[yIndex];
-        if(zIndex >= 0) sZ = sample[zIndex];
-        glVertex3f(sX,sY,sZ);
-    }
-
-    static inline void glLine(fvec p1, fvec p2, int xIndex=0, int yIndex=1, int zIndex=2)
-    {
-        glVertex3f(p1[xIndex], p1[yIndex], zIndex >= 0 ? p1[zIndex] : 0.f);
-        glVertex3f(p2[xIndex], p2[yIndex], zIndex >= 0 ? p2[zIndex] : 0.f);
-    }
+    void LoadShader(QOpenGLShaderProgram **program_, QString vshader, QString fshader);
 
 public slots:
     void setXRotation(int angle);
@@ -69,7 +56,11 @@ signals:
     void zPositionChanged(float pos);
 
 protected:
+    void GenTextures();
+    void LoadShaders();
+    void InitLights();
     void initializeGL();
+    void initializeGLAlt();
     void paintGL();
     void resizeGL(int width, int height);
     void zoom(int delta);
@@ -81,8 +72,8 @@ protected:
 
 private:
     void normalizeAngle(int &angle);
-    void RenderFBO(QGLFramebufferObject *fbo, QGLShaderProgram *program);
-    void RenderShadowMap(QGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects);
+    void RenderFBO(QOpenGLFramebufferObject *fbo, QOpenGLShaderProgram *program);
+    void RenderShadowMap(QOpenGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects);
 
     QMatrix4x4 perspectiveMatrix;
     QMatrix4x4 modelViewMatrix;
@@ -97,7 +88,7 @@ private:
 
     QPoint lastPos;
 
-    std::map<QString, QGLShaderProgram*> shaders;
+    std::map<QString, QOpenGLShaderProgram*> shaders;
 
 public:
     QMutex *mutex;
@@ -120,11 +111,11 @@ public:
     static const constexpr float texRadius = texWidth*0.9;
     static const int textureCount = 2; // 0: samples, 1: wide circle
     static GLuint *textureNames;
-    static unsigned char **textureData;
+    static std::vector< std::vector<unsigned char> > textureData;
 
-    QGLFramebufferObject *render_fbo;
-    QGLFramebufferObject *texture_fbo;
-    QGLFramebufferObject *light_fbo;
+    QOpenGLFramebufferObject *render_fbo;
+    QOpenGLFramebufferObject *texture_fbo;
+    QOpenGLFramebufferObject *light_fbo;
 };
 
 #endif

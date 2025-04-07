@@ -195,7 +195,7 @@ void surfaceT::Reduce(float mindist, unsigned int *pruned)
 
    -*/
 {
-    register unsigned int i;
+    unsigned int i;
     float *v0, *v1, *v2;
     float d0, d1, d2;
     unsigned int vn0, vn1, vn2, key;
@@ -605,9 +605,9 @@ static inline int apply_gmask(gridT &grid, int owner,
                               int i, int j, int k,
                               float *vrtx)
 {
-    register int x, y, z, i1, j1, k1;
-    register float *maskptr;
-    register int thisaddr;
+    int x, y, z, i1, j1, k1;
+    float *maskptr;
+    int thisaddr;
     int DIVISIONS, DIVISIONS2, dim[3];
     float d, *data;
 
@@ -684,7 +684,7 @@ static inline int apply_gmask(gridT &grid, int owner,
 
 static int JACUnFlagGrid(gridT &grid, surfaceT &surface)
 {
-    register int i, j, k;
+    int i, j, k;
     unsigned int l;
     float *vrtx;
 
@@ -782,7 +782,7 @@ static void calc_normal(float *p1, float *p2, float *p3, float *n)
 
 void JACSurfaceNormalize(surfaceT &surface)
 {
-    register unsigned int i;
+    unsigned int i;
     float *p1, *p2, *p3;
     float n[3];
 

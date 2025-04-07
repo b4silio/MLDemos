@@ -1,7 +1,7 @@
 #include "glUtils.h"
 #include <public.h>
 
-QGLFunctions *gl = 0;
+QOpenGLFunctions *gl = 0;
 
 GLLight::GLLight()
 {

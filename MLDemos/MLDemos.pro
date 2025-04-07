@@ -126,4 +126,5 @@ OTHER_FILES += \
     shaders/depthSamples.fsh \
     shaders/depthSamples.vsh \
     shaders/drawSamplesShadow.fsh \
-    shaders/drawSamplesShadow.vsh
+    shaders/drawSamplesShadow.vsh \
+    shaders/BasicLighting.vert

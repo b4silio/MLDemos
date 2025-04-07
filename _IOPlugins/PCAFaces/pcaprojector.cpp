@@ -32,13 +32,14 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <opencv2/highgui.hpp>
 #include "ui_eigenvalues.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <QBitmap>
 
 using namespace std;
 using cv::Mat;
 
 PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
-    : options(options), samples(0), start(QPoint(-1,-1)), bFromWebcam(true), grabber(0), timerID(0), eigenDisplay(new Ui::EigenVectorWidget()), eigenDisplayWidget(new QWidget())
+    : options(options), start(QPoint(-1,-1)), bFromWebcam(true), grabber(0), timerID(0), eigenDisplay(new Ui::EigenVectorWidget()), eigenDisplayWidget(new QWidget())
 {
     eigenDisplay->setupUi(eigenDisplayWidget);
     eigenDisplayWidget->hide();
@@ -49,8 +50,7 @@ PCAProjector::PCAProjector( Ui::PCAFacesDialog *options )
     selection = QRect(0,0,256,256);
     image = cv::Mat(256,256,CV_8UC3);
     display = cv::Mat(256,256,CV_8UC3);
-    samples = cvCreateImage(cvSize(380,340),8,3);
-    cvSet(samples, CV_RGB(255,255,255));
+    samples = cv::Mat::ones(cv::Size(380,340),CV_8UC3);
     connect(imageWindow, SIGNAL(MousePressEvent(QMouseEvent *)), this, SLOT(SelectionStart(QMouseEvent *)));
     connect(imageWindow, SIGNAL(MouseMoveEvent(QMouseEvent *)), this, SLOT(SelectionResize(QMouseEvent *)));
     connect(imageWindow, SIGNAL(MouseReleaseEvent(QMouseEvent *)), this, SLOT(SelectionStop(QMouseEvent *)));
@@ -89,7 +89,6 @@ PCAProjector::~PCAProjector()
     timerID = -1;
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     if(grabber.isOpened()) grabber.release();
-    IMKILL(samples);
     DEL(imageWindow);
     DEL(samplesWindow);
     DEL(eigenDisplay);
@@ -131,9 +130,8 @@ void PCAProjector::DrawEigen()
         SampleManager eigVecs;
         int heatmapMode = eigenDisplay->heatCheck->checkState();
         eigVecs.AddSamples(eig.GetEigenVectorsImages(heatmapMode));
-        IplImage *image = eigVecs.GetSampleImage();
+        cv::Mat image = eigVecs.GetSampleImage();
         eigenVecPixmap = QNamedWindow::toPixmap(image);
-        IMKILL(image);
         eigVecs.Clear();
 
         fvec eigenValues = eig.GetEigenValues();
@@ -162,7 +160,7 @@ void PCAProjector::DrawEigen()
         painter.drawLine(pad,h-pad,w-pad,h-pad);
         painter.drawLine(pad,pad,pad,h-pad);
         QString text = "Reconstruction Error";
-        int textWidth = painter.fontMetrics().width(text);
+        int textWidth = painter.fontMetrics().horizontalAdvance(text);
         painter.drawText(QRect(w - pad - textWidth,pad, textWidth, painter.fontMetrics().height()), Qt::AlignCenter, text);
         painter.drawText(QPointF(pad, h-2), "eigenvalues -->");
         painter.save();
@@ -293,28 +291,27 @@ void PCAProjector::SetImage( cv::Mat img )
     cv::resize(image, display, cv::Size(display.cols, display.rows), 0, 0, cv::INTER_CUBIC);
     cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(0,0,0),3);
     cv::rectangle(display, cv::Rect(selection.x(),selection.y(),selection.width(), selection.height()), cv::Scalar(255,255,255),1);
-    IplImage displayImg(display);
-    imageWindow->ShowImage(&displayImg);
+    imageWindow->ShowImage(display);
     imageWindow->repaint();
 }
 
 void PCAProjector::RefreshDataset()
 {
-    IplImage *dataset = sm.GetSampleImage();
-    if(!dataset)
+    cv::Mat dataset = sm.GetSampleImage();
+    if(dataset.empty())
     {
         options->samplesLabel->setText(QString("Samples: %1").arg(sm.GetCount()));
-        cvSet(samples, CV_RGB(255,255,255));
+        samples = cv::Mat::ones(samples.rows, samples.cols, CV_8UC3);
         samplesWindow->ShowImage(samples);
         samplesWindow->repaint();
         return;
     }
-    float ratio = dataset->width / (float)dataset->height;
-    cvSet(samples, CV_RGB(255,255,255));
-    CvRect rect = cvRect(0,0,samples->width,samples->height/ratio);
-    if(ratio != 1) ROI(samples, rect);
-    cvResize(dataset, samples, CV_INTER_CUBIC);
-    unROI(samples);
+    float ratio = dataset.cols / (float)dataset.rows;
+    samples = cv::Mat::ones(samples.rows, samples.cols, CV_8UC3);
+    cv::Rect rect = cv::Rect(0,0,samples.cols,samples.rows /ratio);
+    Mat samplesROI = samples(rect);
+    if (ratio != 1) cv::resize(dataset, samplesROI, cv::Size(samplesROI.cols, samplesROI.rows), cv::INTER_CUBIC);
+    cv::resize(dataset, samples, cv::Size(samples.cols, samples.rows), cv::INTER_CUBIC);
     samplesWindow->ShowImage(samples);
     int posCount=0, negCount=0;
     FOR(i, sm.GetCount())
@@ -371,10 +368,10 @@ void PCAProjector::DatasetClick(QMouseEvent *event)
     int y = event->pos().y();
 
     // we need to know the conversion ratio between display and real samples
-    IplImage *sampleImage = sm.GetSampleImage();
-    if(!sampleImage) return;
-    CvSize realSize = cvGetSize(sampleImage);
-    CvSize size = cvGetSize(samples);
+    Mat sampleImage = sm.GetSampleImage();
+    if(sampleImage.empty()) return;
+    cv::Size realSize(sampleImage.cols, sampleImage.rows);
+    cv::Size size(samples.cols, samples.rows);
     float ratio = realSize.width/(float)realSize.height;
     x = x*realSize.width/size.width;
     y = (int)(y*realSize.height*ratio/size.height);
@@ -505,7 +502,7 @@ void PCAProjector::FromClipboard()
         if (mimeData->hasImage()) {
 
             QImage image = clipboard->image();
-            IplImage *img = QNamedWindow::cvxCopyQImage(image);
+            IplImage *img = QNamedWindow::qImage2IplImage(image);
             Mat imgMat = cv::cvarrToMat(img);
 
             if(!imgMat.empty()){
@@ -548,13 +545,11 @@ void PCAProjector::AddImage()
     rect.width *= ratio;
     rect.height *= ratio;
     if(!rect.width || !rect.height) return;
-    if(rect.width < 0)
-    {
+    if(rect.width < 0) {
         rect.width = abs(rect.width);
         rect.x -= rect.width;
     }
-    if(rect.height < 0)
-    {
+    if(rect.height < 0) {
         rect.height = abs(rect.height);
         rect.y -= rect.height;
     }
@@ -562,8 +557,7 @@ void PCAProjector::AddImage()
     if(rect.y < 0) rect.y = 0;
     if(rect.x+rect.width > image.cols) rect.width = image.cols - rect.x;
     if(rect.y+rect.height > image.rows) rect.height= image.rows - rect.y;
-    IplImage imageIpl(image);
-    sm.AddSample(&imageIpl, rect);
+    sm.AddSample(image, rect);
     RefreshDataset();
 }
 
@@ -638,7 +632,7 @@ void PCAProjector::FixLabels(SampleManager &sm)
         if(couples[i].first == couples[i].second) continue; // nothing to change here!
         FOR(j, sm.GetCount())
         {
-            if(sm.GetLabel(j) == couples[i].first) sm.SetLabel(j,(u8)couples[i].second);
+            if(sm.GetLabel(j) == (u8)couples[i].first) sm.SetLabel(j,(u8)couples[i].second);
         }
     }
 }

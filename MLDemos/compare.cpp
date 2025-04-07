@@ -18,8 +18,8 @@ CompareAlgorithms::CompareAlgorithms(Canvas *canvas)
     paramsWidget->setWindowFlag(Qt::WindowTitleHint, true);
     paramsWidget->setWindowFlag(Qt::WindowSystemMenuHint, true);
     paramsWidget->setWindowFlag(Qt::WindowMaximizeButtonHint, true);
-    paramsWidget->setWindowFlag(Qt::WindowCloseButtonHint, false);
     */
+    paramsWidget->setWindowFlag(Qt::WindowCloseButtonHint, false);
     paramsWidget->installEventFilter(this);
 
     if (!params->resultWidget->layout() ) {

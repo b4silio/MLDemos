@@ -95,7 +95,8 @@ void CSVRow::readNextRow(std::istream& str)
     while(std::getline(lineStream,cell,separator[0]))
     {
         std::string test = cell;
-        std::remove(test.begin(), test.end(), ' ');
+        auto it = std::remove(test.begin(), test.end(), ' ');
+        test.erase(it);
         if(test.empty()) m_data.push_back("?");
         else m_data.push_back(cell);
     }

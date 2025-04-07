@@ -6,11 +6,19 @@
 ##############################
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
-QT += svg opengl
+QT += svg opengl openglwidgets
 QT += widgets
 macx: LIBS += -framework QtWidgets
 
-macx: QMAKE_MAC_SDK=macosx10.11
+macx {
+    DEFINES += MACX
+    CONFIG += MACX
+
+    QMAKE_APPLE_DEVICE_ARCHS="x86_64"
+    QMAKE_MACOSX_DEPLOYMENT_TARGET=12.0
+    QMAKE_MAC_SDK=macosx
+}
+CONFIG += c++14
 
 #################################
 #         Project Paths         #
@@ -70,7 +78,7 @@ unix:MLBUILD = build
 
 win32{
     CONFIG += opencv3
-    OPENCV_VER = 341
+    OPENCV_VER = 420
 }else:macx{
     CONFIG += opencv3
 }else{
@@ -94,10 +102,14 @@ win32{
     OPENCV = C:/opencv/build
 }else:macx{
     BOOST = /usr/local/include
-    BREW_FFMPEG = /usr/local/Cellar/ffmpeg/4.0.1
-    BREW_OPENCV = /usr/local/Cellar/opencv3/3.4.2
-    BREW_LIBPNG = /usr/local/Cellar/libpng/1.6.34
-    BREW_PNGPP  = /usr/local/Cellar/png++/0.2.5_1
+    BREW_PATH = /usr/local/Cellar
+
+    BREW_FFMPEG = $$BREW_PATH/ffmpeg/7.1_3
+    BREW_OPENCV = $$BREW_PATH/opencv/4.10.0_12
+    BREW_LIBPNG = $$BREW_PATH/libpng/1.6.44
+    BREW_PNGPP  = $$BREW_PATH/png++/0.2.10
+    BREW_EIGEN  = $$BREW_PATH/eigen/3.4.0_1
+    BREW_GSL    = $$BREW_PATH//gsl/2.8
 }
 
 
@@ -110,7 +122,6 @@ win32{
 
 # OPENCV
 win32{
-CONFIG(opencv3){
     DEFINES += OPENCV3
     INCLUDEPATH += . "$$OPENCV/include"
     LIBS += -L"$$OPENCV/install/x86/mingw/lib"
@@ -129,29 +140,20 @@ CONFIG(opencv3){
         -lopencv_ml$$OPENCV_VER \
         -lopencv_features2d$$OPENCV_VER \
         -lopencv_core$$OPENCV_VER
-    }
-CONFIG(opencv22){
-    DEFINES += OPENCV22
-    INCLUDEPATH += . "$$OPENCV/include"
-    LIBS += -L"$$OPENCV/lib"
-    LIBS += -L"$$OPENCV/bin"
-#    INCLUDEPATH += . "$$OPENCV/build/include"
-#	LIBS += -L"$$OPENCV/build/x86/mingw/lib"
-#	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
-    LIBS += -lopencv_core$$OPENCV_VER \
-        -lopencv_features2d$$OPENCV_VER \
-                -lopencv_highgui$$OPENCV_VER \
-                -lopencv_imgproc$$OPENCV_VER \
-                -lopencv_legacy$$OPENCV_VER \
-                -lopencv_ml$$OPENCV_VER
-    }
 }
 macx{
     DEFINES += OPENCV3
 
-    INCLUDEPATH += $$BREW_FFMPEG/include $$BREW_OPENCV/include # $$BREW_LIBPNG/include $$BREW_PNGPP/include
-    LIBS += -L$$BREW_FFMPEG/lib -L$$BREW_OPENCV/lib # -L$$BREW_LIBPNG/lib
+    INCLUDEPATH += $$BREW_FFMPEG/include
+    INCLUDEPATH += $$BREW_OPENCV/include/opencv4
+    INCLUDEPATH += $$BREW_LIBPNG/include
+    INCLUDEPATH += $$BREW_PNGPP/include
+    INCLUDEPATH += $$BREW_EIGEN/include/eigen3
+    INCLUDEPATH += $$BREW_GSL/include
 
+    LIBS += -L$$BREW_FFMPEG/lib
+    LIBS += -L$$BREW_OPENCV/lib
+    LIBS += -L$$BREW_GSL/lib
     LIBS += \
     -lopencv_bgsegm \
     -lopencv_calib3d \
@@ -162,6 +164,7 @@ macx{
     -lopencv_objdetect \
     -lopencv_ml \
     -lopencv_core
+    LIBS += -lgsl
 }else:unix{
 # some issues between qmake and pkgconfig
 # invoking pkg-config manually instead
@@ -188,12 +191,6 @@ win32{
 }else:unix{
     CONFIG += link_pkgconfig
 }
-
-#win32{
-    #INCLUDEPATH += C:/DEV/glew-1.9.0/include
-    #LIBS += -LC:/DEV/glew-1.9.0/lib
-    #LIBS += -lglew32 -lglu32 -lopengl32 -lglut32win
-#}
 
 # BOOST
 CONFIG(boost){

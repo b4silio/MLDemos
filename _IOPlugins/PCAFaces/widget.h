@@ -62,14 +62,9 @@ public:
     static QPixmap toPixmap(IplImage *src);
     static IplImage *toImage(QImage image);
 
-
-    // modifed from http://opencv-extension-library.googlecode.com/svn/trunk/QtOpenCV/qcv/qcvimage.cpp
-    static IplImage *cvxCopyQImage(const QImage &qImage); // added for debug, solved From Clipboard bug 08.05.2014
-
-    static QImage IplImage2QImage(const IplImage *iplImage); // added for debug remove when no longer required
+    // alternative from http://opencv-extension-library.googlecode.com/svn/trunk/QtOpenCV/qcv/qcvimage.cpp
+    static QImage IplImage2QImage(const IplImage *iplImage);
     static IplImage* qImage2IplImage(QImage &qImage); // added for debug  remove wen no longer required
-
-
 
 signals:
 	void MouseMoveEvent(QMouseEvent *event);

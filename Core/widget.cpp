@@ -43,7 +43,7 @@ QPixmap QNamedWindow::toPixmap(IplImage *src)
 	else
 	{
 		IplImage *image = cvCreateImage(cvGetSize(src),8,4);
-		cvCvtColor(src, image, src->nChannels==1 ? CV_GRAY2BGRA : CV_BGR2BGRA);
+		cvCvtColor(src, image, src->nChannels==1 ? cv::COLOR_GRAY2BGR : cv::COLOR_BGR2BGRA);
 		QImage qimg = QImage((const unsigned char *)image->imageData, image->width, image->height, QImage::Format_RGB32);
 		pixmap = QPixmap::fromImage(qimg).copy();
 		cvReleaseImage(&image);

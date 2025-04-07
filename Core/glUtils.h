@@ -17,7 +17,7 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QtOpenGL>
-#include <QGLFunctions>
+#include <QOpenGLFunctions>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D

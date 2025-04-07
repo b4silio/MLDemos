@@ -33,11 +33,6 @@
 #pragma warning(disable:4305) // 'initializing' : truncation from X to Y
 #endif
 
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <float.h>
-#include <cmath>
 
 #ifdef WIN32
 #define drand48() (rand()/(float)RAND_MAX) // not as accurate as it could be
@@ -71,7 +66,7 @@ static const QColor SampleColor [22]= {
 static const int SampleColorCnt = 22;
 
 #ifndef CV_RGB
-#define CV_RGB CvScalar
+#define CV_RGB cv::Scalar
 #endif
 
 #endif //_PUBLIC_H_

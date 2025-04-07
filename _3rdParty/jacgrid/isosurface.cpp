@@ -66,15 +66,15 @@ bool jacMakeSurface(surfaceT &surf, unsigned int itype,
     PRAD = JACGetProbeRadius();
     atoms = &atms;
 
-    register unsigned int x, y, z;
-    register unsigned int xdim1, ydim1, zdim1;
+    unsigned int x, y, z;
+    unsigned int xdim1, ydim1, zdim1;
     unsigned int index;
     unsigned int npolys;
     unsigned int *swap;
-    register unsigned int num_o_polys;
-    register unsigned int poly;
-    register unsigned int poly3;
-    register unsigned int *polys;
+    unsigned int num_o_polys;
+    unsigned int poly;
+    unsigned int poly3;
+    unsigned int *polys;
     void (*calc_cell_verts)(unsigned int, unsigned int, unsigned int, unsigned int);
 
     /* pointer to apropriate vert calc routine */
@@ -170,7 +170,7 @@ static void calc_index_and_temps(const float *data,
 /* temporary variables (for speed). */
 {
 
-    register const float *tmp;
+    const float *tmp;
 
     *index = 0;
 
@@ -206,8 +206,8 @@ static void calc_index_and_temps(const float *data,
    -*/
 static void contour_calc_cell_verts(unsigned int index, unsigned int x1, unsigned int y1, unsigned int z1)
 {
-    register unsigned int i;
-    register unsigned int x2, y2, z2;
+    unsigned int i;
+    unsigned int x2, y2, z2;
     unsigned int nedges;
     unsigned int crnt_edge;
     float *vrtx;
@@ -414,9 +414,9 @@ static inline void do_smooth(float rad, const float *center, float *vertex)
 
 static void accessible_calc_cell_verts(unsigned int index, unsigned int x1, unsigned int y1, unsigned int z1)
 {
-    register unsigned int i;
-    register unsigned int x2, y2, z2;
-    register unsigned int thisaddr = 0;
+    unsigned int i;
+    unsigned int x2, y2, z2;
+    unsigned int thisaddr = 0;
     unsigned int nedges, owner;
     unsigned int crnt_edge;
     unsigned int lookedup;
@@ -660,11 +660,11 @@ static void accessible_calc_cell_verts(unsigned int index, unsigned int x1, unsi
 
 static void molecular_calc_cell_verts(unsigned int index, unsigned int x1, unsigned int y1, unsigned int z1)
 {
-    register unsigned int i;
-    register unsigned int x2, y2, z2;
+    unsigned int i;
+    unsigned int x2, y2, z2;
     unsigned int nedges, thisowner, thatowner;
     unsigned int crnt_edge, lookedup;
-    register unsigned int thisaddr = 0, thataddr = 0;
+    unsigned int thisaddr = 0, thataddr = 0;
     float *vrtx, *vrtx_sav;
 
     x2 = x1+1;

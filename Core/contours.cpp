@@ -78,7 +78,7 @@ int CContourMap::contour(CRaster *r)
 
     int m1,m2,m3,case_value;
     double dmin,dmax,x1,x2,y1,y2;
-    register int i,j,k,m;
+    int i,j,k,m;
     double h[5];
     int sh[5];
     double xh[5],yh[5];

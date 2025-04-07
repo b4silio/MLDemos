@@ -40,7 +40,7 @@ class PCAProjector : public QObject
     Ui::PCAFacesDialog *    options;
     EigenFaces              eig;
     cv::Mat                 image, display;
-    IplImage *              samples;
+    cv::Mat                 samples;
     QNamedWindow *          imageWindow;
     QNamedWindow *          samplesWindow;
     SampleManager           sm;

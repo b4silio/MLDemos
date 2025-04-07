@@ -197,6 +197,7 @@ void MLDemos::initDialogs()
     connect(algo, SIGNAL(UpdateInfo()), this, SLOT(UpdateInfo()));
     connect(algo, SIGNAL(Trained()), this, SLOT(Trained()));
     connect(ui.restrictDimCheck, SIGNAL(clicked(bool)), algo, SLOT(RestrictDimChanged()));
+    glw->InitializeGL();
 }
 
 // this function is to set the font size of gui elements in the interface for non-osx systems

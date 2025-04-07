@@ -44,9 +44,9 @@ void JACPlane::Transform(float *v, float i, float j) const
 
 void JACPlane::LoadFromGrid(const gridT &grid)
 {
-    register unsigned int i, l, m;
+    unsigned int i, l, m;
     float r[3];
-    register float *tmp;
+    float *tmp;
     float DATA1, DATA2, DATA3, DATA4, DATA5, DATA6, DATA7, DATA8;
     unsigned int valid, thisaddr, dim2;
     float *current;
@@ -150,11 +150,11 @@ void JACPlane::Contour(float threshold, VertexSender &vs)
    -*/
 {
     unsigned int index = 0;
-    register float *tmp;
+    float *tmp;
     float DATA1, DATA2, DATA3, DATA4;
     float f, v[3];
-    register unsigned int x1, y1, x2, y2;
-    register unsigned int xdim1, ydim1;
+    unsigned int x1, y1, x2, y2;
+    unsigned int xdim1, ydim1;
     unsigned int edge_loop, edge;
     if(!data) return;
 

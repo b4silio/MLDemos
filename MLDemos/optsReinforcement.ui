@@ -497,7 +497,6 @@ p, li { white-space: pre-wrap; }
         <font>
          <family>Lucida Console</family>
          <pointsize>28</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
          <underline>false</underline>
@@ -517,11 +516,11 @@ p, li { white-space: pre-wrap; }
 border-style: ridge;
 border-width: 1px;
 border-color: gray;
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
 }
 
 QPushButton:pressed {
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
 }</string>
        </property>
        <property name="text">
@@ -544,7 +543,6 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         <font>
          <family>Lucida Console</family>
          <pointsize>32</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
          <underline>false</underline>
@@ -564,11 +562,11 @@ p, li { white-space: pre-wrap; }
 border-style: ridge;
 border-width: 1px;
 border-color: gray;
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
 }
 
 QPushButton:pressed {
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
 }</string>
        </property>
        <property name="text">
@@ -845,11 +843,11 @@ p, li { white-space: pre-wrap; }
 border-style: ridge;
 border-width: 1px;
 border-color: gray;
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
 }
 
 QPushButton:pressed {
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
 }</string>
        </property>
        <property name="text">
@@ -903,11 +901,11 @@ p, li { white-space: pre-wrap; }
 border-style: ridge;
 border-width: 1px;
 border-color: gray;
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
 }
 
 QPushButton:pressed {
-background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
 }</string>
        </property>
        <property name="text">
@@ -940,7 +938,6 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
     <widget class="QWidget" name="algoWidget" native="true">
      <property name="styleSheet">
       <string notr="true">#algoWidget {
-background-color: rgb(220, 220, 220);
 border-style: inset;
 border-width: 1px;
 border-color: rgb(190,190,190);

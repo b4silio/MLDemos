@@ -19,10 +19,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *********************************************************************/
 #include "public.h"
 #include "regressorLowess.h"
-#include "gsl/multifit/gsl_multifit.h"
-#include "gsl/sort/gsl_sort.h"
 #include "lowessHelpers.h"
-#include "gsl/matrix/gsl_matrix.h"
 #include <algorithm>
 #include <QMessageBox>
 #include <QDebug>

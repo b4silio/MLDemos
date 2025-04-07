@@ -432,9 +432,9 @@ void KMeansCluster::KmeansClustering(std::vector<ClusterPoint> &points, vector<f
         //bSomethingChanged = false;
 
         //classify the points into clusters
-        for (register int i=0; i<nbPoints; i++){
+        for (int i=0; i<nbPoints; i++){
             // compute the distance to each clusters
-            for (register int j=0;j<nbClusters;j++){
+            for (int j=0;j<nbClusters;j++){
                 distances[j] = Distance(points[i].point, means[j]);
             }
 
@@ -516,7 +516,7 @@ void KMeansCluster::Mean(std::vector<ClusterPoint> &points, vector<fvec> &means,
     }
 
     // sum the points
-    for (register int i = 0; (u32)i<points.size(); i++){
+    for (int i = 0; (u32)i<points.size(); i++){
         means[points[i].cluster] += points[i].point;
         nbPointInCluster[points[i].cluster] += 1;
     }

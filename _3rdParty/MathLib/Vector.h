@@ -989,7 +989,7 @@ public:
     str[0] = 0;
     if(maxsize<=0){
       for (unsigned int i = 0; i < row; i++){
-        cIndex += sprintf(str+cIndex,"%1.12f ",_[i]);
+        cIndex += snprintf(str+cIndex, 100, "%1.12f ",_[i]);
       }
     }else{
       for (unsigned int i = 0; i < row; i++){

@@ -128,9 +128,10 @@ void Canvas::wheelEvent(QWheelEvent *event)
 {
     if(canvasType) return;
     if(event->buttons() != Qt::NoButton) return;
+    float delta = event->pixelDelta().y();
     if(event->modifiers() == Qt::ShiftModifier)
     {
-        zooms[xIndex] += event->delta()/1000.f;
+        zooms[xIndex] += delta/1000.f;
         if(zooms[xIndex] < 0.001) zooms[xIndex] = 0.001;
         //qDebug() << "zooms[" << xIndex << "]: " << zooms[xIndex];
 
@@ -147,8 +148,8 @@ void Canvas::wheelEvent(QWheelEvent *event)
         return;
     }
     float d = 0;
-    if (event->delta() > 100) d = 1;
-    if (event->delta() < 100) d = -1;
+    if ( delta > 1) d = 1;
+    if ( delta < -1) d = -1;
     if(d!=0) emit Navigation(fVec(-1,d));
 }
 

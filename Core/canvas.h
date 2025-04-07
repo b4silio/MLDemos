@@ -210,7 +210,7 @@ public:
 		float x = point.x();
 		float y = point.y();
 
-		QColor color = SampleColor[label%SampleColorCnt];
+        QColor color = SampleColor[max(label,0)%SampleColorCnt];
 		QColor edge = Qt::black;
         if(label == -1)
         {

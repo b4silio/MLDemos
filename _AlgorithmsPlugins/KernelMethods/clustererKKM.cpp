@@ -52,19 +52,19 @@ ClustererKKM::~ClustererKKM()
 const char *ClustererKKM::GetInfoString()
 {
 	char *text = new char[1024];
-	sprintf(text, "Kernel K-Means\n");
-    sprintf(text, "%sClusters: %d\n", text, nbClusters);
-	sprintf(text, "%sKernel: ", text);
+    snprintf(text, 100, "Kernel K-Means\n");
+    snprintf(text, 100, "%sClusters: %d\n", text, nbClusters);
+    snprintf(text, 100, "%sKernel: ", text);
 	switch(kernelType)
 	{
 	case 0:
-		sprintf(text, "%s linear", text);
+        snprintf(text, 100, "%s linear", text);
 		break;
 	case 1:
-		sprintf(text, "%s polynomial (deg: %f width: %f)", text, kernelDegree, kernelGamma);
+        snprintf(text, 100, "%s polynomial (deg: %f width: %f)", text, kernelDegree, kernelGamma);
 		break;
 	case 2:
-		sprintf(text, "%s rbf (gamma: %f)", text, kernelGamma);
+        snprintf(text, 100, "%s rbf (gamma: %f)", text, kernelGamma);
 		break;
 	}
 	return text;

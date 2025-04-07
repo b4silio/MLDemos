@@ -104,7 +104,6 @@ void DrawSVG::Vectors(int count, int steps, QPainter &painter)
 	int h = canvas->height();
 
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
 
 	FOR(i, count)
@@ -139,7 +138,6 @@ void DrawSVG::Maximization(QPainter &painter)
 {
 	if(!maximizer) return;
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
     maximizer->Draw(painter);
 }
 
@@ -183,7 +181,7 @@ void DrawSVG::DrawClassificationSamples(Canvas *canvas, QPainter &painter, Class
         }
         else {
             int max = 0;
-            for(int i=1; i<res.size(); i++) if(res[max] < res[i]) max = i;
+            for(int i=1; i<(int)res.size(); i++) if(res[max] < res[i]) max = i;
             int resp = classifier->inverseMap[max];
             if(label == resp) Canvas::drawSample(painter, point, 9, label);
             else Canvas::drawCross(painter, point, 6, label);
@@ -205,7 +203,6 @@ void DrawSVG::VectorsFast(int count, int steps, QPainter &painter)
 	int h = canvas->height();
 
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 	vector<Obstacle> obstacles = canvas->data->GetObstacles();
     FOR(i, count) {
 		QPointF samplePre(rand()/(float)RAND_MAX * w, rand()/(float)RAND_MAX * h);

@@ -203,7 +203,7 @@ void ReinforcementRandom::Draw(QPainter &painter)
 const char *ReinforcementRandom::GetInfoString()
 {
 	char *text = new char[1024];
-	if(variance == 0) sprintf(text, "Random Search");
-	else sprintf(text, "Random Walk\n");
+    if(variance == 0) snprintf(text, 16, "Random Search");
+    else snprintf(text, 16, "Random Walk\n");
 	return text;
 }

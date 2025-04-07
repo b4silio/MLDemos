@@ -854,7 +854,7 @@ void Expose::Repaint()
 
 void Expose::Clipboard()
 {
-    QImage image = ui->display->pixmap()->toImage();
+    QImage image = ui->display->pixmap().toImage();
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setImage(image);
 }

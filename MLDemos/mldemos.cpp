@@ -39,6 +39,8 @@ MLDemos::MLDemos(QString filename, QWidget *parent, Qt::WindowFlags flags)
     qDebug() << "OpenGL 2.1";
 #endif
 
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
     connect(ui.actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
     connect(ui.actionClearData, SIGNAL(triggered()), this, SLOT(ClearData()));

@@ -1524,7 +1524,7 @@ void Visualization::GenerateDensityPlot()
         QString s = inputType ? (canvas->dimNames.size() > (int)i ? canvas->dimNames.at(i) : QString("Dimension %1").arg(i+1)) : canvas->GetClassString(i);
         int y = pad + 5 + i*20;
         if(y > pad + mapH - 10) break;
-        int length = painter.fontMetrics().width(s);
+        int length = painter.fontMetrics().horizontalAdvance(s);
         maxLength = max(maxLength, length);
         maxCount++;
     }

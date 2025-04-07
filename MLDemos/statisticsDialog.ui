@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>558</width>
-    <height>395</height>
+    <height>401</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,7 +30,7 @@
        <string>Help and Information</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <property name="margin">
+       <property name="margin" stdset="0">
         <number>0</number>
        </property>
        <item>
@@ -54,7 +54,7 @@
            <string>Algorithm</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout">
-           <property name="margin">
+           <property name="margin" stdset="0">
             <number>0</number>
            </property>
            <item>
@@ -80,7 +80,7 @@
            <string>MLDemos</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_4">
-           <property name="margin">
+           <property name="margin" stdset="0">
             <number>0</number>
            </property>
            <item>
@@ -127,14 +127,14 @@
             <x>0</x>
             <y>0</y>
             <width>318</width>
-            <height>316</height>
+            <height>322</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <property name="spacing">
             <number>0</number>
            </property>
-           <property name="margin">
+           <property name="margin" stdset="0">
             <number>0</number>
            </property>
            <item>
@@ -181,7 +181,7 @@
           </size>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
-          <property name="margin">
+          <property name="margin" stdset="0">
            <number>0</number>
           </property>
           <item>
@@ -219,7 +219,7 @@
           <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin">
+          <property name="margin" stdset="0">
            <number>0</number>
           </property>
          </layout>

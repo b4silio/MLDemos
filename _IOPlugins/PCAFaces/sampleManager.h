@@ -38,9 +38,9 @@ protected:
 
 	u32 ID;
 
-	CvSize size; // the samples size (resolution)
+    cv::Size size; // the samples size (resolution)
 
-	std::vector<IplImage *> samples;
+    std::vector<cv::Mat> samples;
 
 	std::vector<smFlags> flags;
 
@@ -48,9 +48,9 @@ protected:
 
 	u32 *perm;
 
-	IplImage *display;
+    cv::Mat display;
 
-	void CreateSampleImage(IplImage **image, bool bShowLabels = false, float ratio = 1.f);
+    void CreateSampleImage(cv::Mat *image, bool bShowLabels = false, float ratio = 1.f);
 
 	bool bShowing;
 
@@ -65,30 +65,29 @@ public:
 	void Clear();
 
 
-	IplImage *GetSampleImage();
-    IplImage *GetDisplay(){return display;}
+	cv::Mat GetSampleImage();
+    cv::Mat& GetDisplay(){return display;}
 
 	static u32 GetClassCount(ivec classes);
 	float GetTestRatio();
 	void Randomize(int seed=-1);
 	void RandomTestSet(float ratio = 0.66f, bool bEnsureOnePerClass=true);
 
-	void AddSample(IplImage *image, unsigned int label = 0);
-	void AddSample(IplImage *image, CvRect selection, unsigned int label = 0);
-    void AddSamples(std::vector<IplImage *>images);
-    void AddSamples(std::vector<cv::Mat>images);
+	void AddSample(cv::Mat &image, unsigned int label = 0);
+	void AddSample(cv::Mat &image, CvRect selection, unsigned int label = 0);
+    void AddSamples(std::vector<cv::Mat> images);
     void AddSamples(SampleManager newSamples);
 	void RemoveSample(unsigned int index);
 
 	int GetIndexAt(int x, int y);
-	f32 Compare(IplImage *sample);
+    f32 Compare(cv::Mat sample);
 
-    CvSize GetSize(){return size;}
+    cv::Size GetSize(){return size;}
     int GetCount(){return samples.size();}
 
-    IplImage *GetSample(unsigned int index=0){return index<samples.size() ? samples[index] : NULL;}
-    std::vector<IplImage *> GetSamples(){return samples;}
-    std::vector<IplImage *> GetSamples(u32 count, smFlags flag=UNUSED, smFlags replaceWith=TRAIN);
+    cv::Mat GetSample(unsigned int index=0){return index<samples.size() ? samples[index] : cv::Mat();}
+    std::vector<cv::Mat > GetSamples(){return samples;}
+    std::vector<cv::Mat > GetSamples(u32 count, smFlags flag=UNUSED, smFlags replaceWith=TRAIN);
     std::vector<cv::Mat> GetSampleMats();
 
 	void ResetFlags();
@@ -104,7 +103,7 @@ public:
 	void Save(const char *filename);
 	bool Load(const char *filename, CvSize resolution = cvSize(48,48));
 
-    virtual void Config(IplImage *image, CvRect selection, IplImage * =0){AddSample(image, selection);}
+    virtual void Config(cv::Mat& image, CvRect selection, IplImage * =0){AddSample(image, selection);}
 };
 
 #endif // _SAMPLE_MANAGER_H_

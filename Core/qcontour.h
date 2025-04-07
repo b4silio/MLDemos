@@ -35,7 +35,7 @@ public:
 public:
     bool bDrawColorbar;
     QColor plotColor;
-    int plotThickness;
+    float plotThickness;
     Qt::PenStyle style;
 };
 

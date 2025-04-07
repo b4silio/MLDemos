@@ -1591,14 +1591,14 @@ bool SEDS::CheckConstraints(Matrix * A){
                     cout<<"The error may be due to change of hard constraints to soft constrints."<<endl;
                     cout<<"To handle this error, increase the value of 'cons_penalty' and re-run the"<<endl;
                     cout<<"optimization. Output error for debugging purpose:"<<endl<<endl;
-                    str.sprintf("%s","Optimization did not finish successfully. Some constraints were violated. "
-                                "The error may be due to change of hard constraints to soft constrints. "
-                                "To handle this error, increase the value of 'Constraint Penalty' and re-run the "
-                                "optimization.\nOutput error for debugging purpose:");
+                    str += "Optimization did not finish successfully. Some constraints were violated.\n"
+                                "The error may be due to change of hard constraints to soft constrints.\n"
+                                "To handle this error, increase the value of 'Constraint Penalty' and re-run the\n"
+                                "optimization.\nOutput error for debugging purpose:";
                 }
                 cout<< "k = " << k << "  ;  err = " << eigvals(i) << endl;
                 nCtrViolated++;
-                str.sprintf("%s %.3f",str.toStdString().c_str(),eigvals(i));
+                str += QString::number(eigvals(i));
             }
         }
     }
@@ -1614,14 +1614,14 @@ bool SEDS::CheckConstraints(Matrix * A){
                 cout<<"The error may be due to change of hard constraints to soft constrints."<<endl;
                 cout<<"To handle this error, increase the value of 'cons_penalty' and re-run the"<<endl;
                 cout<<"optimization. Output error for debugging purpose:"<<endl<<endl;
-                str.sprintf("%s","Optimization did not finish successfully. Some constraints were violated. "
-                            "The error may be due to change of hard constraints to soft constrints. "
-                            "To handle this error, increase the value of 'Constraint Penalty' and re-run the "
-                            "optimization.\nOutput error for debugging purpose:");
+                str += "Optimization did not finish successfully. Some constraints were violated.\n"
+                            "The error may be due to change of hard constraints to soft constrints.\n"
+                            "To handle this error, increase the value of 'Constraint Penalty' and re-run the\n"
+                            "optimization.\nOutput error for debugging purpose:";
             }
             cout<< "C_Lyapunov ;  err = " << eigvals(i) << endl;
             nCtrViolated++;
-            str.sprintf("%s %.3f",str.toStdString().c_str(),eigvals(i));
+            str += QString::number(eigvals(i));
         }
     }
 
@@ -1631,7 +1631,7 @@ bool SEDS::CheckConstraints(Matrix * A){
         QMessageBox *qmes = new QMessageBox ();
         qmes->addButton("Ok",QMessageBox::AcceptRole);
         qmes->setWindowTitle("Error!");
-        str.sprintf("%s. In total %d constraints were violated.",str.toStdString().c_str(),nCtrViolated);
+        str += QString(". In total %1 constraints were violated.").arg(nCtrViolated);
         qmes->setText(str);
         qmes->show();
     }

@@ -47,55 +47,8 @@ QPixmap QNamedWindow::toPixmap(cv::Mat src)
 
 QPixmap QNamedWindow::toPixmap(IplImage *src)
 {
-	QPixmap pixmap;
-	if(!src) return pixmap;
-	if(src->nChannels == 4)
-	{
-		pixmap = QPixmap::fromImage(QImage((const unsigned char *)src->imageData,src->width, src->height, QImage::Format_RGB32)).copy();
-	}
-	else
-	{
-		IplImage *image = cvCreateImage(cvGetSize(src),8,4);
-		cvCvtColor(src, image, src->nChannels==1 ? CV_GRAY2BGRA : CV_BGR2BGRA);
-		QImage qimg = QImage((const unsigned char *)image->imageData, image->width, image->height, QImage::Format_RGB32);
-		pixmap = QPixmap::fromImage(qimg).copy();
-		cvReleaseImage(&image);
-	}
-	return pixmap;
-}
-
-IplImage *QNamedWindow::cvxCopyQImage(const QImage &qImage)
-{
-    if(qImage.isNull()) return NULL;
-
-    int w = qImage.width();
-    int h = qImage.height();
-
-    IplImage *pIplImage =     cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3); // (!ppIplImage || !CV_IS_IMAGE(*ppIplImage))?
-    if(!CV_IS_IMAGE(pIplImage)) return NULL;
-    if(pIplImage->width != w || pIplImage->height != h) {
-
-        cvReleaseImage(&pIplImage);
-        pIplImage = cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3);
-
-        if(!CV_IS_IMAGE(pIplImage)){return NULL;}
-    }
-
-    pIplImage->origin = IPL_ORIGIN_TL;
-
-    int x, y;
-    for(x = 0; x < pIplImage->width; ++x) {
-        for(y = 0; y < pIplImage->height; ++y) {
-            QRgb rgb = qImage.pixel(x, y);
-
-            if(pIplImage->nChannels == 1) {
-                cvSet2D(pIplImage, y, x, CV_RGB(qGray(rgb), 0, 0));
-            } else {
-                cvSet2D(pIplImage, y, x, CV_RGB(qRed(rgb), qGreen(rgb), qBlue(rgb)));
-            }
-        }
-    }
-   return pIplImage;
+    cv::Mat srcMat = cv::cvarrToMat(src);
+    return toPixmap(srcMat);
 }
 
 IplImage* QNamedWindow::qImage2IplImage(QImage& qImage)
@@ -249,10 +202,10 @@ void QNamedWindow::mousePressEvent(QMouseEvent *event)
 {
 	int x = event->x(), y = event->y();
 	int flags = 0, events = 0;
-	if(event->buttons() == Qt::LeftButton) flags |= CV_EVENT_FLAG_LBUTTON;
-	if(event->buttons() == Qt::RightButton) flags |= CV_EVENT_FLAG_RBUTTON;
-	if(event->button() == Qt::LeftButton) events = CV_EVENT_LBUTTONDOWN;
-	else if(event->button() == Qt::RightButton) events = CV_EVENT_RBUTTONDOWN;
+    if(event->buttons() == Qt::LeftButton) flags |= cv::EVENT_FLAG_LBUTTON;
+    if(event->buttons() == Qt::RightButton) flags |= cv::EVENT_FLAG_RBUTTON;
+    if(event->button() == Qt::LeftButton) events = cv::EVENT_LBUTTONDOWN;
+    else if(event->button() == Qt::RightButton) events = cv::EVENT_RBUTTONDOWN;
 	if(mouseCallback) mouseCallback(events, x, y, flags);
 	emit MousePressEvent(event);
 }
@@ -261,10 +214,10 @@ void QNamedWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	int x = event->x(), y = event->y();
 	int flags = 0, events = 0;
-	if(event->buttons() == Qt::LeftButton) flags |= CV_EVENT_FLAG_LBUTTON;
-	if(event->buttons() == Qt::RightButton) flags |= CV_EVENT_FLAG_RBUTTON;
-	if(event->button() == Qt::LeftButton) events = CV_EVENT_LBUTTONUP;
-	else if(event->button() == Qt::RightButton) events = CV_EVENT_RBUTTONUP;
+    if(event->buttons() == Qt::LeftButton) flags |= cv::EVENT_FLAG_LBUTTON;
+    if(event->buttons() == Qt::RightButton) flags |= cv::EVENT_FLAG_RBUTTON;
+    if(event->button() == Qt::LeftButton) events = cv::EVENT_LBUTTONUP;
+    else if(event->button() == Qt::RightButton) events = cv::EVENT_RBUTTONUP;
 	if(mouseCallback) mouseCallback(events, x, y, flags);
 	emit MouseReleaseEvent(event);
 }
@@ -273,8 +226,8 @@ void QNamedWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	int x = event->x(), y = event->y();
 	int flags = 0, events = 0;
-	if(event->buttons() == Qt::LeftButton) flags |= CV_EVENT_FLAG_LBUTTON;
-	if(event->buttons() == Qt::RightButton) flags |= CV_EVENT_FLAG_RBUTTON;
+    if(event->buttons() == Qt::LeftButton) flags |= cv::EVENT_FLAG_LBUTTON;
+    if(event->buttons() == Qt::RightButton) flags |= cv::EVENT_FLAG_RBUTTON;
 	if(mouseCallback) mouseCallback(events, x, y, flags);
 	emit MouseMoveEvent(event);
 }

@@ -3,6 +3,8 @@
 #include <math.h>
 #include <QLabel>
 #include <QDebug>
+#include <QPainterPath>
+
 
 QContour::QContour(double *values, int w, int h)
     : valueMap(ValueMap(values,w,h)), plotColor(Qt::green), plotThickness(2), style(Qt::SolidLine)
@@ -132,7 +134,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
 
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setBrush(Qt::NoBrush);
-    for(int i=0; i<min(paths.size(),300); i++)
+    for(int i=0; i<min((int)paths.size(),300); i++)
     {
         painter.setPen(QPen(plotColor, 0.25 + i/(double)paths.size()*plotThickness, style));
         painter.drawPath(paths.at(i));
@@ -191,7 +193,7 @@ void QContour::Paint(QPainter &painter, int levels, int zoom)
             double mean = meanValue(testRect);
             mean = (mean-vmin)/(vmax-vmin);
             painter.setPen((mean>0.5)? Qt::black : Qt::white);
-            painter.drawText(textRect, Qt::AlignRight + Qt::AlignVCenter, text);
+            painter.drawText(textRect, Qt::AlignRight | Qt::AlignVCenter, text);
             painter.drawLine(rect.x(), y, rect.x()-4, y);
         }
 

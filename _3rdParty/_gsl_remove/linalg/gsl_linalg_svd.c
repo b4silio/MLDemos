@@ -20,8 +20,6 @@
 //Here config.h is needed for GSL_COERCE_DBL
 #include "../config.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>

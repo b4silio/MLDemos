@@ -25,6 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QPen>
 #include <QImage>
 #include <QFontMetrics>
+#include <QTransform>
 #include <iostream>
 
 #include "expose.h"
@@ -73,7 +74,6 @@ void Canvas::PaintBufferedCanvas(QPainter &painter, bool bSvg)
     painter.setBackground(Qt::white);
     painter.fillRect(geometry(),Qt::white);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     if(bDisplayMap && !maps.confidence.isNull())
     {
@@ -164,7 +164,6 @@ void Canvas::PaintSequentialCanvas(QPainter &painter, bool bSvg)
     painter.setBackground(Qt::white);
     painter.fillRect(geometry(),Qt::white);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     if(bDisplayMap && !maps.confidence.isNull())
     {
@@ -499,7 +498,7 @@ void Canvas::DrawLegend(QPainter &painter)
             int y = rect.y() + i*rect.height()/steps;
             QRect textRect = QRect(rect.x()-40, y - 10, 40-6, 20);
             painter.setPen(Qt::black);
-            painter.drawText(textRect, Qt::AlignRight + Qt::AlignVCenter, text);
+            painter.drawText(textRect, Qt::AlignRight | Qt::AlignVCenter, text);
             painter.drawLine(rect.x(), y, rect.x()-4, y);
         }
         painter.setPen(QPen(Qt::black, 1));
@@ -603,7 +602,7 @@ void Canvas::DrawAxes(QPainter &painter)
             float canvasX = toCanvasCoords(x, 0).x();
             painter.drawLine(canvasX, 0, canvasX, h);
             QString text = QString("%1").arg(x, 0, 'f', sizeDigits);
-            int textW = fm.width(text);
+            int textW = fm.horizontalAdvance(text);
             QRect rect(canvasX-textW/2,h-2-fm.height(),textW, fm.height());
             painter.drawText(rect, Qt::AlignCenter, text);
         }
@@ -624,7 +623,7 @@ void Canvas::DrawAxes(QPainter &painter)
             float canvasY = toCanvasCoords(0, y).y();
             painter.drawLine(0, canvasY, w, canvasY);
             QString text = QString("%1").arg(y, 0, 'f', sizeDigits);
-            int textW = fm.width(text);
+            int textW = fm.horizontalAdvance(text);
             QRect rect(2,canvasY-fm.height()/2,textW, fm.height());
             painter.drawText(rect, Qt::AlignCenter, text);
         }
@@ -735,7 +734,6 @@ void Canvas::DrawSamples()
     }
     QPainter painter(&maps.samples);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     for(int i=drawnSamples; i<data->GetCount(); i++)
     {
         if(data->GetFlag(i) == _TRAJ) continue;
@@ -810,10 +808,10 @@ void Canvas::DrawObstacles(QPainter &painter)
         paths.push_back(obstaclePath);
         obstaclePath = DrawObstacle(data->GetObstacle(i));
 
-        QMatrix scalingMatrix;
+        QTransform scalingTransform;
         QPointF t = toCanvasCoords(data->GetObstacle(i).center);
-        scalingMatrix.scale(data->GetObstacle(i).repulsion[0], data->GetObstacle(i).repulsion[1]);
-        obstaclePath = scalingMatrix.map(obstaclePath);
+        scalingTransform.scale(data->GetObstacle(i).repulsion[0], data->GetObstacle(i).repulsion[1]);
+        obstaclePath = scalingTransform.map(obstaclePath);
         obstaclePath.translate(toCanvasCoords(data->GetObstacle(i).center));
         safeties.push_back(obstaclePath);
     }
@@ -857,7 +855,6 @@ void Canvas::DrawRewards()
 
     QPainter painter(&maps.reward);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     int radius = 10;
     int stepsW = w/radius;
@@ -1048,7 +1045,6 @@ void Canvas::DrawTrajectories()
 
     QPainter painter(&maps.trajectories);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     ivec trajLabels(sequences.size());
     FOR(i, sequences.size())
@@ -1144,7 +1140,6 @@ void Canvas::DrawTimeseries()
 
     QPainter painter(&maps.timeseries);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     //qDebug() << "drawing: " << timeseries.size() << "series";
     // we draw all the timeseries, each with its own color

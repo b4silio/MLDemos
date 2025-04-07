@@ -450,7 +450,6 @@ bool DrawTimer::Vectors(int count, int steps)
     QMutexLocker drawLock(&drawMutex);
     QPainter painter(&modelMap);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
     FOR(i, count)
     {
@@ -657,7 +656,7 @@ void DrawTimer::Maximization()
         else
         {
             o.objectType = "Samples,Maximization";
-            o.style ="pointsize:12,dotted";
+            o.style ="pointsize:6,dotted";
         }
         if(o.colors.size()) o.colors.back() = QVector4D(0,0,0,1);
         // we replace all past points as history
@@ -740,7 +739,6 @@ bool DrawTimer::VectorsFast(int count, int steps)
     QMutexLocker drawLock(&drawMutex);
     QPainter painter(&modelMap);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
     vector<Obstacle> obstacles = canvas->data->GetObstacles();
     FOR(i, count)
     {

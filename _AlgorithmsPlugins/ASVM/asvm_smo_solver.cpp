@@ -447,11 +447,11 @@ bool ASVM_SMO_Solver::takeStepForAlpha(unsigned int i1, unsigned int i2, double 
 	}
 
 
-	register double *xptr = x_smo;
-	register double *kerptr1 = ker_matrix[i1];
-	register double *kerptr2 = ker_matrix[i2];
-	register double *errptr = err_cache_alpha;
-	register double *errptr2 = err_cache_beta;
+    double *xptr = x_smo;
+    double *kerptr1 = ker_matrix[i1];
+    double *kerptr2 = ker_matrix[i2];
+    double *errptr = err_cache_alpha;
+    double *errptr2 = err_cache_beta;
 	double theMax = err_cache_alpha[maximum_alpha];
 	double theMin = err_cache_alpha[minimum_alpha];
 	unsigned int i=0;
@@ -553,10 +553,10 @@ bool ASVM_SMO_Solver::takeStepForBeta(unsigned int i1, double E1)
 	if(beta_new > 0 && beta_new < Cparam)
 		err_cache_beta[i1-M] = forward_beta(i1);
 
-	register double *xptr = x_smo;
-	register double *kerptr1 = ker_matrix[i1];
-	register double *errptr = err_cache_alpha;
-	register double *errptr2 = err_cache_beta;
+    double *xptr = x_smo;
+    double *kerptr1 = ker_matrix[i1];
+    double *errptr = err_cache_alpha;
+    double *errptr2 = err_cache_beta;
 	double theMax = err_cache_alpha[maximum_alpha];
 	double theMin = err_cache_alpha[minimum_alpha];
 	unsigned int i=0;
@@ -653,8 +653,8 @@ void ASVM_SMO_Solver::updateB0()
 	double fnc = 0;
 	int cnt=0;
 	unsigned int i;
-	register double *xptr = x_smo;
-	register int *dlabptr = dlabels;
+    double *xptr = x_smo;
+    int *dlabptr = dlabels;
 	for(i=0;i<M;i++)
 	{
 		if(*xptr > 0 && *xptr < Cparam)
@@ -668,7 +668,7 @@ void ASVM_SMO_Solver::updateB0()
 
 	Bparam = fnc/cnt;
 
-	register double *errptr = err_cache_alpha;
+    double *errptr = err_cache_alpha;
 	xptr = x_smo;
 	double theMax = err_cache_alpha[maximum_alpha];
 	double theMin = err_cache_alpha[minimum_alpha];
@@ -709,9 +709,9 @@ double ASVM_SMO_Solver::forward(int index)
 {
 	double fval = 0.0;
 
-	register double *kerptr = ker_matrix[index];
-	register int *dlabptr = dlabels;
-	register double *xptr = x_smo;
+    double *kerptr = ker_matrix[index];
+    int *dlabptr = dlabels;
+    double *xptr = x_smo;
 	unsigned int i=0;
 	double tmp;
 	while(i<M)

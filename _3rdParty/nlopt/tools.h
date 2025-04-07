@@ -36,7 +36,7 @@ public:
   friend ostream & operator << (ostream &, RCTrial) ;
 };
 
-class TrialGT : public unary_function<Trial, bool>
+class TrialGT : public __unary_function<Trial, bool>
 // Predicate for Trial (needed for remove_if)
 {
 public:

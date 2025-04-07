@@ -1,5 +1,5 @@
 #include <GHSOM/globals.h>
-#include <QGLWidget>
+#include <QtOpenGLWidgets/QtOpenGLWidgets>
 #include "interfaceGHSOM.h"
 #include "projectorGHSOM.h"
 #include <QDebug>
@@ -198,6 +198,23 @@ void GHSOMProjector::DrawInfo(Canvas *canvas, QPainter &painter, Projector *proj
     */
 }
 
+
+static inline void glSample(fvec sample, QColor c, int xIndex, int yIndex, int zIndex)
+{
+    glColor3f(c.redF(), c.greenF(), c.blueF());
+    float sX=0,sY=0,sZ=0;
+    if(xIndex >= 0) sX = sample[xIndex];
+    if(yIndex >= 0) sY = sample[yIndex];
+    if(zIndex >= 0) sZ = sample[zIndex];
+    glVertex3f(sX,sY,sZ);
+}
+
+static inline void glLine(fvec p1, fvec p2, int xIndex=0, int yIndex=1, int zIndex=2)
+{
+    glVertex3f(p1[xIndex], p1[yIndex], zIndex >= 0 ? p1[zIndex] : 0.f);
+    glVertex3f(p2[xIndex], p2[yIndex], zIndex >= 0 ? p2[zIndex] : 0.f);
+}
+
 void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
 {
     if(!canvas || !glw || !projector) return;
@@ -273,7 +290,7 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
             {
                 fvec &p1 = dataLines[i].first;
                 fvec &p2 = dataLines[i].second;
-                GLWidget::glLine(p1, p2, xIndex, yIndex, zIndex);
+                glLine(p1, p2, xIndex, yIndex, zIndex);
             }
             glEnd();
 
@@ -284,8 +301,8 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
             {
                 FOR(x, w)
                 {
-                    if(x < w-1) GLWidget::glLine(points[x+y*w], points[(x+1)+y*w], xIndex, yIndex, zIndex);
-                    if(y < h-1) GLWidget::glLine(points[x+y*w], points[x+(y+1)*w], xIndex, yIndex, zIndex);
+                    if(x < w-1) glLine(points[x+y*w], points[(x+1)+y*w], xIndex, yIndex, zIndex);
+                    if(y < h-1) glLine(points[x+y*w], points[x+(y+1)*w], xIndex, yIndex, zIndex);
                 }
             }
             glEnd();
@@ -301,7 +318,7 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
                 if(neuron->weightsize>=dim)
                 {
                     FOR(d, dim) anchor[d] = neuron->weights[d];
-                    FOR(i, points.size()) GLWidget::glLine(anchor, points[i], xIndex, yIndex, zIndex);
+                    FOR(i, points.size()) glLine(anchor, points[i], xIndex, yIndex, zIndex);
                 }
                 glEnd();
             }
@@ -325,7 +342,7 @@ void GHSOMProjector::DrawGL(Canvas *canvas, GLWidget *glw, Projector *projector)
             {
                 fvec point = points[i];
                 QColor c = SampleColor[(layerCount+1)%SampleColorCnt];
-                GLWidget::glSample(point, c, xIndex, yIndex, zIndex);
+                glSample(point, c, xIndex, yIndex, zIndex);
             }
             glEnd();
 

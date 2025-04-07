@@ -275,7 +275,7 @@ void ClustDBSCAN::DrawInfo(Canvas *canvas, QPainter &painter, Clusterer *cluster
             cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
             cv::Canny(gray, edges, 50, 100, 3);
             std::vector<std::vector<cv::Point> > contours;
-            cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+            cv::findContours(gray, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
             FOR(i, contours.size()) {
                 std::vector<cv::Point>& contour = contours.at(i);
                 QPolygonF poly;

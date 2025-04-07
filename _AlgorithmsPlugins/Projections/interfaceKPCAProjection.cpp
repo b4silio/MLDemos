@@ -45,13 +45,13 @@ bool KPCAProjection::eventFilter(QObject *obj, QEvent *event)
             int displayType = contours->displayCombo->currentIndex();
             int index = contours->dimSpin->value();
             QImage image = contourPixmaps[index].toImage();
-            if(displayType != 0 || e->x() < 0 || e->y() < 0 || e->x() >= image.width() || e->y() >= image.height()) return QObject::eventFilter(obj, event);
-            int limit = qRed(image.pixel(e->x(), e->y()));
+            if(displayType != 0 || e->position().x() < 0 || e->position().y() < 0 || e->position().x() >= image.width() || e->position().y() >= image.height()) return QObject::eventFilter(obj, event);
+            int limit = qRed(image.pixel(e->position().x(), e->position().y()));
             // we get the neighboring pixels
-            if(e->y() < image.height()-2)
+            if(e->position().y() < image.height()-2)
             {
-                int l2 = qRed(image.pixel(e->x(), e->y()+1));
-                int l3 = qRed(image.pixel(e->x(), e->y()+2));
+                int l2 = qRed(image.pixel(e->position().x(), e->position().y()+1));
+                int l3 = qRed(image.pixel(e->position().x(), e->position().y()+2));
                 if(abs(l2 - limit) > 5 || abs(l3 - limit) > 5) return QObject::eventFilter(obj, event);
             }
             if(limit <= 0 || limit >= 255) return QObject::eventFilter(obj, event);
@@ -145,12 +145,12 @@ void KPCAProjection::GetParameterList(std::vector<QString> &parameterNames,
 
 void KPCAProjection::SaveScreenshot()
 {
-    const QPixmap *screenshot = contours->plotLabel->pixmap();
-    if(screenshot->isNull()) return;
+    const QPixmap& screenshot = contours->plotLabel->pixmap();
+    if(screenshot.isNull()) return;
 
     QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setImage(screenshot->toImage());
-    clipboard->setPixmap(*screenshot);
+    clipboard->setImage(screenshot.toImage());
+    clipboard->setPixmap(screenshot);
 }
 
 void KPCAProjection::ContoursChanged()

@@ -631,7 +631,7 @@ namespace std
         Define std::less<rectangle> so that you can use rectangles in the associative containers.
     !*/
     template<>
-    struct less<dlib::rectangle> : public binary_function<dlib::rectangle ,dlib::rectangle,bool>
+    struct less<dlib::rectangle> : public __binary_function<dlib::rectangle ,dlib::rectangle,bool>
     {
         inline bool operator() (const dlib::rectangle& a, const dlib::rectangle& b) const
         { 

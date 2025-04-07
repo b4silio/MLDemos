@@ -296,7 +296,7 @@ namespace dlib
 
         template<typename Y>
         explicit shared_ptr(
-            std::auto_ptr<Y>& r
+            std::shared_ptr<Y>& r
         )
         {
             DLIB_ASSERT(r.get() != 0,
@@ -328,7 +328,7 @@ namespace dlib
 
         template<typename Y> 
         shared_ptr& operator= (
-            std::auto_ptr<Y>& r
+            std::shared_ptr<Y>& r
         )
         {
             DLIB_ASSERT(r.get() != 0,

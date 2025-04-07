@@ -21,6 +21,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include <map>
+#include <cfloat>
+
 // type definitions, u <- unsigned, s <- signed, f <- floating point, X: number of bits
 typedef unsigned char u8;
 typedef unsigned short int u16;

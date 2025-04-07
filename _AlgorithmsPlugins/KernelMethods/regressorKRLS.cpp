@@ -25,23 +25,23 @@ using namespace std;
 const char *RegressorKRLS::GetInfoString()
 {
 	char *text = new char[255];
-	sprintf(text, "Kernel Ridge Least Squares\n");
-	sprintf(text, "%sCapacity: %d", text, capacity);
-	sprintf(text, "%sKernel: ", text);
+    snprintf(text, 100, "Kernel Ridge Least Squares\n");
+    snprintf(text, 100, "%sCapacity: %d", text, capacity);
+    snprintf(text, 100, "%sKernel: ", text);
 	switch(kernelType)
 	{
 	case 0:
-		sprintf(text, "%s linear", text);
+        snprintf(text, 100, "%s linear", text);
 		break;
 	case 1:
-		sprintf(text, "%s polynomial (deg: %d width: %f)", text, kernelDegree, kernelParam);
+        snprintf(text, 100, "%s polynomial (deg: %d width: %f)", text, kernelDegree, kernelParam);
 		break;
 	case 2:
-		sprintf(text, "%s rbf (gamma: %f)", text, kernelParam);
+        snprintf(text, 100, "%s rbf (gamma: %f)", text, kernelParam);
 		break;
 	}
-	sprintf(text, "%seps: %f\n", text, epsilon);
-	sprintf(text, "%sBasis Functions: %lu\n", text, (unsigned long)GetSVs().size());
+    snprintf(text, 100, "%seps: %f\n", text, epsilon);
+    snprintf(text, 100, "%sBasis Functions: %lu\n", text, (unsigned long)GetSVs().size());
 	return text;
 }
 

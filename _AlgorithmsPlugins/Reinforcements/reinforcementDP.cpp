@@ -187,7 +187,7 @@ void ReinforcementDP::Draw(QPainter &painter)
 const char *ReinforcementDP::GetInfoString()
 {
 	char *text = new char[1024];
-    if(variance == 0) sprintf(text, "DP Search");
-    else sprintf(text, "DP Walk\n");
+    if(variance == 0) snprintf(text, 16, "DP Search");
+    else snprintf(text, 16, "DP Walk\n");
 	return text;
 }

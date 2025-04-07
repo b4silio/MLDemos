@@ -21,8 +21,9 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <vector>
 #include "regressor.h"
-#include "gsl/multifit/gsl_multifit.h"
-#include "gsl/matrix/gsl_matrix.h"
+#include <gsl/gsl_multifit.h>
+#include <gsl/gsl_sort.h>
+#include <gsl/gsl_matrix.h>
 
 enum lowessWeightFunc
 {

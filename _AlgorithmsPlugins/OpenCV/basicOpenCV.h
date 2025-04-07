@@ -29,11 +29,16 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <opencv2/legacy/legacy.hpp>
 #include <opencv2/legacy/compat.hpp>
 #else
-#include <opencv/cv.h>
-#include <opencv/cxcore.h>
-#include <opencv/cvaux.h>
-#include <opencv/ml.h>
-#include <opencv/highgui.h>
+#include <opencv2/core/core_c.h>
+#include <opencv2/highgui.hpp>
+#include <opencv2/ml.hpp>
+//#include <opencv2/imgproc.hpp>
+//#include <opencv2/features2d.hpp>
+//#include <opencv2/xfeatures2d.hpp>
+//#include <opencv2/nonfree/features2d.hpp>
+//#include <opencv2/video/tracking.hpp>
+//#include <opencv2/calib3d.hpp>
+//#include <opencv2/videoio.hpp>
 #endif
 
 /* computes the point corresponding to a certain angle on an input image */
@@ -54,44 +59,11 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 	cvLine( img, cvPoint( center.x, center.y - d ),			\
 		cvPoint( center.x, center.y + d ), color, 1, 0 )
 
-void cvDrawRect(IplImage *img, CvRect rect, CvScalar color=CvScalar(0,0,255), int thickness=1, int line_type=8, int shift=0);
-void cvDrawGradient(IplImage *image, CvRect rect, CvScalar color1, CvScalar color2, bool vertical=true);
-
 class BasicOpenCV
 {
 public:
-	static const CvScalar color [22];
+    static const cv::Scalar color [22];
 	static const u32 colorCnt = 22;
-
-	static IplImage *Rotate(IplImage *src, float angle);
-	static IplImage *Rotate90(IplImage *src, u32 direction=0);
-	static void integralImage(const IplImage *image, IplImage **intimage);
-	static u32 GetSum(IplImage *integral, CvRect rect);
-	static u32 GetSum(IplImage *integral, int x, int y, int w, int h);
-	static void cvCopyFlipped(IplImage *src, IplImage *dst);
-	static void DisplayHueSatHist(IplImage* src);
-	static void CreateHistogramImage(IplImage *src, IplImage *dst, int bins=256, int channels=0);
-	static void RGB2NCC(IplImage *image, IplImage *red, IplImage *green);
-	static void BinaryMedian(IplImage *src, IplImage *dst);
-	static void RemoveNoise(IplImage * src);
-	static IplImage *Deinterlace(IplImage *image);
-	static IplImage *GetField(IplImage *image, u32 field);
-	static IplImage *Half2Full(IplImage *image);
-	static void Half2Full(IplImage *src, IplImage *dst);
-	static IplImage *Half2Demi(IplImage *image);
-	static void Half2Demi(IplImage *src, IplImage *dst);
-	static IplImage *Half(IplImage *src);
-	static void Half(IplImage **src);
-	static IplImage *Resize(IplImage *src, CvSize size);
-	static void Resize(IplImage **src,CvSize size);
-	static void ChannelSubtraction(IplImage *src , IplImage *dst, u32 first, u32 second);
-	static void Divide(IplImage *img1, IplImage *img2 );
-	static IplImage *Crop(IplImage *image,CvRect selection);
-	static int otsuThreshold(CvMat* prob, CvHistogram* hist);
-	static float MaximizeSquare(IplImage *image, int *x, int *y, int *s);
-
-	static IplImage *BoxPlot(std::vector<float> data, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
-	static IplImage *BoxPlot(std::vector<std::vector<float> > data, float maxVal=-FLT_MAX, float minVal=FLT_MAX);
 };
 
 typedef BasicOpenCV CV;
@@ -196,30 +168,6 @@ namespace BasicML
 			}
 		}
 		return means;
-	}
-
-	static CvPoint *KMeans(IplImage *image, u32 clusterCount)
-	{
-		if(!image ||image->nChannels != 1) return NULL;
-
-		cvMorphologyEx(image, image, 0, 0, CV_MOP_CLOSE,2);
-		u32 width = image->width;
-		u32 height = image->height;
-		CvPoint3D32f *points = new CvPoint3D32f[width*height];
-		u32 pointsCount = 0;
-
-		FOR(i,height){
-                        FOR(j,width){
-                                if ((uchar)image->imageData[i*width+j]){
-					points[pointsCount++] = cvPoint3D32f(j,i,0);
-				}
-			}
-		}
-		CvPoint *clusters = KmeansClustering(points, pointsCount, clusterCount, width, height);
-		//FOR(i,pointsCount)
-			//RGB(image, u32(points[i].y*width + points[i].x)) = ((u32)points[i].z + 1)*255/(clusterCount+1);
-		delete points;
-		return clusters;
 	}
 
 	#ifndef EIGEN_STRUCT
@@ -372,8 +320,9 @@ namespace BasicML
 		u32 width = x->width;
 		u32 height = x->height;
 		FOR(i,height){
-			FOR(j, width){
-                                dst->imageData[i*width + j] = isInsideEllipse(cvPoint2D32f((unsigned char)(x->imageData[i*width+j])/255.f, ((unsigned char)y->imageData[i*width+j])/255.f), eig, ratio) ? 255 : 0;
+            FOR(j, width){
+                dst->imageData[i*width + j] = isInsideEllipse(cvPoint2D32f((unsigned char)(x->imageData[i*width+j])/255.f,
+                                                              ((unsigned char)y->imageData[i*width+j])/255.f), eig, ratio) ? (unsigned char)255 : (unsigned char)0;
 			}
 		}
 	}

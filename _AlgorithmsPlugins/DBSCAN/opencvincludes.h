@@ -13,42 +13,6 @@
 
 #include <QImage>
 
-static QImage const Mat2QImage(cv::Mat& mat)
-{
-    QImage img(mat.cols, mat.rows, QImage::Format_RGB32);
-    cv::Mat image;
-    if (mat.channels() == 3) { image = mat; }
-    else { cv::cvtColor(mat, image, CV_GRAY2BGR); }
-    FOR(i, img.height()) {
-        FOR(j, img.width()) {
-            cv::Vec3b c = image.at< cv::Vec3b >(i,j);
-            img.setPixel(j, i, qRgb(c[2],c[1],c[0]));
-        }
-    }
-    return img;
-}
-
-static QImage const Mat2QImage(IplImage* image)
-{
-    cv::Mat mat = cv::cvarrToMat(image);
-    return Mat2QImage(mat);
-}
-
-static QPixmap toPixmap(IplImage* src){
-
-    QPixmap pixmap;
-    if (src->nChannels == 4) {
-        pixmap = QPixmap::fromImage(QImage((const unsigned char*)src->imageData,src->width, src->height, QImage::Format_RGB32)).copy();
-    } else {
-        IplImage* image = cvCreateImage(cvGetSize(src),8,4);
-        cvCvtColor(src, image, src->nChannels==1 ? CV_GRAY2BGRA : CV_BGR2BGRA);
-        QImage qimg = QImage((const unsigned char*)image->imageData, image->width, image->height, QImage::Format_RGB32);
-        pixmap = QPixmap::fromImage(qimg).copy();
-        cvReleaseImage(&image);
-    }
-    return pixmap;
-}
-
 /**
    Functions to convert between OpenCV's cv::Mat and Qt's QImage and QPixmap.
 
@@ -190,75 +154,4 @@ static QPixmap toPixmap(IplImage* src){
      return QImageToCvMat( inPixmap.toImage(), inCloneImageData );
   }
 
-  void SimplifyContour ( const std::vector<cv::Point>& contourIn, std::vector<cv::Point>& contourOut, float tolerance )
-  {
-      //-- copy points.
-
-      int numOfPoints;
-      numOfPoints = contourIn.size();
-
-      CvPoint* cvpoints;
-      cvpoints = new CvPoint[ numOfPoints ];
-
-      for( int i=0; i<numOfPoints; i++)
-      {
-          int j = i % numOfPoints;
-
-          cvpoints[ i ].x = contourIn[ j ].x;
-          cvpoints[ i ].y = contourIn[ j ].y;
-      }
-
-      //-- create contour.
-
-      CvContour	contour;
-      CvSeqBlock	contour_block;
-
-      cvMakeSeqHeaderForArray
-      (
-          CV_SEQ_POLYLINE,
-          sizeof(CvContour),
-          sizeof(CvPoint),
-          cvpoints,
-          numOfPoints,
-          (CvSeq*)&contour,
-          &contour_block
-      );
-
-      printf( "length = %f \n", cvArcLength( &contour ) );
-
-      //-- simplify contour.
-
-      CvMemStorage* storage;
-      storage = cvCreateMemStorage( 1000 );
-
-      CvSeq *result = 0;
-      result = cvApproxPoly
-      (
-          &contour,
-          sizeof( CvContour ),
-          storage,
-          CV_POLY_APPROX_DP,
-          cvContourPerimeter( &contour ) * tolerance,
-          0
-      );
-
-      //-- contour out points.
-
-      contourOut.clear();
-      for( int j=0; j<result->total; j++ )
-      {
-          CvPoint * pt = (CvPoint*)cvGetSeqElem( result, j );
-
-          contourOut.push_back( cv::Point() );
-          contourOut.back().x = (float)pt->x;
-          contourOut.back().y = (float)pt->y;
-      }
-
-      //-- clean up.
-
-      if( storage != NULL )
-          cvReleaseMemStorage( &storage );
-
-      delete[] cvpoints;
-  }
 #endif // OPENCVINCLUDES_H

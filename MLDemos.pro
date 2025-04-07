@@ -3,11 +3,10 @@
 #       MLDemos Bundle       #
 #                            #
 ##############################
-greaterThan(QT_MAJOR_VERSION, 4) {
-	cache();
-}
+cache();
 
 TEMPLATE = subdirs
+
 # the main software
 CONFIG += ordered
 SUBDIRS = 3rdParty Core MLDemos

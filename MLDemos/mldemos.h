@@ -22,6 +22,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <QMainWindow>
 #include <QtWidgets>
 #include <QTime>
+#include <QElapsedTimer>
 #include <QResizeEvent>
 #include <QMutex>
 #include <QMutexLocker>
@@ -92,7 +93,7 @@ private:
 	QWidget *drawContext1Widget, *drawContext2Widget, *drawContext3Widget, *drawContext4Widget;
 
 	DrawTimer *drawTimer;
-	QTime drawTime;
+    QElapsedTimer drawTime;
 	Canvas *canvas;
     GridSearch *gridSearch;
     GLWidget *glw;
@@ -129,7 +130,7 @@ private:
 	bool bIsRocNew;
 	bool bIsCrossNew;
 public:
-    MLDemos(QString filename="", QWidget *parent = 0, Qt::WindowFlags flags = 0);
+    MLDemos(QString filename="", QWidget *parent = 0, Qt::WindowFlags flags = Qt::Widget);
 	~MLDemos();
 
 	void resizeEvent( QResizeEvent *event );

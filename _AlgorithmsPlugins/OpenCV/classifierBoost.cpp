@@ -58,10 +58,12 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
     case 1: // projections
         learnerCount = dim>2?1000:360;
         break;
-    case 2: // rectangles
-    case 3: // circles
-    case 4: // gmm
-    case 5: // svm
+    case 2: // circles
+    case 3: // squares
+    case 4: // diamonds
+    case 5: // rectangles
+    case 6: // gmm
+    case 7: // svm
         learnerCount = 3000;
         break;
     }
@@ -75,34 +77,27 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
     {
     case 0:// stumps
     {
-        FOR(i, learnerCount)
-        {
+        FOR(i, learnerCount) {
             learners[i].resize(1);
             learners[i][0] = i % dim; // we choose a single dimension
         }
     }
         break;
-    case 1:// random projection
+    case 1:// projection
     {
-        if(dim==2)
-        {
-            FOR(i, learnerCount)
-            {
+        if(dim==2) {
+            FOR(i, learnerCount) {
                 learners[i].resize(dim);
                 float theta = i / (float)learnerCount * PIf;
                 learners[i][0] = cosf(theta);
                 learners[i][1] = sinf(theta);
             }
-        }
-        else
-        {
-            FOR(i, learnerCount)
-            {
+        } else {
+            FOR(i, learnerCount) {
                 learners[i].resize(dim);
                 fvec projection(dim,0);
                 float norm = 0;
-                FOR(d, dim)
-                {
+                FOR(d, dim) {
                     projection[d] = drand48();
                     norm += projection[d];
                 }
@@ -111,62 +106,43 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
         }
     }
         break;
-    case 2: // random rectangle
+    case 2: // circle
+    case 3: // square
+    case 4: // diamond
     {
-        FOR(i, learnerCount)
-        {
+        FOR(i, learnerCount) {
+            learners[i].resize(dim);
+            FOR(d, dim) learners[i][d] = drand48()*(xMax[d]-xMin[d]) + xMin[d];
+        }
+    }
+        break;
+    case 5: // rectangle
+    {
+        FOR(i, learnerCount) {
             learners[i].resize(dim*2);
-            FOR(d, dim)
-            {
+            FOR(d, dim) {
                 float x = drand48()*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
-                //float x = (drand48()*2-0.5)*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
-                float l = drand48()*(xMax[d] - xMin[d]); // width
-                //float x = drand48()*(xMax[d] - xMin[d]) + xMin[d]; // rectangle center
-                //float l = drand48()*(xMax[d] - xMin[d]); // width
+                float aspectRatio = 0.5 + (drand48()-0.5)*.5; // multiplier on aspect ratio for current d
+
                 learners[i][2*d] = x;
-                learners[i][2*d+1] = l;
+                learners[i][2*d+1] = aspectRatio;
             }
         }
     }
         break;
-    case 3: // random circle
+    case 6: // GMM
     {
-        if(dim==2)
-        {
-            FOR(i, learnerCount)
-            {
-                learners[i].resize(dim);
-                learners[i][0] =  drand48()*(xMax[0]-xMin[0]) + xMin[0];
-                learners[i][1] =  drand48()*(xMax[1]-xMin[1]) + xMin[1];
-            }
-        }
-        else
-        {
-            FOR(i, learnerCount)
-            {
-                learners[i].resize(dim);
-                FOR(d, dim) learners[i][d] = drand48()*(xMax[d]-xMin[d]) + xMin[d];
-            }
-        }
-    }
-        break;
-    case 4: // random GMM
-    {
-        FOR(i, learnerCount)
-        {
+        FOR(i, learnerCount) {
             learners[i].resize(dim + dim*(dim+1)/2); // a center plus a covariance matrix
             // we generate a random center
-            FOR(d, dim)
-            {
+            FOR(d, dim) {
                 learners[i][d] = drand48()*(xMax[d] - xMin[d]) + xMin[d];
             }
             // we generate a random covariance matrix
             float minLambda = (xMax[0]-xMin[0])*0.01f; // we set the minimum covariance lambda to 1% of the data span
             fvec C = RandCovMatrix(dim, minLambda);
-            FOR(d1, dim)
-            {
-                FOR(d2,d1+1)
-                {
+            FOR(d1, dim) {
+                FOR(d2,d1+1) {
                     int index = d1*(d1+1)/2 + d2; // index in triangular matrix form
                     learners[i][dim + index] = C[d1*dim + d2];
                 }
@@ -174,21 +150,18 @@ void ClassifierBoost::InitLearners(fvec xMin, fvec xMax)
         }
     }
         break;
-    case 5: // random SVM
+    case 7: // SVM
     {
-        FOR(i, learnerCount)
-        {
+        FOR(i, learnerCount) {
             learners[i].resize(1 + svmCount*(dim+1)); // a kernel width plus svmCount points plus svmCount alphas
             learners[i][0] = 1.f / drand48()*(xMax[0]-xMin[0]); // kernel width proportional to the data
             float sumAlpha=0;
-            FOR(j, svmCount)
-            {
+            FOR(j, svmCount) {
                 // we generate a random alpha
                 if((int)j<svmCount-1) sumAlpha += (learners[i][1+(dim+1)*j] = drand48()*2.f - 1.f);
                 else learners[i][1+(dim+1)*j] = -sumAlpha; // we ensure that the sum of all alphas is zero
                 // and the coordinates of the SV
-                FOR(d, dim)
-                {
+                FOR(d, dim) {
                     learners[i][1+(dim+1)*j+1 + d] = drand48()*(xMax[d]-xMin[d])+xMin[d];
                 }
             }
@@ -215,48 +188,47 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
                 val = index < (int)dim ? sample[index] : 0;
             }
                 break;
-            case 1:// random projection
+            case 1:// projections
             {
                 if(dim == 2) val = sample[0]* learner[0] + sample[1]* learner[1];
-                else {
-                    FOR(d, dim) val += sample[d] * learner[d];
-                }
+                else FOR(d, dim) val += sample[d] * learner[d];
             }
                 break;
-            case 2:// random rectangles
+            case 2: // circles
             {
-                // check if the sample is inside the recangle generated by the classifier
-                val = 1;
-                FOR(d, dim)
-                {
-                    if(sample[d] < learner[2*d] || sample[d] > learner[2*d]+learner[2*d+1])
-                    {
-                        val = 0;
-                        break;
-                    }
-                }
-                val += drand48()*0.01; // we add a small noise to the value just to not have only 0s and 1s
+                if(dim==2) val = (sample[0] - learner[0])*(sample[0] - learner[0]) + (sample[1] - learner[1])*(sample[1] - learner[1]);
+                else FOR(d,dim) val += (sample[d] - learner[d])*(sample[d] - learner[d]);
+                val = sqrtf(val);
             }
                 break;
-            case 3: // random circle
+            case 3: // squares
             {
-                if(dim==2) val = sqrtf((sample[0] - learner[0])*(sample[0] - learner[0]) + (sample[1] - learner[1])*(sample[1] - learner[1]));
-                else {
-                    FOR(d,dim) val += (sample[d] - learner[d])*(sample[d] - learner[d]);
-                    val = sqrtf(val);
-                }
+                if(dim==2) val = max(fabs(sample[0] - learner[0]), fabs(sample[1] - learner[1]));
+                else FOR(d,dim) val = max(val, fabs(sample[d] - learner[d]));
             }
                 break;
-            case 4: // random GMM
+            case 4: // diamonds
+            {
+                if(dim==2) val = fabs(sample[0] - learner[0]) + fabs(sample[1] - learner[1]);
+                else FOR(d,dim) val += fabs(sample[d] - learner[d]);
+            }
+                break;
+            case 5:// rectangles
+            {
+                // compute the max distance, scaled according to aspect ratio of each dimension
+                val = 0;
+                if(dim==2) val = max(fabs((sample[0] - learner[0]))*learner[1],fabs((sample[1] - learner[2]))*learner[3]);
+                FOR(d, dim) val = max(val, fabs((sample[d] - learner[2*d]))*learner[2*d+1]);
+            }
+                break;
+            case 6: // GMMs
             {
                 fvec &gmm = learner;
                 fvec x(dim);
                 FOR(d, dim) x[d] = sample[d]-gmm[d];
-                FOR(d, dim)
-                {
+                FOR(d, dim) {
                     float xC = 0;
-                    FOR(d1,dim)
-                    {
+                    FOR(d1,dim) {
                         int index = d1>d? d1*(d1+1)/2 + d : d*(d+1)/2 + d1;
                         xC += x[d1]*gmm[dim+index];
                     }
@@ -264,19 +236,17 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
                 }
             }
                 break;
-            case 5: // random SVM
+            case 7: // SVMs
             {
                 // compute the svm function
                 fvec &svm = learner;
                 float gamma = svm[0];
-                FOR(k, svmCount)
-                {
+                FOR(k, svmCount) {
                     float alpha = svm[1+k*(dim+1)];
                     // we compute the rbf kernel;
                     float K = 0;
                     int index = 1+k*(dim+1)+1;
-                    FOR(d, dim)
-                    {
+                    FOR(d, dim) {
                         float dist = sample[d]-svm[index+d];
                         K += dist*dist;
                     }
@@ -291,7 +261,6 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
         return res;
     }
 
-
     switch(weakType)
     {
     case 0:// stumps
@@ -304,7 +273,7 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
         }
     }
         break;
-    case 1:// random projection
+    case 1:// projection
     {
         FOR(j, learnerCount)
         {
@@ -317,39 +286,51 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
         }
     }
         break;
-    case 2:// random rectangles
-    {
-        // check if the sample is inside the recangle generated by the classifier
-        FOR(j, learnerCount)
-        {
-            float val = 1;
-            FOR(d, dim)
-            {
-                if(sample[d] < learners[j][2*d] || sample[d] > learners[j][2*d]+learners[j][2*d+1])
-                {
-                    val = 0;
-                    break;
-                }
-            }
-            res[j] = val + drand48()*0.01; // we add a small noise to the value just to not have only 0s and 1s
-        }
-    }
-        break;
-    case 3: // random circle
+    case 2: // circle
     {
         FOR(j, learnerCount)
         {
             float val = 0;
-            if(dim==2) val = sqrtf((sample[0] - learners[j][0])*(sample[0] - learners[j][0]) + (sample[1] - learners[j][1])*(sample[1] - learners[j][1]));
-            else {
-                FOR(d,dim) val += (sample[d] - learners[j][d])*(sample[d] - learners[j][d]);
-                val = sqrtf(val);
-            }
+            if(dim==2) val = (sample[0] - learners[j][0])*(sample[0] - learners[j][0]) + (sample[1] - learners[j][1])*(sample[1] - learners[j][1]);
+            else FOR(d,dim) val += (sample[d] - learners[j][d])*(sample[d] - learners[j][d]);
+            val = sqrtf(val);
             res[j] = val;
         }
     }
         break;
-    case 4: // random GMM
+    case 3: // square
+    {
+        FOR(j, learnerCount)
+        {
+            float val = 0;
+            if(dim==2) val = max(fabs(sample[0] - learners[j][0]), fabs(sample[1] - learners[j][1]));
+            else FOR(d,dim) val = max(val,fabs(sample[d] - learners[j][d]));
+            res[j] = val;
+        }
+    }
+        break;
+    case 4: // diamonds
+    {
+        FOR(j, learnerCount)
+        {
+            float val = 0;
+            if(dim==2) val = fabs(sample[0] - learners[j][0]) + fabs(sample[1] - learners[j][1]);
+            else FOR(d,dim) val += fabs(sample[d] - learners[j][d]);
+            res[j] = val;
+        }
+    }
+        break;
+    case 5:// rectangles
+    {
+        FOR(j, learnerCount)
+        {
+            float val = 0;
+            FOR(d, dim) val = max(val, fabs((sample[d] - learners[j][2*d]))*learners[j][2*d+1]);
+            res[j] = val;
+        }
+    }
+        break;
+    case 6: // random GMM
     {
         FOR(j, learnerCount)
         {
@@ -357,11 +338,9 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
             float val = 0;
             fvec x(dim);
             FOR(d, dim) x[d] = sample[d]-gmm[d];
-            FOR(d, dim)
-            {
+            FOR(d, dim) {
                 float xC = 0;
-                FOR(d1,dim)
-                {
+                FOR(d1,dim) {
                     int index = d1>d? d1*(d1+1)/2 + d : d*(d+1)/2 + d1;
                     xC += x[d1]*gmm[dim+index];
                 }
@@ -371,7 +350,7 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
         }
     }
         break;
-    case 5: // random SVM
+    case 7: // random SVM
     {
         // compute the svm function
         FOR(j, learnerCount)
@@ -379,14 +358,12 @@ fvec ClassifierBoost::GetFeatures(const fvec sample, const int weakType, const i
             fvec &svm = learners[j];
             float val = 0;
             float gamma = svm[0];
-            FOR(k, svmCount)
-            {
+            FOR(k, svmCount) {
                 float alpha = svm[1+k*(dim+1)];
                 // we compute the rbf kernel;
                 float K = 0;
                 int index = 1+k*(dim+1)+1;
-                FOR(d, dim)
-                {
+                FOR(d, dim) {
                     float dist = sample[d]-svm[index+d];
                     K += dist*dist;
                 }
@@ -424,10 +401,8 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 
     // we need to find the boundaries
     fvec xMin(dim, FLT_MAX), xMax(dim, -FLT_MAX);
-    FOR(i, samples.size())
-    {
-        FOR(d,dim)
-        {
+    FOR(i, samples.size()) {
+        FOR(d,dim) {
             if(xMin[d] > samples[i][d]) xMin[d] = samples[i][d];
             if(xMax[d] < samples[i][d]) xMax[d] = samples[i][d];
         }
@@ -440,8 +415,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     Mat trainLabels(sampleCnt, 1, CV_32FC1);
     Mat sampleWeights(sampleCnt, 1, CV_32FC1);
 
-    FOR(i, sampleCnt)
-    {
+    FOR(i, sampleCnt) {
         fvec sample = samples[perm[i]];
         fvec trainSample = GetFeatures(sample, weakType);
         FOR(j, learnerCount) trainSamples.at<float>(i,j) = trainSample[j];
@@ -466,15 +440,13 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 
     scoreMultiplier = 1.f;
     float maxScore=-FLT_MAX, minScore=FLT_MAX;
-    FOR(i, samples.size())
-    {
+    FOR(i, samples.size()) {
         float score = Test(samples[i]);
         if(score > maxScore) maxScore = score;
         if(score < minScore) minScore = score;
         //qDebug() << "score" << i << score;
     }
-    if(minScore != maxScore)
-    {
+    if(minScore != maxScore) {
         scoreMultiplier = 1.f/(max(abs((double)maxScore),abs((double)minScore)))*5.f;
     }
 
@@ -482,20 +454,17 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
     vector<fvec> responses(predictorsLength);
     FOR(i, predictorsLength) responses[i].resize(sampleCnt);
     // first we compute all the errors, for each learner
-    FOR(i, sampleCnt)
-    {
+    FOR(i, sampleCnt) {
         fvec response(predictorsLength);
         Test(samples[i], &response);
         FOR(j, predictorsLength) responses[j][i] = response[j];
     }
     // then we iterate through the learners
     errorWeights = fvec(sampleCnt,1.f);
-    FOR(i, responses.size())
-    {
+    FOR(i, responses.size()) {
         double sum = 0;
         // we compute the current weighted error
-        FOR(j, sampleCnt)
-        {
+        FOR(j, sampleCnt) {
             double response = responses[i][j];
             //debugString += QString("%1(%2) ").arg(response,0,'f',2).arg(labels[perm[j]]);
             if((response < 0 && labels[j] == 1) || (response >= 0 && labels[j]!=1)) sum += fabs(response)*errorWeights[j]/sampleCnt;
@@ -505,8 +474,7 @@ void ClassifierBoost::Train( std::vector< fvec > samples, ivec labels )
 
         // we update the individual weights
         sum = 0;
-        FOR(j, sampleCnt)
-        {
+        FOR(j, sampleCnt) {
             double response = responses[i][j];
             if((response < 0 && labels[j] == 1) || (response >= 0 && labels[j]!=1)) errorWeights[j] *= c;
             else errorWeights[j] *= 1.f/c;
@@ -572,19 +540,25 @@ const char *ClassifierBoost::GetInfoString() const
         sprintf(text, "%sDecision Stumps\n", text);
         break;
     case 1:
-        sprintf(text, "%sRandom Projections\n", text);
+        sprintf(text, "%sLinear Projections\n", text);
         break;
     case 2:
-		sprintf(text, "%sRandom Rectangles\n", text);
+        sprintf(text, "%sCircles\n", text);
 		break;
     case 3:
-        sprintf(text, "%sRandom Circles\n", text);
+        sprintf(text, "%sSquares\n", text);
         break;
     case 4:
-        sprintf(text, "%sRandom GMM\n", text);
+        sprintf(text, "%sDiamonds\n", text);
         break;
     case 5:
-        sprintf(text, "%sRandom SVM %d\n", text, svmCount);
+        sprintf(text, "%s Rectangles\n", text);
+        break;
+    case 6:
+        sprintf(text, "%sGMMs\n", text);
+        break;
+    case 7:
+        sprintf(text, "%sSVMs %d\n", text, svmCount);
         break;
     }
 	return text;

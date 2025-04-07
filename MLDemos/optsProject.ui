@@ -178,7 +178,6 @@
     <widget class="QWidget" name="algoWidget" native="true">
      <property name="styleSheet">
       <string notr="true">#algoWidget {
-background-color: rgb(220, 220, 220);
 border-style: inset;
 border-width: 1px;
 border-color: rgb(190,190,190);

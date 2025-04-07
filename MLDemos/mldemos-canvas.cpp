@@ -282,9 +282,9 @@ void MLDemos::Navigation(fvec sample)
         if (labels[i] == 0) ++pcount;
         else ++ncount;
     }
-    sprintf(string, "samples: %d (o:%.3d|x:%.3d)", count, pcount, ncount);
+    snprintf(string, 100, "samples: %d (o:%.3d|x:%.3d)", count, pcount, ncount);
     information += QString(string);
-    sprintf(string, " | x%d: %.3f x%d: %.3f", canvas->xIndex+1, sample[canvas->xIndex], canvas->yIndex+1, sample[canvas->yIndex]);
+    snprintf(string, 100, " | x%d: %.3f x%d: %.3f", canvas->xIndex+1, sample[canvas->xIndex], canvas->yIndex+1, sample[canvas->yIndex]);
     information += QString(string);
     if (algo->classifier) {
         float score;
@@ -305,7 +305,7 @@ void MLDemos::Navigation(fvec sample)
             score = algo->classifier->Test(sample);
         }
         drawTimer->bPaused = false;
-        sprintf(string, " | value: %.4f", score);
+        snprintf(string, 100, " | value: %.4f", score);
         information += QString(string);
     } else if (algo->dynamical) {
         // we build the trajectory(by hand)

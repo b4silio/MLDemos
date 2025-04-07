@@ -25,10 +25,7 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 using namespace std;
 
-PCAFaces::PCAFaces()
-: guiDialog(0), projector(0)
-{
-}
+PCAFaces::PCAFaces() : guiDialog(0), projector(0) {}
 
 PCAFaces::~PCAFaces()
 {
@@ -36,18 +33,18 @@ PCAFaces::~PCAFaces()
 	DEL(projector);
 }
 
-void PCAFaces::setButtons(bool bStatus){
+void PCAFaces::setButtons(bool bStatus)
+{
     gui->eigenButton->setEnabled(bStatus);
     gui->eigenCountSpin->setEnabled(bStatus);
     gui->spinE1->setEnabled(bStatus);
     gui->spinE2->setEnabled(bStatus);
 }
 
-void PCAFaces::setButtonsOn(){
-    setButtons(true);
-}
+void PCAFaces::setButtonsOn() { setButtons(true); }
 
-void PCAFaces::setButtonsOff(){
+void PCAFaces::setButtonsOff()
+{
     bool bVisible = (gui->eigenCountSpin->value() == 2);
     gui->spinE1->setVisible(bVisible);
     gui->spinE2->setVisible(bVisible);
@@ -73,10 +70,14 @@ void PCAFaces::Start()
         connect(&futureWatcher, SIGNAL(finished()), this, SLOT(setButtonsOn()));
 
         connect(gui->closeButton, SIGNAL(clicked()), this, SLOT(Closing()));
-        connect(projector, SIGNAL(Update()), this, SLOT(ConcurrentUpdate()));
-        connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
-        connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
-        connect(gui->eigenCountSpin, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
+        //connect(projector, SIGNAL(Update()), this, SLOT(ConcurrentUpdate()));
+        //connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
+        //connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
+        //connect(gui->eigenCountSpin, SIGNAL(valueChanged(int)), this, SLOT(ConcurrentUpdate()));
+        connect(gui->spinE1, SIGNAL(valueChanged(int)), this, SLOT(Update()));
+        connect(gui->spinE2, SIGNAL(valueChanged(int)), this, SLOT(Update()));
+        connect(gui->eigenCountSpin, SIGNAL(valueChanged(int)), this, SLOT(Update()));
+
         ConcurrentUpdate();
 
 	}
@@ -85,10 +86,7 @@ void PCAFaces::Start()
 
 void PCAFaces::Stop()
 {
-	if(projector)
-    {
-		guiDialog->hide();
-	}
+    if(projector) guiDialog->hide();
 }
 
 void PCAFaces::Closing()
@@ -109,15 +107,12 @@ void PCAFaces::Updating()
 
 }
 
-void PCAFaces::ConcurrentUpdate(){
-       QFuture<void> future = QtConcurrent::run(this, &PCAFaces::Updating);
-       futureWatcher.setFuture(future);
-}
-
-
-void PCAFaces::FetchResults(std::vector<fvec> results)
+void PCAFaces::ConcurrentUpdate()
 {
-
+       //QFuture<void> future = QtConcurrent::run(this, &PCAFaces::Updating);
+       //futureWatcher.setFuture(future);
 }
+
+void PCAFaces::FetchResults(std::vector<fvec> /*results*/){}
 
 //Q_EXPORT_PLUGIN2(IO_PCAFaces, PCAFaces)

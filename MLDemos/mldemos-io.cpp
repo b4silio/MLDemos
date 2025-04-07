@@ -179,7 +179,7 @@ void MLDemos::ScreenshotToFile()
     if (filename.isEmpty()) return;
     if (!filename.endsWith(".jpg") && !filename.endsWith(".png")) filename += ".png";
     if (canvas->canvasType == 1) {
-        QImage img = glw->grabFrameBuffer();
+        QImage img = glw->grabFramebuffer();
         if (!img.save(filename)) ui.statusBar->showMessage("WARNING: Unable to save image");
         else ui.statusBar->showMessage("Image saved successfully");
     }
@@ -198,7 +198,7 @@ void MLDemos::ScreenshotToClipboard()
 {
     QClipboard *clipboard = QApplication::clipboard();
     if (canvas->canvasType == 1) {
-        QImage img = glw->grabFrameBuffer();
+        QImage img = glw->grabFramebuffer();
         clipboard->setImage(img);
         clipboard->setPixmap(QPixmap::fromImage(img));
     } else if (canvas->canvasType == 2) {
