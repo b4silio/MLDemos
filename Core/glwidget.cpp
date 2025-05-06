@@ -66,7 +66,8 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
 
     this->canvas = canvas;
     this->zoomFactor = ZoomZero;
-    bHiDPI = (qApp->devicePixelRatio() > 1);
+    auto screen = QGuiApplication::screenAt(this->pos());
+    devicePixelRatio = screen->devicePixelRatio();
     mutex = new QMutex();
     bDisplaySamples=bDisplayLines=bDisplaySurfaces=bDisplayTransparency=bDisplayBlurry=true;
     bRotateCamera=false;
@@ -605,7 +606,7 @@ void GLWidget::DrawParticles(const GLObject &o) const
 void GLWidget::DrawSamples(const GLObject &o) const
 {
     QString style = o.style.toLower();
-    float pointSize = 6.f;
+    float pointSize = 12.f;
     if(style.contains("pointsize"))
     {
         QStringList params = style.split(",");
@@ -619,8 +620,7 @@ void GLWidget::DrawSamples(const GLObject &o) const
             }
         }
     }
-    if(bHiDPI) pointSize *= 2;
-    //gl_PointSize = pointSize;
+    pointSize *= devicePixelRatio;
 
     QOpenGLShaderProgram *program = bDisplayShadows ? shaders.at("SamplesShadow") : shaders.at("Samples");
     program->bind();
@@ -1383,6 +1383,7 @@ void GLWidget::paintGL()
 {
     if(!canvas) return;
     mutex->lock();
+
     if(render_fbo == nullptr) InitializeGL();
     killObjects();
     generateObjects();
@@ -1669,7 +1670,7 @@ void GLWidget::paintGL()
         }
         std::sort(list.begin(), list.end());
         glPushMatrix();
-        float scaleAdjustment = 2.0f / (zoomFactor/ZoomZero);
+        float scaleAdjustment = devicePixelRatio / (zoomFactor/ZoomZero);
         glScalef(scaleAdjustment, scaleAdjustment, scaleAdjustment);
         FOR(i, list.size())
         {
@@ -1869,10 +1870,13 @@ void GLWidget::zoom(int delta)
 void GLWidget::resizeGL(int width, int height)
 {
     mutex->lock();
-    float devicePixelRatio = qApp->devicePixelRatio();
-    bHiDPI = devicePixelRatio > 1.f;
+    auto screen = QGuiApplication::screenAt(this->pos());
+    devicePixelRatio = screen->devicePixelRatio();
+
     this->width = width;
     this->height = height;
+    width *= devicePixelRatio;
+    height *= devicePixelRatio;
 
     glViewport(0,0,width, height);
     viewport = QVector4D(0,0,width,height);
@@ -1928,20 +1932,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     int dx = event->position().x() - lastPos.x();
     int dy = event->position().y() - lastPos.y();
 
-    if (event->modifiers() & Qt::ShiftModifier)
-    {
-        if(event->buttons() & Qt::LeftButton)
-        {
+    if (event->modifiers() & Qt::ShiftModifier) {
+        if(event->buttons() & Qt::LeftButton) {
             setXPosition(xPos + -dy/64.f*sin(yRot));
             setZPosition(zPos + -dx/64.f*(-cos(yRot)));
-        }
-        else if(event->buttons() & Qt::RightButton)
-        {
+        } else if(event->buttons() & Qt::RightButton) {
             setYPosition(yPos - dy/64.f);
         }
-    }
-    else
-    {
+    } else {
         if (event->buttons() & Qt::LeftButton) {
             setXRotation(xRot + 8 * dy);
             setYRotation(yRot + 8 * dx);

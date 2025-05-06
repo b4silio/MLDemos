@@ -163,7 +163,7 @@ public slots:
     void HideStatsDialog();
     void HideDataGenerator();
     void ShowEditingTools();
-    void HideEditingTools();
+    void HideEditingTools(bool bHideGridOptions=false);
     void DisplayOptionsChanged();
     void Display3DOptionsChanged();
     void DrawToolsChanged();

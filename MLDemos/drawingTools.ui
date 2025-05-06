@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>132</width>
-    <height>487</height>
+    <width>104</width>
+    <height>614</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,30 +16,36 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>104</width>
+    <height>16777215</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Drawing Toolbar</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0">
    <property name="spacing">
     <number>3</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>4</number>
    </property>
    <property name="topMargin">
     <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>4</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <item>
-    <widget class="QWidget" name="widget" native="true">
+    <widget class="QWidget" name="toolButtons" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
@@ -52,13 +58,7 @@
        <height>0</height>
       </size>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="horizontalSpacing">
-       <number>4</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>4</number>
-      </property>
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -70,6 +70,9 @@
       </property>
       <property name="bottomMargin">
        <number>0</number>
+      </property>
+      <property name="spacing">
+       <number>4</number>
       </property>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_0">
@@ -92,6 +95,12 @@
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -162,6 +171,12 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
           <height>26</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>9</pointsize>
@@ -225,6 +240,12 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -295,6 +316,12 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
           <height>26</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>9</pointsize>
@@ -349,7 +376,7 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <widget class="QLabel" name="label_1">
         <property name="font">
          <font>
@@ -364,12 +391,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="4" column="0">
        <widget class="QPushButton" name="spray3DButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -426,12 +459,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="4" column="1">
        <widget class="QPushButton" name="trajectoryButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -494,12 +533,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="5" column="0">
        <widget class="QPushButton" name="paintButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -556,12 +601,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="5" column="1">
        <widget class="QPushButton" name="obstacleButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -618,12 +669,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="8" column="0">
+      <item row="6" column="0">
        <widget class="QPushButton" name="lineButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -686,12 +743,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="8" column="1">
+      <item row="6" column="1">
        <widget class="QPushButton" name="ellipseButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -754,7 +817,7 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="10" column="0" colspan="2">
+      <item row="7" column="0" colspan="2">
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
@@ -769,12 +832,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </property>
        </widget>
       </item>
-      <item row="11" column="0">
+      <item row="8" column="0">
        <widget class="QPushButton" name="dragButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -831,12 +900,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="11" column="1">
+      <item row="8" column="1">
        <widget class="QPushButton" name="moveButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -893,12 +968,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="12" column="0">
+      <item row="9" column="0">
        <widget class="QPushButton" name="moveClassButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -955,12 +1036,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="12" column="1">
+      <item row="9" column="1">
        <widget class="QPushButton" name="extrudeButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -1017,12 +1104,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="13" column="0">
+      <item row="10" column="0">
        <widget class="QPushButton" name="dimPlusButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -1085,12 +1178,18 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="13" column="1">
+      <item row="10" column="1">
        <widget class="QPushButton" name="dimLessButton">
         <property name="minimumSize">
          <size>
           <width>26</width>
           <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -1153,7 +1252,7 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </attribute>
        </widget>
       </item>
-      <item row="15" column="0" colspan="2">
+      <item row="11" column="0" colspan="2">
        <widget class="Line" name="line_5">
         <property name="minimumSize">
          <size>
@@ -1163,192 +1262,6 @@ background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="16" column="0" colspan="2">
-       <widget class="QPushButton" name="datasetGeneratorButton">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Change samples labels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-border-style: ridge;
-border-width: 1px;
-border-color: gray;
-#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
-}
-
-QPushButton:checked {
-#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
-}</string>
-        </property>
-        <property name="text">
-         <string>Generate</string>
-        </property>
-        <property name="icon">
-         <iconset resource="mldemos.qrc">
-          <normaloff>:/MLDemos/icons/icons_datagenerator.png</normaloff>:/MLDemos/icons/icons_datagenerator.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-        <property name="default">
-         <bool>false</bool>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="17" column="0" colspan="2">
-       <widget class="QPushButton" name="compareButton">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Change samples labels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-border-style: ridge;
-border-width: 1px;
-border-color: gray;
-#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
-}
-
-QPushButton:checked {
-#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
-}</string>
-        </property>
-        <property name="text">
-         <string>Compare</string>
-        </property>
-        <property name="icon">
-         <iconset resource="mldemos.qrc">
-          <normaloff>:/MLDemos/icons/icons_compare.png</normaloff>:/MLDemos/icons/icons_compare.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-        <property name="default">
-         <bool>false</bool>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="18" column="0" colspan="2">
-       <widget class="QPushButton" name="gridsearchButton">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Change samples labels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-border-style: ridge;
-border-width: 1px;
-border-color: gray;
-#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
-}
-
-QPushButton:checked {
-#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
-}</string>
-        </property>
-        <property name="text">
-         <string>Gridsrc</string>
-        </property>
-        <property name="icon">
-         <iconset resource="mldemos.qrc">
-          <normaloff>:/MLDemos/icons/icons_gridsearch.png</normaloff>:/MLDemos/icons/icons_gridsearch.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-        <property name="default">
-         <bool>false</bool>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -1474,6 +1387,229 @@ QPushButton:checked {
           <number>0</number>
          </property>
         </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QWidget" name="toolGenerate" native="true">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="datasetGeneratorButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Change samples labels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+border-style: ridge;
+border-width: 1px;
+border-color: gray;
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+}
+
+QPushButton:checked {
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+}</string>
+        </property>
+        <property name="text">
+         <string>Generate</string>
+        </property>
+        <property name="icon">
+         <iconset resource="mldemos.qrc">
+          <normaloff>:/MLDemos/icons/icons_datagenerator.png</normaloff>:/MLDemos/icons/icons_datagenerator.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="compareButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Change samples labels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+border-style: ridge;
+border-width: 1px;
+border-color: gray;
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+}
+
+QPushButton:checked {
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+}</string>
+        </property>
+        <property name="text">
+         <string>Compare</string>
+        </property>
+        <property name="icon">
+         <iconset resource="mldemos.qrc">
+          <normaloff>:/MLDemos/icons/icons_compare.png</normaloff>:/MLDemos/icons/icons_compare.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="gridsearchButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Change samples labels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+border-style: ridge;
+border-width: 1px;
+border-color: gray;
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:0.75, stop:0 lightgray, stop:1 white);
+}
+
+QPushButton:checked {
+#background-color: qlineargradient( x1:0 y1:-0.5, x2:0 y2:1, stop:0 gray, stop:1 lightgray);
+}</string>
+        </property>
+        <property name="text">
+         <string>Gridsrc</string>
+        </property>
+        <property name="icon">
+         <iconset resource="mldemos.qrc">
+          <normaloff>:/MLDemos/icons/icons_gridsearch.png</normaloff>:/MLDemos/icons/icons_gridsearch.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>

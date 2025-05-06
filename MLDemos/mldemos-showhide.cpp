@@ -117,16 +117,19 @@ void MLDemos::ShowEditingTools()
     displayOptions->fitToViewport->show();
 }
 
-void MLDemos::HideEditingTools()
+void MLDemos::HideEditingTools(bool bHideGridOptions)
 {
     ui.leftPaneWidget->hide();
+
     displayOptions->showSamples->hide();
     displayOptions->showOutput->hide();
     displayOptions->showModel->hide();
     displayOptions->showBackground->hide();
-    displayOptions->showGrid->hide();
     displayOptions->showLegend->hide();
-    displayOptions->clearAll->hide();
-    displayOptions->clearData->hide();
     displayOptions->fitToViewport->hide();
+    if(bHideGridOptions) {
+        displayOptions->clearAll->hide();
+        displayOptions->clearData->hide();
+        displayOptions->showGrid->hide();
+    }
 }

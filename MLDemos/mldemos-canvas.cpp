@@ -144,7 +144,7 @@ void MLDemos::CanvasTypeChanged()
     //if ((!glw || !glw->isVisible()) || ((!vis || !vis->isVisible()) && canvas->canvasType == type)) return;
     if (type == 1) { // 3D viewport
         if(vis) vis->hide();
-        HideEditingTools();
+        HideEditingTools(false);
         ui.rightPaneWidget->show();
         canvas->Clear();
         canvas->repaint();
@@ -163,7 +163,7 @@ void MLDemos::CanvasTypeChanged()
         glw->show();
         glw->repaint();
     } else if (type==2) { // visualizations
-        HideEditingTools();
+        HideEditingTools(true);
         ui.rightPaneWidget->hide();
         glw->hide();
         canvas->Clear();

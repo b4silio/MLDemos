@@ -100,11 +100,13 @@ ivec AlgorithmManager::GetInputDimensions()
     if(!canvas || !canvas->data->GetCount()) return ivec();
 
     if(mldemos->ui.restrictDimCheck->isChecked()) {
-        if(canvas->data->GetDimCount() == 2) return ivec();
-        ivec dimList(2);
-        dimList.front() = canvas->xIndex;
-        dimList.back() = canvas->yIndex;
-        return dimList;
+        if(!canvas->canvasType) {
+            if(canvas->data->GetDimCount() == 2) return ivec();
+            return ivec({canvas->xIndex, canvas->yIndex});
+        } else if (canvas->canvasType == 1) {
+            if(canvas->data->GetDimCount() == 3) return ivec();
+            return ivec({canvas->xIndex, canvas->yIndex, canvas->zIndex});
+        }
     }
 
     QList<QListWidgetItem*> selected = inputDimensions->dimList->selectedItems();

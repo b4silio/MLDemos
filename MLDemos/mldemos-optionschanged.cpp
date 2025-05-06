@@ -185,7 +185,7 @@ void MLDemos::DrawToolsChanged()
         ui.leftPaneWidget->setMinimumWidth(70);
     } else {
         drawToolbar->toolOptionWidget->show();
-        ui.leftPaneWidget->setMinimumWidth(68 + 82);
+        ui.leftPaneWidget->setMinimumWidth(70);
     }
     ResetMinimumWidth();
 }
