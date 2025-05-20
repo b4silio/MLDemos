@@ -5,6 +5,8 @@
 
 MLDemos is open-source and free for personal and academic use.
 
+https://github.com/user-attachments/assets/a6081ac5-0064-48d6-8c86-00a95006380e
+
 
 ## Some History
 
