@@ -8,6 +8,14 @@ NAME = mld_Lowess
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
+
+win32{
+    INCLUDEPATH += "$$EIGEN/include/"
+    INCLUDEPATH += "$$GSL/include/"
+    LIBS += -L"$$GSL/lib"
+    LIBS += -lgsl -lgslcblas
+}
+
 ###########################
 # Source Files            #
 ###########################
@@ -17,26 +25,26 @@ include($$MLPATH/MLDemos_variables.pri)
 FORMS += paramsLowess.ui
 
 HEADERS +=	\
-			canvas.h \
-			datasetManager.h \
-			mymaths.h \
-			drawUtils.h \
-            regressorLowess.h \
-            interfaceLowess.h \
-            pluginLowess.h \
+    canvas.h \
+    datasetManager.h \
+    mymaths.h \
+    drawUtils.h \
+    regressorLowess.h \
+    interfaceLowess.h \
+    pluginLowess.h \
     lowessHelpers.h
 
 SOURCES += 	\
-            regressorLowess.cpp \
-            interfaceLowess.cpp \
-            pluginLowess.cpp
+    regressorLowess.cpp \
+    interfaceLowess.cpp \
+    pluginLowess.cpp
 
 ###########################
 # Dependencies            #
 ###########################
 # add here the dependencies to third party libraries (e.g. the one in 3rdParty)
 HEADERS += \
-		    ../../_3rdParty/GSL_fit/gsl_fit.h
+    ../../_3rdParty/GSL_fit/gsl_fit.h
 
 OTHER_FILES += \
     plugin.json

@@ -258,8 +258,8 @@ void Global::Search(int axis, RCRVector x_av){
       cout << endl << "*** Inner loop completed ***" << endl ;
     
     // Reduce SolSet if necessary
-    SolSet.erase(remove_if(SolSet.begin(), SolSet.end(),
-			   TrialGT(fbound+mu)),SolSet.end());
+    SolSet.erase(remove_if(SolSet.begin(), SolSet.end(), TrialGT(fbound+mu)),SolSet.end());
+
     if (InTime()) {
       if (stogo_verbose) {
 	cout << "Current set of minimizers (" << SolSet.size() << ")" << endl ;

@@ -19,19 +19,18 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef _BASICOPENCV_H_
 #define _BASICOPENCV_H_
 
+#include "public.h"
 #include <vector>
-#ifdef OPENCV22
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/video/tracking.hpp>
-#include <opencv2/ml/ml.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/legacy/legacy.hpp>
-#include <opencv2/legacy/compat.hpp>
-#else
+#ifdef WIN32
+// opencv includes
 #include <opencv2/core/core_c.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/ml.hpp>
+#else
+#include <opencv4/opencv2/core/core_c.h>
+#include <opencv4/opencv2/highgui.hpp>
+#include <opencv4/opencv2/ml.hpp>
+#endif
 //#include <opencv2/imgproc.hpp>
 //#include <opencv2/features2d.hpp>
 //#include <opencv2/xfeatures2d.hpp>
@@ -39,7 +38,6 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#include <opencv2/video/tracking.hpp>
 //#include <opencv2/calib3d.hpp>
 //#include <opencv2/videoio.hpp>
-#endif
 
 /* computes the point corresponding to a certain angle on an input image */
 #define calc_point(img, angle)                                      \

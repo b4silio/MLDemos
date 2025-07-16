@@ -1,8 +1,8 @@
 #include "projectorCCA.h"
 #include <mymaths.h>
-#include <Eigen/Core>
-#include <Eigen/Eigen>
-#include <Eigen/LU>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Eigen>
+#include <eigen3/Eigen/LU>
 #include <QDebug>
 #include <math.h>
 #include <map>

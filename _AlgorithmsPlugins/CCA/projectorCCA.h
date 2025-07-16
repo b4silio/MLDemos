@@ -3,7 +3,7 @@
 #include <public.h>
 #include <mymaths.h>
 #include <projector.h>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <iostream>
 #include <QPainter>
 #include <QDebug>

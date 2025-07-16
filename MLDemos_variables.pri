@@ -1,4 +1,3 @@
-
 ##############################
 #                            #
 #     MLDemos Variables      #
@@ -6,8 +5,8 @@
 ##############################
 
 # PLEASE EDIT THIS PART TO FIT YOUR NEEDS/SETUP
+QT += widgets core gui
 QT += svg opengl openglwidgets
-QT += widgets
 macx: LIBS += -framework QtWidgets
 
 macx {
@@ -66,8 +65,13 @@ LIBS += -L$$MLPATH/_3rdParty -l3rdParty
 ########################################
 # Location of intermediate build files #
 ########################################
-win32:MLBUILD = C:/tmp/MLDemos/$$NAME
-unix:MLBUILD = build
+win32{
+    MLBUILD = build
+}else:macx{
+}else{
+    MLBUILD = build
+}
+
 
 ######################
 # Optional libraries #
@@ -78,11 +82,11 @@ unix:MLBUILD = build
 
 win32{
     CONFIG += opencv3
-    OPENCV_VER = 420
+    OPENCV_VER = 4110
 }else:macx{
     CONFIG += opencv3
 }else{
-    CONFIG += opencv$$system(pkg-config --modversion opencv | cut -d . -f'1,2' | sed -e \'s/\.[2-9]/2/g\' -e \'s/\.1/1/g\')
+    CONFIG += opencv3
 }
 
 # Boost
@@ -98,8 +102,11 @@ win32{
 # manager     CONFIG(opencv21)|CONFIG(opencv22):OPENCV = E:/Dvt/opencv/build/x86/mingw
 
 win32{
-    BOOST = C:/DEV/boost_1_66_0
-    OPENCV = C:/opencv/build
+    BOOST = C:/DEV/boost_1_88_0
+    OPENCV = C:/DEV/opencv/sources/build/install
+    OPENCVLIB = $$OPENCV/x64/mingw
+    EIGEN = C:/DEV/eigen-3.4.0
+    GSL = C:/DEV/MSYS2/mingw64
 }else:macx{
     BOOST = /usr/local/include
     BREW_PATH = /usr/local/Cellar
@@ -110,6 +117,10 @@ win32{
     BREW_PNGPP  = $$BREW_PATH/png++/0.2.10
     BREW_EIGEN  = $$BREW_PATH/eigen/3.4.0_1
     BREW_GSL    = $$BREW_PATH//gsl/2.8
+} else {
+    INCLUDEPATH += /usr/include
+    INCLUDEPATH += /usr/include/eigen3
+    INCLUDEPATH += /usr/include/eigen3/EIGEN
 }
 
 
@@ -119,13 +130,18 @@ win32{
 # Autoconfiguration part #
 ##########################
 
+# Other Libraries
+win32{
+    INCLUDEPATH += "$$EIGEN/include/"
+    DEFINES += DLIB_NO_THROW_ERROR_MESSAGES
+}
 
 # OPENCV
 win32{
     DEFINES += OPENCV3
-    INCLUDEPATH += . "$$OPENCV/include"
-    LIBS += -L"$$OPENCV/install/x86/mingw/lib"
-    LIBS += -L"$$OPENCV/install/x86/mingw/bin"
+    INCLUDEPATH += "$$OPENCV/include"
+    LIBS += -L"$$OPENCVLIB/lib"
+    LIBS += -L"$$OPENCVLIB/bin"
 #    INCLUDEPATH += . "$$OPENCV/build/include"
 #	LIBS += -L"$$OPENCV/build/x86/mingw/lib"
 #	LIBS += -L"$$OPENCV/build/x86/mingw/bin"
@@ -140,8 +156,7 @@ win32{
         -lopencv_ml$$OPENCV_VER \
         -lopencv_features2d$$OPENCV_VER \
         -lopencv_core$$OPENCV_VER
-}
-macx{
+}else:macx{
     DEFINES += OPENCV3
 
     INCLUDEPATH += $$BREW_FFMPEG/include
@@ -165,21 +180,26 @@ macx{
     -lopencv_ml \
     -lopencv_core
     LIBS += -lgsl
-}else:unix{
-# some issues between qmake and pkgconfig
-# invoking pkg-config manually instead
-    CONFIG(opencv22){
-        PKGCONFIG += opencv
-        DEFINES += OPENCV22
-        #message("Using opencv22 or later")
-        LIBS += $$system(pkg-config --libs opencv)
-    }
-    CONFIG(opencv21) {
-        PKGCONFIG += opencv
-        DEFINES += OPENCV21
-        #message("Using opencv21")
-        LIBS += $$system(pkg-config --libs opencv)
-    }
+}else{
+    DEFINES += OPENCV3
+ #   CONFIG += link_pkgconfig
+ #   PKGCONFIG += opencv4
+ #   LIBS += $$system(pkg-config --libs opencv4)
+ #   for some reason pkg-config does not work on my machine, feel free to replace all this below with the 3 lines above
+    INCLUDEPATH += /usr/include/opencv4
+    INCLUDEPATH += /usr/include/opencv4/opencv2
+    QMAKE_CXXFLAGS += -I/usr/include/opencv4
+    LIBS += -L/usr/lib/aarch64-linux-gnu
+    LIBS += \
+    -lopencv_bgsegm \
+    -lopencv_calib3d \
+    -lopencv_highgui \
+    -lopencv_imgcodecs \
+    -lopencv_imgproc \
+    -lopencv_videoio \
+    -lopencv_objdetect \
+    -lopencv_ml \
+    -lopencv_core
 }
 
 win32{
@@ -188,8 +208,7 @@ win32{
 }else:macx{
     DEFINES += MACX
     CONFIG += MACX
-}else:unix{
-    CONFIG += link_pkgconfig
+}else{
 }
 
 # BOOST
@@ -218,42 +237,20 @@ CONFIG(debug, debug|release){
 }
 
 win32{
-	CONFIG(Debug, Debug|Release){
-        MOC_DIR = $${MLBUILD}/Debug
-        UI_DIR = $${MLBUILD}/Debug
-        RCC_DIR = $${MLBUILD}/Debug
-        OBJECTS_DIR = $${MLBUILD}/Debug
-	}else{
-        MOC_DIR = $${MLBUILD}/Release
-        UI_DIR = $${MLBUILD}/Release
-        RCC_DIR = $${MLBUILD}/Release
-        OBJECTS_DIR = $${MLBUILD}/Release
-	}
+    CONFIG(Debug, Debug|Release){
+    MOC_DIR = $${MLBUILD}/Debug
+    UI_DIR = $${MLBUILD}/Debug
+    RCC_DIR = $${MLBUILD}/Debug
+    OBJECTS_DIR = $${MLBUILD}/Debug
+    }else{
+    MOC_DIR = $${MLBUILD}/Release
+    UI_DIR = $${MLBUILD}/Release
+    RCC_DIR = $${MLBUILD}/Release
+    OBJECTS_DIR = $${MLBUILD}/Release
+    }
 }else{
     MOC_DIR = $${MLBUILD}
     UI_DIR = $${MLBUILD}
     RCC_DIR = $${MLBUILD}
     OBJECTS_DIR = $${MLBUILD}
-}
-
-################################
-# Turn the bloody warnings off #
-################################
-win32-g++|macx|unix {
-	QMAKE_CXXFLAGS_WARN_ON = ""
-	QMAKE_CXXFLAGS += -Wno-all
-	#QMAKE_CXXFLAGS += -Wno-endif-labels
-	QMAKE_CXXFLAGS += -Wno-unused-variable
-	QMAKE_CXXFLAGS += -Wno-unused-parameter
-	#QMAKE_CXXFLAGS += -Wno-switch
-	QMAKE_CXXFLAGS += -Wtrigraphs
-	QMAKE_CXXFLAGS += -Wreturn-type
-	QMAKE_CXXFLAGS += -Wnon-virtual-dtor
-	#QMAKE_CXXFLAGS += -Woverloaded-virtual
-	#QMAKE_CXXFLAGS += -Wunused-variable
-	QMAKE_CXXFLAGS += -Wunused-value
-	QMAKE_CXXFLAGS += -Wunknown-pragmas
-	QMAKE_CXXFLAGS += -Wno-shadow
-	#QMAKE_CXXFLAGS += -Wno-deprecated-declarations
-	#QMAKE_CXXFLAGS += -Wno-missing-braces
 }

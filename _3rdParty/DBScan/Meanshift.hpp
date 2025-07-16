@@ -13,7 +13,7 @@
 #include <iostream>
 
 //#include <gmm/gmm.h>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace gmm{
     template<typename V>

@@ -5,8 +5,8 @@
 #define EIGEN_PCA_H
 
 #include <iostream>
-#include <Eigen/Core>
-#include <Eigen/Eigen>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Eigen>
 #include <vector>
 
 // Pretty simple and straightforward implementation of Kernel - PCA

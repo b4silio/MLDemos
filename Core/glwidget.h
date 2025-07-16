@@ -5,6 +5,7 @@
 #include <canvas.h>
 #include <vector>
 #include <QtOpenGL>
+#include <QOpenGLFunctions>
 #include <QtOpenGLWidgets/QOpenGLWidget>
 #include <QMatrix4x4>
 
@@ -13,13 +14,9 @@ class QMatrix4x4;
 class QOpenGLShaderProgram;
 class QOpenGLShader;
 
-class GLWidget : public QOpenGLWidget
+class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
-
-#ifdef WIN32
-static QOpenGLFunctions glf;
-#endif
 
 public:
     GLWidget(Canvas *canvas, QWidget *parent = 0);
@@ -31,12 +28,12 @@ public:
     void killObjects();
     void generateObjects();
     void FixSurfaces(GLObject &o);
-    void DrawObject(const GLObject &o) const ;
-    void DrawSamples(const GLObject &o) const ;
-    void DrawParticles(const GLObject &o) const;
-    void DrawLines(const GLObject &o) const;
-    void DrawSurfaces_old(const GLObject &o) const;
-    void DrawSurfaces(const GLObject &o) const;
+    void DrawObject(const GLObject &o)  ;
+    void DrawSamples(const GLObject &o) ;
+    void DrawParticles(const GLObject &o);
+    void DrawLines(const GLObject &o) ;
+    void DrawSurfaces_old(const GLObject &o) ;
+    void DrawSurfaces(const GLObject &o) ;
     void LoadShader(QOpenGLShaderProgram **program_, QString vshader, QString fshader);
 
 public slots:
@@ -74,6 +71,10 @@ private:
     void normalizeAngle(int &angle);
     void RenderFBO(QOpenGLFramebufferObject *fbo, QOpenGLShaderProgram *program);
     void RenderShadowMap(QOpenGLFramebufferObject *fbo, GLLight light, std::vector<GLObject> objects);
+
+#ifdef WIN32
+    QOpenGLFunctions *m_functions;
+#endif
 
     QMatrix4x4 perspectiveMatrix;
     QMatrix4x4 modelViewMatrix;

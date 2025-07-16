@@ -36,12 +36,13 @@ public:
   friend ostream & operator << (ostream &, RCTrial) ;
 };
 
-class TrialGT : public __unary_function<Trial, bool>
 // Predicate for Trial (needed for remove_if)
+// class TrialGT : public __unary_function<Trial, bool>
+class TrialGT
 {
 public:
   explicit TrialGT(double val) : _val(val) {}
-  bool operator()(Trial& foo) { 
+  bool operator()(const Trial& foo) const {
     return foo.objval > _val;
   }
 private:

@@ -19,7 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 using namespace Eigen;
 using namespace std;

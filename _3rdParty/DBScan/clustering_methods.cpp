@@ -4,7 +4,7 @@
 #include "xmeans.hpp"
 //#include "generalized-kmeans.hpp"
 
-#include "Eigen/Eigen"
+#include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
 using namespace clustering;

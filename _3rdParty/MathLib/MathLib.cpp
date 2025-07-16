@@ -25,7 +25,7 @@ using namespace std;
 using namespace MathLib;
 #endif
 
-int main(int argc, char *argv[]){
+int main_(int argc, char *argv[]){
 
 
   Matrix3 m1,m2,m3;

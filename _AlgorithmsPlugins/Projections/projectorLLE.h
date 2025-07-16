@@ -22,8 +22,8 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <vector>
 #include <projector.h>
 #include "ANN/ANN.h"
-#include <Eigen/Core>
-#include <Eigen/Eigen>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Eigen>
 
 typedef std::pair<double, int> myPair;
 typedef std::vector<myPair> PermutationIndices;

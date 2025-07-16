@@ -5,8 +5,8 @@ TEMPLATE = app
 QT += opengl svg
 
 
-TARGET = mldemos
-NAME = mldemos
+TARGET = MLDemos_run
+NAME = MLDemos
 MLPATH =..
 DESTDIR = $$MLPATH
 
@@ -22,7 +22,7 @@ include($$MLPATH/MLDemos_variables.pri)
 # Source Files       #
 # ##########################
 FORMS += aboutDialog.ui \
-	algorithmOptions.ui \
+        algorithmOptions.ui \
 	optsClassify.ui \
 	optsCluster.ui \
 	optsRegress.ui \

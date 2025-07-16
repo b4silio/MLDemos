@@ -33,7 +33,7 @@
 #include <stdexcept>
 
 // Eigen
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 namespace EigenHelpers{
 	template <typename TVector>

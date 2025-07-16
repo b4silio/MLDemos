@@ -1383,7 +1383,8 @@ namespace std
         Define std::less<vector<T,3> > so that you can use vectors in the associative containers.
     !*/
     template<typename T>
-    struct less<dlib::vector<T,3> > : public __binary_function<dlib::vector<T,3> ,dlib::vector<T,3> ,bool>
+    // struct less<dlib::vector<T,3> > : public __binary_function<dlib::vector<T,3> ,dlib::vector<T,3> ,bool>
+    struct less<dlib::vector<T,3> >
     {
         inline bool operator() (const dlib::vector<T,3> & a, const dlib::vector<T,3> & b) const
         { 
@@ -1401,7 +1402,8 @@ namespace std
         Define std::less<vector<T,2> > so that you can use vector<T,2>s in the associative containers.
     !*/
     template<typename T>
-    struct less<dlib::vector<T,2> > : public __binary_function<dlib::vector<T,2> ,dlib::vector<T,2> ,bool>
+    // struct less<dlib::vector<T,2> > : public __binary_function<dlib::vector<T,2> ,dlib::vector<T,2> ,bool>
+    struct less<dlib::vector<T,2> >
     {
         inline bool operator() (const dlib::vector<T,2> & a, const dlib::vector<T,2> & b) const
         { 

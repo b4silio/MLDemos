@@ -464,7 +464,7 @@ void GHSOMProjector::DrawModel(Canvas *canvas, QPainter &painter, Projector *pro
             {
                 NeuronLayer *le = layer->elementAt(j);
                 if(!le) continue;
-		printf("\t(%d x %d) units\t0x%lx\n", le->getX(), le->getY(), (unsigned long)le->getSuperNeuron());
+        printf("\t(%d x %d) units\t%p\n", le->getX(), le->getY(), (void*)le->getSuperNeuron());
                 Neuron ***map = le->getMap();
                 FOR(y, le->getY())
                 {

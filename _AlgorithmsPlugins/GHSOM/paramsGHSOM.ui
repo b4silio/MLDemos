@@ -113,7 +113,7 @@
     <string>x</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="tau1Spin">

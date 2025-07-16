@@ -7,7 +7,7 @@
 //#include <omp.h>
 
 // Any basic vector/matrix library should also work
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace clustering
 {

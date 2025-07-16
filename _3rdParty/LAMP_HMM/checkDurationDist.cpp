@@ -43,7 +43,7 @@
 using namespace std;
 
 //===============================================================================
-
+/*
 int main (int argc, char **argv)
 {
 	int i;
@@ -81,3 +81,4 @@ int main (int argc, char **argv)
 	cout << endl << "Input mean and variance " << mean << " " << variance << endl;
 	cout <<"Output mean and variance " << newMean << " " << newVariance << endl;
 }
+*/

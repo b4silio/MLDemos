@@ -69,8 +69,8 @@ void readConfigFile(char *configName, char *sequenceName, char *hmmInputName, ch
 // hmmFind.app/Contents/MacOS/hmmFind  /Users/daniel/C-CODE/HMM2Movies/Source/configFileExample.txt
 //
 //===============================================================================
-
-int main (int argc, char *argv[])
+/*
+int main(int argc, char *argv[])
 {
     int nbDimensions, nbSymbols, nbStates, seed;
     int *listNbSymbols;
@@ -274,6 +274,7 @@ int main (int argc, char *argv[])
             
     return 0;
 }
+*/
 
 //===============================================================================
 

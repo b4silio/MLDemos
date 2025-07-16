@@ -7,6 +7,7 @@ NAME = mld_Projections
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
+QMAKE_CXXFLAGS += -Os
 ###########################
 # Source Files            #
 ###########################

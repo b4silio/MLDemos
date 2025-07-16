@@ -45,12 +45,13 @@ void checkGL()
     }
 }
 
-#ifdef WIN32
-#define GLActiveTexture glf.glActiveTexture
-QGLFunctions GLWidget::glf;
-#else
-    #define GLActiveTexture glActiveTexture
-#endif
+//#ifdef WIN32
+//    #define GLActiveTexture glf.glActiveTexture
+//#else
+//    #define GLActiveTexture glActiveTexture
+//#endif
+#define GLActiveTexture glActiveTexture
+
 
 GLuint *GLWidget::textureNames = 0;
 std::vector< std::vector<unsigned char> > GLWidget::textureData;
@@ -72,9 +73,6 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
     bDisplaySamples=bDisplayLines=bDisplaySurfaces=bDisplayTransparency=bDisplayBlurry=true;
     bRotateCamera=false;
     makeCurrent();
-#ifdef WIN32
-    glf.initializeGLFunctions(this->context());
-#endif
     width = 800;
     height = 600;
 
@@ -91,6 +89,7 @@ GLWidget::GLWidget(Canvas *canvas, QWidget *parent)
 
 void GLWidget::InitializeGL()
 {
+    /*
     if (QOpenGLFramebufferObject::hasOpenGLFramebufferBlit()) {
         QOpenGLFramebufferObjectFormat format;
         format.setSamples(8);
@@ -105,6 +104,7 @@ void GLWidget::InitializeGL()
         light_fbo = new QOpenGLFramebufferObject(width,height);
         lightBlur_fbo = light_fbo;
     }
+    */
     startTimer(20);
 }
 
@@ -372,6 +372,28 @@ void GLWidget::initializeGLAlt()
 
 void GLWidget::initializeGL()
 {
+#ifdef WIN32
+    initializeOpenGLFunctions();
+    m_functions = this->context()->extraFunctions();
+#endif
+
+    if (QOpenGLFramebufferObject::hasOpenGLFramebufferBlit()) {
+        QOpenGLFramebufferObjectFormat format;
+        format.setSamples(8);
+        format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+        render_fbo = new QOpenGLFramebufferObject(width, height, format);
+        texture_fbo = new QOpenGLFramebufferObject(width, height, format);
+        light_fbo = new QOpenGLFramebufferObject(width,height, format);
+        lightBlur_fbo = new QOpenGLFramebufferObject(width,height, format);
+    } else {
+        render_fbo = new QOpenGLFramebufferObject(width*2, height*2);
+        texture_fbo = render_fbo;
+        light_fbo = new QOpenGLFramebufferObject(width,height);
+        lightBlur_fbo = light_fbo;
+    }
+
+
+
     GenTextures();
 
     /*
@@ -545,7 +567,7 @@ void GLWidget::generateObjects()
     }
 }
 
-void GLWidget::DrawObject(const GLObject &o) const
+void GLWidget::DrawObject(const GLObject &o)
 {
     if(!o.vertices.size()) return;
     if(bDisplaySamples && o.objectType.contains("Samples")) DrawSamples(o);
@@ -554,7 +576,7 @@ void GLWidget::DrawObject(const GLObject &o) const
     else if(bDisplayLines && o.objectType.contains("Particles")) DrawParticles(o);
 }
 
-void GLWidget::DrawParticles(const GLObject &o) const
+void GLWidget::DrawParticles(const GLObject &o)
 {
     QString style = o.style.toLower();
     float pointSize = 6.f;
@@ -603,7 +625,7 @@ void GLWidget::DrawParticles(const GLObject &o) const
     program->release();
 }
 
-void GLWidget::DrawSamples(const GLObject &o) const
+void GLWidget::DrawSamples(const GLObject &o)
 {
     QString style = o.style.toLower();
     float pointSize = 12.f;
@@ -671,7 +693,7 @@ void GLWidget::DrawSamples(const GLObject &o) const
     program->release();
 }
 
-void GLWidget::DrawLines(const GLObject &o) const
+void GLWidget::DrawLines(const GLObject &o)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
@@ -922,7 +944,7 @@ void GLWidget::FixSurfaces(GLObject &o)
     }
 }
 
-void GLWidget::DrawSurfaces(const GLObject &o) const
+void GLWidget::DrawSurfaces(const GLObject &o)
 {
     QString style = o.style.toLower();
     QStringList params = style.split(",");
@@ -1130,7 +1152,7 @@ void GLWidget::DrawSurfaces(const GLObject &o) const
     }
 }
 
-void GLWidget::DrawSurfaces_old(const GLObject &o) const
+void GLWidget::DrawSurfaces_old(const GLObject &o)
 {
     QString style = o.style.toLower();
     QStringList params = style.split(",");
@@ -1936,7 +1958,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
         if(event->buttons() & Qt::LeftButton) {
             setXPosition(xPos + -dy/64.f*sin(yRot));
             setZPosition(zPos + -dx/64.f*(-cos(yRot)));
-        } else if(event->buttons() & Qt::RightButton) {
+        } else if(event->buttons() & Qt::RightButton) {
             setYPosition(yPos - dy/64.f);
         }
     } else {

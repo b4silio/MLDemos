@@ -7,7 +7,7 @@
 #ifndef CVOLEARNER_H
 #define CVOLEARNER_H
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <vector>
 
 class CVOLearner

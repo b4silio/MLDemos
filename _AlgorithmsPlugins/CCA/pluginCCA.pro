@@ -7,6 +7,8 @@ NAME = mld_CCA
 MLPATH =../..
 
 include($$MLPATH/MLDemos_variables.pri)
+QMAKE_CXXFLAGS += -Os
+
 ###########################
 # Source Files            #
 ###########################
