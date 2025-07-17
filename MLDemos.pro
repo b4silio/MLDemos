@@ -15,8 +15,9 @@ Core.file = Core/Core.pro
 Core.depends = 3rdParty
 MLDemos.file = MLDemos/MLDemos.pro
 MLDemos.depends = Core
-MLScripting.file = MLScripting/MLScripting.pro
-MLScripting.depends = Core
+
+#MLScripting.file = MLScripting/MLScripting.pro
+#MLScripting.depends = Core
 
 # algorithm plugins
 ALGOPATH = _AlgorithmsPlugins

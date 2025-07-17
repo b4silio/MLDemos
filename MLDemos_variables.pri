@@ -17,7 +17,7 @@ macx {
     QMAKE_MACOSX_DEPLOYMENT_TARGET=12.0
     QMAKE_MAC_SDK=macosx
 }
-CONFIG += c++14
+CONFIG += c++17
 
 #################################
 #         Project Paths         #
@@ -111,9 +111,9 @@ win32{
     BOOST = /usr/local/include
     BREW_PATH = /usr/local/Cellar
 
-    BREW_FFMPEG = $$BREW_PATH/ffmpeg/7.1_3
-    BREW_OPENCV = $$BREW_PATH/opencv/4.10.0_12
-    BREW_LIBPNG = $$BREW_PATH/libpng/1.6.44
+    BREW_FFMPEG = $$BREW_PATH/ffmpeg/7.1.1_3
+    BREW_OPENCV = $$BREW_PATH/opencv/4.11.0_1
+    BREW_LIBPNG = $$BREW_PATH/libpng/1.6.49
     BREW_PNGPP  = $$BREW_PATH/png++/0.2.10
     BREW_EIGEN  = $$BREW_PATH/eigen/3.4.0_1
     BREW_GSL    = $$BREW_PATH//gsl/2.8
