@@ -1,8 +1,11 @@
-![MLDemos](http://mldemos.b4silio.com/header.jpg)
+![MLDemos](http://basilio.dev/header.jpg)
+
 
 **MLDemos** is an open-source visualization tool for machine learning algorithms created to help studying and understanding how several algorithms function and how their parameters affect and modify the results in problems of classification, regression, clustering, dimensionality reduction, dynamical systems and reward maximization.
 
 MLDemos is open-source and free for personal and academic use.
+
+https://github.com/user-attachments/assets/a6081ac5-0064-48d6-8c86-00a95006380e
 
 
 ## Some History
